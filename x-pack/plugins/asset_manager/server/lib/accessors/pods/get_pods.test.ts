@@ -8,7 +8,7 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { GetApmIndicesMethod } from '../../asset_client_types';
-import { getContainers } from './get_containers';
+import { getPods } from './get_pods';
 import {
   createGetApmIndicesMock,
   expectToThrowValidationErrorWithStatusCode,
@@ -32,7 +32,7 @@ function createBaseOptions({
   };
 }
 
-describe('getContainers', () => {
+describe('getPods', () => {
   let getApmIndicesMock = createGetApmIndicesMock();
   let metricsDataClientMock = MetricsDataClientMock.create();
   let baseOptions = createBaseOptions({ getApmIndicesMock, metricsDataClientMock });
@@ -66,7 +66,7 @@ describe('getContainers', () => {
   });
 
   it('should query Elasticsearch correctly', async () => {
-    await getContainers({
+    await getPods({
       ...baseOptions,
       from: 'now-5d',
       to: 'now-3d',
@@ -97,29 +97,27 @@ describe('getContainers', () => {
     expect(bool?.must).toEqual([
       {
         exists: {
-          field: 'container.id',
+          field: 'kubernetes.pod.uid',
+        },
+      },
+      {
+        exists: {
+          field: 'kubernetes.node.name',
         },
       },
     ]);
-
-    expect(bool?.should).toEqual([
-      { exists: { field: 'kubernetes.container.id' } },
-      { exists: { field: 'kubernetes.pod.uid' } },
-      { exists: { field: 'kubernetes.node.name' } },
-      { exists: { field: 'host.hostname' } },
-    ]);
   });
 
-  it('should correctly include an EAN filter as a container ID term query', async () => {
-    const mockContainerId = '123abc';
+  it('should correctly include an EAN filter as a pod ID term query', async () => {
+    const mockPodId = '123abc';
 
-    await getContainers({
+    await getPods({
       ...baseOptions,
       from: 'now-1h',
       elasticsearchClient: esClientMock,
       savedObjectsClient: soClientMock,
       filters: {
-        ean: `container:${mockContainerId}`,
+        ean: `pod:${mockPodId}`,
       },
     });
 
@@ -131,73 +129,44 @@ describe('getContainers', () => {
       expect.arrayContaining([
         {
           exists: {
-            field: 'container.id',
+            field: 'kubernetes.pod.uid',
+          },
+        },
+        {
+          exists: {
+            field: 'kubernetes.node.name',
           },
         },
         {
           term: {
-            'container.id': mockContainerId,
+            'kubernetes.pod.uid': mockPodId,
           },
         },
       ])
     );
   });
 
-  it('should not query ES and return empty if filtering on non-container EAN', async () => {
+  it('should not query ES and return empty if filtering on non-pod EAN', async () => {
     const mockId = 'some-id-123';
 
-    const result = await getContainers({
+    const result = await getPods({
       ...baseOptions,
       from: 'now-1h',
       elasticsearchClient: esClientMock,
       savedObjectsClient: soClientMock,
       filters: {
-        ean: `pod:${mockId}`,
+        ean: `container:${mockId}`,
       },
     });
 
     expect(esClientMock.search).toHaveBeenCalledTimes(0);
-    expect(result).toEqual({ containers: [] });
-  });
-
-  it('should throw an error when an invalid EAN is provided', async () => {
-    try {
-      await getContainers({
-        ...baseOptions,
-        from: 'now-1h',
-        elasticsearchClient: esClientMock,
-        savedObjectsClient: soClientMock,
-        filters: {
-          ean: `invalid`,
-        },
-      });
-    } catch (error) {
-      const hasMessage = 'message' in error;
-      expect(hasMessage).toEqual(true);
-      expect(error.message).toEqual('invalid is not a valid EAN');
-    }
-
-    try {
-      await getContainers({
-        ...baseOptions,
-        from: 'now-1h',
-        elasticsearchClient: esClientMock,
-        savedObjectsClient: soClientMock,
-        filters: {
-          ean: `invalid:toomany:colons`,
-        },
-      });
-    } catch (error) {
-      const hasMessage = 'message' in error;
-      expect(hasMessage).toEqual(true);
-      expect(error.message).toEqual('invalid:toomany:colons is not a valid EAN');
-    }
+    expect(result).toEqual({ pods: [] });
   });
 
   it('should include a wildcard ID filter when an ID filter is provided with asterisks included', async () => {
     const mockIdPattern = '*partial-id*';
 
-    await getContainers({
+    await getPods({
       ...baseOptions,
       from: 'now-1h',
       elasticsearchClient: esClientMock,
@@ -215,12 +184,17 @@ describe('getContainers', () => {
       expect.arrayContaining([
         {
           exists: {
-            field: 'container.id',
+            field: 'kubernetes.pod.uid',
+          },
+        },
+        {
+          exists: {
+            field: 'kubernetes.node.name',
           },
         },
         {
           wildcard: {
-            'container.id': mockIdPattern,
+            'kubernetes.pod.uid': mockIdPattern,
           },
         },
       ])
@@ -230,7 +204,7 @@ describe('getContainers', () => {
   it('should include a term ID filter when an ID filter is provided without asterisks included', async () => {
     const mockId = 'full-id';
 
-    await getContainers({
+    await getPods({
       ...baseOptions,
       from: 'now-1h',
       elasticsearchClient: esClientMock,
@@ -248,12 +222,17 @@ describe('getContainers', () => {
       expect.arrayContaining([
         {
           exists: {
-            field: 'container.id',
+            field: 'kubernetes.pod.uid',
+          },
+        },
+        {
+          exists: {
+            field: 'kubernetes.node.name',
           },
         },
         {
           term: {
-            'container.id': mockId,
+            'kubernetes.pod.uid': mockId,
           },
         },
       ])
@@ -264,7 +243,7 @@ describe('getContainers', () => {
     const mockCloudProvider = 'gcp';
     const mockCloudRegion = 'us-central-1';
 
-    await getContainers({
+    await getPods({
       ...baseOptions,
       from: 'now-1h',
       elasticsearchClient: esClientMock,
@@ -283,7 +262,12 @@ describe('getContainers', () => {
       expect.arrayContaining([
         {
           exists: {
-            field: 'container.id',
+            field: 'kubernetes.pod.uid',
+          },
+        },
+        {
+          exists: {
+            field: 'kubernetes.node.name',
           },
         },
         {
@@ -303,7 +287,7 @@ describe('getContainers', () => {
   it('should reject with 400 for invalid "from" date', () => {
     return expectToThrowValidationErrorWithStatusCode(
       () =>
-        getContainers({
+        getPods({
           ...baseOptions,
           from: 'now-1zz',
           to: 'now-3d',
@@ -317,7 +301,7 @@ describe('getContainers', () => {
   it('should reject with 400 for invalid "to" date', () => {
     return expectToThrowValidationErrorWithStatusCode(
       () =>
-        getContainers({
+        getPods({
           ...baseOptions,
           from: 'now-5d',
           to: 'now-3fe',
@@ -331,7 +315,7 @@ describe('getContainers', () => {
   it('should reject with 400 when "from" is a date that is after "to"', () => {
     return expectToThrowValidationErrorWithStatusCode(
       () =>
-        getContainers({
+        getPods({
           ...baseOptions,
           from: 'now',
           to: 'now-5d',
@@ -345,7 +329,7 @@ describe('getContainers', () => {
   it('should reject with 400 when "from" is in the future', () => {
     return expectToThrowValidationErrorWithStatusCode(
       () =>
-        getContainers({
+        getPods({
           ...baseOptions,
           from: 'now+1d',
           elasticsearchClient: esClientMock,
