@@ -95,7 +95,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
           isLoading={isSaving}
           disabled={!canEditTimeline}
           data-test-subj="save-timeline-action-btn"
-          id={SAVE_BUTTON_ELEMENT_ID}
+          id={'save-timeline-action'}
         >
           {timelineTranslations.SAVE}
         </EuiButton>

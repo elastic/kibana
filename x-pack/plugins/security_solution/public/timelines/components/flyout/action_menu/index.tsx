@@ -15,6 +15,7 @@ import { AddToCaseButton } from '../add_to_case_button';
 import { NewTimelineAction } from './new_timeline';
 import { SaveTimelineButton } from './save_timeline_button';
 import { OpenTimelineAction } from './open_timeline';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
 interface TimelineActionMenuProps {
   mode?: 'compact' | 'normal';
@@ -32,6 +33,7 @@ const TimelineActionMenuComponent = ({
   const userCasesPermissions = useGetUserCasesPermissions();
   return (
     <EuiFlexGroup
+      id={TIMELINE_TOUR_CONFIG_ANCHORS.ACTION_MENU}
       gutterSize="xs"
       justifyContent="flexEnd"
       alignItems="center"
