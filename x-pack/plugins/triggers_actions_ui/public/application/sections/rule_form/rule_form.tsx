@@ -932,94 +932,98 @@ export const RuleForm = ({
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
-      {ruleTypeModel ? (
-        <>{ruleTypeDetails}</>
-      ) : availableRuleTypes.length ? (
-        <>
-          <EuiHorizontalRule />
-          <EuiFormRow
-            fullWidth
-            labelAppend={
-              hasDisabledByLicenseRuleTypes && (
+      <div data-test-subj="ruleGroupTypeSelectContainer">
+        {ruleTypeModel ? (
+          <>{ruleTypeDetails}</>
+        ) : availableRuleTypes.length ? (
+          <>
+            <EuiHorizontalRule />
+            <EuiFormRow
+              fullWidth
+              labelAppend={
+                hasDisabledByLicenseRuleTypes && (
+                  <EuiTitle size="xxs">
+                    <EuiLink
+                      href={VIEW_LICENSE_OPTIONS_LINK}
+                      target="_blank"
+                      external
+                      className="actActionForm__getMoreActionsLink"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Get more rule types"
+                        id="xpack.triggersActionsUI.sections.actionForm.getMoreRuleTypesTitle"
+                      />
+                    </EuiLink>
+                  </EuiTitle>
+                )
+              }
+              label={
                 <EuiTitle size="xxs">
-                  <EuiLink
-                    href={VIEW_LICENSE_OPTIONS_LINK}
-                    target="_blank"
-                    external
-                    className="actActionForm__getMoreActionsLink"
-                  >
+                  <h5>
                     <FormattedMessage
-                      defaultMessage="Get more rule types"
-                      id="xpack.triggersActionsUI.sections.actionForm.getMoreRuleTypesTitle"
+                      id="xpack.triggersActionsUI.sections.ruleForm.ruleTypeSelectLabel"
+                      defaultMessage="Select rule type"
                     />
-                  </EuiLink>
+                  </h5>
                 </EuiTitle>
-              )
-            }
-            label={
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleForm.ruleTypeSelectLabel"
-                    defaultMessage="Select rule type"
-                  />
-                </h5>
-              </EuiTitle>
-            }
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  fullWidth
-                  data-test-subj="ruleSearchField"
-                  onChange={(e) => {
-                    setInputText(e.target.value);
-                    if (e.target.value === '') {
-                      setSearchText('');
-                    }
-                  }}
-                  onKeyUp={(e) => {
-                    if (e.keyCode === ENTER_KEY) {
-                      setSearchText(inputText);
-                    }
-                  }}
-                  placeholder={i18n.translate(
-                    'xpack.triggersActionsUI.sections.ruleForm.searchPlaceholderTitle',
-                    { defaultMessage: 'Search' }
-                  )}
-                />
-              </EuiFlexItem>
-              {solutions ? (
-                <EuiFlexItem grow={false}>
-                  <SolutionFilter
-                    key="solution-filter"
-                    solutions={solutions}
-                    onChange={(selectedSolutions: string[]) => setSolutionFilter(selectedSolutions)}
+              }
+            >
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiFieldSearch
+                    fullWidth
+                    data-test-subj="ruleSearchField"
+                    onChange={(e) => {
+                      setInputText(e.target.value);
+                      if (e.target.value === '') {
+                        setSearchText('');
+                      }
+                    }}
+                    onKeyUp={(e) => {
+                      if (e.keyCode === ENTER_KEY) {
+                        setSearchText(inputText);
+                      }
+                    }}
+                    placeholder={i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleForm.searchPlaceholderTitle',
+                      { defaultMessage: 'Search' }
+                    )}
                   />
                 </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFormRow>
-          <EuiSpacer />
-          {errors.ruleTypeId.length >= 1 && rule.ruleTypeId !== undefined ? (
-            <>
-              <EuiSpacer />
-              <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />
-              <EuiSpacer />
-            </>
-          ) : null}
-          {ruleTypeNodes}
-        </>
-      ) : ruleTypeIndex && !ruleTypesIsLoading ? (
-        <NoAuthorizedRuleTypes operation={operation} />
-      ) : (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleForm.loadingRuleTypesDescription"
-            defaultMessage="Loading rule types…"
-          />
-        </SectionLoading>
-      )}
+                {solutions ? (
+                  <EuiFlexItem grow={false}>
+                    <SolutionFilter
+                      key="solution-filter"
+                      solutions={solutions}
+                      onChange={(selectedSolutions: string[]) =>
+                        setSolutionFilter(selectedSolutions)
+                      }
+                    />
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <EuiSpacer />
+            {errors.ruleTypeId.length >= 1 && rule.ruleTypeId !== undefined ? (
+              <>
+                <EuiSpacer />
+                <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />
+                <EuiSpacer />
+              </>
+            ) : null}
+            {ruleTypeNodes}
+          </>
+        ) : ruleTypeIndex && !ruleTypesIsLoading ? (
+          <NoAuthorizedRuleTypes operation={operation} />
+        ) : (
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleForm.loadingRuleTypesDescription"
+              defaultMessage="Loading rule types…"
+            />
+          </SectionLoading>
+        )}
+      </div>
     </EuiForm>
   );
 };

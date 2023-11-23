@@ -35,7 +35,7 @@ import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { triggersActionsUiHealth } from '../../../common/lib/health_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import { waitFor } from '@testing-library/react';
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/rule_api/rule_types', () => ({
@@ -193,17 +193,7 @@ describe('rule_add', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <QueryClientProvider
-        client={
-          new QueryClient({
-            defaultOptions: {
-              queries: {
-                retry: false,
-              },
-            },
-          })
-        }
-      >
+      <QueryClientProvider client={new QueryClient()}>
         <RuleAdd
           consumer={ALERTS_FEATURE_ID}
           onClose={onClose}
@@ -252,7 +242,7 @@ describe('rule_add', () => {
     });
   });
 
-  it('renders a confirm close modal if the flyout is closed after inputs have changed', async () => {
+  it('renders selection of rule types to pick in the modal', async () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
@@ -267,14 +257,47 @@ describe('rule_add', () => {
       wrapper.update();
     });
 
-    wrapper.find('[data-test-subj="my-rule-type-SelectOption"]').last().simulate('click');
-    expect(wrapper.find('input#ruleName').props().value).toBe('');
-    expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
-    expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
+    await waitFor(() => {
+      const ruleTypesContainer = wrapper.find('[data-test-subj="ruleGroupTypeSelectContainer"]');
+      const ruleTypeButton = ruleTypesContainer
+        .render()
+        .find('[data-test-subj="my-rule-type-SelectOption"]');
 
-    wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
-    expect(onClose).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="confirmRuleCloseModal"]').exists()).toBe(true);
+      expect(ruleTypeButton.length).toEqual(1);
+      expect(ruleTypeButton.text()).toMatchInlineSnapshot(`"Testtest"`);
+    });
+  });
+
+  it('renders a confirm close modal if the flyout is closed after inputs have changed', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+    const onClose = jest.fn();
+    await setup({
+      initialValues: {},
+      onClose,
+      ruleTypeId: 'my-rule-type',
+    });
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    wrapper
+      .find('input#ruleName')
+      .at(0)
+      .simulate('change', { target: { value: 'my rule type' } });
+
+    await waitFor(() => {
+      expect(wrapper.find('input#ruleName').props().value).toBe('my rule type');
+      expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
+      expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
+
+      wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
+      expect(onClose).not.toHaveBeenCalled();
+      expect(wrapper.find('[data-test-subj="confirmRuleCloseModal"]').exists()).toBe(true);
+    });
   });
 
   it('renders rule add flyout with initial values', async () => {
@@ -504,13 +527,15 @@ describe('rule_add', () => {
       wrapper.update();
     });
 
-    expect(createRule).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        rule: expect.objectContaining({
-          consumer: 'logs',
-        }),
-      })
-    );
+    await waitFor(() => {
+      expect(createRule).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          rule: expect.objectContaining({
+            consumer: 'logs',
+          }),
+        })
+      );
+    });
   });
 
   it('should enforce any default interval', async () => {
@@ -531,14 +556,16 @@ describe('rule_add', () => {
       wrapper.update();
     });
 
-    const intervalInputUnit = wrapper
-      .find('[data-test-subj="intervalInputUnit"]')
-      .first()
-      .getElement().props.value;
-    const intervalInput = wrapper.find('[data-test-subj="intervalInput"]').first().getElement()
-      .props.value;
-    expect(intervalInputUnit).toBe('h');
-    expect(intervalInput).toBe(3);
+    await waitFor(() => {
+      const intervalInputUnit = wrapper
+        .find('[data-test-subj="intervalInputUnit"]')
+        .first()
+        .getElement().props.value;
+      const intervalInput = wrapper.find('[data-test-subj="intervalInput"]').first().getElement()
+        .props.value;
+      expect(intervalInputUnit).toBe('h');
+      expect(intervalInput).toBe(3);
+    });
   });
 
   it('should load connectors and connector types when there is a pre-selected rule type', async () => {
@@ -553,10 +580,18 @@ describe('rule_add', () => {
       actionsShow: true,
     });
 
-    expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
-    expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
-    expect(loadActionTypes).toHaveBeenCalledTimes(1);
-    expect(loadAllActions).toHaveBeenCalledTimes(1);
+    // Wait for handlers to fire
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    await waitFor(() => {
+      expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
+      expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
+      expect(loadActionTypes).toHaveBeenCalledTimes(1);
+      expect(loadAllActions).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should not load connectors and connector types when there is not an encryptionKey', async () => {
@@ -575,13 +610,21 @@ describe('rule_add', () => {
       actionsShow: true,
     });
 
-    expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
-    expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
-    expect(loadActionTypes).not.toHaveBeenCalled();
-    expect(loadAllActions).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="actionNeededEmptyPrompt"]').first().text()).toContain(
-      'You must configure an encryption key to use Alerting'
-    );
+    // Wait for handlers to fire
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    await waitFor(() => {
+      expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
+      expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
+      expect(loadActionTypes).not.toHaveBeenCalled();
+      expect(loadAllActions).not.toHaveBeenCalled();
+      expect(wrapper.find('[data-test-subj="actionNeededEmptyPrompt"]').first().text()).toContain(
+        'You must configure an encryption key to use Alerting'
+      );
+    });
   });
 });
 
