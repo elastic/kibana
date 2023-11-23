@@ -71,7 +71,7 @@ export class HttpService
     this.env = env;
     this.log = logger.get('http');
     this.config$ = combineLatest([
-      configService.atPath<HttpConfigType>(httpConfig.path),
+      configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
     ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
