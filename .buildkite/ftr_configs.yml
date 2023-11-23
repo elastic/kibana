@@ -14,7 +14,9 @@ disabled:
   - x-pack/test/api_integration/config.ts
   - x-pack/test/fleet_api_integration/config.base.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
+  - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
   - x-pack/test/security_solution_endpoint_api_int/config.base.ts
 
@@ -318,6 +320,7 @@ enabled:
   - x-pack/test/functional/apps/transform/feature_controls/config.ts
   - x-pack/test/functional/apps/upgrade_assistant/config.ts
   - x-pack/test/functional/apps/uptime/config.ts
+  - x-pack/test/functional/apps/user_profiles/config.ts
   - x-pack/test/functional/apps/visualize/config.ts
   - x-pack/test/functional/apps/watcher/config.ts
   - x-pack/test/functional/config_security_basic.ts
@@ -485,3 +488,6 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/user_roles/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine/configs/ess.config.ts
+

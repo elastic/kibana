@@ -10,6 +10,7 @@ import './suggestion_panel.scss';
 import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiIcon,
@@ -20,7 +21,9 @@ import {
   EuiButtonEmpty,
   EuiAccordion,
   EuiText,
+  EuiNotificationBadge,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
@@ -65,6 +68,7 @@ import {
   selectFramePublicAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
 
@@ -99,10 +103,13 @@ export interface SuggestionPanelProps {
   visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
-  getUserMessages: UserMessagesGetter;
+  getUserMessages?: UserMessagesGetter;
   nowProvider: DataPublicPluginStart['nowProvider'];
   core: CoreStart;
   showOnlyIcons?: boolean;
+  wrapSuggestions?: boolean;
+  isAccordionOpen?: boolean;
+  toggleAccordionCb?: (flag: boolean) => void;
 }
 
 const PreviewRenderer = ({
@@ -165,6 +172,7 @@ const SuggestionPreview = ({
   onSelect,
   showTitleAsLabel,
   onRender,
+  wrapSuggestions,
 }: {
   onSelect: () => void;
   preview: {
@@ -177,15 +185,30 @@ const SuggestionPreview = ({
   selected: boolean;
   showTitleAsLabel?: boolean;
   onRender: () => void;
+  wrapSuggestions?: boolean;
 }) => {
   return (
-    <EuiToolTip content={preview.title}>
+    <EuiToolTip
+      content={preview.title}
+      anchorProps={
+        wrapSuggestions
+          ? {
+              css: css`
+                display: flex;
+                flex-direction: column;
+                flex-basis: calc(50% - 9px);
+              `,
+            }
+          : undefined
+      }
+    >
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
           hasBorder={true}
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
             'lnsSuggestionPanel__button-isSelected': selected,
+            'lnsSuggestionPanel__button-fixedWidth': !wrapSuggestions,
           })}
           paddingSize="none"
           data-test-subj="lnsSuggestion"
@@ -231,6 +254,9 @@ export function SuggestionPanel({
   nowProvider,
   core,
   showOnlyIcons,
+  wrapSuggestions,
+  toggleAccordionCb,
+  isAccordionOpen,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -243,14 +269,22 @@ export function SuggestionPanel({
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
+  const initialAccordionStatusValue =
+    typeof isAccordionOpen !== 'undefined' ? !Boolean(isAccordionOpen) : false;
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
     LOCAL_STORAGE_SUGGESTIONS_PANEL,
-    false
+    initialAccordionStatusValue
   );
+  useEffect(() => {
+    if (typeof isAccordionOpen !== 'undefined') {
+      setHideSuggestions(!Boolean(isAccordionOpen));
+    }
+  }, [isAccordionOpen, setHideSuggestions]);
 
   const toggleSuggestions = useCallback(() => {
     setHideSuggestions(!hideSuggestions);
-  }, [setHideSuggestions, hideSuggestions]);
+    toggleAccordionCb?.(!hideSuggestions);
+  }, [setHideSuggestions, hideSuggestions, toggleAccordionCb]);
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
@@ -304,8 +338,10 @@ export function SuggestionPanel({
             ),
           }));
 
-    const hasErrors =
-      getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length > 0;
+    const hasErrors = getUserMessages
+      ? getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length >
+        0
+      : false;
 
     const newStateExpression =
       currentVisualization.state && currentVisualization.activeId && !hasErrors
@@ -450,6 +486,7 @@ export function SuggestionPanel({
             selected={lastSelectedSuggestion === -1}
             showTitleAsLabel
             onRender={() => onSuggestionRender(0)}
+            wrapSuggestions={wrapSuggestions}
           />
         )}
         {!hideSuggestions &&
@@ -474,64 +511,88 @@ export function SuggestionPanel({
                 selected={index === lastSelectedSuggestion}
                 onRender={() => onSuggestionRender(index + 1)}
                 showTitleAsLabel={showOnlyIcons}
+                wrapSuggestions={wrapSuggestions}
               />
             );
           })}
       </>
     );
   };
-
+  const title = (
+    <EuiTitle
+      size="xxs"
+      css={css`
+    padding: 2px;
+  }
+`}
+    >
+      <h3>
+        <FormattedMessage
+          id="xpack.lens.editorFrame.suggestionPanelTitle"
+          defaultMessage="Suggestions"
+        />
+      </h3>
+    </EuiTitle>
+  );
   return (
-    <div className="lnsSuggestionPanel">
-      <EuiAccordion
-        id="lensSuggestionsPanel"
-        buttonProps={{ 'data-test-subj': 'lensSuggestionsPanelToggleButton' }}
-        buttonContent={
-          <EuiTitle size="xxs">
-            <h3>
-              <FormattedMessage
-                id="xpack.lens.editorFrame.suggestionPanelTitle"
-                defaultMessage="Suggestions"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        forceState={hideSuggestions ? 'closed' : 'open'}
-        onToggle={toggleSuggestions}
-        extraAction={
-          existsStagedPreview &&
-          !hideSuggestions && (
-            <EuiToolTip
-              content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
-                defaultMessage: 'Refresh the suggestions based on the selected visualization.',
-              })}
-            >
-              <EuiButtonEmpty
-                data-test-subj="lensSubmitSuggestion"
-                size="xs"
-                iconType="refresh"
-                onClick={() => {
-                  dispatchLens(submitSuggestion());
-                }}
-              >
-                {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
-                  defaultMessage: 'Refresh',
+    <EuiAccordion
+      id="lensSuggestionsPanel"
+      buttonProps={{
+        'data-test-subj': 'lensSuggestionsPanelToggleButton',
+        paddingSize: wrapSuggestions ? 'm' : 's',
+      }}
+      className="lnsSuggestionPanel"
+      css={css`
+        padding-bottom: ${wrapSuggestions ? 0 : euiThemeVars.euiSizeS};
+      `}
+      buttonContent={title}
+      forceState={hideSuggestions ? 'closed' : 'open'}
+      onToggle={toggleSuggestions}
+      extraAction={
+        !hideSuggestions && (
+          <>
+            {existsStagedPreview && (
+              <EuiToolTip
+                content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+                  defaultMessage: 'Refresh the suggestions based on the selected visualization.',
                 })}
-              </EuiButtonEmpty>
-            </EuiToolTip>
-          )
-        }
+              >
+                <EuiButtonEmpty
+                  data-test-subj="lensSubmitSuggestion"
+                  size="xs"
+                  iconType="refresh"
+                  onClick={() => {
+                    dispatchLens(submitSuggestion());
+                  }}
+                >
+                  {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                    defaultMessage: 'Refresh',
+                  })}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            )}
+            {wrapSuggestions && (
+              <EuiNotificationBadge size="m" color="subdued">
+                {suggestions.length + 1}
+              </EuiNotificationBadge>
+            )}
+          </>
+        )
+      }
+    >
+      <div
+        className="lnsSuggestionPanel__suggestions"
+        data-test-subj="lnsSuggestionsPanel"
+        role="list"
+        tabIndex={0}
+        css={css`
+          flex-wrap: ${wrapSuggestions ? 'wrap' : 'nowrap'};
+          gap: ${wrapSuggestions ? euiThemeVars.euiSize : 0};
+        `}
       >
-        <div
-          className="lnsSuggestionPanel__suggestions"
-          data-test-subj="lnsSuggestionsPanel"
-          role="list"
-          tabIndex={0}
-        >
-          {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
-        </div>
-      </EuiAccordion>
-    </div>
+        {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
+      </div>
+    </EuiAccordion>
   );
 }
 
