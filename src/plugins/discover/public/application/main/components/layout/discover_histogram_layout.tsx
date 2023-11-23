@@ -27,6 +27,7 @@ export const DiscoverHistogramLayout = ({
   dataView,
   stateContainer,
   container,
+  panelsToggle,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
   const { dataState } = stateContainer;
@@ -52,6 +53,8 @@ export const DiscoverHistogramLayout = ({
       requestAdapter={dataState.inspectorAdapters.requests}
       container={container}
       css={histogramLayoutCss}
+      prependToToolbar={panelsToggle}
+      hidden={Boolean(hideChart)}
     >
       <DiscoverMainContent
         {...mainContentProps}
@@ -61,6 +64,7 @@ export const DiscoverHistogramLayout = ({
         // The documents grid doesn't rerender when the chart visibility changes
         // which causes it to render blank space, so we need to force a rerender
         key={`docKey${hideChart}`}
+        panelsToggle={hideChart ? panelsToggle : undefined}
       />
     </UnifiedHistogramContainer>
   );

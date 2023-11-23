@@ -111,6 +111,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   prependToToolbar?: ReactElement;
   /**
+   * Pass `true` to hide chart panel and its toolbar
+   */
+  hidden?: boolean;
+  /**
    * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
    */
   disableAutoFetching?: boolean;
@@ -198,6 +202,7 @@ export const UnifiedHistogramLayout = ({
   container,
   topPanelHeight,
   prependToToolbar,
+  hidden,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
@@ -269,6 +274,7 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <Chart
+          hiddenPanel={hidden}
           className={chartClassName}
           services={services}
           dataView={dataView}

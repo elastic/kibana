@@ -55,6 +55,7 @@ export type UnifiedHistogramContainerProps = {
   | 'columns'
   | 'container'
   | 'prependToToolbar'
+  | 'hidden'
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'

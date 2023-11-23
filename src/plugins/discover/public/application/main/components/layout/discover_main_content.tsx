@@ -8,7 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
-import React, { useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -44,8 +44,7 @@ export interface DiscoverMainContentProps {
   onFieldEdited: () => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
-  isSidebarCollapsed: boolean;
-  onToggleSidebar: (isSidebarCollapsed: boolean) => void;
+  panelsToggle?: ReactElement;
 }
 
 export const DiscoverMainContent = ({
@@ -57,8 +56,7 @@ export const DiscoverMainContent = ({
   columns,
   stateContainer,
   onDropFieldToTable,
-  isSidebarCollapsed,
-  onToggleSidebar,
+  panelsToggle,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
 
@@ -86,18 +84,10 @@ export const DiscoverMainContent = ({
         isTextBasedQuery={isPlainRecord}
         stateContainer={stateContainer}
         setDiscoverViewMode={setDiscoverViewMode}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={onToggleSidebar}
+        prepend={panelsToggle}
       />
     );
-  }, [
-    viewMode,
-    setDiscoverViewMode,
-    isPlainRecord,
-    stateContainer,
-    isSidebarCollapsed,
-    onToggleSidebar,
-  ]);
+  }, [viewMode, setDiscoverViewMode, isPlainRecord, stateContainer, panelsToggle]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 

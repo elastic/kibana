@@ -45,6 +45,7 @@ import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 
 export interface ChartProps {
+  hiddenPanel?: boolean;
   className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
@@ -84,6 +85,7 @@ export interface ChartProps {
 const HistogramMemoized = memo(Histogram);
 
 export function Chart({
+  hiddenPanel,
   className,
   services,
   dataView,
@@ -238,8 +240,8 @@ export function Chart({
     isPlainRecord,
   });
 
-  if (!chart) {
-    return <div data-test-subj="unifiedHistogramChartEmpty" />;
+  if (hiddenPanel) {
+    return <div data-test-subj="unifiedHistogramPanelHidden" />;
   }
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;

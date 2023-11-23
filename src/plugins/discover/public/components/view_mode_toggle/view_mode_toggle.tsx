@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -15,22 +15,19 @@ import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverStateContainer } from '../../application/main/services/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
-import { PanelsToggle } from '../panels_toggle';
 
 export const DocumentViewModeToggle = ({
   viewMode,
   isTextBasedQuery,
+  prepend,
   stateContainer,
   setDiscoverViewMode,
-  isSidebarCollapsed,
-  onToggleSidebar,
 }: {
   viewMode: VIEW_MODE;
   isTextBasedQuery: boolean;
+  prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
-  isSidebarCollapsed: boolean;
-  onToggleSidebar: (isSidebarCollapsed: boolean) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
@@ -52,11 +49,7 @@ export const DocumentViewModeToggle = ({
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" css={containerCss}>
-      <PanelsToggle
-        stateContainer={stateContainer}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={onToggleSidebar}
-      />
+      {prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
       <EuiFlexItem grow={false}>
         {isTextBasedQuery || !showViewModeToggle ? (
           <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />

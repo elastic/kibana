@@ -57,6 +57,7 @@ import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -217,6 +218,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [unifiedFieldListSidebarContainerApi]
   );
 
+  const panelsToggle = useMemo(() => {
+    return (
+      <PanelsToggle
+        stateContainer={stateContainer}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={onToggleSidebar}
+      />
+    );
+  }, [stateContainer, isSidebarCollapsed, onToggleSidebar]);
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -237,8 +248,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           onFieldEdited={onFieldEdited}
           container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
-          isSidebarCollapsed={isSidebarCollapsed}
-          onToggleSidebar={onToggleSidebar}
+          panelsToggle={panelsToggle}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -255,8 +265,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     resultState,
     stateContainer,
     viewMode,
-    isSidebarCollapsed,
-    onToggleSidebar,
+    panelsToggle,
   ]);
 
   return (
