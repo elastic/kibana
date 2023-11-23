@@ -9,18 +9,18 @@ import {
   INSPECT_BUTTONS_IN_SECURITY,
   INSPECT_MODAL,
   INSPECT_MODAL_INDEX_PATTERN,
-} from '../../screens/inspect';
+} from '../../../screens/inspect';
 import {
   closesModal,
   openLensVisualizationsInspectModal,
   openTab,
   openTableInspectModal,
-} from '../../tasks/inspect';
-import { login } from '../../tasks/login';
-import { visitWithTimeRange } from '../../tasks/navigation';
-import { waitForWelcomePanelToBeLoaded } from '../../tasks/common';
-import { selectDataView } from '../../tasks/sourcerer';
-import { postDataView } from '../../tasks/api_calls/common';
+} from '../../../tasks/inspect';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
+import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
+import { selectDataView } from '../../../tasks/sourcerer';
+import { postDataView } from '../../../tasks/api_calls/common';
 
 const DATA_VIEW = 'auditbeat-*';
 
