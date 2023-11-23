@@ -27,6 +27,8 @@ export interface BuildkiteBuildExtract {
   buildNumber: number;
   slug: string;
   commit: string;
+  startedAt?: string;
+  finishedAt?: string;
 }
 
 export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBuildExtract | null> {
@@ -77,6 +79,8 @@ export async function getQAFTestBuilds(date: string): Promise<BuildkiteBuildExtr
         slug: QA_FTR_TEST_SLUG,
         buildNumber: build.number,
         commit: kibanaBuildHash || build.commit,
+        startedAt: build.started_at,
+        finishedAt: build.finished_at,
       };
     })
     .reverse();
@@ -185,8 +189,8 @@ export function toBuildkiteBuildInfoHtml(
 export function toCommitInfoWithBuildResults(commits: CommitWithStatuses[]) {
   const commitWithBuildResultsHtml = commits.map((commitInfo) => {
     const checks = commitInfo.checks;
-    const prBuildSnippet = getBuildInfoSnippet('on merge', checks.onMergeBuild);
-    const ftrBuildSnippet = getBuildInfoSnippet('ftr tests', checks.ftrBuild);
+    const prBuildSnippet = getBuildInfoSnippet('on merge job', checks.onMergeBuild);
+    const ftrBuildSnippet = getBuildInfoSnippet('qaf/ftr tests', checks.ftrBuild);
     const artifactBuildSnippet = getBuildInfoSnippet('artifact build', checks.artifactBuild);
     const titleWithLink = commitInfo.title.replace(
       /#(\d{4,6})/,
@@ -195,7 +199,10 @@ export function toCommitInfoWithBuildResults(commits: CommitWithStatuses[]) {
 
     return `<div>
   <div>
-      <strong><a href="${commitInfo.link}">${commitInfo.sha}</a></strong> | [${prBuildSnippet}][${ftrBuildSnippet}][${artifactBuildSnippet}]
+      <div><strong><a href="${commitInfo.link}">${commitInfo.sha}</a></strong></div>
+      <div>| ${prBuildSnippet}</div>
+      <div>| ${artifactBuildSnippet}</div>
+      <div>| ${ftrBuildSnippet}</div>
   </div>
   <div>
       <strong>${titleWithLink}</strong><i> by ${commitInfo.author} on ${commitInfo.date}</i>
@@ -209,8 +216,10 @@ export function toCommitInfoWithBuildResults(commits: CommitWithStatuses[]) {
 
 function getBuildInfoSnippet(name: string, build: BuildkiteBuildExtract | null) {
   if (!build) {
-    return `[❓] ${name}`;
+    return `[❓] ${name} - no build found`;
   } else {
-    return `${build.stateEmoji} <a href="${build.url}">${name}</a>`;
+    const statedAt = build.startedAt ? `started at ${build.startedAt}` : 'not started yet';
+    const finishedAt = build.finishedAt ? `finished at ${build.finishedAt}` : 'not finished yet';
+    return `[${build.stateEmoji}] <a href="${build.url}">${name}</a> - ${statedAt}, ${finishedAt}`;
   }
 }
