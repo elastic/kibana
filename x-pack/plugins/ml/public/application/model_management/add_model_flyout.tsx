@@ -93,7 +93,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                               <p>
                                 <EuiText color={'subdued'} size={'s'}>
                                   <FormattedMessage
-                                    id="xpack.ml.trainedModels.modelsList.elserDescription"
+                                    id="xpack.ml.trainedModels.addModelFlyout.elserDescription"
                                     defaultMessage="ELSER is designed to efficiently use context in natural language queries with better results than BM25 alone."
                                   />
                                 </EuiText>
