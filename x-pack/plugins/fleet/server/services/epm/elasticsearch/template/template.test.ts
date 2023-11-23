@@ -897,7 +897,30 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing dimension field on a keyword - tsdb disabled', () => {
+    const literalYml = `
+- name: example.id
+  type: keyword
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, false);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -921,7 +944,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -955,7 +978,40 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field - tsdb disabled', () => {
+    const literalYml = `
+- name: total.norm.pct
+  type: scaled_float
+  metric_type: gauge
+  unit: percent
+  format: percent
+`;
+    const expectedMapping = {
+      properties: {
+        total: {
+          properties: {
+            norm: {
+              properties: {
+                pct: {
+                  scaling_factor: 1000,
+                  type: 'scaled_float',
+                  meta: {
+                    unit: 'percent',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, false);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -982,7 +1038,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -1292,7 +1348,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 
