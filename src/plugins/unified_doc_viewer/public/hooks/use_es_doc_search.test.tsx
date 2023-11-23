@@ -67,7 +67,9 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           },
           "script_fields": Array [],
-          "stored_fields": Array [],
+          "stored_fields": Array [
+            "*",
+          ],
           "version": true,
         },
       }
@@ -108,7 +110,9 @@ describe('Test of <Doc /> helper / hook', () => {
           },
           "runtime_mappings": Object {},
           "script_fields": Array [],
-          "stored_fields": Array [],
+          "stored_fields": Array [
+            "*",
+          ],
           "version": true,
         },
       }
@@ -150,7 +154,9 @@ describe('Test of <Doc /> helper / hook', () => {
           },
           "runtime_mappings": Object {},
           "script_fields": Array [],
-          "stored_fields": Array [],
+          "stored_fields": Array [
+            "*",
+          ],
           "version": true,
         },
       }
@@ -209,7 +215,9 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           },
           "script_fields": Array [],
-          "stored_fields": Array [],
+          "stored_fields": Array [
+            "*",
+          ],
           "version": true,
         },
       }
