@@ -8,6 +8,7 @@
 
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
+import memoize from 'lodash/memoize';
 import {
   SQLLang,
   monaco,
@@ -56,6 +57,8 @@ import {
   getWrappedInPipesCode,
   parseErrors,
   getIndicesForAutocomplete,
+  extractESQLQueryToExecute,
+  clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -133,7 +136,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
-  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(serverErrors ? code : '');
+  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
@@ -269,28 +272,35 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     updateLinesFromModel = true;
   }, []);
 
+  const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
+    // need to store the timing of the first request so we can atomically clear the cache per query
+    const fn = memoize(
+      (...args: [{ esql: string }, ExpressionsStart]) => ({
+        timestamp: Date.now(),
+        result: fetchFieldsFromESQL(...args),
+      }),
+      ({ esql }) => esql
+    );
+    return { cache: fn.cache, memoizedFieldsFromESQL: fn };
+  }, []);
+
   const esqlCallbacks: ESQLCallbacks = useMemo(
     () => ({
       getSources: async () => {
         return await getIndicesForAutocomplete(dataViews);
       },
       getFieldsFor: async (options: { sourcesOnly?: boolean } | { customQuery?: string } = {}) => {
-        const pipes = editorModel.current?.getValue().split('|');
-        pipes?.pop();
-        let validContent = pipes?.join('|');
-        if ('customQuery' in options && options.customQuery) {
-          validContent = options.customQuery;
-        }
-        if (pipes && 'sourcesOnly' in options && options.sourcesOnly) {
-          validContent = pipes[0];
-        }
-        if (validContent) {
+        const queryToExecute = extractESQLQueryToExecute(editorModel.current, options);
+
+        if (queryToExecute) {
           // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {
-            esql: `${validContent} | limit 0`,
+            esql: `${queryToExecute} | limit 0`,
           };
+          // Check if there's a stale entry and clear it
+          clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
           try {
-            const table = await fetchFieldsFromESQL(esqlQuery, expressions);
+            const table = await memoizedFieldsFromESQL(esqlQuery, expressions).result;
             return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
           } catch (e) {
             // no action yet
@@ -307,7 +317,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
     }),
-    [dataViews, expressions, indexManagementApiService]
+    [dataViews, expressions, indexManagementApiService, esqlFieldsCache, memoizedFieldsFromESQL]
   );
 
   const queryValidation = useCallback(
@@ -339,6 +349,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   useDebounceWithOptions(
     () => {
       if (!editorModel.current) return;
+      const subscription = { active: true };
       if (code === codeWhenSubmitted) {
         if (serverErrors || serverWarning) {
           const parsedErrors = parseErrors(serverErrors || [], code);
@@ -354,12 +365,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           );
           return;
         }
+      } else {
+        queryValidation(subscription).catch((error) => {
+          // console.log({ error });
+        });
       }
-      const subscription = { active: true };
-      queryValidation(subscription).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.log({ error });
-      });
       return () => (subscription.active = false);
     },
     { skipFirstRender: false },
