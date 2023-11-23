@@ -18,6 +18,7 @@ describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {
     const wrapper = mountWithIntl(
       <ExpressionRow
+        title={<>Condition</>}
         canDelete={false}
         fields={[
           {

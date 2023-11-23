@@ -536,7 +536,9 @@ x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/runtime_field_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
+x-pack/packages/ml/ui_actions @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/obs-ux-infra_services-team
 x-pack/plugins/monitoring @elastic/obs-ux-infra_services-team
@@ -1394,6 +1396,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/de
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/user_roles  @elastic/security-detection-engine
+x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/detection_engine/scripts/roles_users @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
@@ -1440,6 +1443,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/de
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry @elastic/security-data-analytics
 
 ## Security Solution sub teams - security-engineering-productivity
 /x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity

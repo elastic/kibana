@@ -6,34 +6,33 @@
  * Side Public License, v 1.
  */
 
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import {
-  MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
+  MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 
+import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
+import { LinksAttributes } from '../../common/content_management';
+import { extract, inject } from '../../common/embeddable';
+import { LinksStrings } from '../components/links_strings';
+import { getLinksAttributeService } from '../services/attribute_service';
 import {
   coreServices,
   presentationUtil,
   untilPluginStartServicesReady,
 } from '../services/kibana_services';
-import { extract, inject } from '../../common/embeddable';
 import type { LinksEmbeddable } from './links_embeddable';
-import { LinksStrings } from '../components/links_strings';
-import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
-import { LinksAttributes } from '../../common/content_management';
-import { getLinksAttributeService } from '../services/attribute_service';
-import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from './types';
+import { LinksByReferenceInput, LinksEditorFlyoutReturn, LinksInput } from './types';
 
 export type LinksFactory = EmbeddableFactory;
 
@@ -111,12 +110,10 @@ export class LinksFactoryDefinition
   public async create(initialInput: LinksInput, parent: DashboardContainer) {
     await untilPluginStartServicesReady();
 
-    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { LinksEmbeddable } = await import('./links_embeddable');
     const editable = await this.isEditable();
 
     return new LinksEmbeddable(
-      reduxEmbeddablePackage,
       { editable },
       { ...getDefaultLinksInput(), ...initialInput },
       getLinksAttributeService(),
@@ -128,8 +125,6 @@ export class LinksFactoryDefinition
     initialInput: LinksInput,
     parent?: DashboardContainer
   ): Promise<LinksEditorFlyoutReturn> {
-    if (!parent) return { newInput: {} };
-
     const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
     const { newInput, attributes } = await openEditorFlyout(
