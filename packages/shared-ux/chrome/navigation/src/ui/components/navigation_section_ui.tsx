@@ -47,6 +47,8 @@ const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNod
 const itemIsVisible = (item: ChromeProjectNavigationNode) => {
   if (item.sideNavStatus === 'hidden') return false;
 
+  if (item.renderItem) return true;
+
   if (nodeHasLink(item)) {
     return true;
   }

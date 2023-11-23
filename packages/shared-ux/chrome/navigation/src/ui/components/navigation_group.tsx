@@ -20,8 +20,10 @@ import type { NodeProps } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';
 import { NavigationBucket, type Props as NavigationBucketProps } from './navigation_bucket';
+import { generateUniqueNodeId } from '../../utils';
 import { initNavNode } from '../../navnode_utils';
 import { CloudLinks } from '../../cloud_links';
+import { NavigationItem } from './navigation_item';
 
 /**
  * Handler to convert the JSX children of the NavigationGroup to the ChromeProjectNavigationNode
@@ -56,10 +58,21 @@ const jsxChildrenToNavigationNode = (
     const isNavigationGroup = child.type === NavigationGroup;
 
     if (!isNavigationGroup) {
-      if (child.props.children && typeof child.props.children !== 'string') {
-        childNode.renderItem = () => child.props.children;
+      const isNavigationItem = child.type === NavigationItem;
+      if (!isNavigationItem) {
+        // This is a custom JSX node, render it as is in the nav.
+        navigationNodes.push({
+          id: generateUniqueNodeId(),
+          title: '',
+          path: '',
+          renderItem: () => child,
+        });
+      } else {
+        if (child.props.children && typeof child.props.children !== 'string') {
+          childNode.renderItem = () => child.props.children;
+        }
+        navigationNodes.push(childNode);
       }
-      navigationNodes.push(childNode);
       return;
     }
 

@@ -10,7 +10,7 @@ import type { ChromeProjectNavigationNode, NodeDefinition } from '@kbn/core-chro
 
 let uniqueId = 0;
 
-function generateUniqueNodeId() {
+export function generateUniqueNodeId() {
   const id = `node${uniqueId++}`;
   return id;
 }
