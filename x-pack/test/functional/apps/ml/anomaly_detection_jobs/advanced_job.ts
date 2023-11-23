@@ -199,8 +199,8 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
-      await ml.testResources.createIndexPatternIfNeeded('ft_categorization_small', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_categorization_small', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -209,8 +209,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
-      await ml.testResources.deleteIndexPatternByTitle('ft_categorization_small');
+      await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_categorization_small');
     });
 
     for (const testData of testDataList) {
