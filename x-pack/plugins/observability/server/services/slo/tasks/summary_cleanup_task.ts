@@ -43,7 +43,7 @@ export const getDeleteQueryFilter = (sloSummaryIdsToDelete: string[]) => {
           },
           {
             term: {
-              'slo.revision': revision,
+              'slo.revision': Number(revision),
             },
           },
         ],
@@ -95,6 +95,12 @@ export class SloSummaryCleanupTask {
       let soIdsToCheck: string[] = [];
       let sloSummaryIdsToDelete: string[] = [];
 
+      try {
+        await this.soClient.delete(SO_SLO_TYPE, 'e087b37d-db19-417c-9b5c-b387939d4b39');
+      } catch (e) {
+        this.logger.error(e);
+      }
+
       for await (const response of finder.find()) {
         const soItems = response.saved_objects.map(
           (so) => `${so.attributes.id}${SEPARATOR}${so.attributes.revision}`
@@ -119,13 +125,15 @@ export class SloSummaryCleanupTask {
 
       if (sloSummaryIdsToDelete.length > 0) {
         this.logger.info(
-          `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO definitions from the summary index`
+          `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summaries from the summary index`
         );
+        this.logger.info(JSON.stringify(sloSummaryIdsToDelete));
+
         await this.esClient.deleteByQuery({
           index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
           query: {
             bool: {
-              filter: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
+              should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
             },
           },
         });
@@ -194,11 +202,13 @@ export class SloSummaryCleanupTask {
       this.logger.info('[SLO] Missing required service during startup, skipping task.');
     }
 
+    this.taskManager.removeIfExists(this.taskId);
+
     this.taskManager.ensureScheduled({
       id: this.taskId,
       taskType: TASK_TYPE,
       schedule: {
-        interval: '2h',
+        interval: '1m',
       },
       scope: ['observability', 'slo'],
       state: {},

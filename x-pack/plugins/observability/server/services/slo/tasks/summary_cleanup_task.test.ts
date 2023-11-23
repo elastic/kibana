@@ -61,7 +61,7 @@ describe('SloSummaryCleanupTask', () => {
       index: '.slo-observability.summary-v2*',
       query: {
         bool: {
-          filter: [
+          should: [
             {
               bool: {
                 must: [
@@ -72,7 +72,7 @@ describe('SloSummaryCleanupTask', () => {
                   },
                   {
                     term: {
-                      'slo.revision': '0',
+                      'slo.revision': 0,
                     },
                   },
                 ],
@@ -88,7 +88,7 @@ describe('SloSummaryCleanupTask', () => {
                   },
                   {
                     term: {
-                      'slo.revision': undefined,
+                      'slo.revision': NaN,
                     },
                   },
                 ],
@@ -127,7 +127,7 @@ describe('SloSummaryCleanupTask', () => {
       index: '.slo-observability.summary-v2*',
       query: {
         bool: {
-          filter: getDeleteQueryFilter(['01', '02', '03', '04']),
+          should: getDeleteQueryFilter(['01', '02', '03', '04']),
         },
       },
     });
@@ -177,7 +177,7 @@ describe('SloSummaryCleanupTask', () => {
       index: '.slo-observability.summary-v2*',
       query: {
         bool: {
-          filter: getDeleteQueryFilter([
+          should: getDeleteQueryFilter([
             `01${SEPARATOR}v1`,
             `02${SEPARATOR}v1`,
             `03${SEPARATOR}v1`,
