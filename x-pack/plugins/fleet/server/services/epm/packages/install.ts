@@ -62,6 +62,7 @@ import {
   PackagePolicyValidationError,
   ConcurrentInstallOperationError,
   FleetUnauthorizedError,
+  PackageInvalidArchiveError,
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
@@ -202,7 +203,7 @@ export async function ensureInstalledPackage(options: {
   }
 
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  if (!installation) throw new FleetError(`Could not get installation ${pkgName}`);
+  if (!installation) throw new FleetError(`Could not get installation for ${pkgName}`);
   return installation;
 }
 
@@ -1273,7 +1274,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
   if (pkgInfo.type !== 'input') return;
 
   const paths = await getArchiveFilelist(pkgInfo);
-  if (!paths) throw new FleetError(`No paths found for ${pkgInfo}`);
+  if (!paths) throw new PackageInvalidArchiveError(`No paths found for ${pkgInfo.name}`);
 
   const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
@@ -1336,7 +1337,9 @@ export async function installAssetsForInputPackagePolicy(opts: {
     logger,
   });
   if (!installedPkg)
-    throw new FleetError('Unable to find installed package while creating index templates');
+    throw new FleetError(
+      `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
+    );
   await installIndexTemplatesAndPipelines({
     installedPkg,
     paths,
