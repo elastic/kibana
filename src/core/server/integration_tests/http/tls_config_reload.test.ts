@@ -7,30 +7,39 @@
  */
 
 import supertest from 'supertest';
+import { duration } from 'moment';
+import { BehaviorSubject, of } from 'rxjs';
 import { KBN_CERT_PATH, KBN_KEY_PATH, ES_KEY_PATH, ES_CERT_PATH } from '@kbn/dev-utils';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { Router } from '@kbn/core-http-router-server-internal';
 import {
-  createServer,
-  getListenerOptions,
-  getServerOptions,
-  setTlsConfig,
-} from '@kbn/server-http-tools';
-import {
+  HttpServer,
   HttpConfig,
   config as httpConfig,
   cspConfig,
   externalUrlConfig,
 } from '@kbn/core-http-server-internal';
-import { flattenCertificateChain, fetchPeerCertificate, isServerTLS } from './tls_utils';
+import { isServerTLS, flattenCertificateChain, fetchPeerCertificate } from './tls_utils';
 
-describe('setTlsConfig', () => {
-  const CSP_CONFIG = cspConfig.schema.validate({});
-  const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
+const CSP_CONFIG = cspConfig.schema.validate({});
+const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
+const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+
+describe('HttpServer - TLS config', () => {
+  let server: HttpServer;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeAll(() => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   });
 
-  it('replaces the TLS configuration on the HAPI server', async () => {
+  beforeEach(() => {
+    const loggingService = loggingSystemMock.create();
+    logger = loggingSystemMock.createLogger();
+    server = new HttpServer(loggingService, 'tests', of(duration('1s')));
+  });
+
+  it('supports dynamic reloading of the TLS configuration', async () => {
     const rawHttpConfig = httpConfig.schema.validate({
       name: 'kibana',
       host: '127.0.0.1',
@@ -46,21 +55,29 @@ describe('setTlsConfig', () => {
     });
     const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
 
-    const serverOptions = getServerOptions(firstConfig);
-    const listenerOptions = getListenerOptions(firstConfig);
-    const server = createServer(serverOptions, listenerOptions);
+    const config$ = new BehaviorSubject(firstConfig);
 
-    server.route({
-      method: 'GET',
-      path: '/',
-      handler: (request, toolkit) => {
-        return toolkit.response('ok');
-      },
+    const { server: innerServer, registerRouter } = await server.setup({ config$ });
+    const listener = innerServer.listener;
+
+    const router = new Router('', logger, enhanceWithContext, {
+      isDev: false,
+      versionedRouteResolution: 'oldest',
     });
+    router.get(
+      {
+        path: '/',
+        validate: false,
+      },
+      async (ctx, req, res) => {
+        return res.ok({
+          body: 'ok',
+        });
+      }
+    );
+    registerRouter(router);
 
     await server.start();
-
-    const listener = server.listener;
 
     // force TS to understand what we're working with.
     if (!isServerTLS(listener)) {
@@ -70,7 +87,6 @@ describe('setTlsConfig', () => {
     const certificate = await fetchPeerCertificate(firstConfig.host, firstConfig.port);
     const certificateChain = flattenCertificateChain(certificate);
 
-    expect(isServerTLS(listener)).toEqual(true);
     expect(certificateChain.length).toEqual(1);
     expect(certificateChain[0].subject.CN).toEqual('kibana');
 
@@ -91,8 +107,7 @@ describe('setTlsConfig', () => {
     });
 
     const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
-
-    setTlsConfig(server, secondConfig.ssl);
+    config$.next(secondConfig);
 
     const secondCertificate = await fetchPeerCertificate(firstConfig.host, firstConfig.port);
     const secondCertificateChain = flattenCertificateChain(secondCertificate);
