@@ -99,7 +99,6 @@ export const createIndexPatternMock = ({
         return accumulatedRuntimeFields;
       }, {}),
       scriptFields: {},
-      storedFields: [],
     }),
   };
 };
