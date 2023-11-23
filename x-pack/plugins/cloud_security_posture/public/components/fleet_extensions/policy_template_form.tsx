@@ -58,7 +58,10 @@ import {
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import { gcpField, getInputVarsFields } from './gcp_credential_form';
-import { SetupTechnologySelector, useSetupTechnology } from './setup_technology_selector';
+import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
+import {
+  useSetupTechnology
+} from './setup_technology_selector/use_setup_technology';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,

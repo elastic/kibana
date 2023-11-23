@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 
-import type { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/public';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -19,46 +18,6 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { CLOUDBEAT_AWS } from '../../../common/constants';
-
-export const useSetupTechnology = ({
-  input,
-  agentlessPolicy,
-  handleSetupTechnologyChange,
-}: {
-  input: NewPackagePolicyInput;
-  agentlessPolicy?: AgentPolicy;
-  handleSetupTechnologyChange?: (value: SetupTechnology) => void;
-}) => {
-  const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(
-    SetupTechnology.AGENT_BASED
-  );
-  const isCspmAws = input.type === CLOUDBEAT_AWS;
-  const isAgentlessAvailable = useMemo(
-    () => Boolean(isCspmAws && agentlessPolicy),
-    [isCspmAws, agentlessPolicy]
-  );
-
-  useEffect(() => {
-    if (isAgentlessAvailable) {
-      setSetupTechnology(SetupTechnology.AGENTLESS);
-    } else {
-      setSetupTechnology(SetupTechnology.AGENT_BASED);
-    }
-  }, [isAgentlessAvailable]);
-
-  useEffect(() => {
-    if (handleSetupTechnologyChange) {
-      handleSetupTechnologyChange(setupTechnology);
-    }
-  }, [handleSetupTechnologyChange, setupTechnology]);
-
-  return {
-    isAgentlessAvailable,
-    setupTechnology,
-    setSetupTechnology,
-  };
-};
 
 export const SetupTechnologySelector = ({
   setupTechnology,
