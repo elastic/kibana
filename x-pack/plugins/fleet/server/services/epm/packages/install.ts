@@ -597,7 +597,9 @@ async function installPackageCommon(options: {
         return { assets, status: 'installed', installType, installSource };
       })
       .catch(async (err: Error) => {
-        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, { error: { stack_trace: err.stack } });
+        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
+          error: { stack_trace: err.stack },
+        });
         await handleInstallPackageFailure({
           savedObjectsClient,
           error: err,

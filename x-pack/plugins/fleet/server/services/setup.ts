@@ -62,10 +62,7 @@ export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const t = apm.startTransaction(
-    'fleet-setup',
-    'fleet'
-  );
+  const t = apm.startTransaction('fleet-setup', 'fleet');
 
   try {
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
@@ -199,10 +196,12 @@ async function createSetupSideEffects(
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
-    formatNonFatalErrors(nonFatalErrors).map(e => JSON.stringify(e)).forEach((error) => {
-      logger.info(error);
-      apm.captureError(error);
-    });
+    formatNonFatalErrors(nonFatalErrors)
+      .map((e) => JSON.stringify(e))
+      .forEach((error) => {
+        logger.info(error);
+        apm.captureError(error);
+      });
   }
 
   logger.info('Fleet setup completed');
