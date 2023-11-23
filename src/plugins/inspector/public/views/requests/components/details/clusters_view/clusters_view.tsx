@@ -100,7 +100,7 @@ export class ClustersView extends Component<DetailViewProps, State> {
             <ClustersHealth clusters={this.state.clusters} />
           </>
         ) : null}
-        <ClustersTable key={this.props.request.id} clusters={this.state.clusters} />
+        <ClustersTable clusters={this.state.clusters} />
       </>
     );
   }
