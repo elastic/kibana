@@ -134,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(allHasSummaryField).to.eql(true);
         });
 
-        it('does not suppport transaction.duration.summary when the field is not present in all documents in the time range for a service', async () => {
+        it('does not support transaction.duration.summary when the field is not present in all documents in the time range for a service', async () => {
           const response = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/time_range_metadata',
             params: {
@@ -158,7 +158,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(allHasSummaryField).to.eql(false);
         });
 
-        it('does not suppport transaction.duration.summary when the field is not present in all documents in the time range', async () => {
+        it('does not support transaction.duration.summary when the field is not present in all documents in the time range', async () => {
           const response = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/time_range_metadata',
             params: {

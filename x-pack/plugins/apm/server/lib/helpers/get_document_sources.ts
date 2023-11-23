@@ -17,10 +17,8 @@ import {
   getDurationSummaryFilter,
   getDurationLegacyFilter,
 } from './transactions';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
+import { getEnvironmentEsField } from '../../../common/environment_filter_values';
 
 const getRequest = ({
   documentType,
@@ -82,6 +80,9 @@ export async function getDocumentSources({
   const diff = end - start;
   const kql = kqlQuery(kuery);
   const beforeRange = rangeQuery(start - diff, end - diff);
+  const environmentEsField = environment
+    ? getEnvironmentEsField(environment)
+    : {};
   const serviceFilter: QueryDslQueryContainer[] | undefined = serviceName
     ? [
         {
@@ -89,14 +90,10 @@ export async function getDocumentSources({
             [SERVICE_NAME]: serviceName,
           },
         },
-        ...(environment &&
-        environment !== 'ENVIRONMENT_ALL' &&
-        environment !== 'ENVIRONMENT_NOT_DEFINED'
+        ...(Object.keys(environmentEsField).length > 0
           ? [
               {
-                term: {
-                  [SERVICE_ENVIRONMENT]: environment,
-                },
+                term: environmentEsField,
               },
             ]
           : []),

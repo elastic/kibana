@@ -184,7 +184,7 @@ export function getDurationLegacyFilter(
           bool: {
             filter: [
               { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-              ...(additionalFilters ? additionalFilters : []),
+              ...(additionalFilters ?? []),
             ],
             must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
           },
@@ -201,7 +201,7 @@ export function getDurationSummaryFilter(
     bool: {
       filter: [
         { exists: { field: TRANSACTION_DURATION_SUMMARY } },
-        ...(additionalFilters ? additionalFilters : []),
+        ...(additionalFilters ?? []),
       ],
     },
   };

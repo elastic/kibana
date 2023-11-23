@@ -168,7 +168,10 @@ export async function getServiceTransactionStats({
 }
 
 function isDurationSummary(
-  outcome: any
+  outcome: AggregationResultOfMap<
+    DurationSummaryAggregation | DurationAggregation,
+    {}
+  >
 ): outcome is AggregationResultOfMap<DurationSummaryAggregation, {}> {
   const summaryAgg = outcome as AggregationResultOfMap<
     DurationSummaryAggregation,
