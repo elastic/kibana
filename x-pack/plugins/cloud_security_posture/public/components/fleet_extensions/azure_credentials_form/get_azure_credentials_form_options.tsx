@@ -47,8 +47,6 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
       } as const;
     });
 
-// export const DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE = 'managed_identity';
-
 const I18N_TENANT_ID = i18n.translate('xpack.csp.azureIntegration.tenantIdLabel', {
   defaultMessage: 'Tenant ID',
 });
