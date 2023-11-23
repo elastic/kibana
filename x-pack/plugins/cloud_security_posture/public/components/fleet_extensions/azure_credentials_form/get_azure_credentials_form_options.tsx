@@ -8,6 +8,8 @@
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiText } from '@elastic/eui';
 import { AzureCredentialsType } from '../../../../common/types';
 
 export type AzureCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
@@ -45,7 +47,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
       } as const;
     });
 
-export const DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE = 'service_principal_with_client_secret';
+// export const DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE = 'managed_identity';
 
 const I18N_TENANT_ID = i18n.translate('xpack.csp.azureIntegration.tenantIdLabel', {
   defaultMessage: 'Tenant ID',
@@ -56,6 +58,20 @@ const I18N_CLIENT_ID = i18n.translate('xpack.csp.azureIntegration.clientIdLabel'
 });
 
 export const getAzureCredentialsFormOptions = (): AzureOptions => ({
+  managed_identity: {
+    label: i18n.translate('xpack.csp.azureIntegration.credentialType.managedIdentityLabel', {
+      defaultMessage: 'Managed Identity',
+    }),
+    info: (
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.azureIntegration.credentialType.managedIdentityInfo"
+          defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication."
+        />
+      </EuiText>
+    ),
+    fields: {},
+  },
   arm_template: {
     label: 'ARM Template',
     info: [],
@@ -117,18 +133,18 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
     },
   },
-  managed_identity: {
-    label: i18n.translate('xpack.csp.azureIntegration.credentialType.managedIdentityLabel', {
-      defaultMessage: 'Managed Identity',
-    }),
-    info: [],
-    fields: {},
-  },
   manual: {
     label: i18n.translate('xpack.csp.azureIntegration.credentialType.manualLabel', {
       defaultMessage: 'Manual',
     }),
-    info: [],
+    info: (
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.azureIntegration.credentialType.manualInfo"
+          defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication."
+        />
+      </EuiText>
+    ),
     fields: {},
   },
 });
