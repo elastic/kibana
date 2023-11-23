@@ -22,6 +22,11 @@ describe('PagerDutyParamsFields renders', () => {
       component: 'test',
       group: 'group',
       class: 'test class',
+      customDetails: '{"foo":"bar"}',
+      links: [
+        { href: 'foo', text: 'bar' },
+        { href: 'foo', text: 'bar' },
+      ],
     };
 
     const wrapper = mountWithIntl(
@@ -56,6 +61,7 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="customDetailsJsonEditor"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="linksListItemRow"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="pagerDutyAddLinkButton"]').length > 0).toBeTruthy();
   });
 

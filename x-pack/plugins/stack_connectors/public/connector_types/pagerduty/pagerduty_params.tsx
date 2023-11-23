@@ -311,13 +311,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               messageVariables={messageVariables}
               paramsProperty={'customDetails'}
               inputTargetValue={customDetails}
+              errors={errors.customDetails as string[]}
               label={i18n.translate(
                 'xpack.stackConnectors.components.pagerDuty.customDetailsFieldLabel',
                 {
                   defaultMessage: 'Custom Details (optional)',
                 }
               )}
-              errors={errors.body as string[]}
               onDocumentsChange={(json: string) => {
                 editAction('customDetails', json, index);
               }}

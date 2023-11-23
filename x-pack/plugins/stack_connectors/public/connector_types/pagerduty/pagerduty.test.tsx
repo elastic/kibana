@@ -53,6 +53,7 @@ describe('pagerduty action params validation', () => {
         summary: [],
         timestamp: [],
         links: [],
+        customDetails: [],
       },
     });
   });
@@ -78,6 +79,59 @@ describe('pagerduty action params validation', () => {
         summary: [],
         timestamp: expect.arrayContaining(expected),
         links: [],
+        customDetails: [],
+      },
+    });
+  });
+
+  test('action params validation fails when customDetails are not valid JSON', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{foo:bar}',
+      links: [],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: [],
+        customDetails: ['Custom details must have a valid JSON format.'],
+      },
+    });
+  });
+
+  test('action params validation does not fail when customDetails are not JSON but have mustache templates inside', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{"details": {{alert.flapping}}}',
+      links: [],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: [],
+        customDetails: [],
       },
     });
   });
@@ -103,6 +157,7 @@ describe('pagerduty action params validation', () => {
         summary: [],
         timestamp: [],
         links: ['Links cannot be empty.'],
+        customDetails: [],
       },
     });
   });
@@ -128,6 +183,7 @@ describe('pagerduty action params validation', () => {
         summary: [],
         timestamp: [],
         links: ['Links cannot be empty.'],
+        customDetails: [],
       },
     });
   });
@@ -157,6 +213,7 @@ describe('pagerduty action params validation', () => {
         summary: [],
         timestamp: [],
         links: ['Links cannot be empty.'],
+        customDetails: [],
       },
     });
   });
