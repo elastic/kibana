@@ -6,8 +6,8 @@
  */
 
 export const SLO_MODEL_VERSION = 2;
-export const SLO_RESOURCES_VERSION = 3;
-export const SLO_SUMMARY_TRANSFORMS_VERSION = 4;
+export const SLO_RESOURCES_VERSION = 3; // we were at 2
+export const SLO_SUMMARY_TRANSFORMS_VERSION = 4; // we were at 3
 
 export const SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.sli-mappings';
 export const SLO_COMPONENT_TEMPLATE_SETTINGS_NAME = '.slo-observability.sli-settings';
@@ -18,7 +18,7 @@ export const SLO_INDEX_TEMPLATE_PATTERN = `.slo-observability.sli-*`;
 export const SLO_DESTINATION_INDEX_NAME = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}`;
 export const SLO_DESTINATION_INDEX_PATTERN = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}*`;
 
-export const SLO_INGEST_PIPELINE_NAME = `.slo-observability.sli.pipeline`;
+export const SLO_INGEST_PIPELINE_NAME = `.slo-observability.sli-pipeline-v${SLO_RESOURCES_VERSION}`;
 // slo-observability.sli-v<version>.(YYYY-MM-DD)
 export const SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}.`;
 
