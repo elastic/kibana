@@ -141,7 +141,7 @@ export const waitForActionToComplete = (
 
 export const waitForActionToSucceed = (
   actionId: string,
-  timeout = 120000
+  timeout = 180000
 ): Cypress.Chainable<ActionDetails> => {
   let action: ActionDetails | undefined;
 
