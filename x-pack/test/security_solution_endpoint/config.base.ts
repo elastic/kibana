@@ -14,7 +14,10 @@ import {
 } from '../security_solution_endpoint_api_int/registry';
 import type { TargetTags } from './target_tags';
 
-const SUITE_TAGS: Record<string, { include: TargetTags[]; exclude: TargetTags[] }> = {
+export const SUITE_TAGS: Record<
+  'ess' | 'serverless',
+  { include: TargetTags[]; exclude: TargetTags[] }
+> = {
   ess: {
     include: ['@ess'],
     exclude: ['@skipInEss'],
@@ -87,10 +90,6 @@ export const generateConfig = async ({
         `--xpack.fleet.packages.0.version=latest`,
         // this will be removed in 8.7 when the file upload feature is released
         `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
-        // disable a tour that prevents tests from passing
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'disableTimelineSaveTour',
-        ])}`,
         ...kbnServerArgs,
       ],
     },

@@ -7,6 +7,7 @@
 
 import path from 'path';
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {
   TOASTER_BODY,
@@ -29,11 +30,7 @@ import {
 } from '../../../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../../../objects/exception';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-} from '../../../../../tasks/common';
+import { resetRulesTableState } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
 
@@ -57,10 +54,6 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
 
 describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
-
-  before(() => {
-    cleanKibana();
-  });
 
   beforeEach(() => {
     login();

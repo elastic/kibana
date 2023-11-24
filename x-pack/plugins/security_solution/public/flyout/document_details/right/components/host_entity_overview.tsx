@@ -49,7 +49,7 @@ import {
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
-import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 
 const HOST_ICON = 'storage';
@@ -70,7 +70,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const { openLeftPanel } = useExpandableFlyoutContext();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: eventId,
@@ -156,7 +156,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     return [
       {
         title: (
-          <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{HOST_RISK_LEVEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
@@ -177,9 +177,14 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   }, [hostRisk]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      responsive={false}
+      data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}
+    >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={HOST_ICON} />
           </EuiFlexItem>
@@ -207,7 +212,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         />
       ) : (
         <EuiFlexItem>
-          <EuiFlexGroup>
+          <EuiFlexGroup responsive={false}>
             <EuiFlexItem>
               <OverviewDescriptionList
                 dataTestSubj={ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID}

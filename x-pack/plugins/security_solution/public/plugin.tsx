@@ -69,6 +69,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   readonly kibanaVersion: string;
   /**
+   * Whether the environment is 'serverless' or 'traditional'
+   */
+  readonly buildFlavor: string;
+  /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
    * when upgrading rules. If not provided, the latest compatible package will be installed,
    * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
@@ -97,6 +101,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.configSettings = parseConfigSettings(this.config.offeringSettings ?? {}).settings;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.contract = new PluginContract(this.experimentalFeatures);
     this.telemetry = new TelemetryService();
@@ -230,11 +235,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const services = await startServices(params);
         await this.registerActions(store, params.history, services);
 
-        const subscriptionTrackingServices = {
-          analyticsClient: coreStart.analytics,
-          navigateToApp: coreStart.application.navigateToApp,
-        };
-
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
 
@@ -248,7 +248,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             coreStart.application.capabilities,
             services
           ),
-          subscriptionTrackingServices,
         });
       },
     });
@@ -281,6 +280,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ...plugins,
       kibanaBranch: this.kibanaBranch,
       kibanaVersion: this.kibanaVersion,
+      buildFlavor: this.buildFlavor,
       prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
     });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });

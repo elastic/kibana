@@ -50,7 +50,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                 <p>
                   {i18n.translate('xpack.serverlessSearch.connectorsEmpty.description', {
                     defaultMessage:
-                      "To set up and deploy a connector you'll be working between the third-party data source, your terminal, and the Kibana UI. The high level process looks like this:",
+                      "To set up and deploy a connector you'll be working between the third-party data source, your terminal, and the Elasticsearch serverless UI. The high level process looks like this:",
                   })}
                 </p>
               </EuiText>
@@ -90,7 +90,10 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                               defaultMessage="Deploy connector code on your own infrastructure by running from {source}, or using {docker}"
                               values={{
                                 source: (
-                                  <EuiLink href="TODO TODO TODO">
+                                  <EuiLink
+                                    data-test-subj="serverlessSearchEmptyConnectorsPromptSourceLink"
+                                    href="TODO TODO TODO"
+                                  >
                                     {i18n.translate(
                                       'xpack.serverlessSearch.connectorsEmpty.sourceLabel',
                                       { defaultMessage: 'source' }
@@ -98,7 +101,10 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                                   </EuiLink>
                                 ),
                                 docker: (
-                                  <EuiLink href="TODO TODO TODO">
+                                  <EuiLink
+                                    data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
+                                    href="TODO TODO TODO"
+                                  >
                                     {i18n.translate(
                                       'xpack.serverlessSearch.connectorsEmpty.dockerLabel',
                                       { defaultMessage: 'Docker' }
@@ -157,7 +163,11 @@ export const EmptyConnectorsPrompt: React.FC = () => {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton fill iconType="plusInCircleFilled">
+              <EuiButton
+                data-test-subj="serverlessSearchEmptyConnectorsPromptCreateConnectorButton"
+                fill
+                iconType="plusInCircleFilled"
+              >
                 {i18n.translate('xpack.serverlessSearch.connectorsEmpty.createConnector', {
                   defaultMessage: 'Create connector',
                 })}

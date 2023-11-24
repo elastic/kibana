@@ -24,6 +24,7 @@ import {
   EXECUTE_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { targetTags } from '../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { ROLE } from '../services/roles_users';
 
@@ -39,7 +40,14 @@ export default function ({ getService }: FtrProviderContext) {
     body: Record<string, unknown> | undefined;
   }
 
-  describe('When attempting to call an endpoint api', () => {
+  // Flaky:
+  // https://github.com/elastic/kibana/issues/171655
+  // https://github.com/elastic/kibana/issues/171656
+  // https://github.com/elastic/kibana/issues/171647
+  // https://github.com/elastic/kibana/issues/171648
+  describe.skip('When attempting to call an endpoint api', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let actionId = '';
     let agentId = '';
@@ -246,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_operations_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(403, {
@@ -268,7 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_operations_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(200);

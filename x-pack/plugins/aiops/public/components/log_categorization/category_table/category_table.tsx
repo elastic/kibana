@@ -30,7 +30,7 @@ import type {
 } from '../../../../common/api/log_categorization/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
-import type { LogCategorizationAppState } from '../../../application/utils/url_state';
+import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
 
 import { MiniHistogram } from '../../mini_histogram';
 
@@ -142,7 +142,7 @@ export const CategoryTable: FC<Props> = ({
 
           return {
             doc_count_overall: adjustedDocCount,
-            doc_count_significant_term: newTerm,
+            doc_count_significant_item: newTerm,
             key: catKey,
             key_as_string: `${catKey}`,
           };
