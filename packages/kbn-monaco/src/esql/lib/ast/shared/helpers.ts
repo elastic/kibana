@@ -412,13 +412,24 @@ export function hasWildcard(name: string) {
 }
 
 export function columnExists(
-  column: string,
+  column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  if (fields.has(column) || variables.has(column)) {
-    return true;
+  if (fields.has(column.name) || variables.has(column.name)) {
+    return { hit: true, nameHit: column.name };
   }
-  return Boolean(fuzzySearch(column, fields.keys()) || fuzzySearch(column, variables.keys()));
+  if (column.quoted) {
+    const trimmedName = column.name.replace(/\s/g, '');
+    if (variables.has(trimmedName)) {
+      return { hit: true, nameHit: trimmedName };
+    }
+  }
+  if (
+    Boolean(fuzzySearch(column.name, fields.keys()) || fuzzySearch(column.name, variables.keys()))
+  ) {
+    return { hit: true, nameHit: column.name };
+  }
+  return { hit: false };
 }
 
 export function sourceExists(index: string, sources: Set<string>) {

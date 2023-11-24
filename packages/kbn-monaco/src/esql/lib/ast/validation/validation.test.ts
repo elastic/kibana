@@ -602,6 +602,10 @@ describe('validation logic', () => {
       'Unknown column [a]',
     ]);
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as a', []);
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField) | rename `avg(numberField)` as avg0',
+      []
+    );
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as ', [
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
@@ -985,6 +989,7 @@ describe('validation logic', () => {
     ]);
 
     testErrorsAndWarnings('from a | eval avg(numberField)', ['Eval does not support function avg']);
+    testErrorsAndWarnings('from a | stats avg(numberField) | eval `avg(numberField)` + 1', []);
 
     describe('date math', () => {
       testErrorsAndWarnings('from a | eval 1 anno', [

@@ -9,9 +9,10 @@
 import type { ParserRuleContext } from 'antlr4ts/ParserRuleContext';
 import { ErrorNode } from 'antlr4ts/tree/ErrorNode';
 import type { TerminalNode } from 'antlr4ts/tree/TerminalNode';
-import type {
+import {
   ArithmeticUnaryContext,
   DecimalValueContext,
+  esql_parser,
   IntegerValueContext,
   QualifiedIntegerLiteralContext,
 } from '../../antlr/esql_parser';
@@ -162,20 +163,24 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 function getQuotedText(ctx: ParserRuleContext) {
   return (
-    ctx.tryGetToken(73 /* esql_parser.SRC_QUOTED_IDENTIFIER*/, 0) ||
-    ctx.tryGetToken(64 /* esql_parser.QUOTED_IDENTIFIER */, 0)
+    ctx.tryGetToken(esql_parser.SRC_QUOTED_IDENTIFIER, 0) ||
+    ctx.tryGetToken(esql_parser.QUOTED_IDENTIFIER, 0)
   );
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
   return (
-    ctx.tryGetToken(72 /* esql_parser.SRC_UNQUOTED_IDENTIFIER */, 0) ||
-    ctx.tryGetToken(63 /* esql_parser.UNQUOTED_IDENTIFIER */, 0)
+    ctx.tryGetToken(esql_parser.SRC_UNQUOTED_IDENTIFIER, 0) ||
+    ctx.tryGetToken(esql_parser.UNQUOTED_IDENTIFIER, 0)
   );
 }
 
 export function sanifyIdentifierString(ctx: ParserRuleContext) {
-  return getUnquotedText(ctx)?.text || getQuotedText(ctx)?.text.replace(/`/g, '') || ctx.text;
+  return (
+    getUnquotedText(ctx)?.text ||
+    getQuotedText(ctx)?.text.replace(/(`)/g, '') ||
+    ctx.text.replace(/(`)/g, '') // for some reason some quoted text is not detected correctly by the parser
+  );
 }
 
 export function createSource(
