@@ -59,7 +59,7 @@ export const defaultExpression: MetricExpression = {
       aggType: Aggregators.COUNT,
     },
   ],
-  threshold: [1000],
+  threshold: [100],
   timeSize: 1,
   timeUnit: 'm',
 };

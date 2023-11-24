@@ -528,6 +528,7 @@ export interface DocLinks {
     installAndUninstallIntegrationAssets: string;
     elasticAgentInputConfiguration: string;
     policySecrets: string;
+    remoteESOoutput: string;
   }>;
   readonly ecs: {
     readonly guide: string;
