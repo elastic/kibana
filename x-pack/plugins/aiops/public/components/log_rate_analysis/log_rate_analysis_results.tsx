@@ -209,7 +209,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
-  const { significantItems } = data;
+  const { significantItems, zeroDocsFallback } = data;
+
   useEffect(
     () => setUniqueFieldNames(uniq(significantItems.map((d) => d.fieldName)).sort()),
     [significantItems]
@@ -490,6 +491,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            zeroDocsFallback={zeroDocsFallback}
           />
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
@@ -501,6 +503,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            zeroDocsFallback={zeroDocsFallback}
           />
         ) : null}
       </div>

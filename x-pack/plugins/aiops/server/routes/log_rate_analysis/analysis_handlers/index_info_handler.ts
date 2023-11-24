@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { updateLoadingStateAction } from '../../../../common/api/log_rate_analysis/actions';
+import {
+  updateLoadingStateAction,
+  setZeroDocsFallback,
+} from '../../../../common/api/log_rate_analysis/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
@@ -97,6 +100,8 @@ export const indexInfoHandlerFactory =
           ),
         })
       );
+
+      responseStream.push(setZeroDocsFallback(zeroDocsFallback));
 
       if (fieldCandidatesCount === 0) {
         responseStream.endWithUpdatedLoadingState();
