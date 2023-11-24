@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 
-import type { TimelineStatus } from '../../../../../common/api/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import {
@@ -22,14 +21,11 @@ import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/
 import { timelineActions } from '../../../store/timeline';
 import * as i18n from './translations';
 
-interface ActiveTimelinesProps {
+export interface ActiveTimelinesProps {
   timelineId: string;
-  timelineStatus: TimelineStatus;
   timelineTitle: string;
   timelineType: TimelineType;
   isOpen: boolean;
-  updated?: number;
-  changed: boolean;
 }
 
 const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
@@ -51,12 +47,9 @@ const TitleConatiner = styled(EuiFlexItem)`
 
 const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   timelineId,
-  timelineStatus,
   timelineType,
   timelineTitle,
-  updated,
   isOpen,
-  changed,
 }) => {
   const dispatch = useDispatch();
 

@@ -17,34 +17,38 @@ const NoWrapText = styled(EuiText)`
   white-space: nowrap;
 `;
 
-export const TimelineStatusInfo = React.memo<{
+export interface TimelineStatusInfoProps {
   status: TimelineStatus;
   updated?: number;
   changed?: boolean;
-}>(({ status, updated, changed }) => {
-  const isUnsaved = status === TimelineStatus.draft;
+}
 
-  let statusContent: React.ReactNode = null;
-  if (isUnsaved || !updated) {
-    statusContent = <EuiTextColor color="warning">{i18n.UNSAVED}</EuiTextColor>;
-  } else if (changed) {
-    statusContent = <EuiTextColor color="warning">{i18n.UNSAVED_CHANGES}</EuiTextColor>;
-  } else {
-    statusContent = (
-      <>
-        {i18n.SAVED}{' '}
-        <FormattedRelative
-          data-test-subj="timeline-status"
-          key="timeline-status-autosaved"
-          value={new Date(updated)}
-        />
-      </>
+export const TimelineStatusInfo = React.memo<TimelineStatusInfoProps>(
+  ({ status, updated, changed }) => {
+    const isUnsaved = status === TimelineStatus.draft;
+
+    let statusContent: React.ReactNode = null;
+    if (isUnsaved || !updated) {
+      statusContent = <EuiTextColor color="warning">{i18n.UNSAVED}</EuiTextColor>;
+    } else if (changed) {
+      statusContent = <EuiTextColor color="warning">{i18n.UNSAVED_CHANGES}</EuiTextColor>;
+    } else {
+      statusContent = (
+        <>
+          {i18n.SAVED}
+          <FormattedRelative
+            data-test-subj="timeline-status"
+            key="timeline-status-autosaved"
+            value={new Date(updated)}
+          />
+        </>
+      );
+    }
+    return (
+      <NoWrapText size="xs" data-test-subj="timeline-status">
+        {statusContent}
+      </NoWrapText>
     );
   }
-  return (
-    <NoWrapText size="xs" data-test-subj="timeline-status">
-      {statusContent}
-    </NoWrapText>
-  );
-});
+);
 TimelineStatusInfo.displayName = 'TimelineStatusInfo';

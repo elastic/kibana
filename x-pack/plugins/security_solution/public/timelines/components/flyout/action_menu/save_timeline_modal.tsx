@@ -46,7 +46,7 @@ interface SaveTimelineModalProps {
   showWarning?: boolean;
 }
 
-export const SaveTimelineModalComponent = React.memo<SaveTimelineModalProps>(
+export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
   ({ closeSaveTimeline, initialFocusOn, timelineId, showWarning }) => {
     const { startTransaction } = useStartTransaction();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -265,6 +265,4 @@ export const SaveTimelineModalComponent = React.memo<SaveTimelineModalProps>(
   }
 );
 
-SaveTimelineModalComponent.displayName = 'SaveTimelineModal';
-
-export const SaveTimelineModal = React.memo(SaveTimelineModalComponent);
+SaveTimelineModal.displayName = 'SaveTimelineModal';

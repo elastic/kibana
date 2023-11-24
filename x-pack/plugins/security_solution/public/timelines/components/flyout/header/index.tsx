@@ -8,13 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -28,7 +27,7 @@ import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import { TimelineStatusInfo } from './timeline_status_info';
 
-interface FlyoutHeaderPanelProps {
+export interface FlyoutHeaderPanelProps {
   timelineId: string;
 }
 
@@ -88,15 +87,14 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     [dataProviders, kqlQuery]
   );
 
-  const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
+  const kqlQueryTimeline = kqlQuery.filterQuery?.kuery?.expression ?? ' ';
 
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
       : kqlQueryTimeline;
-  const kqlQueryTest = useMemo(
+
+  const kqlQueryObj = useMemo(
     () => ({ query: kqlQueryExpression, language: 'kuery' }),
     [kqlQueryExpression]
   );
@@ -109,10 +107,10 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
         indexPattern,
         browserFields,
         filters: filters ? filters : [],
-        kqlQuery: kqlQueryTest,
+        kqlQuery: kqlQueryObj,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryTest]
+    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryObj]
   );
 
   const handleClose = useCallback(() => {
@@ -144,10 +142,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                   timelineId={timelineId}
                   timelineType={timelineType}
                   timelineTitle={title}
-                  timelineStatus={timelineStatus}
                   isOpen={show}
-                  updated={updated}
-                  changed={changed}
                 />
               </ActiveTimelinesContainer>
             </EuiFlexItem>

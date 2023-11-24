@@ -19,7 +19,7 @@ const panelStyle = {
   padding: 0,
 };
 
-const NewTimelineActionComponent = ({ timelineId }: NewTimelineActionProps) => {
+export const NewTimelineAction = React.memo(({ timelineId }: NewTimelineActionProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const closePopover = useCallback(() => {
@@ -57,6 +57,6 @@ const NewTimelineActionComponent = ({ timelineId }: NewTimelineActionProps) => {
       </EuiFlexGroup>
     </EuiPopover>
   );
-};
+});
 
-export const NewTimelineAction = React.memo(NewTimelineActionComponent);
+NewTimelineAction.displayName = 'NewTimelineAction';

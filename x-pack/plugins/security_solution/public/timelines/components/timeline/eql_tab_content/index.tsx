@@ -63,7 +63,7 @@ const EqlTabHeaderContainer = styled.div`
   width: 100%;
 `;
 
-EqlTabHeaderContainer.displayName = 'TimelineHeaderContainer';
+EqlTabHeaderContainer.displayName = 'EqlTabHeaderContainer';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   align-items: stretch;

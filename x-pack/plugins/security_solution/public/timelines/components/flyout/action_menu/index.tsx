@@ -31,7 +31,13 @@ const TimelineActionMenuComponent = ({
 }: TimelineActionMenuProps) => {
   const userCasesPermissions = useGetUserCasesPermissions();
   return (
-    <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      justifyContent="flexEnd"
+      alignItems="center"
+      responsive={false}
+      data-test-subj="timeline-action-menu"
+    >
       <EuiFlexItem data-test-subj="new-timeline-action">
         <NewTimelineAction timelineId={timelineId} />
       </EuiFlexItem>
