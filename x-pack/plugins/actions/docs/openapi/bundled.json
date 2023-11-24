@@ -5076,12 +5076,16 @@
           "class": {
             "description": "The class or type of the event.",
             "type": "string",
-            "example": "cpu load"
+            "examples": [
+              "cpu load"
+            ]
           },
           "component": {
             "description": "The component of the source machine that is responsible for the event.",
             "type": "string",
-            "example": "eth0"
+            "examples": [
+              "eth0"
+            ]
           },
           "customDetails": {
             "description": "Additional details to add to the event.",
@@ -5102,7 +5106,9 @@
           "group": {
             "description": "The logical grouping of components of a service.",
             "type": "string",
-            "example": "app-stack"
+            "examples": [
+              "app-stack"
+            ]
           },
           "links": {
             "description": "A list of links to add to the event.",
