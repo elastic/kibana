@@ -288,9 +288,9 @@ function sendReleaseSlackAnnouncement(selectedCommit: GithubCommitType, deployTa
           isDryRun
             ? '*:memo:This is a dry run - no commit will actually be promoted. Please ignore!*'
             : 'Attention @kibana-serverless-promotion-notify!',
-          `:ship: Promotion of a new <https://github.com/elastic/kibana/commit/${commitSha}|commit> to QA has been initiated!`,
-          `:mag: The details of the candidate selection can be found here: <${process.env.BUILDKITE_BUILD_URL}|${buildShortname}>`,
-          `:test_tube: Once promotion is complete, please begin any required manual testing.`,
+          `Promotion of a new <https://github.com/elastic/kibana/commit/${commitSha}|commit> to QA has been initiated!`,
+          `The details of the candidate selection can be found here: <${process.env.BUILDKITE_BUILD_URL}|${buildShortname}>`,
+          `Once promotion is complete, please begin any required manual testing.`,
           `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.`
         ),
       },
