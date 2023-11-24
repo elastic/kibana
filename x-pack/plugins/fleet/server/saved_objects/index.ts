@@ -431,6 +431,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       importableAndExportable: false,
     },
     mappings: {
+      dynamic: false,
       properties: {
         name: { type: 'keyword' },
         version: { type: 'keyword' },
@@ -457,10 +458,6 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         },
         installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
-          dynamic: false,
-          properties: {},
-        },
-        latest_install_failed_attempts: {
           dynamic: false,
           properties: {},
         },
