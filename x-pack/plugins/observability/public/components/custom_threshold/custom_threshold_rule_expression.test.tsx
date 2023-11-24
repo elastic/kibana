@@ -16,6 +16,7 @@ import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/t
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
+import { omit } from 'lodash';
 
 jest.mock('../../utils/kibana_react');
 jest.mock('./components/preview_chart/preview_chart', () => ({
@@ -83,20 +84,18 @@ describe('Expression', () => {
 
   it('should use default metrics', async () => {
     const { ruleParams } = await setup();
-    expect(ruleParams.criteria).toEqual([
-      {
-        metrics: [
-          {
-            name: 'A',
-            aggType: Aggregators.COUNT,
-          },
-        ],
-        comparator: Comparator.GT,
-        threshold: [100],
-        timeSize: 1,
-        timeUnit: 'm',
-      },
-    ]);
+    expect(omit(ruleParams.criteria[0], 'id')).toEqual({
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+        },
+      ],
+      comparator: Comparator.GT,
+      threshold: [100],
+      timeSize: 1,
+      timeUnit: 'm',
+    });
   });
 
   it('should show an error message when searchSource throws an error', async () => {
