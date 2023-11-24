@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Dataset } from '../datasets';
 import { DatasetSelectionStrategy } from './types';
 
@@ -22,7 +21,7 @@ export class AllDatasetSelection implements DatasetSelectionStrategy {
     };
   }
 
-  toDataviewSpec(): DataViewSpec {
+  toDataviewSpec() {
     return this.selection.dataset.toDataviewSpec();
   }
 

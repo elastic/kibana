@@ -8,15 +8,12 @@
 import { IToasts } from '@kbn/core-notifications-browser';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { ControlPanels } from '@kbn/log-explorer-plugin/common';
 import * as Either from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
-import { mapValues } from 'lodash';
 import { InvokeCreator } from 'xstate';
+import { OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY } from '../../../../common';
 import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
 import * as urlSchemaV1 from './url_schema_v1';
-
-const URL_STATE_KEY = 'pageState';
 
 interface ObservabilityLogExplorerUrlStateDependencies {
   toastsService: IToasts;
@@ -35,7 +32,9 @@ export const updateUrlFromLogExplorerState =
       context.logExplorerState
     );
 
-    urlStateStorageContainer.set(URL_STATE_KEY, encodedUrlStateValues);
+    urlStateStorageContainer.set(OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY, encodedUrlStateValues, {
+      replace: true,
+    });
   };
 
 export const initializeFromUrl =
@@ -48,7 +47,8 @@ export const initializeFromUrl =
   > =>
   (_context, _event) =>
   (send) => {
-    const urlStateValues = urlStateStorageContainer.get<unknown>(URL_STATE_KEY) ?? undefined;
+    const urlStateValues =
+      urlStateStorageContainer.get<unknown>(OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY) ?? undefined;
 
     // in the future we'll have to more schema versions to the union
     const stateValuesE = rt
@@ -70,12 +70,3 @@ export const initializeFromUrl =
       });
     }
   };
-
-// Remove dataViewId from control panels
-const cleanControlPanels = (controlPanels: ControlPanels) => {
-  return mapValues(controlPanels, (controlPanelConfig) => {
-    const { explicitInput } = controlPanelConfig;
-    const { dataViewId, ...rest } = explicitInput;
-    return { ...controlPanelConfig, explicitInput: rest };
-  });
-};

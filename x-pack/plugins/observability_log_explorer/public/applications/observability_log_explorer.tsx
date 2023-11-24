@@ -67,10 +67,7 @@ export const ObservabilityLogExplorerApp = ({
   return (
     <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
       <KibanaContextProviderForPlugin>
-        <KbnUrlStateStorageFromRouterProvider
-          history={appParams.history}
-          toastsService={core.notifications.toasts}
-        >
+        <KbnUrlStateStorageFromRouterProvider>
           <Router history={appParams.history}>
             <Routes>
               <Route path="/" exact={true} render={() => <ObservablityLogExplorerMainRoute />} />

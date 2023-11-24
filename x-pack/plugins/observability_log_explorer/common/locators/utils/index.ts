@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './helpers';
+export * from './construct_locator_path';

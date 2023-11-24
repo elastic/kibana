@@ -10,12 +10,10 @@ import {
   LogExplorerControllerContext,
 } from '@kbn/log-explorer-plugin/public';
 import { QueryState } from '@kbn/data-plugin/common';
-// import { DatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
 import {
   LogExplorerPublicState,
   LogExplorerPublicStateUpdate,
 } from '@kbn/log-explorer-plugin/public';
-// import { UrlSchema } from './url_state_storage_service';
 
 export type ObservabilityLogExplorerContext = ObservabilityLogExplorerTypeState['context'];
 
@@ -31,17 +29,9 @@ interface WithController {
   controller: LogExplorerController;
 }
 
-//   initialControllerState: Omit<UrlSchema, 'datasetSelection'> &
-//     WithDecodedDatasetSelection &
-//     WithTimeFilter;
-// interface WithDecodedDatasetSelection {
-//   datasetSelection?: DatasetSelectionPlain;
-// }
-
 export type ObservabilityLogExplorerEvent =
   | {
       type: 'INITIALIZED_FROM_URL';
-      // stateFromUrl?: Omit<UrlSchema, 'datasetSelection'> & WithDecodedDatasetSelection;
       stateFromUrl?: LogExplorerPublicStateUpdate;
     }
   | {

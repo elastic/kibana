@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_LOG_EXPLORER_APP_ID = 'observability-log-explorer';
-
-export const OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY = 'pageState';
+export * as urlSchemaV1 from './url_schema_v1';

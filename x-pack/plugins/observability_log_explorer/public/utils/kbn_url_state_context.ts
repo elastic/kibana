@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import createContainer from 'constate';
 import { useState } from 'react';
-import { ObservabilityLogExplorerHistory } from '../types';
+import { useKibanaContextForPlugin } from './use_kibana';
 
-const useKbnUrlStateStorageFromRouter = ({
-  history,
-  toastsService,
-}: {
-  history: ObservabilityLogExplorerHistory;
-  toastsService: IToasts;
-}) => {
+const useKbnUrlStateStorageFromRouter = () => {
+  const {
+    services: {
+      appParams: { history },
+      notifications: { toasts },
+      uiSettings,
+    },
+  } = useKibanaContextForPlugin();
+
   const [urlStateStorage] = useState(() =>
     createKbnUrlStateStorage({
       history,
-      useHash: false,
+      useHash: uiSettings.get('state:storeInSessionStorage'),
       useHashQuery: false,
-      ...withNotifyOnErrors(toastsService),
+      ...withNotifyOnErrors(toasts),
     })
   );
 
