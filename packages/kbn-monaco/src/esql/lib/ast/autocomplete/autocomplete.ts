@@ -990,7 +990,7 @@ async function getOptionArgsSuggestions(
     if (!suggestions.length) {
       const argIndex = Math.max(option.args.length - 1, 0);
       const types = [optionDef.signature.params[argIndex].type].filter(nonNullable);
-      if (option.args.length) {
+      if (option.args.length && !isRestartingExpression(innerText)) {
         suggestions.push(
           ...getFinalSuggestions({
             comma: true,

@@ -386,6 +386,7 @@ describe('autocomplete', () => {
     testSuggestions('from a | stats a=max(b) by ', [...fields.map(({ name }) => name)]);
     testSuggestions('from a | stats a=max(b) BY ', [...fields.map(({ name }) => name)]);
     testSuggestions('from a | stats a=c by d', ['|', ',']);
+    testSuggestions('from a | stats a=c by d, ', [...fields.map(({ name }) => name)]);
     testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
     testSuggestions(
       'from a | stats a=min()',
