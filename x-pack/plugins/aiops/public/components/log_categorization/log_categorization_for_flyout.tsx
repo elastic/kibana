@@ -29,7 +29,7 @@ import type { Category, SparkLinesPerCategory } from '../../../common/api/log_ca
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
-} from '../../application/utils/url_state';
+} from '../../application/url_state/log_pattern_analysis';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';

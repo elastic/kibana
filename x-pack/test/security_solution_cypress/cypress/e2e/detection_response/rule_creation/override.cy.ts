@@ -47,7 +47,7 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import {
   createAndEnableRule,

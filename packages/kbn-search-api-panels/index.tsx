@@ -14,7 +14,7 @@ import { AuthenticatedUser } from '@kbn/security-plugin/common';
 export * from './components/code_box';
 export * from './components/github_link';
 export * from './components/ingest_data';
-export * from './components/integrations_panel';
+export * from './components/ingestions_panel';
 export * from './components/language_client_panel';
 export * from './components/overview_panel';
 export * from './components/select_client';
