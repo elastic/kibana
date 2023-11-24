@@ -11,7 +11,7 @@ import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { phrasesValuesComboboxCss } from './phrases_values_input.styles';
@@ -33,9 +33,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
     const { suggestions, isLoading } = this.state;
     const { values, intl, onChange, fullWidth, onParamsUpdate, compressed, disabled } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
-    const panelMinWidth = calculateWidthFromCharCount(
-      options.reduce((acc, curr) => (acc > curr.length ? acc : curr.length), 0)
-    );
+    const panelMinWidth = calculateWidthFromEntries(options);
     return (
       <StringComboBox
         async

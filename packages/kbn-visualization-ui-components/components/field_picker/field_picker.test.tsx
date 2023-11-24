@@ -13,11 +13,11 @@ import faker from 'faker';
 import userEvent from '@testing-library/user-event';
 import { DataType, FieldOptionValue } from './types';
 
-const shortSizeLabel = () => ({
-  label: faker.random.alpha({ count: 20 }),
+const generateFieldWithLabelOfLength = (length: number) => ({
+  label: faker.random.alpha({ count: length }),
   value: {
     type: 'field' as const,
-    field: faker.random.alpha({ count: 20 }),
+    field: faker.random.alpha({ count: length }),
     dataType: 'date' as DataType,
     operationType: 'count',
   },
@@ -25,31 +25,7 @@ const shortSizeLabel = () => ({
   compatible: 1,
 });
 
-const mediumSizeLabel = () => ({
-  label: faker.random.alpha({ count: 50 }),
-  value: {
-    type: 'field' as const,
-    field: faker.random.alpha({ count: 50 }),
-    dataType: 'date' as DataType,
-    operationType: 'count',
-  },
-  exists: true,
-  compatible: 1,
-});
-
-const longSizeLabel = () => ({
-  label: faker.random.alpha({ count: 80 }),
-  value: {
-    type: 'field' as const,
-    field: faker.random.alpha({ count: 80 }),
-    dataType: 'date' as DataType,
-    operationType: 'count',
-  },
-  exists: true,
-  compatible: 1,
-});
-
-const generateProps = (customLabel = shortSizeLabel()) =>
+const generateProps = (customField = generateFieldWithLabelOfLength(20)) =>
   ({
     selectedOptions: [
       {
@@ -67,8 +43,12 @@ const generateProps = (customLabel = shortSizeLabel()) =>
         label: 'nested options',
         exists: true,
         compatible: 1,
-        value: shortSizeLabel(),
-        options: [shortSizeLabel(), customLabel, shortSizeLabel()],
+        value: generateFieldWithLabelOfLength(20),
+        options: [
+          generateFieldWithLabelOfLength(20),
+          customField,
+          generateFieldWithLabelOfLength(20),
+        ],
       },
     ],
     onChoose: jest.fn(),
@@ -76,8 +56,8 @@ const generateProps = (customLabel = shortSizeLabel()) =>
   } as unknown as FieldPickerProps<FieldOptionValue>);
 
 describe('field picker', () => {
-  const renderFieldPicker = (customLabel = shortSizeLabel()) => {
-    const props = generateProps(customLabel);
+  const renderFieldPicker = (customField = generateFieldWithLabelOfLength(20)) => {
+    const props = generateProps(customField);
     const rtlRender = render(<FieldPicker {...props} />);
     return {
       openCombobox: () => userEvent.click(screen.getByLabelText(/open list of options/i)),
@@ -93,7 +73,7 @@ describe('field picker', () => {
   });
 
   it('should render calculated width dropdown list if the longest label is longer than min width', async () => {
-    const { openCombobox } = renderFieldPicker(mediumSizeLabel());
+    const { openCombobox } = renderFieldPicker(generateFieldWithLabelOfLength(50));
     openCombobox();
 
     const popover = screen.getByRole('dialog');
@@ -101,7 +81,7 @@ describe('field picker', () => {
   });
 
   it('should render maximum width dropdown list if the longest label is longer than max width', async () => {
-    const { openCombobox } = renderFieldPicker(longSizeLabel());
+    const { openCombobox } = renderFieldPicker(generateFieldWithLabelOfLength(80));
     openCombobox();
     const popover = screen.getByRole('dialog');
     expect(popover).toHaveStyle('inline-size: 550px');

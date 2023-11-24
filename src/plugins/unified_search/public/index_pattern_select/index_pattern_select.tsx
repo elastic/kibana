@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
 
@@ -149,12 +149,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
       ...rest
     } = this.props;
 
-    const panelMinWidth = calculateWidthFromCharCount(
-      this.state.options.reduce(
-        (acc, curr) => (acc > curr.label.length ? acc : curr.label.length),
-        0
-      )
-    );
+    const panelMinWidth = calculateWidthFromEntries(this.state.options, ['label']);
 
     return (
       <EuiComboBox

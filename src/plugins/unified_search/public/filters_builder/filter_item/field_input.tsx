@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { useGeneratedHtmlId, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
@@ -74,9 +74,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
     onFieldChange(newValues);
   };
 
-  const panelMinWidth = calculateWidthFromCharCount(
-    euiOptions.reduce((acc, curr) => (acc > curr.label.length ? acc : curr.label.length), 0)
-  );
+  const panelMinWidth = calculateWidthFromEntries(euiOptions, ['label']);
 
   return (
     <EuiComboBox

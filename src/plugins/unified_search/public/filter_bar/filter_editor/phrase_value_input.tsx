@@ -10,7 +10,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
@@ -59,9 +59,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
     // there are cases when the value is a number, this would cause an exception
     const valueAsStr = String(value);
     const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
-    const panelMinWidth = calculateWidthFromCharCount(
-      options.reduce((acc, curr) => (acc > curr.length ? acc : curr.length), 0)
-    );
+    const panelMinWidth = calculateWidthFromEntries(options);
     return (
       <StringComboBox
         async

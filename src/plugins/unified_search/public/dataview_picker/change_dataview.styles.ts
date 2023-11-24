@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
+import { DataViewListItemEnhanced } from './dataview_list';
 
 const MIN_WIDTH = 300;
 
 export const changeDataViewStyles = ({
   fullWidth,
-  maxLabelLength,
+  dataViewsList,
 }: {
   fullWidth?: boolean;
-  maxLabelLength: number;
+  dataViewsList: DataViewListItemEnhanced[];
 }) => {
   return {
     trigger: {
       maxWidth: fullWidth ? undefined : MIN_WIDTH,
     },
     popoverContent: {
-      width: calculateWidthFromCharCount(maxLabelLength, { minWidth: MIN_WIDTH }),
+      width: calculateWidthFromEntries(dataViewsList, ['name', 'id'], { minWidth: MIN_WIDTH }),
     },
   };
 };

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
@@ -31,11 +31,6 @@ export function ChangeIndexPattern({
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  const maxLabelLength = indexPatternRefs.reduce((acc, curr) => {
-    const dataViewName = curr.name || curr.id;
-    return acc > dataViewName.length ? acc : dataViewName.length;
-  }, 20);
-
   return (
     <EuiPopover
       button={
@@ -56,7 +51,10 @@ export function ChangeIndexPattern({
     >
       <div
         css={css`
-          width: ${calculateWidthFromCharCount(maxLabelLength, { minWidth: 320, maxWidth: 600 })}px;
+          width: ${calculateWidthFromEntries(indexPatternRefs, ['name', 'id'], {
+            minWidth: 320,
+            maxWidth: 600,
+          })}px;
         `}
       >
         <EuiPopoverTitle paddingSize="s">

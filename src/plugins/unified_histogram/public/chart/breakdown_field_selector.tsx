@@ -9,7 +9,7 @@
 import { EuiComboBox, EuiComboBoxOptionOption, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
@@ -62,9 +62,7 @@ export const BreakdownFieldSelector = ({
     max-width: ${euiTheme.base * 22}px;
   `;
 
-  const panelMinWidth = calculateWidthFromCharCount(
-    fieldOptions.reduce((acc, curr) => (acc > curr.label.length ? acc : curr.label.length), 0)
-  );
+  const panelMinWidth = calculateWidthFromEntries(fieldOptions, ['label']);
 
   return (
     <EuiToolTip
