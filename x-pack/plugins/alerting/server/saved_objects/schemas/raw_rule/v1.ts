@@ -168,6 +168,7 @@ const rawRuleAlertsFilterSchema = schema.object({
             key: schema.maybe(schema.string()),
             params: schema.maybe(schema.recordOf(schema.string(), schema.any())), // better type?
             value: schema.maybe(schema.string()),
+            field: schema.maybe(schema.string()),
           }),
           $state: schema.maybe(
             schema.object({
