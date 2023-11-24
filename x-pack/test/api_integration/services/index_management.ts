@@ -18,6 +18,6 @@ export function IndexManagementProvider({ getService }: FtrProviderContext) {
     },
     mappings: {
       api: mappingsApi(getService),
-    }
+    },
   };
 }
