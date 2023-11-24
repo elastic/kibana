@@ -110,11 +110,14 @@ const LinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat 
   return (
     <EuiLink
       onClick={() => {
-        share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID)?.navigate({
-          dataset,
-          integration,
-          query,
-        });
+        share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID)?.navigate(
+          {
+            dataset,
+            integration,
+            query,
+          },
+          { replace: true }
+        );
       }}
     >
       {openActionName}
