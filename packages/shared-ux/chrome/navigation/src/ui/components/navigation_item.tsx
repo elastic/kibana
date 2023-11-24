@@ -16,7 +16,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { useNavigation as useNavigationServices } from '../../services';
 import type { NodeProps } from '../types';
 import { useNavigation } from './navigation';
-import { getNavigationNodeHref, isActiveFromUrl } from '../../utils';
+import { isActiveFromUrl } from '../../utils';
 import { initNavNode } from '../../navnode_utils';
 
 export interface Props<
@@ -101,7 +101,7 @@ function NavigationItemComp<
   const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
   if (isRootLevel) {
-    const href = getNavigationNodeHref(navNode);
+    const { href } = navNode;
     const dataTestSubj = classNames(`nav-item`, {
       [`nav-item-deepLinkId-${navNode.deepLink?.id}`]: !!navNode.deepLink,
       [`nav-item-isActive`]: isActive,

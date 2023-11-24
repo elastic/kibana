@@ -16,7 +16,7 @@ import type {
 
 import type { CloudLinks } from './cloud_links';
 import type { NodeProps } from './ui/types';
-import { getNavigationNodeId, isAbsoluteLink } from './utils';
+import { getNavigationNodeHref, getNavigationNodeId, isAbsoluteLink } from './utils';
 
 /**
  * We don't have currently a way to know if a user has access to a Cloud section.
@@ -150,7 +150,7 @@ export const initNavNode = <
 
   const id = getNavigationNodeId(node, () => `node-${rootIndex}-${treeDepth}-${index}`) as Id;
   const title = getTitleForNode(node, { deepLink, cloudLinks });
-  const href = cloudLink ? cloudLinks[cloudLink]?.href : node.href; // TODO: should we set the deepLink href if there is one??
+  const href = cloudLink ? cloudLinks[cloudLink]?.href : node.href;
   const path = parentNodePath ? `${parentNodePath}.${id}` : id;
 
   if (href && !isAbsoluteLink(href)) {
@@ -160,10 +160,10 @@ export const initNavNode = <
   const internalNavNode: ChromeProjectNavigationNode = {
     ...navNode,
     id,
+    href: getNavigationNodeHref({ href, deepLink }),
     path,
     title,
     deepLink,
-    href,
     sideNavStatus,
   };
 
