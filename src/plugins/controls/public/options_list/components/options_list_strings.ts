@@ -234,14 +234,22 @@ export const OptionsListStrings = {
           }),
       },
       _key: {
-        getSortByLabel: (type?: string) =>
-          type === 'date'
-            ? i18n.translate('controls.optionsList.popover.sortBy.date', {
+        getSortByLabel: (type?: string) => {
+          switch (type) {
+            case 'date':
+              return i18n.translate('controls.optionsList.popover.sortBy.date', {
                 defaultMessage: 'By date',
-              })
-            : i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
+              });
+            case 'number':
+              return i18n.translate('controls.optionsList.popover.sortBy.numeric', {
+                defaultMessage: 'Numerically',
+              });
+            default:
+              return i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
                 defaultMessage: 'Alphabetically',
-              }),
+              });
+          }
+        },
       },
     },
     sortOrder: {

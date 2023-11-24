@@ -51,7 +51,7 @@ export const OptionsListPopoverActionBar = ({
 
   return (
     <div className="optionsList__actions">
-      {fieldSpec?.type !== 'date' && (
+      {fieldSpec?.type !== 'date' && fieldSpec?.type !== 'number' && (
         <EuiFormRow className="optionsList__searchRow" fullWidth>
           <EuiFieldSearch
             isInvalid={!searchString.valid}
