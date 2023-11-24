@@ -50,14 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should get the index mappings', async () => {
-      const mappings = {
-        properties: {
-          total: { type: 'long' },
-          tag: { type: 'keyword' },
-          createdAt: { type: 'date' },
-        },
-      };
-
       const { body } = await getMapping(indexName).expect(200);
 
       expect(body.mappings).to.eql(mappings);
