@@ -20,6 +20,7 @@ interface DestinationIndexFormProps {
   destinationIndexNameExists: boolean;
   destinationIndexNameValid: boolean;
   destIndexSameAsId: boolean;
+  fullWidth?: boolean;
   indexNameExistsMessage: string;
   isJobCreated: boolean;
   onDestinationIndexChange: (d: string) => void;
@@ -34,6 +35,7 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
   destinationIndexNameExists,
   destinationIndexNameValid,
   destIndexSameAsId,
+  fullWidth = true,
   indexNameExistsMessage,
   isJobCreated,
   onDestinationIndexChange,
@@ -42,7 +44,7 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
 }) => (
   <>
     <EuiFormRow
-      fullWidth
+      fullWidth={fullWidth}
       helpText={destIndexSameAsId === true && destinationIndexNameExists && indexNameExistsMessage}
     >
       <UseIdAsIndexNameSwitch
@@ -54,7 +56,7 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
     </EuiFormRow>
     {destIndexSameAsId === false && (
       <EuiFormRow
-        fullWidth
+        fullWidth={fullWidth}
         label={i18n.translate('xpack.ml.creationWizardUtils.destinationIndexLabel', {
           defaultMessage: 'Destination index',
         })}
@@ -80,20 +82,20 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
         }
       >
         <EuiFieldText
-          fullWidth
+          fullWidth={fullWidth}
           disabled={isJobCreated}
           placeholder="destination index"
           value={destinationIndex}
           // onChange={(e) => setFormState({ destinationIndex: e.target.value })}
           onChange={(e) => onDestinationIndexChange(e.target.value)}
           aria-label={i18n.translate(
-            'xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel',
+            'xpack.ml.creationWizardUtils.destinationIndexInputAriaLabel',
             {
               defaultMessage: 'Choose a unique destination index name.',
             }
           )}
           isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
-          data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
+          data-test-subj="mlCreationWizardUtilsDestinationIndexInput"
         />
       </EuiFormRow>
     )}

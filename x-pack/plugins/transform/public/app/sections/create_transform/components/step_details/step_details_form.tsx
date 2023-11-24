@@ -456,6 +456,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             destinationIndexNameExists={indexNameExists}
             destinationIndexNameValid={indexNameValid}
             destIndexSameAsId={destIndexSameAsId}
+            fullWidth={false}
             indexNameExistsMessage={i18n.translate(
               'xpack.transform.stepDetailsForm.destinationIndexHelpText',
               {
