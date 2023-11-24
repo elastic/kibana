@@ -60,6 +60,20 @@ export const useFilterConfig = ({
     setFilters(newFilters);
   }, [systemFilterConfig, customFieldsFilterConfig]);
 
+  useEffect(() => {
+    const newFilterKeys = new Map(
+      [...systemFilterConfig, ...customFieldsFilterConfig]
+        .filter((filter) => filter.isAvailable)
+        .map((filter) => [filter.key, filter])
+    );
+
+    filters.forEach((filter) => {
+      if (!newFilterKeys.has(filter.key)) {
+        filter.deactivate();
+      }
+    });
+  }, [filters, systemFilterConfig, customFieldsFilterConfig]);
+
   const onChange = ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
     const newFilterVisibilityMap = new Map(filterVisibilityMap);
     const deactivatedFilters: string[] = [];
@@ -89,9 +103,9 @@ export const useFilterConfig = ({
       }
     });
 
-    deactivatedFilters.forEach((key) => {
-      (filters.get(key) as FilterConfig).deactivate();
-    });
+    deactivatedFilters
+      .filter((key) => filters.has(key))
+      .forEach((key) => (filters.get(key) as FilterConfig).deactivate());
 
     setFilterVisibilityMap(newFilterVisibilityMap);
   };
