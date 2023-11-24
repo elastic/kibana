@@ -9,7 +9,12 @@ import { QueryState } from '@kbn/data-plugin/public';
 import { DiscoverContainerProps } from '@kbn/discover-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { Observable } from 'rxjs';
-import { DatasetSelectionPlain, DisplayOptions, PartialDisplayOptions } from '../../common';
+import {
+  availableControlsPanels,
+  DatasetSelectionPlain,
+  DisplayOptions,
+  PartialDisplayOptions,
+} from '../../common';
 import { IDatasetsClient } from '../services/datasets';
 import {
   LogExplorerControllerStateMachine,
@@ -33,21 +38,34 @@ export type LogExplorerDiscoverServices = Pick<
   urlStateStorage: IKbnUrlStateStorage;
 };
 
-export interface ControlOption {
-  controlId: string;
-  selectedOptions: string[];
+export interface OptionsListControlOption {
+  mode: 'include' | 'exclude';
+  selection:
+    | {
+        type: 'options';
+        selectedOptions: string[];
+      }
+    | {
+        type: 'exists';
+      };
+}
+
+export interface ControlOptions {
+  [availableControlsPanels.NAMESPACE]?: OptionsListControlOption;
 }
 
 // we might want to wrap this into an object that has a "state value" laster
 export type LogExplorerPublicState = QueryState &
-  DisplayOptions & { datasetSelection: DatasetSelectionPlain };
-// TODO: add selection and controls
-//  & {
-//   controls: ControlOption[];
-// };
+  DisplayOptions & {
+    controls: ControlOptions;
+    datasetSelection: DatasetSelectionPlain;
+  };
 
 export type LogExplorerPublicStateUpdate = QueryState &
-  PartialDisplayOptions & { datasetSelection?: DatasetSelectionPlain };
+  PartialDisplayOptions & {
+    controls?: ControlOptions;
+    datasetSelection?: DatasetSelectionPlain;
+  };
 
 // a placeholder for now
 export type LogExplorerPublicEvent = never;

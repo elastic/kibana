@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './available_control_panels';
 export * from './types';

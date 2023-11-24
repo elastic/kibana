@@ -10,7 +10,12 @@ import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { mapValues, pick } from 'lodash';
 import { InvokeCreator } from 'xstate';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ControlPanels, ControlPanelRT } from '../../../../../common';
+import {
+  ControlPanels,
+  ControlPanelRT,
+  availableControlPanelFields,
+  controlPanelConfigs,
+} from '../../../../../common';
 import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
 export const initializeControlPanels =
@@ -127,23 +132,3 @@ const mergeDefaultPanelsWithControlPanels = (dataView: DataView, urlPanels: Cont
     dataView.id
   );
 };
-
-export const availableControlsPanels = {
-  NAMESPACE: 'data_stream.namespace',
-};
-
-export const controlPanelConfigs: ControlPanels = {
-  [availableControlsPanels.NAMESPACE]: {
-    order: 0,
-    width: 'medium',
-    grow: false,
-    type: 'optionsListControl',
-    explicitInput: {
-      id: availableControlsPanels.NAMESPACE,
-      fieldName: availableControlsPanels.NAMESPACE,
-      title: 'Namespace',
-    },
-  },
-};
-
-export const availableControlPanelFields = Object.values(availableControlsPanels);

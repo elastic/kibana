@@ -15,9 +15,11 @@ const PanelRT = rt.type({
     rt.type({ id: rt.string }),
     rt.partial({
       dataViewId: rt.string,
+      exclude: rt.boolean,
+      existsSelected: rt.boolean,
       fieldName: rt.string,
-      title: rt.union([rt.string, rt.undefined]),
       selectedOptions: rt.array(rt.string),
+      title: rt.union([rt.string, rt.undefined]),
     }),
   ]),
 });

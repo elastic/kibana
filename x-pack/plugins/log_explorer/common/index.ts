@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export { ControlPanelRT } from './control_panels';
-export type { ControlPanels } from './control_panels';
+export {
+  availableControlPanelFields,
+  availableControlsPanels,
+  controlPanelConfigs,
+  ControlPanelRT,
+} from './control_panels';
+export type { AvailableControlPanels, ControlPanels } from './control_panels';
 export {
   AllDatasetSelection,
   datasetSelectionPlainRT,

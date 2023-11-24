@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-// import { ControlPanels } from '../../common';
-import { hydrateDatasetSelection } from '../../common';
+import {
+  availableControlsPanels,
+  controlPanelConfigs,
+  ControlPanels,
+  hydrateDatasetSelection,
+} from '../../common';
 import {
   DEFAULT_CONTEXT,
   LogExplorerControllerContext,
 } from '../state_machines/log_explorer_controller';
-import { LogExplorerPublicState, LogExplorerPublicStateUpdate } from './types';
+import {
+  LogExplorerPublicState,
+  LogExplorerPublicStateUpdate,
+  OptionsListControlOption,
+} from './types';
 
 export const getPublicStateFromContext = (
   context: LogExplorerControllerContext
@@ -24,8 +32,7 @@ export const getPublicStateFromContext = (
     query: context.query,
     refreshInterval: context.refreshInterval,
     time: context.time,
-    // TODO: fix control panels
-    // controls: getPublicControlsStateFromControlPanels(context.controlPanels),
+    controls: getPublicControlsStateFromControlPanels(context.controlPanels),
   };
 };
 
@@ -37,6 +44,7 @@ export const getContextFromPublicState = (
     ...DEFAULT_CONTEXT.chart,
     ...publicState.chart,
   },
+  controlPanels: getControlPanelsFromPublicControlsState(publicState.controls),
   datasetSelection:
     publicState.datasetSelection != null
       ? hydrateDatasetSelection(publicState.datasetSelection)
@@ -53,19 +61,74 @@ export const getContextFromPublicState = (
   query: publicState.query ?? DEFAULT_CONTEXT.query,
   refreshInterval: publicState.refreshInterval ?? DEFAULT_CONTEXT.refreshInterval,
   time: publicState.time ?? DEFAULT_CONTEXT.time,
-  // TODO: add control panels
 });
 
-// const getPublicControlsStateFromControlPanels = (
-//   controlPanels: ControlPanels | undefined
-// ): LogExplorerPublicState['controls'] =>
-//   Object.entries(controlPanels ?? {}).map(([controlId, controlConfig]) => ({
-//     controlId,
-//     selectedOptions: controlConfig.explicitInput.selectedOptions ?? [],
-//   }));
+const getPublicControlsStateFromControlPanels = (
+  controlPanels: ControlPanels | undefined
+): LogExplorerPublicState['controls'] =>
+  controlPanels != null
+    ? {
+        ...(availableControlsPanels.NAMESPACE in controlPanels
+          ? {
+              [availableControlsPanels.NAMESPACE]: getOptionsListPublicControlStateFromControlPanel(
+                controlPanels[availableControlsPanels.NAMESPACE]
+              ),
+            }
+          : {}),
+      }
+    : {};
 
-// const getControlPanelsFromPublicControlsState = (
-//   publicControlsState: LogExplorerPublicState['controls']
-// ) => {
-//   return publicControlsState.reduce(() => {}, {});
-// };
+const getOptionsListPublicControlStateFromControlPanel = (
+  optionsListControlPanel: ControlPanels[string]
+): OptionsListControlOption => ({
+  mode: optionsListControlPanel.explicitInput.exclude ? 'exclude' : 'include',
+  selection: optionsListControlPanel.explicitInput.existsSelected
+    ? { type: 'exists' }
+    : {
+        type: 'options',
+        selectedOptions: optionsListControlPanel.explicitInput.selectedOptions ?? [],
+      },
+});
+
+const getControlPanelsFromPublicControlsState = (
+  publicControlsState: LogExplorerPublicStateUpdate['controls']
+): ControlPanels => {
+  if (publicControlsState == null) {
+    return {};
+  }
+
+  const namespacePublicControlState = publicControlsState[availableControlsPanels.NAMESPACE];
+
+  return {
+    ...(namespacePublicControlState
+      ? {
+          [availableControlsPanels.NAMESPACE]: getControlPanelFromOptionsListPublicControlState(
+            availableControlsPanels.NAMESPACE,
+            namespacePublicControlState
+          ),
+        }
+      : {}),
+  };
+};
+
+const getControlPanelFromOptionsListPublicControlState = (
+  controlId: string,
+  publicControlState: OptionsListControlOption
+): ControlPanels[string] => {
+  const defaultControlPanelConfig = controlPanelConfigs[controlId];
+
+  return {
+    ...defaultControlPanelConfig,
+    explicitInput: {
+      ...defaultControlPanelConfig.explicitInput,
+      exclude: publicControlState.mode === 'exclude',
+      ...(publicControlState.selection.type === 'exists'
+        ? {
+            existsSelected: true,
+          }
+        : {
+            selectedOptions: publicControlState.selection.selectedOptions,
+          }),
+    },
+  };
+};
