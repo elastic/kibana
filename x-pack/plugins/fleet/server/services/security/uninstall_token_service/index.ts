@@ -109,7 +109,7 @@ export interface UninstallTokenServiceInterface {
    * @param force generate a new token even if one already exists
    * @returns hashedToken
    */
-  generateTokenForPolicyId(policyId: string, force?: boolean): Promise<string>;
+  generateTokenForPolicyId(policyId: string, force?: boolean): Promise<void>;
 
   /**
    * Generate uninstall tokens for given policy ids
@@ -119,7 +119,7 @@ export interface UninstallTokenServiceInterface {
    * @param force generate a new token even if one already exists
    * @returns Record<policyId, hashedToken>
    */
-  generateTokensForPolicyIds(policyIds: string[], force?: boolean): Promise<Record<string, string>>;
+  generateTokensForPolicyIds(policyIds: string[], force?: boolean): Promise<void>;
 
   /**
    * Generate uninstall tokens all policies
@@ -128,7 +128,7 @@ export interface UninstallTokenServiceInterface {
    * @param force generate a new token even if one already exists
    * @returns Record<policyId, hashedToken>
    */
-  generateTokensForAllPolicies(force?: boolean): Promise<Record<string, string>>;
+  generateTokensForAllPolicies(force?: boolean): Promise<void>;
 
   /**
    * If encryption is available, checks for any plain text uninstall tokens and encrypts them
@@ -214,6 +214,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         this.assertPolicyId(attributes);
         this.assertToken(attributes);
         this.assertCreatedAt(createdAt);
+
+        // todo: can we give warnings while setup?
+        // todo: give error when enabling stuff
+        // todo: maybe this is a function: check tokens!
 
         return {
           id: _id,
@@ -304,32 +308,30 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return this.getHashedTokensForPolicyIds(policyIds);
   }
 
-  public async generateTokenForPolicyId(policyId: string, force: boolean = false): Promise<string> {
-    return (await this.generateTokensForPolicyIds([policyId], force))[policyId];
+  public generateTokenForPolicyId(policyId: string, force: boolean = false): Promise<void> {
+    return this.generateTokensForPolicyIds([policyId], force);
   }
 
   public async generateTokensForPolicyIds(
     policyIds: string[],
     force: boolean = false
-  ): Promise<Record<string, string>> {
+  ): Promise<void> {
     const { agentTamperProtectionEnabled } = appContextService.getExperimentalFeatures();
 
     if (!agentTamperProtectionEnabled || !policyIds.length) {
-      return {};
+      return;
     }
 
-    const existingTokens = force
-      ? {}
-      : (await this.getDecryptedTokensForPolicyIds(policyIds)).reduce(
-          (acc, { policy_id: policyId, token }) => {
-            acc[policyId] = token;
-            return acc;
-          },
-          {} as Record<string, string>
-        );
+    const existingTokens = new Set();
+
+    if (!force) {
+      (await this.getTokenObjectsByIncludeFilter(policyIds)).forEach((tokenObject) => {
+        existingTokens.add(tokenObject._source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id);
+      });
+    }
     const missingTokenPolicyIds = force
       ? policyIds
-      : policyIds.filter((policyId) => !existingTokens[policyId]);
+      : policyIds.filter((policyId) => !existingTokens.has(policyId));
 
     const newTokensMap = missingTokenPolicyIds.reduce((acc, policyId) => {
       const token = this.generateToken();
@@ -338,7 +340,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         [policyId]: token,
       };
     }, {} as Record<string, string>);
-
     await this.persistTokens(missingTokenPolicyIds, newTokensMap);
     if (force) {
       const config = appContextService.getConfig();
@@ -349,21 +350,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
           await agentPolicyService.deployPolicies(this.soClient, policyIdsBatch)
       );
     }
-
-    const tokensMap = {
-      ...existingTokens,
-      ...newTokensMap,
-    };
-
-    return Object.entries(tokensMap).reduce((acc, [policyId, token]) => {
-      acc[policyId] = this.hashToken(token);
-      return acc;
-    }, {} as Record<string, string>);
   }
 
-  public async generateTokensForAllPolicies(
-    force: boolean = false
-  ): Promise<Record<string, string>> {
+  public async generateTokensForAllPolicies(force: boolean = false): Promise<void> {
     const policyIds = await this.getAllPolicyIds();
     return this.generateTokensForPolicyIds(policyIds, force);
   }
