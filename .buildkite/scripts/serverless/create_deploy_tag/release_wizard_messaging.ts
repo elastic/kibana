@@ -10,14 +10,11 @@ import {
   buildkite,
   COMMIT_INFO_CTX,
   DEPLOY_TAG_META_KEY,
+  octokit,
   SELECTED_COMMIT_META_KEY,
   sendSlackMessage,
 } from './shared';
-
-/**
- * We'd like to define the release steps, and define the pre-post actions for transitions.
- * For this we can create a basic state machine, and define the transitions.
- */
+import { GithubCommitType } from './info_sections/commit_info';
 
 const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';
 const WIZARD_CTX_DEFAULT = 'wizard-main';
@@ -109,7 +106,6 @@ const states: Record<StateNames, StateShape> = {
     instruction: `<h3>Deploy tag successfully created!</h3>`,
     post: async () => {
       const deployTag = buildkite.getMetadata(DEPLOY_TAG_META_KEY);
-      const selectedCommit = buildkite.getMetadata(SELECTED_COMMIT_META_KEY);
       buildkite.setAnnotation(
         WIZARD_CTX_INSTRUCTION,
         'success',
@@ -117,7 +113,23 @@ const states: Record<StateNames, StateShape> = {
 Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}'>here on buildkite.</a>`
       );
 
-      sendSlackAnnouncement(selectedCommit, deployTag);
+      const selectedCommit = buildkite.getMetadata(SELECTED_COMMIT_META_KEY);
+
+      if (!selectedCommit) {
+        // If we get here with no selected commit set, it's either an unsynced change in keys, or some weird error.
+        throw new Error(
+          `Couldn't find selected commit in buildkite meta-data (with key '${SELECTED_COMMIT_META_KEY}').`
+        );
+      }
+
+      const commitData = (
+        await octokit.repos.getCommit({
+          owner: 'elastic',
+          repo: 'kibana',
+          ref: selectedCommit,
+        })
+      ).data;
+      sendReleaseSlackAnnouncement(commitData, deployTag);
     },
     instructionStyle: 'success',
     display: true,
@@ -137,7 +149,9 @@ Your deployment will appear <a href='https://buildkite.com/elastic/kibana-server
 };
 
 /**
- * Entrypoint for the CLI
+ * This module is a central interface for updating the messaging interface for the wizard.
+ * It's implemented as a state machine that updates the wizard state as we transition between states.
+ * Use: `node <dir>/release_wizard_messaging.ts --state <state_name> [--data <data>]`
  */
 export async function main(args: string[]) {
   if (!args.includes('--state')) {
@@ -257,45 +271,42 @@ async function tryCall(fn: any, ...args: any[]) {
   }
 }
 
-function sendSlackAnnouncement(selectedCommit: string | null, deployTag: string | null) {
-  const isDryRun = process.env.DRY_RUN?.match('(1|true)');
+function sendReleaseSlackAnnouncement(selectedCommit: GithubCommitType, deployTag: string | null) {
   const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
   const buildShortname = `kibana-serverless-release #${process.env.BUILDKITE_BUILD_NUMBER}`;
+
+  const isDryRun = process.env.DRY_RUN?.match('(1|true)');
+  const mergedAtDate = selectedCommit.commit?.committer?.date;
+  const commitSha = selectedCommit.sha;
+  const mergedAtUtcString = mergedAtDate ? new Date(mergedAtDate).toUTCString() : 'unknown';
+
   sendSlackMessage({
     blocks: [
       {
         type: 'section',
         text: textBlock(
-          `:ship: Promotion of a new <https://github.com/elastic/kibana/commit/${selectedCommit}|commit> to QA has been initiated!`,
+          isDryRun
+            ? '*:memo:This is a dry run - no commit will actually be promoted. Please ignore!*'
+            : 'Attention @kibana-serverless-promotion-notify!',
+          `:ship: Promotion of a new <https://github.com/elastic/kibana/commit/${commitSha}|commit> to QA has been initiated!`,
           `:mag: The details of the candidate selection can be found here: <${process.env.BUILDKITE_BUILD_URL}|${buildShortname}>`,
           `:test_tube: Once promotion is complete, please begin any required manual testing.`,
-          `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.`,
-          `${isDryRun ? '*:white_check_mark:This is a dry run, no action will be taken.*' : ''}`
+          `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.`
         ),
       },
       {
         type: 'section',
         fields: [
-          textBlock(
-            `*More detail on the candidate selection:*`,
-            `<${process.env.BUILDKITE_BUILD_URL || 'about://blank'}|${buildShortname}>`
-          ),
-          textBlock(`*Initiated by:*`, `${process.env.BUILDKITE_BUILD_CREATOR || 'unknown'}`),
+          textBlock(`*Initiated by:*`, process.env.BUILDKITE_BUILD_CREATOR || 'unknown'),
           textBlock(
             `*Git tag:*`,
             `<https://github.com/elastic/kibana/releases/tag/${deployTag}|${deployTag}>`
           ),
           textBlock(
-            `*QA Deploy job:*`,
-            `<https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}|Link>`
-          ),
-          textBlock(
             `*Commit:*`,
-            `<https://github.com/elastic/kibana/commit/${selectedCommit}|${selectedCommit.slice(
-              0,
-              12
-            )}>`
+            `<https://github.com/elastic/kibana/commit/${commitSha}|${commitSha.slice(0, 12)}>`
           ),
+          textBlock(`*Merged at:*`, mergedAtUtcString),
         ],
       },
     ],

@@ -9,8 +9,8 @@
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
 import { buildkite, octokit, SELECTED_COMMIT_META_KEY } from '../shared';
 
-type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];
-type ListedGithubCommitType =
+export type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];
+export type ListedGithubCommitType =
   RestEndpointMethodTypes['repos']['listCommits']['response']['data'][0];
 
 const KIBANA_PR_BASE = 'https://github.com/elastic/kibana/pull';
