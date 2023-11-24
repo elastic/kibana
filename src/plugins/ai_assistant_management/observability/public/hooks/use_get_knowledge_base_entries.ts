@@ -19,16 +19,20 @@ export interface UseGetKnowledgeBaseEntriesResponse {
   entries: KnowledgeBaseEntry[] | undefined;
 }
 
-export function useGetKnowledgeBaseEntries(): UseGetKnowledgeBaseEntriesResponse {
+export function useGetKnowledgeBaseEntries(query: string): UseGetKnowledgeBaseEntriesResponse {
   const { http } = useAppContext();
 
   const { isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES],
+    queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query],
     queryFn: async ({ signal }) => {
       const response = await http.get<{ entries: KnowledgeBaseEntry[] }>(
         `/internal/management/ai_assistant/observability/kb/entries`,
         {
-          query: {},
+          query: query
+            ? {
+                query,
+              }
+            : {},
           signal,
         }
       );

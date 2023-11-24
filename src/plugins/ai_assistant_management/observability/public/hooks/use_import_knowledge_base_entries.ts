@@ -26,7 +26,12 @@ export function useImportKnowledgeBaseEntries() {
     void,
     ServerError,
     {
-      entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+      entries: Array<
+        Omit<
+          KnowledgeBaseEntry,
+          '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels'
+        >
+      >;
     }
   >(
     [REACT_QUERY_KEYS.IMPORT_KB_ENTRIES],

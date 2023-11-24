@@ -26,7 +26,10 @@ export function useCreateKnowledgeBaseEntry() {
     void,
     ServerError,
     {
-      entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+      entry: Omit<
+        KnowledgeBaseEntry,
+        '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels'
+      >;
     }
   >(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],

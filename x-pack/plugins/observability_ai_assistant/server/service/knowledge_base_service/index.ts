@@ -228,6 +228,7 @@ export class KnowledgeBaseService {
     this.hasSetup = true;
 
     this.dependencies.logger.info(`Processing ${this._queue.length} queue operations`);
+
     const limiter = pLimit(5);
 
     const operations = this._queue.concat();
@@ -245,14 +246,13 @@ export class KnowledgeBaseService {
   }
 
   queue(operations: KnowledgeBaseEntryOperation[]): void {
-    this.dependencies.logger.info(`setup? ${String(this.hasSetup)}`);
-
     if (!operations.length) {
       return;
     }
 
+    this._queue.push(...operations);
+
     if (!this.hasSetup) {
-      this._queue.push(...operations);
       return;
     }
 
@@ -262,10 +262,14 @@ export class KnowledgeBaseService {
       limiter(() => this.processOperation(operation))
     );
 
-    Promise.all(limitedFunctions).catch((err) => {
-      this.dependencies.logger.error(`Failed to process all queued operations`);
-      this.dependencies.logger.error(err);
-    });
+    Promise.all(limitedFunctions)
+      .then(() => {
+        this._queue = [];
+      })
+      .catch((err) => {
+        this.dependencies.logger.error(`Failed to process all queued operations`);
+        this.dependencies.logger.error(err);
+      });
   }
 
   status = async () => {
@@ -349,10 +353,21 @@ export class KnowledgeBaseService {
     }
   };
 
-  getEntries = async (): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  getEntries = async (query: string | undefined): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     try {
       const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
         index: this.dependencies.resources.aliases.kb,
+        ...(query
+          ? {
+              query: {
+                wildcard: {
+                  'labels.document_id': {
+                    value: `${query}*`,
+                  },
+                },
+              },
+            }
+          : {}),
         size: 10000,
         _source: {
           includes: ['text', 'is_correction', 'labels', 'confidence', 'public', '@timestamp'],

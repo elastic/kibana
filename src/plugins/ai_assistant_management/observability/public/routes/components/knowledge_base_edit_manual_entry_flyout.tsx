@@ -48,12 +48,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
         entry: {
           id: newEntryId,
           text: newEntryText,
-          confidence: 'high',
-          is_correction: false,
-          public: true,
-          labels: {
-            type: 'manual',
-          },
         },
       });
       onClose();
@@ -74,13 +68,13 @@ export function KnowledgeBaseEditManualEntryFlyout({
           <h2>
             {!entry
               ? i18n.translate(
-                  'aiAssistantManagementObservabilityknowledgeBaseNewEntryFlyout.h2.newEntryLabel',
+                  'aiAssistantManagementObservability.knowledgeBaseNewEntryFlyout.h2.newEntryLabel',
                   {
                     defaultMessage: 'New entry',
                   }
                 )
               : i18n.translate(
-                  'aiAssistantManagementObservabilityknowledgeBaseNewEntryFlyout.h2.editEntryLabel',
+                  'aiAssistantManagementObservability.knowledgeBaseNewEntryFlyout.h2.editEntryLabel',
                   {
                     defaultMessage: 'Edit {id}',
                     values: { id: entry.id },

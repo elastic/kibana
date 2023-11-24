@@ -9,12 +9,17 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
 import { useAppContext } from '../../context/app_context';
 import { SettingsTab } from './settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
 
 export function SettingsPage() {
   const { navigateToApp, serverless, setBreadcrumbs } = useAppContext();
+
+  const { search } = useLocation();
+  const searchParams = new URLSearchParams(search);
+  const selectedTab = searchParams.get('tab');
 
   useEffect(() => {
     if (serverless) {
@@ -57,7 +62,7 @@ export function SettingsPage() {
       content: <SettingsTab />,
     },
     {
-      id: 'kb',
+      id: 'knowledge_base',
       name: i18n.translate('aiAssistantManagementObservability.settingsPage.knowledgeBaseLabel', {
         defaultMessage: 'Knowledge base',
       }),
@@ -65,7 +70,9 @@ export function SettingsPage() {
     },
   ];
 
-  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+  const [selectedTabId, setSelectedTabId] = useState(
+    selectedTab ? tabs.find((tab) => tab.id === selectedTab)?.id : tabs[0].id
+  );
 
   const selectedTabContent = tabs.find((obj) => obj.id === selectedTabId)?.content;
 

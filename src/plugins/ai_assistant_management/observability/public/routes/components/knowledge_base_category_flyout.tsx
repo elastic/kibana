@@ -14,6 +14,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
@@ -22,6 +23,21 @@ import moment from 'moment';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 import { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 
+const CATEGORY_MAP = {
+  lens: {
+    description: (
+      <>
+        <EuiText size="m">
+          {i18n.translate('aiAssistantManagementObservability..lensIsAKibanaTextLabel', {
+            defaultMessage:
+              'Lens is a Kibana feature which allows the Assistant to visualize data in response to user queries. These Knowledge base items are loaded into the Knowledge base by default.',
+          })}
+        </EuiText>
+      </>
+    ),
+  },
+};
+
 export function KnowledgeBaseCategoryFlyout({
   category,
   onClose,
@@ -29,12 +45,17 @@ export function KnowledgeBaseCategoryFlyout({
   category: KnowledgeBaseEntryCategory;
   onClose: () => void;
 }) {
-  const { mutate } = useDeleteKnowledgeBaseEntry();
+  const { mutate: deleteEntry } = useDeleteKnowledgeBaseEntry();
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntry>> = [
     {
       field: '@timestamp',
-      name: 'Date created',
+      name: i18n.translate(
+        'aiAssistantManagementObservability.knowledgeBaseCategoryFlyout.actions.dateCreated',
+        {
+          defaultMessage: 'Date created',
+        }
+      ),
       sortable: true,
       render: (timestamp: KnowledgeBaseEntry['@timestamp']) => (
         <EuiBadge color="hollow">{moment(timestamp).format('MM-DD-YYYY')}</EuiBadge>
@@ -42,7 +63,12 @@ export function KnowledgeBaseCategoryFlyout({
     },
     {
       field: 'id',
-      name: 'Name',
+      name: i18n.translate(
+        'aiAssistantManagementObservability.knowledgeBaseCategoryFlyout.actions.name',
+        {
+          defaultMessage: 'Name',
+        }
+      ),
       sortable: true,
       width: '340px',
     },
@@ -50,26 +76,30 @@ export function KnowledgeBaseCategoryFlyout({
       name: 'Actions',
       actions: [
         {
-          name: 'Delete',
-          description: 'Delete this entry',
+          name: i18n.translate(
+            'aiAssistantManagementObservability.knowledgeBaseCategoryFlyout.actions.delete',
+            {
+              defaultMessage: 'Delete',
+            }
+          ),
+          description: i18n.translate(
+            'aiAssistantManagementObservability.knowledgeBaseCategoryFlyout.actions.deleteDescription',
+            { defaultMessage: 'Delete this entry' }
+          ),
           type: 'icon',
           icon: 'trash',
-          onClick: (entry) => {
-            mutate({ id: entry.id });
+          onClick: ({ id }) => {
+            deleteEntry({ id });
           },
         },
       ],
     },
   ];
 
-  return category.entries.length === 1 && category.entries[0].labels.type === 'manual' ? (
-    <div>
-      {i18n.translate(
-        'aiAssistantManagementObservability.knowledgeBaseCategoryFlyout.div.helloLabel',
-        { defaultMessage: 'hello' }
-      )}
-    </div>
-  ) : (
+  const hasDescription =
+    CATEGORY_MAP[category.categoryName as unknown as keyof typeof CATEGORY_MAP]?.description;
+
+  return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
@@ -77,7 +107,11 @@ export function KnowledgeBaseCategoryFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiBasicTable<KnowledgeBaseEntry> columns={columns} items={category.entries ?? []} />
+        {hasDescription ? (
+          hasDescription
+        ) : (
+          <EuiBasicTable<KnowledgeBaseEntry> columns={columns} items={category.entries ?? []} />
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

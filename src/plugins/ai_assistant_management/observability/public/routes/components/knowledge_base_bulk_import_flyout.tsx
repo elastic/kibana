@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCode,
+  EuiCodeBlock,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +27,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KnowledgeBaseEntry } from '../../../common/types';
 import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
 
@@ -97,14 +100,33 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
         <EuiSpacer size="l" />
 
         <EuiText size="s">
+          <FormattedMessage
+            id="aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.uploadAJSONFileTextLabel"
+            defaultMessage="Upload a newline delimited JSON ({ext}) file containing a list of entries to add to your Knowledge base."
+            values={{
+              ext: <EuiCode language="html">.ldjson</EuiCode>,
+            }}
+          />
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiText size="s">
           {i18n.translate(
-            'aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.uploadAJSONFileTextLabel',
-            {
-              defaultMessage:
-                'Upload a JSON file containing a list of entries to add to your Knowledge base.',
-            }
+            'aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.theObjectsShouldBeTextLabel',
+            { defaultMessage: 'The objects should be of the following format:' }
           )}
         </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiCodeBlock isCopyable paddingSize="s">
+          {`{
+  "id": "a_unique_human_readable_id",
+  "text": "Contents of item",
+}
+`}
+        </EuiCodeBlock>
 
         <EuiHorizontalRule />
 
@@ -118,7 +140,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
           id={filePickerId}
           initialPromptText={i18n.translate(
             'aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.euiFilePicker.selectOrDragAndLabel',
-            { defaultMessage: 'Select or drag and drop multiple files' }
+            { defaultMessage: 'Select or drag and drop a .ldjson file' }
           )}
           onChange={onChange}
         />

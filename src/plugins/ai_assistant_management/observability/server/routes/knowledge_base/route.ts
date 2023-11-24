@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 import { notImplemented } from '@hapi/boom';
-import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
+import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import { KnowledgeBaseEntry } from '../../../common/types';
 import { createAIAssistantManagementObservabilityServerRoute } from '../create_ai_assistant_management_observability_server_route';
 
@@ -69,6 +69,14 @@ const getKnowledgeBaseEntries = createAIAssistantManagementObservabilityServerRo
   options: {
     tags: ['access:ai_assistant'],
   },
+  params: t.type({
+    query: t.union([
+      t.type({
+        query: t.string,
+      }),
+      t.undefined,
+    ]),
+  }),
   handler: async (
     resources
   ): Promise<{
@@ -85,7 +93,7 @@ const getKnowledgeBaseEntries = createAIAssistantManagementObservabilityServerRo
       request: resources.request,
     });
 
-    return client.getKnowledgeBaseEntries();
+    return client.getKnowledgeBaseEntries(resources.params.query?.query);
   },
 });
 
@@ -95,10 +103,6 @@ const saveKnowledgeBaseEntry = createAIAssistantManagementObservabilityServerRou
     body: t.type({
       id: t.string,
       text: nonEmptyStringRt,
-      confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
-      is_correction: toBooleanRt,
-      public: toBooleanRt,
-      labels: t.record(t.string, t.string),
     }),
   }),
   options: {
@@ -117,7 +121,16 @@ const saveKnowledgeBaseEntry = createAIAssistantManagementObservabilityServerRou
     });
 
     return await client.createKnowledgeBaseEntry({
-      entry: resources.params.body,
+      entry: {
+        confidence: 'high',
+        is_correction: false,
+        public: true,
+        labels: {
+          type: 'manual',
+          document_id: resources.params.body.id,
+        },
+        ...resources.params.body,
+      },
     });
   },
 });
@@ -130,10 +143,6 @@ const importKnowledgeBaseEntries = createAIAssistantManagementObservabilityServe
         t.type({
           id: t.string,
           text: nonEmptyStringRt,
-          confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
-          is_correction: toBooleanRt,
-          public: toBooleanRt,
-          labels: t.record(t.string, t.string),
         })
       ),
     }),
@@ -153,7 +162,18 @@ const importKnowledgeBaseEntries = createAIAssistantManagementObservabilityServe
       request: resources.request,
     });
 
-    return await client.importKnowledgeBaseEntries({ entries: resources.params.body.entries });
+    const entries = resources.params.body.entries.map((entry) => ({
+      confidence: 'high' as KnowledgeBaseEntry['confidence'],
+      is_correction: false,
+      public: true,
+      labels: {
+        type: 'manual',
+        document_id: entry.id,
+      },
+      ...entry,
+    }));
+
+    return await client.importKnowledgeBaseEntries({ entries });
   },
 });
 
