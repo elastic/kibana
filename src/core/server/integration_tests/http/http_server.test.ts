@@ -51,7 +51,7 @@ describe('Http server', () => {
 
     beforeEach(async () => {
       shutdownTimeout = config.shutdownTimeout.asMilliseconds();
-      const { registerRouter, server: innerServer } = await server.setup(config);
+      const { registerRouter, server: innerServer } = await server.setup({ config$: of(config) });
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
