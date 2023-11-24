@@ -16,7 +16,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('When on the Trusted Apps list', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/171481
+  describe.skip('When on the Trusted Apps list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;

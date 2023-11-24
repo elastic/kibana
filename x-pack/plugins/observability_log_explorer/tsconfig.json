@@ -17,6 +17,7 @@
     "@kbn/core-mount-utils-browser-internal",
     "@kbn/core-notifications-browser",
     "@kbn/data-plugin",
+    "@kbn/dataset-quality-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/es-query",

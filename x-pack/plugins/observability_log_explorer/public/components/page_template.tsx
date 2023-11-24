@@ -10,13 +10,20 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
-export const ObservabilityLogExplorerPageTemplate = ({ children }: React.PropsWithChildren<{}>) => {
+export const ObservabilityLogExplorerPageTemplate = ({
+  children,
+  pageProps,
+}: React.PropsWithChildren<{
+  pageProps?: EuiPageSectionProps;
+}>) => {
   const {
     services: { observabilityShared },
   } = useKibanaContextForPlugin();
 
   return (
-    <observabilityShared.navigation.PageTemplate pageSectionProps={pageSectionProps}>
+    <observabilityShared.navigation.PageTemplate
+      pageSectionProps={{ ...pageSectionProps, ...pageProps }}
+    >
       {children}
     </observabilityShared.navigation.PageTemplate>
   );
