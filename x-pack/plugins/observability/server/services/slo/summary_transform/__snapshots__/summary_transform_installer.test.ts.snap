@@ -12,7 +12,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a 7 days rolling time window",
       "dest": Object {
         "index": ".slo-observability.summary-v3",
-        "pipeline": ".slo-observability.summary.pipeline",
+        "pipeline": ".slo-observability.summary.pipeline-v3",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -221,7 +221,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a 30 days rolling time window",
       "dest": Object {
         "index": ".slo-observability.summary-v3",
-        "pipeline": ".slo-observability.summary.pipeline",
+        "pipeline": ".slo-observability.summary.pipeline-v3",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -430,7 +430,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a 90 days rolling time window",
       "dest": Object {
         "index": ".slo-observability.summary-v3",
-        "pipeline": ".slo-observability.summary.pipeline",
+        "pipeline": ".slo-observability.summary.pipeline-v3",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -639,7 +639,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a weekly calendar aligned time window",
       "dest": Object {
         "index": ".slo-observability.summary-v3",
-        "pipeline": ".slo-observability.summary.pipeline",
+        "pipeline": ".slo-observability.summary.pipeline-v3",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -861,7 +861,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a monthly calendar aligned time window",
       "dest": Object {
         "index": ".slo-observability.summary-v3",
-        "pipeline": ".slo-observability.summary.pipeline",
+        "pipeline": ".slo-observability.summary.pipeline-v3",
       },
       "frequency": "1m",
       "pivot": Object {
