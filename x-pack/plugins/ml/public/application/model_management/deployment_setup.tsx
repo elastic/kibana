@@ -269,7 +269,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
             ) : errors?.numOfAllocations?.max ? (
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsMaxError"
-                defaultMessage="Number of allocations cannot exceed {max}."
+                defaultMessage="Cannot exceed {max} - the total number of ML processors."
                 values={{ max: totalMlProcessors }}
               />
             ) : null
