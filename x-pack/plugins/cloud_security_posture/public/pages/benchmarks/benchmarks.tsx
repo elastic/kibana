@@ -126,7 +126,7 @@ const BenchmarkSearchField = ({
           isLoading={isLoading}
           placeholder={i18n.translate(
             'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
-            { defaultMessage: 'Search by Benchmark Name' }
+            { defaultMessage: 'Search by benchmark Name' }
           )}
           incremental
         />

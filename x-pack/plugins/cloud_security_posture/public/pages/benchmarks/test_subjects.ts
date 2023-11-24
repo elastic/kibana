@@ -14,12 +14,4 @@ export const BENCHMARKS_TABLE_COLUMNS = {
   APPLICABLE_TO: 'benchmark-table-column-applicable-to',
   EVALUATED: 'benchmark-table-column-evaluated',
   COMPLIANCE: 'benchmark-table-column-compliance',
-  // INTEGRATION_NAME: 'benchmarks-table-column-integration-name',
-  // MONITORING: 'benchmarks-table-column-monitoring',
-  // RULES: 'benchmarks-table-column-rules',
-  // INTEGRATION: 'benchmarks-table-column-integration',
-  // AGENT_POLICY: 'benchmarks-table-column-agent-policy',
-  // NUMBER_OF_AGENTS: 'benchmarks-table-column-number-of-agents',
-  // CREATED_BY: 'benchmarks-table-column-created-by',
-  // CREATED_AT: 'benchmarks-table-column-created-at',
 };

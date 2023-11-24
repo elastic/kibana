@@ -155,6 +155,7 @@ const getBenchmarks = async (
           };
           const benchmarkScore = await getStats(esClient, query, pitId, runtimeMappings);
           const benchmarkEvaluation = await getClusters(esClient, query, pitId, runtimeMappings);
+
           return {
             benchmark_id: benchmarkId,
             benchmark_name: benchmarkName,
@@ -197,7 +198,6 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
 
         const excludeVulnMgmtPackages = true;
         try {
-          await getBenchmarks(cspContext.soClient, cspContext);
           const packagePolicies: ListResult<PackagePolicy> = await getCspPackagePolicies(
             cspContext.soClient,
             cspContext.packagePolicyService,
@@ -226,10 +226,10 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
             packagePolicies.items
           );
 
-          const benchmarksNeo = await getBenchmarks(cspContext.soClient, cspContext);
+          const benchmarksVersion2 = await getBenchmarks(cspContext.soClient, cspContext);
           const getBenchmarkResponse = {
             ...packagePolicies,
-            items: benchmarksNeo,
+            items: benchmarksVersion2,
             items_policies_information: benchmarks,
           };
 
