@@ -35,9 +35,9 @@ export interface ChatItemProps extends ChatTimelineItem {
 }
 
 const normalMessageClassName = css`
-  // .euiCommentEvent__header {
-  //   padding: 4px 8px;
-  // }
+  .euiCommentEvent__header {
+    padding: 4px 8px;
+  }
 
   .euiCommentEvent__body {
     padding: 0;

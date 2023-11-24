@@ -44,7 +44,6 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
 
   const handleSubmitNewEntryClick = async () => {
     let entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>> = [];
-    // for (const file of files) {
     const text = await files[0].text();
 
     const elements = text.split('\n').filter(Boolean);
@@ -53,11 +52,9 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
       entries = elements.map((el) => JSON.parse(el)) as Array<
         Omit<KnowledgeBaseEntry, '@timestamp'>
       >;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
+    } catch (_) {
+      /* empty */
     }
-    // }
 
     try {
       await mutateAsync({ entries });
