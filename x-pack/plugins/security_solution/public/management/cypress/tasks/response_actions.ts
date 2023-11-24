@@ -152,7 +152,7 @@ export const waitForActionToSucceed = (
           method: 'GET',
           url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
         }).then((response) => {
-          if (response.body.data.status === 'successful') {
+          if (response.body.data.isCompleted && response.body.data.status === 'successful') {
             action = response.body.data;
             return true;
           }
@@ -164,7 +164,7 @@ export const waitForActionToSucceed = (
     )
     .then(() => {
       if (!action) {
-        throw new Error(`Failed to retrieve successful action`);
+        throw new Error('Failed to retrieve successful action');
       }
 
       return action;
