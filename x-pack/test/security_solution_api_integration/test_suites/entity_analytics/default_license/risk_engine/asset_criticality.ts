@@ -12,6 +12,7 @@ import {
   assetCriticalityRouteHelpersFactory,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+const assetCriticalityIndex = '.asset-criticality.asset-criticality-default';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -19,6 +20,15 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const supertest = getService('supertest');
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
+
+  const getAssetCriticalityDoc = async (idField: string, idValue: string) => {
+    const doc = await es.get({
+      index: assetCriticalityIndex,
+      id: `${idField}:${idValue}`,
+    });
+
+    return doc._source;
+  };
 
   describe('@ess @serverless @skipInQA asset_criticality Asset Criticality APIs', () => {
     beforeEach(async () => {
@@ -33,8 +43,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('initialisation of resources', () => {
       it('should has index installed on status api call', async () => {
-        const assetCriticalityIndex = '.asset-criticality.asset-criticality-default';
-
         let assetCriticalityIndexExist;
 
         try {
@@ -78,6 +86,69 @@ export default ({ getService }: FtrProviderContext) => {
               type: 'date',
             },
           },
+        });
+      });
+    });
+
+    describe('create', () => {
+      it('should correctly create asset criticality', async () => {
+        const assetCriticality = {
+          id_field: 'host.name',
+          id_value: 'host-01',
+          criticality: 'important',
+        };
+
+        const { body: result } = await assetCriticalityRoutes.create(assetCriticality);
+
+        expect(result.id_field).to.eql('host.name');
+        expect(result.id_value).to.eql('host-01');
+        expect(result.criticality).to.eql('important');
+        expect(result['@timestamp']).to.be.a('string');
+
+        const doc = await getAssetCriticalityDoc('host.name', 'host-01');
+
+        expect(doc).to.eql(result);
+      });
+
+      it('should return 400 if id_field is missing', async () => {
+        const assetCriticality = {
+          id_value: 'host-01',
+          criticality: 'important',
+        };
+
+        await assetCriticalityRoutes.create(assetCriticality, {
+          expectStatusCode: 400,
+        });
+      });
+      it('should return 400 if id_value is missing', async () => {
+        const assetCriticality = {
+          id_field: 'host.name',
+          criticality: 'important',
+        };
+
+        await assetCriticalityRoutes.create(assetCriticality, {
+          expectStatusCode: 400,
+        });
+      });
+      it('should return 400 if criticality is missing', async () => {
+        const assetCriticality = {
+          id_field: 'host.name',
+          id_value: 'host-01',
+        };
+
+        await assetCriticalityRoutes.create(assetCriticality, {
+          expectStatusCode: 400,
+        });
+      });
+      it('should return 400 if criticality is invalid', async () => {
+        const assetCriticality = {
+          id_field: 'host.name',
+          id_value: 'host-01',
+          criticality: 'invalid',
+        };
+
+        await assetCriticalityRoutes.create(assetCriticality, {
+          expectStatusCode: 400,
         });
       });
     });
