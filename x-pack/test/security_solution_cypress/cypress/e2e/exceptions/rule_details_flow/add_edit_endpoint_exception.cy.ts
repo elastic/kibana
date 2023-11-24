@@ -30,7 +30,7 @@ import {
   deleteAlertsAndRules,
   deleteEndpointExceptionList,
   deleteExceptionLists,
-} from '../../../tasks/common';
+} from '../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,

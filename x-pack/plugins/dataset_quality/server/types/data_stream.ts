@@ -9,7 +9,7 @@ import { ByteSize } from '@elastic/elasticsearch/lib/api/types';
 import { Integration } from './integration';
 
 export interface DataStreamsStatResponse {
-  items: DataStreamStat[];
+  dataStreamsStats: DataStreamStat[];
   integrations: Integration[];
 }
 
