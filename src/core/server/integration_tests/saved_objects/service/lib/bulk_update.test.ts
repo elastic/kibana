@@ -20,7 +20,6 @@ import {
 import { delay } from '../../migrations/test_utils';
 import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 
-// export const logFilePath = Path.join(__dirname, 'update.test.log');
 export const logFilePath = Path.join(__dirname, 'bulk_update.test.log');
 
 describe('SOR - bulk_update API', () => {

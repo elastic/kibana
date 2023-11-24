@@ -652,7 +652,7 @@ export const getMockBulkUpdateResponse = (
   options?: SavedObjectsBulkUpdateOptions,
   originId?: string
 ) => {
-  const mockedBulkUpdateResponse = {
+  return {
     items: objects.map(({ type, id }) => ({
       index: {
         _id: `${
@@ -670,7 +670,6 @@ export const getMockBulkUpdateResponse = (
       },
     })),
   } as estypes.BulkResponse;
-  return mockedBulkUpdateResponse;
 };
 
 export const bulkUpdateSuccess = async (
