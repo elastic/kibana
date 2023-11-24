@@ -19,6 +19,8 @@ import {
   EuiPopoverTitle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
+  EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
@@ -60,12 +62,14 @@ export function ErrorsWarningsPopover({
   type,
   setIsPopoverOpen,
   onErrorClick,
+  isSpaceReduced,
 }: {
   isPopoverOpen: boolean;
   items: MonacoMessage[];
   type: 'error' | 'warning';
   setIsPopoverOpen: (flag: boolean) => void;
   onErrorClick: (error: MonacoMessage) => void;
+  isSpaceReduced?: boolean;
 }) {
   const strings = getConstsByType(type, items.length);
   return (
@@ -90,7 +94,7 @@ export function ErrorsWarningsPopover({
                   setIsPopoverOpen(!isPopoverOpen);
                 }}
               >
-                <p>{strings.message}</p>
+                <p>{isSpaceReduced ? items.length : strings.message}</p>
               </EuiText>
             }
             ownFocus={false}
@@ -151,8 +155,11 @@ interface EditorFooterProps {
   warnings?: MonacoMessage[];
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoMessage) => void;
-  refreshErrors: () => void;
+  runQuery: () => void;
   hideRunQueryText?: boolean;
+  disableSubmitAction?: boolean;
+  editorIsInline?: boolean;
+  isSpaceReduced?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -162,9 +169,13 @@ export const EditorFooter = memo(function EditorFooter({
   warnings,
   detectTimestamp,
   onErrorClick,
-  refreshErrors,
+  runQuery,
   hideRunQueryText,
+  disableSubmitAction,
+  editorIsInline,
+  isSpaceReduced,
 }: EditorFooterProps) {
+  const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
   return (
@@ -177,6 +188,41 @@ export const EditorFooter = memo(function EditorFooter({
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+            <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-footer-lines">
+              <p>
+                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineCount', {
+                  defaultMessage: '{count} {count, plural, one {line} other {lines}}',
+                  values: { count: lines },
+                })}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
+            <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-date-info">
+                  <p>
+                    {isSpaceReduced
+                      ? '@timestamp'
+                      : detectTimestamp
+                      ? i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
+                          {
+                            defaultMessage: '@timestamp found',
+                          }
+                        )
+                      : i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
+                          {
+                            defaultMessage: '@timestamp not found',
+                          }
+                        )}
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
           {errors && errors.length > 0 && (
             <ErrorsWarningsPopover
               isPopoverOpen={isErrorPopoverOpen}
@@ -205,42 +251,6 @@ export const EditorFooter = memo(function EditorFooter({
               onErrorClick={onErrorClick}
             />
           )}
-          <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
-            <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-footer-lines">
-              <p>
-                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineCount', {
-                  defaultMessage: '{count} {count, plural, one {line} other {lines}}',
-                  values: { count: lines },
-                })}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
-            <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="calendar" color="subdued" size="s" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-date-info">
-                  <p>
-                    {detectTimestamp
-                      ? i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
-                          {
-                            defaultMessage: '@timestamp detected',
-                          }
-                        )
-                      : i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
-                          {
-                            defaultMessage: '@timestamp not detected',
-                          }
-                        )}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {!hideRunQueryText && (
@@ -264,6 +274,53 @@ export const EditorFooter = memo(function EditorFooter({
               >{`${COMMAND_KEY} + Enter`}</EuiCode>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+      {Boolean(editorIsInline) && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="text"
+            size="s"
+            fill
+            onClick={runQuery}
+            isDisabled={Boolean(disableSubmitAction)}
+            data-test-subj="TextBasedLangEditor-run-query-button"
+            minWidth={isSpaceReduced ? false : undefined}
+          >
+            <EuiFlexGroup
+              gutterSize="xs"
+              responsive={false}
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem grow={false}>
+                {isSpaceReduced
+                  ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.run', {
+                      defaultMessage: 'Run',
+                    })
+                  : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+                      defaultMessage: 'Run query',
+                    })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  size="xs"
+                  css={css`
+                    border: 1px solid
+                      ${Boolean(disableSubmitAction)
+                        ? euiTheme.colors.disabled
+                        : euiTheme.colors.emptyShade};
+                    padding: 0 ${euiTheme.size.xs};
+                    font-size: ${euiTheme.size.s};
+                    margin-left: ${euiTheme.size.xs};
+                    border-radius: ${euiTheme.size.xs};
+                  `}
+                >
+                  {COMMAND_KEY}⏎
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiButton>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

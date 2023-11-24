@@ -67,19 +67,43 @@ import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import './overwrite.scss';
 
 export interface TextBasedLanguagesEditorProps {
+  /** The aggregate type query */
   query: AggregateQuery;
+  /** Callback running everytime the query changes */
   onTextLangQueryChange: (query: AggregateQuery) => void;
-  onTextLangQuerySubmit: () => void;
+  /** Callback running when the user submits the query */
+  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
+  /** Can be used to expand/minimize the editor */
   expandCodeEditor: (status: boolean) => void;
+  /** If it is true, the editor initializes with height EDITOR_INITIAL_HEIGHT_EXPANDED */
   isCodeEditorExpanded: boolean;
+  /** If it is true, the editor displays the message @timestamp found
+   * The text based queries are relying on adhoc dataviews which
+   * can have an @timestamp timefield or nothing
+   */
   detectTimestamp?: boolean;
+  /** Array of errors */
   errors?: Error[];
+  /** Warning string as it comes from ES */
   warning?: string;
+  /** Disables the editor */
   isDisabled?: boolean;
+  /** Indicator if the editor is on dark mode */
   isDarkMode?: boolean;
   dataTestSubj?: string;
+  /** If true it hides the minimize button and the user can't return to the minimized version
+   * Useful when the application doesn't want to give this capability
+   */
   hideMinimizeButton?: boolean;
+  /** Hide the Run query information which appears on the footer*/
   hideRunQueryText?: boolean;
+  /** This is used for applications (such as the inline editing flyout in dashboards)
+   * which want to add the editor without being part of the Unified search component
+   * It renders a submit query button inside the editor
+   */
+  editorIsInline?: boolean;
+  /** Disables the submit query action*/
+  disableSubmitAction?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -95,6 +119,9 @@ const EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS = 220;
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
+
+// for editor width smaller than this value we want to start hiding some text
+const BREAKPOINT_WIDTH = 410;
 
 const languageId = (language: string) => {
   switch (language) {
@@ -126,6 +153,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isDarkMode,
   hideMinimizeButton,
   hideRunQueryText,
+  editorIsInline,
+  disableSubmitAction,
   dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
@@ -140,6 +169,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
+  const [isSpaceReduced, setIsSpaceReduced] = useState(false);
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
@@ -153,10 +183,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
-  const onTextLangQuerySubmitWrapped = useCallback(() => {
-    setCodeStateOnSubmission(code);
-    onTextLangQuerySubmit();
-  }, [code, onTextLangQuerySubmit]);
+  const onQuerySubmit = useCallback(() => {
+    const currentValue = editor1.current?.getValue();
+    if (currentValue != null) {
+      setCodeStateOnSubmission(currentValue);
+    }
+    onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery);
+  }, [language, onTextLangQuerySubmit]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -180,7 +213,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(editorMessages.errors.length),
     Boolean(editorMessages.warnings.length),
     isCodeEditorExpandedFocused,
-    Boolean(documentationSections)
+    Boolean(documentationSections),
+    Boolean(editorIsInline)
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -461,6 +495,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [code, isCodeEditorExpanded, isWordWrapped]);
 
   const onResize = ({ width }: { width: number }) => {
+    setIsSpaceReduced(Boolean(editorIsInline && width < BREAKPOINT_WIDTH));
     calculateVisibleCode(width);
     if (editor1.current) {
       editor1.current.layout({ width, height: editorHeight });
@@ -553,6 +588,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               <EuiButtonIcon
                 iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
                 color="text"
+                size="s"
                 data-test-subj="TextBasedLangEditor-toggleWordWrap"
                 aria-label={
                   isWordWrapped
@@ -607,6 +643,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         }
                       )}
                       data-test-subj="TextBasedLangEditor-minimize"
+                      size="s"
                       onClick={() => {
                         expandCodeEditor(false);
                         updateLinesFromModel = false;
@@ -623,6 +660,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       sections={documentationSections}
                       buttonProps={{
                         color: 'text',
+                        size: 's',
                         'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
                           'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
@@ -750,9 +788,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         editor.addCommand(
                           // eslint-disable-next-line no-bitwise
                           monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                          function () {
-                            onTextLangQuerySubmitWrapped();
-                          }
+                          onQuerySubmit
                         );
                         if (!isCodeEditorExpanded) {
                           editor.onDidContentSizeChange((e) => {
@@ -767,13 +803,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         containerCSS={styles.bottomContainer}
                         {...editorMessages}
                         onErrorClick={onErrorClick}
-                        refreshErrors={() => {
+                        runQuery={() => {
                           if (editorMessages.errors.some((e) => e.source !== 'client')) {
-                            onTextLangQuerySubmitWrapped();
+                            onQuerySubmit();
                           }
                         }}
                         detectTimestamp={detectTimestamp}
+                        editorIsInline={editorIsInline}
+                        disableSubmitAction={disableSubmitAction}
                         hideRunQueryText={hideRunQueryText}
+                        isSpaceReduced={isSpaceReduced}
                       />
                     )}
                   </div>
@@ -856,9 +895,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           lines={lines}
           containerCSS={styles.bottomContainer}
           onErrorClick={onErrorClick}
-          refreshErrors={onTextLangQuerySubmitWrapped}
+          runQuery={onQuerySubmit}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
+          editorIsInline={editorIsInline}
+          disableSubmitAction={disableSubmitAction}
+          isSpaceReduced={isSpaceReduced}
           {...editorMessages}
         />
       )}
@@ -866,6 +908,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         <ResizableButton
           onMouseDownResizeHandler={onMouseDownResizeHandler}
           onKeyDownResizeHandler={onKeyDownResizeHandler}
+          editorIsInline={editorIsInline}
         />
       )}
     </>
