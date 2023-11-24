@@ -10,7 +10,6 @@ import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isActiveTimeline } from '../../../../../helpers';
 import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
@@ -43,12 +42,6 @@ interface AddExceptionModalWrapperData {
   ruleRuleId: string;
   ruleName: string;
 }
-
-const StyledFooter = styled(EuiFlyoutFooter)`
-  padding-inline: ${({ theme }) => theme.eui.euiSizeM};
-  padding-block: ${({ theme }) => theme.eui.euiSizeM};
-  background-color: transparent;
-`;
 
 // eslint-disable-next-line react/display-name
 export const FlyoutFooterComponent = React.memo(
@@ -149,7 +142,10 @@ export const FlyoutFooterComponent = React.memo(
 
     return (
       <>
-        <StyledFooter data-test-subj="side-panel-flyout-footer">
+        <EuiFlyoutFooter
+          className="side-panel-flyout-footer"
+          data-test-subj="side-panel-flyout-footer"
+        >
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {detailsEcsData && (
@@ -170,7 +166,7 @@ export const FlyoutFooterComponent = React.memo(
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </StyledFooter>
+        </EuiFlyoutFooter>
         {/* This is still wrong to do render flyout/modal inside of the flyout
         We need to completely refactor the EventDetails  component to be correct
       */}
