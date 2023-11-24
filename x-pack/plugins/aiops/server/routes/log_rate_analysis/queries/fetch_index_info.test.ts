@@ -60,7 +60,7 @@ describe('fetch_index_info', () => {
       expect(baselineTotalDocCount).toEqual(5000000);
       expect(deviationTotalDocCount).toEqual(5000000);
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
-      expect(esClientSearchMock).toHaveBeenCalledTimes(1);
+      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
     });
   });
 });

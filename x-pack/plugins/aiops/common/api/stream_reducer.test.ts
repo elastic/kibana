@@ -31,6 +31,7 @@ describe('streamReducer', () => {
       significantItems: [],
       significantItemsGroups: [],
       errors: [],
+      zeroDocsFallback: false,
     });
   });
 
