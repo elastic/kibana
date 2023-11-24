@@ -57,7 +57,8 @@ function getFunctionSignaturesByReturnType(
   command: string,
   expectedReturnType: string,
   { agg, evalMath, builtin }: { agg?: boolean; evalMath?: boolean; builtin?: boolean } = {},
-  paramsTypes?: string[]
+  paramsTypes?: string[],
+  ignored?: string[]
 ) {
   const list = [];
   if (agg) {
@@ -90,6 +91,12 @@ function getFunctionSignaturesByReturnType(
             (expectedType, i) => expectedType === 'any' || expectedType === params[i].type
           )
         );
+      }
+      return true;
+    })
+    .filter(({ name }) => {
+      if (ignored?.length) {
+        return !ignored?.includes(name);
       }
       return true;
     })
@@ -334,7 +341,9 @@ describe('autocomplete', () => {
       'from a | where log10()',
       [
         ...getFieldNamesByType('number'),
-        ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }),
+        ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }, undefined, [
+          'log10',
+        ]),
       ],
       '('
     );
@@ -346,7 +355,9 @@ describe('autocomplete', () => {
       'from a | WHERE pow(numberField, )',
       [
         ...getFieldNamesByType('number'),
-        ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }),
+        ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }, undefined, [
+          'pow',
+        ]),
       ],
       ','
     );
@@ -484,7 +495,9 @@ describe('autocomplete', () => {
       'from a | eval a=round()',
       [
         ...getFieldNamesByType('number'),
-        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          'round',
+        ]),
       ],
       '('
     );
@@ -506,7 +519,9 @@ describe('autocomplete', () => {
       'from a | eval a=round(numberField), b=round()',
       [
         ...getFieldNamesByType('number'),
-        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          'round',
+        ]),
       ],
       '('
     );
@@ -523,9 +538,13 @@ describe('autocomplete', () => {
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
                 [
                   ...getFieldNamesByType(param.type).map((f) => (canHaveMoreArgs ? `${f},` : f)),
-                  ...getFunctionSignaturesByReturnType('eval', param.type, { evalMath: true }).map(
-                    (l) => (canHaveMoreArgs ? `${l},` : l)
-                  ),
+                  ...getFunctionSignaturesByReturnType(
+                    'eval',
+                    param.type,
+                    { evalMath: true },
+                    undefined,
+                    [fn.name]
+                  ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
                   ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
                 ]
               );
@@ -535,9 +554,13 @@ describe('autocomplete', () => {
                 } )`,
                 [
                   ...getFieldNamesByType(param.type).map((f) => (canHaveMoreArgs ? `${f},` : f)),
-                  ...getFunctionSignaturesByReturnType('eval', param.type, { evalMath: true }).map(
-                    (l) => (canHaveMoreArgs ? `${l},` : l)
-                  ),
+                  ...getFunctionSignaturesByReturnType(
+                    'eval',
+                    param.type,
+                    { evalMath: true },
+                    undefined,
+                    [fn.name]
+                  ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
                   ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
                 ]
               );

@@ -62,7 +62,10 @@ import { EDITOR_MARKER } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 
 type GetSourceFn = () => Promise<AutocompleteCommandDefinition[]>;
-type GetFieldsByTypeFn = (type: string | string[]) => Promise<AutocompleteCommandDefinition[]>;
+type GetFieldsByTypeFn = (
+  type: string | string[],
+  ignored?: string[]
+) => Promise<AutocompleteCommandDefinition[]>;
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<AutocompleteCommandDefinition[]>;
 type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
@@ -202,14 +205,16 @@ function getFieldsByTypeRetriever(resourceRetriever?: ESQLCallbacks) {
     }
   };
   return {
-    getFieldsByType: async (expectedType: string | string[] = 'any') => {
+    getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
       await getFields();
       return buildFieldsDefinitions(
         Array.from(cacheFields.values())
-          ?.filter(({ type }) => {
+          ?.filter(({ name, type }) => {
             const ts = Array.isArray(type) ? type : [type];
-            return ts.some((t) => types[0] === 'any' || types.includes(t));
+            return (
+              !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t))
+            );
           })
           .map(({ name }) => name) || []
       );
@@ -740,10 +745,17 @@ async function getFieldsOrFunctionsSuggestions(
     functions: boolean;
     fields: boolean;
     variables?: Map<string, ESQLVariable[]>;
-  }
+  },
+  {
+    ignoreFn = [],
+    ignoreFields = [],
+  }: {
+    ignoreFn?: string[];
+    ignoreFields?: string[];
+  } = {}
 ): Promise<AutocompleteCommandDefinition[]> {
   const filteredFieldsByType = (await (fields
-    ? getFieldsByType(types)
+    ? getFieldsByType(types, ignoreFields)
     : [])) as AutocompleteCommandDefinition[];
 
   const filteredVariablesByType: string[] = [];
@@ -756,7 +768,7 @@ async function getFieldsOrFunctionsSuggestions(
   }
 
   const suggestions = filteredFieldsByType.concat(
-    functions ? getCompatibleFunctionDefinition(commandName, types) : [],
+    functions ? getCompatibleFunctionDefinition(commandName, types, ignoreFn) : [],
     variables ? buildVariablesDefinitions(filteredVariablesByType) : [],
     getCompatibleLiterals(commandName, types) // literals are handled internally
   );
@@ -820,11 +832,19 @@ async function getFunctionArgsSuggestions(
       // ... | EVAL fn( <suggest>)
       // ... | EVAL fn( field, <suggest>)
       suggestions.push(
-        ...(await getFieldsOrFunctionsSuggestions(types, command.name, getFieldsByType, {
-          functions: command.name !== 'stats',
-          fields: true,
-          variables: variablesExcludingCurrentCommandOnes,
-        }))
+        ...(await getFieldsOrFunctionsSuggestions(
+          types,
+          command.name,
+          getFieldsByType,
+          {
+            functions: command.name !== 'stats',
+            fields: true,
+            variables: variablesExcludingCurrentCommandOnes,
+          },
+          // do not repropose the same function as arg
+          // i.e. avoid cases like abs(abs(abs(...))) with suggestions
+          { ignoreFn: [node.name] }
+        ))
       );
     }
 
@@ -851,6 +871,7 @@ async function getFunctionArgsSuggestions(
         // suggest a comma if there's another argument for the function
         suggestions.push(commaCompleteItem);
       }
+      // if there are other arguments in the function, inject automatically a comma after each suggestion
       return suggestions.map((suggestion) =>
         suggestion !== commaCompleteItem
           ? {
