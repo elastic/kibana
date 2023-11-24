@@ -41,10 +41,37 @@ import {
   mergeForUpdate,
 } from './utils';
 import { ApiExecutionContext } from './types';
+
 export interface PerformUpdateParams<T = unknown> {
   objects: Array<SavedObjectsBulkUpdateObject<T>>;
   options: SavedObjectsBulkUpdateOptions;
 }
+
+type DocumentToSave = Record<string, unknown>;
+type ExpectedBulkGetResult = Either<
+  { type: string; id: string; error: Payload },
+  {
+    type: string;
+    id: string;
+    version?: string;
+    documentToSave: DocumentToSave;
+    objectNamespace?: string;
+    esRequestIndex: number;
+    migrationVersionCompatibility?: 'raw' | 'compatible';
+  }
+>;
+
+type ExpectedBulkUpdateResult = Either<
+  { type: string; id: string; error: Payload },
+  {
+    type: string;
+    id: string;
+    namespaces?: string[];
+    documentToSave: DocumentToSave;
+    esRequestIndex: number;
+    rawMigratedUpdatedDoc: SavedObjectsRawDoc;
+  }
+>;
 
 export const performBulkUpdate = async <T>(
   { objects, options }: PerformUpdateParams<T>,
@@ -61,20 +88,6 @@ export const performBulkUpdate = async <T>(
   const time = getCurrentTime();
 
   let bulkGetRequestIndexCounter = 0;
-  type DocumentToSave = Record<string, unknown>;
-  type ExpectedBulkGetResult = Either<
-    { type: string; id: string; error: Payload },
-    {
-      type: string;
-      id: string;
-      version?: string;
-      documentToSave: DocumentToSave;
-      objectNamespace?: string;
-      esRequestIndex?: number;
-      migrationVersionCompatibility?: 'raw' | 'compatible';
-    }
-  >;
-
   const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
     const {
       type,
@@ -141,13 +154,11 @@ export const performBulkUpdate = async <T>(
 
   const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
 
-  const bulkGetDocs = validObjects
-    .filter(({ value }) => value.esRequestIndex !== undefined)
-    .map(({ value: { type, id, objectNamespace } }) => ({
-      _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
-      _index: commonHelper.getIndexForType(type),
-      _source: ['type', 'namespaces'],
-    }));
+  const bulkGetDocs = validObjects.map(({ value: { type, id, objectNamespace } }) => ({
+    _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
+    _index: commonHelper.getIndexForType(type),
+    _source: true,
+  }));
 
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
@@ -167,27 +178,25 @@ export const performBulkUpdate = async <T>(
   }
 
   const authObjects: AuthorizeUpdateObject[] = validObjects.map((element) => {
-    let result;
     const { type, id, objectNamespace, esRequestIndex: index } = element.value;
+    const preflightResult = bulkGetResponse!.body.docs[index];
 
-    const preflightResult = index !== undefined ? bulkGetResponse?.body?.docs[index] : undefined;
     if (registry.isMultiNamespace(type)) {
-      result = {
+      return {
         type,
         id,
         objectNamespace,
         // @ts-expect-error MultiGetHit._source is optional
-        existingNamespaces: preflightResult?._source?.namespaces ?? [],
+        existingNamespaces: preflightResult._source?.namespaces ?? [],
       };
     } else {
-      result = {
+      return {
         type,
         id,
         objectNamespace,
         existingNamespaces: [],
       };
     }
-    return result;
   });
 
   const authorizationResult = await securityExtension?.authorizeBulkUpdate({
@@ -197,18 +206,6 @@ export const performBulkUpdate = async <T>(
 
   let bulkUpdateRequestIndexCounter = 0;
   const bulkUpdateParams: object[] = [];
-
-  type ExpectedBulkUpdateResult = Either<
-    { type: string; id: string; error: Payload },
-    {
-      type: string;
-      id: string;
-      namespaces?: string[];
-      documentToSave: DocumentToSave;
-      esRequestIndex: number;
-      rawMigratedUpdatedDoc: SavedObjectsRawDoc;
-    }
-  >;
 
   const expectedBulkUpdateResults = await Promise.all(
     expectedBulkGetResults.map<Promise<ExpectedBulkUpdateResult>>(async (expectedBulkGetResult) => {
@@ -227,81 +224,58 @@ export const performBulkUpdate = async <T>(
       } = expectedBulkGetResult.value;
 
       let namespaces: string[] | undefined;
-      let versionProperties;
+      const versionProperties = getExpectedVersionProperties(version);
       const indexFound = bulkGetResponse?.statusCode !== 404;
-      const actualResult =
-        indexFound && esRequestIndex !== undefined
-          ? bulkGetResponse?.body.docs[esRequestIndex]
-          : undefined;
-      const docFound =
-        indexFound && esRequestIndex !== undefined && isMgetDoc(actualResult) && actualResult.found;
-      if (registry.isMultiNamespace(type)) {
-        if (
-          !docFound ||
+      const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+      const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
+      const isMultiNS = registry.isMultiNamespace(type);
+
+      if (
+        !docFound ||
+        (isMultiNS &&
           !rawDocExistsInNamespace(
             registry,
             actualResult as SavedObjectsRawDoc,
             getNamespaceId(objectNamespace)
-          )
-        ) {
-          return left({
-            id,
-            type,
-            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          });
-        }
+          ))
+      ) {
+        return left({
+          id,
+          type,
+          error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+        });
+      }
+
+      if (isMultiNS) {
         // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
         namespaces = actualResult!._source.namespaces ?? [
           // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
         ];
-        versionProperties = getExpectedVersionProperties(version);
-      } else {
-        if (!docFound) {
-          return left({
-            id,
-            type,
-            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          });
-        }
-        if (registry.isSingleNamespace(type)) {
-          // if `objectNamespace` is undefined, fall back to `options.namespace`
-          namespaces = [getNamespaceString(objectNamespace)];
-        }
-        versionProperties = getExpectedVersionProperties(version);
+      } else if (registry.isSingleNamespace(type)) {
+        // if `objectNamespace` is undefined, fall back to `options.namespace`
+        namespaces = [getNamespaceString(objectNamespace)];
       }
 
-      const expectedResult = {
+      const document = getSavedObjectFromSource<T>(
+        registry,
         type,
         id,
-        namespaces,
-        esRequestIndex: bulkUpdateRequestIndexCounter++,
-        documentToSave: expectedBulkGetResult.value.documentToSave,
-        rawMigratedUpdatedDoc: {} as SavedObjectsRawDoc,
-        migrationVersionCompatibility,
-      };
+        actualResult as SavedObjectsRawDoc,
+        { migrationVersionCompatibility }
+      );
+
       let migrated: SavedObject<T>;
-      const typeDefinition = registry.getType(type)!;
-
-      if (docFound) {
-        const document = getSavedObjectFromSource<T>(
-          registry,
-          type,
-          id,
-          actualResult as SavedObjectsRawDoc,
-          { migrationVersionCompatibility }
+      try {
+        migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
+      } catch (migrateStorageDocError) {
+        throw SavedObjectsErrorHelpers.decorateGeneralError(
+          migrateStorageDocError,
+          'Failed to migrate document to the latest version.'
         );
-
-        try {
-          migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
-        } catch (migrateStorageDocError) {
-          throw SavedObjectsErrorHelpers.decorateGeneralError(
-            migrateStorageDocError,
-            'Failed to migrate document to the latest version.'
-          );
-        }
       }
 
+      const typeDefinition = registry.getType(type)!;
       const updatedAttributes = mergeForUpdate({
         targetAttributes: {
           ...migrated!.attributes,
@@ -328,7 +302,16 @@ export const performBulkUpdate = async <T>(
       const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
         migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
       );
-      expectedResult.rawMigratedUpdatedDoc = updatedMigratedDocumentToSave;
+
+      const expectedResult = {
+        type,
+        id,
+        namespaces,
+        esRequestIndex: bulkUpdateRequestIndexCounter++,
+        documentToSave: expectedBulkGetResult.value.documentToSave,
+        rawMigratedUpdatedDoc: updatedMigratedDocumentToSave,
+        migrationVersionCompatibility,
+      };
 
       bulkUpdateParams.push(
         {
