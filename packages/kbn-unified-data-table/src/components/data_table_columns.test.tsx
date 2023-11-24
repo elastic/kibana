@@ -108,6 +108,16 @@ describe('Data table columns', function () {
       ) as string[];
       expect(actual).toEqual(['timestamp', 'extension', 'message']);
     });
+
+    it('returns grid columns without time column if the dataView is text-based', () => {
+      const actual = getVisibleColumns(
+        ['extension', 'message'],
+        dataViewWithTimefieldMock,
+        false,
+        true
+      ) as string[];
+      expect(actual).toEqual(['extension', 'message']);
+    });
   });
 
   describe('column tokens', () => {

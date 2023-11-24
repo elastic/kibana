@@ -267,8 +267,17 @@ export function getEuiGridColumns({
   );
 }
 
-export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
+export function getVisibleColumns(
+  columns: string[],
+  dataView: DataView,
+  showTimeCol: boolean,
+  isPlainRecord: boolean = false
+) {
   const timeFieldName = dataView.timeFieldName;
+
+  if (isPlainRecord) {
+    return columns;
+  }
 
   if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
     return [timeFieldName, ...columns];

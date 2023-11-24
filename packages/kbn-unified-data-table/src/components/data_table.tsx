@@ -618,8 +618,8 @@ export const UnifiedDataTable = ({
   );
 
   const visibleColumns = useMemo(
-    () => getVisibleColumns(displayedColumns, dataView, showTimeCol),
-    [dataView, displayedColumns, showTimeCol]
+    () => getVisibleColumns(displayedColumns, dataView, showTimeCol, isPlainRecord),
+    [dataView, displayedColumns, showTimeCol, isPlainRecord]
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
