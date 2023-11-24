@@ -47,10 +47,6 @@ export function AlertActions({
   refresh,
   setFlyoutAlert,
 }: AlertActionsProps) {
-  const alertDoc = Object.entries(alert).reduce((acc, [key, val]) => {
-    return { ...acc, [key]: val?.[0] };
-  }, {});
-
   const {
     cases,
     http: {
@@ -165,7 +161,7 @@ export function AlertActions({
       key="viewAlertDetailsFlyout"
       onClick={() => {
         closeActionsPopover();
-        setFlyoutAlert({ fields: alertDoc });
+        setFlyoutAlert(alert._id);
       }}
     >
       {i18n.translate('xpack.ml.alertsTable.viewAlertDetailsButtonText', {

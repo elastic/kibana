@@ -20,46 +20,29 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import {
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_UUID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
-import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALERT_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { AlertActionsProps as CustomActionsProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/row_actions/types';
+import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
+import { paths } from '../../../../common/locators/paths';
+import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
-import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { parseAlert } from '../helpers/parse_alert';
-import { paths } from '../../../../common/locators/paths';
-import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
-import type { TopAlert } from '../../../typings/alerts';
+import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
 
-const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
-
-export interface Props {
+export interface AlertActionsProps extends CustomActionsProps {
   config: ConfigSchema;
-  data: TimelineNonEcsData[];
-  ecsData: Ecs;
-  id?: string;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  refresh: () => void;
-  setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
 export function AlertActions({
   config,
-  data,
-  ecsData,
-  id: pageId,
   observabilityRuleTypeRegistry,
-  refresh,
-  setFlyoutAlert,
-}: Props) {
+  ...customActionsProps
+}: AlertActionsProps) {
+  const { alert, refresh } = customActionsProps;
   const {
     cases: {
       helpers: { getRuleIdFromEvent },
@@ -68,31 +51,35 @@ export function AlertActions({
     http: {
       basePath: { prepend },
     },
+    triggersActionsUi,
   } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
-  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+
+  const data = useMemo(
+    () =>
+      Object.entries(alert ?? {}).reduce<TimelineNonEcsData[]>(
+        (acc, [field, value]) => [...acc, { field, value: value as string[] }],
+        []
+      ),
+    [alert]
+  );
+
+  const ecsData = useMemo<Ecs>(
+    () => ({
+      _id: alert._id,
+      _index: alert._index,
+    }),
+    [alert._id, alert._index]
+  );
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
     [observabilityRuleTypeRegistry]
   );
 
-  const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-  const alert = parseObservabilityAlert(dataFieldEs);
+  const observabilityAlert = parseObservabilityAlert(alert);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-
-  const ruleId = alert.fields[ALERT_RULE_UUID] ?? null;
-  const linkToRule =
-    pageId !== RULE_DETAILS_PAGE_ID && ruleId
-      ? prepend(paths.observability.ruleDetails(ruleId))
-      : null;
-
-  const alertId = alert.fields[ALERT_UUID] ?? null;
-  const linkToAlert =
-    pageId !== ALERT_DETAILS_PAGE_ID && alertId
-      ? prepend(paths.observability.alertDetails(alertId))
-      : null;
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
@@ -106,11 +93,6 @@ export function AlertActions({
         ]
       : [];
   }, [ecsData, getRuleIdFromEvent, data]);
-
-  const isActiveAlert = useMemo(
-    () => alert.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
-    [alert.fields]
-  );
 
   const onSuccess = useCallback(() => {
     refresh();
@@ -137,13 +119,22 @@ export function AlertActions({
     closeActionsPopover();
   };
 
-  const handleUntrackAlert = useCallback(async () => {
-    await untrackAlerts({
-      indices: [ecsData?._index ?? ''],
-      alertUuids: [alertId],
-    });
-    onSuccess();
-  }, [untrackAlerts, alertId, ecsData, onSuccess]);
+  const DefaultRowActions = useMemo(
+    () =>
+      triggersActionsUi.getAlertsTableDefaultAlertActions({
+        key: 'defaultRowActions',
+        onActionExecuted: closeActionsPopover,
+        isAlertDetailsEnabled: isAlertDetailsEnabledPerApp(observabilityAlert, config),
+        resolveRulePagePath: (ruleId, currentPageId) =>
+          currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null,
+        resolveAlertPagePath: (alertId, currentPageId) =>
+          currentPageId !== ALERT_DETAILS_PAGE_ID
+            ? paths.observability.alertDetails(alertId)
+            : null,
+        ...customActionsProps,
+      }),
+    [config, customActionsProps, observabilityAlert, triggersActionsUi]
+  );
 
   const actionsMenuItems = [
     ...(userCasesPermissions.create && userCasesPermissions.read
@@ -170,60 +161,7 @@ export function AlertActions({
           </EuiContextMenuItem>,
         ]
       : []),
-
-    ...(!!linkToRule
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="viewRuleDetails"
-            key="viewRuleDetails"
-            href={linkToRule}
-          >
-            {i18n.translate('xpack.observability.alertsTable.viewRuleDetailsButtonText', {
-              defaultMessage: 'View rule details',
-            })}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-
-    ...[
-      isAlertDetailsEnabledPerApp(alert, config) && linkToAlert ? (
-        <EuiContextMenuItem
-          data-test-subj="viewAlertDetailsPage"
-          key="viewAlertDetailsPage"
-          href={linkToAlert}
-        >
-          {i18n.translate('xpack.observability.alertsTable.viewAlertDetailsButtonText', {
-            defaultMessage: 'View alert details',
-          })}
-        </EuiContextMenuItem>
-      ) : (
-        <EuiContextMenuItem
-          data-test-subj="viewAlertDetailsFlyout"
-          key="viewAlertDetailsFlyout"
-          onClick={() => {
-            closeActionsPopover();
-            setFlyoutAlert(alert);
-          }}
-        >
-          {i18n.translate('xpack.observability.alertsTable.viewAlertDetailsButtonText', {
-            defaultMessage: 'View alert details',
-          })}
-        </EuiContextMenuItem>
-      ),
-    ],
-    ...(isActiveAlert
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="untrackAlert"
-            key="untrackAlert"
-            onClick={handleUntrackAlert}
-          >
-            {i18n.translate('xpack.observability.alerts.actions.untrack', {
-              defaultMessage: 'Mark as untracked',
-            })}
-          </EuiContextMenuItem>,
-        ]
-      : []),
+    DefaultRowActions,
   ];
 
   const actionsToolTip =
@@ -238,7 +176,7 @@ export function AlertActions({
   return (
     <>
       {/* Hide the View In App for the Threshold alerts, temporarily https://github.com/elastic/kibana/pull/159915  */}
-      {alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
+      {observabilityAlert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
         <EuiFlexItem style={{ width: 32 }} />
       ) : (
         <EuiFlexItem>
@@ -253,7 +191,7 @@ export function AlertActions({
                 defaultMessage: 'View in app',
               })}
               color="text"
-              href={prepend(alert.link ?? '')}
+              href={prepend(observabilityAlert.link ?? '')}
               iconType="eye"
               size="s"
             />

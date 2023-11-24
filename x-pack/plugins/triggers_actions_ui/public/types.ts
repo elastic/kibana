@@ -578,7 +578,7 @@ export type AlertsTableProps = {
 export type GetRenderCellValue = ({
   setFlyoutAlert,
 }: {
-  setFlyoutAlert?: (data: unknown) => void;
+  setFlyoutAlert?: (alertId: string) => void;
 }) => (props: unknown) => React.ReactNode;
 
 export type AlertTableFlyoutComponent =
@@ -658,7 +658,7 @@ export interface RenderCustomActionsRowArgs {
   rowIndex: number;
   cveProps: EuiDataGridCellValueElementProps;
   alert: Alert;
-  setFlyoutAlert: (data: unknown) => void;
+  setFlyoutAlert: (alertId: string) => void;
   id?: string;
   setIsActionLoading?: (isLoading: boolean) => void;
   refresh: () => void;
