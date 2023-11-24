@@ -259,7 +259,7 @@ export function Chart({
       }),
       iconType: 'pencil',
       isDisabled: isFlyoutVisible,
-      'data-test-subj': 'unifiedHistogramEditVisualizationOnTheFly',
+      'data-test-subj': 'unifiedHistogramEditFlyoutVisualization',
       onClick: () => setIsFlyoutVisible(true),
     });
   } else if (onEditVisualization) {
@@ -310,7 +310,7 @@ export function Chart({
                           defaultMessage: 'Show chart',
                         }),
                     iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
-                    'data-test-subj': 'unifiedHistogramHideChartButton',
+                    'data-test-subj': 'unifiedHistogramToggleChartButton',
                     onClick: toggleHideChart,
                   },
                 ]}

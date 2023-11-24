@@ -32,6 +32,7 @@ jest.mock('./hooks/use_edit_visualization', () => ({
 }));
 
 async function mountComponent({
+  hiddenPanel,
   noChart,
   noHits,
   noBreakdown,
@@ -44,6 +45,7 @@ async function mountComponent({
   hasDashboardPermissions,
   isChartLoading,
 }: {
+  hiddenPanel?: boolean;
   noChart?: boolean;
   noHits?: boolean;
   noBreakdown?: boolean;
@@ -70,6 +72,7 @@ async function mountComponent({
   };
 
   const props = {
+    hiddenPanel,
     dataView,
     query: {
       language: 'kuery',
@@ -125,9 +128,14 @@ describe('Chart', () => {
 
   test('render when chart is undefined', async () => {
     const component = await mountComponent({ noChart: true });
-    expect(
-      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
-    ).toBeFalsy();
+    expect(component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()).toBe(
+      true
+    );
+  });
+
+  test('should not render when chart panel is hidden', async () => {
+    const component = await mountComponent({ hiddenPanel: true });
+    expect(component.find('[data-test-subj="unifiedHistogramPanelHidden"]').exists()).toBe(true);
   });
 
   test('render when chart is defined and onEditVisualization is undefined', async () => {
@@ -186,7 +194,7 @@ describe('Chart', () => {
     await act(async () => {
       component
         .find('[data-test-subj="unifiedHistogramEditVisualization"]')
-        .first()
+        .last()
         .simulate('click');
     });
     expect(mockUseEditVisualization).toHaveBeenCalled();

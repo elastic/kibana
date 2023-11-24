@@ -12,11 +12,9 @@ import {
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { findTestSubject } from '@kbn/test-jest-helpers';
-import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 import { mount } from 'enzyme';
 import { isEqual as mockIsEqual } from 'lodash';
 import React from 'react';
-import { of } from 'rxjs';
 import { DiscoverResizableLayout, SIDEBAR_WIDTH_KEY } from './discover_resizable_layout';
 
 const mockSidebarKey = SIDEBAR_WIDTH_KEY;
@@ -56,7 +54,7 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={null}
+        isSidebarCollapsed={true}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -69,7 +67,7 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={null}
+        isSidebarCollapsed={true}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -82,7 +80,7 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={null}
+        isSidebarCollapsed={true}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -95,9 +93,7 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
-        }
+        isSidebarCollapsed={false}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -110,9 +106,7 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
-        }
+        isSidebarCollapsed={false}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -125,9 +119,7 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(true) } as UnifiedFieldListSidebarContainerApi
-        }
+        isSidebarCollapsed={true}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -140,9 +132,7 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
-        }
+        isSidebarCollapsed={false}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -157,9 +147,7 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
-        }
+        isSidebarCollapsed={false}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
