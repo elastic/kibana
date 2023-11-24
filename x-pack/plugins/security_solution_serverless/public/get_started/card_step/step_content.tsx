@@ -39,6 +39,9 @@ const StepContentComponent = ({
 
   useEffect(() => {
     securitySolution.getLandingPageContext$().subscribe((context) => {
+      if (checkIfStepCompleted == null) {
+        return;
+      }
       const isDone = checkIfStepCompleted?.(context);
       updateStepStatus(!isDone);
     });
