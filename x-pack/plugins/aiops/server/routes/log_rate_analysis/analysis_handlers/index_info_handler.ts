@@ -36,6 +36,7 @@ export const indexInfoHandlerFactory =
     const textFieldCandidates: string[] = [];
 
     let totalDocCount = 0;
+    let zeroDocsFallback = false;
 
     if (!requestBody.overrides?.remainingFieldCandidates) {
       logDebugMessage('Fetch index information.');
@@ -63,7 +64,8 @@ export const indexInfoHandlerFactory =
         fieldCandidates.push(...indexInfo.fieldCandidates);
         fieldCandidatesCount = fieldCandidates.length;
         textFieldCandidates.push(...indexInfo.textFieldCandidates);
-        totalDocCount = indexInfo.totalDocCount;
+        totalDocCount = indexInfo.deviationTotalDocCount;
+        zeroDocsFallback = indexInfo.zeroDocsFallback;
       } catch (e) {
         if (!isRequestAbortedError(e)) {
           logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
@@ -105,5 +107,5 @@ export const indexInfoHandlerFactory =
       }
     }
 
-    return { fieldCandidates, textFieldCandidates };
+    return { fieldCandidates, textFieldCandidates, zeroDocsFallback };
   };

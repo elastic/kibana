@@ -22,6 +22,7 @@ import { groupingHandlerFactory } from './analysis_handlers/grouping_handler';
 import { histogramHandlerFactory } from './analysis_handlers/histogram_handler';
 import { overridesHandlerFactory } from './analysis_handlers/overrides_handler';
 import { significantItemsHandlerFactory } from './analysis_handlers/significant_items_handler';
+import { topItemsHandlerFactory } from './analysis_handlers/top_items_handler';
 import { overallHistogramHandlerFactory } from './analysis_handlers/overall_histogram_handler';
 import {
   logDebugMessageFactory,
@@ -131,6 +132,7 @@ export const responseStreamFactory = <T extends ApiVersion>(options: ResponseStr
       overallHistogramHandler: overallHistogramHandlerFactory(streamFetchOptions),
       overridesHandler: overridesHandlerFactory(streamFetchOptions),
       significantItemsHandler: significantItemsHandlerFactory(streamFetchOptions),
+      topItemsHandler: topItemsHandlerFactory(streamFetchOptions),
     },
     responseWithHeaders,
   };
