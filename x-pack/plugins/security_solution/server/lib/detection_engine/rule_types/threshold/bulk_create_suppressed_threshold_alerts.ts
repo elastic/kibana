@@ -52,7 +52,7 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
   const ruleParams = completeRule.ruleParams;
   const suppressionDuration = runOpts.completeRule.ruleParams.alertSuppression?.duration;
   if (!suppressionDuration) {
-    throw Error('Suppression duration or groupByFields can not be empty');
+    throw Error('Suppression duration can not be empty');
   }
 
   const suppressionWindow = `now-${suppressionDuration.value}${suppressionDuration.unit}`;
