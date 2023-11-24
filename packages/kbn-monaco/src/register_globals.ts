@@ -11,6 +11,7 @@ import { PainlessLang } from './painless';
 import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
+import { YAML_LANG_ID } from './yaml';
 import { registerLanguage, registerTheme } from './helpers';
 
 export const DEFAULT_WORKER_ID = 'default';
@@ -19,7 +20,7 @@ const langSpecificWorkerIds = [
   PainlessLang.ID,
   ESQLLang.ID,
   monaco.languages.json.jsonDefaults.languageId,
-  'yaml',
+  YAML_LANG_ID,
 ];
 
 /**

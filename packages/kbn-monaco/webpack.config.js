@@ -14,13 +14,15 @@ const getWorkerEntry = (language) => {
       return 'monaco-editor/esm/vs/editor/editor.worker.js';
     case 'json':
       return 'monaco-editor/esm/vs/language/json/json.worker.js';
-    case 'yaml':
-      return 'monaco-yaml/yaml.worker.js';
     default:
       return path.resolve(__dirname, 'src', language, 'worker', `${language}.worker.ts`);
   }
 };
 
+/**
+ * @param {string} language
+ * @returns {import('webpack').Configuration}
+ */
 const getWorkerConfig = (language) => ({
   mode: process.env.NODE_ENV || 'development',
   entry: getWorkerEntry(language),
@@ -31,28 +33,18 @@ const getWorkerConfig = (language) => ({
   },
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
+    alias: {
+      // swap default umd import for the esm one provided in vscode-uri package
+      'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),
+    },
   },
   stats: 'errors-only',
   module: {
     rules: [
       {
-        test: /\.(jsx?|tsx?)$/,
-        exclude: /node_modules(?!\/@kbn\/)(\/[^\/]+\/)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            envName: process.env.NODE_ENV || 'development',
-            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-          },
-        },
-      },
-      {
-        /**
-         * further process the esm modules exported by monaco-editor
-         * because they utilize the class property proposal.
-         */
-        test: /monaco-editor\/esm\/vs\/.*(t|j)sx?$/,
+        test: /\.m?(t|j)sx?$/,
+        exclude:
+          /node_modules(?!\/(@kbn|monaco-editor|monaco-yaml|yaml\/browser|vscode-uri)\/)(\/[^\/]+\/)/,
         use: {
           loader: 'babel-loader',
           options: {
