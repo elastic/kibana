@@ -518,7 +518,6 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
       'a', // @TODO remove this
     ]);
-
     testSuggestions(
       'from a | stats avg(numberField) by stringField | eval ',
       [
@@ -531,17 +530,47 @@ describe('autocomplete', () => {
       [[], undefined, undefined]
     );
     testSuggestions(
-      'from a | eval avg(numberField) + 1 | eval ',
+      'from a | eval abs(numberField) + 1 | eval ',
       [
         'var0 =',
+        ...getFieldNamesByType('any'),
         ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
         // @TODO: leverage the location data to get the original text
         // For now return back the trimmed version:
         // the ANTLR parser trims all text so that's what it's stored in the AST
-        '`avg(numberField)+1`',
+        '`abs(numberField)+1`',
+      ],
+      ' '
+    );
+    testSuggestions(
+      'from a | stats avg(numberField) by stringField | eval ',
+      [
+        'var0 =',
+        ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+        '`avg(numberField)`',
       ],
       ' ',
-      [[], undefined, undefined]
+      // make aware EVAL of the previous STATS command with the buggy field name from expression
+      [[{ name: 'avg_numberField_', type: 'number' }], undefined, undefined]
+    );
+    testSuggestions(
+      'from a | stats avg(numberField), avg(kubernetes.something.something) by stringField | eval ',
+      [
+        'var0 =',
+        ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+        '`avg(numberField)`',
+        '`avg(kubernetes.something.something)`',
+      ],
+      ' ',
+      // make aware EVAL of the previous STATS command with the buggy field name from expression
+      [
+        [
+          { name: 'avg_numberField_', type: 'number' },
+          { name: 'avg_kubernetes.something.something_', type: 'number' },
+        ],
+        undefined,
+        undefined,
+      ]
     );
     testSuggestions(
       'from a | eval a=round(numberField), b=round()',

@@ -769,6 +769,20 @@ async function getFieldsOrFunctionsSuggestions(
         filteredVariablesByType.push(variable[0].name);
       }
     }
+    // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
+    // avg( numberField ) => avg_numberField_
+    if (
+      filteredVariablesByType.length &&
+      filteredVariablesByType.some((v) => /[^a-zA-Z\d]/.test(v))
+    ) {
+      for (const variable of filteredVariablesByType) {
+        const underscoredName = variable.replace(/[^a-zA-Z\d]/g, '_');
+        const index = filteredFieldsByType.findIndex(({ label }) => underscoredName === label);
+        if (index >= 0) {
+          filteredFieldsByType.splice(index);
+        }
+      }
+    }
   }
 
   const suggestions = filteredFieldsByType.concat(
