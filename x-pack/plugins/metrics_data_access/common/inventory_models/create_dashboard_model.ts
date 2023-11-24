@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChartModel, LayerModel } from '@kbn/lens-embeddable-utils';
+import type { ChartModel, LayerModel } from '@kbn/lens-embeddable-utils';
 
 export const createDashboardModel = <TLayer extends LayerModel>({
   charts,

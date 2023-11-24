@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 import * as rt from 'io-ts';
 
 export const ItemTypeRT = rt.keyof({
