@@ -128,12 +128,14 @@ describe('render', () => {
       expect(healthbar).not.toBeNull();
     });
 
-    test('search bar should filter table', () => {
+    test('should filter table and health bar', () => {
       render(<ClustersView request={request} />);
       const searchbar = screen.getByRole('searchbox');
       fireEvent.change(searchbar, { target: { value: 'remot' } });
       const tableRows = screen.getAllByRole('row');
       expect(tableRows.length).toBe(2); // table header and matching table row
+      const healthbar = screen.getByText('1 cluster');
+      expect(healthbar).not.toBeNull();
     });
 
     test('should display search bar when there are no matches for search', () => {
