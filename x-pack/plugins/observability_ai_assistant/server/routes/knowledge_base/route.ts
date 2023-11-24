@@ -59,6 +59,14 @@ const getKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
+  params: t.type({
+    query: t.union([
+      t.type({
+        query: t.string,
+      }),
+      t.undefined,
+    ]),
+  }),
   handler: async (
     resources
   ): Promise<{
@@ -70,7 +78,7 @@ const getKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return await client.getKnowledgeBaseEntries();
+    return await client.getKnowledgeBaseEntries(resources.params.query?.query);
   },
 });
 

@@ -411,8 +411,6 @@ export class ObservabilityAIAssistantClient {
       document: { ...entry, '@timestamp': new Date().toISOString() },
     }));
 
-    console.log('operations:::::', operations[0].document);
-
     this.dependencies.knowledgeBaseService.queue(operations);
     await this.dependencies.knowledgeBaseService.processQueue();
   };
