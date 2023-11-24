@@ -113,12 +113,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables alerts suppression for threshold rules
    */
   alertsSuppressionForThresholdRuleEnabled: false,
-
-  /**
-   * Disables the timeline save tour.
-   * This flag is used to disable the tour in cypress tests.
-   */
-  disableTimelineSaveTour: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

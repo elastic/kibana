@@ -83,6 +83,9 @@ export {
 export {
   EMBEDDABLE_FLAMEGRAPH,
   EMBEDDABLE_FUNCTIONS,
+  EMBEDDABLE_PROFILING_SEARCH_BAR,
   EmbeddableFlamegraph,
   EmbeddableFunctions,
+  EmbeddableProfilingSearchBar,
+  type EmbeddableProfilingSearchBarProps,
 } from './components/profiling/embeddables';
