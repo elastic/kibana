@@ -17,11 +17,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
           properties: {
             name: {
               type: 'keyword',
-              ignore_above: 256,
             },
             environment: {
               type: 'keyword',
-              ignore_above: 256,
             },
           },
         },
@@ -29,11 +27,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
           properties: {
             name: {
               type: 'keyword',
-              ignore_above: 256,
             },
             type: {
               type: 'keyword',
-              ignore_above: 256,
             },
           },
         },
@@ -48,11 +44,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
             },
             groupBy: {
               type: 'keyword',
-              ignore_above: 256,
             },
             instanceId: {
               type: 'keyword',
-              ignore_above: 256,
             },
             name: {
               type: 'text',
@@ -62,7 +56,6 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
             },
             tags: {
               type: 'keyword',
-              ignore_above: 256,
             },
             indicator: {
               properties: {

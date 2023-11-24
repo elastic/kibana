@@ -29,11 +29,9 @@ export const getSLOMappingsTemplate = (name: string) => ({
           properties: {
             name: {
               type: 'keyword',
-              ignore_above: 256,
             },
             environment: {
               type: 'keyword',
-              ignore_above: 256,
             },
           },
         },
@@ -41,11 +39,9 @@ export const getSLOMappingsTemplate = (name: string) => ({
           properties: {
             name: {
               type: 'keyword',
-              ignore_above: 256,
             },
             type: {
               type: 'keyword',
-              ignore_above: 256,
             },
           },
         },
@@ -60,7 +56,6 @@ export const getSLOMappingsTemplate = (name: string) => ({
             },
             instanceId: {
               type: 'keyword',
-              ignore_above: 256,
             },
             objective: {
               properties: {
