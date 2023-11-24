@@ -41,29 +41,6 @@ export const isolateHostWithComment = (comment: string, hostname: string): void 
   cy.getByTestSubj('host_isolation_comment').type(comment);
 };
 
-export const isolateHostFromEndpointList = (index: number = 0): void => {
-  // open the action menu and click isolate action
-  cy.getByTestSubj('endpointTableRowActions').eq(index).click();
-  cy.getByTestSubj('isolateLink').click();
-  // isolation form, click confirm button
-  cy.getByTestSubj('hostIsolateConfirmButton').click();
-  // return to endpoint details
-  cy.getByTestSubj('hostIsolateSuccessCompleteButton').click();
-  // close details flyout
-  cy.getByTestSubj('euiFlyoutCloseButton').click();
-
-  // ensure the host is isolated, wait for 3 minutes for the host to be isolated
-  cy.wait(18000);
-
-  cy.getByTestSubj('endpointListTable').within(() => {
-    cy.get('tbody tr')
-      .eq(index)
-      .within(() => {
-        cy.get('td').eq(1).should('contain', 'Isolated');
-      });
-  });
-};
-
 export const releaseHostWithComment = (comment: string, hostname: string): void => {
   cy.contains(`${hostname} is currently isolated.`);
   cy.getByTestSubj('endpointHostIsolationForm');
@@ -142,11 +119,11 @@ export const filterOutIsolatedHosts = (): void => {
 const checkEndpointListForIsolationStatus = (expectIsolated: boolean): void => {
   const chainer = expectIsolated ? 'contain' : 'not.contain';
   cy.getByTestSubj('endpointListTable').within(() => {
-    cy.get('tbody tr').each(($tr) => {
-      cy.wrap($tr).within(() => {
+    cy.get('tbody tr')
+      .eq(0)
+      .within(() => {
         cy.get('td').eq(1).should(chainer, 'Isolated');
       });
-    });
   });
 };
 

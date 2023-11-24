@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { waitForActionToComplete } from '../../../tasks/response_actions';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
@@ -19,7 +21,6 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../t
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
-  isolateHostFromEndpointList,
 } from '../../../tasks/isolate';
 
 import { login } from '../../../tasks/login';
@@ -71,7 +72,21 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       const command = 'release';
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       // isolate the host first
-      isolateHostFromEndpointList();
+      // use API
+      cy.request({
+        headers: { 'kbn-xsrf': 'cypress-creds', 'elastic-api-version': API_VERSIONS.public.v1 },
+        method: 'POST',
+        url: 'api/endpoint/action/isolate',
+        body: {
+          endpoint_ids: [createdHost.agentId],
+        },
+      })
+        // verify action was successful
+        .then((response) => waitForActionToComplete(response.body.data.id))
+        .then((actionResponse) => {
+          expect(actionResponse.status).to.equal('successful');
+        });
+
       // verify and find the isolated host
       checkEndpointListForOnlyIsolatedHosts();
       openResponseConsoleFromEndpointList();
