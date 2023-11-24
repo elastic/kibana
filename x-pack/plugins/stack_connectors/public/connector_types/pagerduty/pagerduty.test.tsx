@@ -105,7 +105,7 @@ describe('pagerduty action params validation', () => {
         summary: [],
         timestamp: [],
         links: [],
-        customDetails: ['Custom details must have a valid JSON format.'],
+        customDetails: ['Custom details must be a valid JSON.'],
       },
     });
   });
@@ -156,7 +156,7 @@ describe('pagerduty action params validation', () => {
         dedupKey: [],
         summary: [],
         timestamp: [],
-        links: ['Links cannot be empty.'],
+        links: ['Link properties cannot be empty.'],
         customDetails: [],
       },
     });
@@ -182,7 +182,7 @@ describe('pagerduty action params validation', () => {
         dedupKey: [],
         summary: [],
         timestamp: [],
-        links: ['Links cannot be empty.'],
+        links: ['Link properties cannot be empty.'],
         customDetails: [],
       },
     });
@@ -212,7 +212,7 @@ describe('pagerduty action params validation', () => {
         dedupKey: [],
         summary: [],
         timestamp: [],
-        links: ['Links cannot be empty.'],
+        links: ['Link properties cannot be empty.'],
         customDetails: [],
       },
     });

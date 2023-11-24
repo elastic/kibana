@@ -61,7 +61,7 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="customDetailsJsonEditor"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="linksListItemRow"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="linksList"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="pagerDutyAddLinkButton"]').length > 0).toBeTruthy();
   });
 

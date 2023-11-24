@@ -49,9 +49,9 @@ export const LinksList: React.FC<LinksListProps> = ({
       <EuiFlexGroup direction="column" data-test-subj="linksList" gutterSize="s">
         {links &&
           links.map((link, currentLinkIndex) => (
-            <EuiFlexItem data-test-subj="linksListItemRow">
+            <EuiFlexItem data-test-subj={`linksListItemRow-${currentLinkIndex}`}>
               <EuiSpacer size="s" />
-              <EuiFlexGroup key={`my-key-${currentLinkIndex}`}>
+              <EuiFlexGroup key={`linksListItemRow-${currentLinkIndex}`}>
                 <EuiFlexItem>
                   <EuiFormRow
                     label={i18n.translate(
@@ -60,13 +60,14 @@ export const LinksList: React.FC<LinksListProps> = ({
                         defaultMessage: 'URL',
                       }
                     )}
-                    isInvalid={!link.href}
+                    fullWidth
                   >
                     <TextFieldWithMessageVariables
                       index={index}
-                      editAction={(key, value, i) => {
-                        links[currentLinkIndex] = { ...links[currentLinkIndex], href: value };
-                        editAction('links', links, i);
+                      editAction={(key, value, actionIndex) => {
+                        const newLinks = [...links];
+                        newLinks[currentLinkIndex] = { text: link.text, href: value };
+                        editAction('links', newLinks, actionIndex);
                       }}
                       messageVariables={messageVariables}
                       paramsProperty={'linksHref'}
@@ -79,16 +80,17 @@ export const LinksList: React.FC<LinksListProps> = ({
                     label={i18n.translate(
                       'xpack.stackConnectors.components.pagerDuty.linkTextFieldLabel',
                       {
-                        defaultMessage: 'Text',
+                        defaultMessage: 'Label',
                       }
                     )}
-                    isInvalid={!link.text}
+                    fullWidth
                   >
                     <TextFieldWithMessageVariables
                       index={index}
-                      editAction={(key, value, i) => {
-                        links[currentLinkIndex] = { ...links[currentLinkIndex], text: value };
-                        editAction('links', links, i);
+                      editAction={(key, value, actionIndex) => {
+                        const newLinks = [...links];
+                        newLinks[currentLinkIndex] = { href: link.href, text: value };
+                        editAction('links', newLinks, actionIndex);
                       }}
                       messageVariables={messageVariables}
                       paramsProperty={'linksText'}
@@ -104,7 +106,7 @@ export const LinksList: React.FC<LinksListProps> = ({
                       editAction('links', links, index);
                     }}
                     iconType="minusInCircle"
-                    style={{ marginTop: '28px' }}
+                    css={{ marginTop: 28 }}
                     data-test-subj="pagerDutyRemoveLinkButton"
                   />
                 </EuiFlexItem>
@@ -123,7 +125,6 @@ export const LinksList: React.FC<LinksListProps> = ({
                 )
               }
               data-test-subj="pagerDutyAddLinkButton"
-              isDisabled={areLinksInvalid}
             >
               {i18n.translate('xpack.stackConnectors.components.pagerDuty.addLinkButtonLabel', {
                 defaultMessage: 'Add Link',

@@ -86,7 +86,7 @@ export function getConnectorType(): ConnectorTypeModel<
           if ((!href || !text) && errors.links.length === 0) {
             errors.links.push(
               i18n.translate('xpack.stackConnectors.components.pagerDuty.error.invalidLink', {
-                defaultMessage: 'Links cannot be empty.',
+                defaultMessage: 'Link properties cannot be empty.',
               })
             );
           }
@@ -100,7 +100,7 @@ export function getConnectorType(): ConnectorTypeModel<
             i18n.translate(
               'xpack.stackConnectors.components.pagerDuty.error.invalidCustomDetails',
               {
-                defaultMessage: 'Custom details must have a valid JSON format.',
+                defaultMessage: 'Custom details must be a valid JSON.',
               }
             )
           );

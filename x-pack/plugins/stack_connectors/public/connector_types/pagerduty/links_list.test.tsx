@@ -50,7 +50,7 @@ describe('LinksList', () => {
       />
     );
 
-    expect(await screen.findAllByTestId('linksListItemRow')).toHaveLength(3);
+    expect(await screen.findAllByTestId('linksListItemRow', { exact: false })).toHaveLength(3);
 
     userEvent.click((await screen.findAllByTestId('pagerDutyRemoveLinkButton'))[1]);
 
@@ -67,7 +67,7 @@ describe('LinksList', () => {
   it('editing a link href field calls editAction with correct params', async () => {
     render(<LinksList {...options} links={[{ href: '', text: 'foobar' }]} />);
 
-    expect(await screen.findByTestId('linksListItemRow')).toBeInTheDocument();
+    expect(await screen.findByTestId('linksListItemRow', { exact: false })).toBeInTheDocument();
 
     userEvent.paste(await screen.findByTestId('linksHrefInput'), 'newHref');
 
@@ -77,20 +77,11 @@ describe('LinksList', () => {
   it('editing a link text field calls editAction with correct params', async () => {
     render(<LinksList {...options} links={[{ href: 'foobar', text: '' }]} />);
 
-    expect(await screen.findByTestId('linksListItemRow')).toBeInTheDocument();
+    expect(await screen.findByTestId('linksListItemRow', { exact: false })).toBeInTheDocument();
 
     userEvent.paste(await screen.findByTestId('linksTextInput'), 'newText');
 
     expect(editAction).toHaveBeenCalledWith('links', [{ href: 'foobar', text: 'newText' }], 0);
-  });
-
-  it('add button is disabled if any link has an error', async () => {
-    render(<LinksList {...options} errors={{ links: ['FoobarError'] }} />);
-
-    const addButton = await screen.findByTestId('pagerDutyAddLinkButton');
-
-    expect(addButton).toBeInTheDocument();
-    expect(addButton).toBeDisabled();
   });
 
   it('correctly displays error messages', async () => {
