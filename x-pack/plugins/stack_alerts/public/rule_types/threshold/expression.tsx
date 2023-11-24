@@ -276,15 +276,6 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           setRuleParams('timeWindowUnit', selectedWindowUnit)
         }
       />
-      {/* <EuiSpacer /> */}
-      {/* <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.filterTitle"
-            defaultMessage="Filter (Optional)"
-          />
-        </h5>
-      </EuiTitle> */}
       <EuiSpacer size="s" />
       <EuiFormRow
         label={i18n.translate('xpack.stackAlerts.threshold.ui.filterTitle', {
