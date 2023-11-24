@@ -50,13 +50,13 @@ const customComparators = {
 interface ExpressionRowProps {
   title: ReactElement;
   fields: DataViewFieldBase[];
-  expressionId: number;
+  expressionId: string;
   expression: MetricExpression;
   errors: IErrorObject;
   canDelete: boolean;
   addExpression(): void;
-  remove(id: number): void;
-  setRuleParams(id: number, params: MetricExpression): void;
+  remove(id: string): void;
+  setRuleParams(id: string, params: MetricExpression): void;
   dataView: DataViewBase;
 }
 

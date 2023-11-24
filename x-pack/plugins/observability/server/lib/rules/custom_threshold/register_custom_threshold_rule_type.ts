@@ -75,6 +75,7 @@ export function thresholdRuleType(
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
     timeUnit: schema.string(),
+    id: schema.maybe(schema.string()),
     timeSize: schema.number(),
   };
 

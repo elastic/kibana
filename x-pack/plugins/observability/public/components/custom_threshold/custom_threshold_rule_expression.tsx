@@ -36,6 +36,7 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { v4 } from 'uuid';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -151,7 +152,7 @@ export default function Expressions(props: Props) {
       setTimeSize(ruleParams.criteria[0].timeSize);
       setTimeUnit(ruleParams.criteria[0].timeUnit);
     } else {
-      setRuleParams('criteria', [defaultExpression]);
+      setRuleParams('criteria', [{ ...defaultExpression, id: v4() }]);
     }
 
     if (typeof ruleParams.alertOnNoData === 'undefined') {
@@ -161,6 +162,19 @@ export default function Expressions(props: Props) {
       setRuleParams('alertOnGroupDisappear', true);
     }
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    // if id is not set, set it to a new uuid in each criteria
+    const ruleCriteria = ruleParams.criteria ? ruleParams.criteria.slice() : [];
+    if (ruleCriteria.find((criterion) => !criterion.id)) {
+      ruleCriteria.forEach((criterion) => {
+        if (!criterion.id) {
+          criterion.id = v4();
+        }
+      });
+      setRuleParams('criteria', ruleCriteria);
+    }
+  }, [ruleParams.criteria, setRuleParams]);
 
   const onSelectDataView = useCallback(
     (newDataView: DataView) => {
@@ -181,9 +195,9 @@ export default function Expressions(props: Props) {
   );
 
   const updateParams = useCallback(
-    (id, e: MetricExpression) => {
-      const ruleCriteria = ruleParams.criteria ? ruleParams.criteria.slice() : [];
-      ruleCriteria[id] = e;
+    (id: string, e: MetricExpression) => {
+      let ruleCriteria = ruleParams.criteria ? ruleParams.criteria.slice() : [];
+      ruleCriteria = ruleCriteria.map((criterion) => (id === criterion.id ? e : criterion));
       setRuleParams('criteria', ruleCriteria);
     },
     [setRuleParams, ruleParams.criteria]
@@ -193,6 +207,7 @@ export default function Expressions(props: Props) {
     const ruleCriteria = ruleParams.criteria?.slice() || [];
     ruleCriteria.push({
       ...defaultExpression,
+      id: v4(),
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
@@ -200,8 +215,8 @@ export default function Expressions(props: Props) {
   }, [setRuleParams, ruleParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
-    (id: number) => {
-      const ruleCriteria = ruleParams.criteria?.filter((_, index) => index !== id) || [];
+    (id: string) => {
+      const ruleCriteria = ruleParams.criteria?.filter(({ id: cId }) => cId !== id) || [];
       setRuleParams('criteria', ruleCriteria);
     },
     [setRuleParams, ruleParams.criteria]
@@ -374,15 +389,15 @@ export default function Expressions(props: Props) {
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
-            <div key={idx}>
+            <div key={e.id}>
               {idx > 0 && <EuiHorizontalRule margin="s" />}
               <ExpressionRow
                 canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
                 fields={derivedIndexPattern.fields}
                 remove={removeExpression}
                 addExpression={addExpression}
-                key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-                expressionId={idx}
+                key={e.id}
+                expressionId={e.id!}
                 setRuleParams={updateParams}
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}

@@ -36,6 +36,7 @@ export interface AlertContextMeta {
 }
 
 export type MetricExpression = Omit<CustomMetricExpressionParams, 'timeSize' | 'timeUnit'> & {
+  id?: string;
   timeSize?: BaseMetricExpressionParams['timeSize'];
   timeUnit?: BaseMetricExpressionParams['timeUnit'];
 };
