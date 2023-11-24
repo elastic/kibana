@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from './trigger';
+export const getServerTLSOptionsMock = jest.fn();
 
-export const CATEGORIZE_FIELD_TRIGGER = 'CATEGORIZE_FIELD_TRIGGER';
-export const categorizeFieldTrigger: Trigger = {
-  id: CATEGORIZE_FIELD_TRIGGER,
-  title: 'Run pattern analysis',
-  description: 'Triggered when user wants to run pattern analysis on a field.',
-};
+jest.doMock('./get_server_options', () => {
+  const actual = jest.requireActual('./get_server_options');
+  return {
+    ...actual,
+    getServerTLSOptions: getServerTLSOptionsMock,
+  };
+});
