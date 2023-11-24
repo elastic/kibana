@@ -13,9 +13,9 @@ export const navigateToAlertsList = (urlQueryParams: string = '') => {
 };
 
 const clickAlertListRefreshButton = (): Cypress.Chainable => {
-  cy.getByTestSubj('filters-global-container').within(() => {
-    cy.getByTestSubj('querySubmitButton').click();
-  });
+  cy.get(
+    '[data-test-subj="filters-global-container"] [data-test-subj="querySubmitButton"]'
+  ).click();
   return cy.getByTestSubj('querySubmitButton').should('be.enabled');
 };
 
