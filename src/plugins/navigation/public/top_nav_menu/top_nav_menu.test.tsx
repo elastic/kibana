@@ -10,11 +10,12 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { MountPoint } from '@kbn/core/public';
-import { TopNavMenu, TopNavMenuBadgeProps } from './top_nav_menu';
+import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiToolTipProps } from '@elastic/eui';
+import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
 
 const unifiedSearch = {
   ui: {
