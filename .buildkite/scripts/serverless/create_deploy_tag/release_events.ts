@@ -291,7 +291,7 @@ function sendSlackAnnouncement(selectedCommit: string | null, deployTag: string 
           ),
           textBlock(
             `*Commit:*`,
-            `<https://github.com/elastic/kibana/commit/${selectedCommit}|${selectedCommit}>`
+            `<https://github.com/elastic/kibana/commit/${selectedCommit}|${selectedCommit.slice(0, 12)}>`
           ),
         ],
       },
