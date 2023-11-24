@@ -7,11 +7,11 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { createCriticalityRecordRequestBody } from '../../../../../common/api/asset_criticality/create/create_asset_criticality_route';
 import { ASSET_CRITICALITY_URL, APP_ID } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { checkAndInitAssetCriticalityResources } from './checkAndInitAssetCriticalityResources';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { checkAndInitAssetCriticalityResources } from './check_and_init_asset_criticality_resources';
+import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
+import { CreateAssetCriticalityRecord } from '../../../../../common/api/asset_criticality';
 export const assetCriticalityUpsertRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
@@ -29,7 +29,7 @@ export const assetCriticalityUpsertRoute = (
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidation(createCriticalityRecordRequestBody),
+            body: buildRouteValidationWithZod(CreateAssetCriticalityRecord),
           },
         },
       },

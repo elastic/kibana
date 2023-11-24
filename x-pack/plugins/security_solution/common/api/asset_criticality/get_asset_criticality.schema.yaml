@@ -1,17 +1,17 @@
 openapi: 3.0.0
 info:
   version: 1.0.0
-  title: Create Asset Criticality Schema
+  title: Asset Criticality Get Record Schema
 paths:
   /internal/asset_criticality:
-    post:
-      summary: Create Criticality Record
+    get:
+      summary: Get Criticality Record
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+              $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
       responses:
         '200':
           description: Successful response
@@ -21,3 +21,5 @@ paths:
                 $ref: '#/components/schemas/SingleAssetCriticality'
         '400':
           description: Invalid request
+        '404':
+          description: Criticality record not found
