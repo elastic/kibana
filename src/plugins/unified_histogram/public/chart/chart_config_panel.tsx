@@ -62,21 +62,23 @@ export function ChartConfigPanel({
       query !== previousQuery?.current;
     async function fetchLensConfigComponent() {
       const Component = await services.lens.EditLensConfigPanelApi();
-      const panel = (
-        <Component
-          attributes={lensAttributesContext.attributes}
-          updatePanelState={updateSuggestion}
-          lensAdapters={lensAdapters}
-          output$={lensEmbeddableOutput$}
-          displayFlyoutHeader
-          closeFlyout={() => {
-            setIsFlyoutVisible(false);
-          }}
-          wrapInFlyout
-          datasourceId="textBased"
-        />
-      );
-      setEditLensConfigPanel(panel);
+      if (Component) {
+        const panel = (
+          <Component
+            attributes={lensAttributesContext.attributes}
+            updatePanelState={updateSuggestion}
+            lensAdapters={lensAdapters}
+            output$={lensEmbeddableOutput$}
+            displayFlyoutHeader
+            closeFlyout={() => {
+              setIsFlyoutVisible(false);
+            }}
+            wrapInFlyout
+            datasourceId="textBased"
+          />
+        );
+        setEditLensConfigPanel(panel);
+      }
       previousSuggestion.current = currentSuggestion;
       previousAdapters.current = tablesAdapters;
       if (dataHasChanged) {

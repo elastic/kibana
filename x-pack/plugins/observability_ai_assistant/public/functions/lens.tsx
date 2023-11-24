@@ -6,13 +6,19 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { Observable } from 'rxjs';
+import { isEqual } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
-import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useState } from 'react';
+import type {
+  LensPublicStart,
+  TypedLensByValueInput,
+  LensEmbeddableOutput,
+} from '@kbn/lens-plugin/public';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
-import { Assign } from 'utility-types';
 import type { RegisterFunctionDefinition } from '../../common/types';
 import type {
   ObservabilityAIAssistantPluginStartDependencies,
@@ -29,6 +35,17 @@ export enum SeriesType {
   BarPercentageStacked = 'bar_percentage_stacked',
   AreaPercentageStacked = 'area_percentage_stacked',
   BarHorizontalPercentageStacked = 'bar_horizontal_percentage_stacked',
+}
+
+interface LensChartLoadEvent {
+  /**
+   * Inspector adapters for the request
+   */
+  adapters: Partial<DefaultInspectorAdapters>;
+  /**
+   * Observable of the lens embeddable output
+   */
+  embeddableOutput$?: Observable<LensEmbeddableOutput>;
 }
 
 function Lens({
@@ -60,28 +77,135 @@ function Lens({
   }, [indexPattern]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [lensInput, setLensInput] = useState<TypedLensByValueInput | null>(null);
+  const [lensLoadEvent, setLensLoadEvent] = useState<LensChartLoadEvent | null>(null);
+  const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
 
-  if (!formulaAsync.value || !dataViewAsync.value) {
+  const previousAttributes = useRef<TypedLensByValueInput['attributes'] | undefined>(undefined);
+
+  const onLoad = useCallback(
+    (
+      isLoading: boolean,
+      adapters: Partial<DefaultInspectorAdapters> | undefined,
+      lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
+    ) => {
+      const adapterTables = adapters?.tables?.tables;
+      if (adapterTables && !isLoading) {
+        setLensLoadEvent({
+          adapters,
+          embeddableOutput$: lensEmbeddableOutput$,
+        });
+      }
+    },
+    []
+  );
+
+  // initialization
+  useEffect(() => {
+    if (formulaAsync.value && dataViewAsync.value && !lensInput) {
+      const initialAttributes = new LensAttributesBuilder({
+        visualization: new XYChart({
+          layers: [xyDataLayer],
+          formulaAPI: formulaAsync.value.formula,
+          dataView: dataViewAsync.value,
+        }),
+      }).build();
+
+      setLensInput({
+        id: indexPattern,
+        attributes: initialAttributes,
+        timeRange: {
+          from: start,
+          to: end,
+          mode: 'relative' as const,
+        },
+        onLoad,
+      });
+    }
+  }, [
+    lensInput,
+    dataViewAsync.value,
+    end,
+    formulaAsync.value,
+    indexPattern,
+    onLoad,
+    start,
+    xyDataLayer,
+  ]);
+
+  const onUpdate = useCallback(
+    (datasourceState: unknown, visualizationState: unknown) => {
+      // needs to be taken programatically
+      const activeDatasourceId = 'formBased';
+      if (lensInput) {
+        const datasourceStates = {
+          ...lensInput?.attributes?.state.datasourceStates,
+          [activeDatasourceId]: datasourceState,
+        };
+        const updatedAttributes = {
+          ...lensInput?.attributes,
+          state: {
+            ...lensInput?.attributes?.state,
+            datasourceStates,
+            visualization: visualizationState,
+          },
+        } as TypedLensByValueInput['attributes'];
+        setLensInput({
+          id: indexPattern,
+          attributes: updatedAttributes,
+          timeRange: {
+            from: start,
+            to: end,
+            mode: 'relative' as const,
+          },
+          onLoad,
+        });
+      }
+    },
+    [end, indexPattern, lensInput, onLoad, start]
+  );
+
+  useEffect(() => {
+    async function fetchLensConfigComponent() {
+      const Component = await lens?.EditLensConfigPanelApi();
+      if (lensInput && Component) {
+        const panel = (
+          <Component
+            attributes={lensInput?.attributes}
+            updatePanelState={onUpdate}
+            lensAdapters={lensLoadEvent?.adapters}
+            output$={lensLoadEvent?.embeddableOutput$}
+            displayFlyoutHeader
+            closeFlyout={() => {
+              setIsFlyoutOpen(false);
+            }}
+            wrapInFlyout
+            datasourceId="formBased"
+          />
+        );
+        setEditLensConfigPanel(panel);
+        previousAttributes.current = lensInput?.attributes;
+      }
+    }
+    const needsUpdate =
+      !isFlyoutOpen && !isEqual(previousAttributes.current, lensInput?.attributes);
+    if (!editLensConfigPanel || needsUpdate) {
+      fetchLensConfigComponent();
+    }
+  }, [
+    editLensConfigPanel,
+    lensLoadEvent?.adapters,
+    lensLoadEvent?.embeddableOutput$,
+    isFlyoutOpen,
+    lens,
+    lensInput,
+    onUpdate,
+  ]);
+
+  if (!formulaAsync.value || !dataViewAsync.value || !lensInput) {
     return <EuiLoadingSpinner />;
   }
-
-  const attributes = new LensAttributesBuilder({
-    visualization: new XYChart({
-      layers: [xyDataLayer],
-      formulaAPI: formulaAsync.value.formula,
-      dataView: dataViewAsync.value,
-    }),
-  }).build();
-
-  const lensEmbeddableInput: Assign<LensEmbeddableInput, { attributes: typeof attributes }> = {
-    id: indexPattern,
-    attributes,
-    timeRange: {
-      from: start,
-      to: end,
-      mode: 'relative' as const,
-    },
-  };
 
   return (
     <>
@@ -91,13 +215,13 @@ function Lens({
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="observabilityAiAssistantLensOpenInLensButton"
-                iconType="lensApp"
+                iconType="pencil"
                 onClick={() => {
-                  lens.navigateToPrefilledEditor(lensEmbeddableInput);
+                  setIsFlyoutOpen(true);
                 }}
               >
-                {i18n.translate('xpack.observabilityAiAssistant.lensFunction.openInLens', {
-                  defaultMessage: 'Open in Lens',
+                {i18n.translate('xpack.observabilityAiAssistant.lensFunction.editInLens', {
+                  defaultMessage: 'Edit in Lens',
                 })}
               </EuiButton>
             </EuiFlexItem>
@@ -118,7 +242,7 @@ function Lens({
         </EuiFlexItem>
         <EuiFlexItem>
           <lens.EmbeddableComponent
-            {...lensEmbeddableInput}
+            {...lensInput}
             style={{
               height: 240,
             }}
@@ -127,12 +251,14 @@ function Lens({
       </EuiFlexGroup>
       {isSaveModalOpen ? (
         <lens.SaveModalComponent
-          initialInput={lensEmbeddableInput}
+          initialInput={lensInput}
           onClose={() => {
             setIsSaveModalOpen(() => false);
           }}
         />
       ) : null}
+
+      {isFlyoutOpen && editLensConfigPanel}
     </>
   );
 }

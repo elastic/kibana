@@ -35,7 +35,6 @@ const chatBodyContainerClassNameWithError = css`
 `;
 
 const conversationListContainerName = css`
-  min-width: 250px;
   width: 250px;
   border-right: solid 1px ${euiThemeVars.euiColorLightShade};
 `;

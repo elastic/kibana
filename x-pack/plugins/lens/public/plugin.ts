@@ -263,7 +263,7 @@ export interface LensPublicStart {
   }>;
 }
 
-export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigurationProps>;
+export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigurationProps> | null;
 
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -675,8 +675,8 @@ export class LensPlugin {
           this.initDependenciesForApi();
         }
         const [visualizationMap, datasourceMap] = await Promise.all([
-          this.editorFrameService!.loadVisualizations(),
-          this.editorFrameService!.loadDatasources(),
+          this.editorFrameService?.loadVisualizations(),
+          this.editorFrameService?.loadDatasources(),
         ]);
         const Component = await getEditLensConfiguration(
           core,
@@ -684,7 +684,7 @@ export class LensPlugin {
           visualizationMap,
           datasourceMap
         );
-        return Component;
+        return visualizationMap && datasourceMap ? Component : null;
       },
     };
   }
