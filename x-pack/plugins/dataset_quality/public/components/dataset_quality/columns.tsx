@@ -6,13 +6,18 @@
  */
 
 import React from 'react';
-import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import {
+  SINGLE_DATASET_LOCATOR_ID,
+  SingleDatasetLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import loggingIcon from '../../icons/logging.svg';
+import { useKibanaContextForPlugin } from '../../utils';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
@@ -24,6 +29,13 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 
 const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
   defaultMessage: 'Last Activity',
+});
+
+const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
+  defaultMessage: 'Actions',
+});
+const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
+  defaultMessage: 'Open',
 });
 
 export const getDatasetQualitTableColumns = ({
@@ -73,5 +85,39 @@ export const getDatasetQualitTableColumns = ({
           .convert(timestamp),
       sortable: true,
     },
+    {
+      name: actionsColumnName,
+      render: (dataStreamStat: DataStreamStat) => (
+        <LinkToLogExplorer dataStreamStat={dataStreamStat} />
+      ),
+      width: '100px',
+    },
   ];
+};
+
+const LinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat }) => {
+  const {
+    services: { share },
+  } = useKibanaContextForPlugin();
+  const [dataset, namespace] = dataStreamStat.title.split('-');
+  const integration = dataStreamStat.integration?.name;
+
+  const query = {
+    query: `data_stream.namespace : "${namespace}"`,
+    language: 'kuery',
+  };
+
+  return (
+    <EuiLink
+      onClick={() => {
+        share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID)?.navigate({
+          dataset,
+          integration,
+          query,
+        });
+      }}
+    >
+      {openActionName}
+    </EuiLink>
+  );
 };
