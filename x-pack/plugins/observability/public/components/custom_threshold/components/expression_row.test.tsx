@@ -32,7 +32,7 @@ describe('ExpressionRow', () => {
         remove={() => {}}
         addExpression={() => {}}
         key={1}
-        expressionId={1}
+        expressionId={'1'}
         setRuleParams={() => {}}
         errors={{
           aggField: [],
