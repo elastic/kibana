@@ -31,10 +31,13 @@ export interface NodeProps<
    * This function will receive the ChromeProjectNavigationNode object
    */
   children?: ReactNode;
-  // children?: ((navNode: ChromeProjectNavigationNode) => ReactNode) | ReactNode;
+  /** @internal - Prop internally controlled, don't use it. */
   parentNodePath?: string;
+  /** @internal - Prop internally controlled, don't use it. */
   rootIndex?: number;
+  /** @internal - Prop internally controlled, don't use it. */
   treeDepth?: number;
+  /** @internal - Prop internally controlled, don't use it. */
   index?: number;
 }
 

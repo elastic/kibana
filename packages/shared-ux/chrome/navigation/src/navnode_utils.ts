@@ -132,7 +132,7 @@ export const initNavNode = <
     treeDepth = 0,
     index = 0,
     children,
-    ...navNode
+    ...navNodeFromProps
   } = node;
   const deepLink = deepLinks.find((dl) => dl.id === link);
   const sideNavStatus = getNodeStatus(
@@ -140,7 +140,7 @@ export const initNavNode = <
       link,
       deepLink,
       cloudLink,
-      sideNavStatus: navNode.sideNavStatus,
+      sideNavStatus: navNodeFromProps.sideNavStatus,
     },
     { cloudLinks }
   );
@@ -157,8 +157,8 @@ export const initNavNode = <
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
   }
 
-  const internalNavNode: ChromeProjectNavigationNode = {
-    ...navNode,
+  const navNode: ChromeProjectNavigationNode = {
+    ...navNodeFromProps,
     id,
     href: getNavigationNodeHref({ href, deepLink }),
     path,
@@ -167,5 +167,5 @@ export const initNavNode = <
     sideNavStatus,
   };
 
-  return internalNavNode;
+  return navNode;
 };

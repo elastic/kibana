@@ -165,14 +165,6 @@ function NavigationGroupInternalComp<
     return null;
   }
 
-  const { path } = navNode;
-
-  // We will only render the <NavigationSectionUI /> component for root groups. The nested group
-  // are handled by the EuiCollapsibleNavItem component through its "items" prop.
-  const pathToArray = path.split('.');
-  const isRootLevel = pathToArray.length === 1;
-
-  if (!isRootLevel) return null;
   return <NavigationSectionUI navNode={navNode} />;
 }
 

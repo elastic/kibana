@@ -97,41 +97,34 @@ function NavigationItemComp<
     return <Fragment>{navNode.title}</Fragment>;
   }
 
-  const isRootLevel = navNode.path.split('.').length === 1;
   const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
-  if (isRootLevel) {
-    const { href } = navNode;
-    const dataTestSubj = classNames(`nav-item`, {
-      [`nav-item-deepLinkId-${navNode.deepLink?.id}`]: !!navNode.deepLink,
-      [`nav-item-isActive`]: isActive,
-    });
+  const { href } = navNode;
+  const dataTestSubj = classNames(`nav-item`, {
+    [`nav-item-deepLinkId-${navNode.deepLink?.id}`]: !!navNode.deepLink,
+    [`nav-item-isActive`]: isActive,
+  });
 
-    return (
-      <EuiCollapsibleNavItem
-        id={navNode.id}
-        title={navNode.title}
-        icon={navNode.icon}
-        iconProps={{ size: 'm' }}
-        isSelected={isActive}
-        data-test-subj={dataTestSubj}
-        linkProps={{
-          href,
-          onClick: (e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (href) {
-              navigateToUrl(href);
-            }
-          },
-        }}
-      />
-    );
-  }
-
-  // We don't render anything in the UI for non root item as those register themselves on the parent (Group)
-  // updating its "childrenNodes" state which are then converted to "items" for the EuiCollapsibleNavItem component.
-  return null;
+  return (
+    <EuiCollapsibleNavItem
+      id={navNode.id}
+      title={navNode.title}
+      icon={navNode.icon}
+      iconProps={{ size: 'm' }}
+      isSelected={isActive}
+      data-test-subj={dataTestSubj}
+      linkProps={{
+        href,
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (href) {
+            navigateToUrl(href);
+          }
+        },
+      }}
+    />
+  );
 }
 
 export const NavigationItem = React.memo(NavigationItemComp) as typeof NavigationItemComp;
