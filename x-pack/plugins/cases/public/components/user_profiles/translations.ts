@@ -36,7 +36,7 @@ export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.userProfile.editAssign
 export const REMOVE_ASSIGNEES = i18n.translate(
   'xpack.cases.userProfile.suggestUsers.removeAssignees',
   {
-    defaultMessage: 'Unassign alert',
+    defaultMessage: 'Remove all assignees',
   }
 );
 
