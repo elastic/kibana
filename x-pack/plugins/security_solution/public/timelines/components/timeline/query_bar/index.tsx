@@ -51,7 +51,7 @@ export interface QueryBarTimelineComponentProps {
 const SearchBarContainer = styled.div`
   /*
   *
-  * hide search bar default filters as they are distrubing the layout  as shown below
+  * hide search bar default filters as they are disturbing the layout  as shown below
   *
   * Filters are displayed with QueryBar so below is how is the layout with default filters.
   *
@@ -63,7 +63,7 @@ const SearchBarContainer = styled.div`
   *                    |      Filters                 |
   *                    --------------------------------
   *
-  * The tree under this component makes sure that default filters are not rendered and we can saperately display
+  * The tree under this component makes sure that default filters are not rendered and we can separately display
   * them outside query component so that layout is as below:
   *
   *   -----------------------------------------------------------
