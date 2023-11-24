@@ -31,6 +31,7 @@ import {
   ESQLTimeInterval,
 } from '../types';
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import { removeMarkerArgFromArgsList } from './context';
 
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
   return arg && !Array.isArray(arg) && arg.type === 'function';
@@ -58,6 +59,11 @@ export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
 
 export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
   return isFunctionItem(arg) && arg.name === '=';
+}
+
+export function isAssignmentComplete(node: ESQLFunction | undefined) {
+  const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
+  return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
 }
 
 export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {

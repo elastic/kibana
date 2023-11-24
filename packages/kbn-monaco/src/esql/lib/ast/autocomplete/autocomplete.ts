@@ -16,6 +16,7 @@ import {
   getCommandOption,
   getFunctionDefinition,
   isAssignment,
+  isAssignmentComplete,
   isColumnItem,
   isFunctionItem,
   isIncompleteItem,
@@ -259,11 +260,6 @@ function findNewVariable(variables: Map<string, ESQLVariable[]>) {
   return name;
 }
 
-function isAssignmentComplete(node: ESQLFunction | undefined) {
-  const assignExpression = node?.args?.[1];
-  return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
-}
-
 function areCurrentArgsValid(
   command: ESQLCommand,
   node: ESQLAstItem,
@@ -433,10 +429,14 @@ async function getExpressionSuggestionsByType(
   // tune it for the variadic case
   if (!argDef) {
     // this is the case of a comma argument
-    // i.e. ... | EVAL a, <here>
-    if (isNewExpression && commandDef.signature.multipleParams) {
-      argDef = commandDef.signature.params[0];
+    if (commandDef.signature.multipleParams) {
+      if (isNewExpression || (isAssignment(lastArg) && !isAssignmentComplete(lastArg))) {
+        // i.e. ... | <COMMAND> a, <here>
+        // i.e. ... | <COMMAND> a = ..., b = <here>
+        argDef = commandDef.signature.params[0];
+      }
     }
+
     // this is the case where there's an argument, but it's of the wrong type
     // i.e. ... | WHERE numberField <here> (WHERE wants a boolean expression!)
     // i.e. ... | STATS numberfield <here> (STATS wants a function expression!)
@@ -513,6 +513,10 @@ async function getExpressionSuggestionsByType(
       if (isNewExpression || (isAssignment(nodeArg) && !isAssignmentComplete(nodeArg))) {
         // ... | STATS a = <suggest>
         // ... | EVAL a = <suggest>
+        // ... | STATS a = ..., <suggest>
+        // ... | EVAL a = ..., <suggest>
+        // ... | STATS a = ..., b = <suggest>
+        // ... | EVAL a = ..., b = <suggest>
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(['any'], command.name, getFieldsByType, {
             functions: true,

@@ -487,6 +487,9 @@ describe('autocomplete', () => {
     testSuggestions('from a | eval a=', [
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
     ]);
+    testSuggestions('from a | eval a=abs(numberField), b= ', [
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+    ]);
     testSuggestions('from a | eval a=numberField, ', [
       'var0 =',
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
