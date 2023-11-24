@@ -14,3 +14,11 @@ export { EmbeddableFlamegraph } from './embeddable_flamegraph';
 export const EMBEDDABLE_FUNCTIONS = 'EMBEDDABLE_FUNCTIONS';
 /** Profiling functions embeddable */
 export { EmbeddableFunctions } from './embeddable_functions';
+
+/** Profiling search bar embeddable key */
+export const EMBEDDABLE_PROFILING_SEARCH_BAR = 'EMBEDDABLE_PROFILING_SEARCH_BAR';
+/** Profiling search bar embeddable */
+export {
+  EmbeddableProfilingSearchBar,
+  type EmbeddableProfilingSearchBarProps,
+} from './embeddable_profiling_search_bar';
