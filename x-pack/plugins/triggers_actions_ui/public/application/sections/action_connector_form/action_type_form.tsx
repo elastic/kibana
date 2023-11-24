@@ -550,6 +550,7 @@ export const ActionTypeForm = ({
                     actionParams={actionItem.params as any}
                     errors={actionParamsErrors.errors}
                     index={index}
+                    selectedActionGroupId={selectedActionGroup?.id}
                     editAction={(key: string, value: RuleActionParam, i: number) => {
                       setWarning(
                         validateParamsForWarnings(

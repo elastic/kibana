@@ -39,6 +39,18 @@ describe('servicenow action params validation', () => {
     });
   });
 
+  test(`${SERVICENOW_ITSM_CONNECTOR_TYPE_ID}: action params validation succeeds when no short_description provided and subAction is closeIncident`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITSM_CONNECTOR_TYPE_ID);
+    const actionParams = {
+      subAction: 'closeIncident',
+      subActionParams: { incident: { correlation_id: 'test' } },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: { ['subActionParams.incident.short_description']: [] },
+    });
+  });
+
   test(`${SERVICENOW_ITSM_CONNECTOR_TYPE_ID}: params validation fails when short_description is not valid`, async () => {
     const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITSM_CONNECTOR_TYPE_ID);
     const actionParams = {

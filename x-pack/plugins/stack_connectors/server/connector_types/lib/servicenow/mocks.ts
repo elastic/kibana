@@ -91,6 +91,16 @@ const createMock = (): jest.Mocked<ExternalService> => {
         description: 'description from servicenow',
       })
     ),
+    getIncidentByCorrelationId: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        id: 'incident-1',
+        title: 'INC01',
+        pushedDate: '2020-03-10T12:24:20.000Z',
+        url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
+        short_description: 'title from servicenow',
+        description: 'description from servicenow',
+      })
+    ),
     createIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
         id: 'incident-1',

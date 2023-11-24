@@ -361,8 +361,10 @@ describe('api', () => {
       const res = await api.closeIncident({
         externalService,
         params: {
-          externalId: apiParams.incident.externalId,
-          correlationId: null,
+          incident: {
+            externalId: apiParams.incident.externalId,
+            correlation_id: null,
+          },
         },
         logger: mockedLogger,
       });
@@ -379,8 +381,10 @@ describe('api', () => {
       const res = await api.closeIncident({
         externalService,
         params: {
-          externalId: null,
-          correlationId: apiParams.incident.correlation_id,
+          incident: {
+            externalId: null,
+            correlation_id: apiParams.incident.correlation_id,
+          },
         },
         logger: mockedLogger,
       });
@@ -397,8 +401,10 @@ describe('api', () => {
       await api.closeIncident({
         externalService,
         params: {
-          externalId: apiParams.incident.externalId,
-          correlationId: null,
+          incident: {
+            externalId: apiParams.incident.externalId,
+            correlation_id: null,
+          },
         },
         logger: mockedLogger,
       });
@@ -413,8 +419,10 @@ describe('api', () => {
       await api.closeIncident({
         externalService,
         params: {
-          externalId: null,
-          correlationId: apiParams.incident.correlation_id,
+          incident: {
+            externalId: null,
+            correlation_id: apiParams.incident.correlation_id,
+          },
         },
         logger: mockedLogger,
       });
