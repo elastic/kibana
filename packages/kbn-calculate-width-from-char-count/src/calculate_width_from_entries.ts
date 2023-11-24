@@ -8,11 +8,9 @@
 
 import { LIMITS, calculateWidthFromCharCount } from './calculate_width_from_char_count';
 
-type GenericObject<T = Record<string, any>> = T;
-
-const getMaxLabelLengthForObjects = (
-  entries: GenericObject[],
-  labelKeys: Array<keyof GenericObject>
+const getMaxLabelLengthForObjects = <T extends Record<string, string>>(
+  entries: T[],
+  labelKeys: Array<keyof T>
 ) =>
   entries.reduce((acc, curr) => {
     const labelKey = labelKeys.find((key) => curr[key]);
@@ -26,13 +24,13 @@ const getMaxLabelLengthForObjects = (
 const getMaxLabelLengthForStrings = (arr: string[]) =>
   arr.reduce((acc, curr) => (acc > curr.length ? acc : curr.length), 0);
 
-export function calculateWidthFromEntries(
-  entries: GenericObject[] | string[],
-  labelKeys?: Array<keyof GenericObject>,
+export function calculateWidthFromEntries<T extends Record<string, string>>(
+  entries: T[] | string[],
+  labelKeys?: Array<keyof T>,
   overridesPanelWidths?: Partial<LIMITS>
 ) {
   const maxLabelLength = labelKeys
-    ? getMaxLabelLengthForObjects(entries as GenericObject[], labelKeys)
+    ? getMaxLabelLengthForObjects(entries as T[], labelKeys)
     : getMaxLabelLengthForStrings(entries as string[]);
 
   return calculateWidthFromCharCount(maxLabelLength, overridesPanelWidths);
