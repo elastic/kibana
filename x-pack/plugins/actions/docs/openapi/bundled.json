@@ -1,9 +1,9 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
     "title": "Connectors",
     "description": "OpenAPI schema for Connectors endpoints",
-    "version": "0.1",
+    "version": "0.2",
     "contact": {
       "name": "Connectors Team"
     },
@@ -266,7 +266,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              "examples": [
+                "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              ]
             }
           }
         ],
@@ -489,28 +491,7 @@
             }
           },
           "400": {
-            "description": "Indicates a bad request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Bad Request"
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "error validating action type config: [index]: expected value of type [string] but got [undefined]"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "example": 400
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/400"
           },
           "401": {
             "$ref": "#/components/responses/401"
@@ -542,56 +523,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "title": "Get connectors response body properties",
-                    "description": "The properties vary for each connector type.",
-                    "type": "object",
-                    "required": [
-                      "connector_type_id",
-                      "id",
-                      "is_deprecated",
-                      "is_preconfigured",
-                      "name",
-                      "referenced_by_count"
-                    ],
-                    "properties": {
-                      "connector_type_id": {
-                        "$ref": "#/components/schemas/connector_types"
-                      },
-                      "config": {
-                        "type": "object",
-                        "description": "The configuration for the connector. Configuration properties vary depending on the connector type.",
-                        "additionalProperties": true,
-                        "nullable": true
-                      },
-                      "id": {
-                        "type": "string",
-                        "description": "The identifier for the connector.",
-                        "example": "b0766e10-d190-11ec-b04c-776c77d14fca"
-                      },
-                      "is_deprecated": {
-                        "$ref": "#/components/schemas/is_deprecated"
-                      },
-                      "is_missing_secrets": {
-                        "$ref": "#/components/schemas/is_missing_secrets"
-                      },
-                      "is_preconfigured": {
-                        "$ref": "#/components/schemas/is_preconfigured"
-                      },
-                      "is_system_action": {
-                        "$ref": "#/components/schemas/is_system_action"
-                      },
-                      "name": {
-                        "type": "string",
-                        "description": "The display name for the connector.",
-                        "example": "my-connector"
-                      },
-                      "referenced_by_count": {
-                        "type": "integer",
-                        "description": "Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated.",
-                        "example": 2,
-                        "default": 0
-                      }
-                    }
+                    "$ref": "#/components/schemas/connector_response_properties"
                   }
                 },
                 "examples": {
@@ -644,17 +576,23 @@
                       "enabled": {
                         "type": "boolean",
                         "description": "Indicates whether the connector type is enabled in Kibana.",
-                        "example": true
+                        "examples": [
+                          true
+                        ]
                       },
                       "enabled_in_config": {
                         "type": "boolean",
                         "description": "Indicates whether the connector type is enabled in the Kibana `.yml` file.",
-                        "example": true
+                        "examples": [
+                          true
+                        ]
                       },
                       "enabled_in_license": {
                         "type": "boolean",
                         "description": "Indicates whether the connector is enabled in the license.",
-                        "example": true
+                        "examples": [
+                          true
+                        ]
                       },
                       "id": {
                         "$ref": "#/components/schemas/connector_types"
@@ -662,12 +600,16 @@
                       "minimum_license_required": {
                         "type": "string",
                         "description": "The license that is required to use the connector type.",
-                        "example": "basic"
+                        "examples": [
+                          "basic"
+                        ]
                       },
                       "name": {
                         "type": "string",
                         "description": "The name of the connector type.",
-                        "example": "Index"
+                        "examples": [
+                          "Index"
+                        ]
                       },
                       "supported_feature_ids": {
                         "type": "array",
@@ -675,10 +617,12 @@
                         "items": {
                           "$ref": "#/components/schemas/features"
                         },
-                        "example": [
-                          "alerting",
-                          "uptime",
-                          "siem"
+                        "examples": [
+                          [
+                            "alerting",
+                            "uptime",
+                            "siem"
+                          ]
                         ]
                       }
                     }
@@ -1105,7 +1049,9 @@
                       "enabledInLicense": {
                         "type": "boolean",
                         "description": "Indicates whether the connector is enabled in the license.",
-                        "example": true
+                        "examples": [
+                          true
+                        ]
                       },
                       "id": {
                         "type": "string",
@@ -1244,7 +1190,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "default"
+          "examples": [
+            "default"
+          ]
         }
       },
       "connector_id": {
@@ -1254,7 +1202,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "df770e30-8b8b-11ed-a780-3b746c987a81"
+          "examples": [
+            "df770e30-8b8b-11ed-a780-3b746c987a81"
+          ]
         }
       },
       "action_id": {
@@ -1264,7 +1214,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
+          "examples": [
+            "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
+          ]
         }
       }
     },
@@ -1327,12 +1279,16 @@
             "enum": [
               ".bedrock"
             ],
-            "example": ".bedrock"
+            "examples": [
+              ".bedrock"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_bedrock"
@@ -1357,11 +1313,13 @@
           "createCommentJson": {
             "type": "string",
             "description": "A JSON payload sent to the create comment URL to create a case comment. You can use variables to add Kibana Cases data to the payload. The required variable is `case.comment`. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated once the Mustache variables have been placed when the REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.\n",
-            "example": {
-              "body": {
-                "[object Object]": null
+            "examples": [
+              {
+                "body": {
+                  "[object Object]": null
+                }
               }
-            }
+            ]
           },
           "createCommentMethod": {
             "type": "string",
@@ -1376,24 +1334,28 @@
           "createCommentUrl": {
             "type": "string",
             "description": "The REST API URL to create a case comment by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the `xpack.actions.allowedHosts setting`, add the hostname to the allowed hosts.\n",
-            "example": "https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment"
+            "examples": [
+              "https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment"
+            ]
           },
           "createIncidentJson": {
             "type": "string",
             "description": "A JSON payload sent to the create case URL to create a case. You can use variables to add case data to the payload. Required variables are `case.title` and `case.description`. Due to Mustache template variables (which is the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid to avoid future validation errors; disregard Mustache variables during your review.\n",
-            "example": {
-              "fields": {
-                "summary": {
-                  "[object Object]": null
-                },
-                "description": {
-                  "[object Object]": null
-                },
-                "labels": {
-                  "[object Object]": null
+            "examples": [
+              {
+                "fields": {
+                  "summary": {
+                    "[object Object]": null
+                  },
+                  "description": {
+                    "[object Object]": null
+                  },
+                  "labels": {
+                    "[object Object]": null
+                  }
                 }
               }
-            }
+            ]
           },
           "createIncidentMethod": {
             "type": "string",
@@ -1420,7 +1382,9 @@
           "getIncidentUrl": {
             "type": "string",
             "description": "The REST API URL to get the case by ID from the third-party system. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts. You can use a variable to add the external system ID to the URL. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.\n",
-            "example": "https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}"
+            "examples": [
+              "https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}"
+            ]
           },
           "hasAuth": {
             "type": "boolean",
@@ -1434,19 +1398,21 @@
           "updateIncidentJson": {
             "type": "string",
             "description": "The JSON payload sent to the update case URL to update the case. You can use variables to add Kibana Cases data to the payload. Required variables are `case.title` and `case.description`. Due to Mustache template variables (which is the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid to avoid future validation errors; disregard Mustache variables during your review.\n",
-            "example": {
-              "fields": {
-                "summary": {
-                  "[object Object]": null
-                },
-                "description": {
-                  "[object Object]": null
-                },
-                "labels": {
-                  "[object Object]": null
+            "examples": [
+              {
+                "fields": {
+                  "summary": {
+                    "[object Object]": null
+                  },
+                  "description": {
+                    "[object Object]": null
+                  },
+                  "labels": {
+                    "[object Object]": null
+                  }
                 }
               }
-            }
+            ]
           },
           "updateIncidentMethod": {
             "type": "string",
@@ -1461,12 +1427,16 @@
           "updateIncidentUrl": {
             "type": "string",
             "description": "The REST API URL to update the case by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.\n",
-            "example": "https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.ID}}}"
+            "examples": [
+              "https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.ID}}}"
+            ]
           },
           "viewIncidentUrl": {
             "type": "string",
             "description": "The URL to view the case in the external system. You can use variables to add the external system ID or external system title to the URL.\n",
-            "example": "https://testing-jira.atlassian.net/browse/{{{external.system.title}}}"
+            "examples": [
+              "https://testing-jira.atlassian.net/browse/{{{external.system.title}}}"
+            ]
           }
         }
       },
@@ -1503,12 +1473,16 @@
             "enum": [
               ".cases-webhook"
             ],
-            "example": ".cases-webhook"
+            "examples": [
+              ".cases-webhook"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_cases_webhook"
@@ -1563,12 +1537,16 @@
             "enum": [
               ".d3security"
             ],
-            "example": ".d3security"
+            "examples": [
+              ".d3security"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_d3security"
@@ -1585,8 +1563,10 @@
         "properties": {
           "clientId": {
             "description": "The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.\n",
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "from": {
             "description": "The from address for all emails sent by the connector. It must be specified in `user@host-name` format.\n",
@@ -1602,8 +1582,10 @@
             "type": "string"
           },
           "oauthTokenUrl": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "port": {
             "description": "The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. \n",
@@ -1627,8 +1609,10 @@
           },
           "tenantId": {
             "description": "The tenant identifier, which is part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.\n",
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -1671,12 +1655,16 @@
             "enum": [
               ".email"
             ],
-            "example": ".email"
+            "examples": [
+              ".email"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_email"
@@ -1767,12 +1755,16 @@
             "enum": [
               ".gen-ai"
             ],
-            "example": ".gen-ai"
+            "examples": [
+              ".gen-ai"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_genai"
@@ -1790,8 +1782,10 @@
           "executionTimeField": {
             "description": "A field that indicates when the document was indexed.",
             "default": null,
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "index": {
             "description": "The Elasticsearch index to be written to.",
@@ -1823,12 +1817,16 @@
             "enum": [
               ".index"
             ],
-            "example": ".index"
+            "examples": [
+              ".index"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           }
         }
       },
@@ -1890,12 +1888,16 @@
             "enum": [
               ".jira"
             ],
-            "example": ".jira"
+            "examples": [
+              ".jira"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_jira"
@@ -1950,12 +1952,16 @@
             "enum": [
               ".opsgenie"
             ],
-            "example": ".opsgenie"
+            "examples": [
+              ".opsgenie"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_opsgenie"
@@ -1969,9 +1975,13 @@
         "properties": {
           "apiUrl": {
             "description": "The PagerDuty event URL.",
-            "type": "string",
-            "nullable": true,
-            "example": "https://events.pagerduty.com/v2/enqueue"
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "https://events.pagerduty.com/v2/enqueue"
+            ]
           }
         }
       },
@@ -2009,12 +2019,16 @@
             "enum": [
               ".pagerduty"
             ],
-            "example": ".pagerduty"
+            "examples": [
+              ".pagerduty"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_pagerduty"
@@ -2076,7 +2090,9 @@
           "connector_type_id": {
             "description": "The type of connector.",
             "type": "string",
-            "example": ".resilient",
+            "examples": [
+              ".resilient"
+            ],
             "enum": [
               ".resilient"
             ]
@@ -2084,7 +2100,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_resilient"
@@ -2106,12 +2124,16 @@
             "enum": [
               ".server-log"
             ],
-            "example": ".server-log"
+            "examples": [
+              ".server-log"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           }
         }
       },
@@ -2198,12 +2220,16 @@
             "enum": [
               ".servicenow"
             ],
-            "example": ".servicenow"
+            "examples": [
+              ".servicenow"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_servicenow"
@@ -2261,12 +2287,16 @@
             "enum": [
               ".servicenow-itom"
             ],
-            "example": ".servicenow-itom"
+            "examples": [
+              ".servicenow-itom"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_servicenow"
@@ -2293,12 +2323,16 @@
             "enum": [
               ".servicenow-sir"
             ],
-            "example": ".servicenow-sir"
+            "examples": [
+              ".servicenow-sir"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_servicenow"
@@ -2335,12 +2369,16 @@
             "enum": [
               ".slack_api"
             ],
-            "example": ".slack_api"
+            "examples": [
+              ".slack_api"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_slack_api"
@@ -2377,12 +2415,16 @@
             "enum": [
               ".slack"
             ],
-            "example": ".slack"
+            "examples": [
+              ".slack"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_slack_webhook"
@@ -2659,12 +2701,16 @@
             "enum": [
               ".swimlane"
             ],
-            "example": ".swimlane"
+            "examples": [
+              ".swimlane"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_swimlane"
@@ -2701,12 +2747,16 @@
             "enum": [
               ".teams"
             ],
-            "example": ".teams"
+            "examples": [
+              ".teams"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_teams"
@@ -2766,12 +2816,16 @@
             "enum": [
               ".tines"
             ],
-            "example": ".tines"
+            "examples": [
+              ".tines"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_tines"
@@ -2826,12 +2880,16 @@
             "enum": [
               ".torq"
             ],
-            "example": ".torq"
+            "examples": [
+              ".torq"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_torq"
@@ -2869,8 +2927,10 @@
             "description": "If `true`, a user name and password must be provided for login type authentication.\n"
           },
           "headers": {
-            "type": "object",
-            "nullable": true,
+            "type": [
+              "object",
+              "null"
+            ],
             "description": "A set of key-value pairs sent as headers with the request."
           },
           "method": {
@@ -2945,12 +3005,16 @@
             "enum": [
               ".webhook"
             ],
-            "example": ".webhook"
+            "examples": [
+              ".webhook"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_webhook"
@@ -2964,8 +3028,10 @@
         "properties": {
           "configUrl": {
             "description": "The request URL for the Elastic Alerts trigger in xMatters. It is applicable only when `usesBasic` is `true`.\n",
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "usesBasic": {
             "description": "Specifies whether the connector uses HTTP basic authentication (`true`) or URL authentication (`false`).",
@@ -3013,12 +3079,16 @@
             "enum": [
               ".xmatters"
             ],
-            "example": ".xmatters"
+            "examples": [
+              ".xmatters"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_xmatters"
@@ -3028,22 +3098,38 @@
       "is_deprecated": {
         "type": "boolean",
         "description": "Indicates whether the connector type is deprecated.",
-        "example": false
+        "examples": [
+          false
+        ]
       },
       "is_missing_secrets": {
         "type": "boolean",
         "description": "Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type.",
-        "example": false
+        "examples": [
+          false
+        ]
       },
       "is_preconfigured": {
         "type": "boolean",
-        "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.",
-        "example": false
+        "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. \n",
+        "examples": [
+          false
+        ]
       },
       "is_system_action": {
         "type": "boolean",
         "description": "Indicates whether the connector is used for system actions.",
-        "example": false
+        "examples": [
+          false
+        ]
+      },
+      "referenced_by_count": {
+        "type": "integer",
+        "description": "Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated. This property is returned only by the get all connectors API.\n",
+        "examples": [
+          2
+        ],
+        "default": 0
       },
       "connector_response_properties_cases_webhook": {
         "title": "Connector request properties for a Webhook - Case Management connector",
@@ -3086,6 +3172,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3130,6 +3219,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3137,7 +3229,6 @@
         "title": "Connector response properties for an email connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3174,6 +3265,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3218,6 +3312,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3262,6 +3359,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3306,6 +3406,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3350,6 +3453,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3394,6 +3500,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3410,8 +3519,10 @@
         ],
         "properties": {
           "config": {
-            "type": "object",
-            "nullable": true
+            "type": [
+              "object",
+              "null"
+            ]
           },
           "connector_type_id": {
             "type": "string",
@@ -3439,6 +3550,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3483,6 +3597,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3527,6 +3644,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3571,6 +3691,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3611,6 +3734,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3651,6 +3777,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3695,6 +3824,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3738,6 +3870,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3782,6 +3917,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3826,6 +3964,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3870,6 +4011,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3914,6 +4058,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -4000,7 +4147,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_cases_webhook"
@@ -4253,7 +4402,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "example": "my-connector"
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_swimlane"
@@ -4361,6 +4512,16 @@
           }
         }
       },
+      "features": {
+        "type": "string",
+        "description": "The feature that uses the connector. Valid values are `alerting`, `cases`, `uptime`, and `siem`.\n",
+        "enum": [
+          "alerting",
+          "cases",
+          "uptime",
+          "siem"
+        ]
+      },
       "connector_types": {
         "title": "Connector types",
         "type": "string",
@@ -4389,16 +4550,8 @@
           ".webhook",
           ".xmatters"
         ],
-        "example": ".server-log"
-      },
-      "features": {
-        "type": "string",
-        "description": "The feature that uses the connector. Valid values are `alerting`, `cases`, `uptime`, and `siem`.\n",
-        "enum": [
-          "alerting",
-          "cases",
-          "uptime",
-          "siem"
+        "examples": [
+          ".server-log"
         ]
       },
       "run_connector_params_documents": {
@@ -4596,10 +4749,12 @@
                 "type": "object",
                 "description": "The custom properties of the alert.",
                 "additionalProperties": true,
-                "example": {
-                  "key1": "value1",
-                  "key2": "value2"
-                }
+                "examples": [
+                  {
+                    "key1": "value1",
+                    "key2": "value2"
+                  }
+                ]
               },
               "entity": {
                 "type": "string",
@@ -4731,7 +4886,9 @@
               "id": {
                 "type": "string",
                 "description": "The Jira issue type identifier.",
-                "example": 10024
+                "examples": [
+                  10024
+                ]
               }
             }
           }
@@ -4813,7 +4970,9 @@
               "externalId": {
                 "type": "string",
                 "description": "The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier.",
-                "example": 71778
+                "examples": [
+                  71778
+                ]
               }
             }
           }
@@ -4843,7 +5002,9 @@
               "id": {
                 "type": "string",
                 "description": "The Jira issue identifier.",
-                "example": 71778
+                "examples": [
+                  71778
+                ]
               }
             }
           }
@@ -5566,6 +5727,36 @@
       }
     },
     "responses": {
+      "400": {
+        "description": "Indicates a bad request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "examples": [
+                    "Bad Request"
+                  ]
+                },
+                "message": {
+                  "type": "string",
+                  "examples": [
+                    "error validating action type config: [index]: expected value of type [string] but got [undefined]"
+                  ]
+                },
+                "statusCode": {
+                  "type": "integer",
+                  "examples": [
+                    400
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "401": {
         "description": "Authorization information is missing or invalid.",
         "content": {
@@ -5576,7 +5767,9 @@
               "properties": {
                 "error": {
                   "type": "string",
-                  "example": "Unauthorized",
+                  "examples": [
+                    "Unauthorized"
+                  ],
                   "enum": [
                     "Unauthorized"
                   ]
@@ -5586,7 +5779,9 @@
                 },
                 "statusCode": {
                   "type": "integer",
-                  "example": 401,
+                  "examples": [
+                    401
+                  ],
                   "enum": [
                     401
                   ]
@@ -5606,18 +5801,24 @@
               "properties": {
                 "error": {
                   "type": "string",
-                  "example": "Not Found",
+                  "examples": [
+                    "Not Found"
+                  ],
                   "enum": [
                     "Not Found"
                   ]
                 },
                 "message": {
                   "type": "string",
-                  "example": "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
+                  "examples": [
+                    "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
+                  ]
                 },
                 "statusCode": {
                   "type": "integer",
-                  "example": 404,
+                  "examples": [
+                    404
+                  ],
                   "enum": [
                     404
                   ]
