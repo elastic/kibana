@@ -6,11 +6,12 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { createDatasetQuality } from './components/dataset_quality';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
-  DatasetQualitySetupDependencies,
-  DatasetQualityStartDependencies,
+  DatasetQualitySetupDeps,
+  DatasetQualityStartDeps,
 } from './types';
 
 export class DatasetQualityPlugin
@@ -18,14 +19,16 @@ export class DatasetQualityPlugin
 {
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: DatasetQualitySetupDependencies) {
+  public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    plugins: DatasetQualityStartDependencies
-  ): DatasetQualityPluginStart {
-    return {};
+  public start(core: CoreStart, plugins: DatasetQualityStartDeps): DatasetQualityPluginStart {
+    const DatasetQuality = createDatasetQuality({
+      core,
+      plugins,
+    });
+
+    return { DatasetQuality };
   }
 }
