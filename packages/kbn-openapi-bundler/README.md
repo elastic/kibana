@@ -6,10 +6,9 @@
 
 To let this package help you with bundling your OpenAPI specifications you should have OpenAPI specification describing your API endpoint request and response schemas along with common types used in your API. Refer [@kbn/openapi-generator](../kbn-openapi-generator/README.md) and [OpenAPI 3.0.3](https://swagger.io/specification/v3/) (support for [OpenAPI 3.1.0](https://swagger.io/specification/) is planned to be added soon) for more details.
 
-Following recommendations provided in `@kbn/openapi-generator` you should have OpenAPI specs defined under a common folder
-something like `my-plugin/common/api`.
+Following recommendations provided in `@kbn/openapi-generator` you should have OpenAPI specs defined under a common folder something like `my-plugin/common/api`.
 
-Currently package supports only programmatic API is supported. As the next step you need to create a JavaScript script file like below and put it to `my-plugin/scripts/openapi`
+Currently package supports only programmatic API. As the next step you need to create a JavaScript script file like below and put it to `my-plugin/scripts/openapi`
 
 ```ts
 require('../../../../../src/setup_node_env');
