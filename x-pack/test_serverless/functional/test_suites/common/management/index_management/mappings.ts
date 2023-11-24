@@ -7,8 +7,6 @@
 
 import expect from '@kbn/expect';
 
-import { mappingsApi } from './lib/mappings.api';
-import { indicesHelpers } from './lib/indices.helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -35,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         mappings: {
           api: { getMapping },
-        }
+        },
       } = indexManagementService);
 
       log.debug('Creating index');
