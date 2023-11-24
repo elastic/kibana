@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -16,6 +16,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
+import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { focusActiveTimelineButton } from '../../timeline/helpers';
@@ -87,12 +88,14 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     [dataProviders, kqlQuery]
   );
 
-  const kqlQueryTimeline = kqlQuery.filterQuery?.kuery?.expression ?? ' ';
+  const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+
+  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId));
 
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
-      : kqlQueryTimeline;
+      : kqlQueryTimeline ?? ' ';
 
   const kqlQueryObj = useMemo(
     () => ({ query: kqlQueryExpression, language: 'kuery' }),
