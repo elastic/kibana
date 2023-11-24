@@ -106,7 +106,6 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { indices: indices1 },
         } = await indexStats(index, 'flush');
-        // @ts-ignore
         expect(indices1[index].total.flush.total).to.be(0);
 
         await flushIndex(index).expect(200);
@@ -114,7 +113,6 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { indices: indices2 },
         } = await indexStats(index, 'flush');
-        // @ts-ignore
         expect(indices2[index].total.flush.total).to.be(1);
       });
     });
@@ -126,7 +124,6 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { indices: indices1 },
         } = await indexStats(index, 'refresh');
-        // @ts-ignore
         const previousRefreshes = indices1[index].total.refresh.total;
 
         await refreshIndex(index).expect(200);
@@ -134,7 +131,6 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { indices: indices2 },
         } = await indexStats(index, 'refresh');
-        // @ts-ignore
         expect(indices2[index].total.refresh.total).to.be(previousRefreshes + 1);
       });
     });
