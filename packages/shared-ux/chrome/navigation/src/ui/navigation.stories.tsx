@@ -7,26 +7,22 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { useState as useStateStorybook } from '@storybook/addons';
 import { ComponentMeta } from '@storybook/react';
 import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import {
   EuiButton,
   EuiCollapsibleNavBeta,
   EuiCollapsibleNavBetaProps,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHeader,
   EuiHeaderSection,
   EuiLink,
   EuiPageTemplate,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../../types';
@@ -34,7 +30,7 @@ import { NavigationProvider } from '../services';
 import { Navigation } from './components';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
-import type { GroupDefinition, ProjectNavigationDefinition } from './types';
+import type { ProjectNavigationDefinition } from './types';
 import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
@@ -1107,6 +1103,65 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
   );
 };
 
+export const WithUIComponentsTiny = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    navLinks$: of([...navLinksMock, ...deepLinks]),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
+
+  return (
+    <NavigationWrapper>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <Navigation>
+            <Navigation.Group
+              // id="example_projet"
+              title="Example project"
+              icon="logoObservability"
+              defaultIsCollapsed={false}
+              isCollapsible={false}
+            >
+              <Navigation.Group
+                // id="hello"
+                title="Hello"
+                renderAs="accordion"
+                defaultIsCollapsed={false}
+              >
+                <Navigation.Item<any> id="item1" link="item1" />
+              </Navigation.Group>
+            </Navigation.Group>
+            <Navigation.Item<any> id="item2" link="item1" title="YEAH!!" icon="launch" />
+            <Navigation.Footer>
+              <Navigation.Item link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
+              <Navigation.Group
+                // id="project_settings_project_nav"
+                title="Project settings"
+                breadcrumbStatus="hidden"
+                icon="gear"
+              >
+                <Navigation.Item link="management" title="Management" />
+                <Navigation.Group title="Sub group" icon="gear">
+                  <Navigation.Item link="management" title="Management" />
+                  <Navigation.Group title="Sub group" icon="gear">
+                    <Navigation.Item link="management" title="Management" />
+                  </Navigation.Group>
+                </Navigation.Group>
+              </Navigation.Group>
+            </Navigation.Footer>
+          </Navigation>
+        </NavigationProvider>
+      )}
+    </NavigationWrapper>
+  );
+};
+
 export const WithUIComponents = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
@@ -1274,230 +1329,6 @@ export const MinimalUI = (args: NavigationServices) => {
             </Navigation.Group>
           </Navigation.Group>
         </Navigation>
-      </NavigationProvider>
-    </NavigationWrapper>
-  );
-};
-
-export const CreativeUI = (args: NavigationServices) => {
-  const services = storybookMock.getServices({
-    ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
-    recentlyAccessed$: of([
-      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-      { label: 'Another example', link: '/app/example/5235', id: '5235' },
-    ]),
-  });
-
-  return (
-    <NavigationWrapper>
-      <NavigationProvider {...services}>
-        <Navigation unstyled>
-          <EuiFlexGroup direction="column" css={{ backgroundColor: 'pink', height: '100%' }}>
-            <EuiFlexItem grow>
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="none"
-                style={{ overflowY: 'auto' }}
-                justifyContent="spaceBetween"
-              >
-                <EuiFlexItem grow={false} css={{ padding: '12px' }}>
-                  <EuiTitle>
-                    <h3>Hello!</h3>
-                  </EuiTitle>
-
-                  <Navigation.Group id="myProject" title="My project" icon="logoObservability">
-                    <ul css={{ margin: '1em' }}>
-                      <Navigation.Item id="item1" title="Star wars movies">
-                        <li
-                          css={{
-                            marginLeft: '20px',
-                            listStyle: 'disc outside none',
-                            marginBottom: '8px',
-                          }}
-                        >
-                          <a href="/">Star wars movies</a>
-                        </li>
-                      </Navigation.Item>
-
-                      {/* <Navigation.Item id="item2" title="My library">
-                        {(navNode) => {
-                          return (
-                            <li
-                              css={{
-                                marginLeft: '20px',
-                                listStyle: 'disc outside none',
-                                marginBottom: '8px',
-                              }}
-                            >
-                              <a href="/">From prop -- {navNode.title}</a>
-                            </li>
-                          );
-                        }}
-                      </Navigation.Item> */}
-
-                      <Navigation.Item id="item3" title="You must see this">
-                        <li
-                          css={{
-                            marginLeft: '20px',
-                            listStyle: 'disc outside none',
-                            marginBottom: '8px',
-                            color: 'yellow',
-                            fontWeight: 700,
-                          }}
-                        >
-                          You must see this
-                        </li>
-                      </Navigation.Item>
-                    </ul>
-                  </Navigation.Group>
-                  <p>
-                    <em>As you can see there is really no limit in what UI you can create!</em>
-                    <br />
-                  </p>
-                  <p css={{ marginTop: '24px', textAlign: 'center' }}>
-                    <EuiButton>Have fun!</EuiButton>
-                  </p>
-                </EuiFlexItem>
-
-                <EuiFlexItem
-                  grow={false}
-                  css={{
-                    borderTop: '2px solid yellow',
-                    padding: '20px',
-                    height: '160px',
-                    backgroundImage: `url('https://images.unsplash.com/photo-1606041008023-472dfb5e530f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2333&q=80')`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    color: 'white',
-                  }}
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Navigation>
-      </NavigationProvider>
-    </NavigationWrapper>
-  );
-};
-
-export const UpdatingState = (args: NavigationServices) => {
-  const simpleGroupDef: GroupDefinition = {
-    type: 'navGroup',
-    id: 'observability_project_nav',
-    title: 'Observability',
-    icon: 'logoObservability',
-    children: [
-      {
-        id: 'aiops',
-        title: 'AIOps',
-        icon: 'branch',
-        children: [
-          {
-            title: 'Anomaly detection',
-            id: 'ml:anomalyDetection',
-            link: 'ml:anomalyDetection',
-          },
-          {
-            title: 'Log Rate Analysis',
-            id: 'ml:logRateAnalysis',
-            link: 'ml:logRateAnalysis',
-          },
-          {
-            title: 'Change Point Detections',
-            link: 'ml:changePointDetections',
-            id: 'ml:changePointDetections',
-          },
-          {
-            title: 'Job Notifications',
-            link: 'ml:notifications',
-            id: 'ml:notifications',
-          },
-        ],
-      },
-      {
-        id: 'project_settings_project_nav',
-        title: 'Project settings',
-        icon: 'gear',
-        children: [
-          { id: 'management', link: 'management' },
-          { id: 'integrations', link: 'integrations' },
-          { id: 'fleet', link: 'fleet' },
-        ],
-      },
-    ],
-  };
-  const firstSection = simpleGroupDef.children![0];
-  const firstSectionFirstChild = firstSection.children![0];
-  const secondSection = simpleGroupDef.children![1];
-  const secondSectionFirstChild = secondSection.children![0];
-
-  const activeNodeSets: ChromeProjectNavigationNode[][][] = [
-    [
-      [
-        {
-          ...simpleGroupDef,
-          path: [simpleGroupDef.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...firstSection,
-          path: [simpleGroupDef.id, firstSection.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...firstSectionFirstChild,
-          path: [simpleGroupDef.id, firstSection.id, firstSectionFirstChild.id],
-        } as unknown as ChromeProjectNavigationNode,
-      ],
-    ],
-    [
-      [
-        {
-          ...simpleGroupDef,
-          path: [simpleGroupDef.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...secondSection,
-          path: [simpleGroupDef.id, secondSection.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...secondSectionFirstChild,
-          path: [simpleGroupDef.id, secondSection.id, secondSectionFirstChild.id],
-        } as unknown as ChromeProjectNavigationNode,
-      ],
-    ],
-  ];
-
-  // use state to track which element of activeNodeSets is active
-  const [activeNodeIndex, setActiveNodeIndex] = useStateStorybook<number>(0);
-  const changeActiveNode = () => {
-    const value = (activeNodeIndex + 1) % 2; // toggle between 0 and 1
-    setActiveNodeIndex(value);
-  };
-
-  const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
-  activeNodes$.next(activeNodeSets[activeNodeIndex]);
-
-  const services = storybookMock.getServices({
-    ...args,
-    activeNodes$,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
-  });
-
-  return (
-    <NavigationWrapper clickAction={changeActiveNode} clickActionText="Change active node">
-      <NavigationProvider {...services}>
-        <DefaultNavigation
-          navigationTree={{
-            body: [simpleGroupDef],
-          }}
-        />
       </NavigationProvider>
     </NavigationWrapper>
   );
