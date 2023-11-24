@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
     'timePicker',
     'header',
+    'svlCommonNavigation',
   ]);
 
   describe('Header menu', () => {
@@ -45,18 +46,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await headerMenu.isDisplayed()).to.be(true);
     });
 
-    describe('Discover fallback link', () => {
+    describe('Discover tabs', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('should render a button link ', async () => {
-        const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
-        expect(await discoverLink.isDisplayed()).to.be(true);
-      });
-
-      it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
+      it('should navigate between discover tabs keeping the current columns/filters/query/time/data view', async () => {
         await retry.try(async () => {
           await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
           await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
@@ -67,8 +63,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Set query bar value
         await PageObjects.observabilityLogExplorer.submitQuery('*favicon*');
 
-        const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
-        discoverLink.click();
+        // go to discover tab
+        await testSubjects.click('discoverTab');
+        await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'discover',
+        });
+        await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbMissing({
+          deepLinkId: 'observability-log-explorer',
+        });
+        expect(await browser.getCurrentUrl()).contain('/app/discover');
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
@@ -92,6 +95,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
         });
+
+        // go to log explorer tab
+        await testSubjects.click('logExplorerTab');
+        await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'discover',
+        });
+        await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'observability-log-explorer',
+        });
+        expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
       });
     });
 

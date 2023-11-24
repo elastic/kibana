@@ -17,9 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const synthtrace = getService('svlLogsSynthtraceClient');
   const dataGrid = getService('dataGrid');
-  const browser = getService('browser');
-  const testSubjects = getService('testSubjects');
-  const kibanaServer = getService('kibanaServer');
 
   describe('Application', () => {
     before(async () => {
@@ -40,36 +37,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(results[0].label).to.eql('Logs Explorer');
 
       await PageObjects.svlCommonNavigation.search.hideSearch();
-    });
-
-    it('should support navigating between Discover tabs', async () => {
-      await kibanaServer.savedObjects.create({
-        type: 'index-pattern',
-        id: 'metrics-*',
-        overwrite: true,
-        attributes: {
-          title: 'metrics-*',
-        },
-      });
-      await PageObjects.svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
-      await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'discover',
-      });
-      expect(await browser.getCurrentUrl()).contain('/app/discover');
-      await testSubjects.click('logExplorerTab');
-      await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'observability-log-explorer',
-      });
-      expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
-      await testSubjects.click('discoverTab');
-      await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'discover',
-      });
-      expect(await browser.getCurrentUrl()).contain('/app/discover');
-      await kibanaServer.savedObjects.delete({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
     });
 
     it('should load logs', async () => {
