@@ -7,9 +7,11 @@
 
 /* eslint-disable cypress/no-unnecessary-waiting */
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { loadPage } from './common';
+import { waitForActionToSucceed } from './response_actions';
 
 const API_ENDPOINT_ACTION_PATH = '/api/endpoint/action/*';
 export const interceptActionRequests = (
@@ -131,6 +133,25 @@ export const checkEndpointListForOnlyUnIsolatedHosts = (): void =>
   checkEndpointListForIsolationStatus(false);
 export const checkEndpointListForOnlyIsolatedHosts = (): void =>
   checkEndpointListForIsolationStatus(true);
+
+export const isolateHostActionViaAPI = (agentId: string): void => {
+  cy.request({
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
+    method: 'POST',
+    url: 'api/endpoint/action/isolate',
+    body: {
+      endpoint_ids: [agentId],
+    },
+  })
+    // verify action was successful
+    .then((response) => waitForActionToSucceed(response.body.data.id))
+    .then((actionResponse) => {
+      expect(actionResponse.status).to.equal('successful');
+    });
+};
 
 export const checkEndpointIsolationStatus = (
   endpointHostname: string,
