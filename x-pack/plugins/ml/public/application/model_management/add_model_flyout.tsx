@@ -179,7 +179,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                                     name={model.model_id}
                                     value={model.model_id}
                                     checked={model.model_id === selectedModelId}
-                                    onChange={() => setSelectedModelId(model.model_id)}
+                                    onChange={setSelectedModelId.bind(null, model.model_id)}
                                   />
                                   <EuiSpacer size="m" />
                                 </React.Fragment>
