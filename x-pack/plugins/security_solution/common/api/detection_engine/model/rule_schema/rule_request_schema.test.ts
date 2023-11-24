@@ -1250,4 +1250,53 @@ describe('rules schema', () => {
       );
     });
   });
+
+  describe('alerts suppression', () => {
+    test('should drop suppression fields apart from duration for "threshold" rule type', () => {
+      const payload = {
+        ...getCreateThresholdRulesSchemaMock(),
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: 'm' },
+          missing_field_strategy: 'suppress',
+        },
+      };
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual({
+        ...payload,
+        alert_suppression: {
+          duration: { value: 5, unit: 'm' },
+        },
+      });
+    });
+    test('should validate only suppression duration for "threshold" rule type', () => {
+      const payload = {
+        ...getCreateThresholdRulesSchemaMock(),
+        alert_suppression: {
+          duration: { value: 5, unit: 'm' },
+        },
+      };
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+    test('should throw error if alert suppression duration is absent for "threshold" rule type', () => {
+      const payload = {
+        ...getCreateThresholdRulesSchemaMock(),
+        alert_suppression: {
+          group_by: ['host.name'],
+          missing_field_strategy: 'suppress',
+        },
+      };
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 14 more"`
+      );
+    });
+  });
 });
