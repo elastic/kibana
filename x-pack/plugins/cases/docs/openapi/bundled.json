@@ -3679,7 +3679,8 @@
       "apiKeyAuth": {
         "type": "apiKey",
         "in": "header",
-        "name": "ApiKey"
+        "name": "Authorization",
+        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
       }
     },
     "parameters": {

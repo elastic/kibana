@@ -15,7 +15,7 @@ import { createRule } from '../../../tasks/api_calls/rules';
 
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import { getDetails } from '../../../tasks/rule_details';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   clearEsqlQueryBar,
   fillEsqlQueryBar,
