@@ -6082,17 +6082,17 @@
                   "type": "string"
                 },
                 "error": {
-                  "type": "object"
-                },
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "message": {
-                    "type": "string"
-                  },
-                  "stack": {
-                    "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "stack": {
+                      "type": "string"
+                    }
                   }
                 }
               }

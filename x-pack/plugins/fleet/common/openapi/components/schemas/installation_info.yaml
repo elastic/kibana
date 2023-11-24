@@ -59,13 +59,13 @@ properties:
           type: string
         error:
           type: object
-        properties:
-          name:
-            type: string
-          message:
-            type: string
-          stack:
-            type: string
+          properties:
+            name:
+              type: string
+            message:
+              type: string
+            stack:
+              type: string
   verification_status:
     type: string
     enum:
