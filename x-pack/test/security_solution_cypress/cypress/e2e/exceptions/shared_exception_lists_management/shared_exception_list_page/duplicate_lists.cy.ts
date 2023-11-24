@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../tasks/common';
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getExceptionList } from '../../../../objects/exception';
 import { assertNumberOfExceptionItemsExists } from '../../../../tasks/exceptions';
