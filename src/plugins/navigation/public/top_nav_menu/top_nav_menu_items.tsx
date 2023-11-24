@@ -8,7 +8,7 @@
 
 import { EuiHeaderLinks } from '@elastic/eui';
 import React from 'react';
-import { TopNavMenuData } from './top_nav_menu_data';
+import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
 export const TopNavMenuItems = ({

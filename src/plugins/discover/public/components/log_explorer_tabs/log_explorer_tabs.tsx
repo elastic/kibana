@@ -84,6 +84,9 @@ export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTa
   );
 };
 
+// eslint-disable-next-line import/no-default-export
+export default LogExplorerTabs;
+
 const isModifiedEvent = (event: MouseEvent) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 

@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiBadgeGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiToolTip, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
 import React, { Fragment, ReactElement } from 'react';
-import { TopNavMenuBadgeProps } from './top_nav_menu';
+
+export type TopNavMenuBadgeProps = EuiBadgeProps & {
+  badgeText: string;
+  toolTipProps?: Partial<EuiToolTipProps>;
+  renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
+};
 
 export const TopNavMenuBadges = ({ badges }: { badges: TopNavMenuBadgeProps[] | undefined }) => {
   if (!badges || badges.length === 0) return null;

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export {
-  LogExplorerTabs,
-  type LogExplorerTabsParams,
-  type LogExplorerTabsProps,
-} from './log_explorer_tabs';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { lazy } from 'react';
+
+export type { LogExplorerTabsParams, LogExplorerTabsProps } from './log_explorer_tabs';
+
+export const LogExplorerTabs = withSuspense(lazy(() => import('./log_explorer_tabs')));

@@ -7,7 +7,6 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
@@ -17,13 +16,7 @@ import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
-import { TopNavMenuBadges } from './top_nav_menu_badges';
-
-export type TopNavMenuBadgeProps = EuiBadgeProps & {
-  badgeText: string;
-  toolTipProps?: Partial<EuiToolTipProps>;
-  renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
-};
+import { TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
 
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   StatefulSearchBarProps<QT>,
