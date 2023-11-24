@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const indexManagementService = getService('indexManagement');
 
   describe('mappings', () => {
+    let indexName: string;
     let getMapping: typeof indexManagementService['mappings']['api']['getMapping'];
     let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
     let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
@@ -38,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       log.debug('Creating index');
       try {
-        await createIndex(undefined, mappings);
+        indexName = await createIndex(undefined, mappings);
       } catch (err) {
         log.debug('[Setup error] Error creating index');
         throw err;
@@ -55,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should get the index mappings', async () => {
-      const { body } = await getMapping(index).expect(200);
+      const { body } = await getMapping(indexName).expect(200);
 
       expect(body.mappings).to.eql(mappings);
     });
