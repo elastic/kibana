@@ -5,35 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
 import { BaseFlameGraph } from '@kbn/profiling-utils';
-import React, { useEffect } from 'react';
-import { InfraProfilingRequestParamsRT } from '../../../../../common/http_api/profiling_api';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useProfilingFlamegraphData } from '../../hooks/use_profilling_flamegraph_data';
+import { useRequestObservable } from '../../hooks/use_request_observable';
+import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
+import { ContentTabIds } from '../../types';
 
 export function Profiling() {
+  const { request$ } = useRequestObservable<BaseFlameGraph>();
   const { asset } = useAssetDetailsRenderPropsContext();
+  const { activeTabId } = useTabSwitcherContext();
   const { getDateRangeInTimestamp } = useDatePickerContext();
-  const body = {
+  const { loading, response } = useProfilingFlamegraphData({
+    active: activeTabId === ContentTabIds.PROFILING,
+    request$,
     hostname: asset.name,
     timeRange: getDateRangeInTimestamp(),
-  };
-
-  const { loading, response, makeRequest } = useHTTPRequest<BaseFlameGraph>(
-    '/api/infra/profiling/flamegraph',
-    'POST',
-    JSON.stringify(InfraProfilingRequestParamsRT.encode(body)),
-    undefined,
-    undefined,
-    undefined,
-    true
-  );
-
-  useEffect(() => {
-    makeRequest();
-  }, [makeRequest]);
+  });
 
   return <EmbeddableFlamegraph data={response ?? undefined} isLoading={loading} height="60vh" />;
 }
