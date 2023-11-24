@@ -161,6 +161,7 @@ describe('Save Timeline Prompts', { tags: ['@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
+    openTimelineUsingToggle();
     createNewTimeline();
   });
 
