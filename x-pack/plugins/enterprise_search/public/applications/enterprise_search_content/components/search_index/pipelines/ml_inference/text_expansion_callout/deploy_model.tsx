@@ -55,7 +55,7 @@ export const DeployModel = ({
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title',
-                    { defaultMessage: 'Improve your results with ELSER v2' }
+                    { defaultMessage: 'Improve your results with ELSER' }
                   )}
                 </h3>
               </EuiText>
