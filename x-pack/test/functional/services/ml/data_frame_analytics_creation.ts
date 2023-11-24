@@ -259,13 +259,13 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertDestIndexInputExists() {
       await retry.tryForTime(4000, async () => {
-        await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+        await testSubjects.existOrFail('mlCreationWizardUtilsDestinationIndexInput');
       });
     },
 
     async assertDestIndexValue(expectedValue: string) {
       const actualDestIndex = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobFlyoutDestinationIndexInput',
+        'mlCreationWizardUtilsDestinationIndexInput',
         'value'
       );
       expect(actualDestIndex).to.eql(
@@ -275,13 +275,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setDestIndex(destIndex: string) {
-      await mlCommonUI.setValueWithChecks(
-        'mlAnalyticsCreateJobFlyoutDestinationIndexInput',
-        destIndex,
-        {
-          clearWithKeyboard: true,
-        }
-      );
+      await mlCommonUI.setValueWithChecks('mlCreationWizardUtilsDestinationIndexInput', destIndex, {
+        clearWithKeyboard: true,
+      });
       await this.assertDestIndexValue(destIndex);
     },
 
@@ -656,7 +652,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch',
+        'mlCreationWizardUtilsJobIdAsDestIndexNameSwitch',
         'aria-checked'
       );
       return state === 'true';
@@ -671,14 +667,14 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertDestIndexSameAsIdSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch`, {
+      await testSubjects.existOrFail(`mlCreationWizardUtilsJobIdAsDestIndexNameSwitch`, {
         allowHidden: true,
       });
     },
 
     async setDestIndexSameAsIdCheckState(checkState: boolean) {
       if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch');
+        await testSubjects.click('mlCreationWizardUtilsJobIdAsDestIndexNameSwitch');
       }
       await this.assertDestIndexSameAsIdCheckState(checkState);
     },

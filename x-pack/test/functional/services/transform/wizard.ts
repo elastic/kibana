@@ -700,13 +700,42 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertTransformDescriptionValue(transformDescription);
     },
 
+    async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlCreationWizardUtilsJobIdAsDestIndexNameSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertDestIndexSameAsIdCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getDestIndexSameAsIdSwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Destination index same as job id check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertDestIndexSameAsIdSwitchExists() {
+      await testSubjects.existOrFail(`mlCreationWizardUtilsJobIdAsDestIndexNameSwitch`, {
+        allowHidden: true,
+      });
+    },
+
+    async setDestIndexSameAsIdCheckState(checkState: boolean) {
+      if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlCreationWizardUtilsJobIdAsDestIndexNameSwitch');
+      }
+      await this.assertDestIndexSameAsIdCheckState(checkState);
+    },
+
     async assertDestinationIndexInputExists() {
-      await testSubjects.existOrFail('transformDestinationIndexInput');
+      await testSubjects.existOrFail('mlCreationWizardUtilsDestinationIndexInput');
     },
 
     async assertDestinationIndexValue(expectedValue: string) {
       const actualDestinationIndex = await testSubjects.getAttribute(
-        'transformDestinationIndexInput',
+        'mlCreationWizardUtilsDestinationIndexInput',
         'value'
       );
       expect(actualDestinationIndex).to.eql(
@@ -716,9 +745,13 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDestinationIndex(destinationIndex: string) {
-      await ml.commonUI.setValueWithChecks('transformDestinationIndexInput', destinationIndex, {
-        clearWithKeyboard: true,
-      });
+      await ml.commonUI.setValueWithChecks(
+        'mlCreationWizardUtilsDestinationIndexInput',
+        destinationIndex,
+        {
+          clearWithKeyboard: true,
+        }
+      );
       await this.assertDestinationIndexValue(destinationIndex);
     },
 
