@@ -25,7 +25,7 @@ export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>(
   kafkaOutput: true,
   outputSecretsStorage: false,
   remoteESOutput: false,
-  agentless: false,
+  agentless: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
