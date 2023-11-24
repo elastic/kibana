@@ -26,8 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     createDatastream,
   } = initElasticsearchHelpers(getService);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170999
-  describe.skip('Component templates', function () {
+  describe('Component templates', function () {
     after(async () => {
       await cleanUpIndexTemplates();
       await cleanUpComponentTemplates();
