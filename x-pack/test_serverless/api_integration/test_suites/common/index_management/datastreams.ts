@@ -18,7 +18,6 @@ export default function ({ getService }: FtrProviderContext) {
   let helpers: typeof indexManagementService['datastreams']['helpers'];
   let createDataStream: typeof helpers['createDataStream'];
   let deleteDataStream: typeof helpers['deleteDataStream'];
-  let assertDataStreamStorageSizeExists: typeof helpers['assertDataStreamStorageSizeExists'];
   let deleteComposableIndexTemplate: typeof helpers['deleteComposableIndexTemplate'];
   let updateIndexTemplateMappings: typeof helpers['updateIndexTemplateMappings'];
   let getMapping: typeof helpers['getMapping'];
@@ -32,7 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
       ({
         createDataStream,
         deleteDataStream,
-        assertDataStreamStorageSizeExists,
         deleteComposableIndexTemplate,
         updateIndexTemplateMappings,
         getMapping,
