@@ -137,22 +137,54 @@ export function FlameGraph({
                       }
 
                       const valueIndex = props.values[0].valueAccessor as number;
+                      const label = primaryFlamegraph.Label[valueIndex];
+                      const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
+                      const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
+                      const totalSeconds = primaryFlamegraph.TotalSeconds;
+                      const nodeID = primaryFlamegraph.ID[valueIndex];
+                      const inline = primaryFlamegraph.Inline[valueIndex];
+                      const comparisonNode = columnarData.comparisonNodesById[nodeID];
+
+                      const parentLabel = inline
+                        ? // If it's an inline frame, look up for its parent frame
+                          primaryFlamegraph.Label[
+                            primaryFlamegraph.Edges.findIndex((edge) => edge.includes(valueIndex))
+                          ]
+                        : undefined;
 
                       return (
                         <FlameGraphTooltip
-                          isRoot={valueIndex === 0}
-                          selectedIndex={valueIndex}
-                          flamegraph={primaryFlamegraph}
-                          comparisonFlamegraph={comparisonFlamegraph}
-                          columnarData={columnarData}
-                          totalSamples={totalSamples}
+                          annualCO2TonsInclusive={
+                            primaryFlamegraph.AnnualCO2TonsInclusive[valueIndex]
+                          }
+                          annualCostsUSDInclusive={
+                            primaryFlamegraph.AnnualCostsUSDInclusive[valueIndex]
+                          }
                           baselineScaleFactor={baseline}
+                          comparisonAnnualCO2TonsInclusive={
+                            comparisonFlamegraph?.AnnualCO2TonsInclusive[valueIndex]
+                          }
+                          comparisonAnnualCostsUSDInclusive={
+                            comparisonFlamegraph?.AnnualCostsUSDInclusive[valueIndex]
+                          }
+                          comparisonCountExclusive={comparisonNode?.CountExclusive}
+                          comparisonCountInclusive={comparisonNode?.CountInclusive}
                           comparisonScaleFactor={comparison}
+                          comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
+                          comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
+                          countExclusive={countExclusive}
+                          countInclusive={countInclusive}
+                          isRoot={valueIndex === 0}
+                          label={label}
                           onShowMoreClick={() => {
                             trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
                             toggleShowInformationWindow();
                             setHighlightedVmIndex(valueIndex);
                           }}
+                          totalSamples={totalSamples}
+                          totalSeconds={totalSeconds}
+                          inline={inline}
+                          parentLabel={parentLabel}
                         />
                       );
                     }}

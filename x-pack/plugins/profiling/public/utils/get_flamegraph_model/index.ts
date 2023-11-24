@@ -25,13 +25,6 @@ const nullColumnarViewModel = {
   size1: new Float32Array(),
 };
 
-export interface ColumnarData {
-  key: string;
-  viewModel: ColumnarViewModel;
-  comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }>;
-  legendItems: Array<{ label: string; color: string }>;
-}
-
 export function getFlamegraphModel({
   primaryFlamegraph,
   comparisonFlamegraph,
@@ -50,7 +43,12 @@ export function getFlamegraphModel({
   comparisonMode?: ComparisonMode;
   baseline?: number;
   comparison?: number;
-}): ColumnarData {
+}): {
+  key: string;
+  viewModel: ColumnarViewModel;
+  comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }>;
+  legendItems: Array<{ label: string; color: string }>;
+} {
   const comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }> =
     {};
 
