@@ -23,29 +23,13 @@ components:
       minItems: 1
       maxItems: 3
 
-    AlertSuppressionDuration:
-      type: object
-      properties:
-        value:
-          type: integer
-          minimum: 1
-        unit:
-          type: string
-          enum:
-            - s
-            - m
-            - h
-      required:
-        - value
-        - unit
-
     AlertSuppression:
       type: object
       properties:
         group_by:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
         duration:
-          $ref: '#/components/schemas/AlertSuppressionDuration'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
         missing_fields_strategy:
           $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
       required:
@@ -57,7 +41,7 @@ components:
         groupBy:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
         duration:
-          $ref: '#/components/schemas/AlertSuppressionDuration'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
         missingFieldsStrategy:
           $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
       required:
