@@ -300,13 +300,15 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
-        <CreateCategorizationJobButton
-          dataView={dataView}
-          field={selectedField}
-          query={searchQuery}
-          earliest={earliest}
-          latest={latest}
-        />
+        {showTabs === false && loading === false ? (
+          <CreateCategorizationJobButton
+            dataView={dataView}
+            field={selectedField}
+            query={searchQuery}
+            earliest={earliest}
+            latest={latest}
+          />
+        ) : null}
         <FieldValidationCallout validationResults={fieldValidationResult} />
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
         <InformationText
