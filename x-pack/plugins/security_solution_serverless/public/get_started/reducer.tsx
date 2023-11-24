@@ -6,7 +6,7 @@
  */
 
 import type { ProductLine } from '../../common/product';
-import { isDefaultFinishedCardStep, setupActiveSections, updateActiveSections } from './helpers';
+import { setupActiveSections, updateActiveSections } from './helpers';
 import type { ExpandedCardSteps, ReducerActions } from './types';
 import { type CardId, type StepId, type TogglePanelReducer, GetStartedPageActions } from './types';
 
