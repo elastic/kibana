@@ -276,17 +276,28 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           setRuleParams('timeWindowUnit', selectedWindowUnit)
         }
       />
-      <EuiSpacer />
-      <EuiTitle size="xs">
+      {/* <EuiSpacer /> */}
+      {/* <EuiTitle size="xs">
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.threshold.ui.filterTitle"
             defaultMessage="Filter (Optional)"
           />
         </h5>
-      </EuiTitle>
+      </EuiTitle> */}
       <EuiSpacer size="s" />
       <EuiFormRow
+        label={i18n.translate('xpack.stackAlerts.threshold.ui.filterTitle', {
+          defaultMessage: 'Filter',
+        })}
+        labelAppend={
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.stackAlerts.threshold.ui.filter.optional"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
         helpText={i18n.translate('xpack.stackAlerts.threshold.ui.filterKQLHelpText', {
           defaultMessage: 'Use a KQL expression to limit the scope of your alerts.',
         })}
