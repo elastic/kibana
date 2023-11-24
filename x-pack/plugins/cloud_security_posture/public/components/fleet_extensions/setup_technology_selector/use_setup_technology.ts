@@ -32,27 +32,23 @@ export const useSetupTechnology = ({
   const agentPolicyId = useMemo(() => agentPolicy?.id, [agentPolicy]);
   const agentlessPolicyId = useMemo(() => agentlessPolicy?.id, [agentlessPolicy]);
 
-  /*
-   handle case when agent policy is coming from outside,
-   e.g. from the get param or when coming to integration from a specific agent policy
-   */
   useEffect(() => {
     if (agentPolicyId && agentPolicyId !== agentlessPolicyId) {
+      /*
+        handle case when agent policy is coming from outside,
+        e.g. from the get param or when coming to integration from a specific agent policy
+      */
       setSetupTechnology(SetupTechnology.AGENT_BASED);
-    }
-  }, [agentPolicyId, agentlessPolicyId]);
-
-  /*
-   preselecting agenteless when available
-   and resetting to agent-based when switching to another integration type, which doesn't support agentless
-   */
-  useEffect(() => {
-    if (isAgentlessAvailable) {
+    } else if (isAgentlessAvailable) {
+      /*
+        preselecting agenteless when available
+        and resetting to agent-based when switching to another integration type, which doesn't support agentless
+      */
       setSetupTechnology(SetupTechnology.AGENTLESS);
     } else {
       setSetupTechnology(SetupTechnology.AGENT_BASED);
     }
-  }, [isAgentlessAvailable]);
+  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable]);
 
   useEffect(() => {
     if (handleSetupTechnologyChange) {
