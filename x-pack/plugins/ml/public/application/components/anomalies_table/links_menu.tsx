@@ -33,7 +33,7 @@ import {
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { mlJobService } from '../../services/job_service';
 import { findMessageField, getDataViewIdFromName } from '../../util/index_utils';
@@ -43,7 +43,6 @@ import { ml } from '../../services/ml_api_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-// @ts-ignore
 import {
   escapeDoubleQuotes,
   getDateFormatTz,
@@ -52,7 +51,6 @@ import {
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
-// @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
