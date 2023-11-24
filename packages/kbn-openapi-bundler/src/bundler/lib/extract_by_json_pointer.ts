@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNode } from '../types';
+import { isPlainObjectType } from './is_plain_object_type';
 
 /**
  * Extract a node from a document using a provided [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901).
@@ -21,25 +21,25 @@ import { DocumentNode } from '../types';
  * @param pointer a JSON Pointer
  * @returns resolved document node
  */
-export function extractByJsonPointer(document: unknown, pointer: string): DocumentNode {
+export function extractByJsonPointer(document: unknown, pointer: string): Record<string, unknown> {
   if (!pointer.startsWith('/')) {
     throw new Error('$ref pointer must start with a leading slash');
   }
 
-  if (typeof document !== 'object' || document === null) {
+  if (!isPlainObjectType(document)) {
     throw new Error('document must be an object');
   }
 
-  let target = document as Record<string, unknown>;
+  let target = document;
 
   for (const segment of pointer.slice(1).split('/')) {
     const nextTarget = target[segment];
 
-    if (nextTarget === undefined || typeof nextTarget !== 'object' || nextTarget === null) {
+    if (!isPlainObjectType(nextTarget)) {
       throw new Error(`JSON Pointer "${pointer}" is not found in "${JSON.stringify(document)}"`);
     }
 
-    target = nextTarget as Record<string, unknown>;
+    target = nextTarget;
   }
 
   return target;
