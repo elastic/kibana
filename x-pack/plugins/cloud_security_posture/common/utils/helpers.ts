@@ -184,7 +184,7 @@ export const getBenchmarkCisName = (benchmarkId: string) => {
     case 'cis_eks':
       return 'CIS EKS';
     case 'cis_gcp':
-      return 'CIS_GCP';
+      return 'CIS GCP';
   }
 };
 

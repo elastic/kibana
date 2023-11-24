@@ -280,7 +280,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     truncateText: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.COMPLIANCE,
     render: (data: BenchmarkScore) => {
-      return <ComplianceScoreBar totalPassed={data.totalPassed} totalFailed={data.totalFailed} />;
+      return <ComplianceScoreBar totalPassed={data?.totalPassed} totalFailed={data?.totalFailed} />;
     },
   },
 ];

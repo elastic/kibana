@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {
+    it(`Should return all benchmarks if user has CSP integrations`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -126,6 +126,17 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(res.items.length).equal(3);
+    });
+
+    it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
+        .get(`/internal/cloud_security_posture/benchmarks`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expect(res.items_policies_information.length).equal(3);
       expect(res.total).equal(3);
     });
 
@@ -137,7 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(2);
+      expect(res.items_policies_information.length).equal(2);
       expect(res.total).equal(3);
     });
 
@@ -149,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(1);
+      expect(res.items_policies_information.length).equal(1);
       expect(res.total).equal(3);
     });
 
@@ -161,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(0);
+      expect(res.items_policies_information.length).equal(0);
       expect(res.total).equal(3);
     });
   });

@@ -153,6 +153,7 @@ export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' 
 
 export interface GetBenchmarkResponse {
   items: BenchmarkVersion2[];
+  items_policies_information: Benchmark[];
   total: number;
   page: number;
   perPage: number;
