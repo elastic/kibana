@@ -17,7 +17,7 @@ const upselling = new UpsellingService();
 export const contractStartServicesMock: ContractStartServices = {
   extraRoutes$: of([]),
   isSidebarEnabled$: of(true),
-  getComponent$: jest.fn(),
+  getComponents$: jest.fn(() => of({})),
   upselling,
   dataQualityPanelConfig: undefined,
 };

@@ -82,7 +82,7 @@ import type { TopValuesPopoverService } from './app/components/top_values_popove
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { DataQualityPanelConfig } from './overview/types';
-import type { SetComponents, GetComponent$ } from './contract_components';
+import type { SetComponents, GetComponents$ } from './contract_components';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -148,7 +148,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
   isSidebarEnabled$: Observable<boolean>;
-  getComponent$: GetComponent$;
+  getComponents$: GetComponents$;
   upselling: UpsellingService;
   dataQualityPanelConfig: DataQualityPanelConfig | undefined;
 }
