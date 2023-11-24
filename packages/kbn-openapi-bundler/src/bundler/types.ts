@@ -8,13 +8,21 @@
 
 import { OpenAPIV3 } from 'openapi-types';
 
+/**
+ * A plain object node not containing `$ref` property
+ */
 export type PlainObjectNode = Record<string, unknown>;
 
+/**
+ * An array node
+ */
 export type ArrayNode = unknown[];
 
-export interface RefNode {
+/**
+ * A ref node containing `$ref` property besides the others
+ */
+export interface RefNode extends PlainObjectNode {
   $ref: string;
-  [key: string]: unknown;
 }
 
 /**
@@ -22,6 +30,9 @@ export interface RefNode {
  */
 export type DocumentNode = PlainObjectNode | ArrayNode | RefNode;
 
+/**
+ * Stick to OpenAPI v3 document meaning it encompasses `3.0` and `3.1` versions
+ */
 export type Document = OpenAPIV3.Document<Record<string, unknown>>;
 
 export interface ResolvedDocument {
@@ -47,6 +58,9 @@ export interface ResolvedRef extends ResolvedDocument {
   refNode: DocumentNode;
 }
 
+/**
+ * Traverse context storing additional information related to the currently traversed node
+ */
 export interface TraverseDocumentContext {
   /**
    * Root document the spec started parsing from
@@ -64,6 +78,11 @@ export interface TraverseDocumentEntryContext extends TraverseDocumentContext {
   parentKey: string | number;
 }
 
+/**
+ * Entry processor controls when a node should be omitted from the result document.
+ *
+ * When result is `true` - omit the node.
+ */
 export type EntryProcessorFn = (
   node: Readonly<DocumentNode>,
   context: TraverseDocumentEntryContext
