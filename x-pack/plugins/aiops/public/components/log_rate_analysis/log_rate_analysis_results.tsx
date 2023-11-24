@@ -46,6 +46,7 @@ import {
 import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 
 import { FieldFilterPopover } from './field_filter_popover';
+import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResults',
@@ -363,37 +364,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           />
         </EuiFlexItem>
       </ProgressControls>
-      {showLogRateAnalysisResultsTable && (
+      {showLogRateAnalysisResultsTable && currentAnalysisType !== undefined && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
-            title={
-              <span data-test-subj="aiopsAnalysisTypeCalloutTitle">
-                {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-                  ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutTitle', {
-                      defaultMessage: 'Analysis type: Log rate spike',
-                    })
-                  : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutTitle', {
-                      defaultMessage: 'Analysis type: Log rate dip',
-                    })}
-              </span>
-            }
-            color="primary"
-            iconType="pin"
-            size="s"
-          >
-            <EuiText size="s">
-              {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-                ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutContent', {
-                    defaultMessage:
-                      'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the analysis results table shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.',
-                  })
-                : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContent', {
-                    defaultMessage:
-                      'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.',
-                  })}
-            </EuiText>
-          </EuiCallOut>
+          <LogRateAnalysisTypeCallOut
+            analysisType={currentAnalysisType}
+            zeroDocsFallback={zeroDocsFallback}
+          />
           <EuiSpacer size="xs" />
         </>
       )}
