@@ -146,7 +146,7 @@ export const thresholdExecutor = async ({
 
     const createResult =
       alertSuppression?.duration &&
-      runOpts?.experimentalFeatures?.alertsSuppressionForThresholdRuleEnabled
+      runOpts?.experimentalFeatures?.alertSuppressionForThresholdRuleEnabled
         ? await bulkCreateSuppressedThresholdAlerts({
             buckets,
             completeRule,

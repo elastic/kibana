@@ -180,8 +180,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
-  const isAlertsSuppressionForThresholdRuleFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'alertsSuppressionForThresholdRuleEnabled'
+  const isAlertSuppressionForThresholdRuleFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForThresholdRuleEnabled'
   );
   const isThresholdRule = getIsThresholdRule(ruleType);
 
@@ -476,7 +476,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [license, groupByFields, isThresholdRule, enableThresholdSuppression]
   );
 
-  const AlertsSuppressionMissingFields = useCallback(
+  const AlertSuppressionMissingFields = useCallback(
     ({ suppressionMissingFields }) => (
       <EuiRadioGroup
         disabled={
@@ -764,8 +764,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
-  const isAlertsSuppressionEnabled =
-    isQueryRule(ruleType) || (isThresholdRule && isAlertsSuppressionForThresholdRuleFeatureEnabled);
+  const isAlertSuppressionEnabled =
+    isQueryRule(ruleType) || (isThresholdRule && isAlertSuppressionForThresholdRuleFeatureEnabled);
 
   return (
     <>
@@ -938,7 +938,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <EuiSpacer size="m" />
-          <RuleTypeEuiFormRow $isVisible={isAlertsSuppressionEnabled && isThresholdRule} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled && isThresholdRule} fullWidth>
             <CommonUseField
               path="enableThresholdSuppression"
               componentProps={{
@@ -952,7 +952,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
-            $isVisible={isAlertsSuppressionEnabled && isQueryRule(ruleType)}
+            $isVisible={isAlertSuppressionEnabled && isQueryRule(ruleType)}
             data-test-subj="alertSuppressionInput"
           >
             <UseField
@@ -969,7 +969,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <IntendedRuleTypeEuiFormRow
-            $isVisible={isAlertsSuppressionEnabled}
+            $isVisible={isAlertSuppressionEnabled}
             data-test-subj="alertSuppressionDuration"
           >
             <UseMultiFields
@@ -991,7 +991,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <IntendedRuleTypeEuiFormRow
             // only query rule has this suppression configuration
-            $isVisible={isAlertsSuppressionEnabled && isQueryRule(ruleType)}
+            $isVisible={isAlertSuppressionEnabled && isQueryRule(ruleType)}
             data-test-subj="alertSuppressionMissingFields"
             label={
               <span>
@@ -1007,7 +1007,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 },
               }}
             >
-              {AlertsSuppressionMissingFields}
+              {AlertSuppressionMissingFields}
             </UseMultiFields>
           </IntendedRuleTypeEuiFormRow>
 

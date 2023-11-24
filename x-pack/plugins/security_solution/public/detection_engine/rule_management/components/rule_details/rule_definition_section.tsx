@@ -430,8 +430,8 @@ const prepareDefinitionSectionListItems = (
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
   {
-    isAlertsSuppressionForThresholdRuleFeatureEnabled,
-  }: { isAlertsSuppressionForThresholdRuleFeatureEnabled: boolean }
+    isAlertSuppressionForThresholdRuleFeatureEnabled,
+  }: { isAlertSuppressionForThresholdRuleFeatureEnabled: boolean }
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -673,7 +673,7 @@ const prepareDefinitionSectionListItems = (
       });
     }
 
-    if (rule.type !== 'threshold' || isAlertsSuppressionForThresholdRuleFeatureEnabled) {
+    if (rule.type !== 'threshold' || isAlertSuppressionForThresholdRuleFeatureEnabled) {
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionDurationPropertyTitle">
@@ -743,15 +743,15 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const isAlertsSuppressionForThresholdRuleFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'alertsSuppressionForThresholdRuleEnabled'
+  const isAlertSuppressionForThresholdRuleFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForThresholdRuleEnabled'
   );
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
     savedQuery,
-    { isAlertsSuppressionForThresholdRuleFeatureEnabled }
+    { isAlertSuppressionForThresholdRuleFeatureEnabled }
   );
 
   return (

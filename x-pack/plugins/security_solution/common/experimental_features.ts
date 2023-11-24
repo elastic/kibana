@@ -112,7 +112,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables alerts suppression for threshold rules
    */
-  alertsSuppressionForThresholdRuleEnabled: false,
+  alertSuppressionForThresholdRuleEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
