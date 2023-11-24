@@ -8,9 +8,14 @@ set -euo pipefail
 echo "--- Collecting commit info"
 ts-node .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.ts
 
-cat << EOF | buildkite-agent pipeline upload
+if [[ "$AUTO_PROMOTE_RC" == "true" ]]; then
+  echo "--- Auto promoting to RC, skipping confirmation"
+else
+  echo "--- Uploading confirmation step"
+  cat << EOF | buildkite-agent pipeline upload
   steps:
     - block: "Confirm deployment"
       prompt: "Are you sure you want to deploy to production? (dry run: ${DRY_RUN:-false})"
       depends_on: collect_data
 EOF
+fi

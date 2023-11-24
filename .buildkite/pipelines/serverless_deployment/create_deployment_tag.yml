@@ -8,9 +8,11 @@ steps:
     commands:
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state initialize
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state collect_commits
-      - ts-node .buildkite/scripts/serverless/create_deploy_tag/list_commit_candidates.ts 25
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/list_commit_candidates.ts 40
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state wait_for_selection
     key: select_commit
+    env:
+      AUTO_PROMOTE_RC: $AUTO_PROMOTE_RC
 
   - wait: ~
 
@@ -21,6 +23,8 @@ steps:
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state wait_for_confirmation
     key: collect_data
     depends_on: select_commit
+    env:
+      AUTO_PROMOTE_RC: $AUTO_PROMOTE_RC
 
   - wait: ~
 

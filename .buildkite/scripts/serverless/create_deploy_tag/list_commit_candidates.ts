@@ -34,8 +34,33 @@ async function main(commitCountArg: string) {
     input: commitListWithBuildResultsHtml,
   });
 
-  console.log('--- Generating buildkite input step');
-  addBuildkiteInputStep();
+  if (process.env.AUTO_PROMOTE_RC === 'true') {
+    console.log('--- Finding suitable candidate for auto-promotion');
+
+    const suitableCandidate = commitsWithStatuses.find((commit) => {
+      return (
+        commit.checks.onMergeBuild?.success &&
+        commit.checks.ftrBuild?.success &&
+        commit.checks.artifactBuild?.success
+      );
+    });
+
+    if (!suitableCandidate) {
+      throw new Error(
+        `Could not find a suitable candidate for auto-promotion in the last ${commitCount} commits. Stopping.`
+      );
+    }
+
+    console.log('Release candidate: ', suitableCandidate);
+
+    console.log('--- Setting buildkite meta-data for auto-promotion');
+    exec(`buildkite-agent meta-data set ${SELECTED_COMMIT_META_KEY} ${suitableCandidate.sha}`, {
+      stdio: 'inherit',
+    });
+  } else {
+    console.log('--- Generating buildkite input step');
+    addBuildkiteInputStep();
+  }
 }
 
 async function collectAvailableCommits(commitCount: number): Promise<GitCommitExtract[]> {
