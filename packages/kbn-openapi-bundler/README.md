@@ -47,3 +47,12 @@ yarn openapi:bundle
 
 This command will produce a bundled file `my-plugin/target/openapi/my-plugin.bundled.schema.yaml` containing
 all specs matching `./**/*.schema.yaml` glob pattern.
+
+## Supported custom (`x-` prefixed) properties
+
+OpenAPI specification allows to define custom properties. They can be used to describe extra functionality that is not covered by the standard OpenAPI Specification. We currently support the following custom properties
+
+| Custom property | Supported values        | Description                                                                                                                                                                                                                           |
+| --------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `x-internal`    | `true` or `false`       | Omit the node and its children from the result document. It's useful when it's necessary to hide some chunk of OpenAPI spec because functionality supporting it is hidden under a feature flag or the chunk is just for internal use. |
+| `x-modify`      | `partial` or `required` | Modifies the node. Value `partial` leads to removing `required` property making params under `properties` optional. Value `required` leads to adding or extending `required` property by adding all param names under `properties`.   |
