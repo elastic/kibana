@@ -48,6 +48,7 @@ export interface TrainedModelsProvider {
       params: estypes.MlPutTrainedModelRequest
     ): Promise<estypes.MlPutTrainedModelResponse>;
     getELSER(params?: GetElserOptions): Promise<ModelDefinitionResponse>;
+    installElasticModel(modelId: string): Promise<estypes.MlTrainedModelConfig>;
   };
 }
 
@@ -129,6 +130,17 @@ export function getTrainedModelsProvider(
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ scopedClient, mlClient }) => {
               return modelsProvider(scopedClient, mlClient, cloud).getELSER(params);
+            });
+        },
+        async installElasticModel(modelId: string) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ scopedClient, mlClient, mlSavedObjectService }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).installElasticModel(
+                modelId,
+                mlSavedObjectService
+              );
             });
         },
       };
