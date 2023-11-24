@@ -209,6 +209,7 @@ const rawRuleActionSchema = schema.object({
     })
   ),
   alertsFilter: schema.maybe(rawRuleAlertsFilterSchema),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
 export const rawRuleSchema = schema.object({
@@ -266,5 +267,6 @@ export const rawRuleSchema = schema.object({
       severity: schema.maybe(schema.string()),
     })
   ),
-  params: schema.recordOf(schema.string(), schema.any()),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
+  typeVersion: schema.maybe(schema.number()),
 });
