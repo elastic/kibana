@@ -68,5 +68,6 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/reporting-export-types-csv-common",
     "@kbn/mock-idp-plugin",
+    "@kbn/index-management-plugin",
   ]
 }
