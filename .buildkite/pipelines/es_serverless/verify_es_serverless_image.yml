@@ -97,6 +97,7 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
         label: 'Serverless Rule Management - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           queue: n2-4-spot
         depends_on: build
@@ -109,6 +110,7 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
         label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           queue: n2-4-spot
         depends_on: build
