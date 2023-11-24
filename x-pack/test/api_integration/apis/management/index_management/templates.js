@@ -25,8 +25,7 @@ export default function ({ getService }) {
     cleanUpTemplates,
   } = registerHelpers({ supertest });
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/170980
-  describe.skip('index templates', () => {
+  describe('index templates', () => {
     after(async () => await cleanUpTemplates());
 
     describe('get all', () => {
@@ -126,6 +125,7 @@ export default function ({ getService }) {
           'order',
           'version',
           '_kbnMeta',
+          'composedOf',
         ].sort();
 
         expect(Object.keys(legacyTemplateFound).sort()).to.eql(expectedLegacyKeys);
@@ -200,6 +200,7 @@ export default function ({ getService }) {
           'order',
           'version',
           '_kbnMeta',
+          'composedOf',
         ].sort();
         const expectedTemplateKeys = ['aliases', 'mappings', 'settings'].sort();
 
