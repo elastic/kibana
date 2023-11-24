@@ -140,7 +140,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                                                 {model.os === 'Linux' && model.arch === 'amd64' ? (
                                                   <FormattedMessage
                                                     id="xpack.ml.trainedModels.addModelFlyout.intelLinuxLabel"
-                                                    defaultMessage="Intel and Linux Optimized"
+                                                    defaultMessage="Intel and Linux optimized"
                                                   />
                                                 ) : (
                                                   <FormattedMessage
