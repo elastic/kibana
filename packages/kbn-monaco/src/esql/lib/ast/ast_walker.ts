@@ -112,7 +112,7 @@ export function getMatchField(ctx: EnrichCommandContext) {
   }
   const identifier = ctx.sourceIdentifier(1);
   if (identifier) {
-    const fn = createOption(ctx.ON()!.text, ctx);
+    const fn = createOption(ctx.ON()!.text.toLowerCase(), ctx);
     if (identifier.text) {
       fn.args.push(createColumn(identifier));
     }
@@ -126,7 +126,7 @@ export function getMatchField(ctx: EnrichCommandContext) {
 export function getEnrichClauses(ctx: EnrichCommandContext) {
   const ast: ESQLCommandOption[] = [];
   if (ctx.WITH()) {
-    const option = createOption(ctx.WITH()!.text, ctx);
+    const option = createOption(ctx.WITH()!.text.toLowerCase(), ctx);
     ast.push(option);
     const clauses = ctx.enrichWithClause();
     for (const clause of clauses) {
@@ -455,7 +455,7 @@ export function visitByOption(ctx: StatsCommandContext) {
   if (!ctx.BY()) {
     return [];
   }
-  const option = createOption(ctx.BY()!.text, ctx);
+  const option = createOption(ctx.BY()!.text.toLowerCase(), ctx);
   for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
     if (qnCtx?.text?.length) {
       option.args.push(createColumn(qnCtx));
@@ -517,7 +517,10 @@ function visitDissectOptions(ctx: CommandOptionsContext | undefined) {
   }
   const options: ESQLCommandOption[] = [];
   for (const optionCtx of ctx.commandOption()) {
-    const option = createOption(sanifyIdentifierString(optionCtx.identifier()), optionCtx);
+    const option = createOption(
+      sanifyIdentifierString(optionCtx.identifier()).toLowerCase(),
+      optionCtx
+    );
     options.push(option);
     // it can throw while accessing constant for incomplete commands, so try catch it
     try {
