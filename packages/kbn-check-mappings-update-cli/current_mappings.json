@@ -1918,6 +1918,7 @@
     }
   },
   "epm-packages": {
+    "dynamic": false,
     "properties": {
       "name": {
         "type": "keyword"
