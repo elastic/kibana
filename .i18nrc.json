@@ -1,7 +1,7 @@
 {
   "paths": {
     "advancedSettings": "src/plugins/advanced_settings",
-    "aiAssistantManagement": "src/plugins/ai_assistant_management",
+    "aiAssistantManagementSelection": "src/plugins/ai_assistant_management/selection",
     "aiAssistantManagementObservability": "src/plugins/ai_assistant_management/observability",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",

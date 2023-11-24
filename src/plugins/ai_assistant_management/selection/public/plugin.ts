@@ -45,10 +45,10 @@ export class AiAssistantManagementPlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'ai_assistant',
-        title: i18n.translate('aiAssistantManagement.app.title', {
+        title: i18n.translate('aiAssistantManagementSelection.app.title', {
           defaultMessage: 'AI Assistants',
         }),
-        description: i18n.translate('aiAssistantManagement.app.description', {
+        description: i18n.translate('aiAssistantManagementSelection.app.description', {
           defaultMessage: 'Manage your AI Assistants.',
         }),
         icon: 'sparkles',
@@ -60,7 +60,7 @@ export class AiAssistantManagementPlugin
 
     management.sections.section.kibana.registerApp({
       id: 'aiAssistantManagement',
-      title: i18n.translate('aiAssistantManagement.managementSectionLabel', {
+      title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
         defaultMessage: 'AI Assistants',
       }),
       order: 1,

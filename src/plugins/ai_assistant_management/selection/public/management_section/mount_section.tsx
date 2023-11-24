@@ -30,7 +30,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
   const { theme$ } = core.theme;
 
   coreStart.chrome.docTitle.change(
-    i18n.translate('aiAssistantManagement.app.titleBar', {
+    i18n.translate('aiAssistantManagementSelection.app.titleBar', {
       defaultMessage: 'AI Assistants',
     })
   );
