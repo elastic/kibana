@@ -7,13 +7,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { share } from 'rxjs';
 import { getPlaceholderObservable, getStreamObservable } from './stream_observable';
 
 interface UseStreamProps {
   amendMessage: (message: string) => void;
   isError: boolean;
   content?: string;
+  connectorTypeTitle: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 interface UseStream {
@@ -39,6 +39,7 @@ interface UseStream {
 export const useStream = ({
   amendMessage,
   content,
+  connectorTypeTitle,
   reader,
   isError,
 }: UseStreamProps): UseStream => {
@@ -49,9 +50,9 @@ export const useStream = ({
   const observer$ = useMemo(
     () =>
       content == null && reader != null
-        ? getStreamObservable(reader, setLoading, isError)
+        ? getStreamObservable({ connectorTypeTitle, reader, setLoading, isError })
         : getPlaceholderObservable(),
-    [content, isError, reader]
+    [content, isError, reader, connectorTypeTitle]
   );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();
@@ -66,7 +67,7 @@ export const useStream = ({
     }
   }, [complete, onCompleteStream]);
   useEffect(() => {
-    const newSubscription = observer$.pipe(share()).subscribe({
+    const newSubscription = observer$.subscribe({
       next: ({ message, loading: isLoading }) => {
         setLoading(isLoading);
         setPendingMessage(message);

@@ -51,7 +51,7 @@ import {
   openTakeActionButtonAndSelectItem,
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { deleteAlertsAndRules } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
