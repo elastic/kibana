@@ -164,8 +164,8 @@ function validateFunctionColumnArg(
 ) {
   const messages: ESQLMessage[] = [];
   if (isColumnItem(actualArg) && actualArg.name) {
-    const columnHit = getColumnHit(actualArg.name, references);
-    if (!columnHit) {
+    const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
+    if (!columnCheck) {
       messages.push(
         getMessageFromId({
           messageId: 'unknownColumn',
@@ -176,8 +176,10 @@ function validateFunctionColumnArg(
         })
       );
     } else {
+      // guaranteed by the check above
+      const columnHit = getColumnHit(nameHit!, references);
       // check the type of the column hit
-      const typeHit = columnHit.type;
+      const typeHit = columnHit!.type;
       if (!isEqualType(actualArg, argDef, references, parentCommand)) {
         messages.push(
           getMessageFromId({
@@ -521,8 +523,8 @@ function validateColumnForCommand(
       );
     }
   } else {
-    const columnCheck = columnExists(column.name, references);
-    if (columnCheck) {
+    const { hit: columnCheck, nameHit } = columnExists(column, references);
+    if (columnCheck && nameHit) {
       const commandDef = getCommandDefinition(commandName);
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
         ({ type, innerType }) => type === 'column' && innerType
@@ -530,7 +532,7 @@ function validateColumnForCommand(
 
       if (columnParamsWithInnerTypes.length) {
         // this should be guaranteed by the columnCheck above
-        const columnRef = getColumnHit(column.name, references)!;
+        const columnRef = getColumnHit(nameHit, references)!;
         if (
           columnParamsWithInnerTypes.every(({ innerType }) => {
             return innerType !== columnRef.type;
@@ -546,7 +548,7 @@ function validateColumnForCommand(
                 type: supportedTypes.join(', '),
                 typeCount: supportedTypes.length,
                 givenType: columnRef.type,
-                column: column.name,
+                column: nameHit,
               },
               locations: column.location,
             })
@@ -554,7 +556,7 @@ function validateColumnForCommand(
         }
       }
       if (
-        hasWildcard(column.name) &&
+        hasWildcard(nameHit) &&
         !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
       ) {
         messages.push(
@@ -562,7 +564,7 @@ function validateColumnForCommand(
             messageId: 'wildcardNotSupportedForCommand',
             values: {
               command: commandName,
-              value: column.name,
+              value: nameHit,
             },
             locations: column.location,
           })

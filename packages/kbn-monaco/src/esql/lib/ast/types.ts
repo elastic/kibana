@@ -78,3 +78,5 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
 }
+
+export type AstProviderFn = (text: string | undefined) => Promise<{ ast: ESQLAst }>;

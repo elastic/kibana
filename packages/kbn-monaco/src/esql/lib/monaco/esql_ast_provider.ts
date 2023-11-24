@@ -9,7 +9,9 @@
 import type { ESQLCallbacks } from '../../../..';
 import type { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../../worker/esql_worker';
-import { getHoverItem, getSignatureHelp, suggest } from '../ast/autocomplete/autocomplete';
+import { suggest } from '../ast/autocomplete/autocomplete';
+import { getHoverItem } from '../ast/hover';
+import { getSignatureHelp } from '../ast/signature';
 import { validateAst } from '../ast/validation/validation';
 
 export class ESQLAstAdapter {

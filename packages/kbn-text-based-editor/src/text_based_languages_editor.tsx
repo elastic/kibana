@@ -309,7 +309,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return await getIndicesForAutocomplete(dataViews);
       },
       getFieldsFor: async (options: { sourcesOnly?: boolean } | { customQuery?: string } = {}) => {
-        const pipes = editorModel.current?.getValue().split('|');
+        // we're caching here with useMemo
+        // and when the editor becomes multi-line it cann be disposed and the ref we had throws
+        // with this method we can get always the fresh model to use
+        const model = monaco.editor
+          .getModels()
+          .find((m) => !m.isDisposed() && m.isAttachedToEditor());
+        const pipes = model?.getValue().split('|');
         pipes?.pop();
         let validContent = pipes?.join('|');
         if ('customQuery' in options && options.customQuery) {
@@ -346,7 +352,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
-      if (!editorModel.current || language !== 'esql') return;
+      if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await ESQLLang.validate(
         editorModel.current,

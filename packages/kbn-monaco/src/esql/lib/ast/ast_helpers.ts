@@ -9,9 +9,10 @@
 import type { ParserRuleContext } from 'antlr4ts/ParserRuleContext';
 import { ErrorNode } from 'antlr4ts/tree/ErrorNode';
 import type { TerminalNode } from 'antlr4ts/tree/TerminalNode';
-import type {
+import {
   ArithmeticUnaryContext,
   DecimalValueContext,
+  esql_parser,
   IntegerValueContext,
   QualifiedIntegerLiteralContext,
 } from '../../antlr/esql_parser';
@@ -26,6 +27,7 @@ import type {
   ESQLSource,
   ESQLColumn,
   ESQLCommandOption,
+  ESQLAstItem,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -125,22 +127,60 @@ export function createFunction(
   };
 }
 
+function walkFunctionStructure(
+  args: ESQLAstItem[],
+  initialLocation: ESQLLocation,
+  prop: 'min' | 'max',
+  getNextItemIndex: (arg: ESQLAstItem[]) => number
+) {
+  let nextArg: ESQLAstItem | undefined = args[getNextItemIndex(args)];
+  const location = { ...initialLocation };
+  while (Array.isArray(nextArg) || nextArg) {
+    if (Array.isArray(nextArg)) {
+      nextArg = nextArg[getNextItemIndex(nextArg)];
+    } else {
+      location[prop] = Math[prop](location[prop], nextArg.location[prop]);
+      if (nextArg.type === 'function') {
+        nextArg = nextArg.args[getNextItemIndex(nextArg.args)];
+      } else {
+        nextArg = undefined;
+      }
+    }
+  }
+  return location[prop];
+}
+
+export function computeLocationExtends(fn: ESQLFunction) {
+  const location = fn.location;
+  if (fn.args) {
+    // get min location navigating in depth keeping the left/first arg
+    location.min = walkFunctionStructure(fn.args, location, 'min', () => 0);
+    // get max location navigating in depth keeping the right/last arg
+    location.max = walkFunctionStructure(fn.args, location, 'max', (args) => args.length - 1);
+  }
+  return location;
+}
+
 function getQuotedText(ctx: ParserRuleContext) {
   return (
-    ctx.tryGetToken(73 /* esql_parser.SRC_QUOTED_IDENTIFIER*/, 0) ||
-    ctx.tryGetToken(64 /* esql_parser.QUOTED_IDENTIFIER */, 0)
+    ctx.tryGetToken(esql_parser.SRC_QUOTED_IDENTIFIER, 0) ||
+    ctx.tryGetToken(esql_parser.QUOTED_IDENTIFIER, 0)
   );
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
   return (
-    ctx.tryGetToken(72 /* esql_parser.SRC_UNQUOTED_IDENTIFIER */, 0) ||
-    ctx.tryGetToken(63 /* esql_parser.UNQUOTED_IDENTIFIER */, 0)
+    ctx.tryGetToken(esql_parser.SRC_UNQUOTED_IDENTIFIER, 0) ||
+    ctx.tryGetToken(esql_parser.UNQUOTED_IDENTIFIER, 0)
   );
 }
 
 export function sanifyIdentifierString(ctx: ParserRuleContext) {
-  return getUnquotedText(ctx)?.text || getQuotedText(ctx)?.text.replace(/`/g, '') || ctx.text;
+  return (
+    getUnquotedText(ctx)?.text ||
+    getQuotedText(ctx)?.text.replace(/(`)/g, '') ||
+    ctx.text.replace(/(`)/g, '') // for some reason some quoted text is not detected correctly by the parser
+  );
 }
 
 export function createSource(

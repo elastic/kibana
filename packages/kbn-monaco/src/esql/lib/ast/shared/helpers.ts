@@ -31,6 +31,7 @@ import {
   ESQLTimeInterval,
 } from '../types';
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import { removeMarkerArgFromArgsList } from './context';
 
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
   return arg && !Array.isArray(arg) && arg.type === 'function';
@@ -49,15 +50,20 @@ export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
 }
 
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
-  return !Array.isArray(arg) && arg.type === 'literal';
+  return arg && !Array.isArray(arg) && arg.type === 'literal';
 }
 
 export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
-  return !Array.isArray(arg) && arg.type === 'timeInterval';
+  return arg && !Array.isArray(arg) && arg.type === 'timeInterval';
 }
 
 export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
   return isFunctionItem(arg) && arg.name === '=';
+}
+
+export function isAssignmentComplete(node: ESQLFunction | undefined) {
+  const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
+  return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
 }
 
 export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
@@ -406,13 +412,24 @@ export function hasWildcard(name: string) {
 }
 
 export function columnExists(
-  column: string,
+  column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  if (fields.has(column) || variables.has(column)) {
-    return true;
+  if (fields.has(column.name) || variables.has(column.name)) {
+    return { hit: true, nameHit: column.name };
   }
-  return Boolean(fuzzySearch(column, fields.keys()) || fuzzySearch(column, variables.keys()));
+  if (column.quoted) {
+    const trimmedName = column.name.replace(/\s/g, '');
+    if (variables.has(trimmedName)) {
+      return { hit: true, nameHit: trimmedName };
+    }
+  }
+  if (
+    Boolean(fuzzySearch(column.name, fields.keys()) || fuzzySearch(column.name, variables.keys()))
+  ) {
+    return { hit: true, nameHit: column.name };
+  }
+  return { hit: false };
 }
 
 export function sourceExists(index: string, sources: Set<string>) {
@@ -420,4 +437,12 @@ export function sourceExists(index: string, sources: Set<string>) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));
+}
+
+export function getLastCharFromTrimmed(text: string) {
+  return text[text.trimEnd().length - 1];
+}
+
+export function isRestartingExpression(text: string) {
+  return getLastCharFromTrimmed(text) === ',';
 }

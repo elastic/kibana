@@ -76,6 +76,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
     ],
     autoClosingPairs: [
       { open: '(', close: ')' },
+      { open: '[', close: ']' },
       { open: `'`, close: `'` },
       { open: '"', close: '"' },
     ],
