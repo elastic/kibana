@@ -59,6 +59,7 @@
       "packages/ml/date_picker",
       "packages/ml/trained_models_utils",
       "packages/ml/category_validator",
+      "packages/ml/ui_actions",
       "plugins/ml"
     ],
     "xpack.monitoring": ["plugins/monitoring"],
