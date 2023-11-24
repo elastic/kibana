@@ -50,7 +50,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
-  create: async (
+  upsert: async (
     body: Record<string, unknown>,
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) =>
@@ -62,7 +62,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .send(body)
       .expect(expectStatusCode),
   delete: async (idField: string, idValue: string) => {
-    const qs = querystring.stringify({ idField, idValue });
+    const qs = querystring.stringify({ id_field: idField, id_value: idValue });
     const route = `${routeWithNamespace(ASSET_CRITICALITY_URL, namespace)}?${qs}`;
     return supertest
       .delete(route)
@@ -72,7 +72,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .expect(200);
   },
   get: async (idField: string, idValue: string) => {
-    const qs = querystring.stringify({ idField, idValue });
+    const qs = querystring.stringify({ id_field: idField, id_value: idValue });
     const route = `${routeWithNamespace(ASSET_CRITICALITY_URL, namespace)}?${qs}`;
     return supertest
       .get(route)
