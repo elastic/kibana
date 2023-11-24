@@ -100,9 +100,15 @@ export function toCommitInfoHtml(sectionTitle: string, commitInfo: GitCommitExtr
     `<a href="${commitInfo.prLink}">$&</a>`
   );
 
+  const commitDateUTC = new Date(commitInfo.date!).toUTCString();
+
   return `<div>
 <div><h4>${sectionTitle}</h4></div>
-<div><a href="${commitInfo.link}">${commitInfo.sha}</a> by ${commitInfo.author} on ${commitInfo.date}</div>
+<div><a href="${commitInfo.link}">
+${commitInfo.sha}</a>
+ by <strong>${commitInfo.author}</strong>
+ on <strong>${commitDateUTC}</strong>
+</div>
 <div><small>:merged-pr: ${titleWithLink}</small></div>
 </div>`;
 }

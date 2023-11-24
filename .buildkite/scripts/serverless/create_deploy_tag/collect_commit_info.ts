@@ -39,7 +39,7 @@ async function main() {
   // Target commit info
   const selectedCommit = await hashToCommit(selectedSha);
   const selectedCommitInfo = getCommitExtract(selectedCommit);
-  addBuildkiteInfoSection(toCommitInfoHtml('Target commit:', selectedCommitInfo));
+  addBuildkiteInfoSection(toCommitInfoHtml('Target commit to deploy:', selectedCommitInfo));
 
   // Buildkite build info
   const buildkiteBuild = await getOnMergePRBuild(selectedSha);
