@@ -8,24 +8,6 @@
 
 import { monaco } from '../../../../..';
 
-/** @public **/
-export interface ESQLCallbacks {
-  getSources?: CallbackFn;
-  getFieldsFor?: CallbackFn<
-    { sourcesOnly?: boolean } | { customQuery?: string },
-    { name: string; type: string }
-  >;
-  getPolicies?: CallbackFn<
-    {},
-    { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
-  >;
-  getPolicyFields?: CallbackFn;
-  getPolicyMatchingField?: CallbackFn;
-}
-
-/** @internal **/
-type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
-
 /** @internal **/
 export interface UserDefinedVariables {
   userDefined: string[];
