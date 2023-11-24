@@ -86,7 +86,6 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
           disabled={isJobCreated}
           placeholder="destination index"
           value={destinationIndex}
-          // onChange={(e) => setFormState({ destinationIndex: e.target.value })}
           onChange={(e) => onDestinationIndexChange(e.target.value)}
           aria-label={i18n.translate(
             'xpack.ml.creationWizardUtils.destinationIndexInputAriaLabel',
