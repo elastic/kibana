@@ -29,11 +29,9 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
       await browser.get(deployment.getHostPort() + '/bootstrap.js');
       await browser.setCookie('sid', session.getCookieValue());
-      // Navigating to project home page
+      // Cookie should be already set in the browsing context, navigating to the Home page
       await browser.get(deployment.getHostPort());
-      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
-      // to use the yml setting, e.g. cloud
-      await browser.setLocalStorageItem('home:welcome:show', 'false');
+      // Verifying that we are logged in
       if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
         log.debug('userMenuButton found, login passed');
       } else {
@@ -44,10 +42,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     async navigateToLoginForm() {
       const url = deployment.getHostPort() + '/login';
       await browser.get(url);
-      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
-      // to use the yml setting, e.g. cloud
-      await browser.setLocalStorageItem('home:welcome:show', 'false');
-
       log.debug('Waiting for Login Form to appear.');
       await retry.waitForWithTimeout('login form', 10_000, async () => {
         return await pageObjects.security.isLoginFormVisible();
