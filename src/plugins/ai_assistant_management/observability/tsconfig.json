@@ -23,7 +23,6 @@
     "@kbn/rule-registry-plugin",
     "@kbn/features-plugin",
     "@kbn/security-plugin",
-    "@kbn/task-manager-plugin"
   ],
   "exclude": ["target/**/*"]
 }
