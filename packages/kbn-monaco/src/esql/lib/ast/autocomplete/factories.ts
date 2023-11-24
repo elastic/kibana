@@ -115,7 +115,7 @@ export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDef
 export const buildVariablesDefinitions = (variables: string[]): AutocompleteCommandDefinition[] =>
   variables.map((label) => ({
     label,
-    insertText: label,
+    insertText: /[^a-zA-Z\d]/.test(label) ? `\`${label}\`` : label,
     kind: 4,
     detail: i18n.translate('monaco.esql.autocomplete.variableDefinition', {
       defaultMessage: `Variable specified by the user within the ES|QL query`,
