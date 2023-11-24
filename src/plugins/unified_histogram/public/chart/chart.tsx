@@ -123,7 +123,7 @@ export function Chart({
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { chartRef, closeChartOptions, toggleHideChart } = useChartActions({
+  const { chartRef, toggleHideChart } = useChartActions({
     chart,
     onChartHiddenChange,
   });
