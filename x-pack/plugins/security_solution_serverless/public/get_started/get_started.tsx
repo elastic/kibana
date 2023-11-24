@@ -32,6 +32,7 @@ import { Progress } from './progress_bar';
 import { ProductTierBadge } from './welcome_panel/product_tier_badge';
 import { useKibana } from '../common/services';
 import { getProjectFeaturesUrl } from '../navigation/links/util';
+import { StepContextProvider } from './context/step_context';
 
 const CONTENT_WIDTH = 1150;
 
@@ -200,14 +201,20 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
           background-color: ${euiTheme.colors.lightestShade};
         `}
       >
-        <TogglePanel
-          finishedSteps={finishedSteps}
-          activeSections={activeSections}
-          activeProducts={activeProducts}
+        <StepContextProvider
           expandedCardSteps={expandedCardSteps}
-          onStepClicked={onStepClicked}
+          finishedSteps={finishedSteps}
           onStepButtonClicked={onStepButtonClicked}
-        />
+        >
+          <TogglePanel
+            finishedSteps={finishedSteps}
+            activeSections={activeSections}
+            activeProducts={activeProducts}
+            expandedCardSteps={expandedCardSteps}
+            onStepClicked={onStepClicked}
+            onStepButtonClicked={onStepButtonClicked}
+          />
+        </StepContextProvider>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

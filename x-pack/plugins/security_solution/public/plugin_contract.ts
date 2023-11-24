@@ -15,6 +15,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
+import { landingPageContext$ } from './common/components/landing_page/land_page_context';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
@@ -53,6 +54,7 @@ export class PluginContract {
 
   public getStartContract(): PluginStart {
     return {
+      getLandingPageContext$: () => landingPageContext$,
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setComponents: (components) => {

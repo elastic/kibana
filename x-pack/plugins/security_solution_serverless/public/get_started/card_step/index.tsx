@@ -12,7 +12,6 @@ import {
   EuiIcon,
   EuiBadge,
   useEuiTheme,
-  EuiButtonEmpty,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -21,10 +20,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { CardId, OnStepClicked, OnStepButtonClicked, SectionId, StepId } from '../types';
-import icon_cross from '../images/icon_cross.svg';
 import {
-  UNDO_MARK_AS_DONE_TITLE,
-  MARK_AS_DONE_TITLE,
   ALL_DONE_TEXT,
   COLLAPSE_STEP_BUTTON_LABEL,
   EXPAND_STEP_BUTTON_LABEL,
@@ -59,6 +55,7 @@ const CardStepComponent: React.FC<{
   stepId,
 }) => {
   const { euiTheme } = useEuiTheme();
+
   const { navigateToApp } = useKibana().services.application;
 
   const stepContentRef = React.useRef<HTMLDivElement>(null);
@@ -69,7 +66,8 @@ const CardStepComponent: React.FC<{
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
     [activeProducts, cardId, sectionId]
   );
-  const { title, description, splitPanel, icon } = steps?.find((step) => step.id === stepId) ?? {};
+  const { title, description, splitPanel, icon, checkIfStepCompleted } =
+    steps?.find((step) => step.id === stepId) ?? {};
   const hasStepContent = description != null || splitPanel != null;
   const expandedStepPanelHeight = `calc(${stepContentRef.current?.offsetHeight}px + ${euiTheme.size.l} + ${euiTheme.size.xxxl})`;
 
@@ -90,15 +88,14 @@ const CardStepComponent: React.FC<{
     [hasStepContent, cardId, stepId, navigateToApp, onStepClicked, sectionId, isExpandedStep]
   );
 
-  const isDone = finishedSteps.has(stepId);
-
-  const handleStepButtonClicked = useCallback(
-    (e) => {
-      e.preventDefault();
-      onStepButtonClicked({ stepId, cardId, sectionId, undo: isDone ? true : false });
+  const updateStepStatus = useCallback(
+    (undo: boolean | undefined) => {
+      onStepButtonClicked({ stepId, cardId, sectionId, undo });
     },
-    [cardId, isDone, onStepButtonClicked, sectionId, stepId]
+    [cardId, onStepButtonClicked, sectionId, stepId]
   );
+
+  const isDone = finishedSteps.has(stepId);
 
   useEffect(() => {
     if (isExpandedCard) {
@@ -203,24 +200,6 @@ const CardStepComponent: React.FC<{
           `}
         >
           <div>
-            {isExpandedStep && isExpandedCard && (
-              <EuiButtonEmpty
-                color="primary"
-                iconType={isDone ? icon_cross : 'checkInCircleFilled'}
-                size="xs"
-                css={css`
-                  margin-right: ${euiTheme.base * 0.375}px;
-                  border-radius: ${euiTheme.border.radius.medium};
-                  border: 1px solid ${euiTheme.colors.lightShade};
-                  .euiIcon {
-                    inline-size: ${euiTheme.size.m};
-                  }
-                `}
-                onClick={handleStepButtonClicked}
-              >
-                {isDone ? UNDO_MARK_AS_DONE_TITLE : MARK_AS_DONE_TITLE}
-              </EuiButtonEmpty>
-            )}
             {isDone && (
               <EuiBadge
                 css={css`
@@ -253,8 +232,10 @@ const CardStepComponent: React.FC<{
           description={description}
           hasStepContent={hasStepContent}
           isExpandedStep={isExpandedStep}
+          updateStepStatus={updateStepStatus}
           splitPanel={splitPanel}
           stepId={stepId}
+          checkIfStepCompleted={checkIfStepCompleted}
         />
       </div>
     </EuiPanel>

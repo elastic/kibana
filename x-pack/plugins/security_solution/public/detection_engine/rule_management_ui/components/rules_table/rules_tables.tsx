@@ -36,6 +36,7 @@ import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
+import { isRulesTableEmpty } from './helpers';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -219,9 +220,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
-  const isTableEmpty =
-    ruleManagementFilters?.rules_summary.custom_count === 0 &&
-    ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
+  const isTableEmpty = isRulesTableEmpty(ruleManagementFilters);
 
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 

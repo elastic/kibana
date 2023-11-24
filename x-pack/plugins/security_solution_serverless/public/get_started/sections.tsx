@@ -6,6 +6,7 @@
  */
 import React from 'react';
 
+import type { LandingPageContext } from '@kbn/security-solution-plugin/public/common/components/landing_page/land_page_context';
 import type { StepId } from './types';
 import {
   SectionId,
@@ -32,6 +33,7 @@ import analyzeDataUsingDashboards from './images/analyze_data_using_dashboards.p
 import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
 import { DashboardButton } from './step_links/dashboard_button';
 import overviewVideo from './images/overview_video.svg';
+import { Video } from './card_step/video';
 
 export const createProjectSteps = [
   {
@@ -46,20 +48,7 @@ export const overviewVideoSteps = [
     title: i18n.SECTION_1_CARD_2_TITLE,
     id: OverviewSteps.getToKnowElasticSecurity,
     description: [i18n.INTRODUCTION_STEP1_DESCRIPTION1, i18n.INTRODUCTION_STEP1_DESCRIPTION2],
-    splitPanel: (
-      <iframe
-        allowFullScreen
-        className="vidyard_iframe"
-        frameBorder="0"
-        height="100%"
-        width="100%"
-        referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin"
-        scrolling="no"
-        src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
-        title={i18n.SECTION_1_CARD_2_TITLE_TASK_1_BUTTON_TITLE}
-      />
-    ),
+    splitPanel: <Video />,
   },
 ];
 
@@ -77,6 +66,7 @@ export const addIntegrationsSteps = [
         width="100%"
       />
     ),
+    checkIfStepCompleted: ({ indicesExist }: LandingPageContext) => indicesExist === true,
   },
 ];
 
@@ -111,6 +101,7 @@ export const enablePrebuildRuleSteps = [
         width="100%"
       />
     ),
+    checkIfStepCompleted: ({ rulesInstalled }: LandingPageContext) => rulesInstalled === true,
   },
 ];
 

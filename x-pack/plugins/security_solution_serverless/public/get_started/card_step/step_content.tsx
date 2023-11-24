@@ -7,7 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme, useEuiShadow, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import type { LandingPageContext } from '@kbn/security-solution-plugin/public/common/components/landing_page/land_page_context';
+import { useKibana } from '../../common/services';
 
 const LEFT_CONTENT_PANEL_WIDTH = 486;
 const RIGHT_CONTENT_PANEL_WIDTH = 510;
@@ -18,17 +20,34 @@ const StepContentComponent = ({
   description,
   hasStepContent,
   isExpandedStep,
+  updateStepStatus,
   splitPanel,
   stepId,
+  checkIfStepCompleted,
 }: {
   description?: React.ReactNode[];
   hasStepContent: boolean;
   isExpandedStep: boolean;
+  updateStepStatus: (undo: boolean | undefined) => void;
   splitPanel?: React.ReactNode;
   stepId: string;
+  checkIfStepCompleted?: (context: LandingPageContext) => boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('s');
+  const { securitySolution } = useKibana().services;
+
+  useEffect(() => {
+    securitySolution.getLandingPageContext$().subscribe((context) => {
+      const isDone = checkIfStepCompleted?.(context);
+      updateStepStatus(!isDone);
+    });
+  }, [
+    updateStepStatus,
+    securitySolution,
+    securitySolution.getLandingPageContext$,
+    checkIfStepCompleted,
+  ]);
 
   return hasStepContent && isExpandedStep ? (
     <EuiFlexGroup

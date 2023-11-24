@@ -9,15 +9,30 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useStepContext } from '../context/step_context';
+import { GetStartedWithAlertsCardsId, SectionId, ViewAlertsSteps } from '../types';
 
-const AlertsButtonComponent = () => (
-  <LinkButton id={SecurityPageName.alerts} fill>
-    <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
-      defaultMessage="View alerts"
-    />
-  </LinkButton>
-);
+const AlertsButtonComponent = () => {
+  const { onStepButtonClicked } = useStepContext();
+
+  const onClick = useCallback(() => {
+    onStepButtonClicked({
+      stepId: ViewAlertsSteps.viewAlerts,
+      cardId: GetStartedWithAlertsCardsId.viewAlerts,
+      sectionId: SectionId.getStartedWithAlerts,
+      undo: false,
+    });
+  }, [onStepButtonClicked]);
+
+  return (
+    <LinkButton id={SecurityPageName.alerts} onClick={onClick} fill>
+      <FormattedMessage
+        id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
+        defaultMessage="View alerts"
+      />
+    </LinkButton>
+  );
+};
 
 export const AlertsButton = React.memo(AlertsButtonComponent);
