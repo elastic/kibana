@@ -12,7 +12,9 @@ export function mappingsApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');
 
   const getMapping = (index: string) =>
-    supertest.get(`${API_BASE_PATH}/mapping/${index}`).set('x-elastic-internal-origin', 'xxx');
+    supertest.get(`${API_BASE_PATH}/mapping/${index}`)
+      .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'xxx');
 
   return {
     getMapping,
