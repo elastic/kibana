@@ -892,6 +892,10 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
 };
 
 function getAdditionalField(anomaly: MlAnomaliesTableRecord) {
+  if (anomaly.entityName === undefined || anomaly.entityValue === undefined) {
+    return null;
+  }
+
   if (anomaly.entityName === MLCATEGORY) {
     if (
       anomaly.source.partition_field_name === undefined ||

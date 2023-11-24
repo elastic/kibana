@@ -192,19 +192,20 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         const { categories } = categorizationResult;
 
         const hasBucketCategories = categories.some((c) => c.subTimeRangeCount !== undefined);
-        const categoriesInBucket = hasBucketCategories
-          ? categorizationResult.categories
-              .filter(
-                (category) => category.subFieldCount !== undefined && category.subFieldCount > 0
-              )
+        let categoriesInBucket: any | null = null;
+        if (additionalFilter) {
+          if (additionalFilter !== undefined) {
+            categoriesInBucket = categorizationResult.categories
               .map((category) => ({
                 ...category,
-                count: category.subFieldCount!,
+                count: category.subFieldCount ?? category.subTimeRangeCount!,
                 examples: category.subFieldExamples!,
                 sparkline: undefined,
               }))
-              .sort((a, b) => b.count - a.count)
-          : null;
+              .filter((category) => category.count > 0)
+              .sort((a, b) => b.count - a.count);
+          }
+        }
 
         setData({
           categories,
