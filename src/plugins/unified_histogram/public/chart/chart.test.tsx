@@ -142,7 +142,7 @@ describe('Chart', () => {
     mockUseEditVisualization = undefined;
     const component = await mountComponent();
     expect(
-      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
     ).toBeTruthy();
     expect(
       component.find('[data-test-subj="unifiedHistogramEditVisualization"]').exists()
@@ -152,7 +152,7 @@ describe('Chart', () => {
   test('render when chart is defined and onEditVisualization is defined', async () => {
     const component = await mountComponent();
     expect(
-      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
     ).toBeTruthy();
     expect(
       component.find('[data-test-subj="unifiedHistogramEditVisualization"]').exists()
@@ -162,7 +162,7 @@ describe('Chart', () => {
   test('render when chart.hidden is true', async () => {
     const component = await mountComponent({ chartHidden: true });
     expect(
-      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
     ).toBeTruthy();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeFalsy();
   });
@@ -170,7 +170,7 @@ describe('Chart', () => {
   test('render when chart.hidden is false', async () => {
     const component = await mountComponent({ chartHidden: false });
     expect(
-      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
     ).toBeTruthy();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
   });
@@ -178,7 +178,7 @@ describe('Chart', () => {
   test('render when is text based and not timebased', async () => {
     const component = await mountComponent({ isPlainRecord: true, dataView: dataViewMock });
     expect(
-      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
     ).toBeTruthy();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
   });

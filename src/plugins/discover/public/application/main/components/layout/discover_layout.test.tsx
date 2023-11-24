@@ -150,17 +150,13 @@ describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewMock, undefined, { attachTo: container });
-    expect(
-      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
-    ).toBeNull();
+    expect(container.querySelector('[data-test-subj="dscToggleHistogramButton"]')).toBeNull();
   }, 10000);
 
   test('selected data view with time field displays chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
-    expect(
-      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
-    ).not.toBeNull();
+    expect(container.querySelector('[data-test-subj="dscToggleHistogramButton"]')).not.toBeNull();
   }, 10000);
 
   describe('sidebar', () => {

@@ -57,7 +57,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
                 defaultMessage: 'Hide chart',
               }),
           iconType: isChartHidden ? 'transitionTopIn' : 'transitionTopOut',
-          'data-test-subj': isChartHidden ? 'dscShowChartButton' : 'dscHideChartButton',
+          'data-test-subj': 'dscToggleHistogramButton',
           onClick: onToggleChart,
         },
       ]}

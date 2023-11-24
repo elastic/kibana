@@ -9,7 +9,7 @@
 import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
 import type { Observable } from 'rxjs';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -21,7 +21,6 @@ import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { Histogram } from './histogram';
-import { useChartPanels } from './hooks/use_chart_panels';
 import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -124,24 +123,9 @@ export function Chart({
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const {
-    showChartOptionsPopover,
-    chartRef,
-    toggleChartOptions,
-    closeChartOptions,
-    toggleHideChart,
-  } = useChartActions({
+  const { chartRef, closeChartOptions, toggleHideChart } = useChartActions({
     chart,
     onChartHiddenChange,
-  });
-
-  const panels = useChartPanels({
-    chart,
-    toggleHideChart,
-    onTimeIntervalChange,
-    closePopover: closeChartOptions,
-    onResetChartHeight,
-    isPlainRecord,
   });
 
   const chartVisible = !!(
@@ -306,7 +290,7 @@ export function Chart({
                       ? i18n.translate('unifiedHistogram.hideChartButton', {
                           defaultMessage: 'Hide chart',
                         })
-                      : i18n.translate('unifiedHistogram.hideChartButton', {
+                      : i18n.translate('unifiedHistogram.showChartButton', {
                           defaultMessage: 'Show chart',
                         }),
                     iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
@@ -349,35 +333,6 @@ export function Chart({
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="unifiedHistogramChartOptions"
-              button={
-                <IconButtonGroup
-                  legend={i18n.translate('unifiedHistogram.chartOptionsButton', {
-                    defaultMessage: 'Chart options',
-                  })}
-                  buttonSize="s"
-                  buttons={[
-                    {
-                      label: i18n.translate('unifiedHistogram.chartOptionsButton', {
-                        defaultMessage: 'Chart options',
-                      }),
-                      iconType: 'gear',
-                      'data-test-subj': 'unifiedHistogramChartOptionsToggle',
-                      onClick: toggleChartOptions,
-                    },
-                  ]}
-                />
-              }
-              isOpen={showChartOptionsPopover}
-              closePopover={closeChartOptions}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenu initialPanelId={0} panels={panels} />
-            </EuiPopover>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {chartVisible && (
@@ -389,6 +344,7 @@ export function Chart({
               defaultMessage: 'Histogram of found documents',
             })}
             css={histogramCss}
+            data-test-subj="unifiedHistogramRendered"
           >
             {isChartLoading && (
               <EuiProgress

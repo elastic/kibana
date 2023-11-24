@@ -248,30 +248,26 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleChartVisibility() {
-    await this.testSubjects.moveMouseTo('unifiedHistogramChartOptionsToggle');
-    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
-    await this.testSubjects.exists('unifiedHistogramChartToggle');
-    await this.testSubjects.click('unifiedHistogramChartToggle');
+    await this.testSubjects.click('dscToggleHistogramButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getChartInterval() {
-    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
-    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
-    const selectedOption = await this.find.byCssSelector(`.unifiedHistogramIntervalSelected`);
-    return selectedOption.getVisibleText();
+    const selectedOptions = await this.comboBox.getComboBoxSelectedOptions(
+      'unifiedHistogramTimeIntervalSelector'
+    );
+    return selectedOptions[0];
   }
 
   public async getChartIntervalWarningIcon() {
-    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
     await this.header.waitUntilLoadingHasFinished();
-    return await this.find.existsByCssSelector('.euiToolTipAnchor');
+    return await this.find.existsByCssSelector(
+      '[data-test-subj="unifiedHistogramRendered"] .euiToolTipAnchor'
+    );
   }
 
   public async setChartInterval(interval: string) {
-    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
-    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
-    await this.testSubjects.click(`unifiedHistogramTimeInterval-${interval}`);
+    await this.comboBox.set('unifiedHistogramTimeIntervalSelector', interval);
     return await this.header.waitUntilLoadingHasFinished();
   }
 

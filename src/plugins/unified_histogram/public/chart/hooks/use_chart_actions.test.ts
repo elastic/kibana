@@ -27,31 +27,6 @@ describe('useChartActions', () => {
     };
   };
 
-  it('should toggle chart options', () => {
-    const { hook } = render();
-    expect(hook.result.current.showChartOptionsPopover).toBe(false);
-    act(() => {
-      hook.result.current.toggleChartOptions();
-    });
-    expect(hook.result.current.showChartOptionsPopover).toBe(true);
-    act(() => {
-      hook.result.current.toggleChartOptions();
-    });
-    expect(hook.result.current.showChartOptionsPopover).toBe(false);
-  });
-
-  it('should close chart options', () => {
-    const { hook } = render();
-    act(() => {
-      hook.result.current.toggleChartOptions();
-    });
-    expect(hook.result.current.showChartOptionsPopover).toBe(true);
-    act(() => {
-      hook.result.current.closeChartOptions();
-    });
-    expect(hook.result.current.showChartOptionsPopover).toBe(false);
-  });
-
   it('should toggle hide chart', () => {
     const { chart, onChartHiddenChange, hook } = render();
     act(() => {

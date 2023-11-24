@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { UnifiedHistogramChartContext } from '../../types';
 
 export const useChartActions = ({
@@ -16,16 +16,6 @@ export const useChartActions = ({
   chart: UnifiedHistogramChartContext | undefined;
   onChartHiddenChange?: (chartHidden: boolean) => void;
 }) => {
-  const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
-
-  const toggleChartOptions = useCallback(() => {
-    setShowChartOptionsPopover(!showChartOptionsPopover);
-  }, [showChartOptionsPopover]);
-
-  const closeChartOptions = useCallback(() => {
-    setShowChartOptionsPopover(false);
-  }, [setShowChartOptionsPopover]);
-
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
     moveFocus: false,
@@ -44,10 +34,7 @@ export const useChartActions = ({
   }, [chart?.hidden, onChartHiddenChange]);
 
   return {
-    showChartOptionsPopover,
     chartRef,
-    toggleChartOptions,
-    closeChartOptions,
     toggleHideChart,
   };
 };
