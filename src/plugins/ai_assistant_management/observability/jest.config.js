@@ -9,10 +9,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/saved_objects_management'],
+  roots: ['<rootDir>/src/plugins/ai_assistant_management/observability'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/ai_assistant_management',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/saved_objects_management/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/plugins/ai_assistant_management/observability/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

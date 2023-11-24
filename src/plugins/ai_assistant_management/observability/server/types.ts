@@ -15,10 +15,6 @@ import type {
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
-  TaskManagerSetupContract as TaskManagerPluginSetup,
-  TaskManagerStartContract as TaskManagerPluginStart,
-} from '@kbn/task-manager-plugin/server';
 import type {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
@@ -35,7 +31,6 @@ export interface AiAssistantManagementObservabilityPluginSetupDependencies {
   features?: FeaturesPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPluginSetup;
   security: SecurityPluginSetup;
-  taskManager?: TaskManagerPluginSetup;
 }
 
 export interface AiAssistantManagementObservabilityPluginStartDependencies {
@@ -43,5 +38,4 @@ export interface AiAssistantManagementObservabilityPluginStartDependencies {
   features?: FeaturesPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
   security: SecurityPluginStart;
-  taskManager?: TaskManagerPluginStart;
 }
