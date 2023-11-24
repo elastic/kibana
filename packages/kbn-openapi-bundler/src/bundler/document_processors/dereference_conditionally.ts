@@ -21,6 +21,16 @@ export type DereferenceConditionallyInliningPredicate = (
   context: TraverseDocumentContext
 ) => boolean;
 
+/**
+ * Creates a node processor to bundle and conditionally dereference document references.
+ *
+ * Bundling means all external references like `../../some_file.schema.yaml#/components/schemas/SomeSchema` saved
+ * to the result document under corresponding path `components` -> `schemas` -> `SomeSchema` and `$ref` property's
+ * values is updated to `#/components/schemas/SomeSchema`.
+ *
+ * Conditional dereference means inlining references when `inliningPredicate()` returns `true`. If `inliningPredicate`
+ * is not passed only bundling happens.
+ */
 export function createDereferenceConditionallyProcessor(
   inliningPredicate?: DereferenceConditionallyInliningPredicate
 ): DocumentNodeProcessor {

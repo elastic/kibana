@@ -8,6 +8,9 @@
 
 import { DocumentNodeProcessor } from '../types';
 
+/**
+ * Creates a node processor to skip paths starting with `/internal` and omit them from the result document.
+ */
 export function createSkipInternalPathProcessor(skipPathPrefix: string): DocumentNodeProcessor {
   return {
     enter(_, context) {

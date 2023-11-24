@@ -9,6 +9,9 @@
 import { isPlainObjectType } from '../lib/is_plain_object_type';
 import { DocumentNodeProcessor } from '../types';
 
+/**
+ * Creates a node processor to remove specified by `propNames` properties.
+ */
 export function createRemovePropsProcessor(propNames: string[]): DocumentNodeProcessor {
   return {
     leave(node) {

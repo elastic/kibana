@@ -8,6 +8,10 @@
 
 import { DocumentNodeProcessor } from '../types';
 
+/**
+ * Creates a node processor to skip nodes having provided `skipProperty` property
+ * and omit them from the result document.
+ */
 export function createSkipNodeWithInternalPropProcessor(
   skipProperty: string
 ): DocumentNodeProcessor {
