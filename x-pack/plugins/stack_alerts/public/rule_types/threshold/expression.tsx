@@ -167,7 +167,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.threshold.ui.selectIndex"
-            defaultMessage="Select an index"
+            defaultMessage="Select indices"
           />
         </h5>
       </EuiTitle>
@@ -203,6 +203,16 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           setRuleParams('timeField', updatedTimeField)
         }
       />
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
+            defaultMessage="Define the condition"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <WhenExpression
         display="fullWidth"
         data-test-subj="whenExpression"
@@ -238,16 +248,6 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         }
         onChangeSelectedTermSize={(selectedTermSize) => setRuleParams('termSize', selectedTermSize)}
       />
-      <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
-            defaultMessage="Define the condition"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <ThresholdExpression
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         threshold={threshold}
