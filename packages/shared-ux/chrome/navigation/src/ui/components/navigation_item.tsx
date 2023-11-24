@@ -36,7 +36,7 @@ function NavigationItemComp<
   const { unstyled: unstyledFromContext, register, activeNodes } = useNavigation();
   const deepLinks = useObservable(navLinks$, []);
   const navNodeRef = useRef<ChromeProjectNavigationNode>();
-  const { order, appendHorizontalRule } = props;
+  const { rootIndex, appendHorizontalRule } = props;
 
   const { children, node } = useMemo(() => {
     const { children: _children, ...rest } = props;
@@ -77,10 +77,10 @@ function NavigationItemComp<
 
   useEffect(() => {
     if (navNode) {
-      register(navNode, order);
+      return register(navNode, rootIndex);
     }
     return undefined;
-  }, [register, navNode, order]);
+  }, [register, navNode, rootIndex]);
 
   if (!navNode) {
     return null;

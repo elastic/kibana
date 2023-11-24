@@ -19,6 +19,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
+import { getChildType } from '../../utils';
 import { RegisterFunction, UnRegisterFunction } from '../types';
 import { NavigationFooter } from './navigation_footer';
 import { NavigationGroup } from './navigation_group';
@@ -121,24 +122,44 @@ export function Navigation({
 
   const childrenParsed = useMemo(() => {
     let footerChildren: ReactNode;
-    const bodyChildren: ReactNode[] = [];
+    let rootIndex = 0;
 
-    Children.forEach(children, (child) => {
-      if (!React.isValidElement(child)) {
-        return;
-      }
+    const parseChildren = (_children: ReactNode, wrapperComponent = '<Navigation />') => {
+      const parsed: ReactNode[] = [];
+      Children.forEach(_children, (child, i) => {
+        if (!React.isValidElement(child)) {
+          return;
+        }
 
-      const isFooterWrapper = child.type === NavigationFooter;
-      if (isFooterWrapper && footerChildren === undefined) {
-        footerChildren = child.props.children;
-        return;
-      }
+        const childType = getChildType(child);
+        if (childType === 'unknown' && unstyled === false) {
+          throw new Error(
+            `${wrapperComponent} only accepts <Navigation.Item />, <Navigation.Group /> and <Navigation.Footer /> as children. Received ${child.type}`
+          );
+        }
 
-      bodyChildren.push(child);
-    });
+        if (childType === 'footer') {
+          if (footerChildren) {
+            throw new Error('Only one <Navigation.Footer /> is allowed');
+          }
+          footerChildren = parseChildren(child.props.children, '<Navigation.Footer />');
+          return;
+        }
+
+        // We add a "rootIndex" prop to each child to keep track of the order of the children
+        // and correctly set the order of nodes in the navigation tree independently of when a
+        // node register itself (it could be after a deepLink is being activated).
+        parsed.push({ ...child, props: { ...child.props, rootIndex } });
+        rootIndex += 1;
+      });
+
+      return parsed;
+    };
+
+    const bodyChildren: ReactNode[] = parseChildren(children);
 
     return { body: bodyChildren, footer: footerChildren };
-  }, [children]);
+  }, [children, unstyled]);
 
   return (
     <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>

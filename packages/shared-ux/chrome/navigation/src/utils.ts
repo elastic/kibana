@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React, { type ReactNode } from 'react';
 import type { ChromeProjectNavigationNode, NodeDefinition } from '@kbn/core-chrome-browser';
+import { NavigationFooter } from './ui/components/navigation_footer';
+import { NavigationGroup } from './ui/components/navigation_group';
+import { NavigationItem } from './ui/components/navigation_item';
+import { RecentlyAccessed } from './ui/components/recently_accessed';
 
 let uniqueId = 0;
 
@@ -54,3 +59,24 @@ export function isActiveFromUrl(nodePath: string, activeNodes: ChromeProjectNavi
     return acc === true ? acc : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
   }, false);
 }
+
+type ChildType = 'item' | 'group' | 'recentlyAccessed' | 'footer' | 'unknown';
+
+export const getChildType = (child: ReactNode): ChildType => {
+  if (!React.isValidElement(child)) {
+    return 'unknown';
+  }
+
+  switch (child.type) {
+    case NavigationItem:
+      return 'item';
+    case NavigationGroup:
+      return 'group';
+    case RecentlyAccessed:
+      return 'recentlyAccessed';
+    case NavigationFooter:
+      return 'footer';
+    default:
+      return 'unknown';
+  }
+};

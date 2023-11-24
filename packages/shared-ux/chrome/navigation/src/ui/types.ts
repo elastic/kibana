@@ -33,7 +33,7 @@ export interface NodeProps<
   children?: ReactNode;
   // children?: ((navNode: ChromeProjectNavigationNode) => ReactNode) | ReactNode;
   parentNodePath?: string;
-  order?: number;
+  rootIndex?: number;
   treeDepth?: number;
   index?: number;
 }

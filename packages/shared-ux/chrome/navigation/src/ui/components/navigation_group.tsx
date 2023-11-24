@@ -20,10 +20,9 @@ import type { NodeProps } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';
 import { NavigationBucket, type Props as NavigationBucketProps } from './navigation_bucket';
-import { generateUniqueNodeId } from '../../utils';
+import { generateUniqueNodeId, getChildType } from '../../utils';
 import { initNavNode } from '../../navnode_utils';
 import { CloudLinks } from '../../cloud_links';
-import { NavigationItem } from './navigation_item';
 
 /**
  * Handler to convert the JSX children of the NavigationGroup to the ChromeProjectNavigationNode
@@ -34,8 +33,9 @@ const jsxChildrenToNavigationNode = (
   {
     parentNodePath,
     jsxChildren,
+    rootIndex,
     treeDepth,
-  }: { parentNodePath: string; jsxChildren?: ReactNode; treeDepth: number },
+  }: { parentNodePath: string; jsxChildren?: ReactNode; rootIndex: number; treeDepth: number },
   { cloudLinks, deepLinks }: { cloudLinks: CloudLinks; deepLinks: Readonly<ChromeNavLink[]> }
 ): ChromeProjectNavigationNode[] | undefined => {
   if (!jsxChildren) return undefined;
@@ -49,29 +49,29 @@ const jsxChildrenToNavigationNode = (
     const title =
       typeof child.props.children === 'string' ? child.props.children : child.props.title;
     const childNode = initNavNode(
-      { ...child.props, title, treeDepth, index, parentNodePath },
+      { ...child.props, title, rootIndex, treeDepth, index, parentNodePath },
       { cloudLinks, deepLinks }
     );
 
     if (!childNode) return;
 
-    const isNavigationGroup = child.type === NavigationGroup;
+    const childType = getChildType(child);
 
-    if (!isNavigationGroup) {
-      const isNavigationItem = child.type === NavigationItem;
-      if (!isNavigationItem) {
-        // This is a custom JSX node, render it as is in the nav.
+    if (childType !== 'group') {
+      if (childType === 'item') {
+        if (child.props.children && typeof child.props.children !== 'string') {
+          // Render the node item
+          childNode.renderItem = () => child.props.children;
+        }
+        navigationNodes.push(childNode);
+      } else {
+        // This is a custom JSX node, render it "as is" in the nav.
         navigationNodes.push({
           id: generateUniqueNodeId(),
           title: '',
           path: '',
           renderItem: () => child,
         });
-      } else {
-        if (child.props.children && typeof child.props.children !== 'string') {
-          childNode.renderItem = () => child.props.children;
-        }
-        navigationNodes.push(childNode);
       }
       return;
     }
@@ -79,10 +79,12 @@ const jsxChildrenToNavigationNode = (
     if (child.props?.children) {
       navigationNodes.push({
         ...childNode,
+        // Recursively add all the children of the group
         children: jsxChildrenToNavigationNode(
           {
             parentNodePath: childNode.path,
             jsxChildren: child.props.children,
+            rootIndex,
             treeDepth: treeDepth + 1,
           },
           { cloudLinks, deepLinks }
@@ -113,7 +115,7 @@ function NavigationGroupInternalComp<
   const { cloudLinks, navLinks$ } = useNavigationServices();
   const { register } = useNavigation();
   const deepLinks = useObservable(navLinks$, []);
-  const { order } = props;
+  const { rootIndex = 0 } = props;
 
   const navNodeRef = useRef<ChromeProjectNavigationNode>();
   const childrenNodesRef = useRef<ChromeProjectNavigationNode[]>();
@@ -124,7 +126,7 @@ function NavigationGroupInternalComp<
     if (!_navNode) return null;
 
     const childrenNodes = jsxChildrenToNavigationNode(
-      { parentNodePath: _navNode.path, jsxChildren: props.children, treeDepth: 0 },
+      { parentNodePath: _navNode.path, jsxChildren: props.children, rootIndex, treeDepth: 1 },
       { cloudLinks, deepLinks }
     );
 
@@ -149,15 +151,15 @@ function NavigationGroupInternalComp<
     }
 
     return navNodeRef.current;
-  }, [props, cloudLinks, deepLinks]);
+  }, [props, cloudLinks, deepLinks, rootIndex]);
 
   /** Register when mounting and whenever the internal nav node changes */
   useEffect(() => {
     if (navNode) {
-      register(navNode, order);
+      return register(navNode, rootIndex);
     }
     return undefined;
-  }, [register, navNode, order]);
+  }, [register, navNode, rootIndex]);
 
   if (!navNode || navNode.sideNavStatus === 'hidden') {
     return null;

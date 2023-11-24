@@ -128,9 +128,9 @@ export const initNavNode = <
     cloudLink,
     link,
     parentNodePath,
+    rootIndex = 0,
     treeDepth = 0,
     index = 0,
-    order,
     children,
     ...navNode
   } = node;
@@ -148,7 +148,7 @@ export const initNavNode = <
     return null;
   }
 
-  const id = getNavigationNodeId(node, () => `node-${treeDepth}-${index ?? 'root'}`) as Id;
+  const id = getNavigationNodeId(node, () => `node-${rootIndex}-${treeDepth}-${index}`) as Id;
   const title = getTitleForNode(node, { deepLink, cloudLinks });
   const href = cloudLink ? cloudLinks[cloudLink]?.href : node.href; // TODO: should we set the deepLink href if there is one??
   const path = parentNodePath ? `${parentNodePath}.${id}` : id;
