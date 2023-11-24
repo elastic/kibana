@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
