@@ -13,7 +13,7 @@ import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 
-const AGENTLESS_POLICY_ID = 'agentless_cspm';
+const AGENTLESS_POLICY_ID = 'agentless';
 
 export function useSetupTechnology({
   updateNewAgentPolicy,
