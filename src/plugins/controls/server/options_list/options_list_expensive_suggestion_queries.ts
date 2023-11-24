@@ -26,6 +26,9 @@ import {
  * Suggestion aggregations
  */
 export const getExpensiveSuggestionAggregationBuilder = ({ fieldSpec }: OptionsListRequestBody) => {
+  if (fieldSpec?.type === 'number') {
+    return expensiveSuggestionAggSubtypes.number;
+  }
   if (fieldSpec?.type === 'boolean') {
     return expensiveSuggestionAggSubtypes.boolean;
   }
@@ -115,6 +118,74 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         suggestions,
         totalCardinality: get(rawEsResult, `${basePath}.unique_terms.value`),
       };
+    },
+  },
+
+  /**
+   * the "number" query / parser should be used when the options list is built on a field of type float, long, etc.
+   */
+  number: {
+    buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => {
+      if (searchString && !new RegExp('^d+$').test(searchString)) {
+        // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
+        // simply don't return an aggregation query for the ES search request
+        return undefined;
+      }
+
+      return searchString && searchString.length > 0
+        ? // only exact match searching is supported for numeric fields
+          {
+            suggestions: {
+              filter: {
+                term: {
+                  [fieldName]: searchString,
+                },
+              },
+            },
+          }
+        : {
+            suggestions: {
+              terms: {
+                size,
+                field: fieldName,
+                shard_size: 10,
+                order: getSortType(sort),
+              },
+            },
+            unique_terms: {
+              cardinality: {
+                field: fieldName,
+              },
+            },
+          };
+    },
+    parse: (rawEsResult, request) => {
+      if ((request.searchString ?? '').length > 0) {
+        const docCount = get(rawEsResult, 'aggregations.suggestions.doc_count');
+        if (!docCount) {
+          return {
+            suggestions: [],
+            totalCardinality: 0,
+          };
+        }
+        return {
+          suggestions: [
+            {
+              value: request.searchString,
+              docCount,
+            },
+          ],
+          totalCardinality: 1,
+        };
+      }
+      const suggestions = get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
+        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
+        },
+        []
+      );
+      return { suggestions, totalCardinality: get(rawEsResult, `aggregations.unique_terms.value`) }; // cardinality is only ever 0, 1, or 2 so safe to use length here
     },
   },
 

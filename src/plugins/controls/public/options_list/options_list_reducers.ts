@@ -37,10 +37,15 @@ export const optionsListReducers = {
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     state.componentState.searchString.value = action.payload;
     if (
-      action.payload !== '' && // empty string search is never invalid
-      state.componentState.field?.type === 'ip' // only IP searches can currently be invalid
+      action.payload.length > 0 && // empty string search is never invalid
+      state.componentState.field
     ) {
-      state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
+      if (state.componentState.field?.type === 'ip')
+        state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
+      else if (state.componentState.field?.type === 'number')
+        state.componentState.searchString.valid = !isNaN(Number(action.payload));
+    } else {
+      state.componentState.searchString.valid = true;
     }
   },
   setAllowExpensiveQueries: (

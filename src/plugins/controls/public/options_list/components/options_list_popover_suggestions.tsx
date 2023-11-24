@@ -52,11 +52,11 @@ export const OptionsListPopoverSuggestions = ({
 
   const canLoadMoreSuggestions = useMemo(
     () =>
-      totalCardinality
+      searchString.valid && totalCardinality
         ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
-    [availableOptions, totalCardinality]
+    [availableOptions, totalCardinality, searchString]
   );
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
