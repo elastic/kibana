@@ -1072,6 +1072,11 @@ describe('validation logic', () => {
       []
     );
 
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) BY ipField',
+      []
+    );
+
     testErrorsAndWarnings('from a | stats numberField + 1', ['Stats does not support function +']);
 
     testErrorsAndWarnings('from a | stats numberField + 1 by ipField', [
