@@ -11,15 +11,15 @@ import type { Literals } from './types';
 
 export const timeLiterals: Literals[] = [
   {
-    name: 'years',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.years', {
-      defaultMessage: 'Years (Plural)',
-    }),
-  },
-  {
     name: 'year',
     description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.year', {
       defaultMessage: 'Year',
+    }),
+  },
+  {
+    name: 'years',
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.years', {
+      defaultMessage: 'Years (Plural)',
     }),
   },
   {

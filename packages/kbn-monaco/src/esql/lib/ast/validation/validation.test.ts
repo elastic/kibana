@@ -163,23 +163,52 @@ describe('validation logic', () => {
     return { ...parseListener.getAst(), syntaxErrors: errorListener.getErrors() };
   };
 
-  function testErrorsAndWarnings(
+  function testErrorsAndWarningsFn(
     statement: string,
     expectedErrors: string[] = [],
-    expectedWarnings: string[] = []
+    expectedWarnings: string[] = [],
+    { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) {
-    it(`${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`, async () => {
-      const { ast, syntaxErrors } = getAstAndErrors(statement);
-      const callbackMocks = getCallbackMocks();
-      const { warnings, errors } = await validateAst(ast, callbackMocks);
-      const finalErrors = errors.concat(
-        // squash syntax errors
-        syntaxErrors.map(({ message }) => ({ text: message })) as ESQLMessage[]
-      );
-      expect(finalErrors.map((e) => e.text)).toEqual(expectedErrors);
-      expect(warnings.map((w) => w.text)).toEqual(expectedWarnings);
-    });
+    const testFn = only ? it.only : skip ? it.skip : it;
+    testFn(
+      `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
+      async () => {
+        const { ast, syntaxErrors } = getAstAndErrors(statement);
+        const callbackMocks = getCallbackMocks();
+        const { warnings, errors } = await validateAst(ast, callbackMocks);
+        const finalErrors = errors.concat(
+          // squash syntax errors
+          syntaxErrors.map(({ message }) => ({ text: message })) as ESQLMessage[]
+        );
+        expect(finalErrors.map((e) => e.text)).toEqual(expectedErrors);
+        expect(warnings.map((w) => w.text)).toEqual(expectedWarnings);
+      }
+    );
   }
+
+  type TestArgs = [string, string[], string[]?];
+
+  // Make only and skip work with our custom wrapper
+  const testErrorsAndWarnings = Object.assign(testErrorsAndWarningsFn, {
+    skip: (...args: TestArgs) => {
+      const warningArgs = [[]].slice(args.length - 2);
+      return testErrorsAndWarningsFn(
+        ...((args.length > 1 ? [...args, ...warningArgs] : args) as TestArgs),
+        {
+          skip: true,
+        }
+      );
+    },
+    only: (...args: TestArgs) => {
+      const warningArgs = [[]].slice(args.length - 2);
+      return testErrorsAndWarningsFn(
+        ...((args.length > 1 ? [...args, ...warningArgs] : args) as TestArgs),
+        {
+          only: true,
+        }
+      );
+    },
+  });
 
   describe('ESQL query should start with a source command', () => {
     ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
@@ -550,7 +579,13 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | rename', [
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
-    testErrorsAndWarnings('from a | rename a', ['SyntaxError: expected {AS} but found "<EOF>"']);
+    testErrorsAndWarnings('from a | rename stringField', [
+      'SyntaxError: expected {AS} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings('from a | rename a', [
+      'Unknown column [a]',
+      'SyntaxError: expected {AS} but found "<EOF>"',
+    ]);
     testErrorsAndWarnings('from a | rename stringField as', [
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
@@ -567,6 +602,10 @@ describe('validation logic', () => {
       'Unknown column [a]',
     ]);
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as a', []);
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField) | rename `avg(numberField)` as avg0',
+      []
+    );
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as ', [
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
@@ -950,6 +989,7 @@ describe('validation logic', () => {
     ]);
 
     testErrorsAndWarnings('from a | eval avg(numberField)', ['Eval does not support function avg']);
+    testErrorsAndWarnings('from a | stats avg(numberField) | eval `avg(numberField)` + 1', []);
 
     describe('date math', () => {
       testErrorsAndWarnings('from a | eval 1 anno', [
@@ -1034,6 +1074,11 @@ describe('validation logic', () => {
 
     testErrorsAndWarnings(
       'from a | stats avg(numberField), percentile(numberField, 50) by ipField',
+      []
+    );
+
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) BY ipField',
       []
     );
 

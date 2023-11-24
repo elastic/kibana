@@ -40,7 +40,7 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage:
         'Retrieves data from one or more datasets. A dataset is a collection of data that you want to search. The only supported dataset is an index. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
     }),
-    examples: ['from logs', 'from logs-*', 'from logs_*, events-*', 'from from remote*:logs*'],
+    examples: ['from logs', 'from logs-*', 'from logs_*, events-*', 'from remote*:logs*'],
     options: [metadataOption],
     signature: {
       multipleParams: true,
@@ -97,8 +97,8 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['… | rename old as new', '… | rename old as new, a as b'],
     signature: {
-      multipleParams: false,
-      params: [{ name: 'renameClause', type: 'any' }],
+      multipleParams: true,
+      params: [{ name: 'renameClause', type: 'column' }],
     },
     options: [asOption],
   },
@@ -111,7 +111,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | limit 100', '… | limit 0'],
     signature: {
       multipleParams: false,
-      params: [{ name: 'size', type: 'number' }],
+      params: [{ name: 'size', type: 'number', literalOnly: true }],
     },
     options: [],
   },
@@ -213,7 +213,7 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: false,
       params: [
         { name: 'column', type: 'column', innerType: 'string' },
-        { name: 'pattern', type: 'string' },
+        { name: 'pattern', type: 'string', literalOnly: true },
       ],
     },
   },
@@ -229,7 +229,7 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: false,
       params: [
         { name: 'column', type: 'column', innerType: 'string' },
-        { name: 'pattern', type: 'string' },
+        { name: 'pattern', type: 'string', literalOnly: true },
       ],
     },
   },

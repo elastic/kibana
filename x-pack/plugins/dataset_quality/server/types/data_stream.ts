@@ -6,9 +6,11 @@
  */
 
 import { ByteSize } from '@elastic/elasticsearch/lib/api/types';
+import { Integration } from './integration';
 
 export interface DataStreamsStatResponse {
-  items: DataStreamStat[];
+  dataStreamsStats: DataStreamStat[];
+  integrations: Integration[];
 }
 
 export interface DataStreamStat {
@@ -16,10 +18,7 @@ export interface DataStreamStat {
   size?: ByteSize;
   size_bytes?: number;
   last_activity?: number;
-  integration?: {
-    name?: string;
-    managed_by?: string;
-  };
+  integration?: Integration;
 }
 
 export type DataStreamTypes = 'logs' | 'metrics' | 'traces' | 'synthetics' | 'profiling';

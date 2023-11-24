@@ -12,11 +12,20 @@ import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
-import { FunctionDefinition, CommandDefinition } from '../definitions/types';
+import {
+  FunctionDefinition,
+  CommandDefinition,
+  CommandOptionsDefinition,
+} from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 
 const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
+
+export const TRIGGER_SUGGESTION_COMMAND = {
+  title: 'Trigger Suggestion Dialog',
+  id: 'editor.action.triggerSuggest',
+};
 
 export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
   const fullSignatures = getFunctionSignatures(fn);
@@ -44,15 +53,24 @@ export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
       value: '',
     },
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   };
 }
 
-export const getCompatibleFunctionDefinition = (
-  command: string,
-  returnTypes?: string[]
-): AutocompleteCommandDefinition[] => {
+export const isCompatibleFunctionName = (fnName: string, command: string) => {
   const fnSupportedByCommand = allFunctions.filter(({ supportedCommands }) =>
     supportedCommands.includes(command)
+  );
+  return fnSupportedByCommand.some(({ name }) => name === fnName);
+};
+
+export const getCompatibleFunctionDefinition = (
+  command: string,
+  returnTypes?: string[],
+  ignored: string[] = []
+): AutocompleteCommandDefinition[] => {
+  const fnSupportedByCommand = allFunctions.filter(
+    ({ name, supportedCommands }) => supportedCommands.includes(command) && !ignored.includes(name)
   );
   if (!returnTypes) {
     return fnSupportedByCommand.map(getAutocompleteFunctionDefinition);
@@ -94,6 +112,17 @@ export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDef
     sortText: 'D',
   }));
 
+export const buildVariablesDefinitions = (variables: string[]): AutocompleteCommandDefinition[] =>
+  variables.map((label) => ({
+    label,
+    insertText: /[^a-zA-Z\d]/.test(label) ? `\`${label}\`` : label,
+    kind: 4,
+    detail: i18n.translate('monaco.esql.autocomplete.variableDefinition', {
+      defaultMessage: `Variable specified by the user within the ES|QL query`,
+    }),
+    sortText: 'D',
+  }));
+
 export const buildSourcesDefinitions = (sources: string[]): AutocompleteCommandDefinition[] =>
   sources.map((label) => ({
     label,
@@ -124,12 +153,12 @@ export const buildConstantsDefinitions = (
 export const buildNewVarDefinition = (label: string): AutocompleteCommandDefinition => {
   return {
     label,
-    insertText: label,
+    insertText: `${label} =`,
     kind: 21,
     detail: i18n.translate('monaco.esql.autocomplete.newVarDoc', {
       defaultMessage: 'Define a new variable',
     }),
-    sortText: 'A',
+    sortText: '1',
   };
 };
 
@@ -167,6 +196,21 @@ export const buildMatchingFieldsDefinition = (
     sortText: 'D',
   }));
 
+export const buildOptionDefinition = (option: CommandOptionsDefinition) => {
+  const completeItem: AutocompleteCommandDefinition = {
+    label: option.name,
+    insertText: option.name,
+    kind: 21,
+    detail: option.description,
+    sortText: 'D',
+  };
+  if (option.wrapped) {
+    completeItem.insertText = `${option.wrapped[0]}${option.name} $0 ${option.wrapped[1]}`;
+    completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  }
+  return completeItem;
+};
+
 export const buildNoPoliciesAvailableDefinition = (): AutocompleteCommandDefinition => ({
   label: i18n.translate('monaco.esql.autocomplete.noPoliciesLabel', {
     defaultMessage: 'No available policy',
@@ -190,7 +234,7 @@ function getUnitDuration(unit: number = 1) {
     const result = /s$/.test(name);
     return unit > 1 ? result : !result;
   });
-  return filteredTimeLiteral.map(({ name }) => name);
+  return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
 }
 
 export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
@@ -201,11 +245,14 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   }
   if (types.includes('time_literal')) {
     // filter plural for now and suggest only unit + singular
-
     suggestions.push(...buildConstantsDefinitions(getUnitDuration(1))); // i.e. 1 year
   }
+  // this is a special type built from the suggestion system, not inherited from the AST
+  if (types.includes('time_literal_unit')) {
+    suggestions.push(...buildConstantsDefinitions(timeLiterals.map(({ name }) => name))); // i.e. year, month, ...
+  }
   if (types.includes('chrono_literal')) {
-    suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY
+    suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY, ...
   }
   if (types.includes('string')) {
     if (names) {

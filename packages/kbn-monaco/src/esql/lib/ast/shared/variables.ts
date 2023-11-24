@@ -8,6 +8,7 @@
 
 import type { ESQLColumn, ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../types';
 import type { ESQLVariable, ESQLRealField } from '../validation/types';
+import { EDITOR_MARKER } from './constants';
 import {
   isColumnItem,
   isAssignment,
@@ -95,6 +96,22 @@ function getAssignRightHandSideType(item: ESQLAstItem, fields: Map<string, ESQLR
   }
 }
 
+export function excludeVariablesFromCurrentCommand(
+  commands: ESQLCommand[],
+  currentCommand: ESQLCommand,
+  fieldsMap: Map<string, ESQLRealField>
+) {
+  const anyVariables = collectVariables(commands, fieldsMap);
+  const currentCommandVariables = collectVariables([currentCommand], fieldsMap);
+  const resultVariables = new Map<string, ESQLVariable[]>();
+  anyVariables.forEach((value, key) => {
+    if (!currentCommandVariables.has(key)) {
+      resultVariables.set(key, value);
+    }
+  });
+  return resultVariables;
+}
+
 export function collectVariables(
   commands: ESQLCommand[],
   fields: Map<string, ESQLRealField>
@@ -115,13 +132,15 @@ export function collectVariables(
       }
       const expressionOperations = command.args.filter(isExpression);
       for (const expressionOperation of expressionOperations) {
-        // just save the entire expression as variable string
-        const expressionType = 'number';
-        addToVariableOccurrencies(variables, {
-          name: expressionOperation.text,
-          type: expressionType,
-          location: expressionOperation.location,
-        });
+        if (!expressionOperation.text.includes(EDITOR_MARKER)) {
+          // just save the entire expression as variable string
+          const expressionType = 'number';
+          addToVariableOccurrencies(variables, {
+            name: expressionOperation.text,
+            type: expressionType,
+            location: expressionOperation.location,
+          });
+        }
       }
     }
     if (command.name === 'enrich') {

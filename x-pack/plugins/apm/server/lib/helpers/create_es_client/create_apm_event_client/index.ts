@@ -62,13 +62,11 @@ type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
 type APMEventEqlSearchRequest = APMEventWrapper<EqlSearchRequest>;
 type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
 
-// These keys shoul all be `ProcessorEvent.x`, but until TypeScript 4.2 we're inlining them here.
-// See https://github.com/microsoft/TypeScript/issues/37888
 type TypeOfProcessorEvent<T extends ProcessorEvent> = {
-  error: APMError;
-  transaction: Transaction;
-  span: Span;
-  metric: Metric;
+  [ProcessorEvent.error]: APMError;
+  [ProcessorEvent.transaction]: Transaction;
+  [ProcessorEvent.span]: Span;
+  [ProcessorEvent.metric]: Metric;
 }[T];
 
 type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
@@ -77,15 +75,13 @@ type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
   InferSearchResponseOf<
     TypeOfProcessorEvent<
-      ValuesType<
-        TParams['apm'] extends { events: ProcessorEvent[] }
-          ? TParams['apm']['events']
-          : TParams['apm'] extends { sources: ApmDataSource[] }
-          ? ProcessorEventOfDocumentType<
-              ValuesType<TParams['apm']['sources']>['documentType']
-            >
-          : never
-      >
+      TParams['apm'] extends { events: ProcessorEvent[] }
+        ? ValuesType<TParams['apm']['events']>
+        : TParams['apm'] extends { sources: ApmDataSource[] }
+        ? ProcessorEventOfDocumentType<
+            ValuesType<TParams['apm']['sources']>['documentType']
+          >
+        : never
     >,
     TParams
   >;

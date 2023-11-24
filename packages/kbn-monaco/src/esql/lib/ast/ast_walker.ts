@@ -69,7 +69,9 @@ import {
   createList,
   createNumericLiteral,
   sanifyIdentifierString,
+  computeLocationExtends,
 } from './ast_helpers';
+import { getPosition } from './ast_position_utils';
 import type {
   ESQLLiteral,
   ESQLColumn,
@@ -110,10 +112,12 @@ export function getMatchField(ctx: EnrichCommandContext) {
   }
   const identifier = ctx.sourceIdentifier(1);
   if (identifier) {
-    const fn = createOption('on', ctx);
+    const fn = createOption(ctx.ON()!.text.toLowerCase(), ctx);
     if (identifier.text) {
       fn.args.push(createColumn(identifier));
     }
+    // overwrite the location inferring the correct position
+    fn.location = getPosition(ctx.ON()!.symbol, ctx.WITH()?.symbol);
     return [fn];
   }
   return [];
@@ -122,7 +126,7 @@ export function getMatchField(ctx: EnrichCommandContext) {
 export function getEnrichClauses(ctx: EnrichCommandContext) {
   const ast: ESQLCommandOption[] = [];
   if (ctx.WITH()) {
-    const option = createOption(ctx.WITH()!.text, ctx);
+    const option = createOption(ctx.WITH()!.text.toLowerCase(), ctx);
     ast.push(option);
     const clauses = ctx.enrichWithClause();
     for (const clause of clauses) {
@@ -140,6 +144,7 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
         }
       }
     }
+    option.location = getPosition(ctx.WITH()?.symbol);
   }
 
   return ast;
@@ -148,12 +153,18 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
 function visitLogicalNot(ctx: LogicalNotContext) {
   const fn = createFunction('not', ctx);
   fn.args.push(...collectBooleanExpression(ctx.booleanExpression()));
+  // update the location of the assign based on arguments
+  const argsLocationExtends = computeLocationExtends(fn);
+  fn.location = argsLocationExtends;
   return fn;
 }
 
 function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
   const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx);
   fn.args.push(...collectBooleanExpression(ctx._left), ...collectBooleanExpression(ctx._right));
+  // update the location of the assign based on arguments
+  const argsLocationExtends = computeLocationExtends(fn);
+  fn.location = argsLocationExtends;
   return fn;
 }
 
@@ -167,6 +178,9 @@ function visitLogicalIns(ctx: LogicalInContext) {
       fn.args.push(filteredArgs);
     }
   }
+  // update the location of the assign based on arguments
+  const argsLocationExtends = computeLocationExtends(fn);
+  fn.location = argsLocationExtends;
   return fn;
 }
 
@@ -204,6 +218,10 @@ function visitValueExpression(ctx: ValueExpressionContext) {
       visitOperatorExpression(ctx._left)!,
       visitOperatorExpression(ctx._right)!
     );
+    // update the location of the comparisonFn based on arguments
+    const argsLocationExtends = computeLocationExtends(comparisonFn);
+    comparisonFn.location = argsLocationExtends;
+
     return comparisonFn;
   }
 }
@@ -229,6 +247,9 @@ function visitOperatorExpression(
         fn.args.push(arg);
       }
     }
+    // update the location of the assign based on arguments
+    const argsLocationExtends = computeLocationExtends(fn);
+    fn.location = argsLocationExtends;
     return fn;
   }
   if (ctx instanceof OperatorExpressionDefaultContext) {
@@ -292,8 +313,14 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
       const asToken = clause.tryGetToken(esql_parser.AS, 0);
       if (asToken) {
         const fn = createOption(asToken.text.toLowerCase(), clause);
-        fn.args.push(createColumn(clause._oldName), createColumn(clause._newName));
+        for (const arg of [clause._oldName, clause._newName]) {
+          if (arg?.text) {
+            fn.args.push(createColumn(arg));
+          }
+        }
         return fn;
+      } else if (clause._oldName?.text) {
+        return createColumn(clause._oldName);
       }
     })
     .filter(nonNullable);
@@ -401,6 +428,9 @@ export function visitField(ctx: FieldContext) {
       createColumn(ctx.qualifiedName()!),
       collectBooleanExpression(ctx.booleanExpression())
     );
+    // update the location of the assign based on arguments
+    const argsLocationExtends = computeLocationExtends(fn);
+    fn.location = argsLocationExtends;
     return [fn];
   }
   return collectBooleanExpression(ctx.booleanExpression());
@@ -425,9 +455,11 @@ export function visitByOption(ctx: StatsCommandContext) {
   if (!ctx.BY()) {
     return [];
   }
-  const option = createOption(ctx.BY()!.text, ctx);
+  const option = createOption(ctx.BY()!.text.toLowerCase(), ctx);
   for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
-    option.args.push(createColumn(qnCtx));
+    if (qnCtx?.text?.length) {
+      option.args.push(createColumn(qnCtx));
+    }
   }
   return [option];
 }
@@ -485,7 +517,10 @@ function visitDissectOptions(ctx: CommandOptionsContext | undefined) {
   }
   const options: ESQLCommandOption[] = [];
   for (const optionCtx of ctx.commandOption()) {
-    const option = createOption(sanifyIdentifierString(optionCtx.identifier()), optionCtx);
+    const option = createOption(
+      sanifyIdentifierString(optionCtx.identifier()).toLowerCase(),
+      optionCtx
+    );
     options.push(option);
     // it can throw while accessing constant for incomplete commands, so try catch it
     try {
