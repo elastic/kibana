@@ -8,14 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { useController } from 'react-hook-form';
 import type { EuiFieldNumberProps } from '@elastic/eui';
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -81,16 +74,6 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
       fullWidth
       error={error?.message}
       isInvalid={hasError}
-      labelAppend={
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.osquery.osquery.liveQuery.timeoutFieldOptionalLabel"
-              defaultMessage="(optional)"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      }
     >
       <EuiFieldNumber
         isInvalid={hasError}

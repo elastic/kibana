@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { assetDetailsDashboards, KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 import { Kpi } from './kpi';
 
@@ -19,19 +20,23 @@ interface Props {
 }
 
 export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
+  const euiTheme = useTheme();
+
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
-      {assetDetailsDashboards.host.hostKPICharts.map((chartProps, index) => (
-        <EuiFlexItem key={index}>
-          <Kpi
-            {...chartProps}
-            dateRange={dateRange}
-            assetName={assetName}
-            dataView={dataView}
-            height={KPI_CHART_HEIGHT}
-          />
-        </EuiFlexItem>
-      ))}
+      {assetDetailsDashboards.host
+        .hostKPICharts(euiTheme.eui.euiColorLightestShade)
+        .map((chartProps, index) => (
+          <EuiFlexItem key={index}>
+            <Kpi
+              {...chartProps}
+              dateRange={dateRange}
+              assetName={assetName}
+              dataView={dataView}
+              height={KPI_CHART_HEIGHT}
+            />
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
   );
 };

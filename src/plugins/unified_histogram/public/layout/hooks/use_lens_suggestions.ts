@@ -62,7 +62,7 @@ export const useLensSuggestions = ({
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
-
+  const histogramQuery = useRef<AggregateQuery | undefined>();
   const histogramSuggestion = useMemo(() => {
     if (
       !currentSuggestion &&
@@ -87,8 +87,7 @@ export const useLensSuggestions = ({
       const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);
       const safeQuery = cleanupESQLQuery(query[language]);
-      const histogramQuery = `${safeQuery}
-        | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+      const esqlQuery = `${safeQuery} | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
@@ -109,15 +108,16 @@ export const useLensSuggestions = ({
           },
         ] as DatatableColumn[],
         query: {
-          esql: histogramQuery,
+          esql: esqlQuery,
         },
       };
       const sug = lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (sug.length) {
+        histogramQuery.current = { esql: esqlQuery };
         return sug[0];
       }
-      return undefined;
     }
+    histogramQuery.current = undefined;
     return undefined;
   }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
@@ -144,6 +144,7 @@ export const useLensSuggestions = ({
     currentSuggestion: histogramSuggestion ?? currentSuggestion,
     suggestionUnsupported: !currentSuggestion && !histogramSuggestion && isPlainRecord,
     isOnHistogramMode: Boolean(histogramSuggestion),
+    histogramQuery: histogramQuery.current ? histogramQuery.current : undefined,
   };
 };
 
