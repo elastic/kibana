@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -35,6 +36,7 @@ import {
   useDiscoverCustomizationService,
 } from '../../customizations';
 import type { DiscoverCustomizationContext } from '../types';
+import { DiscoverTopNavServerless } from './components/top_nav/discover_topnav_serverless';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -63,7 +65,6 @@ export function DiscoverMainRoute({
     dataViewEditor,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
-
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
       history,
@@ -212,18 +213,6 @@ export function DiscoverMainRoute({
     ]
   );
 
-  const onDataViewCreated = useCallback(
-    async (nextDataView: unknown) => {
-      if (nextDataView) {
-        setLoading(true);
-        setShowNoDataPage(false);
-        setError(undefined);
-        await loadSavedSearch(nextDataView as DataView);
-      }
-    },
-    [loadSavedSearch]
-  );
-
   useEffect(() => {
     if (!isCustomizationServiceInitialized) return;
 
@@ -247,8 +236,20 @@ export function DiscoverMainRoute({
     },
   });
 
-  if (showNoDataPage) {
-    const analyticsServices = {
+  const onDataViewCreated = useCallback(
+    async (nextDataView: unknown) => {
+      if (nextDataView) {
+        setLoading(true);
+        setShowNoDataPage(false);
+        setError(undefined);
+        await loadSavedSearch(nextDataView as DataView);
+      }
+    },
+    [loadSavedSearch]
+  );
+
+  const noDataDependencies = useMemo(
+    () => ({
       coreStart: core,
       dataViews: {
         ...data.dataViews,
@@ -263,27 +264,53 @@ export function DiscoverMainRoute({
       },
       dataViewEditor,
       noDataPage: services.noDataPage,
-    };
+    }),
+    [core, data.dataViews, dataViewEditor, hasESData, hasUserDataView, services.noDataPage]
+  );
 
-    return (
-      <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
-      </AnalyticsNoDataPageKibanaProvider>
-    );
-  }
+  const loadingIndicator = useMemo(
+    () => <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />,
+    [hasCustomBranding]
+  );
+
+  const mainContent = useMemo(() => {
+    if (showNoDataPage) {
+      return (
+        <AnalyticsNoDataPageKibanaProvider {...noDataDependencies}>
+          <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
+        </AnalyticsNoDataPageKibanaProvider>
+      );
+    }
+
+    if (loading) {
+      return loadingIndicator;
+    }
+
+    return <DiscoverMainAppMemoized stateContainer={stateContainer} />;
+  }, [
+    loading,
+    loadingIndicator,
+    noDataDependencies,
+    onDataViewCreated,
+    showNoDataPage,
+    stateContainer,
+  ]);
 
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (loading || !customizationService) {
-    return <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />;
+  if (!customizationService) {
+    return loadingIndicator;
   }
 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverMainAppMemoized stateContainer={stateContainer} />
+        <>
+          <DiscoverTopNavServerless stateContainer={stateContainer} />
+          {mainContent}
+        </>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );

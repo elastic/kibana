@@ -192,7 +192,7 @@ export interface DiscoverStateContainer {
      * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: () => void;
+    updateAdHocDataViewId: () => Promise<DataView | undefined>;
   };
 }
 

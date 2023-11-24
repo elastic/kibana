@@ -5,53 +5,40 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/discover-utils';
-import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
-import {
-  TopNavMenuBadgeProps,
-  TopNavMenuBadges,
-  TopNavMenuData,
-  TopNavMenuItems,
-} from '@kbn/navigation-plugin/public';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getTopNavLinks } from './get_top_nav_links';
-import { getTopNavBadges } from './get_top_nav_badges';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
-import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
-import type { DiscoverCustomizationContext } from '../../../types';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import { useDiscoverTopNav } from './use_discover_topnav';
 
 export interface DiscoverTopNavProps {
-  onOpenInspector: () => void;
   savedQuery?: string;
   updateQuery: (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => void;
   stateContainer: DiscoverStateContainer;
-  isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   textBasedLanguageModeWarning?: string;
   onFieldEdited: () => Promise<void>;
 }
 
 export const DiscoverTopNav = ({
-  onOpenInspector,
   savedQuery,
   stateContainer,
   updateQuery,
-  isPlainRecord,
   textBasedLanguageModeErrors,
   textBasedLanguageModeWarning,
   onFieldEdited,
@@ -61,13 +48,14 @@ export const DiscoverTopNav = ({
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
+  const isTextBased = useMemo(() => isTextBasedQuery(query), [query]);
   const showDatePicker = useMemo(() => {
     // always show the timepicker for text based languages
     return (
-      isPlainRecord ||
-      (!isPlainRecord && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+      isTextBased ||
+      (!isTextBased && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
     );
-  }, [dataView, isPlainRecord]);
+  }, [dataView, isTextBased]);
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 
@@ -123,44 +111,6 @@ export const DiscoverTopNav = ({
       allowAdHocDataView: true,
     });
   }, [dataViewEditor, stateContainer]);
-
-  const topNavCustomization = useDiscoverCustomization('top_nav');
-
-  const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
-  const hasUnsavedChanges =
-    hasSavedSearchChanges && Boolean(stateContainer.savedSearchState.getId());
-  const topNavBadges = useMemo(
-    () =>
-      getTopNavBadges({
-        stateContainer,
-        services,
-        hasUnsavedChanges,
-        topNavCustomization,
-      }),
-    [stateContainer, services, hasUnsavedChanges, topNavCustomization]
-  );
-
-  const topNavMenu = useMemo(
-    () =>
-      getTopNavLinks({
-        dataView,
-        services,
-        state: stateContainer,
-        onOpenInspector,
-        isPlainRecord,
-        adHocDataViews,
-        topNavCustomization,
-      }),
-    [
-      adHocDataViews,
-      dataView,
-      isPlainRecord,
-      onOpenInspector,
-      services,
-      stateContainer,
-      topNavCustomization,
-    ]
-  );
 
   const onEditDataView = async (editedDataView: DataView) => {
     if (editedDataView.isPersisted()) {
@@ -238,97 +188,48 @@ export const DiscoverTopNav = ({
     [services, stateContainer]
   );
 
-  const { customizationContext } = stateContainer;
-  const topNavProps = services.serverless
-    ? {
-        topNavBadges,
-        topNavMenu,
+  const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
+  const topNavProps = !services.serverless && {
+    badges: topNavBadges,
+    config: topNavMenu,
+    setMenuMountPoint,
+  };
+
+  return (
+    <SearchBar
+      {...topNavProps}
+      appName="discover"
+      indexPatterns={[dataView]}
+      onQuerySubmit={updateQuery}
+      onSavedQueryIdChange={updateSavedQueryId}
+      query={query}
+      savedQueryId={savedQuery}
+      screenTitle={savedSearch.title}
+      showDatePicker={showDatePicker}
+      saveQueryMenuVisibility={
+        services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
       }
-    : {
-        badges: topNavBadges,
-        config: topNavMenu,
-        setMenuMountPoint,
-      };
-
-  return (
-    <>
-      {Boolean(services.serverless) && customizationContext.displayMode === 'standalone' && (
-        <ServerlessTopNav customizationContext={customizationContext} {...topNavProps} />
-      )}
-      <SearchBar
-        {...(!services.serverless && topNavProps)}
-        appName="discover"
-        indexPatterns={[dataView]}
-        onQuerySubmit={updateQuery}
-        onSavedQueryIdChange={updateSavedQueryId}
-        query={query}
-        savedQueryId={savedQuery}
-        screenTitle={savedSearch.title}
-        showDatePicker={showDatePicker}
-        saveQueryMenuVisibility={
-          services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-        }
-        showSearchBar={true}
-        useDefaultBehaviors={true}
-        dataViewPickerOverride={
-          searchBarCustomization?.CustomDataViewPicker ? (
-            <searchBarCustomization.CustomDataViewPicker />
-          ) : undefined
-        }
-        dataViewPickerComponentProps={
-          shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
-        }
-        displayStyle="detached"
-        textBasedLanguageModeErrors={
-          textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
-        }
-        textBasedLanguageModeWarning={textBasedLanguageModeWarning}
-        onTextBasedSavedAndExit={onTextBasedSavedAndExit}
-        prependFilterBar={
-          searchBarCustomization?.PrependFilterBar ? (
-            <searchBarCustomization.PrependFilterBar />
-          ) : undefined
-        }
-      />
-    </>
-  );
-};
-
-export const ServerlessTopNav = ({
-  customizationContext,
-  topNavMenu,
-  topNavBadges,
-}: {
-  customizationContext: DiscoverCustomizationContext;
-  topNavMenu?: TopNavMenuData[];
-  topNavBadges?: TopNavMenuBadgeProps[];
-}) => {
-  const services = useDiscoverServices();
-  const columns = useAppStateSelector((state) => state.columns);
-  const sort = useAppStateSelector((state) => state.sort);
-  const dataView = useInternalStateSelector((state) => state.dataView!);
-
-  return (
-    <EuiHeader css={{ flexShrink: 0, boxShadow: 'none' }}>
-      {customizationContext.showLogExplorerTabs && (
-        <EuiHeaderSection>
-          <EuiHeaderSectionItem>
-            <LogExplorerTabs
-              services={services}
-              params={{ columns, sort, dataViewSpec: dataView?.toMinimalSpec() }}
-              selectedTab="discover"
-            />
-          </EuiHeaderSectionItem>
-        </EuiHeaderSection>
-      )}
-      <EuiHeaderSection side="right">
-        <EuiHeaderSectionItem>
-          <TopNavMenuBadges badges={topNavBadges} />
-        </EuiHeaderSectionItem>
-        <EuiHeaderSectionItem>
-          <TopNavMenuItems config={topNavMenu} />
-        </EuiHeaderSectionItem>
-      </EuiHeaderSection>
-    </EuiHeader>
+      showSearchBar={true}
+      useDefaultBehaviors={true}
+      dataViewPickerOverride={
+        searchBarCustomization?.CustomDataViewPicker ? (
+          <searchBarCustomization.CustomDataViewPicker />
+        ) : undefined
+      }
+      dataViewPickerComponentProps={
+        shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
+      }
+      displayStyle="detached"
+      textBasedLanguageModeErrors={
+        textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
+      }
+      textBasedLanguageModeWarning={textBasedLanguageModeWarning}
+      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+      prependFilterBar={
+        searchBarCustomization?.PrependFilterBar ? (
+          <searchBarCustomization.PrependFilterBar />
+        ) : undefined
+      }
+    />
   );
 };
