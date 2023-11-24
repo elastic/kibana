@@ -196,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for data grid with collapsed side bar', async () => {
       await PageObjects.discover.closeSidebar();
       await a11y.testAppSnapshot();
-      await PageObjects.discover.toggleSidebarCollapse();
+      await PageObjects.discover.openSidebar();
     });
 
     it('a11y test for adding a field from side bar', async () => {

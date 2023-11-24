@@ -394,8 +394,8 @@ export class DiscoverPageObject extends FtrService {
     return await Promise.all(marks.map((mark) => mark.getVisibleText()));
   }
 
-  public async toggleSidebarCollapse() {
-    return await this.testSubjects.click('unifiedFieldListSidebar__toggle');
+  public async openSidebar() {
+    return await this.testSubjects.click('dscShowSidebarButton');
   }
 
   public async closeSidebar() {
