@@ -12,7 +12,10 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 
-import { createCategoryRequest } from '../../../common/api/log_categorization/create_category_request';
+import {
+  type CategorizationAdditionalFilter,
+  createCategoryRequest,
+} from '../../../common/api/log_categorization/create_category_request';
 import { processCategoryResults } from '../../../common/api/log_categorization/process_category_results';
 import type { Category, CatResponse } from '../../../common/api/log_categorization/types';
 
@@ -26,7 +29,6 @@ import {
 
 import { RandomSampler } from './sampling_menu';
 import { RANDOM_SAMPLER_OPTION, DEFAULT_PROBABILITY } from './sampling_menu/random_sampler';
-import { CategorizationAdditionalFilter } from './log_categorization_for_flyout';
 
 export type EventRate = Array<{
   key: number;

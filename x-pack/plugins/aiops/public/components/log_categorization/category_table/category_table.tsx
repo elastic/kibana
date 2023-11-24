@@ -25,6 +25,7 @@ import { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
 
 import moment from 'moment';
+import type { CategorizationAdditionalFilter } from '../../../../common/api/log_categorization/create_category_request';
 import {
   type QueryMode,
   QUERY_MODE,
@@ -41,7 +42,6 @@ import type { EventRate } from '../use_categorize_request';
 
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
-import { CategorizationAdditionalFilter } from '../log_categorization_for_flyout';
 
 interface Props {
   categories: Category[];

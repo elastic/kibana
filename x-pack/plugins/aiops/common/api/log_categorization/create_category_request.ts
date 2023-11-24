@@ -14,7 +14,7 @@ import { createCategorizeQuery } from './create_categorize_query';
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
 
-interface CategorizationAdditionalFilter {
+export interface CategorizationAdditionalFilter {
   from: number;
   to: number;
   field?: { name: string; value: string };

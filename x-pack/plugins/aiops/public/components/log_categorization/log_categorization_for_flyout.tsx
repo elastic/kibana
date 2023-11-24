@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
+import type { CategorizationAdditionalFilter } from '../../../common/api/log_categorization/create_category_request';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import type { Category } from '../../../common/api/log_categorization/types';
@@ -52,12 +53,6 @@ import { CreateCategorizationJobButton } from './create_categorization_job';
 enum SELECTED_TAB {
   BUCKET,
   FULL_TIME_RANGE,
-}
-
-export interface CategorizationAdditionalFilter {
-  from: number;
-  to: number;
-  field?: { name: string; value: string };
 }
 
 export interface LogCategorizationPageProps {
