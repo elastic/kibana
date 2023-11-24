@@ -56,6 +56,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       alignItems="center"
       tabIndex={-1}
       data-test-subj="filter-items-group"
+      className={`filter-items-group ${props.className ?? ''}`}
     >
       {props.prepend}
       <FilterItems

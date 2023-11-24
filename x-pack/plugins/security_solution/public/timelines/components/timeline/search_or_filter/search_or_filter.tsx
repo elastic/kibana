@@ -110,7 +110,7 @@ export const SearchOrFilter = React.memo<Props>(
           <EuiFlexGroup
             data-test-subj="timeline-search-or-filter"
             gutterSize="xs"
-            alignItems="center"
+            alignItems="flexStart"
             responsive={false}
           >
             <EuiFlexItem grow={false}>

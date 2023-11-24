@@ -95,7 +95,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
-      : kqlQueryTimeline ?? ' ';
+      : kqlQueryTimeline ?? '';
 
   const kqlQueryObj = useMemo(
     () => ({ query: kqlQueryExpression, language: 'kuery' }),

@@ -73,7 +73,7 @@ const SearchBarContainer = styled.div`
   *   -----------------------------------------------------------
   *
   * */
-  [data-test-subj='globalQueryBar'] [data-test-subj='filter-items-group'] {
+  .uniSearchBar .filter-items-group {
     display: none;
   }
 
