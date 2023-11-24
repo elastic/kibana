@@ -26,11 +26,29 @@
       ]
     },
     {
-      "label": "Operations",
+      "label": "Teams",
       "items": [
         {
-          "id": "kibDevDocsOpsOverview",
-          "label": "Overview"
+          "label": "Operations",
+          "items": [
+            {
+              "id": "kibDevDocsOpsOverview",
+              "label": "Overview"
+            }
+          ]
+        },
+        {
+          "label": "Shared UX",
+          "items": [
+            {
+              "id": "kibDevDocsOpsOverview",
+              "label": "Overview"
+            },
+            {
+              "id": "kibDevDocsOpsOverview",
+              "label": "Overview"
+            }
+          ]
         }
       ]
     },
@@ -187,9 +205,6 @@
         },
         {
           "id": "kibDevTutorialsContentManagementOnboarding"
-        },
-        {
-          "id": "kibDevTutorialsServerlessProjectNavigation"
         }
       ]
     },
@@ -201,6 +216,9 @@
         },
         {
           "id": "ktCustomServerlessImage"
+        },
+        {
+          "id": "kibDevTutorialsServerlessProjectNavigation"
         }
       ]
     },
