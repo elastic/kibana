@@ -13,7 +13,7 @@ import { registerHelpers } from './templates.helpers';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { cleanUp: cleanUpEsResources, catTemplate } = initElasticsearchHelpers(getService);
+  const { catTemplate } = initElasticsearchHelpers(getService);
 
   const {
     getAllTemplates,
@@ -27,7 +27,7 @@ export default function ({ getService }) {
 
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/170980
   describe.skip('index templates', () => {
-    after(() => Promise.all([cleanUpEsResources(), cleanUpTemplates()]));
+    after(async () => await cleanUpTemplates());
 
     describe('get all', () => {
       const indexTemplate = getTemplatePayload(`template-${getRandomString()}`, [
