@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { FetchOptions } from '../../../common';
+import { FetchOptions } from '..';
 
 function getFetchOptions(fetchOptions: FetchOptions) {
   const { body, ...rest } = fetchOptions;
