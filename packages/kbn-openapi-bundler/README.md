@@ -57,6 +57,82 @@ yarn openapi:bundle
 This command will produce a bundled file `my-plugin/target/openapi/my-plugin.bundled.schema.yaml` containing
 all specs matching `./**/*.schema.yaml` glob pattern.
 
+Here's an example how your source schemas can look like and the expected result
+
+- `example1.schema.yaml`
+
+```yaml
+openapi: 3.0.3
+info:
+  title: My endpoint
+  version: '2023-10-31'
+
+paths:
+  /api/path/to/endpoint:
+    get:
+      operationId: MyGetEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+```
+
+- `example2.schema.yaml`
+
+```yaml
+openapi: 3.0.3
+info:
+  title: My endpoint
+  version: '2023-10-31'
+
+paths:
+  /api/path/to/endpoint:
+    post:
+      x-internal: true
+      operationId: MyPostEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+```
+
+And the target spec will look like
+
+```yaml
+openapi: 3.0.3
+info:
+  title: Bundled specs file. See individual path.verb.tags for details
+  version: not applicable
+paths:
+  /api/path/to/endpoint:
+    get:
+      operationId: MyGetEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      operationId: MyPostEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  schemas: {}
+```
+
 ## Supported custom (`x-` prefixed) properties
 
 OpenAPI specification allows to define custom properties. They can be used to describe extra functionality that is not covered by the standard OpenAPI Specification. We currently support the following custom properties
