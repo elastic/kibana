@@ -16,7 +16,7 @@ import { join, isAbsolute } from 'path';
  * @param baseDirPath a path from root to the folder maybeAbsolutePath is relative to
  * @returns absolute path
  */
-export function toAbsolutePath(maybeAbsolutePath: string, baseDirPath = process.cwd()): string {
+export function toAbsolutePath(maybeAbsolutePath: string, baseDirPath: string): string {
   if (isAbsolute(maybeAbsolutePath)) {
     return maybeAbsolutePath;
   }
