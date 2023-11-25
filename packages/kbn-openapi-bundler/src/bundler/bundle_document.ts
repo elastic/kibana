@@ -15,13 +15,8 @@ import { createModifyPartialProcessor } from './document_processors/modify_parti
 import { createSkipInternalPathProcessor } from './document_processors/skip_internal_path';
 import { ResolvedDocument } from './types';
 import { createRemovePropsProcessor } from './document_processors/remove_props';
-import {
-  X_CODEGEN_ENABLED,
-  X_INLINE,
-  X_INTERNAL,
-  X_MODIFY,
-} from './document_processors/lib/known_custom_props';
 import { createModifyRequiredProcessor } from './document_processors/modify_required';
+import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {

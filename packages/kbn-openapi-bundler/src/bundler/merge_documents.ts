@@ -8,8 +8,8 @@
 
 import chalk from 'chalk';
 import { OpenAPIV3 } from 'openapi-types';
-import { logger } from '../lib/logger';
-import { X_SOURCE_FILE_PATH } from './document_processors/lib/known_custom_props';
+import { logger } from '../logger';
+import { X_SOURCE_FILE_PATH } from './known_custom_props';
 import { Document } from './types';
 
 type HttpMethods = typeof HTTP_METHODS[number];

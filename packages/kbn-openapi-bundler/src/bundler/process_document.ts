@@ -18,9 +18,9 @@ import {
   RefNode,
   PlainObjectNode,
 } from './types';
-import { parseRef } from './lib/parse_ref';
-import { toAbsolutePath } from './lib/to_absolute_path';
-import { isPlainObjectType } from './lib/is_plain_object_type';
+import { parseRef } from '../utils/parse_ref';
+import { toAbsolutePath } from '../utils/to_absolute_path';
+import { isPlainObjectType } from '../utils/is_plain_object_type';
 
 interface TraverseItem {
   node: DocumentNode;

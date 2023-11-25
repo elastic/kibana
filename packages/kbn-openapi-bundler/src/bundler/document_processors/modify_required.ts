@@ -7,12 +7,12 @@
  */
 
 import chalk from 'chalk';
-import { logger } from '../../lib/logger';
-import { isPlainObjectType } from '../lib/is_plain_object_type';
+import { logger } from '../../logger';
+import { isPlainObjectType } from '../../utils/is_plain_object_type';
 import { DocumentNodeProcessor } from '../types';
-import { hasProp } from './lib/has_prop';
-import { inlineRef } from './lib/inline_ref';
-import { X_MODIFY } from './lib/known_custom_props';
+import { hasProp } from '../../utils/has_prop';
+import { X_MODIFY } from '../known_custom_props';
+import { inlineRef } from './utils/inline_ref';
 
 /**
  * Creates a node processor to modify a node by add or extending `required` property

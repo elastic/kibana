@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isPlainObjectType } from '../../lib/is_plain_object_type';
+import { isPlainObjectType } from './is_plain_object_type';
 
 export function hasProp<Property extends string, Value extends string | number | boolean>(
   node: unknown,

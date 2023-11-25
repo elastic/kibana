@@ -7,9 +7,9 @@
  */
 
 import { DocumentNodeProcessor } from '../types';
-import { hasProp } from './lib/has_prop';
-import { inlineRef } from './lib/inline_ref';
-import { X_MODIFY } from './lib/known_custom_props';
+import { hasProp } from '../../utils/has_prop';
+import { inlineRef } from './utils/inline_ref';
+import { X_MODIFY } from '../known_custom_props';
 
 /**
  * Creates a node processor to modify a node by removing `required` property when

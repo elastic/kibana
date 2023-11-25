@@ -12,9 +12,9 @@ import { basename, dirname, join, resolve } from 'path';
 import { Document } from './bundler/types';
 import { bundleDocument, SkipException } from './bundler/bundle_document';
 import { mergeDocuments } from './bundler/merge_documents';
-import { removeFilesByGlob } from './lib/remove_files_by_glob';
-import { logger } from './lib/logger';
-import { writeYamlDocument } from './bundler/lib/write_yaml_document';
+import { removeFilesByGlob } from './utils/remove_files_by_glob';
+import { logger } from './logger';
+import { writeYamlDocument } from './utils/write_yaml_document';
 
 export interface BundlerConfig {
   rootDir: string;

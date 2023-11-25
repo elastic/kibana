@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isPlainObjectType } from '../lib/is_plain_object_type';
+import { isPlainObjectType } from '../../utils/is_plain_object_type';
 import { DocumentNodeProcessor } from '../types';
 
 /**

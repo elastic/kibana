@@ -7,8 +7,8 @@
  */
 
 import path from 'path';
-import { extractByJsonPointer } from './lib/extract_by_json_pointer';
-import { readYamlDocument } from './lib/read_yaml_document';
+import { extractByJsonPointer } from '../utils/extract_by_json_pointer';
+import { readYamlDocument } from '../utils/read_yaml_document';
 import { ResolvedDocument, ResolvedRef } from './types';
 
 export class RefResolver {

@@ -7,9 +7,9 @@
  */
 
 import { DocumentNodeProcessor, ResolvedRef } from '../types';
-import { hasProp } from './lib/has_prop';
-import { inlineRef } from './lib/inline_ref';
-import { X_SOURCE_FILE_PATH } from './lib/known_custom_props';
+import { hasProp } from '../../utils/has_prop';
+import { inlineRef } from './utils/inline_ref';
+import { X_SOURCE_FILE_PATH } from '../known_custom_props';
 
 /**
  * Creates a node processor to bundle and conditionally dereference document references.
