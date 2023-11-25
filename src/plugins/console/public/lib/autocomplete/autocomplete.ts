@@ -978,6 +978,7 @@ export default function ({
   function addPathAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method?.toUpperCase();
+    context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
     const components = getTopLevelUrlCompleteComponents(context.method);
