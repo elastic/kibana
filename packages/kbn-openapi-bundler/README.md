@@ -1,6 +1,15 @@
 # OpenAPI Specs Bundler for Kibana
 
-`@kbn/openapi-bunler` is an OpenAPI utility to produce a single bundled specification file for documentation purposes. Utility resolves references and inlines some of them for better readability. Bundled file contains only local references and paths.
+`@kbn/openapi-bundler` is a tool for transforming multiple OpenAPI specification files (source specs) into a single bundled specification file (target spec).
+This can be used for API docs generation purposes. This approach allows you to:
+
+- Abstract away the knowledge of where you keep your OpenAPI specs, how many specs there are, and how to find them. The Docs team should only know where a single file is located - the bundle.
+- Omit internal API endpoints from the bundle.
+- Omit API endpoints that are hidden behind a feature flag and haven't been released yet.
+- Omit parts of schemas that are hidden behind a feature flag (e.g. a new property added to an existing response schema).
+- Omit custom OpenAPI attributes from the bundle, such as `x-codegen-enabled`, `x-internal`, and `x-modify` (see below).
+- Transform the target schema according to the custom OpenAPI attributes, such as `x-modify`.
+- Resolve references and inline some of them for better readability. The bundled file contains only local references and paths.
 
 ## Getting started
 
