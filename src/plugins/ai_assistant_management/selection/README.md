@@ -1,3 +1,3 @@
-# `aiAssistantManagement` plugin
+# `aiAssistantManagementSelection` plugin
 
-The `aiAssistantManagement` plugin manages the `Ai Assistant` management section.
+The `aiAssistantManagementSelection` plugin manages the `Ai Assistant` management section.

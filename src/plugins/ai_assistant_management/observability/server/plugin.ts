@@ -39,8 +39,6 @@ export class AiAssistantManagementObservabilityPlugin
     >,
     plugins: AiAssistantManagementObservabilityPluginSetupDependencies
   ) {
-    this.logger.debug('Setting up AiAssistantManagement for Observability plugin');
-
     const routeHandlerPlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -66,8 +64,6 @@ export class AiAssistantManagementObservabilityPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('Starting up AiAssistantManagement for Observability plugin');
-
     return {};
   }
 }

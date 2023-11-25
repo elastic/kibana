@@ -36,7 +36,7 @@ export function KnowledgeBaseTab() {
     KnowledgeBaseEntryCategory | undefined
   >();
 
-  const [flyoutTypeOpen, setFlyoutTypeOpen] = useState<
+  const [flyoutOpenType, setFlyoutOpenType] = useState<
     'singleEntry' | 'bulkImport' | 'category' | undefined
   >();
 
@@ -55,8 +55,8 @@ export function KnowledgeBaseTab() {
       name: (
         <EuiScreenReaderOnly>
           <span>
-            {i18n.translate('aiAssistantManagementObservability.span.expandRowsLabel', {
-              defaultMessage: 'Expand rows',
+            {i18n.translate('aiAssistantManagementObservability.span.expandRowLabel', {
+              defaultMessage: 'Expand row',
             })}
           </span>
         </EuiScreenReaderOnly>
@@ -191,7 +191,7 @@ export function KnowledgeBaseTab() {
                       icon="document"
                       onClick={() => {
                         setNewEntryPopoverOpen(false);
-                        setFlyoutTypeOpen('singleEntry');
+                        setFlyoutOpenType('singleEntry');
                       }}
                       size="s"
                     >
@@ -205,7 +205,7 @@ export function KnowledgeBaseTab() {
                       icon="documents"
                       onClick={() => {
                         setNewEntryPopoverOpen(false);
-                        setFlyoutTypeOpen('bulkImport');
+                        setFlyoutOpenType('bulkImport');
                       }}
                     >
                       {i18n.translate(
@@ -232,12 +232,12 @@ export function KnowledgeBaseTab() {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {flyoutTypeOpen === 'singleEntry' ? (
-        <KnowledgeBaseEditManualEntryFlyout onClose={() => setFlyoutTypeOpen(undefined)} />
+      {flyoutOpenType === 'singleEntry' ? (
+        <KnowledgeBaseEditManualEntryFlyout onClose={() => setFlyoutOpenType(undefined)} />
       ) : null}
 
-      {flyoutTypeOpen === 'bulkImport' ? (
-        <KnowledgeBaseBulkImportFlyout onClose={() => setFlyoutTypeOpen(undefined)} />
+      {flyoutOpenType === 'bulkImport' ? (
+        <KnowledgeBaseBulkImportFlyout onClose={() => setFlyoutOpenType(undefined)} />
       ) : null}
 
       {selectedCategory ? (

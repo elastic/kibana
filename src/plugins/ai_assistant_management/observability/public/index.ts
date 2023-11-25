@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { AiAssistantManagementObservabilityPlugin as AiAssistantManagementObservabilityPlugin } from './plugin';
 
 export type {
-  AiAssistantManagementObservabilityPluginSetup as AiAssistantManagementPluginSetup,
-  AiAssistantManagementObservabilityPluginStart as AiAssistantManagementPluginStart,
+  AiAssistantManagementObservabilityPluginSetup,
+  AiAssistantManagementObservabilityPluginStart,
 } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin() {
   return new AiAssistantManagementObservabilityPlugin();
 }

@@ -14,13 +14,13 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { StartDependencies, AiAssistantManagementPluginStart } from '../plugin';
-import { aIAssistantManagementRouter } from '../routes/config';
+import { StartDependencies, AiAssistantManagementSelectionPluginStart } from '../plugin';
+import { aIAssistantManagementSelectionRouter } from '../routes/config';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { AppContextProvider } from '../app_context';
 
 interface MountParams {
-  core: CoreSetup<StartDependencies, AiAssistantManagementPluginStart>;
+  core: CoreSetup<StartDependencies, AiAssistantManagementSelectionPluginStart>;
   mountParams: ManagementAppMountParams;
 }
 
@@ -46,7 +46,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
               navigateToApp: coreStart.application.navigateToApp,
             }}
           >
-            <RouterProvider history={history} router={aIAssistantManagementRouter as any}>
+            <RouterProvider history={history} router={aIAssistantManagementSelectionRouter as any}>
               <RouteRenderer />
             </RouterProvider>
           </AppContextProvider>

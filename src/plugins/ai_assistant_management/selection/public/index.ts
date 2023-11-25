@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { AiAssistantManagementPlugin as AiAssistantManagementPlugin } from './plugin';
 
-export type { AiAssistantManagementPluginSetup, AiAssistantManagementPluginStart } from './plugin';
+export type {
+  AiAssistantManagementSelectionPluginSetup as AiAssistantManagementPluginSetup,
+  AiAssistantManagementSelectionPluginStart as AiAssistantManagementPluginStart,
+} from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin() {
   return new AiAssistantManagementPlugin();
 }

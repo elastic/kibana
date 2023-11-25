@@ -3,7 +3,7 @@
   "id": "@kbn/ai-assistant-management-plugin",
   "owner": "@elastic/obs-ai-assistant",
   "plugin": {
-    "id": "aiAssistantManagement",
+    "id": "aiAssistantManagementSelection",
     "server": false,
     "browser": true,
     "requiredPlugins": ["management"],

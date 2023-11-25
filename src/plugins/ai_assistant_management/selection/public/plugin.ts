@@ -13,10 +13,10 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginSetup } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAssistantManagementPluginSetup {}
+export interface AiAssistantManagementSelectionPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAssistantManagementPluginStart {}
+export interface AiAssistantManagementSelectionPluginStart {}
 
 export interface SetupDependencies {
   management: ManagementSetup;
@@ -30,16 +30,16 @@ export interface StartDependencies {}
 export class AiAssistantManagementPlugin
   implements
     Plugin<
-      AiAssistantManagementPluginSetup,
-      AiAssistantManagementPluginStart,
+      AiAssistantManagementSelectionPluginSetup,
+      AiAssistantManagementSelectionPluginStart,
       SetupDependencies,
       StartDependencies
     >
 {
   public setup(
-    core: CoreSetup<StartDependencies, AiAssistantManagementPluginStart>,
+    core: CoreSetup<StartDependencies, AiAssistantManagementSelectionPluginStart>,
     { home, management, serverless }: SetupDependencies
-  ): AiAssistantManagementPluginSetup {
+  ): AiAssistantManagementSelectionPluginSetup {
     if (serverless) return {};
 
     if (home) {
@@ -59,7 +59,7 @@ export class AiAssistantManagementPlugin
     }
 
     management.sections.section.kibana.registerApp({
-      id: 'aiAssistantManagement',
+      id: 'aiAssistantManagementSelection',
       title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
         defaultMessage: 'AI Assistants',
       }),

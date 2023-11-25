@@ -14,14 +14,16 @@ import { AiAssistantSelectionPage } from './components/ai_assistant_selection_pa
  * The array of route definitions to be used when the application
  * creates the routes.
  */
-const aIAssistantManagementRoutes = {
+const aIAssistantManagementSelectionRoutes = {
   '/': {
     element: <AiAssistantSelectionPage />,
   },
 };
 
-export type AIAssistantManagementRoutes = typeof aIAssistantManagementRoutes;
+export type AIAssistantManagementSelectionRoutes = typeof aIAssistantManagementSelectionRoutes;
 
-export const aIAssistantManagementRouter = createRouter(aIAssistantManagementRoutes);
+export const aIAssistantManagementSelectionRouter = createRouter(
+  aIAssistantManagementSelectionRoutes
+);
 
-export type AIAssistantManagementRouter = typeof aIAssistantManagementRouter;
+export type AIAssistantManagementSelectionRouter = typeof aIAssistantManagementSelectionRouter;
