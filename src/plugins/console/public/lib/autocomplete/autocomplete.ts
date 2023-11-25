@@ -981,8 +981,8 @@ export default function ({
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
-    const components = getTopLevelUrlCompleteComponents(context.method);
 
+    const components = getTopLevelUrlCompleteComponents(context.method);
     let urlTokenPath = context.urlTokenPath;
     let predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => boolean = () => true;
 
