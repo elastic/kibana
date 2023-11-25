@@ -61,7 +61,301 @@ all specs matching `./**/*.schema.yaml` glob pattern.
 
 OpenAPI specification allows to define custom properties. They can be used to describe extra functionality that is not covered by the standard OpenAPI Specification. We currently support the following custom properties
 
-| Custom property | Supported values        | Description                                                                                                                                                                                                                           |
-| --------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `x-internal`    | `true` or `false`       | Omit the node and its children from the result document. It's useful when it's necessary to hide some chunk of OpenAPI spec because functionality supporting it is hidden under a feature flag or the chunk is just for internal use. |
-| `x-modify`      | `partial` or `required` | Modifies the node. Value `partial` leads to removing `required` property making params under `properties` optional. Value `required` leads to adding or extending `required` property by adding all param names under `properties`.   |
+- [x-internal](#x-internal) - marks source spec nodes the bundler must NOT include in the target spec
+- [x-modify](#x-modify) - marks nodes to be modified by the bundler
+
+### `x-internal`
+
+Marks source spec nodes the bundler must NOT include in the target spec.
+
+**Supported values**: `true`
+
+When bundlers encounters a node with `x-internal: true` it doesn't include this node into the target spec. It's useful when it's necessary to hide some chunk of OpenAPI spec because functionality supporting it is hidden under a feature flag or the chunk is just for internal use.
+
+#### Examples
+
+The following spec defines an API endpoint `/api/path/to/endpoint` accepting `GET` and `POST` requests. It has `x-internal: true` defined in `post` section meaning it won't be included in the target spec.
+
+```yaml
+openapi: 3.0.3
+info:
+  title: My endpoint
+  version: '2023-10-31'
+
+paths:
+  /api/path/to/endpoint:
+    get:
+      operationId: MyGetEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      x-internal: true
+      operationId: MyPostEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+```
+
+The target spec will look like
+
+```yaml
+openapi: 3.0.3
+info:
+  title: My endpoint
+  version: '2023-10-31'
+
+paths:
+  /api/path/to/endpoint:
+    get:
+      operationId: MyGetEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+```
+
+`x-internal: true` can also be defined next to a reference.
+
+```yaml
+openapi: 3.0.3
+info:
+  title: My endpoint
+  version: '2023-10-31'
+
+paths:
+  /api/path/to/endpoint:
+    get:
+      operationId: MyGetEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      $ref: '#/components/schemas/MyPostEndpointResponse'
+      x-internal: true
+
+components:
+  schemas:
+    MyPostEndpointResponse:
+      operationId: MyPostEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+```
+
+The target spec will look like
+
+```yaml
+openapi: 3.0.3
+info:
+  title: My endpoint
+  version: '2023-10-31'
+
+paths:
+  /api/path/to/endpoint:
+    get:
+      operationId: MyGetEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+```
+
+### `x-modify`
+
+Marks nodes to be modified by the bundler.
+
+**Supported values**: `partial` or `required`
+
+Value `partial` leads to removing `required` property making params under `properties` optional. Value `required` leads to adding or extending `required` property by adding all param names under `properties`.
+
+#### Examples
+
+The following spec has `x-modify: partial` at `schema` section. It makes params optional for a PATCH request.
+
+```yaml
+openapi: 3.0.0
+info:
+  title: My endpoint
+  version: '2023-10-31'
+paths:
+  /api/path/to/endpoint:
+    patch:
+      operationId: MyPatchEndpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              x-modify: partial
+              type: object
+              properties:
+                param1:
+                  type: string
+                  enum: [val1, val2, val3]
+                param2:
+                  type: number
+              required:
+                - param1
+                - param2
+```
+
+The target spec will look like
+
+```yaml
+openapi: 3.0.0
+info:
+  title: My endpoint
+  version: '2023-10-31'
+paths:
+  /api/path/to/endpoint:
+    patch:
+      operationId: MyPatchEndpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                param1:
+                  type: string
+                  enum: [val1, val2, val3]
+                param2:
+                  type: number
+```
+
+The following spec has `x-modify: required` at `schema` section. It makes params optional for a PATCH request.
+
+```yaml
+openapi: 3.0.0
+info:
+  title: My endpoint
+  version: '2023-10-31'
+paths:
+  /api/path/to/endpoint:
+    put:
+      operationId: MyPutEndpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              x-modify: required
+              type: object
+              properties:
+                param1:
+                  type: string
+                  enum: [val1, val2, val3]
+                param2:
+                  type: number
+```
+
+The target spec will look like
+
+```yaml
+openapi: 3.0.0
+info:
+  title: My endpoint
+  version: '2023-10-31'
+paths:
+  /api/path/to/endpoint:
+    patch:
+      operationId: MyPatchEndpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                param1:
+                  type: string
+                  enum: [val1, val2, val3]
+                param2:
+                  type: number
+              required:
+                - param1
+                - param2
+```
+
+`x-modify` can also be defined next to a reference.
+
+```yaml
+openapi: 3.0.0
+info:
+  title: My endpoint
+  version: '2023-10-31'
+paths:
+  /api/path/to/endpoint:
+    patch:
+      operationId: MyPatchEndpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchProps'
+              x-modify: partial
+
+components:
+  schemas:
+    PatchProps:
+      type: object
+      properties:
+        param1:
+          type: string
+          enum: [val1, val2, val3]
+        param2:
+          type: number
+      required:
+        - param1
+        - param2
+```
+
+The target spec will look like
+
+```yaml
+openapi: 3.0.0
+info:
+  title: My endpoint
+  version: '2023-10-31'
+paths:
+  /api/path/to/endpoint:
+    patch:
+      operationId: MyPatchEndpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                param1:
+                  type: string
+                  enum: [val1, val2, val3]
+                param2:
+                  type: number
+```
