@@ -164,7 +164,6 @@ export function MessageText({ loading, content, index }: Props) {
     overflow-wrap: break-word;
   `;
 
-
   return (
     <EuiText className={containerClassName}>
       <EuiMarkdownFormat
