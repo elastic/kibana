@@ -7,18 +7,18 @@
 
 import expect from '@kbn/expect';
 
-import { initElasticsearchHelpers } from './lib';
+import { indicesHelpers } from './lib/indices.helpers';
 import { registerHelpers } from './mapping.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(getService);
+  const { createIndex, deleteAllIndices } = indicesHelpers(getService);
 
   const { getIndexMapping } = registerHelpers({ supertest });
 
   describe('mapping', () => {
-    after(() => Promise.all([cleanUpEsResources()]));
+    after(async () => await deleteAllIndices());
 
     it('should fetch the index mapping', async () => {
       const mappings = {
@@ -28,7 +28,7 @@ export default function ({ getService }) {
           createdAt: { type: 'date' },
         },
       };
-      const index = await createIndex(undefined, { mappings });
+      const index = await createIndex(undefined, mappings);
 
       const { body } = await getIndexMapping(index).expect(200);
 

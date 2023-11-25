@@ -218,12 +218,7 @@ export function PreviewChart({
           decimals: isPercent ? 0 : 2,
         },
       },
-      filter: {
-        language: 'kuery',
-        query: filterQuery || '',
-      },
     };
-
     const xYDataLayerOptions: XYLayerOptions = {
       buckets: {
         type: 'date_histogram',
@@ -252,7 +247,6 @@ export function PreviewChart({
         value: layer.value,
         label: layer.label,
         format: layer.format,
-        filter: layer.filter,
       })),
       options: xYDataLayerOptions,
     });
@@ -333,6 +327,10 @@ export function PreviewChart({
         timeRange={{ from: `now-${timeSize * 20}${timeUnit}`, to: 'now' }}
         attributes={attributes}
         disableTriggers={true}
+        query={{
+          language: 'kuery',
+          query: filterQuery || '',
+        }}
       />
     </div>
   );
