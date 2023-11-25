@@ -6,7 +6,27 @@
  * Side Public License, v 1.
  */
 
+/**
+ * `x-internal: true` marks nodes the bundler must NOT include in the result bundled document. Any other values are ignored.
+ */
 export const X_INTERNAL = 'x-internal';
+
+/**
+ * `x-modify` marks nodes to be modified by the bundler. `partial` and `required` values are supported.
+ *
+ * - `partial` leads to removing `required` property making params under `properties` optional
+ * - `required` leads to adding or extending `required` property by adding all param names under `properties`
+ */
 export const X_MODIFY = 'x-modify';
+
+/**
+ * `x-codegen-enabled` is used by the code generator package `@kbn/openapi-generator` and shouldn't be included
+ *  in result bundled document.
+ */
 export const X_CODEGEN_ENABLED = 'x-codegen-enabled';
+
+/**
+ * `x-source-file-path` specifies component's source file path and used internally by the bundler to detect conflicts
+ * in the result bundled document's components'
+ */
 export const X_SOURCE_FILE_PATH = 'x-source-file-path';
