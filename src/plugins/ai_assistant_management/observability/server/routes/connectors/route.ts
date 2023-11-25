@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { notImplemented } from '@hapi/boom';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { createAIAssistantManagementObservabilityServerRoute } from '../create_ai_assistant_management_observability_server_route';
 
@@ -16,6 +17,10 @@ const listConnectorsRoute = createAIAssistantManagementObservabilityServerRoute(
   },
   handler: async (resources): Promise<FindActionResult[]> => {
     const { request, plugins } = resources;
+
+    if (!plugins.actions) {
+      throw notImplemented();
+    }
 
     const actionsClient = await (
       await plugins.actions.start()
