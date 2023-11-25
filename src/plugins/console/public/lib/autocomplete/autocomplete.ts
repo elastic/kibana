@@ -978,37 +978,25 @@ export default function ({
   function addPathAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method?.toUpperCase();
-    context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
-
     const components = getTopLevelUrlCompleteComponents(context.method);
-    const { tokenPath, predicate } = (() => {
-      const lastUrlTokenPath =
-        Array.isArray(context.urlTokenPath) && context.urlTokenPath.length !== 0
-          ? context.urlTokenPath[context.urlTokenPath.length - 1]
-          : null;
-      // Checking the last chunk of path like 'c,d,' of 'GET /a/b/c,d,'
-      if (
-        Array.isArray(lastUrlTokenPath) &&
-        // true if neither c nor d equals to every ConstantComponent's name (such as _search)
-        !_.find(
-          components,
-          (c) => c instanceof ConstantComponent && _.find(lastUrlTokenPath, (p) => c.name === p)
-        )
-      ) {
-        // will simulate autocomplete on 'GET /a/b/' with a filter by index
-        return {
-          tokenPath: context.urlTokenPath?.slice(0, -1),
-          predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => term.meta === 'index',
-        };
-      } else {
-        // will do nothing special
-        return { tokenPath: context.urlTokenPath, predicate: () => true };
-      }
-    })();
 
-    populateContext(tokenPath, context, editor, true, components);
+    let urlTokenPath = context.urlTokenPath;
+    let predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => boolean = () => true;
+    if (Array.isArray(urlTokenPath) && editor.getTokenAt(pos)?.type === 'url.comma') {
+      const lastUrlTokenPath = _.last(urlTokenPath) || []; // ['c', 'd'] from 'GET /a/b/c,d,'
+      const constantComponents = _.filter(components, (c) => c instanceof ConstantComponent);
+      const constantComponentNames = _.map(constantComponents, 'name');
+
+      // check if neither 'c' nor 'd' is a constant component name such as '_search'
+      if (_.every(lastUrlTokenPath, (token) => !_.includes(constantComponentNames, token))) {
+        urlTokenPath = urlTokenPath.slice(0, -1); // drop the last 'c,d,' part from the url path
+        predicate = (term) => term.meta === 'index'; // limit the suggestion to indices only
+      }
+    }
+
+    populateContext(urlTokenPath, context, editor, true, components);
     context.autoCompleteSet = _.filter(
       addMetaToTermsList(context.autoCompleteSet!, 'endpoint'),
       predicate
