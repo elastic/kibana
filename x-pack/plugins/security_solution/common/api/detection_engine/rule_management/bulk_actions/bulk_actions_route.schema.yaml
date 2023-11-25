@@ -169,6 +169,7 @@ components:
       type: string
 
     BulkActionBase:
+      x-inline: true
       type: object
       properties:
         query:
