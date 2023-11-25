@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isAbsolute } from 'path';
 import { RefResolver } from './ref_resolver';
 import { processDocument } from './process_document';
 import { createDereferenceConditionallyProcessor } from './document_processors/dereference_conditionally';
@@ -19,7 +20,6 @@ import {
   X_INTERNAL,
   X_MODIFY,
 } from './document_processors/lib/known_custom_props';
-import { toAbsolutePath } from './lib/to_absolute_path';
 import { createModifyRequiredProcessor } from './document_processors/modify_required';
 
 export class SkipException extends Error {
@@ -28,10 +28,15 @@ export class SkipException extends Error {
   }
 }
 
-export async function bundleDocument(documentPath: string): Promise<ResolvedDocument> {
+export async function bundleDocument(absoluteDocumentPath: string): Promise<ResolvedDocument> {
+  if (!isAbsolute(absoluteDocumentPath)) {
+    throw new Error(
+      `bundleDocument expects an absolute document path but got "${absoluteDocumentPath}"`
+    );
+  }
+
   const refResolver = new RefResolver();
-  const documentAbsolutePath = toAbsolutePath(documentPath);
-  const resolvedDocument = await refResolver.resolveDocument(documentAbsolutePath);
+  const resolvedDocument = await refResolver.resolveDocument(absoluteDocumentPath);
   const shareBasePointerInlineRegEx = /Shared|Base/;
 
   if (!hasPaths(resolvedDocument.document as MaybeObjectWithPaths)) {
