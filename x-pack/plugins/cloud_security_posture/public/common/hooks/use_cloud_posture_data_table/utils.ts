@@ -28,7 +28,10 @@ const getBaseQuery = ({
       query: buildEsQuery(dataView, query, filters, config), // will throw for malformed query
     };
   } catch (error) {
-    throw new Error(error);
+    return {
+      query: undefined,
+      error: error instanceof Error ? error : new Error('Unknown Error'),
+    };
   }
 };
 
