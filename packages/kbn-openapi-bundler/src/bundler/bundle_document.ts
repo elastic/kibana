@@ -28,6 +28,20 @@ export class SkipException extends Error {
   }
 }
 
+/**
+ * Bundles document into one file and performs appropriate document modifications.
+ *
+ * Bundling assumes external references defined via `$ref` are included into the result document.
+ * Some of the references get inlined.
+ *
+ * Document modification includes the following
+ * - skips nodes with `x-internal: true` property
+ * - skips paths started with `/internal`
+ * - modifies nodes having `x-modify`
+ *
+ * @param absoluteDocumentPath document's absolute path
+ * @returns bundled document
+ */
 export async function bundleDocument(absoluteDocumentPath: string): Promise<ResolvedDocument> {
   if (!isAbsolute(absoluteDocumentPath)) {
     throw new Error(
