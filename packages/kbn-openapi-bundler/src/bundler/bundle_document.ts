@@ -17,6 +17,7 @@ import { ResolvedDocument } from './types';
 import { createRemovePropsProcessor } from './document_processors/remove_props';
 import { createModifyRequiredProcessor } from './document_processors/modify_required';
 import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
+import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
@@ -58,6 +59,8 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
     throw new SkipException(resolvedDocument.absolutePath, 'Document has no paths defined');
   }
 
+  const removeUnusedComponentsProcessor = new RemoveUnusedComponentsProcessor();
+
   await processDocument(resolvedDocument, refResolver, [
     createSkipNodeWithInternalPropProcessor(X_INTERNAL),
     createSkipInternalPathProcessor('/internal'),
@@ -65,7 +68,12 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
     createRemovePropsProcessor([X_MODIFY, X_CODEGEN_ENABLED]),
+    removeUnusedComponentsProcessor,
   ]);
+
+  if (resolvedDocument.document.components) {
+    removeUnusedComponentsProcessor.removeUnusedComponents(resolvedDocument.document.components);
+  }
 
   // If document.paths were removed by processors skip the document
   if (!hasPaths(resolvedDocument.document as MaybeObjectWithPaths)) {
