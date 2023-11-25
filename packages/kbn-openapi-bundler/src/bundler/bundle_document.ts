@@ -40,6 +40,12 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
   const shareBasePointerInlineRegEx = /Shared|Base/;
 
   if (!hasPaths(resolvedDocument.document as MaybeObjectWithPaths)) {
+    // Specs without paths defined are usually considered as shared. Such specs have `components` defined
+    // and referenced by the specs with paths defined. In this case the shared specs have been
+    // handled already and must be skipped.
+    //
+    // An additional case when it's a rogue spec. Rogue specs are skipped as well as they don't contribute
+    // to the API endpoints.
     throw new SkipException(resolvedDocument.absolutePath, 'Document has no paths defined');
   }
 
