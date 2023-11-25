@@ -12,6 +12,11 @@
 export const X_INTERNAL = 'x-internal';
 
 /**
+ * `x-internal: true` marks reference nodes the bundler must inline in the result bundled document.
+ */
+export const X_INLINE = 'x-inline';
+
+/**
  * `x-modify` marks nodes to be modified by the bundler. `partial` and `required` values are supported.
  *
  * - `partial` leads to removing `required` property making params under `properties` optional

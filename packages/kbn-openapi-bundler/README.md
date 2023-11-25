@@ -107,7 +107,7 @@ And the target spec will look like
 ```yaml
 openapi: 3.0.3
 info:
-  title: Bundled specs file. See individual path.verb.tags for details
+  title: Bundled specs file. See individual paths.verb.tags for details
   version: not applicable
 paths:
   /api/path/to/endpoint:
@@ -139,6 +139,7 @@ OpenAPI specification allows to define custom properties. They can be used to de
 
 - [x-internal](#x-internal) - marks source spec nodes the bundler must NOT include in the target spec
 - [x-modify](#x-modify) - marks nodes to be modified by the bundler
+- [x-inline](#x-inline) - marks reference nodes to be inlined when bundled
 
 ### `x-internal`
 
@@ -146,7 +147,7 @@ Marks source spec nodes the bundler must NOT include in the target spec.
 
 **Supported values**: `true`
 
-When bundlers encounters a node with `x-internal: true` it doesn't include this node into the target spec. It's useful when it's necessary to hide some chunk of OpenAPI spec because functionality supporting it is hidden under a feature flag or the chunk is just for internal use.
+When bundler encounters a node with `x-internal: true` it doesn't include this node into the target spec. It's useful when it's necessary to hide some chunk of OpenAPI spec because functionality supporting it is hidden under a feature flag or the chunk is just for internal use.
 
 #### Examples
 
@@ -186,9 +187,8 @@ The target spec will look like
 ```yaml
 openapi: 3.0.3
 info:
-  title: My endpoint
-  version: '2023-10-31'
-
+  title: Bundled specs file. See individual paths.verb.tags for details
+  version: not applicable
 paths:
   /api/path/to/endpoint:
     get:
@@ -243,9 +243,8 @@ The target spec will look like
 ```yaml
 openapi: 3.0.3
 info:
-  title: My endpoint
-  version: '2023-10-31'
-
+  title: Bundled specs file. See individual paths.verb.tags for details
+  version: not applicable
 paths:
   /api/path/to/endpoint:
     get:
@@ -303,8 +302,8 @@ The target spec will look like
 ```yaml
 openapi: 3.0.0
 info:
-  title: My endpoint
-  version: '2023-10-31'
+  title: Bundled specs file. See individual paths.verb.tags for details
+  version: not applicable
 paths:
   /api/path/to/endpoint:
     patch:
@@ -354,8 +353,8 @@ The target spec will look like
 ```yaml
 openapi: 3.0.0
 info:
-  title: My endpoint
-  version: '2023-10-31'
+  title: Bundled specs file. See individual paths.verb.tags for details
+  version: not applicable
 paths:
   /api/path/to/endpoint:
     patch:
@@ -416,8 +415,8 @@ The target spec will look like
 ```yaml
 openapi: 3.0.0
 info:
-  title: My endpoint
-  version: '2023-10-31'
+  title: Bundled specs file. See individual paths.verb.tags for details
+  version: not applicable
 paths:
   /api/path/to/endpoint:
     patch:
@@ -434,4 +433,61 @@ paths:
                   enum: [val1, val2, val3]
                 param2:
                   type: number
+```
+
+### `x-inline`
+
+Marks reference nodes to be inlined when bundled.
+
+**Supported values**: `true`
+
+`x-inline: true` can be specified at a reference node itself (a node with `$ref` key) or at a node `$ref` resolves to. When bundler encounters such a node it assigns (copies keys via `Object.assign()`) the latter node (a node`$ref` resolves to) to the first node (a node with `$ref` key). This way target won't have referenced component in `components` as well.
+
+#### Examples
+
+The following spec defines an API endpoint `/api/path/to/endpoint` accepting `POST` request. It has `x-inline: true` specified in `post` section meaning reference `#/components/schemas/MyPostEndpointResponse` will be inlined in the target spec.
+
+```yaml
+openapi: 3.0.3
+info:
+  title: My endpoint
+  version: '2023-10-31'
+
+paths:
+  /api/path/to/endpoint:
+    post:
+      $ref: '#/components/schemas/MyPostEndpointResponse'
+      x-inline: true
+
+components:
+  schemas:
+    MyPostEndpointResponse:
+      operationId: MyPostEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+```
+
+The target spec will look like
+
+```yaml
+openapi: 3.0.3
+info:
+  title: Bundled specs file. See individual paths.verb.tags for details
+  version: not applicable
+paths:
+  /api/path/to/endpoint:
+    post:
+      operationId: MyPostEndpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
 ```

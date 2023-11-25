@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import { logger } from '../../lib/logger';
 import { isPlainObjectType } from '../lib/is_plain_object_type';
 import { DocumentNodeProcessor } from '../types';
+import { hasProp } from './lib/has_prop';
 import { inlineRef } from './lib/inline_ref';
 import { X_MODIFY } from './lib/known_custom_props';
 
@@ -20,11 +21,11 @@ import { X_MODIFY } from './lib/known_custom_props';
 export function createModifyRequiredProcessor(): DocumentNodeProcessor {
   return {
     ref(node, resolvedRef) {
-      if (!(X_MODIFY in node) || node[X_MODIFY] !== 'required') {
+      if (!hasProp(node, X_MODIFY, 'required')) {
         return;
       }
 
-      if (!('properties' in resolvedRef.refNode)) {
+      if (!hasProp(resolvedRef.refNode, 'properties')) {
         logger.warning(
           `Unable to apply ${chalk.blueBright(X_MODIFY)} to ${chalk.cyan(
             resolvedRef.pointer
@@ -48,11 +49,11 @@ export function createModifyRequiredProcessor(): DocumentNodeProcessor {
       node.required = Object.keys(resolvedRef.refNode.properties);
     },
     leave(node) {
-      if (!(X_MODIFY in node) || node[X_MODIFY] !== 'required') {
+      if (!hasProp(node, X_MODIFY, 'required')) {
         return;
       }
 
-      if (!('properties' in node)) {
+      if (!hasProp(node, 'properties')) {
         logger.warning(
           `Unable to apply ${chalk.blueBright(X_MODIFY)} to ${chalk.cyan(
             node

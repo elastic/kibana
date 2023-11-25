@@ -6,20 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  DocumentNode,
-  DocumentNodeProcessor,
-  ResolvedRef,
-  TraverseDocumentContext,
-} from '../types';
+import { DocumentNodeProcessor, ResolvedRef } from '../types';
+import { hasProp } from './lib/has_prop';
 import { inlineRef } from './lib/inline_ref';
 import { X_SOURCE_FILE_PATH } from './lib/known_custom_props';
-
-export type DereferenceConditionallyInliningPredicate = (
-  node: DocumentNode,
-  resolvedRef: ResolvedRef,
-  context: TraverseDocumentContext
-) => boolean;
 
 /**
  * Creates a node processor to bundle and conditionally dereference document references.
@@ -31,17 +21,20 @@ export type DereferenceConditionallyInliningPredicate = (
  * Conditional dereference means inlining references when `inliningPredicate()` returns `true`. If `inliningPredicate`
  * is not passed only bundling happens.
  */
-export function createDereferenceConditionallyProcessor(
-  inliningPredicate?: DereferenceConditionallyInliningPredicate
-): DocumentNodeProcessor {
+export function createBundleRefsProcessor(inliningPropName: string): DocumentNodeProcessor {
   return {
     ref(node, resolvedRef, context) {
       if (!resolvedRef.pointer.startsWith('/components')) {
         throw new Error(`$ref pointer must start with "/components"`);
       }
 
-      if (inliningPredicate?.(node, resolvedRef, context)) {
+      if (
+        hasProp(node, inliningPropName, true) ||
+        hasProp(resolvedRef.refNode, inliningPropName, true)
+      ) {
         inlineRef(node, resolvedRef);
+
+        delete node[inliningPropName];
       } else {
         if (!context.rootDocument.document.components) {
           context.rootDocument.document.components = {};

@@ -9,7 +9,7 @@
 import { isAbsolute } from 'path';
 import { RefResolver } from './ref_resolver';
 import { processDocument } from './process_document';
-import { createDereferenceConditionallyProcessor } from './document_processors/dereference_conditionally';
+import { createBundleRefsProcessor } from './document_processors/bundle_refs';
 import { createSkipNodeWithInternalPropProcessor } from './document_processors/skip_node_with_internal_prop';
 import { createModifyPartialProcessor } from './document_processors/modify_partial';
 import { createSkipInternalPathProcessor } from './document_processors/skip_internal_path';
@@ -17,6 +17,7 @@ import { ResolvedDocument } from './types';
 import { createRemovePropsProcessor } from './document_processors/remove_props';
 import {
   X_CODEGEN_ENABLED,
+  X_INLINE,
   X_INTERNAL,
   X_MODIFY,
 } from './document_processors/lib/known_custom_props';
@@ -51,7 +52,6 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
 
   const refResolver = new RefResolver();
   const resolvedDocument = await refResolver.resolveDocument(absoluteDocumentPath);
-  const shareBasePointerInlineRegEx = /Shared|Base/;
 
   if (!hasPaths(resolvedDocument.document as MaybeObjectWithPaths)) {
     // Specs without paths defined are usually considered as shared. Such specs have `components` defined
@@ -66,9 +66,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
   await processDocument(resolvedDocument, refResolver, [
     createSkipNodeWithInternalPropProcessor(X_INTERNAL),
     createSkipInternalPathProcessor('/internal'),
-    createDereferenceConditionallyProcessor((_, resolvedRef) =>
-      shareBasePointerInlineRegEx.test(resolvedRef.pointer)
-    ),
+    createBundleRefsProcessor(X_INLINE),
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
     createRemovePropsProcessor([X_MODIFY, X_CODEGEN_ENABLED]),

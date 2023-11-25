@@ -7,6 +7,7 @@
  */
 
 import { DocumentNodeProcessor } from '../types';
+import { hasProp } from './lib/has_prop';
 import { inlineRef } from './lib/inline_ref';
 import { X_MODIFY } from './lib/known_custom_props';
 
@@ -17,7 +18,7 @@ import { X_MODIFY } from './lib/known_custom_props';
 export function createModifyPartialProcessor(): DocumentNodeProcessor {
   return {
     ref(node, resolvedRef) {
-      if (!(X_MODIFY in node) || node[X_MODIFY] !== 'partial') {
+      if (!hasProp(node, X_MODIFY, 'partial')) {
         return;
       }
 
@@ -27,7 +28,7 @@ export function createModifyPartialProcessor(): DocumentNodeProcessor {
       delete node.required;
     },
     leave(node) {
-      if (!(X_MODIFY in node) || node[X_MODIFY] !== 'partial') {
+      if (!hasProp(node, X_MODIFY, 'partial')) {
         return;
       }
 
