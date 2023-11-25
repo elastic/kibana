@@ -984,15 +984,22 @@ export default function ({
 
     let urlTokenPath = context.urlTokenPath;
     let predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => boolean = () => true;
-    if (Array.isArray(urlTokenPath) && editor.getTokenAt(pos)?.type === 'url.comma') {
-      const lastUrlTokenPath = _.last(urlTokenPath) || []; // ['c', 'd'] from 'GET /a/b/c,d,'
-      const constantComponents = _.filter(components, (c) => c instanceof ConstantComponent);
-      const constantComponentNames = _.map(constantComponents, 'name');
+    if (Array.isArray(urlTokenPath)) {
+      const tokenIter = createTokenIterator({ editor, position: pos });
+      const isCurrentOrPreviousTokenTypeUrlComma =
+        tokenIter.getCurrentToken()?.type === 'url.comma' ||
+        tokenIter.stepBackward()?.type === 'url.comma';
 
-      // check if neither 'c' nor 'd' is a constant component name such as '_search'
-      if (_.every(lastUrlTokenPath, (token) => !_.includes(constantComponentNames, token))) {
-        urlTokenPath = urlTokenPath.slice(0, -1); // drop the last 'c,d,' part from the url path
-        predicate = (term) => term.meta === 'index'; // limit the suggestion to indices only
+      if (isCurrentOrPreviousTokenTypeUrlComma) {
+        const lastUrlTokenPath = _.last(urlTokenPath) || []; // ['c', 'd'] from 'GET /a/b/c,d,'
+        const constantComponents = _.filter(components, (c) => c instanceof ConstantComponent);
+        const constantComponentNames = _.map(constantComponents, 'name');
+
+        // check if neither 'c' nor 'd' is a constant component name such as '_search'
+        if (_.every(lastUrlTokenPath, (token) => !_.includes(constantComponentNames, token))) {
+          urlTokenPath = urlTokenPath.slice(0, -1); // drop the last 'c,d,' part from the url path
+          predicate = (term) => term.meta === 'index'; // limit the suggestion to indices only
+        }
       }
     }
 
