@@ -26,7 +26,7 @@ export const bundle = async (config: BundlerConfig) => {
   const {
     rootDir,
     sourceGlob,
-    outputFilePath: relativeOutputFilePath = '/target/openapi/bundled.schema.yaml',
+    outputFilePath: relativeOutputFilePath = 'target/openapi/bundled.schema.yaml',
   } = config;
 
   logger.debug(chalk.bold(`Bundling API route schemas`));
