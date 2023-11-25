@@ -986,11 +986,18 @@ export default function ({
     let predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => boolean = () => true;
     if (Array.isArray(urlTokenPath)) {
       const tokenIter = createTokenIterator({ editor, position: pos });
-      const isCurrentOrPreviousTokenTypeUrlComma =
-        tokenIter.getCurrentToken()?.type === 'url.comma' ||
-        tokenIter.stepBackward()?.type === 'url.comma';
+      const currentTokenType = tokenIter.getCurrentToken()?.type;
+      const previousTokenType = tokenIter.stepBackward()?.type;
 
-      if (isCurrentOrPreviousTokenTypeUrlComma) {
+      if (previousTokenType === 'url.comma' && currentTokenType === 'url.comma') {
+        predicate = () => false; // two consecutive commas empty the autocomplete
+      } else if (previousTokenType === 'url.comma' && currentTokenType === 'url.slash') {
+        // a comma followed by a slash does not deflect the autocomplete
+      } else if (
+        (previousTokenType === 'url.comma' && currentTokenType === 'url.part') ||
+        (previousTokenType === 'url.slash' && currentTokenType === 'url.comma') ||
+        (previousTokenType === 'url.part' && currentTokenType === 'url.comma')
+      ) {
         const lastUrlTokenPath = _.last(urlTokenPath) || []; // ['c', 'd'] from 'GET /a/b/c,d,'
         const constantComponents = _.filter(components, (c) => c instanceof ConstantComponent);
         const constantComponentNames = _.map(constantComponents, 'name');
@@ -998,7 +1005,7 @@ export default function ({
         // check if neither 'c' nor 'd' is a constant component name such as '_search'
         if (_.every(lastUrlTokenPath, (token) => !_.includes(constantComponentNames, token))) {
           urlTokenPath = urlTokenPath.slice(0, -1); // drop the last 'c,d,' part from the url path
-          predicate = (term) => term.meta === 'index'; // limit the suggestion to indices only
+          predicate = (term) => term.meta === 'index'; // limit the autocomplete to indices only
         }
       }
     }
