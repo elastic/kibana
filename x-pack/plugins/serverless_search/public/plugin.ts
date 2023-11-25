@@ -15,6 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { appIds } from '@kbn/management-cards-navigation';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from './application/components/index_mappings_docs_link';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import {
@@ -45,7 +46,7 @@ export class ServerlessSearchPlugin
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       appRoute: '/app/elasticsearch',
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
@@ -58,7 +59,7 @@ export class ServerlessSearchPlugin
           user = undefined;
         }
 
-        return await renderApp(element, coreStart, { user, ...services });
+        return await renderApp(element, coreStart, { history, user, ...services });
       },
     });
 
@@ -71,12 +72,12 @@ export class ServerlessSearchPlugin
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       searchable: false,
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
 
         docLinks.setDocLinks(coreStart.docLinks.links);
-        return await renderApp(element, coreStart, { ...services });
+        return await renderApp(element, coreStart, { history, ...services });
       },
     });
 
@@ -85,7 +86,7 @@ export class ServerlessSearchPlugin
 
   public start(
     core: CoreStart,
-    { serverless, management, cloud }: ServerlessSearchPluginStartDependencies
+    { serverless, management, cloud, indexManagement }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
@@ -94,6 +95,7 @@ export class ServerlessSearchPlugin
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
     });
+    indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
     return {};
   }
 

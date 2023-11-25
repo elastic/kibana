@@ -24,7 +24,7 @@ import {
 
 import { editFirstRule, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -43,9 +43,9 @@ import {
   visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
 import { createRule } from '../../../tasks/api_calls/rules';
-
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
@@ -53,10 +53,6 @@ const savedQueryFilterKey = 'testAgent.value';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   describe('Custom saved_query detection rule creation', () => {
     beforeEach(() => {
       login();
@@ -87,6 +83,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
       fillScheduleRuleAndContinue(rule);
       cy.intercept('POST', '/api/detection_engine/rules').as('savedQueryRule');
       createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.wait('@savedQueryRule').then(({ response }) => {
         // created rule should have saved_query type

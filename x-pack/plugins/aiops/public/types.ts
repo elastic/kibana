@@ -18,6 +18,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableChangePointChartInput } from './embeddable/embeddable_change_point_chart';
 
 export interface AiopsPluginSetupDeps {
@@ -40,6 +41,7 @@ export interface AiopsPluginStartDeps {
   licensing: LicensingPluginStart;
   executionContext: ExecutionContextStart;
   embeddable: EmbeddableStart;
+  usageCollection: UsageCollectionSetup;
 }
 
 export type AiopsPluginSetup = void;

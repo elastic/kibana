@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/utility-types",
-    "@kbn/core-plugins-server-internal"
+    "@kbn/core-plugins-server-internal",
+    "@kbn/core-plugins-contracts-server"
   ],
   "exclude": [
     "target/**/*",

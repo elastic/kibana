@@ -37,7 +37,7 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -68,7 +68,6 @@ describe(
     const ITEM_FIELD = 'unique_value.test';
 
     before(() => {
-      cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     });
 
@@ -79,6 +78,7 @@ describe(
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
+      deleteExceptionLists();
 
       const exceptionList = getExceptionList();
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);

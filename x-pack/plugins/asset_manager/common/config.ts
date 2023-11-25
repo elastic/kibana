@@ -23,14 +23,6 @@ export const configSchema = schema.object({
     },
     { defaultValue: INDEX_DEFAULTS }
   ),
-  // Choose an explicit source for asset queries.
-  // NOTE: This will eventually need to be able to cleverly switch
-  // between these values based on the availability of data in the
-  // indices, and possibly for each asset kind/type value.
-  // For now, we set this explicitly.
-  lockedSource: schema.oneOf([schema.literal('assets'), schema.literal('signals')], {
-    defaultValue: 'signals',
-  }),
 });
 
 export type AssetManagerConfig = TypeOf<typeof configSchema>;

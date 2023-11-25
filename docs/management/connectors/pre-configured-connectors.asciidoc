@@ -1,5 +1,9 @@
 [[pre-configured-connectors]]
 == Preconfigured connectors
+:frontmatter-description: Define connectors in the {kib} configuration file.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 If you are running {kib} on-prem, you can preconfigure a connector to have all
 the information it needs prior to startup by adding it to the `kibana.yml` file.
@@ -20,6 +24,7 @@ predefined, including the connector name and ID.
 
 Add `xpack.actions.preconfigured` settings to your `kibana.yml` file. The
 settings vary depending on which type of connector you're adding.
+Refer to <<preconfigured-connector-settings>>.
 
 This example shows a valid configuration for a Slack connector and a Webhook
 connector:
@@ -107,6 +112,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 [[preconfigured-connector-examples]]
 === Examples
 
+* <<preconfigured-bedrock-configuration>>
 * <<preconfigured-d3security-configuration>>
 * <<preconfigured-email-configuration>>
 * <<preconfigured-gen-ai-configuration>>
@@ -117,6 +123,9 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-opsgenie-configuration>>
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
+* <<preconfigured-servicenow-itom-configuration>>
+* <<preconfigured-servicenow-configuration>>
+* <<preconfigured-servicenow-sir-configuration>>
 * <<preconfigured-slack-configuration>>
 * <<preconfigured-swimlane-configuration>>
 * <<preconfigured-torq-configuration>>
@@ -124,6 +133,30 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
+
+[float]
+[[preconfigured-bedrock-configuration]]
+==== {bedrock} connectors
+
+The following example creates an <<bedrock-action-type,{bedrock} connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-bedrock:
+    name: preconfigured-bedrock-connector-type
+    actionTypeId: .bedrock
+    config:
+      apiUrl: https://bedrock.us-east-1.amazonaws.com <1>
+      defaultModel: anthropic.claude-v2 <2>
+    secrets:
+      accessKey: key-value <3>
+      secret: secret-value <4>
+--
+<1> The {bedrock} request URL.
+<2> The default model to use for requests. Current support is for the Anthropic Claude models, defaulting to Claude 2.
+<3> The AWS access key for authentication.
+<4> The AWS secret for authentication.
 
 [float]
 [[preconfigured-d3security-configuration]]
@@ -299,7 +332,7 @@ xpack.actions.preconfigured:
     secrets:
       apiKey: superlongapikey <4>
 --
-<1> The OpenAI request URL
+<1> The OpenAI request URL.
 <2> The OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
 <3> The default model to use for requests. This setting is optional and applicable only when `apiProvider` is `OpenAI`.
 <4> The OpenAI or Azure OpenAI API key for authentication.
@@ -441,6 +474,155 @@ xpack.actions.preconfigured:
     name: preconfigured-server-log-connector-type
     actionTypeId: .server-log
 --
+
+[float]
+[[preconfigured-servicenow-itom-configuration]]
+==== {sn-itom} connectors
+
+The following example creates a <<servicenow-itom-action-type,{sn-itom} connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow-itom:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow-itom
+    config:
+      apiUrl: https://example.service-now.com/ <1>
+    secrets:
+      username: testuser <2>
+      password: passwordkeystorevalue <3>
+--
+<1> The ServiceNow instance URL.
+<2> A user name.
+<3> A password. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
+
+The following example creates a {sn-itom} connector with OAuth authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow-itom
+    config:
+      apiUrl: https://example.service-now.com/
+      isOAuth: true <1>
+      userIdentifierValue: testuser@email.com <2>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <3>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
+    secrets:
+      clientSecret: secretsecret <5>
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+--
+<1> Specifies whether the connector uses basic or OAuth authentication.
+<2> The user identifier.
+<3> The client identifier assigned to your OAuth application.
+<4> The key identifier assigned to the JWT verifier map of your OAuth application.
+<5> The client secret assigned to your OAuth application.
+<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+
+[float]
+[[preconfigured-servicenow-configuration]]
+==== {sn-itsm} connectors
+
+The following example creates a <<servicenow-action-type,{sn-itsm} connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow
+    config:
+      apiUrl: https://example.service-now.com/ <1>
+      usesTableApi: false <2>
+    secrets:
+      username: testuser <3>
+      password: passwordkeystorevalue <4>
+--
+<1> The ServiceNow instance URL.
+<2> Specifies whether the connector uses the Table API or the Import Set API. If `usesTableApi` is `false`, the Elastic application should be installed in {sn}.
+<3> The user name.
+<4> The password. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
+
+The following example creates a {sn-itsm} connector with OAuth authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false
+      isOAuth: true <1>
+      userIdentifierValue: testuser@email.com <2>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <3>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
+    secrets:
+      clientSecret: secretsecret <5>
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+--
+<1> Specifies whether the connector uses basic or OAuth authentication.
+<2> The user identifier.
+<3> The client identifier assigned to your OAuth application.
+<4> The key ID assigned to the JWT verifier map of your OAuth application.
+<5> The client secret assigned to the OAuth application.
+<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+
+[float]
+[[preconfigured-servicenow-sir-configuration]]
+==== {sn-sir} connectors
+
+The following example creates a <<servicenow-sir-action-type,{sn-sir} connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow-sir:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow-sir
+    config:
+      apiUrl: https://example.service-now.com/ <1>
+      usesTableApi: false <2>
+    secrets:
+      username: testuser <3>
+      password: passwordkeystorevalue <4>
+--
+<1> The ServiceNow instance URL.
+<2> Specifies whether the connector uses the Table API or the Import Set API. If `usesTableApi` is false, the Elastic application should be installed in {sn}.
+<3> The user name.
+<4> The password. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>. 
+
+The following example creates a {sn-sir} connector with OAuth authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow-sir
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false
+      isOAuth: true <1>
+      userIdentifierValue: testuser@email.com <2>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <3>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
+    secrets:
+      clientSecret: secretsecret <5>
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+--
+<1> Specifies whether the connector uses basic or OAuth authentication.
+<2> The user identifier.
+<3> The client identifier assigned to the OAuth application.
+<4> The key ID assigned to the JWT verifier map of your OAuth application.
+<5> The client secret assigned to the OAuth application.
+<6> The RSA private key. If it has a password, you must also specify
+`privateKeyPassword`.
+
 
 [float]
 [[preconfigured-slack-configuration]]
@@ -605,7 +787,6 @@ xpack.actions.preconfigured:
 
 NOTE: SSL authentication is not supported in preconfigured webhook connectors.
 
-
 [float]
 [[preconfigured-cases-webhook-configuration]]
 ==== {webhook-cm} connectors
@@ -664,7 +845,7 @@ The following example creates an <<xmatters-action-type,xMatters connector>> wit
 [source,text]
 --
 xpack.actions.preconfigured:
-my-xmatters:
+  my-xmatters:
     name: preconfigured-xmatters-connector-type
     actionTypeId: .xmatters
     config:

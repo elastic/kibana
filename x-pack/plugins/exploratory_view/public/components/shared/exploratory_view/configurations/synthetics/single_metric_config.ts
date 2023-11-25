@@ -16,6 +16,8 @@ import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 
+export const FINAL_SUMMARY_KQL =
+  'summary: * and (summary.final_attempt: true or not summary.final_attempt: *)';
 export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'line',
@@ -70,7 +72,10 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           },
           titlePosition: 'bottom',
         },
-        columnFilter: { language: 'kuery', query: 'summary.up: *' },
+        columnFilter: {
+          language: 'kuery',
+          query: FINAL_SUMMARY_KQL,
+        },
       },
       {
         id: 'monitor_duration',
@@ -130,7 +135,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(state.id, kql=\'monitor.status: "down"\')',
+        formula: `unique_count(state.id, kql='${FINAL_SUMMARY_KQL} and monitor.status: "down"')`,
         format: 'number',
       },
       {
@@ -143,7 +148,10 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         },
         field: RECORDS_FIELD,
         format: 'number',
-        columnFilter: { language: 'kuery', query: 'summary.down > 0' },
+        columnFilter: {
+          language: 'kuery',
+          query: 'summary.status: down and summary.final_attempt: true',
+        },
       },
     ],
     labels: FieldLabels,

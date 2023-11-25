@@ -12,7 +12,7 @@ import type { RuleParams } from './rule_schemas';
 
 export type RuleAlertType = SanitizedRule<RuleParams>;
 
-export const isAlertType = (
+export const hasValidRuleType = (
   partialAlert: PartialRule<RuleParams>
 ): partialAlert is RuleAlertType => {
   const ruleTypeValues = Object.values(ruleTypeMappings) as unknown as string[];

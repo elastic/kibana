@@ -42,7 +42,7 @@ export function o365LogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-o365.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/o365.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/o365.svg'),
     artifacts: {
       dashboards: [
         {
@@ -58,7 +58,7 @@ export function o365LogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/o365_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/o365_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

@@ -17,32 +17,32 @@ import {
 
 const getDefaultRules = (response: any) => ({
   id: response.body.rules[0].id,
-  notifyWhen: 'onThrottleInterval',
+  notify_when: 'onThrottleInterval',
   enabled: false,
   name: 'abc',
   tags: ['foo'],
   consumer: 'alertsFixture',
   throttle: '1m',
-  alertTypeId: 'test.noop',
-  apiKeyCreatedByUser: false,
-  apiKeyOwner: response.body.rules[0].apiKeyOwner,
-  createdBy: 'elastic',
-  updatedBy: response.body.rules[0].updatedBy,
-  muteAll: false,
-  mutedInstanceIds: [],
+  rule_type_id: 'test.noop',
+  api_key_created_by_user: false,
+  api_key_owner: response.body.rules[0].api_key_owner,
+  created_by: 'elastic',
+  updated_by: response.body.rules[0].updated_by,
+  mute_all: false,
+  muted_alert_ids: [],
   schedule: { interval: '1m' },
   actions: [],
   params: {},
   running: false,
-  snoozeSchedule: [],
-  updatedAt: response.body.rules[0].updatedAt,
-  createdAt: response.body.rules[0].createdAt,
-  scheduledTaskId: response.body.rules[0].scheduledTaskId,
-  executionStatus: response.body.rules[0].executionStatus,
+  snooze_schedule: [],
+  updated_at: response.body.rules[0].updated_at,
+  created_at: response.body.rules[0].created_at,
+  scheduled_task_id: response.body.rules[0].scheduled_task_id,
+  execution_status: response.body.rules[0].execution_status,
   monitoring: response.body.rules[0].monitoring,
   revision: 0,
-  ...(response.body.rules[0].nextRun ? { nextRun: response.body.rules[0].nextRun } : {}),
-  ...(response.body.rules[0].lastRun ? { lastRun: response.body.rules[0].lastRun } : {}),
+  ...(response.body.rules[0].next_run ? { next_run: response.body.rules[0].next_run } : {}),
+  ...(response.body.rules[0].last_run ? { last_run: response.body.rules[0].last_run } : {}),
 });
 
 const getDefaultResponse = (response: any) => ({
@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
                 rules: [
                   {
                     ...getDefaultRules(response),
-                    alertTypeId: 'test.restricted-noop',
+                    rule_type_id: 'test.restricted-noop',
                     consumer: 'alertsRestrictedFixture',
                   },
                 ],
@@ -233,7 +233,7 @@ export default ({ getService }: FtrProviderContext) => {
                 rules: [
                   {
                     ...getDefaultRules(response),
-                    alertTypeId: 'test.restricted-noop',
+                    rule_type_id: 'test.restricted-noop',
                   },
                 ],
                 errors: [],
@@ -470,7 +470,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
+          "Error validating bulk disable data - Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
         );
       });
 
@@ -506,7 +506,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.body).to.eql({
           error: 'Bad Request',
-          message: "Either 'ids' or 'filter' property in method's arguments should be provided",
+          message:
+            "Error validating bulk disable data - Either 'ids' or 'filter' property in method's arguments should be provided",
           statusCode: 400,
         });
       });
@@ -534,7 +535,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.body).to.eql({
           error: 'Bad Request',
-          message: "Either 'ids' or 'filter' property in method's arguments should be provided",
+          message:
+            "Error validating bulk disable data - Either 'ids' or 'filter' property in method's arguments should be provided",
           statusCode: 400,
         });
       });

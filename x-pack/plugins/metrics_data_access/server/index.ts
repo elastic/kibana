@@ -6,7 +6,6 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { MetricsDataPlugin } from './plugin';
 
 export type {
   MetricsDataPluginSetup,
@@ -18,7 +17,9 @@ export type {
 export { metricsDataSourceSavedObjectName } from './saved_objects/metrics_data_source';
 
 export { MetricsDataClient } from './client';
+export { MetricsDataClientMock } from './client_mock';
 
-export function plugin(context: PluginInitializerContext) {
+export async function plugin(context: PluginInitializerContext) {
+  const { MetricsDataPlugin } = await import('./plugin');
   return new MetricsDataPlugin(context);
 }

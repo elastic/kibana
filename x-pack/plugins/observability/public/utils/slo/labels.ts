@@ -21,6 +21,13 @@ export const INDICATOR_CUSTOM_METRIC = i18n.translate(
   }
 );
 
+export const INDICATOR_TIMESLICE_METRIC = i18n.translate(
+  'xpack.observability.slo.indicators.timesliceMetric',
+  {
+    defaultMessage: 'Timeslice Metric',
+  }
+);
+
 export const INDICATOR_HISTOGRAM = i18n.translate('xpack.observability.slo.indicators.histogram', {
   defaultMessage: 'Histogram Metric',
 });
@@ -53,6 +60,9 @@ export function toIndicatorTypeLabel(
 
     case 'sli.histogram.custom':
       return INDICATOR_HISTOGRAM;
+
+    case 'sli.metric.timeslice':
+      return INDICATOR_TIMESLICE_METRIC;
 
     default:
       assertNever(indicatorType as never);

@@ -26,7 +26,14 @@ export interface InfraConfig {
     };
   };
   featureFlags: {
+    customThresholdAlertsEnabled: boolean;
+    logsUIEnabled: boolean;
     metricsExplorerEnabled: boolean;
+    osqueryEnabled: boolean;
+    inventoryThresholdAlertRuleEnabled: boolean;
+    metricThresholdAlertRuleEnabled: boolean;
+    logThresholdAlertRuleEnabled: boolean;
+    alertsAndRulesDropdownEnabled: boolean;
   };
 }
 

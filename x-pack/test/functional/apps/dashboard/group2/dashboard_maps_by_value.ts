@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
-  const appsMenu = getService('appsMenu');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
 
@@ -60,10 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       if (!saveToDashboard) {
-        await appsMenu.clickLink('Dashboard', {
-          category: 'kibana',
-          closeCollapsibleNav: true,
-        });
+        await PageObjects.dashboard.navigateToAppFromAppsMenu();
       }
     } else {
       await PageObjects.maps.clickSaveAndReturnButton();
@@ -78,8 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.dashboard.clickNewDashboard();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/152476
-  describe.skip('dashboard maps by value', function () {
+  describe('dashboard maps by value', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(

@@ -75,7 +75,7 @@ export class AppFeaturesService {
   }
 
   public setAppFeaturesConfigurator(configurator: AppFeaturesConfigurator) {
-    const securityAppFeaturesConfig = configurator.security(this.experimentalFeatures);
+    const securityAppFeaturesConfig = configurator.security();
     this.securityAppFeatures.setConfig(securityAppFeaturesConfig);
 
     const casesAppFeaturesConfig = configurator.cases();

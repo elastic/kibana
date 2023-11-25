@@ -9,7 +9,7 @@ import type { EventTypeOpts } from '@kbn/analytics-client';
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
   taskDurationInSeconds: number;
-  executionDurationExceededInterval: boolean;
+  interval: string;
 }> = {
   eventType: 'risk_score_execution_success',
   schema: {
@@ -25,10 +25,10 @@ export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
         description: 'Duration (in seconds) of the current risk scoring task execution',
       },
     },
-    executionDurationExceededInterval: {
-      type: 'boolean',
+    interval: {
+      type: 'keyword',
       _meta: {
-        description: `Whether the risk scoring task's duration exceeded its allocated interval`,
+        description: `Configured interval for the current risk scoring task`,
       },
     },
   },
@@ -39,4 +39,36 @@ export const RISK_SCORE_EXECUTION_ERROR_EVENT: EventTypeOpts<{}> = {
   schema: {},
 };
 
-export const events = [RISK_SCORE_EXECUTION_SUCCESS_EVENT, RISK_SCORE_EXECUTION_ERROR_EVENT];
+export const RISK_SCORE_EXECUTION_CANCELLATION_EVENT: EventTypeOpts<{
+  scoresWritten: number;
+  taskDurationInSeconds: number;
+  interval: string;
+}> = {
+  eventType: 'risk_score_execution_cancellation',
+  schema: {
+    scoresWritten: {
+      type: 'long',
+      _meta: {
+        description: 'Number of risk scores written during this scoring task execution',
+      },
+    },
+    taskDurationInSeconds: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the current risk scoring task execution',
+      },
+    },
+    interval: {
+      type: 'keyword',
+      _meta: {
+        description: `Configured interval for the current risk scoring task`,
+      },
+    },
+  },
+};
+
+export const events = [
+  RISK_SCORE_EXECUTION_SUCCESS_EVENT,
+  RISK_SCORE_EXECUTION_ERROR_EVENT,
+  RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
+];

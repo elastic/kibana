@@ -23,6 +23,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -39,7 +40,6 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import {
-  ApmRuleType,
   APM_SERVER_FEATURE_ID,
   formatTransactionErrorRateReason,
   RULE_TYPES_CONFIG,
@@ -50,7 +50,7 @@ import {
   asDecimalOrInteger,
   getAlertUrlTransaction,
 } from '../../../../../common/utils/formatters';
-import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
+import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -83,9 +83,9 @@ export const transactionErrorRateActionVariables = [
 export function registerTransactionErrorRateRuleType({
   alerting,
   alertsLocator,
+  apmConfig,
   basePath,
   getApmIndices,
-  apmConfig,
   logger,
   ruleDataClient,
 }: RegisterRuleDependencies) {
@@ -113,6 +113,7 @@ export function registerTransactionErrorRateRuleType({
         spaceId,
         params: ruleParams,
         startedAt,
+        getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.TransactionErrorRate,
@@ -154,6 +155,10 @@ export function registerTransactionErrorRateRuleType({
             ]
           : [];
 
+        const { dateStart } = getTimeRange(
+          `${ruleParams.windowSize}${ruleParams.windowUnit}`
+        );
+
         const searchParams = {
           index,
           body: {
@@ -165,11 +170,11 @@ export function registerTransactionErrorRateRuleType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: dateStart,
                       },
                     },
                   },
-                  ...getDocumentTypeFilterForTransactions(
+                  ...getBackwardCompatibleDocumentTypeFilter(
                     searchAggregatedTransactions
                   ),
                   {

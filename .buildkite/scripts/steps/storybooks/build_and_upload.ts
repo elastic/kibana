@@ -16,7 +16,6 @@ const STORYBOOKS = [
   'canvas',
   'cases',
   'cell_actions',
-  'ci_composite',
   'cloud_chat',
   'coloring',
   'chart_icons',
@@ -45,7 +44,7 @@ const STORYBOOKS = [
   'observability',
   'observability_ai_assistant',
   'presentation',
-  // 'security_solution', => This build is error out and failing CI. SEE: https://github.com/elastic/kibana/issues/162290
+  'security_solution',
   'security_solution_packages',
   'serverless',
   'shared_ux',
@@ -93,14 +92,12 @@ const upload = () => {
     console.log('--- Generating Storybooks HTML');
 
     process.chdir(path.join('.', 'built_assets', 'storybook'));
-    fs.renameSync('ci_composite', 'composite');
 
     const storybooks = execSync(`ls -1d */`)
       .toString()
       .trim()
       .split('\n')
-      .map((filePath) => filePath.replace('/', ''))
-      .filter((filePath) => filePath !== 'composite');
+      .map((filePath) => filePath.replace('/', ''));
 
     const listHtml = storybooks
       .map((storybook) => `<li><a href="${STORYBOOK_BASE_URL}/${storybook}">${storybook}</a></li>`)
@@ -110,8 +107,6 @@ const upload = () => {
       <html>
         <body>
           <h1>Storybooks</h1>
-          <p><a href="${STORYBOOK_BASE_URL}/composite">Composite Storybook</a></p>
-          <h2>All</h2>
           <ul>
             ${listHtml}
           </ul>

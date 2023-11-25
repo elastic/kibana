@@ -48,14 +48,6 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
       {
         '@timestamp': now,
         message: {
-          role: MessageRole.System,
-          content: `You are infra-gpt, a helpful assistant for metrics-based infrastructure observability. Answer as
-          concisely as possible.`,
-        },
-      },
-      {
-        '@timestamp': now,
-        message: {
           role: MessageRole.User,
           content: `I am a software engineer. I am trying to understand what a process running on my
           machine does.
@@ -196,7 +188,11 @@ export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) =
                     <CodeListItem>{item.user}</CodeListItem>
                   </EuiDescriptionListDescription>
                 </EuiFlexItem>
-                <ProcessRowCharts command={item.command} />
+                <ProcessRowCharts
+                  command={item.command}
+                  hasCpuData={item.cpu !== null}
+                  hasMemoryData={item.memory !== null}
+                />
               </EuiFlexGrid>
               {supportAIAssistant && <ContextualInsightProcessRow command={item.command} />}
             </ExpandedRowDescriptionList>

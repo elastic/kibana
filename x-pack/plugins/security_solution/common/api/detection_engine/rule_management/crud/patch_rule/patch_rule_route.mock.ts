@@ -6,7 +6,7 @@
  */
 
 import type { ThresholdRulePatchProps } from '../../../model';
-import type { PatchRuleRequestBody } from './patch_rule_route';
+import type { PatchRuleRequestBody } from './patch_rule_route.gen';
 
 export const getPatchRulesSchemaMock = (): PatchRuleRequestBody => ({
   description: 'some description',

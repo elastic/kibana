@@ -133,6 +133,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const [hasNameError, toggleHasNameError] = useState<boolean>(!exception.name);
     const [newComment, setNewComment] = useState('');
+    const [hasCommentError, setHasCommentError] = useState(false);
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
@@ -173,10 +174,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       // and not just default entry without values
       return (
         !hasNameError &&
+        !hasCommentError &&
         !!exception.entries.length &&
         (exception.entries as EventFilterItemEntries).some((e) => e.value !== '' || e.value.length)
       );
-    }, [hasNameError, exception.entries]);
+    }, [hasCommentError, hasNameError, exception.entries]);
 
     const processChanged = useCallback(
       (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
@@ -340,6 +342,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           exceptionItemComments={existingComments}
           newCommentValue={newComment}
           newCommentOnChange={handleOnChangeComment}
+          setCommentError={setHasCommentError}
         />
       ),
       [existingComments, handleOnChangeComment, newComment]

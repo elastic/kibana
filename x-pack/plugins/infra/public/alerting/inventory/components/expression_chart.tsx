@@ -10,11 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
 import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
@@ -191,7 +192,7 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={dateFormatter}
           />
           <Axis id={'values'} position={Position.Left} tickFormat={yAxisFormater} domain={domain} />
-          <Settings baseTheme={chartTheme.baseTheme} />
+          <Settings baseTheme={chartTheme.baseTheme} locale={i18n.getLocale()} />
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>

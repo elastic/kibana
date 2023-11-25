@@ -45,7 +45,7 @@ import {
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -56,21 +56,16 @@ import {
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewThresholdRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
   const expectedTags = rule.tags?.join('');
   const mitreAttack = rule.threat;
   const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
-
-  before(() => {
-    cleanKibana();
-  });
 
   beforeEach(() => {
     deleteAlertsAndRules();
@@ -84,6 +79,7 @@ describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless
     fillAboutRuleAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
     createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

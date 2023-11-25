@@ -61,7 +61,7 @@ describe('installWithTimeout', () => {
         timeoutMs: 10,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failure during installation. Server is stopping; must stop all async operations"`
+      `"Server is stopping; must stop all async operations"`
     );
     expect(logger.info).not.toHaveBeenCalled();
   });

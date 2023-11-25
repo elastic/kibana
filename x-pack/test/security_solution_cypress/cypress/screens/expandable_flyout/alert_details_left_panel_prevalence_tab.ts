@@ -10,12 +10,11 @@ import {
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/left/components/test_ids';
-import { INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/tabs/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/left/components/test_ids';
+import { INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/tabs/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON = getDataTestSubjectSelector(
@@ -23,9 +22,6 @@ export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON = getDataTes
 );
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_DATE_PICKER =
   getDataTestSubjectSelector(PREVALENCE_DETAILS_DATE_PICKER_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE = getDataTestSubjectSelector(
-  PREVALENCE_DETAILS_TABLE_TEST_ID
-);
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_TYPE_CELL =
   getDataTestSubjectSelector(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_NAME_CELL =

@@ -32,7 +32,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
-import { merge, Subscription } from 'rxjs';
+import { merge, Subscription, switchMap } from 'rxjs';
 import { toExpression } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
@@ -97,7 +97,7 @@ import {
   GetCompatibleCellValueActions,
   UserMessage,
   IndexPatternRef,
-  FrameDatasourceAPI,
+  FramePublicAPI,
   AddUserMessages,
   isMessageRemovable,
   UserMessagesGetter,
@@ -544,18 +544,21 @@ export class Embeddable
     // Merge and debounce the observables to avoid multiple reloads
     this.inputReloadSubscriptions.push(
       merge(searchContext$, attributesOrSavedObjectId$)
-        .pipe(debounceTime(0))
-        .subscribe(async ({ trigger, input }) => {
-          if (trigger === 'attributesOrSavedObjectId') {
-            await this.initializeSavedVis(input);
-          }
+        .pipe(
+          debounceTime(0),
+          switchMap(async ({ trigger, input }) => {
+            if (trigger === 'attributesOrSavedObjectId') {
+              await this.initializeSavedVis(input);
+            }
 
-          // reset removable messages
-          // Dashboard search/context changes are detected here
-          this.additionalUserMessages = {};
+            // reset removable messages
+            // Dashboard search/context changes are detected here
+            this.additionalUserMessages = {};
 
-          this.reload();
-        })
+            this.reload();
+          })
+        )
+        .subscribe()
     );
   }
 
@@ -604,11 +607,14 @@ export class Embeddable
     userMessages.push(
       ...getApplicationUserMessages({
         visualizationType: this.savedVis?.visualizationType,
-        visualization: {
+        visualizationState: {
           state: this.activeVisualizationState,
           activeId: this.activeVisualizationId,
         },
-        visualizationMap: this.deps.visualizationMap,
+        visualization:
+          this.activeVisualizationId && this.deps.visualizationMap[this.activeVisualizationId]
+            ? this.deps.visualizationMap[this.activeVisualizationId]
+            : undefined,
         activeDatasource: this.activeDatasource,
         activeDatasourceState: {
           isLoading: !this.activeDatasourceState,
@@ -627,7 +633,7 @@ export class Embeddable
     }
     const mergedSearchContext = this.getMergedSearchContext();
 
-    const frameDatasourceAPI: FrameDatasourceAPI = {
+    const framePublicAPI: FramePublicAPI = {
       dataViews: {
         indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
@@ -654,14 +660,14 @@ export class Embeddable
     userMessages.push(
       ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
-        frame: frameDatasourceAPI,
+        frame: framePublicAPI,
         visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
           this.activeVisualizationState,
-          frameDatasourceAPI
+          framePublicAPI
         ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
-        frame: frameDatasourceAPI,
+        frame: framePublicAPI,
       }) ?? [])
     );
 
@@ -741,7 +747,11 @@ export class Embeddable
    * Gets the Lens embeddable's datasource and visualization states
    * updates the embeddable input
    */
-  async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
+  async updateVisualization(
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualizationType?: string
+  ) {
     const viz = this.savedVis;
     const activeDatasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
@@ -763,7 +773,7 @@ export class Embeddable
         ),
         visualizationState,
         activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[this.activeVisualizationId]
+          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
           : undefined,
       });
       const attrs = {
@@ -774,6 +784,7 @@ export class Embeddable
           datasourceStates,
         },
         references,
+        visualizationType: visualizationType ?? viz.visualizationType,
       };
 
       /**
@@ -787,6 +798,15 @@ export class Embeddable
        */
       this.renderUserMessages();
     }
+  }
+
+  async updateSuggestion(attrs: LensSavedObjectAttributes) {
+    const viz = this.savedVis;
+    const newViz = {
+      ...viz,
+      ...attrs,
+    };
+    this.updateInput({ attributes: newViz });
   }
 
   /**
@@ -842,6 +862,7 @@ export class Embeddable
         <Component
           attributes={attributes}
           updatePanelState={this.updateVisualization.bind(this)}
+          updateSuggestion={this.updateSuggestion.bind(this)}
           datasourceId={datasourceId}
           lensAdapters={this.lensInspector.adapters}
           output$={this.getOutput$()}
@@ -852,6 +873,7 @@ export class Embeddable
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
           displayFlyoutHeader={true}
+          canEditTextBasedQuery={this.isTextBasedLanguage()}
         />
       );
     }
@@ -1210,6 +1232,7 @@ export class Embeddable
         .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
         .map((action) => ({
           id: action.id,
+          type: action.type,
           iconType: action.getIconType({ embeddable, data, trigger: cellValueTrigger })!,
           displayName: action.getDisplayName({ embeddable, data, trigger: cellValueTrigger }),
           execute: (cellData) =>

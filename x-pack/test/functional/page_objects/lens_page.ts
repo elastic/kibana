@@ -32,6 +32,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const comboBox = getService('comboBox');
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const queryBar = getService('queryBar');
 
   const PageObjects = getPageObjects([
     'common',
@@ -1376,13 +1377,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param title - title for the new lens. If left undefined, the panel will be created by value
      * @param redirectToOrigin - whether to redirect back to the dashboard after saving the panel
+     * @param ignoreTimeFilter - whether time range has to be changed
      */
     async createAndAddLensFromDashboard({
       title,
       redirectToOrigin,
+      ignoreTimeFilter,
     }: {
       title?: string;
       redirectToOrigin?: boolean;
+      ignoreTimeFilter?: boolean;
     }) {
       log.debug(`createAndAddLens${title}`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
@@ -1390,7 +1394,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
-      await this.goToTimeRange();
+
+      if (!ignoreTimeFilter) {
+        await this.goToTimeRange();
+      }
+
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
@@ -1875,6 +1883,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (isSuggestionPanelOpen) {
         await testSubjects.click('lensSuggestionsPanelToggleButton');
       }
+    },
+
+    /**
+     * Enables elastic charts debug state with *soft* refresh
+     */
+    async enableEchDebugState() {
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await queryBar.clickQuerySubmitButton();
     },
 
     async changeColorMappingPalette(selector: string, paletteId: string) {

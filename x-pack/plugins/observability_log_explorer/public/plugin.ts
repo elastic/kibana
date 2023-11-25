@@ -23,6 +23,7 @@ import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../common/constants';
 import { logExplorerAppTitle } from '../common/translations';
 import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
 import type {
+  ObservabilityLogExplorerAppMountParameters,
   ObservabilityLogExplorerPluginSetup,
   ObservabilityLogExplorerPluginStart,
   ObservabilityLogExplorerSetupDeps,
@@ -56,7 +57,7 @@ export class ObservabilityLogExplorerPlugin
         : AppNavLinkStatus.hidden,
       searchable: true,
       keywords: ['logs', 'log', 'explorer', 'logs explorer'],
-      mount: async (appMountParams) => {
+      mount: async (appMountParams: ObservabilityLogExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
 
         return renderObservabilityLogExplorer(

@@ -60,7 +60,7 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="ghost" {...savedQueryListProps}>
+                <EuiButtonEmpty color="text" {...savedQueryListProps}>
                   <FormattedMessage
                     id="xpack.osquery.addSavedQuery.form.cancelButtonLabel"
                     defaultMessage="Cancel"

@@ -163,10 +163,45 @@
       },
       {
         "parentPluginId": "dashboard",
-        "id": "def-public.getEmbeddableParams",
+        "id": "def-public.DashboardTopNav",
         "type": "Function",
         "tags": [],
-        "label": "getEmbeddableParams",
+        "label": "DashboardTopNav",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "DashboardTopNavProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardTopNav.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "DashboardTopNavProps"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.getDashboardLocatorParamsFromEmbeddable",
+        "type": "Function",
+        "tags": [],
+        "label": "getDashboardLocatorParamsFromEmbeddable",
         "description": [],
         "signature": [
           "(source: ",
@@ -198,8 +233,8 @@
             "pluginId": "dashboard",
             "scope": "public",
             "docId": "kibDashboardPluginApi",
-            "section": "def-public.DashboardAppLocatorParams",
-            "text": "DashboardAppLocatorParams"
+            "section": "def-public.DashboardLocatorParams",
+            "text": "DashboardLocatorParams"
           },
           ">"
         ],
@@ -209,7 +244,7 @@
         "children": [
           {
             "parentPluginId": "dashboard",
-            "id": "def-public.getEmbeddableParams.$1",
+            "id": "def-public.getDashboardLocatorParamsFromEmbeddable.$1",
             "type": "Object",
             "tags": [],
             "label": "source",
@@ -239,7 +274,7 @@
           },
           {
             "parentPluginId": "dashboard",
-            "id": "def-public.getEmbeddableParams.$2",
+            "id": "def-public.getDashboardLocatorParamsFromEmbeddable.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -482,6 +517,46 @@
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardCreationOptions.getEmbeddableAppContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getEmbeddableAppContext",
+            "description": [],
+            "signature": [
+              "((dashboardId?: string | undefined) => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableAppContext",
+                "text": "EmbeddableAppContext"
+              },
+              ") | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardCreationOptions.getEmbeddableAppContext.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dashboardId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -610,8 +685,8 @@
             "pluginId": "dashboard",
             "scope": "public",
             "docId": "kibDashboardPluginApi",
-            "section": "def-public.DashboardAppLocatorParams",
-            "text": "DashboardAppLocatorParams"
+            "section": "def-public.DashboardLocatorParams",
+            "text": "DashboardLocatorParams"
           },
           ">"
         ],
@@ -622,10 +697,10 @@
       },
       {
         "parentPluginId": "dashboard",
-        "id": "def-public.DashboardAppLocatorParams",
+        "id": "def-public.DashboardLocatorParams",
         "type": "Type",
         "tags": [],
-        "label": "DashboardAppLocatorParams",
+        "label": "DashboardLocatorParams",
         "description": [],
         "signature": [
           "Partial<Omit<",
@@ -656,7 +731,7 @@
           },
           " | undefined; }"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_app/locator/locator.ts",
+        "path": "src/plugins/dashboard/public/dashboard_container/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

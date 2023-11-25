@@ -8,69 +8,93 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { SlosView } from './slos_view';
+import { SLO_CARD_VIEW_PER_ROW_SIZE } from './card_view/cards_per_row';
+import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import { SloListItems } from './slo_list_items';
-import { SloListSearchFilterSortBar, SortField } from './slo_list_search_filter_sort_bar';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
+import { SloListSearchBar, SortField } from './slo_list_search_bar';
 
 export interface Props {
   autoRefresh: boolean;
 }
 
 export function SloList({ autoRefresh }: Props) {
-  const [activePage, setActivePage] = useState(0);
-  const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortField | undefined>('status');
+  const { state, store: storeState } = useUrlSearchState();
+  const [page, setPage] = useState(state.page);
+  const [query, setQuery] = useState(state.kqlQuery);
+  const [sort, setSort] = useState<SortField>(state.sort.by);
+  const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
 
-  const { isLoading, isRefetching, isError, sloList } = useFetchSloList({
-    page: activePage + 1,
+  const [sloView, setSLOView] = useState<SLOViewType>('cardView');
+
+  const {
+    isLoading,
+    isRefetching,
+    isError,
+    data: sloList,
+  } = useFetchSloList({
+    page: page + 1,
     kqlQuery: query,
     sortBy: sort,
-    sortDirection: 'desc',
+    sortDirection: direction,
     shouldRefetch: autoRefresh,
   });
 
-  const { results = [], total = 0, perPage = 0 } = sloList || {};
+  const { results = [], total = 0, perPage = 0 } = sloList ?? {};
 
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
+  const [cardsPerRow, setCardsPerRow] = useLocalStorage(SLO_CARD_VIEW_PER_ROW_SIZE, '4');
 
   const handlePageClick = (pageNumber: number) => {
-    setActivePage(pageNumber);
+    setPage(pageNumber);
+    storeState({ page: pageNumber });
   };
 
   const handleChangeQuery = (newQuery: string) => {
-    setActivePage(0);
+    setPage(0);
     setQuery(newQuery);
+    storeState({ page: 0, kqlQuery: newQuery });
   };
 
-  const handleChangeSort = (newSort: SortField | undefined) => {
-    setActivePage(0);
+  const handleChangeSort = (newSort: SortField) => {
+    setPage(0);
     setSort(newSort);
+    storeState({ page: 0, sort: { by: newSort, direction: state.sort.direction } });
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
-        <SloListSearchFilterSortBar
+        <SloListSearchBar
           loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
+          initialState={state}
         />
       </EuiFlexItem>
-
-      <EuiFlexItem>
-        <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
+      <EuiFlexItem grow={false}>
+        <ToggleSLOView sloView={sloView} setSLOView={setSLOView} setCardsPerRow={setCardsPerRow} />
       </EuiFlexItem>
+      <SlosView
+        sloList={results}
+        loading={isLoading || isRefetching}
+        error={isError}
+        cardsPerRow={cardsPerRow}
+        sloView={sloView}
+      />
 
-      {results.length ? (
+      {total > 0 ? (
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
               <EuiPagination
                 pageCount={Math.ceil(total / perPage)}
-                activePage={activePage}
+                activePage={page}
                 onPageClick={handlePageClick}
               />
             </EuiFlexItem>

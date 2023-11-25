@@ -120,7 +120,7 @@ export function ChangeDataView({
 
   useEffect(() => {
     if (textBasedLanguage) {
-      setTriggerLabel(getLanguageDisplayName(textBasedLanguage).toUpperCase());
+      setTriggerLabel(getLanguageDisplayName(textBasedLanguage));
     } else {
       setTriggerLabel(trigger.label);
     }
@@ -215,7 +215,7 @@ export function ChangeDataView({
             })}
           </EuiContextMenuItem>
         ) : (
-          <React.Fragment />
+          <React.Fragment key="empty" />
         ),
         <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
       );
@@ -244,7 +244,9 @@ export function ChangeDataView({
                         {
                           defaultMessage:
                             "Switching data views removes the current {textBasedLanguage} query. Save this search to ensure you don't lose work.",
-                          values: { textBasedLanguage },
+                          values: {
+                            textBasedLanguage: getLanguageDisplayName(textBasedLanguage),
+                          },
                         }
                       )}
                     >
@@ -334,7 +336,7 @@ export function ChangeDataView({
     if (textBasedLanguages?.length) {
       panelItems.push(
         <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
-        <EuiPanel color="transparent" paddingSize="none">
+        <EuiPanel color="transparent" paddingSize="none" key="try-esql">
           <EuiButton
             color="success"
             size="s"

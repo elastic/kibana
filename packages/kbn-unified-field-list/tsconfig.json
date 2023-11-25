@@ -30,6 +30,8 @@
     "@kbn/discover-utils",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-button-toolbar",
+    "@kbn/field-utils",
+    "@kbn/ml-ui-actions",
   ],
   "exclude": ["target/**/*"]
 }

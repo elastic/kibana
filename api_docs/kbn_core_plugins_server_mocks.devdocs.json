@@ -58,8 +58,15 @@
             "label": "createSetupContract",
             "description": [],
             "signature": [
-              "() => ",
-              "PluginsServiceSetup"
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-plugins-contracts-server",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsContractsServerPluginApi",
+                "section": "def-common.PluginsServiceSetup",
+                "text": "PluginsServiceSetup"
+              },
+              ">"
             ],
             "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
@@ -75,7 +82,49 @@
             "label": "createStartContract",
             "description": [],
             "signature": [
-              "() => { contracts: Map<any, any>; }"
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-plugins-contracts-server",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsContractsServerPluginApi",
+                "section": "def-common.PluginsServiceStart",
+                "text": "PluginsServiceStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-common.pluginServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "InternalPluginsServiceSetup"
+            ],
+            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-common.pluginServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "InternalPluginsServiceStart"
             ],
             "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,

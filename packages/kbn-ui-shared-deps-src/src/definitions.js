@@ -91,6 +91,7 @@ const externals = {
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
+  '@kbn/shared-ux-error-boundary': '__kbnSharedDeps__.KbnSharedUxErrorBoundary',
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',

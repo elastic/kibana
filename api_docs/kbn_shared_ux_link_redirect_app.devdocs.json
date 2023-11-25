@@ -29,7 +29,9 @@
           "\nA service-enabled component that provides Kibana-specific functionality to the `RedirectAppLinks`\npure component.\n"
         ],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children, ...props }: React.PropsWithChildren<Omit<",
+          "RedirectAppLinksComponentProps",
+          ", \"navigateToUrl\">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.container.tsx",
         "deprecated": false,
@@ -38,12 +40,14 @@
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
             "id": "def-common.RedirectAppLinks.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{ children }",
+            "label": "{\n  children,\n  ...props\n}",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; }"
+              "React.PropsWithChildren<Omit<",
+              "RedirectAppLinksComponentProps",
+              ", \"navigateToUrl\">>"
             ],
             "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.container.tsx",
             "deprecated": false,
@@ -64,7 +68,7 @@
           "\nUtility component that will intercept click events on children anchor (`<a>`) elements to call\n`navigateToUrl` with the link's href. This will trigger SPA friendly navigation when the link points\nto a valid Kibana app.\n"
         ],
         "signature": [
-          "({ children, navigateToUrl, currentAppId, }: React.PropsWithChildren<",
+          "({ children, navigateToUrl, currentAppId, ...containerProps }: React.PropsWithChildren<",
           "RedirectAppLinksComponentProps",
           ">) => JSX.Element"
         ],
@@ -77,7 +81,7 @@
             "id": "def-common.RedirectAppLinks.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  navigateToUrl,\n  currentAppId,\n}",
+            "label": "{\n  children,\n  navigateToUrl,\n  currentAppId,\n  ...containerProps\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -317,9 +321,11 @@
           "Props for the `RedirectAppLinks` component."
         ],
         "signature": [
+          "(",
           "RedirectAppLinksKibanaDependencies",
           " | ",
-          "RedirectAppLinksServices"
+          "RedirectAppLinksServices",
+          ") & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>"
         ],
         "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
         "deprecated": false,

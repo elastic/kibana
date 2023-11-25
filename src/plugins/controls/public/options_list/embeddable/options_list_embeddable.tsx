@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { merge, Subject, Subscription } from 'rxjs';
+import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
 import React, { createContext, useContext } from 'react';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
@@ -207,30 +207,33 @@ export class OptionsListEmbeddable
               a.exclude === b.exclude &&
               a.existsSelected === b.existsSelected &&
               isEqual(a.selectedOptions, b.selectedOptions)
-          )
-        )
-        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
-          if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-            this.dispatch.clearValidAndInvalidSelections({});
-          } else {
-            const { invalidSelections } = this.getState().componentState ?? {};
-            const newValidSelections: string[] = [];
-            const newInvalidSelections: string[] = [];
-            for (const selectedOption of newSelectedOptions) {
-              if (invalidSelections?.includes(selectedOption)) {
-                newInvalidSelections.push(selectedOption);
-                continue;
+          ),
+          tap(({ selectedOptions: newSelectedOptions }) => {
+            if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
+              this.dispatch.clearValidAndInvalidSelections({});
+            } else {
+              const { invalidSelections } = this.getState().componentState ?? {};
+              const newValidSelections: string[] = [];
+              const newInvalidSelections: string[] = [];
+              for (const selectedOption of newSelectedOptions) {
+                if (invalidSelections?.includes(selectedOption)) {
+                  newInvalidSelections.push(selectedOption);
+                  continue;
+                }
+                newValidSelections.push(selectedOption);
               }
-              newValidSelections.push(selectedOption);
+              this.dispatch.setValidAndInvalidSelections({
+                validSelections: newValidSelections,
+                invalidSelections: newInvalidSelections,
+              });
             }
-            this.dispatch.setValidAndInvalidSelections({
-              validSelections: newValidSelections,
-              invalidSelections: newInvalidSelections,
-            });
-          }
-          const newFilters = await this.buildFilter();
-          this.dispatch.publishFilters(newFilters);
-        })
+          }),
+          switchMap(async () => {
+            const newFilters = await this.buildFilter();
+            this.dispatch.publishFilters(newFilters);
+          })
+        )
+        .subscribe()
     );
   };
 
@@ -332,6 +335,7 @@ export class OptionsListEmbeddable
       }
 
       const { suggestions, invalidSelections, totalCardinality } = response;
+
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
@@ -347,7 +351,7 @@ export class OptionsListEmbeddable
         const valid: string[] = [];
         const invalid: string[] = [];
         for (const selectedOption of selectedOptions ?? []) {
-          if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+          if (invalidSelections?.includes(String(selectedOption))) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
         this.dispatch.updateQueryResults({
@@ -397,6 +401,7 @@ export class OptionsListEmbeddable
         newFilter = buildPhrasesFilter(field, validSelections, dataView);
       }
     }
+
     if (!newFilter) return [];
 
     newFilter.meta.key = field?.name;

@@ -7,6 +7,13 @@
 
 export const EMAIL_ACTION_BTN = '[data-test-subj=".email-siem-ActionTypeSelectOption"]';
 
+export const WEBHOOK_ACTION_BTN = '[data-test-subj=".webhook-siem-ActionTypeSelectOption"]';
+
+/**
+ * all rule actions buttons, elements which data-test-subj attribute ends with  '-siem-ActionTypeSelectOption'
+ */
+export const ACTION_BTN = '[data-test-subj$="-siem-ActionTypeSelectOption"]';
+
 export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
 
 export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';

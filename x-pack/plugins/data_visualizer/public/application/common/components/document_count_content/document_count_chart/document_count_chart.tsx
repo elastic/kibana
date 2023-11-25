@@ -154,6 +154,7 @@ export const DocumentCountChart: FC<Props> = ({
             onElementClick={onElementClick}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
+            locale={i18n.getLocale()}
           />
           <Axis
             id="bottom"

@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -29,10 +30,11 @@ import {
   EuiComboBox,
   EuiBetaBadge,
   useEuiTheme,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
@@ -44,12 +46,15 @@ import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
+import { SecretFormRow } from './output_form_secret_form_row';
+
 import { OutputFormKafkaSection } from './output_form_kafka';
 
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 import { AdvancedOptionsSection } from './advanced_options_section';
+import { OutputFormRemoteEsSection } from './output_form_remote_es';
 
 export interface EditOutputFlyoutProps {
   output?: Output;
@@ -65,18 +70,31 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   useBreadcrumbs('settings');
   const form = useOutputForm(onClose, output);
   const inputs = form.inputs;
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
   const { euiTheme } = useEuiTheme();
+  const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
+  const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
+
+  const onUsePlainText = () => {
+    setUseSecretsStorage(false);
+  };
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
     [proxies]
   );
 
-  const { kafkaOutput: isKafkaOutputEnabled } = ExperimentalFeaturesService.get();
+  const { kafkaOutput: isKafkaOutputEnabled, remoteESOutput: isRemoteESOutputEnabled } =
+    ExperimentalFeaturesService.get();
+  const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
+  // Remote ES output not yet supported in serverless
+  const isStateful = !cloud?.isServerlessEnabled;
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
+    ...(isRemoteESOutputEnabled && isStateful
+      ? [{ value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' }]
+      : []),
     { value: outputType.Logstash, text: 'Logstash' },
     ...(isKafkaOutputEnabled ? [{ value: outputType.Kafka, text: 'Kafka' }] : []),
   ];
@@ -161,28 +179,51 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             )}
           />
         </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
-              defaultMessage="Client SSL certificate key"
-            />
-          }
-          {...inputs.sslKeyInput.formRowProps}
-        >
-          <EuiTextArea
+        {(output && output?.ssl?.key) || !useSecretsStorage ? (
+          <EuiFormRow
             fullWidth
-            rows={5}
-            {...inputs.sslKeyInput.props}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
-              {
-                defaultMessage: 'Specify certificate key',
-              }
-            )}
-          />
-        </EuiFormRow>
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
+                defaultMessage="Client SSL certificate key"
+              />
+            }
+            {...inputs.sslKeyInput.formRowProps}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeyInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </EuiFormRow>
+        ) : (
+          <SecretFormRow
+            fullWidth
+            title={i18n.translate('xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle', {
+              defaultMessage: 'Client SSL certificate key',
+            })}
+            {...inputs.sslKeySecretInput.formRowProps}
+            onUsePlainText={onUsePlainText}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeySecretInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
+        )}
       </>
     );
   };
@@ -229,9 +270,22 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     );
   };
 
+  const renderRemoteElasticsearchSection = () => {
+    if (isRemoteESOutputEnabled) {
+      return <OutputFormRemoteEsSection inputs={inputs} />;
+    }
+    return null;
+  };
+
   const renderKafkaSection = () => {
     if (isKafkaOutputEnabled) {
-      return <OutputFormKafkaSection inputs={inputs} />;
+      return (
+        <OutputFormKafkaSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          onUsePlainText={onUsePlainText}
+        />
+      );
     }
     return null;
   };
@@ -242,6 +296,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         return renderLogstashSection();
       case outputType.Kafka:
         return renderKafkaSection();
+      case outputType.RemoteElasticsearch:
+        return renderRemoteElasticsearchSection();
       case outputType.Elasticsearch:
       default:
         return renderElasticsearchSection();
@@ -251,7 +307,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const renderTypeSpecificWarning = () => {
     const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
     const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
-    if (!isKafkaOutput && !isESOutput) {
+    if (!isKafkaOutput && !isESOutput && !isRemoteESOutput) {
       return null;
     }
 
@@ -266,11 +322,30 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         case outputType.Elasticsearch:
           return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
             defaultMessage:
-              'This output type currently does not support connectivity to a remote Elasticsearch cluster.',
+              'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
           });
       }
     };
-    return (
+    return isRemoteESOutput ? (
+      <>
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.remoteESTypeText"
+            defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
+            values={{
+              doc: (
+                <EuiLink href={docLinks.links.fleet.remoteESOoutput} target="_blank">
+                  {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
+                    defaultMessage: 'our documentation',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+      </>
+    ) : (
       <>
         <EuiSpacer size="xs" />
         <EuiCallOut
@@ -392,37 +467,39 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
           {renderOutputTypeSection(inputs.typeInput.value)}
 
-          <EuiFormRow
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
-                defaultMessage="Proxy"
-              />
-            }
-          >
-            <EuiComboBox
+          {isRemoteESOutput ? null : (
+            <EuiFormRow
               fullWidth
-              data-test-subj="settingsOutputsFlyout.proxyIdInput"
-              {...inputs.proxyIdInput.props}
-              onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
-              selectedOptions={
-                inputs.proxyIdInput.value !== ''
-                  ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
-                  : []
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
+                  defaultMessage="Proxy"
+                />
               }
-              options={proxiesOptions}
-              singleSelection={{ asPlainText: true }}
-              isDisabled={inputs.proxyIdInput.props.disabled}
-              isClearable={true}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.proxyIdPlaceholder',
-                {
-                  defaultMessage: 'Select proxy',
+            >
+              <EuiComboBox
+                fullWidth
+                data-test-subj="settingsOutputsFlyout.proxyIdInput"
+                {...inputs.proxyIdInput.props}
+                onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+                selectedOptions={
+                  inputs.proxyIdInput.value !== ''
+                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
+                    : []
                 }
-              )}
-            />
-          </EuiFormRow>
+                options={proxiesOptions}
+                singleSelection={{ asPlainText: true }}
+                isDisabled={inputs.proxyIdInput.props.disabled}
+                isClearable={true}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.proxyIdPlaceholder',
+                  {
+                    defaultMessage: 'Select proxy',
+                  }
+                )}
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow
             label={
               <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
@@ -466,6 +543,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   }}
                 />
               }
+              disabled={isRemoteESOutput}
             />
           </EuiFormRow>
           <EuiFormRow fullWidth {...inputs.defaultMonitoringOutputInput.formRowProps}>

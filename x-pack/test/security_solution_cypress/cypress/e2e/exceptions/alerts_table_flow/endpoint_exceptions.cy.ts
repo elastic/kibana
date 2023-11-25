@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
@@ -51,7 +51,6 @@ describe.skip(
 
     beforeEach(() => {
       cy.task('esArchiverUnload', 'endpoint');
-      cy.task('esArchiverResetKibana');
       login();
       deleteAlertsAndRules();
 

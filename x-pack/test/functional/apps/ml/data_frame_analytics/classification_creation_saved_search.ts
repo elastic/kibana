@@ -14,10 +14,11 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('classification saved search creation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/147020
+  describe.skip('classification saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');
       // Need to use the saved searches with filters that match multiple airlines
@@ -35,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote_small');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote_small');
     });
 
     const dateNow = Date.now();
@@ -92,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
             string,
@@ -192,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
             string,
@@ -292,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           fieldStatsValues: {
             airline: ['AAL', 'ASA'],
@@ -384,7 +385,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           fieldStatsValues: { airline: ['ASA', 'FFT'] } as Record<string, string[]>,
           source: 'ft_farequote_small',
@@ -462,7 +463,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
-          await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await ml.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the data frame analytics wizard', async () => {
@@ -591,10 +592,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
 
           await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

@@ -12,7 +12,8 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { migrateLegacyActions } from '../lib';
+import { untrackRuleAlerts, migrateLegacyActions } from '../lib';
+import { RuleAttributes } from '../../data/rule/types';
 
 export async function deleteRule(context: RulesClientContext, { id }: { id: string }) {
   return await retryIfConflicts(
@@ -65,6 +66,8 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     );
     throw error;
   }
+
+  await untrackRuleAlerts(context, id, attributes as RuleAttributes);
 
   // migrate legacy actions only for SIEM rules
   if (attributes.consumer === AlertConsumers.SIEM) {

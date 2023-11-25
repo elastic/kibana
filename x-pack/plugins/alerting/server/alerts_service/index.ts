@@ -25,4 +25,5 @@ export {
   createConcreteWriteIndex,
   installWithTimeout,
   isValidAlertIndexName,
+  InstallShutdownError,
 } from './lib';

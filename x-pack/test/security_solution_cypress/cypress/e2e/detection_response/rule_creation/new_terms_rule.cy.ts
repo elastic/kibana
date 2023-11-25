@@ -45,7 +45,7 @@ import {
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -56,15 +56,10 @@ import {
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-
 import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-  });
+describe('New Terms rules', { tags: ['@ess', '@serverless'] }, () => {
   describe('Detection rules, New Terms', () => {
     const rule = getNewTermsRule();
     const expectedUrls = rule.references?.join('');
@@ -86,6 +81,7 @@ describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

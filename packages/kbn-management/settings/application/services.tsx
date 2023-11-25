@@ -18,20 +18,26 @@ import { UiSettingMetadata } from '@kbn/management-settings-types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { Subscription } from 'rxjs';
+import { ScopedHistory } from '@kbn/core-application-browser';
 
 export interface Services {
   getAllowlistedSettings: () => Record<string, UiSettingMetadata>;
   subscribeToUpdates: (fn: () => void) => Subscription;
   isCustomSetting: (key: string) => boolean;
   isOverriddenSetting: (key: string) => boolean;
+  addUrlToHistory: (url: string) => void;
 }
 
 export type SettingsApplicationServices = Services & FormServices;
 
 export interface KibanaDependencies {
   settings: {
-    client: Pick<IUiSettingsClient, 'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$'>;
+    client: Pick<
+      IUiSettingsClient,
+      'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
+    >;
   };
+  history: ScopedHistory;
 }
 
 export type SettingsApplicationKibanaDependencies = KibanaDependencies & FormKibanaDependencies;
@@ -49,6 +55,7 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
   const {
     saveChanges,
     showError,
+    validateChange,
     showReloadPagePrompt,
     links,
     showDanger,
@@ -56,13 +63,22 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
     subscribeToUpdates,
     isCustomSetting,
     isOverriddenSetting,
+    addUrlToHistory,
   } = services;
 
   return (
     <SettingsApplicationContext.Provider
-      value={{ getAllowlistedSettings, subscribeToUpdates, isCustomSetting, isOverriddenSetting }}
+      value={{
+        getAllowlistedSettings,
+        subscribeToUpdates,
+        isCustomSetting,
+        isOverriddenSetting,
+        addUrlToHistory,
+      }}
     >
-      <FormProvider {...{ saveChanges, showError, showReloadPagePrompt, links, showDanger }}>
+      <FormProvider
+        {...{ saveChanges, showError, validateChange, showReloadPagePrompt, links, showDanger }}
+      >
         {children}
       </FormProvider>
     </SettingsApplicationContext.Provider>
@@ -76,7 +92,7 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   children,
   ...dependencies
 }) => {
-  const { docLinks, notifications, theme, i18n, settings } = dependencies;
+  const { docLinks, notifications, theme, i18n, settings, history } = dependencies;
   const { client } = settings;
 
   const getAllowlistedSettings = () => {
@@ -94,6 +110,7 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
     isCustomSetting: (key: string) => client.isCustom(key),
     isOverriddenSetting: (key: string) => client.isOverridden(key),
     subscribeToUpdates: (fn: () => void) => client.getUpdate$().subscribe(fn),
+    addUrlToHistory: (url: string) => history.push({ pathname: '', search: url }),
   };
 
   return (

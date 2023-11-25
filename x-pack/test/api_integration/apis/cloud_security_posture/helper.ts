@@ -8,6 +8,7 @@
 import type { SuperTest, Test } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types';
 import { SecurityService } from '../../../../../test/common/services/security/security';
 
@@ -47,7 +48,8 @@ export async function createPackagePolicy(
   policyTemplate: string,
   input: string,
   deployment: string,
-  posture: string
+  posture: string,
+  packageName: string = 'cloud_security_posture-1'
 ) {
   const version = '1.3.0';
   const title = 'Security Posture Management';
@@ -71,10 +73,11 @@ export async function createPackagePolicy(
 
   const { body: postPackageResponse } = await supertest
     .post(`/api/fleet/package_policies`)
+    .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
     .set('kbn-xsrf', 'xxxx')
     .send({
       force: true,
-      name: 'cloud_security_posture-1',
+      name: packageName,
       description: '',
       namespace: 'default',
       policy_id: agentPolicyId,

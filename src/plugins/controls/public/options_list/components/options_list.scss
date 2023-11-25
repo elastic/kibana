@@ -15,15 +15,18 @@
       font-weight: $euiFontWeightRegular;
     }
 
+    .optionsList__filterValid {
+      font-weight: $euiFontWeightMedium;
+    }
+
     .optionsList__filterInvalid {
       color: $euiTextSubduedColor;
       text-decoration: line-through;
-      margin-left: $euiSizeS;
       font-weight: $euiFontWeightRegular;
     }
 
     .optionsList__negateLabel {
-      font-weight: bold;
+      font-weight: $euiFontWeightSemiBold;
       font-size: $euiSizeM;
       color: $euiColorDanger;
     }
@@ -34,6 +37,7 @@
       width: 0;
     }
   }
+
 }
 
 .optionsList--sortPopover {
@@ -42,24 +46,22 @@
 
 .optionsList__existsFilter {
   font-style: italic;
+  font-weight: $euiFontWeightMedium;
 }
 
 .optionsList__popoverOverride {
   @include euiBottomShadowMedium;
   filter: none; // overwrite the default popover shadow
-  transform: translateY(-$euiSizeS) translateX(0); // prevent "slide in" animation on open/close
 }
 
 .optionsList__popover {
   .optionsList__actions {
-    padding: $euiSizeS;
-    padding-bottom: 0;
+    padding: 0 $euiSizeS;
     border-bottom: $euiBorderThin;
     border-color: darken($euiColorLightestShade, 2%);
 
-    .optionsList__sortButton {
-      box-shadow: inset 0 0 0 $euiBorderWidthThin $euiFormBorderColor;
-      background-color: $euiFormBackgroundColor;
+    .optionsList__searchRow {
+      padding-top: $euiSizeS
     }
 
     .optionsList__actionsRow {

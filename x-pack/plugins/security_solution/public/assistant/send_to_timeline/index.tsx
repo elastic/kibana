@@ -6,10 +6,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { sourcererSelectors } from '../../common/store';
 import { sourcererActions } from '../../common/store/actions';
@@ -19,16 +20,22 @@ import type { TimeRange } from '../../common/store/inputs/model';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
 import { TimelineType } from '../../../common/api/timeline';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../detections/components/alerts_table/translations';
+import {
+  ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
+  ACTION_INVESTIGATE_IN_TIMELINE,
+} from '../../detections/components/alerts_table/translations';
 import type { DataProvider } from '../../timelines/components/timeline/data_providers/data_provider';
 import { useCreateTimeline } from '../../timelines/components/timeline/properties/use_create_timeline';
 import {
   applyKqlFilterQuery,
   setActiveTabTimeline,
   setFilters,
+  showTimeline,
   updateDataView,
   updateEqlOptions,
 } from '../../timelines/store/timeline/actions';
+import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -49,6 +56,9 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   ...rest
 }) => {
   const dispatch = useDispatch();
+  const { showAssistantOverlay } = useAssistantContext();
+  const [isTimelineBottomBarVisible] = useShowTimeline();
+  const { discoverStateContainer } = useDiscoverInTimelineContext();
 
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
@@ -67,7 +77,33 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   });
 
   const configureAndOpenTimeline = useCallback(() => {
+    // Hide the assistant overlay so timeline can be seen (noop if using assistant in timeline)
+    showAssistantOverlay({ showOverlay: false });
+
     if (dataProviders || filters) {
+      // If esql, don't reset filters or mess with dataview & time range
+      if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
+        discoverStateContainer.current?.appState.update({
+          query: {
+            esql: dataProviders[0].kqlQuery,
+          },
+        });
+
+        dispatch(
+          setActiveTabTimeline({
+            id: TimelineId.active,
+            activeTab: TimelineTabs.esql,
+          })
+        );
+        dispatch(
+          showTimeline({
+            id: TimelineId.active,
+            show: true,
+          })
+        );
+        return;
+      }
+
       // Reset the current timeline
       if (timeRange) {
         clearTimeline({
@@ -147,6 +183,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
             break;
         }
       }
+
       // Use filters if more than a certain amount of ids for dom performance.
       if (filters) {
         dispatch(
@@ -171,33 +208,47 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
       dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
     }
   }, [
+    showAssistantOverlay,
     dataProviders,
-    clearTimeline,
-    dispatch,
-    defaultDataView.id,
-    signalIndexName,
     filters,
     timeRange,
     keepDataView,
+    dispatch,
+    clearTimeline,
+    discoverStateContainer,
+    defaultDataView.id,
+    signalIndexName,
   ]);
+
+  // As we work around timeline visibility issues, we will disable the button if timeline isn't available
+  const toolTipText = isTimelineBottomBarVisible
+    ? ACTION_INVESTIGATE_IN_TIMELINE
+    : ACTION_CANNOT_INVESTIGATE_IN_TIMELINE;
+  const isDisabled = !isTimelineBottomBarVisible;
 
   return asEmptyButton ? (
     <EuiButtonEmpty
-      aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
+      aria-label={toolTipText}
       onClick={configureAndOpenTimeline}
+      isDisabled={isDisabled}
       color="text"
       flush="both"
       size="xs"
     >
-      {children}
+      <EuiToolTip position="right" content={toolTipText}>
+        <>{children}</>
+      </EuiToolTip>
     </EuiButtonEmpty>
   ) : (
     <EuiButton
-      aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
+      aria-label={toolTipText}
+      isDisabled={isDisabled}
       onClick={configureAndOpenTimeline}
       {...rest}
     >
-      {children}
+      <EuiToolTip position="right" content={toolTipText}>
+        <>{children}</>
+      </EuiToolTip>
     </EuiButton>
   );
 };

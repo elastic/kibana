@@ -13,8 +13,8 @@ import type {
   TestCaseWithoutTimeline,
 } from '../objects/case';
 import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
-
 import { TIMELINE_SEARCHBOX } from '../screens/common/controls';
+
 import {
   BACK_TO_CASES_BTN,
   DESCRIPTION_INPUT,
@@ -23,6 +23,8 @@ import {
   LOADING_SPINNER,
   TAGS_INPUT,
   TITLE_INPUT,
+  TIMELINE,
+  EMPTY_TIMELINE,
 } from '../screens/create_new_case';
 import {
   CONNECTOR_RESILIENT,
@@ -37,6 +39,7 @@ import {
   SELECT_SN,
   SELECT_URGENCY,
 } from '../screens/edit_connector';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const backToCases = () => {
   cy.get(BACK_TO_CASES_BTN).click({ force: true });
@@ -56,8 +59,28 @@ export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
 };
 
 export const attachTimeline = (newCase: TestCase) => {
-  cy.get(INSERT_TIMELINE_BTN).click({ force: true });
-  cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
+  cy.waitUntil(
+    () => {
+      cy.log('Waiting for timeline to appear');
+      cy.get('body').type('{esc}');
+      cy.get(INSERT_TIMELINE_BTN).click();
+      cy.get(LOADING_INDICATOR).should('not.exist');
+      cy.get(TIMELINE_SEARCHBOX).should('exist');
+      cy.get(TIMELINE_SEARCHBOX).should('be.visible');
+
+      return cy.root().then(($el) => {
+        const emptyTimelineState = $el.find(EMPTY_TIMELINE);
+        if (emptyTimelineState.length > 0) {
+          cy.log('Timeline dropdown is empty');
+          return false;
+        } else {
+          return true;
+        }
+      });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+  cy.get(TIMELINE).first().click();
 };
 
 export const createCase = () => {

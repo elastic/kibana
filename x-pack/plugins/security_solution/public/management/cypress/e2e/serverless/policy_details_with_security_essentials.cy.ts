@@ -12,7 +12,7 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/e
 describe(
   'When displaying the Policy Details in Security Essentials PLI',
   {
-    tags: ['@serverless', '@brokenInServerless'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
@@ -23,7 +23,11 @@ describe(
     let loadedPolicyData: IndexedFleetEndpointPolicyResponse;
 
     before(() => {
-      cy.task('indexFleetEndpointPolicy', { policyName: 'tests-serverless' }).then((response) => {
+      cy.task(
+        'indexFleetEndpointPolicy',
+        { policyName: 'tests-serverless' },
+        { timeout: 5 * 60 * 1000 }
+      ).then((response) => {
         loadedPolicyData = response as IndexedFleetEndpointPolicyResponse;
       });
     });

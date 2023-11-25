@@ -68,7 +68,7 @@ declare global {
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
 const BORDER_WIDTH = 1;
-const CELL_HEIGHT = 30;
+export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
 
@@ -160,6 +160,7 @@ export interface SwimlaneProps {
   showYAxis?: boolean;
   yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
   chartsService: ChartsPluginStart;
+  onRenderComplete?: () => void;
 }
 
 /**
@@ -187,6 +188,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   showLegend = true,
   'data-test-subj': dataTestSubj,
   yAxisWidth,
+  onRenderComplete,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -452,6 +454,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         xDomain={xDomain}
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
+                        locale={i18n.getLocale()}
+                        onRenderChange={(isRendered) => {
+                          if (isRendered && onRenderComplete) {
+                            onRenderComplete();
+                          }
+                        }}
                       />
 
                       <Heatmap

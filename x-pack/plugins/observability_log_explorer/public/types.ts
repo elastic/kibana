@@ -11,7 +11,13 @@ import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { ObservabilityLogExplorerLocators } from '../common/locators';
+import { AppMountParameters, ScopedHistory } from '@kbn/core/public';
+import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
+import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
+import {
+  ObservabilityLogExplorerLocators,
+  ObservabilityLogExplorerLocationState,
+} from '../common/locators';
 
 export interface ObservabilityLogExplorerPluginSetup {
   locators: ObservabilityLogExplorerLocators;
@@ -29,7 +35,13 @@ export interface ObservabilityLogExplorerStartDeps {
   data: DataPublicPluginStart;
   discover: DiscoverStart;
   logExplorer: LogExplorerPluginStart;
+  logsShared: LogsSharedClientStartExports;
   observabilityShared: ObservabilitySharedPluginStart;
   serverless?: ServerlessPluginStart;
   share: SharePluginStart;
+  datasetQuality: DatasetQualityPluginStart;
 }
+
+export type ObservabilityLogExplorerHistory = ScopedHistory<ObservabilityLogExplorerLocationState>;
+export type ObservabilityLogExplorerAppMountParameters =
+  AppMountParameters<ObservabilityLogExplorerLocationState>;

@@ -81,7 +81,6 @@ export interface IAlertsClient<
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
   };
-  setAlertStatusToUntracked(indices: string[], ruleIds: string[]): Promise<void>;
   factory(): PublicAlertFactory<
     State,
     Context,
@@ -107,6 +106,7 @@ export interface ProcessAndLogAlertsOpts {
 export interface InitializeExecutionOpts {
   maxAlerts: number;
   ruleLabel: string;
+  startedAt: Date | null;
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;

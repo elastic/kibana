@@ -136,6 +136,8 @@ export interface TimelineModel {
   /* discover saved search Id */
   savedSearchId: string | null;
   isDiscoverSavedSearchLoaded?: boolean;
+  /** used to mark the timeline as unsaved in the UI */
+  changed?: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -191,6 +193,7 @@ export type SubsetTimelineModel = Readonly<
     | 'filterManager'
     | 'savedSearchId'
     | 'isDiscoverSavedSearchLoaded'
+    | 'changed'
   >
 >;
 

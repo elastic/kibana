@@ -24,7 +24,10 @@
     "@kbn/unified-data-table",
     "@kbn/core-ui-settings-browser",
     "@kbn/discover-utils",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/field-formats-plugin",
+    "@kbn/custom-icons",
+    "@kbn/elastic-agent-utils"
   ],
   "exclude": ["target/**/*"]
 }

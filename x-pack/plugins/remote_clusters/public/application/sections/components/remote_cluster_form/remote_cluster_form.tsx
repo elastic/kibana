@@ -31,7 +31,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 
-import { Cluster } from '../../../../../common/lib';
+import { Cluster, ClusterPayload } from '../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
 
 import { AppContext, Context } from '../../../app_context';
@@ -48,7 +48,7 @@ import {
   isCloudUrlEnabled,
 } from './validators';
 
-const defaultClusterValues: Cluster = {
+const defaultClusterValues: ClusterPayload = {
   name: '',
   seeds: [],
   skipUnavailable: false,
@@ -62,14 +62,14 @@ const ERROR_TITLE_ID = 'removeClustersErrorTitle';
 const ERROR_LIST_ID = 'removeClustersErrorList';
 
 interface Props {
-  save: (cluster: Cluster) => void;
+  save: (cluster: ClusterPayload) => void;
   cancel?: () => void;
   isSaving?: boolean;
   saveError?: any;
   cluster?: Cluster;
 }
 
-export type FormFields = Cluster & { cloudUrl: string; cloudUrlEnabled: boolean };
+export type FormFields = ClusterPayload & { cloudUrl: string; cloudUrlEnabled: boolean };
 
 interface State {
   fields: FormFields;
@@ -146,7 +146,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     });
   };
 
-  getCluster(): Cluster {
+  getCluster(): ClusterPayload {
     const {
       fields: {
         name,
@@ -204,7 +204,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     this.onFieldsChange({ skipUnavailable });
   };
 
-  resetToDefault = (fieldName: keyof Cluster) => {
+  resetToDefault = (fieldName: keyof ClusterPayload) => {
     this.onFieldsChange({
       [fieldName]: defaultClusterValues[fieldName],
     });

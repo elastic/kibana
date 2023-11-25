@@ -139,6 +139,7 @@ export const StdErrorLogs = ({
         }}
         pagination={{
           pageSize,
+          pageSizeOptions: [2, 5, 10, 20, 50],
         }}
       />
     </>
