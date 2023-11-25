@@ -21,10 +21,15 @@ import {
 import { parseRef } from '../utils/parse_ref';
 import { toAbsolutePath } from '../utils/to_absolute_path';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
+import { isChildContext } from './is_child_context';
 
 interface TraverseItem {
   node: DocumentNode;
   context: TraverseDocumentContext;
+  /**
+   * Keeps track of visited nodes to be able to detect circular references
+   */
+  visitedDocumentNodes: Set<DocumentNode>;
   parentNode: DocumentNode;
   parentKey: string | number;
   resolvedRef?: ResolvedRef;
@@ -41,9 +46,9 @@ export async function processDocument(
       // OpenAPIV3.Document can't be casted directly to DocumentNode.
       node: resolvedDocument.document as unknown as DocumentNode,
       context: {
-        rootDocument: resolvedDocument,
-        currentDocument: resolvedDocument,
+        resolvedDocument,
       },
+      visitedDocumentNodes: new Set(),
       parentNode: resolvedDocument.document as unknown as DocumentNode,
       parentKey: '',
     },
@@ -57,6 +62,13 @@ export async function processDocument(
       continue;
     }
 
+    if (traverseItem.visitedDocumentNodes.has(traverseItem.node)) {
+      // Circular reference in the current document detected
+      continue;
+    }
+
+    traverseItem.visitedDocumentNodes.add(traverseItem.node);
+
     if (shouldSkipNode(traverseItem, processors)) {
       removeNode(traverseItem);
       continue;
@@ -65,21 +77,32 @@ export async function processDocument(
     postOrderTraversalStack.push(traverseItem);
 
     if (isRefNode(traverseItem.node)) {
+      const currentDocument = isChildContext(traverseItem.context)
+        ? traverseItem.context.resolvedRef
+        : traverseItem.context.resolvedDocument;
       const { path, pointer } = parseRef(traverseItem.node.$ref);
       const refAbsolutePath = path
-        ? toAbsolutePath(path, dirname(traverseItem.context.currentDocument.absolutePath))
-        : traverseItem.context.currentDocument.absolutePath;
+        ? toAbsolutePath(path, dirname(currentDocument.absolutePath))
+        : currentDocument.absolutePath;
+      const absoluteRef = `${refAbsolutePath}#${pointer}`;
+
+      if (isCircularRef(absoluteRef, traverseItem.context)) {
+        continue;
+      }
 
       const resolvedRef = await refResolver.resolveRef(refAbsolutePath, pointer);
+      const childContext = {
+        resolvedRef,
+        parentContext: traverseItem.context,
+        followedRef: absoluteRef,
+      };
 
       traverseItem.resolvedRef = resolvedRef;
 
       nodesToVisit.push({
         node: resolvedRef.refNode,
-        context: {
-          rootDocument: traverseItem.context.rootDocument,
-          currentDocument: resolvedRef,
-        },
+        context: childContext,
+        visitedDocumentNodes: new Set(),
         parentNode: traverseItem.parentNode,
         parentKey: traverseItem.parentKey,
       });
@@ -94,6 +117,7 @@ export async function processDocument(
         nodesToVisit.push({
           node: nodeItem as DocumentNode,
           context: traverseItem.context,
+          visitedDocumentNodes: traverseItem.visitedDocumentNodes,
           parentNode: traverseItem.node,
           parentKey: i,
         });
@@ -107,6 +131,7 @@ export async function processDocument(
         nodesToVisit.push({
           node: value as DocumentNode,
           context: traverseItem.context,
+          visitedDocumentNodes: traverseItem.visitedDocumentNodes,
           parentNode: traverseItem.node,
           parentKey: key,
         });
@@ -157,4 +182,22 @@ function removeNode(traverseItem: TraverseItem): void {
   }
 
   delete (traverseItem.parentNode as PlainObjectNode)[traverseItem.parentKey];
+}
+
+function isCircularRef(absoluteRef: string, context: TraverseDocumentContext): boolean {
+  let nextContext: TraverseDocumentContext | undefined = context;
+
+  if (!isChildContext(nextContext)) {
+    return false;
+  }
+
+  do {
+    if (nextContext.followedRef === absoluteRef) {
+      return true;
+    }
+
+    nextContext = nextContext.parentContext;
+  } while (nextContext);
+
+  return false;
 }

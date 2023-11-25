@@ -58,25 +58,42 @@ export interface ResolvedRef extends ResolvedDocument {
   refNode: DocumentNode;
 }
 
+export interface TraverseRootDocumentContext {
+  /**
+   * Root document
+   */
+  resolvedDocument: ResolvedDocument;
+
+  parentContext?: undefined;
+  followedRef?: undefined;
+}
+
+export interface TraverseChildDocumentContext {
+  /**
+   * Current document after resolving $ref property
+   */
+  resolvedRef: ResolvedRef;
+
+  /**
+   * Context of the parent document the current one in `document` field was referenced via $ref. Empty if it's the root document.
+   */
+  parentContext: TraverseDocumentContext;
+
+  /**
+   * Reference used to resolve the current document
+   */
+  followedRef: string;
+}
+
 /**
  * Traverse context storing additional information related to the currently traversed node
  */
-export interface TraverseDocumentContext {
-  /**
-   * Root document the spec started parsing from
-   */
-  rootDocument: ResolvedDocument;
+export type TraverseDocumentContext = TraverseRootDocumentContext | TraverseChildDocumentContext;
 
-  /**
-   * Current document. Can be root document or referenced document when followed $ref properties.
-   */
-  currentDocument: ResolvedDocument | ResolvedRef;
-}
-
-export interface TraverseDocumentEntryContext extends TraverseDocumentContext {
+export type TraverseDocumentEntryContext = TraverseDocumentContext & {
   parentNode: DocumentNode;
   parentKey: string | number;
-}
+};
 
 /**
  * Entry processor controls when a node should be omitted from the result document.

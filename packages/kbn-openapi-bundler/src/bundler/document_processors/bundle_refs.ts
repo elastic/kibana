@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNodeProcessor, ResolvedRef } from '../types';
+import { DocumentNodeProcessor, Document, ResolvedRef, TraverseDocumentContext } from '../types';
 import { hasProp } from '../../utils/has_prop';
-import { inlineRef } from './utils/inline_ref';
 import { X_SOURCE_FILE_PATH } from '../known_custom_props';
+import { isChildContext } from '../is_child_context';
+import { inlineRef } from './utils/inline_ref';
 
 /**
  * Creates a node processor to bundle and conditionally dereference document references.
@@ -36,17 +37,24 @@ export function createBundleRefsProcessor(inliningPropName: string): DocumentNod
 
         delete node[inliningPropName];
       } else {
-        if (!context.rootDocument.document.components) {
-          context.rootDocument.document.components = {};
+        const rootDocument = extractRootDocument(context);
+
+        if (!rootDocument.components) {
+          rootDocument.components = {};
         }
 
-        node.$ref = saveComponent(
-          resolvedRef,
-          context.rootDocument.document.components as Record<string, unknown>
-        );
+        node.$ref = saveComponent(resolvedRef, rootDocument.components as Record<string, unknown>);
       }
     },
   };
+}
+
+function extractRootDocument(context: TraverseDocumentContext): Document {
+  while (isChildContext(context)) {
+    context = context.parentContext;
+  }
+
+  return context.resolvedDocument.document;
 }
 
 function saveComponent(ref: ResolvedRef, components: Record<string, unknown>): string {
