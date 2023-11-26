@@ -11,7 +11,7 @@ import { ActionGroup } from './action_group_types';
 
 export const RecoveredActionGroup: Readonly<ActionGroup<'recovered'>> = Object.freeze({
   id: 'recovered',
-  name: i18n.translate('xpack.alerting.builtinActionGroups.recovered', {
+  name: i18n.translate('alertingTypes.builtinActionGroups.recovered', {
     defaultMessage: 'Recovered',
   }),
 });

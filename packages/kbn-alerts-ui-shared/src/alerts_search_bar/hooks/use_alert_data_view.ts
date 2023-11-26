@@ -51,7 +51,7 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
 
   const onErrorFn = () => {
     toasts.addDanger(
-      i18n.translate('xpack.triggersActionsUI.useAlertDataView.useAlertDataMessage', {
+      i18n.translate('alertsUIShared.hooks.useAlertDataView.useAlertDataMessage', {
         defaultMessage: 'Unable to load alert data view',
       })
     );

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const SEARCH_BAR_PLACEHOLDER = i18n.translate(
-  'xpack.triggersActionsUI.alertsSearchBar.placeholder',
+  'alertsUIShared.component.alertsSearchBar.placeholder',
   {
     defaultMessage: 'Search alerts (e.g. kibana.alert.evaluation.threshold > 75)',
   }

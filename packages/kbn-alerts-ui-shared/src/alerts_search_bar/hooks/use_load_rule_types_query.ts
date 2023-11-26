@@ -45,7 +45,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
 
   const onErrorFn = () => {
     toasts.addDanger(
-      i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTypesMessage', {
+      i18n.translate('alertsUIShared.hooks.useLoadRuleTypesQuery.unableToLoadRuleTypesMessage', {
         defaultMessage: 'Unable to load rule types',
       })
     );

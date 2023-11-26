@@ -3,6 +3,7 @@
     "advancedSettings": "src/plugins/advanced_settings",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
+    "alertingTypes": "packages/kbn-alerting-types",
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "bfetch": "src/plugins/bfetch",

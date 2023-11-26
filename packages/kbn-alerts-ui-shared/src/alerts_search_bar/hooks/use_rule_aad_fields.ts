@@ -34,7 +34,7 @@ export function useRuleAADFields(props: UseRuleAADFieldsProps): UseRuleAADFields
 
   const onErrorFn = () => {
     toasts.addDanger(
-      i18n.translate('xpack.triggersActionsUI.useRuleAADFields.errorMessage', {
+      i18n.translate('alertsUIShared.hooks.useRuleAADFields.errorMessage', {
         defaultMessage: 'Unable to load alert fields per rule type',
       })
     );
