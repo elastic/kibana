@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useCallback, useState } from 'react';
-import { Query, TimeRange } from '@kbn/es-query';
-import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import type { Query, TimeRange } from '@kbn/es-query';
+import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
-import { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useAlertDataView } from './hooks/use_alert_data_view'; 
+import type { AlertsSearchBarProps, QueryLanguageType } from './types';
+import { useAlertDataView } from './hooks/use_alert_data_view';
 import { useRuleAADFields } from './hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from './hooks/use_load_rule_types_query';
 
@@ -48,7 +49,7 @@ export const AlertsSearchBar = ({
     dataViewsService,
   });
   const { aadFields, loading: fieldsLoading } = useRuleAADFields({
-    ruleTypeId: ruleTypeId,
+    ruleTypeId,
     http,
     toasts,
   });
@@ -97,29 +98,29 @@ export const AlertsSearchBar = ({
   };
 
   return unifiedSearchBar({
-    appName: appName,
-    disableQueryLanguageSwitcher: disableQueryLanguageSwitcher,
+    appName,
+    disableQueryLanguageSwitcher,
     // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
     indexPatterns: loading || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns,
-    placeholder: placeholder,
+    placeholder,
     query: { query: query ?? '', language: queryLanguage },
-    filters: filters,
+    filters,
     dateRangeFrom: rangeFrom,
     dateRangeTo: rangeTo,
-    displayStyle: "inPage",
-    showFilterBar: showFilterBar,
+    displayStyle: 'inPage',
+    showFilterBar,
     onQuerySubmit: onSearchQuerySubmit,
-    onFiltersUpdated: onFiltersUpdated,
-    onRefresh: onRefresh,
-    showDatePicker: showDatePicker,
+    onFiltersUpdated,
+    onRefresh,
+    showDatePicker,
     showQueryInput: true,
-    saveQueryMenuVisibility: "allowed_by_app_privilege",
-    showSubmitButton: showSubmitButton,
-    submitOnBlur: submitOnBlur,
+    saveQueryMenuVisibility: 'allowed_by_app_privilege',
+    showSubmitButton,
+    submitOnBlur,
     onQueryChange: onSearchQueryChange,
     suggestionsAbstraction: isSecurity ? undefined : SA_ALERTS,
   });
-}
+};
 
 // eslint-disable-next-line import/no-default-export
 export { AlertsSearchBar as default };

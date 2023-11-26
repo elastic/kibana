@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
-
 import { ALERTS_FEATURE_ID } from '../constants';
 import { fetchRuleTypes } from '../apis/fetch_rule_types';
 
-interface UseLoadRuleTypesQueryProps {
+export interface UseLoadRuleTypesQueryProps {
   filteredRuleTypes: string[];
   enabled?: boolean;
-  http: HttpStart,
-  toasts: ToastsStart,
+  http: HttpStart;
+  toasts: ToastsStart;
 }
 
 const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTypes: string[]) => {
@@ -36,12 +37,7 @@ const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTyp
 };
 
 export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
-  const { 
-    filteredRuleTypes, 
-    enabled = true,
-    http,
-    toasts,
-  } = props;
+  const { filteredRuleTypes, enabled = true, http, toasts } = props;
 
   const queryFn = () => {
     return fetchRuleTypes({ http });

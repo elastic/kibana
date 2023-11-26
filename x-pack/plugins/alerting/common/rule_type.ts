@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export type {
-  RuleType,
-  ActionGroup,
-  ActionGroupIdsOf,
-} from '@kbn/alerting-types';
+export type { RuleType, ActionGroup, ActionGroupIdsOf } from '@kbn/alerting-types';

@@ -38,6 +38,7 @@ export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
 export * from './saved_objects/rules/mappings';
 export * from './rule_circuit_breaker_error_message';
+export * from './maintenance_window_scoped_query_error_message';
 
 export type {
   MaintenanceWindowModificationMetadata,

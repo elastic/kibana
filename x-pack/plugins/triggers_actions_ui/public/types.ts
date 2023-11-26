@@ -64,6 +64,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -94,13 +95,7 @@ import type { RulesListNotifyBadgePropsWithApi } from './application/sections/ru
 import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 
-import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
-
-export type {
-  ActionVariables,
-  RuleType,
-  RuleTypeIndex,
-} from '@kbn/triggers-actions-ui-types';
+export type { ActionVariables, RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 
 export {
   REQUIRED_ACTION_VARIABLES,

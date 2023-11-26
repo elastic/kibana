@@ -30,13 +30,16 @@ import {
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { Filter } from '@kbn/es-query';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { Filter } from '@kbn/es-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { FormProps, schema } from './schema';
 import * as i18n from '../translations';
 import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
 import { SubmitButton } from './submit_button';
 import { convertToRRule } from '../helpers/convert_to_rrule';
+import { isScopedQueryError } from '../../../../common';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
 import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
 import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
@@ -77,15 +80,33 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     const [filters, setFilters] = useState<Filter[]>(
       (initialValue?.scopedQuery?.filters as Filter[]) || []
     );
+    const [isQueryInvalid, setIsQueryInvalid] = useState<boolean>(false);
+    const hasSetInitialCategories = useRef<boolean>(false);
 
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
-    const hasSetInitialCategories = useRef<boolean>(false);
+    const onCreateOrUpdateError = useCallback(
+      (error: IHttpFetchError<KibanaServerError>) => {
+        if (!error.body?.message) {
+          return;
+        }
+        if (isScopedQueryError(error.body.message)) {
+          setIsQueryInvalid(true);
+        }
+      },
+      [setIsQueryInvalid]
+    );
 
     const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
-      useCreateMaintenanceWindow();
+      useCreateMaintenanceWindow({
+        onError: onCreateOrUpdateError,
+      });
+
     const { mutate: updateMaintenanceWindow, isLoading: isUpdateLoading } =
-      useUpdateMaintenanceWindow();
+      useUpdateMaintenanceWindow({
+        onError: onCreateOrUpdateError,
+      });
+
     const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
 
     const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
@@ -105,29 +126,33 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
     const submitMaintenanceWindow = useCallback(
       async (formData, isValid) => {
-        if (isValid) {
-          const startDate = moment(formData.startDate);
-          const endDate = moment(formData.endDate);
-          const maintenanceWindow = {
-            title: formData.title,
-            duration: endDate.diff(startDate),
-            rRule: convertToRRule(
-              startDate,
-              formData.timezone ? formData.timezone[0] : defaultTimezone,
-              formData.recurringSchedule
-            ),
-            categoryIds: formData.categoryIds,
-            scopedQuery: scopedQueryPayload,
-          };
-          if (isEditMode) {
-            updateMaintenanceWindow({ maintenanceWindowId, maintenanceWindow }, { onSuccess });
-          } else {
-            createMaintenanceWindow(maintenanceWindow, { onSuccess });
-          }
+        if (!isValid || isQueryInvalid) {
+          return;
+        }
+
+        const startDate = moment(formData.startDate);
+        const endDate = moment(formData.endDate);
+        const maintenanceWindow = {
+          title: formData.title,
+          duration: endDate.diff(startDate),
+          rRule: convertToRRule(
+            startDate,
+            formData.timezone ? formData.timezone[0] : defaultTimezone,
+            formData.recurringSchedule
+          ),
+          categoryIds: formData.categoryIds,
+          scopedQuery: scopedQueryPayload,
+        };
+
+        if (isEditMode) {
+          updateMaintenanceWindow({ maintenanceWindowId, maintenanceWindow }, { onSuccess });
+        } else {
+          createMaintenanceWindow(maintenanceWindow, { onSuccess });
         }
       },
       [
         isEditMode,
+        isQueryInvalid,
         maintenanceWindowId,
         updateMaintenanceWindow,
         createMaintenanceWindow,
@@ -179,28 +204,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       return [...featureIdsSet];
     }, [ruleTypes, categoryIds, mounted]);
 
-    const onCategoryIdsCheckboxClick = useCallback(
-      (id: string) => {
+    const onCategoryIdsChange = useCallback(
+      (ids: string[]) => {
         if (!categoryIds) {
           return;
         }
-        if (categoryIds.includes(id)) {
-          setFieldValue(
-            'categoryIds',
-            categoryIds.filter((category) => category !== id)
-          );
-          return;
-        }
-        setFieldValue('categoryIds', [...categoryIds, id]);
+        setFieldValue('categoryIds', ids);
       },
       [categoryIds, setFieldValue]
-    );
-
-    const onCategoryIdsRadioClick = useCallback(
-      (id: string) => {
-        setFieldValue('categoryIds', [id]);
-      },
-      [setFieldValue]
     );
 
     const onScopeQueryToggle = useCallback(
@@ -211,6 +222,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         setIsScopedQueryEnabled(isEnabled);
       },
       [categoryIds, availableCategories, setFieldValue]
+    );
+
+    const onQueryChange = useCallback(
+      (newQuery: string) => {
+        if (isQueryInvalid) {
+          setIsQueryInvalid(false);
+        }
+        setQuery(newQuery);
+      },
+      [isQueryInvalid]
     );
 
     const modal = useMemo(() => {
@@ -390,7 +411,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <UseField path="scopedQuery">
               {() => (
                 <MaintenanceWindowScopedQuerySwitch
-                  isEnabled={isScopedQueryEnabled}
+                  checked={isScopedQueryEnabled}
                   onEnabledChange={onScopeQueryToggle}
                 />
               )}
@@ -406,8 +427,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                   selectedCategories={categoryIds || []}
                   availableCategories={availableCategories}
                   errors={field.errors.map((error) => error.message)}
-                  onCheckboxChange={onCategoryIdsCheckboxClick}
-                  onRadioChange={onCategoryIdsRadioClick}
+                  onChange={onCategoryIdsChange}
                 />
               )}
             </UseField>
@@ -420,7 +440,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 filters={filters}
                 isLoading={isLoadingRuleTypes}
                 isEnabled={isScopedQueryEnabled}
-                onQueryChange={setQuery}
+                isInvalid={isQueryInvalid}
+                onQueryChange={onQueryChange}
                 onFiltersChange={setFilters}
               />
             )}

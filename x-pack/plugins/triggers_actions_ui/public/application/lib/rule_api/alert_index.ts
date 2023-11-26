@@ -5,21 +5,4 @@
  * 2.0.
  */
 
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import { HttpSetup } from '@kbn/core/public';
-
-export async function fetchAlertIndexNames({
-  http,
-  features,
-}: {
-  http: HttpSetup;
-  features: string;
-}): Promise<string[]> {
-  const { index_name: indexNamesStr = [] } = await http.get<{ index_name: string[] }>(
-    `${BASE_RAC_ALERTS_API_PATH}/index`,
-    {
-      query: { features },
-    }
-  );
-  return indexNamesStr;
-}
+export { fetchAlertIndexNames } from '@kbn/alerts-ui-shared';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
   EuiFlexGroup,
@@ -43,9 +43,8 @@ export interface MaintenanceWindowCategorySelectionProps {
   availableCategories: string[];
   errors?: string[];
   isLoading?: boolean;
-  isScopedQueryEnabled: boolean;
-  onCheckboxChange: (category: string) => void;
-  onRadioChange: (category: string) => void;
+  isScopedQueryEnabled?: boolean;
+  onChange: (categories: string[]) => void;
 }
 
 export const MaintenanceWindowCategorySelection = (
@@ -57,8 +56,7 @@ export const MaintenanceWindowCategorySelection = (
     errors = [],
     isLoading = false,
     isScopedQueryEnabled = false,
-    onCheckboxChange,
-    onRadioChange,
+    onChange,
   } = props;
 
   const selectedMap = useMemo(() => {
@@ -75,10 +73,29 @@ export const MaintenanceWindowCategorySelection = (
     }));
   }, [availableCategories]);
 
+  const onCheckboxChange = useCallback(
+    (id: string) => {
+      if (selectedCategories.includes(id)) {
+        onChange(selectedCategories.filter((category) => category !== id));
+      } else {
+        onChange([...selectedCategories, id]);
+      }
+    },
+    [selectedCategories, onChange]
+  );
+
+  const onRadioChange = useCallback(
+    (id: string) => {
+      onChange([id]);
+    },
+    [onChange]
+  );
+
   const categorySelection = useMemo(() => {
     if (isScopedQueryEnabled) {
       return (
         <EuiRadioGroup
+          data-test-subj="maintenanceWindowCategorySelectionRadioGroup"
           options={options}
           idSelected={selectedCategories[0]}
           onChange={onRadioChange}
@@ -87,6 +104,7 @@ export const MaintenanceWindowCategorySelection = (
     }
     return (
       <EuiCheckboxGroup
+        data-test-subj="maintenanceWindowCategorySelectionCheckboxGroup"
         options={options}
         idToSelectedMap={selectedMap}
         onChange={onCheckboxChange}

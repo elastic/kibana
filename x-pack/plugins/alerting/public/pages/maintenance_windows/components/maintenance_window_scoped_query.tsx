@@ -6,10 +6,11 @@
  */
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLoadingSpinner } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
+import * as translations from '../translations';
 import { PLUGIN } from '../../../../common/constants/plugin';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -17,6 +18,7 @@ export interface MaintenanceWindowScopedQueryProps {
   featureIds: AlertConsumers[];
   query: string;
   filters: Filter[];
+  isInvalid?: boolean;
   isLoading?: boolean;
   isEnabled?: boolean;
   onQueryChange: (query: string) => void;
@@ -25,8 +27,16 @@ export interface MaintenanceWindowScopedQueryProps {
 
 export const MaintenanceWindowScopedQuery = React.memo(
   (props: MaintenanceWindowScopedQueryProps) => {
-    const { featureIds, query, filters, isLoading, isEnabled, onQueryChange, onFiltersChange } =
-      props;
+    const {
+      featureIds,
+      query,
+      filters,
+      isInvalid = false,
+      isLoading,
+      isEnabled = true,
+      onQueryChange,
+      onFiltersChange,
+    } = props;
 
     const {
       http,
@@ -64,24 +74,30 @@ export const MaintenanceWindowScopedQuery = React.memo(
     return (
       <EuiFlexGroup data-test-subj="maintenanceWindowScopeQuery" direction="column">
         <EuiFlexItem>
-          <AlertsSearchBar
-            appName={PLUGIN.getI18nName(i18n)}
-            featureIds={featureIds}
-            disableQueryLanguageSwitcher={true}
-            query={query}
-            filters={filters}
-            onQueryChange={onQueryChangeInternal}
-            onQuerySubmit={onQueryChangeInternal}
-            onFiltersUpdated={onFiltersChange}
-            showFilterBar
-            submitOnBlur
-            showDatePicker={false}
-            showSubmitButton={false}
-            http={http}
-            toasts={toasts}
-            unifiedSearchBar={SearchBar}
-            dataViewsService={data.dataViews}
-          />
+          <EuiFormRow
+            fullWidth
+            isInvalid={isInvalid}
+            error={translations.CREATE_FORM_SCOPED_QUERY_ERROR_MESSAGE}
+          >
+            <AlertsSearchBar
+              appName={PLUGIN.getI18nName(i18n)}
+              featureIds={featureIds}
+              disableQueryLanguageSwitcher={true}
+              query={query}
+              filters={filters}
+              onQueryChange={onQueryChangeInternal}
+              onQuerySubmit={onQueryChangeInternal}
+              onFiltersUpdated={onFiltersChange}
+              showFilterBar
+              submitOnBlur
+              showDatePicker={false}
+              showSubmitButton={false}
+              http={http}
+              toasts={toasts}
+              unifiedSearchBar={SearchBar}
+              dataViewsService={data.dataViews}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

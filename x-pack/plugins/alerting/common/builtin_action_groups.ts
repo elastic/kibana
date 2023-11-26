@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { 
-  RecoveredActionGroupId,
-  ActionGroup 
-} from '@kbn/alerting-types';
+import type { RecoveredActionGroupId, ActionGroup } from '@kbn/alerting-types';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
 
 export type ReservedActionGroups<RecoveryActionGroupId extends string> =
@@ -26,9 +23,6 @@ export function getBuiltinActionGroups<RecoveryActionGroupId extends string>(
   return [customRecoveryGroup ?? RecoveredActionGroup];
 }
 
-export type { 
-  RecoveredActionGroupId,
-  DefaultActionGroupId,
-} from '@kbn/alerting-types';
+export type { RecoveredActionGroupId, DefaultActionGroupId } from '@kbn/alerting-types';
 
 export { RecoveredActionGroup } from '@kbn/alerting-types';

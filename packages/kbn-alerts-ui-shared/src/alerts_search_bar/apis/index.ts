@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const SEARCH_BAR_PLACEHOLDER = i18n.translate(
-  'xpack.triggersActionsUI.alertsSearchBar.placeholder',
-  {
-    defaultMessage: 'Search alerts (e.g. kibana.alert.evaluation.threshold > 75)',
-  }
-);
+export * from './fetch_aad_fields';
+export * from './fetch_alert_fields';
+export * from './fetch_alert_index_names';
+export * from './fetch_rule_types';

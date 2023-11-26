@@ -18,14 +18,14 @@ import {
 import * as i18n from '../translations';
 
 interface MaintenanceWindowScopedQuerySwitchProps {
-  isEnabled: boolean;
-  onEnabledChange: (isEnabled: boolean) => void;
+  checked: boolean;
+  onEnabledChange: (checked: boolean) => void;
 }
 
 export const MaintenanceWindowScopedQuerySwitch = (
   props: MaintenanceWindowScopedQuerySwitchProps
 ) => {
-  const { isEnabled, onEnabledChange } = props;
+  const { checked, onEnabledChange } = props;
 
   const onEnabledChangeInternal = useCallback(
     (event: EuiSwitchEvent) => {
@@ -35,7 +35,7 @@ export const MaintenanceWindowScopedQuerySwitch = (
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup data-test-subj="maintenanceWindowScopedQuerySwitch" direction="column">
       <EuiFlexItem>
         <EuiText size="s">
           <h4>{i18n.CREATE_FORM_SCOPED_QUERY_TITLE}</h4>
@@ -47,7 +47,7 @@ export const MaintenanceWindowScopedQuerySwitch = (
       <EuiFlexItem>
         <EuiSwitch
           label={i18n.CREATE_FORM_SCOPED_QUERY_TOGGLE_TITLE}
-          checked={isEnabled}
+          checked={checked}
           onChange={onEnabledChangeInternal}
         />
       </EuiFlexItem>
