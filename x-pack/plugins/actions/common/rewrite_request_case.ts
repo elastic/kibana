@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-
-export type {
-  AsApiContract,
-  RewriteRequestCase,
-  RewriteResponseCase,
-} from '@kbn/actions-types';
+export type { AsApiContract, RewriteRequestCase, RewriteResponseCase } from '@kbn/actions-types';
