@@ -22,7 +22,6 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -59,7 +58,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 
 const EqlTabHeaderContainer = styled.div`
-  margin-top: ${euiThemeVars.euiSizeS};
+  margin-top: ${(props) => props.theme.eui.euiSizeS};
   width: 100%;
 `;
 

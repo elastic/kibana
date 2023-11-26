@@ -151,7 +151,6 @@ export const DeprecatedMessage = ({
     return (
       <span data-test-subj="sourcerer-deprecated-message">
         <FormattedMessage
-          data-test-subj="sourcerer-deprecated-message"
           id="xpack.securitySolution.indexPatterns.timelineTemplate.toggleToNewSourcerer"
           defaultMessage="We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}."
           values={{
