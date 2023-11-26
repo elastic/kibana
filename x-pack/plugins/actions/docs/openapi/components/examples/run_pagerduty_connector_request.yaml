@@ -1,0 +1,10 @@
+summary: Run a PagerDuty connector to trigger an alert.
+value:
+  params:
+    eventAction: trigger
+    summary: A brief event summary
+    links:
+      - href: http://example.com/pagerduty
+        text: An example link
+    customDetails:
+      my_data_1: test data
