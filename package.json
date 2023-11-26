@@ -969,7 +969,7 @@
     "md5": "^2.1.0",
     "mdast-util-to-hast": "10.2.0",
     "memoize-one": "^6.0.0",
-    "mermaid": "^11.0.0-alpha.5",
+    "mermaid": "^11.0.0-alpha.6",
     "mime": "^2.4.4",
     "mime-types": "^2.1.27",
     "minimatch": "^3.1.2",
