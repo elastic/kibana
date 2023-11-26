@@ -10,6 +10,33 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+const scopedQuery = {
+  kql: "_id: '1234'",
+  filters: [
+    {
+      meta: {
+        disabled: false,
+        negate: false,
+        alias: null,
+        key: 'kibana.alert.action_group',
+        field: 'kibana.alert.action_group',
+        params: {
+          query: 'test',
+        },
+        type: 'phrase',
+      },
+      $state: {
+        store: 'appState',
+      },
+      query: {
+        match_phrase: {
+          'kibana.alert.action_group': 'test',
+        },
+      },
+    },
+  ],
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function createMaintenanceWindowTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,32 +52,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         tzid: 'UTC',
         freq: 2, // weekly
       },
-      scoped_query: {
-        kql: "_id: '1234'",
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-              key: 'kibana.alert.action_group',
-              field: 'kibana.alert.action_group',
-              params: {
-                query: 'test',
-              },
-              type: 'phrase',
-            },
-            $state: {
-              store: 'appState',
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.action_group': 'test',
-              },
-            },
-          },
-        ],
-      },
+      category_ids: ['management'],
     };
     afterEach(() => objectRemover.removeAll());
 
@@ -62,7 +64,10 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(createParams);
+            .send({
+              ...createParams,
+              scoped_query: scopedQuery,
+            });
 
           if (response.body.id) {
             objectRemover.add(

@@ -5,4 +5,23 @@
  * 2.0.
  */
 
-export { fetchAlertFields } from '@kbn/alerts-ui-shared';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { HttpSetup } from '@kbn/core/public';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
+
+export async function fetchAlertFields({
+  http,
+  featureIds,
+}: {
+  http: HttpSetup;
+  featureIds: ValidFeatureId[];
+}): Promise<FieldSpec[]> {
+  const { fields: alertFields = [] } = await http.get<{ fields: FieldSpec[] }>(
+    `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
+    {
+      query: { featureIds },
+    }
+  );
+  return alertFields;
+}
