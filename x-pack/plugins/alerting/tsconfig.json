@@ -62,7 +62,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-application-common",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }
