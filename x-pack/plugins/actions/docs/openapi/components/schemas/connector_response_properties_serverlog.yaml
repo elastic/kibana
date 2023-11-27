@@ -8,8 +8,9 @@ required:
   - name
 properties:
   config:
-    type: object
-    nullable: true
+    type:
+      - "object"
+      - "null"
   connector_type_id:
     type: string
     description: The type of connector.
