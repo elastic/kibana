@@ -367,10 +367,12 @@ export class CsvGenerator {
             totalRecords = hits.total;
           } else {
             totalRecords = hits.total?.value;
-            totalRelation = hits.total?.relation ?? totalRelation; // looking to capture "eq"
+            totalRelation = hits.total?.relation ?? totalRelation; // hoping for "eq"
           }
         }
-        this.logger.debug(`Total hits: ${totalRecords}. (Relational accuracy: ${totalRelation})`);
+        this.logger.debug(
+          `Received total hits: ${totalRecords}. Received accuracy: ${totalRelation}.`
+        );
 
         if (!results) {
           this.logger.warn(`Search results are undefined!`);

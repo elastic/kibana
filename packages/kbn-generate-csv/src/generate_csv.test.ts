@@ -935,7 +935,9 @@ describe('CsvGenerator', () => {
 
       await generateCsv.generateData();
 
-      expect(debugLogSpy).toHaveBeenCalledWith('Total hits: 12345. (Relational accuracy: eq)');
+      expect(debugLogSpy).toHaveBeenCalledWith(
+        'Received total hits: 12345. Received accuracy: eq.'
+      );
     });
 
     it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
@@ -972,7 +974,9 @@ describe('CsvGenerator', () => {
 
       await generateCsv.generateData();
 
-      expect(debugLogSpy).toHaveBeenCalledWith('Total hits: 12345. (Relational accuracy: unknown)');
+      expect(debugLogSpy).toHaveBeenCalledWith(
+        'Received total hits: 12345. Received accuracy: unknown.'
+      );
     });
   });
 

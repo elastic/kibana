@@ -77,7 +77,7 @@ Array [
     "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
   ],
   Array [
-    "Total hits: 3. (Relational accuracy: unknown)",
+    "Received total hits: 3. Received accuracy: unknown.",
   ],
   Array [
     "Results metadata: {\\"header\\":{\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\",\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0}},\\"hitsMeta\\":{\\"total\\":3,\\"max_score\\":0}}",
@@ -98,7 +98,7 @@ Array [
     "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
   ],
   Array [
-    "Total hits: 3. (Relational accuracy: unknown)",
+    "Received total hits: 3. Received accuracy: unknown.",
   ],
   Array [
     "Results metadata: {\\"header\\":{\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\",\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0}},\\"hitsMeta\\":{\\"total\\":3,\\"max_score\\":0}}",
@@ -116,7 +116,7 @@ Array [
     "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
   ],
   Array [
-    "Total hits: 3. (Relational accuracy: unknown)",
+    "Received total hits: 3. Received accuracy: unknown.",
   ],
   Array [
     "Results metadata: {\\"header\\":{\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\",\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0}},\\"hitsMeta\\":{\\"total\\":3,\\"max_score\\":0}}",
