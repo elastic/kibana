@@ -12,7 +12,7 @@ import type { ExperimentalIndexingFeature } from '../../../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { Installation, UpdatePackageRequestSchema } from '../../../types';
-import { FleetError } from '../../../errors';
+import { PackageNotFoundError } from '../../../errors';
 
 import { auditLoggingService } from '../../audit_logging';
 
@@ -29,7 +29,7 @@ export async function updatePackage(
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
   if (!installedPackage) {
-    throw new FleetError(`package ${pkgName} is not installed`);
+    throw new PackageNotFoundError(`Error while updating package: ${pkgName} is not installed`);
   }
 
   auditLoggingService.writeCustomSoAuditLog({
