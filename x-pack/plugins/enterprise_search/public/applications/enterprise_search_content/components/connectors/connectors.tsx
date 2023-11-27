@@ -26,7 +26,7 @@ import { Status } from '../../../../../common/types/api';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
-import { NEW_INDEX_METHOD_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
+import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 import { SelectConnector } from '../new_index/select_connector/select_connector';
 
@@ -72,6 +72,7 @@ export const Connectors: React.FC = () => {
               ? []
               : [
                   <EuiButton
+                    key="newConnector"
                     color="primary"
                     iconType="plusInCircle"
                     fill
@@ -85,9 +86,10 @@ export const Connectors: React.FC = () => {
                     />
                   </EuiButton>,
                   <EuiButton
+                    key="newConnectorNative"
                     onClick={() => {
                       KibanaLogic.values.navigateToUrl(
-                        generateEncodedPath(NEW_INDEX_METHOD_PATH, { filter: 'native' })
+                        NEW_INDEX_SELECT_CONNECTOR_PATH + '?filter=native'
                       );
                     }}
                   >
@@ -97,9 +99,10 @@ export const Connectors: React.FC = () => {
                     )}
                   </EuiButton>,
                   <EuiButton
+                    key="newConnectorClient"
                     onClick={() => {
                       KibanaLogic.values.navigateToUrl(
-                        generateEncodedPath(NEW_INDEX_METHOD_PATH, { filter: 'connector_clients' })
+                        NEW_INDEX_SELECT_CONNECTOR_PATH + '?filter=connector_client'
                       );
                     }}
                   >

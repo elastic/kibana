@@ -33,10 +33,11 @@ import { errorToText } from '../utils/error_to_text';
 import { AddConnectorLogic } from './add_connector_logic';
 
 interface MethodConnectorProps {
+  connectorType?: 'native' | 'connector_client';
   serviceType: string;
 }
 
-export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType }) => {
+export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType, connectorType }) => {
   const { apiReset, makeRequest } = useActions(AddConnectorApiLogic);
   const { error, status } = useValues(AddConnectorApiLogic);
   const { isModalVisible } = useValues(AddConnectorLogic);
@@ -45,12 +46,16 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType })
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const isNative =
+  const isNativeAvailable =
     Boolean(NATIVE_CONNECTORS.find((connector) => connector.serviceType === serviceType)) &&
     isCloud;
   const isBeta = Boolean(
     BETA_CONNECTORS.find((connector) => connector.serviceType === serviceType)
   );
+
+  const isNative =
+    (isNativeAvailable && !connectorType) ||
+    Boolean(isNativeAvailable && connectorType && connectorType === 'native');
 
   const isGated = isNative && !isCloud && !hasPlatinumLicense;
 

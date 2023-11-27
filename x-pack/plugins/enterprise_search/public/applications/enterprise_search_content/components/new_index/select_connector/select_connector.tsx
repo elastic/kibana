@@ -21,7 +21,6 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -35,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 
 import { INGESTION_METHOD_IDS } from '../../../../../../common/constants';
 
-import { BACK_BUTTON_LABEL, CONTINUE_BUTTON_LABEL } from '../../../../shared/constants';
+import { BACK_BUTTON_LABEL } from '../../../../shared/constants';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -56,7 +55,7 @@ export const SelectConnector: React.FC = () => {
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const hasNativeAccess = isCloud;
-  const { service_type: serviceType, filter } = parseQueryParams(search);
+  const { filter } = parseQueryParams(search);
   const [selectedConnectorFilter, setSelectedConnectorFilter] = useState<string | null>(
     Array.isArray(filter) ? filter[0] : filter ?? null
   );
@@ -85,9 +84,6 @@ export const SelectConnector: React.FC = () => {
         searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
       );
   }, [showBeta, showTechPreview, useNativeFilter, searchTerm]);
-  const [selectedConnector, setSelectedConnector] = useState<string | null>(
-    Array.isArray(serviceType) ? serviceType[0] : serviceType ?? null
-  );
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -107,17 +103,6 @@ export const SelectConnector: React.FC = () => {
         }),
       }}
     >
-      {/* <EuiForm
-        component="form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          KibanaLogic.values.navigateToUrl(
-            `${generateEncodedPath(NEW_INDEX_METHOD_PATH, {
-              type: INGESTION_METHOD_IDS.CONNECTOR,
-            })}?service_type=${selectedConnector}`
-          );
-        }}
-      > */}
       <EuiFlexGroup>
         {/* Only facet is for native connectors, so only show facets if we can show native connectors */}
         {hasNativeAccess && (
@@ -273,22 +258,21 @@ export const SelectConnector: React.FC = () => {
             {filteredConnectors.map((connector) => (
               <EuiFlexItem key={connector.serviceType} grow>
                 <ConnectorCheckable
-                  disabled={connector.platinumOnly && !(hasPlatinumLicense || isCloud)}
+                  isDisabled={connector.platinumOnly && !(hasPlatinumLicense || isCloud)}
                   icon={connector.icon}
                   isBeta={connector.isBeta}
                   isTechPreview={Boolean(connector.isTechPreview)}
                   showNativeBadge={connector.isNative && hasNativeAccess}
                   name={connector.name}
                   serviceType={connector.serviceType}
-                  onSelect={() => {
+                  onConnectorSelect={(queryParams?: string) => {
                     KibanaLogic.values.navigateToUrl(
                       `${generateEncodedPath(NEW_INDEX_METHOD_PATH, {
                         type: INGESTION_METHOD_IDS.CONNECTOR,
-                      })}?service_type=${connector.serviceType}`
+                      })}?service_type=${connector.serviceType}&${queryParams ?? ''}`
                     );
                   }}
                   documentationUrl={connector.docsUrl}
-                  checked={selectedConnector === connector.serviceType}
                 />
               </EuiFlexItem>
             ))}
@@ -309,7 +293,6 @@ export const SelectConnector: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {/* </EuiForm> */}
     </EnterpriseSearchContentPageTemplate>
   );
 };

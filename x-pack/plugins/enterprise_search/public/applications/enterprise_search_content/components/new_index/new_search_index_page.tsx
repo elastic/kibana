@@ -83,13 +83,23 @@ function getDescription(method: string): string {
   }
 }
 
+const parseConnectorTypeParam = (queryString: string | string[] | null) => {
+  const parsedStr = Array.isArray(queryString) ? queryString[0] : queryString;
+  if (parsedStr === 'native') return 'native';
+  if (parsedStr === 'connector_client') return 'connector_client';
+  return undefined;
+};
+
 export const NewSearchIndexPage: React.FC = () => {
   const type = decodeURIComponent(useParams<{ type: string }>().type);
   const { search } = useLocation();
-  const { service_type: inputServiceType } = parseQueryParams(search);
+  const { service_type: inputServiceType, connector_type: inputConnectorType } =
+    parseQueryParams(search);
   const serviceType = Array.isArray(inputServiceType)
     ? inputServiceType[0]
     : inputServiceType || '';
+
+  const connectorType = parseConnectorTypeParam(inputConnectorType);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -112,7 +122,9 @@ export const NewSearchIndexPage: React.FC = () => {
         <>
           {type === INGESTION_METHOD_IDS.CRAWLER && <MethodCrawler />}
           {type === INGESTION_METHOD_IDS.API && <MethodApi />}
-          {type === INGESTION_METHOD_IDS.CONNECTOR && <MethodConnector serviceType={serviceType} />}
+          {type === INGESTION_METHOD_IDS.CONNECTOR && (
+            <MethodConnector serviceType={serviceType} connectorType={connectorType} />
+          )}
         </>
       }
     </EnterpriseSearchContentPageTemplate>
