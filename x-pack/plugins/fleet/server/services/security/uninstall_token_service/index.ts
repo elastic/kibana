@@ -229,10 +229,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         this.assertToken(attributes);
         this.assertCreatedAt(createdAt);
 
-        // todo: can we give warnings while setup?
-        // todo: give error when enabling stuff
-        // todo: maybe this is a function: check tokens!
-
         return {
           id: _id,
           policy_id: attributes.policy_id,
