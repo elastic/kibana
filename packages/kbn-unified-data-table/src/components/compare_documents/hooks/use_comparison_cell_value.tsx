@@ -236,6 +236,7 @@ const InnerCellValue = ({
             dataView.getFieldByName(fieldName)
           ),
         }}
+        css={{ whiteSpace: 'pre-wrap' }}
       />
     );
   }
@@ -250,7 +251,7 @@ const InnerCellValue = ({
   `;
 
   return (
-    <span className={CELL_CLASS}>
+    <span className={CELL_CLASS} css={{ whiteSpace: 'pre-wrap' }}>
       {diff.map((change, i) => (
         <DiffSegment
           key={`segment-${i}`}
