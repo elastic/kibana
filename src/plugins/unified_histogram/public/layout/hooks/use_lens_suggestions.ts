@@ -11,6 +11,7 @@ import {
   AggregateQuery,
   isOfAggregateQueryType,
   getAggregateQueryMode,
+  cleanupESQLQueryForLensSuggestions,
   Query,
   TimeRange,
 } from '@kbn/es-query';
@@ -85,7 +86,8 @@ export const useLensSuggestions = ({
 
       const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);
-      const esqlQuery = `${query[language]} | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+      const safeQuery = cleanupESQLQueryForLensSuggestions(query[language]);
+      const esqlQuery = `${safeQuery} | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
