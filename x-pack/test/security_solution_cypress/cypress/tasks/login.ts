@@ -12,13 +12,13 @@ import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
-import { rootRequest } from './common';
 import {
   CLOUD_SERVERLESS,
   ELASTICSEARCH_PASSWORD,
   ELASTICSEARCH_USERNAME,
   IS_SERVERLESS,
 } from '../env_var_names_constants';
+import { API_HEADERS, rootRequest } from './api_calls/common';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -210,7 +210,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
       (provider) => provider.type === 'basic'
     );
 
-    return rootRequest({
+    cy.request({
       url: `${baseUrl}/internal/security/login`,
       method: 'POST',
       body: {
@@ -219,6 +219,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
         currentURL: '/',
         params: { username, password },
       },
+      headers: API_HEADERS,
     });
   });
 };

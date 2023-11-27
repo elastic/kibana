@@ -13,10 +13,14 @@ import React from 'react';
 export const ObservabilityLogExplorerPageTemplate = ({
   children,
   observabilityShared,
+  pageProps,
 }: React.PropsWithChildren<{
   observabilityShared: ObservabilitySharedPluginStart;
+  pageProps?: EuiPageSectionProps;
 }>) => (
-  <observabilityShared.navigation.PageTemplate pageSectionProps={pageSectionProps}>
+  <observabilityShared.navigation.PageTemplate
+    pageSectionProps={{ ...pageSectionProps, ...pageProps }}
+  >
     {children}
   </observabilityShared.navigation.PageTemplate>
 );

@@ -15,13 +15,15 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
+import { extractWarnings, type SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { IESAggSource } from '../es_agg_source';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
-  getTimeFilter,
+  getInspector,
   getSearchService,
+  getTimeFilter,
 } from '../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
@@ -34,6 +36,7 @@ import {
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
+  StyleMetaData,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorStyle } from '../../styles/vector/vector_style';
@@ -78,7 +81,7 @@ export interface IESSource extends IVectorSource {
     searchSessionId?: string;
     inspectorAdapters: Adapters;
     executionContext: KibanaExecutionContext;
-  }): Promise<object>;
+  }): Promise<{ styleMeta: StyleMetaData; warnings: SearchResponseWarning[] }>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -157,25 +160,27 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   async _runEsQuery({
     registerCancelCallback,
-    requestDescription,
     requestId,
     requestName,
     searchSessionId,
     searchSource,
     executionContext,
     requestsAdapter,
+    onWarning,
   }: {
     registerCancelCallback: (callback: () => void) => void;
-    requestDescription: string;
     requestId: string;
     requestName: string;
     searchSessionId?: string;
     searchSource: ISearchSource;
     executionContext: KibanaExecutionContext;
     requestsAdapter: RequestAdapter | undefined;
+    onWarning?: (warning: SearchResponseWarning) => void;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
+
+    const disableWarningToasts = onWarning !== undefined && requestsAdapter !== undefined;
 
     try {
       const { rawResponse: resp } = await lastValueFrom(
@@ -187,11 +192,18 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             adapter: requestsAdapter,
             id: requestId,
             title: requestName,
-            description: requestDescription,
           },
           executionContext,
+          disableWarningToasts,
         })
       );
+
+      if (disableWarningToasts) {
+        extractWarnings(resp, getInspector(), requestsAdapter, requestName, requestId).forEach(
+          onWarning
+        );
+      }
+
       return resp;
     } catch (error) {
       if (isSearchSourceAbortError(error)) {
@@ -462,7 +474,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSessionId?: string;
     inspectorAdapters: Adapters;
     executionContext: KibanaExecutionContext;
-  }): Promise<object> {
+  }) {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
     });
@@ -495,30 +507,30 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       }
     }
 
+    const warnings: SearchResponseWarning[] = [];
     const resp = await this._runEsQuery({
       requestId: `${this.getId()}_styleMeta`,
       requestName: i18n.translate('xpack.maps.source.esSource.stylePropsMetaRequestName', {
-        defaultMessage: '{layerName} - metadata',
+        defaultMessage: 'load symbolization ranges ({layerName})',
         values: { layerName },
       }),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate(
-        'xpack.maps.source.esSource.stylePropsMetaRequestDescription',
-        {
-          defaultMessage:
-            'Elasticsearch request retrieving field metadata used for calculating symbolization bands.',
-        }
-      ),
       searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_source:style_meta' },
         executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
-    return resp.aggregations;
+    return {
+      styleMeta: resp.aggregations,
+      warnings,
+    };
   }
 
   getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {

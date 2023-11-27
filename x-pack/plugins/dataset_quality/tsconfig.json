@@ -4,14 +4,28 @@
     "outDir": "target/types"
   },
   "include": [
-    "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*.ts",
-    "../../typings/**/*"
+    "server/**/*",
+    "../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-plugins-server",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/deeplinks-observability",
+    "@kbn/fleet-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/server-route-repository",
+    "@kbn/share-plugin",
+    "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/field-formats-plugin",
+    "@kbn/field-types"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*",
+  ]
 }
