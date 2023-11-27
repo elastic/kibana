@@ -30,7 +30,7 @@ import type {
 /**
  * The interface required for a Response Actions provider
  */
-export interface ResponseActionsProvider {
+export interface ResponseActionsClient {
   isolate: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;
 
   release: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;

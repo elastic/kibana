@@ -17,7 +17,7 @@ import type {
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
 } from '../../../../../common/api/endpoint';
-import { BaseResponseActionsClient } from '../../../lib/response_actions/base_actions_provider';
+import { ResponseActionsClientImpl } from '../../../lib/response_actions/base_response_actions_client';
 import type {
   ActionDetails,
   HostMetadata,
@@ -36,7 +36,7 @@ import type {
   ImmutableObject,
 } from '../../../../../common/endpoint/types';
 
-export class EndpointActionsClient extends BaseResponseActionsClient {
+export class EndpointActionsClient extends ResponseActionsClientImpl {
   private async checkAgentIds(ids: string[]): Promise<{
     valid: string[];
     invalid: string[];

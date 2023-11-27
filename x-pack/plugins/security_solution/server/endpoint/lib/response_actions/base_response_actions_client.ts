@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { EndpointAppContext } from '../../types';
-import type { ResponseActionsProvider } from './types';
+import type { ResponseActionsClient } from './types';
 import type {
   ActionDetails,
   GetProcessesActionOutputContent,
@@ -40,7 +40,10 @@ export interface BaseActionsProviderOptions {
   username: string;
 }
 
-export abstract class BaseResponseActionsClient implements ResponseActionsProvider {
+/**
+ * Base class for a Response Actions client
+ */
+export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
 
   constructor(protected readonly options: BaseActionsProviderOptions) {
