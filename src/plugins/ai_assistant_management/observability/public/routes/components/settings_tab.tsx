@@ -47,7 +47,7 @@ export function SettingsTab() {
 
   const handleNavigateToSpacesConfiguration = () => {
     navigateToApp('management', {
-      path: '/spaces',
+      path: '/kibana/spaces',
     });
   };
 
