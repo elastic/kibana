@@ -34,13 +34,11 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       const startTime = Date.now();
       const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
       try {
-        const [clusterInfoPromise, licenseInfoPromise, packageVersion, alertsIndex] =
-          await Promise.allSettled([
-            receiver.fetchClusterInfo(),
-            receiver.fetchLicenseInfo(),
-            receiver.fetchDetectionRulesPackageVersion(),
-            receiver.getAlertsIndex(),
-          ]);
+        const [clusterInfoPromise, licenseInfoPromise, packageVersion] = await Promise.allSettled([
+          receiver.fetchClusterInfo(),
+          receiver.fetchLicenseInfo(),
+          receiver.fetchDetectionRulesPackageVersion(),
+        ]);
 
         const clusterInfo =
           clusterInfoPromise.status === 'fulfilled'
@@ -52,7 +50,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             : ({} as ESLicense | undefined);
         const packageInfo =
           packageVersion.status === 'fulfilled' ? packageVersion.value : undefined;
-        const index = alertsIndex.status === 'fulfilled' ? alertsIndex.value : undefined;
+        const index = receiver.getAlertsIndex();
 
         if (index === undefined) {
           tlog(logger, `alerts index is not ready yet, skipping telemetry task`);
