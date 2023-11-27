@@ -9,6 +9,55 @@ import { i18n } from '@kbn/i18n';
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
 
+export const NEW_TIMELINE_BTN = i18n.translate(
+  'xpack.securitySolution.flyout.timeline.actionMenu.newTimelineBtn',
+  {
+    defaultMessage: 'New',
+  }
+);
+
+export const NEW_TIMELINE = i18n.translate(
+  'xpack.securitySolution.flyout.timeline.actionMenu.newTimeline',
+  {
+    defaultMessage: 'New Timeline',
+  }
+);
+
+export const OPEN_TIMELINE_BTN = i18n.translate(
+  'xpack.securitySolution.flyout.timeline.actionMenu.openTimelineBtn',
+  {
+    defaultMessage: 'Open',
+  }
+);
+
+export const OPEN_TIMELINE_BTN_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.timeline.actionMenu.openTimelineBtnLabel',
+  {
+    defaultMessage: 'Open Existing Timeline',
+  }
+);
+
+export const SAVE_TIMELINE_BTN = i18n.translate(
+  'xpack.securitySolution.flyout.timeline.actionMenu.saveTimelineBtn',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const SAVE_TIMELINE_BTN_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.timeline.actionMenu.saveTimelineBtnLabel',
+  {
+    defaultMessage: 'Save currently opened Timeline',
+  }
+);
+
+export const NEW_TEMPLATE_TIMELINE = i18n.translate(
+  'xpack.securitySolution.flyout.timeline.actionMenu.newTimelineTemplate',
+  {
+    defaultMessage: 'New Timeline template',
+  }
+);
+
 export const CALL_OUT_UNAUTHORIZED_MSG = i18n.translate(
   'xpack.securitySolution.timeline.callOut.unauthorized.message.description',
   {
@@ -79,13 +128,6 @@ export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineTypeLiteral) =>
     defaultMessage: 'You have an unsaved {timeline}. Do you wish to save it?',
   });
 
-export const TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.saveTimeline.modal.titleTitle',
-  {
-    defaultMessage: 'Title',
-  }
-);
-
 export const TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.titleAriaLabel',
   {
@@ -113,6 +155,10 @@ export const SAVE_TOUR_CLOSE = i18n.translate(
     defaultMessage: 'Close',
   }
 );
+
+export const TITLE = i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.title', {
+  defaultMessage: 'Title',
+});
 
 export const SAVE_TOUR_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.flyout.saveTour.title',

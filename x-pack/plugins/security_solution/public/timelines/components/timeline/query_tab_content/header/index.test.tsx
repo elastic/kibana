@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { mockIndexPattern } from '../../../../common/mock';
-import { TestProviders } from '../../../../common/mock/test_providers';
+import { mockIndexPattern } from '../../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock/test_providers';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { mockDataProviders } from '../../data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
-import { TimelineHeader } from '.';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { QueryTabHeader } from '.';
+import { TimelineStatus, TimelineType } from '../../../../../../common/api/timeline';
 import { waitFor } from '@testing-library/react';
+import { TimelineId } from '../../../../../../common/types';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
@@ -44,21 +44,16 @@ describe('Header', () => {
     show: true,
     showCallOutUnauthorizedMsg: false,
     status: TimelineStatus.active,
-    timelineId: 'foo',
+    timelineId: TimelineId.test,
     timelineType: TimelineType.default,
   };
 
   describe('rendering', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<TimelineHeader {...props} />);
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('it renders the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
       const wrapper = await getWrapper(
         <TestProviders>
-          <TimelineHeader {...testProps} />
+          <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
@@ -74,7 +69,7 @@ describe('Header', () => {
 
       const wrapper = await getWrapper(
         <TestProviders>
-          <TimelineHeader {...testProps} />
+          <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
@@ -90,7 +85,7 @@ describe('Header', () => {
 
       const wrapper = await getWrapper(
         <TestProviders>
-          <TimelineHeader {...testProps} />
+          <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
@@ -108,7 +103,7 @@ describe('Header', () => {
 
       const wrapper = await getWrapper(
         <TestProviders>
-          <TimelineHeader {...testProps} />
+          <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
@@ -129,7 +124,7 @@ describe('Header', () => {
 
       const wrapper = await getWrapper(
         <TestProviders>
-          <TimelineHeader {...testProps} />
+          <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
@@ -146,7 +141,7 @@ describe('Header', () => {
 
       const wrapper = await getWrapper(
         <TestProviders>
-          <TimelineHeader {...testProps} />
+          <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 
@@ -165,7 +160,7 @@ describe('Header', () => {
 
       const wrapper = await getWrapper(
         <TestProviders>
-          <TimelineHeader {...testProps} />
+          <QueryTabHeader {...testProps} />
         </TestProviders>
       );
 

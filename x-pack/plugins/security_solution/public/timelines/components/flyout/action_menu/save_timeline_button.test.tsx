@@ -11,7 +11,7 @@ import type { SaveTimelineButtonProps } from './save_timeline_button';
 import { SaveTimelineButton } from './save_timeline_button';
 import { TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { getTimelineStatusByIdSelector } from '../../flyout/header/selectors';
+import { getTimelineStatusByIdSelector } from '../header/selectors';
 import { TimelineStatus } from '../../../../../common/api/timeline';
 
 const TEST_ID = {
@@ -28,7 +28,7 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../flyout/header/selectors', () => {
+jest.mock('../header/selectors', () => {
   return {
     getTimelineStatusByIdSelector: jest.fn().mockReturnValue(() => ({
       status: 'draft',
