@@ -12,6 +12,9 @@ import {
   bedrockSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { PassThrough } from 'stream';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -160,7 +163,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring AWS Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: Error configuring Amazon Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -280,7 +283,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: AWS Bedrock. Connector type: .bedrock`,
+            service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: Amazon Bedrock. Connector type: .bedrock`,
           });
         });
       });
@@ -404,7 +407,43 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: bedrockSuccessResponse.completion,
+              data: { message: bedrockSuccessResponse.completion },
+            });
+          });
+
+          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
+            await new Promise<void>((resolve, reject) => {
+              const passThrough = new PassThrough();
+
+              supertest
+                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .on('error', reject)
+                .send({
+                  params: {
+                    subAction: 'invokeStream',
+                    subActionParams: {
+                      messages: [
+                        {
+                          role: 'user',
+                          content: 'Hello world',
+                        },
+                      ],
+                    },
+                  },
+                  assistantLangChain: false,
+                })
+                .pipe(passThrough);
+              const responseBuffer: Uint8Array[] = [];
+              passThrough.on('data', (chunk) => {
+                responseBuffer.push(chunk);
+              });
+
+              passThrough.on('end', () => {
+                const parsed = parseBedrockBuffer(responseBuffer);
+                expect(parsed).to.eql('Hello world, what a unique string!');
+                resolve();
+              });
             });
           });
         });
@@ -478,4 +517,47 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
       });
     });
   });
+}
+
+const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
+  let bedrockBuffer: Uint8Array = new Uint8Array(0);
+
+  return chunks
+    .map((chunk) => {
+      bedrockBuffer = concatChunks(bedrockBuffer, chunk);
+      let messageLength = getMessageLength(bedrockBuffer);
+      const buildChunks = [];
+      while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
+        const extractedChunk = bedrockBuffer.slice(0, messageLength);
+        buildChunks.push(extractedChunk);
+        bedrockBuffer = bedrockBuffer.slice(messageLength);
+        messageLength = getMessageLength(bedrockBuffer);
+      }
+
+      const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+
+      return buildChunks
+        .map((bChunk) => {
+          const event = awsDecoder.decode(bChunk);
+          const body = JSON.parse(
+            Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
+          );
+          return body.completion;
+        })
+        .join('');
+    })
+    .join('');
+};
+
+function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
+  const newBuffer = new Uint8Array(a.length + b.length);
+  newBuffer.set(a);
+  newBuffer.set(b, a.length);
+  return newBuffer;
+}
+
+function getMessageLength(buffer: Uint8Array): number {
+  if (buffer.byteLength === 0) return 0;
+  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  return view.getUint32(0, false);
 }

@@ -23,7 +23,6 @@ const casesLinks = getCasesDeepLinks<LinkItem>({
     },
     [SecurityPageName.caseConfigure]: {
       capabilities: [`${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`],
-      licenseType: 'gold',
       sideNavDisabled: true,
     },
     [SecurityPageName.caseCreate]: {

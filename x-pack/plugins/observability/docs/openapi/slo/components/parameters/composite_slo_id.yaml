@@ -1,7 +1,0 @@
-in: path
-name: compositeSloId
-description: An identifier for the composite slo.
-required: true
-schema:
-  type: string
-  example: 9c235211-6834-11ea-a78c-6feb38a34414

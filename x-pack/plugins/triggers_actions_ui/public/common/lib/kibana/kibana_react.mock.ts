@@ -74,6 +74,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     theme$: themeServiceMock.createTheme$(),
     licensing: licensingPluginMock,
     expressions: expressionsPluginMock.createStartContract(),
+    isServerless: false,
   } as TriggersAndActionsUiServices;
 };
 

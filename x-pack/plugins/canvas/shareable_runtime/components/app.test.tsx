@@ -103,7 +103,7 @@ describe('<App />', () => {
   test('autohide footer functions on mouseEnter + Leave', async () => {
     const wrapper = getWrapper();
     await openSettings(wrapper);
-    await selectMenuItem(wrapper, 1);
+    await selectMenuItem(wrapper, 2);
 
     expect(footer(wrapper).prop('isHidden')).toEqual(false);
     expect(footer(wrapper).prop('isAutohide')).toEqual(false);
@@ -122,7 +122,7 @@ describe('<App />', () => {
 
     // Open the menu and activate toolbar hiding.
     await openSettings(wrapper);
-    await selectMenuItem(wrapper, 1);
+    await selectMenuItem(wrapper, 2);
 
     toolbarCheck(wrapper).simulate('click');
     await tick(20);

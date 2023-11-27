@@ -47,10 +47,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       // Please make sure that the remote clusters, snapshot and restore and
       // CCR tests stay in that order. Their execution fails if rearranged.
       require.resolve('./apps/remote_clusters'),
-      // https://github.com/elastic/kibana/issues/153788
-      // require.resolve('./apps/snapshot_and_restore'),
-      // https://github.com/elastic/kibana/issues/153599
-      // require.resolve('./apps/cross_cluster_replication'),
+      require.resolve('./apps/snapshot_and_restore'),
+      require.resolve('./apps/cross_cluster_replication'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
       // require.resolve('./apps/license_management'),

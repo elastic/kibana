@@ -32,14 +32,17 @@ import {
   ServerlessOptions,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import { ES_P12_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
 import {
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
   SERVERLESS_JWKS_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
+import * as waitForSecurityIndexUtil from './wait_for_security_index';
+import * as mockIdpPluginUtil from '@kbn/mock-idp-plugin/common';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -53,6 +56,12 @@ jest.mock('./wait_until_cluster_ready', () => ({
   waitUntilClusterReady: jest.fn(),
 }));
 
+jest.mock('./wait_for_security_index', () => ({
+  waitForSecurityIndex: jest.fn(),
+}));
+
+jest.mock('@kbn/mock-idp-plugin/common');
+
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
@@ -63,6 +72,9 @@ const serverlessDir = 'stateless';
 const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
 
 const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
+const waitForSecurityIndexMock = jest.spyOn(waitForSecurityIndexUtil, 'waitForSecurityIndex');
+const ensureSAMLRoleMappingMock = jest.spyOn(mockIdpPluginUtil, 'ensureSAMLRoleMapping');
+const createMockIdpMetadataMock = jest.spyOn(mockIdpPluginUtil, 'createMockIdpMetadata');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -417,6 +429,66 @@ describe('resolveEsArgs()', () => {
       ]
     `);
   });
+
+  test('should add SAML realm args when kibanaUrl and SSL are passed', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'https://localhost:5601/',
+    });
+
+    expect(esArgs).toHaveLength(26);
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.order=0",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.idp.entity_id=urn:mock-idp",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.sp.entity_id=https://localhost:5601",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.sp.acs=https://localhost:5601/api/security/saml/callback",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.sp.logout=https://localhost:5601/logout",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.name=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.mail=http://saml.elastic-cloud.com/attributes/name",
+      ]
+    `);
+  });
+
+  test('should not add SAML realm args when security is disabled', () => {
+    const esArgs = resolveEsArgs([['xpack.security.enabled', 'false']], {
+      ssl: true,
+      kibanaUrl: 'https://localhost:5601/',
+    });
+
+    expect(esArgs).toHaveLength(8);
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.enabled=false",
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+      ]
+    `);
+  });
 });
 
 describe('setupServerlessVolumes()', () => {
@@ -457,21 +529,29 @@ describe('setupServerlessVolumes()', () => {
     expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(false);
   });
 
-  test('should add SSL volumes when ssl is passed', async () => {
+  test('should add SSL and IDP metadata volumes when ssl and kibanaUrl are passed', async () => {
     mockFs(existingObjectStore);
+    createMockIdpMetadataMock.mockResolvedValue('<xml/>');
 
-    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, ssl: true });
+    const volumeCmd = await setupServerlessVolumes(log, {
+      basePath: baseEsPath,
+      ssl: true,
+      kibanaUrl: 'https://localhost:5603/',
+    });
+
+    expect(createMockIdpMetadataMock).toHaveBeenCalledTimes(1);
+    expect(createMockIdpMetadataMock).toHaveBeenCalledWith('https://localhost:5603/');
 
     const requiredPaths = [
       `${baseEsPath}:/objectstore:z`,
+      SERVERLESS_IDP_METADATA_PATH,
       ES_P12_PATH,
       ...SERVERLESS_RESOURCES_PATHS,
     ];
     const pathsNotIncludedInCmd = requiredPaths.filter(
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
-
-    expect(volumeCmd).toHaveLength(20);
+    expect(volumeCmd).toHaveLength(22);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
 
@@ -537,6 +617,7 @@ describe('runServerlessEsNode()', () => {
 
 describe('runServerlessCluster()', () => {
   test('should start 3 serverless nodes', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
     });
@@ -559,6 +640,53 @@ describe('runServerlessCluster()', () => {
     expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
     expect(waitUntilClusterReadyMock.mock.calls[0][0].expectedStatus).toEqual('green');
     expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+  });
+
+  test(`should create SAML role mapping when ssl and kibanaUrl are passed`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [CA_CERT_PATH]: '',
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+    createMockIdpMetadataMock.mockResolvedValue('<xml/>');
+
+    await runServerlessCluster(log, {
+      basePath: baseEsPath,
+      waitForReady: true,
+      ssl: true,
+      kibanaUrl: 'https://localhost:5601/',
+    });
+
+    expect(ensureSAMLRoleMappingMock).toHaveBeenCalledTimes(1);
+  });
+
+  test(`should wait for the security index`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    waitForSecurityIndexMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
+    expect(waitForSecurityIndexMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+  });
+
+  test(`should not wait for the security index when security is disabled`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, {
+      basePath: baseEsPath,
+      waitForReady: true,
+      esArgs: ['xpack.security.enabled=false'],
+    });
+    expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
   });
 });
 

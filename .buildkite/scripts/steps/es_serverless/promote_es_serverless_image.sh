@@ -76,7 +76,7 @@ if [[ "${PUBLISH_MANIFEST:-}" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0
   "kibana_commit": "$BUILDKITE_COMMIT",
   "kibana_branch": "$BUILDKITE_BRANCH",
   "elasticsearch_serverless_tag": "$SOURCE_IMAGE_OR_TAG",
-  "elasticsearch_serverless_image_url: "$SOURCE_IMAGE",
+  "elasticsearch_serverless_image_url": "$SOURCE_IMAGE",
   "elasticsearch_serverless_commit": "TODO: this currently can't be decided",
   "elasticsearch_commit": "$ELASTIC_COMMIT_HASH",
   "created_at": "`date`",

@@ -14,14 +14,16 @@ post:
       required: true
       schema:
         type: string
-        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+        examples:
+          - 41893910-6bca-11eb-9e0d-85d233e3ee35
     - in: path
       name: alertInstanceId
       description: An identifier for the alert instance.
       required: true
       schema:
         type: string
-        example: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+        examples:
+          - dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
   responses:
     '204':
       description: Indicates a successful call.
@@ -31,7 +33,3 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

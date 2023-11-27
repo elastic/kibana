@@ -79,7 +79,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
+    expect(await findAllByText('One or more maintenance windows are running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -94,7 +94,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
+    expect(await findAllByText('One or more maintenance windows are running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -106,7 +106,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(await findByText('One or more maintenance windows are running')).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -132,6 +132,85 @@ describe('MaintenanceWindowCallout', () => {
 
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should be visible if there is a "running" maintenance window that matches the specified category', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['observability']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('A maintenance window is running for Observability rules')
+    ).toBeInTheDocument();
+  });
+
+  it('should NOT be visible if there is a "running" maintenance window that does not match the specified category', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { container } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['securitySolution']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should be visible if there is a "running" maintenance window with a category, and no categories are specified', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('A maintenance window is running for Observability rules')
+    ).toBeInTheDocument();
+  });
+
+  it('should only display the specified categories in the callout title for a maintenance window that matches muliple categories', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability', 'securitySolution', 'management'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['observability', 'management']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('A maintenance window is running for Observability and Stack rules')
+    ).toBeInTheDocument();
   });
 
   it('should see an error toast if there was an error while fetching maintenance windows', async () => {
@@ -169,7 +248,7 @@ describe('MaintenanceWindowCallout', () => {
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledWith(mockError, {
         title: 'Failed to check if maintenance windows are active',
-        toastMessage: 'Rule notifications are stopped while the maintenance window is running.',
+        toastMessage: 'Rule notifications are stopped while maintenance windows are running.',
       });
     });
   });
@@ -195,7 +274,7 @@ describe('MaintenanceWindowCallout', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should work as expected if window maintenance privilege is READ ', async () => {
+  it('should work as expected if window maintenance privilege is READ', async () => {
     const servicesMock = {
       ...kibanaServicesMock,
       application: {
@@ -213,7 +292,7 @@ describe('MaintenanceWindowCallout', () => {
       wrapper: TestProviders,
     });
 
-    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(await findByText('One or more maintenance windows are running')).toBeInTheDocument();
   });
 
   it('should display the callout if the category ids contains the specified category', async () => {

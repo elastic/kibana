@@ -6,80 +6,117 @@
  * Side Public License, v 1.
  */
 
+import { PluginName } from '@kbn/core-base-common';
 import {
+  type CoreStatus,
   ServiceStatusLevels,
   type ServiceStatus,
   type ServiceStatusLevel,
 } from '@kbn/core-status-common';
+import type { NamedPluginStatus, NamedServiceStatus, PluginStatus } from './types';
+
+interface GetSummaryStatusParams {
+  serviceStatuses?: CoreStatus;
+  pluginStatuses?: Record<PluginName, PluginStatus>;
+}
 
 /**
  * Returns a single {@link ServiceStatus} that summarizes the most severe status level from a group of statuses.
  */
-export const getSummaryStatus = (
-  statuses: Array<[string, ServiceStatus]>,
-  {
-    allAvailableSummary = `All services are available`,
-    maxServices = 3,
-  }: { allAvailableSummary?: string; maxServices?: number } = {}
-): ServiceStatus => {
-  const { highestLevel, highestStatuses } = highestLevelSummary(statuses);
+export const getSummaryStatus = ({
+  serviceStatuses,
+  pluginStatuses,
+}: GetSummaryStatusParams): ServiceStatus => {
+  const { highestLevel, highestLevelServices, highestLevelPlugins } = highestLevelSummary({
+    serviceStatuses,
+    pluginStatuses,
+  });
 
   if (highestLevel === ServiceStatusLevels.available) {
     return {
       level: ServiceStatusLevels.available,
-      summary: allAvailableSummary,
+      summary:
+        serviceStatuses && pluginStatuses
+          ? 'All services and plugins are available'
+          : serviceStatuses
+          ? 'All services are available'
+          : 'All plugins are available',
     };
   } else {
-    const affectedServices = highestStatuses.map(([serviceName]) => serviceName);
+    const failingPlugins = highestLevelPlugins?.filter(({ reported }) => reported);
+    const affectedPlugins = highestLevelPlugins?.filter(({ reported }) => !reported);
+    const failingServicesNames = highestLevelServices?.map(({ name }) => name);
+    const failingPluginsNames = failingPlugins?.map(({ name }) => name);
+    const affectedPluginsNames = affectedPlugins?.map(({ name }) => name);
     return {
       level: highestLevel,
-      summary: getSummaryContent(affectedServices, highestLevel, maxServices),
+      summary: getSummaryContent({
+        level: highestLevel,
+        services: failingServicesNames,
+        plugins: failingPluginsNames,
+      }),
       // TODO: include URL to status page
       detail: `See the status page for more information`,
       meta: {
-        affectedServices,
+        failingServices: failingServicesNames,
+        failingPlugins: failingPluginsNames,
+        affectedPlugins: affectedPluginsNames,
       },
     };
   }
 };
 
-const getSummaryContent = (
-  affectedServices: string[],
-  statusLevel: ServiceStatusLevel,
-  maxServices: number
-): string => {
-  const serviceCount = affectedServices.length;
-  if (serviceCount === 1) {
-    return `1 service is ${statusLevel.toString()}: ${affectedServices[0]}`;
-  } else if (serviceCount > maxServices) {
-    const exceedingCount = serviceCount - maxServices;
-    return `${serviceCount} services are ${statusLevel.toString()}: ${affectedServices
-      .slice(0, maxServices)
-      .join(', ')} and ${exceedingCount} other(s)`;
-  } else {
-    return `${serviceCount} services are ${statusLevel.toString()}: ${affectedServices.join(', ')}`;
-  }
+interface GetSummaryContentParams {
+  level: ServiceStatusLevel;
+  services: string[];
+  plugins: string[];
+}
+
+const getSummaryContent = ({ level, services, plugins }: GetSummaryContentParams): string => {
+  const list = [...services, ...plugins].join(', ');
+  return `${services.length} service(s) and ${
+    plugins.length
+  } plugin(s) are ${level.toString()}: ${list}`;
 };
 
-type StatusPair = [string, ServiceStatus];
+const highestLevelSummary = ({ serviceStatuses, pluginStatuses }: GetSummaryStatusParams) => {
+  let highestServiceLevel: ServiceStatusLevel = ServiceStatusLevels.available;
+  let highestPluginLevel: ServiceStatusLevel = ServiceStatusLevels.available;
+  let highestLevelServices: NamedServiceStatus[] = [];
+  let highestLevelPlugins: NamedPluginStatus[] = [];
 
-const highestLevelSummary = (
-  statuses: StatusPair[]
-): { highestLevel: ServiceStatusLevel; highestStatuses: StatusPair[] } => {
-  let highestLevel: ServiceStatusLevel = ServiceStatusLevels.available;
-  let highestStatuses: StatusPair[] = [];
-
-  for (const pair of statuses) {
-    if (pair[1].level === highestLevel) {
-      highestStatuses.push(pair);
-    } else if (pair[1].level > highestLevel) {
-      highestLevel = pair[1].level;
-      highestStatuses = [pair];
+  if (serviceStatuses) {
+    let name: keyof CoreStatus;
+    for (name in serviceStatuses) {
+      if (Object.hasOwn(serviceStatuses, name)) {
+        const namedStatus: NamedServiceStatus = { ...serviceStatuses[name], name };
+        if (serviceStatuses[name].level === highestServiceLevel) {
+          highestLevelServices.push(namedStatus);
+        } else if (serviceStatuses[name].level > highestServiceLevel) {
+          highestLevelServices = [namedStatus];
+          highestServiceLevel = serviceStatuses[name].level;
+        }
+      }
     }
   }
 
-  return {
-    highestLevel,
-    highestStatuses,
-  };
+  if (pluginStatuses) {
+    Object.entries(pluginStatuses).forEach(([name, pluginStatus]) => {
+      const namedStatus: NamedPluginStatus = { ...pluginStatus, name };
+      if (pluginStatus.level === highestPluginLevel) {
+        highestLevelPlugins.push(namedStatus);
+      } else if (pluginStatus.level > highestPluginLevel) {
+        highestLevelPlugins = [namedStatus];
+        highestPluginLevel = pluginStatus.level;
+      }
+    });
+  }
+
+  if (highestServiceLevel === highestPluginLevel) {
+    return { highestLevel: highestServiceLevel, highestLevelServices, highestLevelPlugins };
+  } else if (highestServiceLevel > highestPluginLevel) {
+    return { highestLevel: highestServiceLevel, highestLevelServices, highestLevelPlugins: [] };
+  } else {
+    return { highestLevel: highestPluginLevel, highestLevelServices: [], highestLevelPlugins };
+  }
 };

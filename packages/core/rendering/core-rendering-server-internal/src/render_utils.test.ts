@@ -16,7 +16,7 @@ describe('getStylesheetPaths', () => {
           getStylesheetPaths({
             darkMode: true,
             themeVersion: 'v8',
-            basePath: '/base-path',
+            baseHref: '/base-path',
             buildNum: 17,
           })
         ).toMatchInlineSnapshot(`
@@ -36,7 +36,7 @@ describe('getStylesheetPaths', () => {
           getStylesheetPaths({
             darkMode: false,
             themeVersion: 'v8',
-            basePath: '/base-path',
+            baseHref: '/base-path',
             buildNum: 69,
           })
         ).toMatchInlineSnapshot(`

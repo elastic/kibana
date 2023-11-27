@@ -10,6 +10,7 @@ import { SLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { useKibana } from '../../../utils/kibana_react';
+import { getDelayInSecondsFromSLO } from '../../../utils/slo/get_delay_in_seconds_from_slo';
 import { useLensDefinition } from './use_lens_definition';
 
 interface Props {
@@ -22,14 +23,18 @@ export function ErrorRateChart({ slo, fromRange }: Props) {
     lens: { EmbeddableComponent },
   } = useKibana().services;
   const lensDef = useLensDefinition(slo);
+  const delayInSeconds = getDelayInSecondsFromSLO(slo);
+
+  const from = moment(fromRange).subtract(delayInSeconds, 'seconds').toISOString();
+  const to = moment().subtract(delayInSeconds, 'seconds').toISOString();
 
   return (
     <EmbeddableComponent
       id="sloErrorRateChart"
       style={{ height: 190 }}
       timeRange={{
-        from: fromRange.toISOString(),
-        to: moment().toISOString(),
+        from,
+        to,
       }}
       attributes={lensDef}
       viewMode={ViewMode.VIEW}

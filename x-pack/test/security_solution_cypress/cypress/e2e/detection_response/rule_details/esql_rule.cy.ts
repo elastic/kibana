@@ -17,7 +17,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 
 import { getDetails } from '../../../tasks/rule_details';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -25,10 +25,6 @@ import { visit } from '../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-  });
   const rule = getEsqlRule();
 
   beforeEach(() => {

@@ -18,6 +18,7 @@ import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../common';
 export interface RulesSettingsClientFactoryOpts {
   logger: Logger;
   savedObjectsService: SavedObjectsServiceStart;
+  isServerless: boolean;
   securityPluginStart?: SecurityPluginStart;
 }
 
@@ -26,6 +27,7 @@ export class RulesSettingsClientFactory {
   private logger!: Logger;
   private savedObjectsService!: SavedObjectsServiceStart;
   private securityPluginStart?: SecurityPluginStart;
+  private isServerless = false;
 
   public initialize(options: RulesSettingsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -35,6 +37,7 @@ export class RulesSettingsClientFactory {
     this.logger = options.logger;
     this.savedObjectsService = options.savedObjectsService;
     this.securityPluginStart = options.securityPluginStart;
+    this.isServerless = options.isServerless;
   }
 
   private createRulesSettingsClient(request: KibanaRequest, withAuth: boolean) {
@@ -54,6 +57,7 @@ export class RulesSettingsClientFactory {
         const user = securityPluginStart.authc.getCurrentUser(request);
         return user ? user.username : null;
       },
+      isServerless: this.isServerless,
     });
   }
 

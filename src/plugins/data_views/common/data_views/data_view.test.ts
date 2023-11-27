@@ -8,7 +8,7 @@
 
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { RuntimeField, RuntimePrimitiveTypes, FieldSpec } from '../types';
+import { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
@@ -41,7 +41,7 @@ const runtimeField = {
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter());
 
 // helper function to create index patterns
-function create(id: string, spec?: object) {
+function create(id: string, spec?: DataViewSpec) {
   const {
     type,
     version,
@@ -315,11 +315,9 @@ describe('IndexPattern', () => {
         id: 'bytes',
       });
       expect(field.customLabel).toEqual('custom name');
-      expect(indexPattern.toSpec().fieldAttrs).toEqual({
-        '@tags': {
-          customLabel: 'custom name',
-          count: 5,
-        },
+      expect(indexPattern.toSpec().fieldAttrs!['@tags']).toEqual({
+        customLabel: 'custom name',
+        count: 5,
       });
 
       indexPattern.removeRuntimeField('@tags');
@@ -393,15 +391,13 @@ describe('IndexPattern', () => {
       expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
       expect(indexPattern.toSpec()!.fields!['new_field.a']).toBeDefined();
       expect(indexPattern.toSpec()!.fields!['new_field.b']).toBeDefined();
-      expect(indexPattern.toSpec()!.fieldAttrs).toEqual({
-        'new_field.a': {
-          count: 3,
-          customLabel: 'custom name a',
-        },
-        'new_field.b': {
-          count: 4,
-          customLabel: 'custom name b',
-        },
+      expect(indexPattern.toSpec().fieldAttrs!['new_field.a']).toEqual({
+        count: 3,
+        customLabel: 'custom name a',
+      });
+      expect(indexPattern.toSpec().fieldAttrs!['new_field.b']).toEqual({
+        count: 4,
+        customLabel: 'custom name b',
       });
 
       indexPattern.removeRuntimeField('new_field');
@@ -485,7 +481,7 @@ describe('IndexPattern', () => {
     });
 
     test('creating from spec does not contain references to spec', () => {
-      const sourceFilters = ['test'];
+      const sourceFilters = [{ value: 'test' }];
       const spec = { sourceFilters };
       const dataView1 = create('test1', spec);
       const dataView2 = create('test2', spec);

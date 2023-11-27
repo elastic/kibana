@@ -42,7 +42,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/api_calls/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
 import {
   fillAboutRule,
@@ -54,7 +54,7 @@ import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
 import { login } from '../../../tasks/login';
 import { getDetails } from '../../../tasks/rule_details';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
   const rule = getEditedRule();
   const expectedEditedtags = rule.tags?.join('');
   const expectedEditedIndexPatterns = rule.index;

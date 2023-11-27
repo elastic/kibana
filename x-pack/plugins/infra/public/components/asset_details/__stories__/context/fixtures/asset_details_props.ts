@@ -17,12 +17,6 @@ const tabs: Tab[] = [
     }),
   },
   {
-    id: ContentTabIds.LOGS,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
-      defaultMessage: 'Logs',
-    }),
-  },
-  {
     id: ContentTabIds.METADATA,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
       defaultMessage: 'Metadata',
@@ -32,6 +26,12 @@ const tabs: Tab[] = [
     id: ContentTabIds.PROCESSES,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
       defaultMessage: 'Processes',
+    }),
+  },
+  {
+    id: ContentTabIds.LOGS,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
+      defaultMessage: 'Logs',
     }),
   },
   {
@@ -49,10 +49,8 @@ const tabs: Tab[] = [
 ];
 
 export const assetDetailsProps: AssetDetailsProps = {
-  asset: {
-    name: 'host1',
-    id: 'host1',
-  },
+  assetName: 'host1',
+  assetId: 'host1',
   overrides: {
     metadata: {
       showActionsColumn: true,

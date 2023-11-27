@@ -93,6 +93,8 @@ NOTE: Temporary {data-sources} are not available in *Stack Management.*
 [[rollup-data-view]]
 ==== Use {data-sources} with rolled up data
 
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
+
 A {data-source} can match one rollup index.  For a combination rollup
 {data-source} with both raw and rolled up data, use the standard notation:
 

@@ -91,7 +91,17 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
   );
 
   const openInLensAction = useCallback(
-    ({ timeRange, query, filters }: { timeRange: TimeRange; filters: Filter[]; query: Query }) =>
+    ({
+        timeRange,
+        query,
+        filters,
+        searchSessionId,
+      }: {
+        timeRange: TimeRange;
+        filters: Filter[];
+        query: Query;
+        searchSessionId?: string;
+      }) =>
       () => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {
@@ -100,6 +110,7 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
               id: '',
               timeRange,
               attributes: injectedAttributes,
+              searchSessionId,
             },
             {
               openInNewTab: true,
@@ -115,12 +126,16 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
       timeRange,
       filters = [],
       query = { language: 'kuery', query: '' },
+      searchSessionId,
     }: {
       timeRange: TimeRange;
       filters?: Filter[];
       query?: Query;
+      searchSessionId?: string;
     }) => {
-      const openInLens = getOpenInLensAction(openInLensAction({ timeRange, filters, query }));
+      const openInLens = getOpenInLensAction(
+        openInLensAction({ timeRange, filters, query, searchSessionId })
+      );
       return [openInLens];
     },
     [openInLensAction]

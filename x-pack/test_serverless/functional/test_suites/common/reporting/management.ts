@@ -6,8 +6,10 @@
  */
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { CSV_REPORT_TYPE_V2 } from '@kbn/reporting-plugin/common/constants';
-import type { JobParamsCsvFromSavedObject } from '@kbn/reporting-plugin/common/types';
+import {
+  CSV_REPORT_TYPE_V2,
+  JobParamsCsvFromSavedObject,
+} from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -17,6 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
+  const config = getService('config');
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -47,8 +50,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ],
     };
 
-    const TEST_USERNAME = 'elastic_serverless';
-    const TEST_PASSWORD = 'changeme';
+    // Kibana CI and MKI use different users
+    const TEST_USERNAME = config.get('servers.kibana.username');
+    const TEST_PASSWORD = config.get('servers.kibana.password');
 
     before('initialize saved object archive', async () => {
       // add test saved search object

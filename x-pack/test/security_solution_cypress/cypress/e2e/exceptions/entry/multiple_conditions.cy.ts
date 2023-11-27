@@ -25,18 +25,13 @@ import {
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../screens/exceptions';
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-// FLAKY: https://github.com/elastic/kibana/issues/165651
-// FLAKY: https://github.com/elastic/kibana/issues/165734
-// FLAKY: https://github.com/elastic/kibana/issues/165652
 describe(
   'Add multiple conditions and validate the generated exceptions',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cy.task('esArchiverResetKibana');
       login();
       deleteAlertsAndRules();
       // At least create Rule with exceptions_list to be able to view created exceptions

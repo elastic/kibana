@@ -11,6 +11,8 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
@@ -211,6 +213,7 @@ export async function getAgentsByKuery(
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
     searchAfter?: SortResults;
+    aggregations?: Record<string, AggregationsAggregationContainer>;
   }
 ): Promise<{
   agents: Agent[];
@@ -218,6 +221,7 @@ export async function getAgentsByKuery(
   page: number;
   perPage: number;
   statusSummary?: Record<AgentStatus, number>;
+  aggregations?: Record<string, estypes.AggregationsAggregate>;
 }> {
   const {
     page = 1,
@@ -230,6 +234,7 @@ export async function getAgentsByKuery(
     showUpgradeable,
     searchAfter,
     pitId,
+    aggregations,
   } = options;
   const filters = [];
 
@@ -263,8 +268,27 @@ export async function getAgentsByKuery(
     unenrolling: 0,
   };
 
-  const queryAgents = async (from: number, size: number) =>
-    esClient.search<
+  const queryAgents = async (from: number, size: number) => {
+    const aggs = {
+      ...(aggregations || getStatusSummary
+        ? {
+            aggs: {
+              ...(aggregations ? aggregations : {}),
+              ...(getStatusSummary
+                ? {
+                    status: {
+                      terms: {
+                        field: 'status',
+                      },
+                    },
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    };
+
+    return esClient.search<
       FleetServerAgent,
       { status: { buckets: Array<{ key: AgentStatus; doc_count: number }> } }
     >({
@@ -288,8 +312,9 @@ export async function getAgentsByKuery(
             ignore_unavailable: true,
           }),
       ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
-      ...(getStatusSummary && { aggs: { status: { terms: { field: 'status' } } } }),
+      ...aggs,
     });
+  };
   let res;
   try {
     res = await queryAgents((page - 1) * perPage, perPage);
@@ -331,6 +356,7 @@ export async function getAgentsByKuery(
     total,
     page,
     perPage,
+    ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };
 }

@@ -51,7 +51,7 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
         white-space: nowrap;
       `}
     >
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           {columnTitles[metadataValue.field as MetadataFields]}
         </EuiFlexItem>

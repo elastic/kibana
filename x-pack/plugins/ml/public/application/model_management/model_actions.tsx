@@ -29,10 +29,12 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { isTestable } from './test_models';
+import { isTestable, isDfaTrainedModel } from './test_models';
 import { ModelItem } from './models_list';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export function useModelActions({
+  onDfaTestAction,
   onTestAction,
   onModelsDeleteRequest,
   onModelDeployRequest,
@@ -42,6 +44,7 @@ export function useModelActions({
   modelAndDeploymentIds,
 }: {
   isLoading: boolean;
+  onDfaTestAction: (model: ModelItem) => void;
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (models: ModelItem[]) => void;
   onModelDeployRequest: (model: ModelItem) => void;
@@ -51,7 +54,7 @@ export function useModelActions({
 }): Array<Action<ModelItem>> {
   const {
     services: {
-      application: { navigateToUrl, capabilities },
+      application: { navigateToUrl },
       overlays,
       theme,
       i18n: i18nStart,
@@ -59,6 +62,18 @@ export function useModelActions({
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+
+  const [
+    canCreateTrainedModels,
+    canStartStopTrainedModels,
+    canTestTrainedModels,
+    canDeleteTrainedModels,
+  ] = usePermissionCheck([
+    'canCreateTrainedModels',
+    'canStartStopTrainedModels',
+    'canTestTrainedModels',
+    'canDeleteTrainedModels',
+  ]);
 
   const [canManageIngestPipelines, setCanManageIngestPipelines] = useState<boolean>(false);
 
@@ -71,10 +86,6 @@ export function useModelActions({
   const urlLocator = useMlLocator()!;
 
   const trainedModelsApiService = useTrainedModelsApiService();
-
-  const canStartStopTrainedModels = capabilities.ml.canStartStopTrainedModels as boolean;
-  const canTestTrainedModels = capabilities.ml.canTestTrainedModels as boolean;
-  const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
 
   useEffect(() => {
     let isMounted = true;
@@ -119,18 +130,19 @@ export function useModelActions({
   return useMemo(
     () => [
       {
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataNameActionLabel', {
           defaultMessage: 'View training data',
         }),
         description: i18n.translate(
           'xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel',
           {
-            defaultMessage: 'View training data',
+            defaultMessage: 'Training data can be viewed when data frame analytics job exists.',
           }
         ),
         icon: 'visTable',
         type: 'icon',
         available: (item) => !!item.metadata?.analytics_config?.id,
+        enabled: (item) => item.origin_job_exists === true,
         onClick: async (item) => {
           if (item.metadata?.analytics_config === undefined) return;
 
@@ -153,7 +165,6 @@ export function useModelActions({
 
           await navigateToUrl(url);
         },
-        isPrimary: true,
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
@@ -394,15 +405,14 @@ export function useModelActions({
         type: 'button',
         isPrimary: true,
         available: (item) =>
-          item.tags.includes(ELASTIC_MODEL_TAG) && item.state === MODEL_STATE.NOT_DOWNLOADED,
+          canCreateTrainedModels &&
+          item.tags.includes(ELASTIC_MODEL_TAG) &&
+          item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           try {
             onLoading(true);
-            await trainedModelsApiService.putTrainedModelConfig(
-              item.model_id,
-              item.putModelConfig!
-            );
+            await trainedModelsApiService.installElasticTrainedModelConfig(item.model_id);
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
                 defaultMessage: '"{modelId}" model download has been started successfully.',
@@ -463,20 +473,15 @@ export function useModelActions({
           onModelDeployRequest(model);
         },
         available: (item) => {
-          const isDfaTrainedModel =
-            item.metadata?.analytics_config !== undefined ||
-            item.inference_config?.regression !== undefined ||
-            item.inference_config?.classification !== undefined;
-
           return (
-            isDfaTrainedModel &&
+            isDfaTrainedModel(item) &&
             !isBuiltInModel(item) &&
             !item.putModelConfig &&
             canManageIngestPipelines
           );
         },
         enabled: (item) => {
-          return item.state !== MODEL_STATE.STARTED;
+          return canStartStopTrainedModels && item.state !== MODEL_STATE.STARTED;
         },
       },
       {
@@ -540,7 +545,13 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: isTestable,
-        onClick: (item) => onTestAction(item),
+        onClick: (item) => {
+          if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
+            onDfaTestAction(item);
+          } else {
+            onTestAction(item);
+          }
+        },
         enabled: (item) => {
           return canTestTrainedModels && isTestable(item, true) && !isLoading;
         },
@@ -581,26 +592,28 @@ export function useModelActions({
       },
     ],
     [
-      urlLocator,
-      navigateToUrl,
-      navigateToPath,
+      canCreateTrainedModels,
+      canDeleteTrainedModels,
+      canManageIngestPipelines,
       canStartStopTrainedModels,
-      isLoading,
-      getUserInputModelDeploymentParams,
-      modelAndDeploymentIds,
-      onLoading,
-      trainedModelsApiService,
+      canTestTrainedModels,
+      displayErrorToast,
       displaySuccessToast,
       fetchModels,
-      displayErrorToast,
       getUserConfirmation,
-      onModelsDeleteRequest,
-      onModelDeployRequest,
-      canDeleteTrainedModels,
+      getUserInputModelDeploymentParams,
       isBuiltInModel,
+      isLoading,
+      modelAndDeploymentIds,
+      navigateToPath,
+      navigateToUrl,
+      onDfaTestAction,
+      onLoading,
+      onModelDeployRequest,
+      onModelsDeleteRequest,
       onTestAction,
-      canTestTrainedModels,
-      canManageIngestPipelines,
+      trainedModelsApiService,
+      urlLocator,
     ]
   );
 }

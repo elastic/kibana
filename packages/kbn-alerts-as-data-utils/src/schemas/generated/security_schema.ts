@@ -182,6 +182,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.suppression.terms.field': schemaStringArray,
   'kibana.alert.suppression.terms.value': schemaStringArray,
   'kibana.alert.system_status': schemaString,
+  'kibana.alert.threshold_result.cardinality': schemaUnknown,
   'kibana.alert.threshold_result.count': schemaStringOrNumber,
   'kibana.alert.threshold_result.from': schemaDate,
   'kibana.alert.threshold_result.terms': rt.array(

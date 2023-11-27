@@ -99,12 +99,18 @@ export function registerEsqlFunction({
       1. ES|QL is not Elasticsearch SQL. Do not apply Elasticsearch SQL
       commands, functions and concepts. Only use information available
       in the context of this conversation.
-      2. When using FROM, never wrap a data source in single or double
-      quotes.
-      3. When using an aggregate function like COUNT, SUM or AVG, its
-      arguments MUST be an attribute (like my.field.name) or literal
-      (100). Math (AVG(my.field.name / 2)) or functions 
-      (AVG(CASE(my.field.name, "foo", 1))) are not allowed.
+      2. Use a WHERE clause as early and often as possible, because
+      it limits the number of documents that need to be evaluated.
+      3. Use EVAL to create new columns that require mathemetical
+      operations or non-aggregation functions like CASE, ROUND or
+      DATE_EXTRACT. YOU MUST DO THIS before using these operations
+      in a STATS command.
+      4. DO NOT UNDER ANY CIRCUMSTANCES:
+      - wrap a data source in single or double quotes when using FROM
+      - use COUNT(*) or COUNT(). A single argument (field name) is
+      required, like COUNT(my.field.name).
+      - use the AS keyword. Create a new column by using the = operator.
+      this is wrong: STATS SUM(field) AS sum_field.
 
       When constructing a query, break it down into the following steps.
       Ask these questions out loud so the user can see your reasoning.
@@ -112,7 +118,15 @@ export function registerEsqlFunction({
 
       - What are the critical rules I need to think of?
       - What data source is the user requesting? What command should I
-      select for this data source?
+      select for this data source? Don't use any quotes to wrap the
+      source.
+      - Does the data set need to be filtered? Use the WHERE clause for
+      this, as it improves performance.
+      - Do I need to add columns that use math or other non-aggregation
+      functions like CASE using the EVAL command before I run the STATS
+      BY command with aggregation functions?
+      - If I run a STATS command, what columns are available after the
+      command?
       - What are the steps needed to get the result that the user needs?
       Break each operation down into its own step. Reason about what data
       is the outcome of each command or function.
@@ -204,12 +218,14 @@ export function registerEsqlFunction({
       ### FROM
 
       \`FROM\` selects a data source, usually an Elasticsearch index or
-      pattern. You can also specify multiple indices.
+      pattern. You can also specify multiple indices. DO NOT UNDER ANY
+      CIRCUMSTANCES wrap an index or pattern in single or double quotes
+      as such: \`FROM "my_index.pattern-*"\`.
       Some examples:
 
       - \`FROM employees\`
-      - \`FROM employees*\`
-      - \`FROM employees*,my-alias\`
+      - \`FROM employees.annual_salaries-*\`
+      - \`FROM employees*,my-alias,my-index.with-a-dot*\`
 
       # Processing commands
 
@@ -223,7 +239,8 @@ export function registerEsqlFunction({
       \`DISSECT\` enables you to extract structured data out of a string.
       It matches the string against a delimiter-based pattern, and extracts
       the specified keys as columns. It uses the same syntax as the
-      Elasticsearch Dissect Processor. Some examples:
+      Elasticsearch Dissect Processor. DO NOT UNDER ANY CIRCUMSTANCES use
+      single quotes instead of double quotes. Some examples:
 
       - \`ROW a = "foo bar" | DISSECT a "%{b} %{c}";\`
       - \`ROW a = "foo bar baz" | DISSECT a "%{b} %{?c} %{d}";\`
@@ -252,8 +269,9 @@ export function registerEsqlFunction({
       - \`| SORT my_field\`
       - \`| SORT height DESC\`
 
-      Important: functions are not supported for SORT. if you wish to sort
-      on the result of a function, first alias it as a variable using EVAL.
+      DO NOT UNDER ANY CIRCUMSTANCES use functions or math as part of the
+      sort statement. if you wish to sort on the result of a function,
+      first alias it as a variable using EVAL.
       This is wrong: \`| SORT AVG(cpu)\`.
       This is right: \`| STATS avg_cpu = AVG(cpu) | SORT avg_cpu\`
 
@@ -273,7 +291,9 @@ export function registerEsqlFunction({
 
       \`WHERE\` filters the documents for which the provided condition
       evaluates to true. Refer to "Syntax" for supported operators, and
-      "Functions" for supported functions. Some examples:
+      "Functions" for supported functions. When using WHERE, make sure
+      that the columns in your statement are still available. Some
+      examples:
 
       - \`| WHERE height <= 180 AND GREATEST(hire_date, birth_date)\`
       - \`| WHERE @timestamp <= NOW()\`
@@ -287,13 +307,16 @@ export function registerEsqlFunction({
       aggregated values and the optional grouping column are dropped.
       Mention the retained columns when explaining the STATS command.
 
-      STATS ... BY does not support nested functions, hoist them to an
-      EVAL statement. 
+      DO NOT UNDER ANY CIRCUMSTANCES use non-aggregation functions (like
+      CASE or DATE_EXTRACT) or mathemetical operators in the STATS
+      command. YOU MUST USE an EVAL command before the STATS command
+      to append the new calculated column.
 
       Some examples:
 
       - \`| STATS count = COUNT(emp_no) BY languages\`
       - \`| STATS salary = AVG(salary)\`
+      - \`| EVAL monthly_salary = salary / 12 | STATS avg_monthly_salary = AVG(monthly_salary) BY emp_country\`
 
       ### LIMIT
 
@@ -432,9 +455,10 @@ export function registerEsqlFunction({
       ### TO_BOOLEAN, TO_DATETIME, TO_DOUBLE, TO_INTEGER, TO_IP, TO_LONG,
       TO_RADIANS, TO_STRING,TO_UNSIGNED_LONG, TO_VERSION
 
-      Converts a column to another type. Supported types are: . Some examples:
+      Converts a column to another type. Some examples:
       - \`| EVAL version = TO_VERSION("1.2.3")\`
       - \`| EVAL as_bool = TO_BOOLEAN(my_boolean_string)\`
+      - \`| EVAL percent = TO_DOUBLE(part) / TO_DOUBLE(total)\`
       
       ### TRIM
 
@@ -455,10 +479,9 @@ export function registerEsqlFunction({
       ### COUNT
 
       \`COUNT\` counts the number of field values. It requires a single
-      argument, and does not support wildcards. Important: COUNT() and
-      COUNT(*) are NOT supported. One single argument is required. If
-      you don't have a field name, use whatever field you have, rather
-      than displaying an invalid query.
+      argument, and does not support wildcards. One single argument is
+      required. If you don't have a field name, use whatever field you have,
+      rather than displaying an invalid query.
       
       Some examples:
 
@@ -505,6 +528,7 @@ export function registerEsqlFunction({
             } else {
               next = content;
             }
+
             return {
               ...message,
               message: {

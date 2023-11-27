@@ -6,7 +6,7 @@
  */
 
 import 'css.escape'; // Polyfill required to render `EuiPageTemplate` server-side
-import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
+import { EuiPageTemplate, EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
 import { icon as EuiIconWarning } from '@elastic/eui/lib/components/icon/assets/warning';
 // @ts-expect-error no definitions in component folder
@@ -32,7 +32,7 @@ appendIconComponentCache({
   warning: EuiIconWarning,
 });
 
-const emotionCache = createCache({ key: 'eui' });
+const emotionCache = createCache({ key: 'eui', stylisPlugins: [euiStylisPrefixer] });
 
 interface Props {
   buildNumber: number;

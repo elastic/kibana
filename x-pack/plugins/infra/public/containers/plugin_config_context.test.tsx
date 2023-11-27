@@ -27,6 +27,8 @@ describe('usePluginConfig()', () => {
         inventoryThresholdAlertRuleEnabled: true,
         metricThresholdAlertRuleEnabled: true,
         logThresholdAlertRuleEnabled: true,
+        alertsAndRulesDropdownEnabled: true,
+        profilingEnabled: false,
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {

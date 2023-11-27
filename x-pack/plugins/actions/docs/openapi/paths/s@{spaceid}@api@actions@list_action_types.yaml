@@ -28,7 +28,8 @@ get:
                 enabledInLicense:
                   type: boolean
                   description: Indicates whether the connector is enabled in the license.
-                  example: true
+                  examples:
+                    - true
                 id:
                   type: string
                   description: The unique identifier for the connector type.
@@ -40,7 +41,3 @@ get:
                   description: The name of the connector type.
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

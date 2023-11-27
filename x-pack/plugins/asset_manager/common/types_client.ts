@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-export interface SharedAssetsOptionsPublic {
+import { AssetFilters, SingleKindAssetFilters } from './types_api';
+
+export interface SharedAssetsOptionsPublic<F = AssetFilters> {
   from: string;
   to?: string;
+  filters?: F;
+  stringFilters?: string;
 }
 
-export type GetHostsOptionsPublic = SharedAssetsOptionsPublic;
+// Methods that return only a single "kind" of asset should not accept
+// a filter of "kind" to filter by asset kinds
 
-export interface GetServicesOptionsPublic extends SharedAssetsOptionsPublic {
+export type GetHostsOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
+export type GetContainersOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
+export type GetPodsOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
+
+export interface GetServicesOptionsPublic
+  extends SharedAssetsOptionsPublic<SingleKindAssetFilters> {
   parent?: string;
 }

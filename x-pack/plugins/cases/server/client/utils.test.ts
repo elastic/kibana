@@ -8,7 +8,8 @@
 import { v1 as uuidv1 } from 'uuid';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { toElasticsearchQuery } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
 
 import { createSavedObjectsSerializerMock } from './mocks';
 import {
@@ -20,7 +21,8 @@ import {
   convertSortField,
 } from './utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
-import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
+import type { CustomFieldsConfiguration } from '../../common/types/domain';
+import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
 
 describe('utils', () => {
   describe('buildFilter', () => {
@@ -673,6 +675,162 @@ describe('utils', () => {
           "type": "function",
         }
       `);
+    });
+
+    describe('customFields', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'Text field',
+          required: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'Toggle field',
+          required: true,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'another toggle field',
+          required: false,
+        },
+      ];
+
+      it('creates a filter with toggle customField', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { second_key: [true] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"cases.attributes.customFields: { (key: second_key AND value.boolean: true) }"`
+        );
+      });
+
+      it('creates a filter with text customField', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { first_key: ['hello'] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"cases.attributes.customFields: { (key: first_key AND value.string: hello) }"`
+        );
+      });
+
+      it('creates a filter with null customField value', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { first_key: [null] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"cases.attributes.customFields: { (key: first_key AND NOT value: *) }"`
+        );
+      });
+
+      it('creates a filter with multiple customFields', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { second_key: [true], third_key: [false] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"(cases.attributes.customFields: { (key: second_key AND value.boolean: true) } AND cases.attributes.customFields: { (key: third_key AND value.boolean: false) })"`
+        );
+      });
+
+      it('creates a filter with multiple customFields values', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { second_key: [true, null], third_key: [false] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"((cases.attributes.customFields: { (key: second_key AND value.boolean: true) } OR cases.attributes.customFields: { (key: second_key AND NOT value: *) }) AND cases.attributes.customFields: { (key: third_key AND value.boolean: false) })"`
+        );
+      });
+
+      it('creates a filter with only key when value is empty', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { second_key: [], third_key: [] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"(cases.attributes.customFields: { key: second_key } AND cases.attributes.customFields: { key: third_key })"`
+        );
+      });
+
+      it('does not create a filter when customFields is undefined', () => {
+        expect(
+          constructQueryOptions({
+            customFields: undefined,
+            customFieldsConfiguration,
+          }).filter
+        ).toBeUndefined();
+      });
+
+      it('does not create a filter when customFieldsConfiguration is undefined', () => {
+        expect(
+          constructQueryOptions({
+            customFields: { second_key: [true] },
+            customFieldsConfiguration: undefined,
+          }).filter
+        ).toBeUndefined();
+      });
+
+      it('does not create a filter when customFieldsConfiguration is empty', () => {
+        expect(
+          constructQueryOptions({
+            customFields: { second_key: [true] },
+            customFieldsConfiguration: [],
+          }).filter
+        ).toBeUndefined();
+      });
+
+      it('does not create a filter when customFields key does not match with any key of customFieldsConfiguration', () => {
+        expect(
+          constructQueryOptions({
+            customFields: { random_key: [true] },
+            customFieldsConfiguration,
+          }).filter
+        ).toBeUndefined();
+      });
+
+      it('does not create a filter when no customFields mapping found', () => {
+        const newCustomFieldsConfiguration = [
+          ...customFieldsConfiguration,
+          {
+            key: 'fourth_key',
+            type: 'number',
+            label: 'Number field',
+            required: true,
+          },
+        ];
+
+        expect(
+          constructQueryOptions({
+            customFields: { fourth_key: [1] },
+            // @ts-expect-error: need to create a mapping check
+            customFieldsConfiguration: newCustomFieldsConfiguration,
+          }).filter
+        ).toBeUndefined();
+      });
     });
   });
 

@@ -9,10 +9,10 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import { infraAlertFeatureIds } from '../../../../pages/metrics/hosts/components/tabs/config';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -49,7 +49,7 @@ export const AlertsSummaryContent = ({
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <AlertsSectionTitle />
         </EuiFlexItem>

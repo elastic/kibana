@@ -10,6 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import { getToastNotifications, getDataViews } from './dependency_cache';
 
 export async function getDataViewNames() {
@@ -20,7 +21,14 @@ export async function getDataViewNames() {
   return (await dataViewsService.getIdsWithTitle()).map(({ title }) => title);
 }
 
-export async function getDataViewIdFromName(name: string): Promise<string | null> {
+/**
+ * Retrieves the data view ID from the given name.
+ * If a job is passed in, a temporary data view will be created if the requested data view doesn't exist.
+ * @param name - The name or index pattern of the data view.
+ * @param job - Optional job object.
+ * @returns The data view ID or null if it doesn't exist.
+ */
+export async function getDataViewIdFromName(name: string, job?: Job): Promise<string | null> {
   const dataViewsService = getDataViews();
   if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
@@ -28,6 +36,15 @@ export async function getDataViewIdFromName(name: string): Promise<string | null
   const dataViews = await dataViewsService.find(name);
   const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
   if (!dataView) {
+    if (job !== undefined) {
+      const tempDataView = await dataViewsService.create({
+        id: undefined,
+        name,
+        title: name,
+        timeFieldName: job.data_description.time_field!,
+      });
+      return tempDataView.id ?? null;
+    }
     return null;
   }
   return dataView.id ?? dataView.getIndexPattern();
@@ -112,6 +129,6 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
  * Returns true if the data view index pattern contains a :
  * which means it is cross-cluster
  */
-export function isCcsIndexPattern(dataViewIndexPattern: string) {
-  return dataViewIndexPattern.includes(':');
+export function isCcsIndexPattern(indexPattern: string) {
+  return indexPattern.includes(':');
 }

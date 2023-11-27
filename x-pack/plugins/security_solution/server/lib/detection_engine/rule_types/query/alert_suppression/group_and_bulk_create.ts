@@ -26,12 +26,10 @@ import { singleSearchAfter } from '../../utils/single_search_after';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
-import {
-  AlertSuppressionMissingFieldsStrategy,
-  DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -171,7 +169,7 @@ export const groupAndBulkCreate = async ({
       const suppressOnMissingFields =
         (runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy ??
           DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
-        AlertSuppressionMissingFieldsStrategy.Suppress;
+        AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
       const groupingAggregation = buildGroupByFieldAggregation({
         groupByFields,

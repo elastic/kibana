@@ -53,6 +53,7 @@ describe('ApplicationService', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });

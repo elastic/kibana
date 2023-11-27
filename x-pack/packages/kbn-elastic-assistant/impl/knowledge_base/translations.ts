@@ -36,6 +36,13 @@ export const KNOWLEDGE_BASE_LABEL = i18n.translate(
   }
 );
 
+export const KNOWLEDGE_BASE_TOOLTIP = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseTooltip',
+  {
+    defaultMessage: 'ELSER must be configured to enable the Knowledge Base',
+  }
+);
+
 export const KNOWLEDGE_BASE_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseDescription',
   {
