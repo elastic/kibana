@@ -17,4 +17,4 @@ export type UpsellingSectionId =
   | 'osquery_automated_response_actions'
   | 'ruleDetailsEndpointExceptions';
 
-export type UpsellingMessageId = 'investigation_guide';
+export type UpsellingMessageId = 'investigation_guide' | 'alert_assignments';
