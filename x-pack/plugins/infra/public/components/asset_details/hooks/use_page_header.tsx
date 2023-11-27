@@ -113,8 +113,9 @@ const useFeatureFlagTabs = () => {
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
       [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
+      [ContentTabIds.PROFILING]: featureFlags.profilingEnabled,
     }),
-    [featureFlags.osqueryEnabled]
+    [featureFlags.osqueryEnabled, featureFlags.profilingEnabled]
   );
 
   const isTabEnabled = useCallback(
