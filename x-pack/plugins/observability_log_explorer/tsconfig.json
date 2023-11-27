@@ -34,7 +34,8 @@
     "@kbn/xstate-utils",
     "@kbn/shared-ux-utility",
     "@kbn/ui-theme",
-    "@kbn/logs-shared-plugin"
+    "@kbn/logs-shared-plugin",
+    "@kbn/dataset-quality-plugin"
   ],
   "exclude": [
     "target/**/*"
