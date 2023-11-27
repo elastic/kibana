@@ -89,7 +89,7 @@
 
     &:hover,
     &:focus {
-      background-color: $embEditingModeHoverColor;
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
     }
   }
 

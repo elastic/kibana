@@ -6,67 +6,49 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
 
-import { EuiCodeBlock, EuiFlexGroup, EuiForm, EuiFormRow, EuiSkeletonText } from '@elastic/eui';
-import { FilterableEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { FilterItems } from '@kbn/unified-search-plugin/public';
+import { EuiCodeBlock, EuiFlexGroup, EuiForm, EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  type AggregateQuery,
-  type Filter,
-  getAggregateQueryMode,
-  isOfQueryType,
-} from '@kbn/es-query';
+import { getAggregateQueryMode, isOfQueryType, type AggregateQuery } from '@kbn/es-query';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
 
-import { FiltersNotificationActionContext } from './filters_notification_action';
+import { FiltersNotificationActionApi } from './filters_notification_action';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 export interface FiltersNotificationProps {
-  context: FiltersNotificationActionContext;
+  api: FiltersNotificationActionApi;
   setDisableEditButton: (flag: boolean) => void;
 }
 
 export function FiltersNotificationPopoverContents({
-  context,
+  api,
   setDisableEditButton,
 }: FiltersNotificationProps) {
-  const { embeddable } = context;
-  const [isLoading, setIsLoading] = useState(true);
-  const [filters, setFilters] = useState<Filter[]>([]);
-  const [queryString, setQueryString] = useState<string>('');
-  const [queryLanguage, setQueryLanguage] = useState<'sql' | 'esql' | undefined>();
-
-  const dataViews = useMemo(
-    () => (embeddable.getRoot() as DashboardContainer)?.getAllDataViews(),
-    [embeddable]
-  );
-
-  useMount(() => {
-    Promise.all([
-      (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
-      (embeddable as IEmbeddable & FilterableEmbeddable).getQuery(),
-    ]).then(([embeddableFilters, embeddableQuery]) => {
-      setFilters(embeddableFilters);
-      if (embeddableQuery) {
-        if (isOfQueryType(embeddableQuery)) {
-          if (typeof embeddableQuery.query === 'string') {
-            setQueryString(embeddableQuery.query);
-          } else {
-            setQueryString(JSON.stringify(embeddableQuery.query, null, 2));
-          }
-        } else {
-          const language = getAggregateQueryMode(embeddableQuery);
-          setQueryLanguage(language);
-          setQueryString(embeddableQuery[language as keyof AggregateQuery]);
-          setDisableEditButton(true);
-        }
+  const filters = useMemo(() => api.localFilters?.value, [api]);
+  const { queryString, queryLanguage } = useMemo(() => {
+    const localQuery = api.localQuery?.value;
+    if (!localQuery) return {};
+    if (isOfQueryType(localQuery)) {
+      if (typeof localQuery.query === 'string') {
+        return { queryString: localQuery.query };
+      } else {
+        return { queryString: JSON.stringify(localQuery.query, null, 2) };
       }
-      setIsLoading(false);
-    });
-  });
+    } else {
+      setDisableEditButton(true);
+      const language: 'sql' | 'esql' | undefined = getAggregateQueryMode(localQuery);
+      return {
+        queryString: localQuery[language as keyof AggregateQuery],
+        queryLanguage: language,
+      };
+    }
+  }, [api, setDisableEditButton]);
+
+  const dataViews = useMemo(() => api.parentApi.value?.getAllDataViews(), [api]);
+
+  useMount(() => {});
 
   return (
     <EuiForm
@@ -75,31 +57,28 @@ export function FiltersNotificationPopoverContents({
         min-width: 300px;
       `}
     >
-      <EuiSkeletonText isLoading={isLoading} lines={3}>
-        {queryString !== '' && (
-          <EuiFormRow
-            label={dashboardFilterNotificationActionStrings.getQueryTitle()}
-            display="rowCompressed"
-            fullWidth
+      {Boolean(queryString) && (
+        <EuiFormRow
+          label={dashboardFilterNotificationActionStrings.getQueryTitle()}
+          display="rowCompressed"
+        >
+          <EuiCodeBlock
+            language={queryLanguage}
+            paddingSize="s"
+            aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
+            tabIndex={0} // focus so that keyboard controls will not skip over the code block
           >
-            <EuiCodeBlock
-              language={queryLanguage}
-              paddingSize="s"
-              aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
-              tabIndex={0} // focus so that keyboard controls will not skip over the code block
-            >
-              {queryString}
-            </EuiCodeBlock>
-          </EuiFormRow>
-        )}
-        {filters && filters.length > 0 && (
-          <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()} fullWidth>
-            <EuiFlexGroup wrap={true} gutterSize="xs">
-              <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
-            </EuiFlexGroup>
-          </EuiFormRow>
-        )}
-      </EuiSkeletonText>
+            {queryString}
+          </EuiCodeBlock>
+        </EuiFormRow>
+      )}
+      {filters && filters.length > 0 && (
+        <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()}>
+          <EuiFlexGroup wrap={true} gutterSize="xs">
+            <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
+          </EuiFlexGroup>
+        </EuiFormRow>
+      )}
     </EuiForm>
   );
 }

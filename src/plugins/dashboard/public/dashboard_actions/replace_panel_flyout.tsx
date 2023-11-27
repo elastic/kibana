@@ -6,27 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import React from 'react';
 
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IContainer,
-  IEmbeddable,
-  SavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
 import { Toast } from '@kbn/core/public';
 
 import { pluginServices } from '../services/plugin_services';
+import { ReplacePanelActionApi } from './replace_panel_action';
 import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
-import { DashboardContainer } from '../dashboard_container';
 
 interface Props {
-  container: IContainer;
+  api: ReplacePanelActionApi;
   savedObjectsFinder: React.ComponentType<any>;
   onClose: () => void;
-  panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }
 
 export class ReplacePanelFlyout extends React.Component<Props> {
@@ -56,18 +48,10 @@ export class ReplacePanelFlyout extends React.Component<Props> {
   };
 
   public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
-    const { panelToRemove, container } = this.props;
-
-    const id = await container.replaceEmbeddable<SavedObjectEmbeddableInput>(
-      panelToRemove.id,
-      {
-        savedObjectId,
-      },
-      type,
-      true
-    );
-
-    (container as DashboardContainer).setHighlightPanelId(id);
+    this.props.api.parent.value.replacePanel(this.props.api.id.value, {
+      panelType: type,
+      initialState: { savedObjectId },
+    });
     this.showToast(name);
     this.props.onClose();
   };
@@ -92,7 +76,9 @@ export class ReplacePanelFlyout extends React.Component<Props> {
       />
     );
 
-    const panelToReplace = 'Replace panel ' + this.props.panelToRemove.getTitle() + ' with:';
+    const panelToReplace =
+      'Replace panel ' + this.props.api.panelTitle?.value ??
+      this.props.api.defaultPanelTitle?.value + ' with:';
 
     return (
       <>

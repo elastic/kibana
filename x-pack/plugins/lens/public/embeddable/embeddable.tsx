@@ -7,7 +7,7 @@
 
 import { partition, uniqBy } from 'lodash';
 import React from 'react';
-import type { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -444,7 +444,7 @@ export class Embeddable
 
   private activeData?: TableInspectorAdapter;
 
-  private dataViews: DataView[] = [];
+  private internalDataViews: DataView[] = [];
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
 
@@ -467,6 +467,8 @@ export class Embeddable
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput)
       .then(() => {
+        this.localQuery.next(this.getQuery());
+        this.localFilters.next(this.getFilters());
         this.reload();
       })
       .catch((e) => this.onFatalError(e));
@@ -560,6 +562,9 @@ export class Embeddable
         )
         .subscribe()
     );
+
+    this.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getQuery());
+    this.localFilters = new BehaviorSubject<Filter[] | undefined>(this.getFilters());
   }
 
   private get activeDatasourceId() {
@@ -1383,7 +1388,7 @@ export class Embeddable
       activeVisualization: this.activeVisualization,
       activeVisualizationState: this.activeVisualizationState,
       activeData: this.activeData,
-      dataViews: this.dataViews,
+      dataViews: this.internalDataViews,
       capabilities: this.deps.capabilities,
       query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],
@@ -1429,7 +1434,7 @@ export class Embeddable
       )
     ).forEach((dataView) => indexPatterns.push(dataView));
 
-    this.dataViews = uniqBy(indexPatterns, 'id');
+    this.internalDataViews = uniqBy(indexPatterns, 'id');
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
@@ -1479,7 +1484,7 @@ export class Embeddable
       description,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
-      indexPatterns: this.dataViews,
+      indexPatterns: this.internalDataViews,
     });
   }
 
@@ -1513,7 +1518,7 @@ export class Embeddable
    * Gets the Lens embeddable's local filters
    * @returns Local/panel-level array of filters for Lens embeddable
    */
-  public async getFilters() {
+  public getFilters() {
     return mapAndFlattenFilters(
       this.deps.injectFilterReferences(
         this.savedVis?.state.filters ?? [],
@@ -1521,14 +1526,16 @@ export class Embeddable
       )
     );
   }
+  public localFilters;
 
   /**
    * Gets the Lens embeddable's local query
    * @returns Local/panel-level query for Lens embeddable
    */
-  public async getQuery() {
+  public getQuery() {
     return this.savedVis?.state.query;
   }
+  public localQuery;
 
   public getSavedVis(): Readonly<Document | undefined> {
     return this.savedVis;

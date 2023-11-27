@@ -14,10 +14,19 @@ import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import {
+  EmbeddableAppContext,
+  EmbeddableError,
+  EmbeddableOutput,
+  IEmbeddable,
+  LegacyEmbeddableAPI,
+} from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
-import { EmbeddableAppContext } from '../../embeddable_panel/types';
+import {
+  CommonLegacyEmbeddable,
+  legacyEmbeddableToApi,
+} from './compatibility/legacy_embeddable_to_api';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   if (input.hidePanelTitles) return '';
@@ -101,7 +110,65 @@ export abstract class Embeddable<
         distinctUntilChanged()
       )
       .subscribe((title) => this.renderComplete.setTitle(title));
+
+    const { api, destroyAPI } = legacyEmbeddableToApi(this as unknown as CommonLegacyEmbeddable);
+    this.destroyAPI = destroyAPI;
+    ({
+      uuid: this.uuid,
+      onEdit: this.onEdit,
+      viewMode: this.viewMode,
+      dataViews: this.dataViews,
+      parentApi: this.parentApi,
+      panelTitle: this.panelTitle,
+      dataLoading: this.dataLoading,
+      blockingError: this.blockingError,
+      setPanelTitle: this.setPanelTitle,
+      linkToLibrary: this.linkToLibrary,
+      hidePanelTitle: this.hidePanelTitle,
+      localTimeRange: this.localTimeRange,
+      isEditingEnabled: this.isEditingEnabled,
+      panelDescription: this.panelDescription,
+      canLinkToLibrary: this.canLinkToLibrary,
+      disabledActionIds: this.disabledActionIds,
+      unlinkFromLibrary: this.unlinkFromLibrary,
+      setHidePanelTitle: this.setHidePanelTitle,
+      defaultPanelTitle: this.defaultPanelTitle,
+      setLocalTimeRange: this.setLocalTimeRange,
+      getTypeDisplayName: this.getTypeDisplayName,
+      setPanelDescription: this.setPanelDescription,
+      getFallbackTimeRange: this.getFallbackTimeRange,
+      canUnlinkFromLibrary: this.canUnlinkFromLibrary,
+    } = api);
   }
+
+  /**
+   * Assign compatibility API directly to the Embeddable instance.
+   */
+  private destroyAPI;
+  public uuid: LegacyEmbeddableAPI['uuid'];
+  public onEdit: LegacyEmbeddableAPI['onEdit'];
+  public viewMode: LegacyEmbeddableAPI['viewMode'];
+  public parentApi: LegacyEmbeddableAPI['parentApi'];
+  public dataViews: LegacyEmbeddableAPI['dataViews'];
+  public panelTitle: LegacyEmbeddableAPI['panelTitle'];
+  public dataLoading: LegacyEmbeddableAPI['dataLoading'];
+  public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
+  public blockingError: LegacyEmbeddableAPI['blockingError'];
+  public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];
+  public localTimeRange: LegacyEmbeddableAPI['localTimeRange'];
+  public hidePanelTitle: LegacyEmbeddableAPI['hidePanelTitle'];
+  public isEditingEnabled: LegacyEmbeddableAPI['isEditingEnabled'];
+  public canLinkToLibrary: LegacyEmbeddableAPI['canLinkToLibrary'];
+  public panelDescription: LegacyEmbeddableAPI['panelDescription'];
+  public disabledActionIds: LegacyEmbeddableAPI['disabledActionIds'];
+  public unlinkFromLibrary: LegacyEmbeddableAPI['unlinkFromLibrary'];
+  public setLocalTimeRange: LegacyEmbeddableAPI['setLocalTimeRange'];
+  public defaultPanelTitle: LegacyEmbeddableAPI['defaultPanelTitle'];
+  public setHidePanelTitle: LegacyEmbeddableAPI['setHidePanelTitle'];
+  public getTypeDisplayName: LegacyEmbeddableAPI['getTypeDisplayName'];
+  public setPanelDescription: LegacyEmbeddableAPI['setPanelDescription'];
+  public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
+  public getFallbackTimeRange: LegacyEmbeddableAPI['getFallbackTimeRange'];
 
   public getAppContext(): EmbeddableAppContext | undefined {
     return this.parent?.getAppContext();
@@ -253,6 +320,7 @@ export abstract class Embeddable<
 
     this.inputSubject.complete();
     this.outputSubject.complete();
+    this.destroyAPI();
 
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();

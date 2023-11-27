@@ -7,12 +7,18 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
+import { Subscription, ReplaySubject, mergeMap, BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
+import {
+  Filter,
+  onlyDisabledFiltersChanged,
+  Query,
+  TimeRange,
+  AggregateQuery,
+} from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -196,6 +202,9 @@ export class VisualizeEmbeddable
       this.inspectorAdapters =
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
+
+    this.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getQuery());
+    this.localFilters = new BehaviorSubject<Filter[] | undefined>(this.getFilters());
   }
 
   public reportsEmbeddableLoad() {
@@ -210,27 +219,21 @@ export class VisualizeEmbeddable
    * Gets the Visualize embeddable's local filters
    * @returns Local/panel-level array of filters for Visualize embeddable
    */
-  public async getFilters() {
-    let input = this.getInput();
-    if (this.inputIsRefType(input)) {
-      input = await this.getInputAsValueType();
-    }
-    const filters = input.savedVis?.data.searchSource?.filter ?? [];
+  public getFilters() {
+    const filters = this.vis.serialize().data.searchSource?.filter ?? [];
     // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
     return mapAndFlattenFilters(_.cloneDeep(filters));
   }
+  public localFilters;
 
   /**
    * Gets the Visualize embeddable's local query
    * @returns Local/panel-level query for Visualize embeddable
    */
-  public async getQuery() {
-    let input = this.getInput();
-    if (this.inputIsRefType(input)) {
-      input = await this.getInputAsValueType();
-    }
-    return input.savedVis?.data.searchSource?.query;
+  public getQuery() {
+    return this.vis.serialize().data.searchSource.query;
   }
+  public localQuery;
 
   public getInspectorAdapters = () => {
     if (!this.handler || (this.inspectorAdapters && !Object.keys(this.inspectorAdapters).length)) {

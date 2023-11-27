@@ -18,12 +18,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { UnlinkFromLibraryAction } from './unlink_from_library_action';
-import { LibraryNotificationActionContext } from './library_notification_action';
+import {
+  UnlinkFromLibraryAction,
+  UnlinkPanelFromLibraryActionApi,
+} from './unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 
 export interface LibraryNotificationProps {
-  context: LibraryNotificationActionContext;
+  context: { api: UnlinkPanelFromLibraryActionApi };
   unlinkAction: UnlinkFromLibraryAction;
   displayName: string;
   icon: string;
@@ -38,7 +40,7 @@ export function LibraryNotificationPopover({
   id,
 }: LibraryNotificationProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { embeddable } = context;
+  const { api } = context;
 
   return (
     <EuiPopover
@@ -74,9 +76,9 @@ export function LibraryNotificationPopover({
               data-test-subj={'libraryNotificationUnlinkButton'}
               size="s"
               fill
-              onClick={() => unlinkAction.execute({ embeddable })}
+              onClick={() => unlinkAction.execute({ embeddable: api })}
             >
-              {unlinkAction.getDisplayName({ embeddable })}
+              {unlinkAction.getDisplayName({ embeddable: api })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

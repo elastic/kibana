@@ -8,25 +8,15 @@
 
 import React from 'react';
 
-import {
-  ViewMode,
-  type IEmbeddable,
-  isErrorEmbeddable,
-  isReferenceOrValueEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
-import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LibraryNotificationPopover } from './library_notification_popover';
+import { unlinkActionIsCompatible, UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
-export interface LibraryNotificationActionContext {
-  embeddable: IEmbeddable;
-}
-
-export class LibraryNotificationAction implements Action<LibraryNotificationActionContext> {
+export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_LIBRARY_NOTIFICATION;
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
@@ -37,41 +27,54 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
 
   private icon = 'folderCheck';
 
-  public readonly MenuItem = ({ context }: { context: LibraryNotificationActionContext }) => {
+  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
+    if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return (
       <LibraryNotificationPopover
         unlinkAction={this.unlinkAction}
         displayName={this.displayName}
-        context={context}
+        context={{ api: embeddable }}
         icon={this.getIconType({ embeddable })}
         id={this.id}
       />
     );
   };
 
-  public getDisplayName({ embeddable }: LibraryNotificationActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return unlinkActionIsCompatible(embeddable);
+  }
+
+  public subscribeToCompatibilityChanges(
+    { embeddable }: EmbeddableApiContext,
+    onChange: (isCompatible: boolean, action: LibraryNotificationAction) => void
+  ) {
+    if (!unlinkActionIsCompatible(embeddable)) return;
+
+    /**
+     * TODO: Upgrade this action by subscribing to changes in the existance of a saved object id. Currently,
+     *  this is unnecessary because a link or unlink operation will cause the panel to unmount and remount.
+     */
+    return embeddable.viewMode.subscribe((viewMode) => {
+      embeddable.canUnlinkFromLibrary().then((canUnlink) => {
+        onChange(viewMode === 'edit' && canUnlink, this);
+      });
+    });
+  }
+
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return this.displayName;
   }
 
-  public getIconType({ embeddable }: LibraryNotificationActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return this.icon;
   }
 
-  public isCompatible = async ({ embeddable }: LibraryNotificationActionContext) => {
-    return (
-      !isErrorEmbeddable(embeddable) &&
-      embeddable.getRoot().isContainer &&
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-      isReferenceOrValueEmbeddable(embeddable) &&
-      embeddable.inputIsRefType(embeddable.getInput())
-    );
+  public isCompatible = async ({ embeddable }: EmbeddableApiContext) => {
+    if (!unlinkActionIsCompatible(embeddable)) return false;
+    return embeddable.viewMode.value === 'edit' && embeddable.canUnlinkFromLibrary();
   };
 
   public execute = async () => {};

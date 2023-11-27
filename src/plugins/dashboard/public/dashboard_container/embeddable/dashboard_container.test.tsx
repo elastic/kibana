@@ -130,9 +130,9 @@ test('DashboardContainer.replacePanel', (done) => {
   );
 
   // replace the panel now
-  container.replacePanel(container.getInput().panels[ID], {
-    type: EMPTY_EMBEDDABLE,
-    explicitInput: { id: ID },
+  container.replacePanel(container.getInput().panels[ID].explicitInput.id, {
+    panelType: EMPTY_EMBEDDABLE,
+    initialState: { id: ID },
   });
 });
 

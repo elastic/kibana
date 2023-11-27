@@ -10,37 +10,36 @@ import React, { useState } from 'react';
 
 import {
   EuiButton,
-  EuiPopover,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonIcon,
-  EuiPopoverTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
   EuiPopoverFooter,
+  EuiPopoverTitle,
 } from '@elastic/eui';
-import { EditPanelAction } from '@kbn/embeddable-plugin/public';
 
-import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
-import { FiltersNotificationActionContext } from './filters_notification_action';
+import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FiltersNotificationPopoverContents } from './filters_notification_popover_contents';
+import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FiltersNotificationActionApi } from './filters_notification_action';
 
 export interface FiltersNotificationProps {
-  context: FiltersNotificationActionContext;
-  editPanelAction: EditPanelAction;
+  api: FiltersNotificationActionApi;
   displayName: string;
   icon: string;
   id: string;
 }
 
 export function FiltersNotificationPopover({
-  editPanelAction,
   displayName,
-  context,
   icon,
+  api,
   id,
 }: FiltersNotificationProps) {
-  const { embeddable } = context;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [disableEditbutton, setDisableEditButton] = useState(false);
+
+  const editPanelAction = getEditPanelAction();
 
   return (
     <EuiPopover
@@ -58,10 +57,7 @@ export function FiltersNotificationPopover({
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
-      <FiltersNotificationPopoverContents
-        context={context}
-        setDisableEditButton={setDisableEditButton}
-      />
+      <FiltersNotificationPopoverContents api={api} setDisableEditButton={setDisableEditButton} />
       <EuiPopoverFooter>
         {!disableEditbutton && (
           <EuiFlexGroup
@@ -76,7 +72,7 @@ export function FiltersNotificationPopover({
                 data-test-subj={'filtersNotificationModal__editButton'}
                 size="s"
                 fill
-                onClick={() => editPanelAction.execute({ embeddable })}
+                onClick={() => editPanelAction.execute({ embeddable: api })}
               >
                 {dashboardFilterNotificationActionStrings.getEditButtonTitle()}
               </EuiButton>

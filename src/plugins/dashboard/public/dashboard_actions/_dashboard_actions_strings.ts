@@ -41,6 +41,10 @@ export const dashboardAddToLibraryActionStrings = {
       defaultMessage: `Panel {panelTitle} was added to the library`,
       values: { panelTitle },
     }),
+  getErrorMessage: () =>
+    i18n.translate('dashboard.panel.addToLibrary.errorMessage', {
+      defaultMessage: `An error was encountered adding this panel to the library`,
+    }),
 };
 
 export const dashboardClonePanelActionStrings = {
@@ -87,8 +91,12 @@ export const dashboardUnlinkFromLibraryActionStrings = {
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
-      defaultMessage: `Panel {panelTitle} is no longer connected to the library`,
+      defaultMessage: `Panel {panelTitle} is no longer connected to the library.`,
       values: { panelTitle },
+    }),
+  getFailureMessage: () =>
+    i18n.translate('dashboard.panel.unlinkFromLibrary.failureMessage', {
+      defaultMessage: `An error occured while unlinking a panel from the library.`,
     }),
 };
 
