@@ -67,6 +67,7 @@ export function AiAssistantSelectionPage() {
               <div>
                 <EuiLink
                   external
+                  target="_blank"
                   href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"
                 >
                   {i18n.translate(
