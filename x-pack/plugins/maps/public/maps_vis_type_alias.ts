@@ -24,8 +24,10 @@ export function getMapsVisTypeAlias() {
   });
 
   return {
-    aliasApp: APP_ID,
-    aliasPath: `/${MAP_PATH}`,
+    alias: {
+      app: APP_ID,
+      path: `/${MAP_PATH}`,
+    },
     name: APP_ID,
     title: APP_NAME,
     description: appDescription,
@@ -45,8 +47,10 @@ export function getMapsVisTypeAlias() {
             title,
             description,
             updatedAt,
-            editUrl: getEditPath(id),
-            editApp: APP_ID,
+            editor: {
+              editUrl: getEditPath(id),
+              editApp: APP_ID,
+            },
             icon: APP_ICON,
             stage: 'production' as VisualizationStage,
             savedObjectType: type,

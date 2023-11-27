@@ -13,6 +13,7 @@ import { createDatasetQualityUsers } from '@kbn/dataset-quality-plugin/server/te
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
@@ -64,6 +65,9 @@ export interface CreateTest {
   services: InheritedServices & {
     datasetQualityFtrConfig: () => DatasetQualityFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
+    logSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<LogsSynthtraceEsClient>;
     datasetQualityApiClient: (context: InheritedFtrProviderContext) => DatasetQualityApiClient;
   };
   junit: { reportName: string };
@@ -95,6 +99,12 @@ export function createTestConfig(
         ...services,
         datasetQualityFtrConfig: () => config,
         registry: RegistryProvider,
+        logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new LogsSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
         datasetQualityApiClient: async (_: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);
