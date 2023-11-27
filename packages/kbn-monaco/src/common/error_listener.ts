@@ -31,6 +31,7 @@ export class ANTLREErrorListener implements ANTLRErrorListener<any> {
       startColumn: column,
       endColumn,
       message,
+      severity: 8,
     });
   }
 

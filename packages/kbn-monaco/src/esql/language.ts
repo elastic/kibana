@@ -15,46 +15,10 @@ import type { ESQLWorker } from './worker/esql_worker';
 
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
-import type { ESQLMessage } from './lib/ast/types';
 import type { ESQLCallbacks } from './lib/ast/shared/types';
 import { ESQLAstAdapter } from './lib/monaco/esql_ast_provider';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
-
-// from linear offset to Monaco position
-export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
-  const lines = expression.split(/\n/);
-  let remainingChars = offset;
-  let lineNumber = 1;
-  for (const line of lines) {
-    if (line.length >= remainingChars) {
-      return new monaco.Position(lineNumber, remainingChars + 1);
-    }
-    remainingChars -= line.length + 1;
-    lineNumber++;
-  }
-
-  throw new Error('Algorithm failure');
-}
-
-function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: ESQLMessage[]) {
-  const fallbackPosition = { column: 0, lineNumber: 0 };
-  return messages.map((e) => {
-    const startPosition = e.location ? offsetToRowColumn(code, e.location.min) : fallbackPosition;
-    const endPosition = e.location
-      ? offsetToRowColumn(code, e.location.max || 0)
-      : fallbackPosition;
-    return {
-      message: e.text,
-      startColumn: startPosition.column,
-      startLineNumber: startPosition.lineNumber,
-      endColumn: endPosition.column + 1,
-      endLineNumber: endPosition.lineNumber,
-      severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
-      _source: 'client' as const,
-    };
-  });
-}
 
 export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
@@ -91,10 +55,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       (...uris) => workerProxyService.getWorker(uris),
       callbacks
     );
-    const { errors, warnings } = await astAdapter.validate(model, code);
-    const monacoErrors = wrapAsMonacoMessage('error', code, errors);
-    const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
-    return { errors: monacoErrors, warnings: monacoWarnings };
+    return await astAdapter.validate(model, code);
   },
   getSignatureProvider: (callbacks?: ESQLCallbacks): monaco.languages.SignatureHelpProvider => {
     return {

@@ -57,7 +57,7 @@ export class ESQLWorker implements BaseWorkerDefinition {
     const { ast } = parserListener.getAst();
     return {
       ast,
-      errors: [],
+      errors: errorListener.getErrors(),
     };
   }
 }

@@ -40,6 +40,7 @@ export class ESQLErrorListener implements ANTLRErrorListener<any> {
       startColumn,
       endColumn,
       message: textMessage,
+      severity: 8, // monaco.MarkerSeverity.Error,
     });
   }
 
