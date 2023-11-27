@@ -15,25 +15,13 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
  * @typedef {WindowParameters}
  */
 export interface WindowParameters {
-  /**
-   * Baseline minimum value
-   * @type {number}
-   */
+  /** Baseline minimum value */
   baselineMin: number;
-  /**
-   * Baseline maximum value
-   * @type {number}
-   */
+  /** Baseline maximum value */
   baselineMax: number;
-  /**
-   * Deviation minimum value
-   * @type {number}
-   */
+  /** Deviation minimum value */
   deviationMin: number;
-  /**
-   * Deviation maximum value
-   * @type {number}
-   */
+  /** Deviation maximum value */
   deviationMax: number;
 }
 

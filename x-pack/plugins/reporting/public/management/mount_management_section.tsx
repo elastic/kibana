@@ -15,10 +15,10 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportListing } from '.';
-import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
 import { KibanaContextProvider } from '../shared_imports';
+import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,
@@ -41,8 +41,9 @@ export async function mountManagementSection(
           }}
         >
           <InternalApiClientProvider apiClient={apiClient}>
-            <IlmPolicyStatusContextProvider>
+            <PolicyStatusContextProvider config={config}>
               <ReportListing
+                apiClient={apiClient}
                 toasts={coreSetup.notifications.toasts}
                 license$={license$}
                 config={config}
@@ -50,7 +51,7 @@ export async function mountManagementSection(
                 navigateToUrl={coreStart.application.navigateToUrl}
                 urlService={urlService}
               />
-            </IlmPolicyStatusContextProvider>
+            </PolicyStatusContextProvider>
           </InternalApiClientProvider>
         </KibanaContextProvider>
       </I18nProvider>
