@@ -26,7 +26,7 @@ import {
   TIMELINES_FAVORITE,
 } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
