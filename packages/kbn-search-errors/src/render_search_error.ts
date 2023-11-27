@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ReactNode } from 'react';
-import { BfetchRequestError } from '@kbn/bfetch';
+import { BfetchRequestError } from '@kbn/bfetch-error';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { EsError } from './es_error';
 
@@ -19,7 +19,7 @@ export function renderSearchError({
   error: Error;
   application: ApplicationStart;
 }): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
-  if (error instanceof EsError) {
+  if (error instanceof EsError || error.constructor.name === 'EsError') {
     return {
       title: i18n.translate('searchErrors.search.esErrorTitle', {
         defaultMessage: 'Cannot retrieve search results',

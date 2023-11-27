@@ -50,7 +50,7 @@
     "@kbn/search-errors",
     "@kbn/search-response-warnings",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/bfetch"
+    "@kbn/bfetch-error"
   ],
   "exclude": [
     "target/**/*",

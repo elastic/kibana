@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-bfetch'],
+  roots: ['<rootDir>/packages/kbn-bfetch-error'],
 };

@@ -14,13 +14,15 @@ import React, { ReactNode } from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { ErrorCallout } from './error_callout';
 
-const mockGetSearchErrorOverrideDisplay = jest.fn();
+const mockRenderSearchError = jest.fn();
 
-jest.mock('@kbn/data-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/data-plugin/public');
+
+import { renderSearchError } from '@kbn/search-errors';
+jest.mock('@kbn/search-errors', () => {
+  const originalModule = jest.requireActual('@kbn/search-errors');
   return {
     ...originalModule,
-    getSearchErrorOverrideDisplay: () => mockGetSearchErrorOverrideDisplay(),
+    renderSearchError: () => mockRenderSearchError(),
   };
 });
 
@@ -31,7 +33,7 @@ describe('ErrorCallout', () => {
     );
 
   afterEach(() => {
-    mockGetSearchErrorOverrideDisplay.mockReset();
+    mockRenderSearchError.mockReset();
   });
 
   it('should render', () => {
@@ -54,7 +56,7 @@ describe('ErrorCallout', () => {
     const title = 'Override title';
     const error = new Error('My error');
     const overrideDisplay = <div>Override display</div>;
-    mockGetSearchErrorOverrideDisplay.mockReturnValue({ title, body: overrideDisplay });
+    mockRenderSearchError.mockReturnValue({ title, body: overrideDisplay });
     const wrapper = mountWithServices(<ErrorCallout title="Original title" error={error} />);
     const prompt = wrapper.find(EuiEmptyPrompt);
     expect(prompt).toHaveLength(1);

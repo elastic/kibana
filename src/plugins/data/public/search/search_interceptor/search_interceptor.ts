@@ -49,7 +49,7 @@ import {
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-import { BfetchRequestError } from '@kbn/bfetch';
+import { BfetchRequestError } from '@kbn/bfetch-error';
 import {
   EsError,
   isEsError,
