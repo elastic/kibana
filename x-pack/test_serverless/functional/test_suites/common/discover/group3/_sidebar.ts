@@ -243,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should collapse when clicked', async function () {
         await PageObjects.discover.closeSidebar();
-        await testSubjects.existOrFail('discover-sidebar');
+        await testSubjects.existOrFail('dscShowSidebarButton');
         await testSubjects.missingOrFail('fieldList');
       });
 
