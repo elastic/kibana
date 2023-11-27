@@ -93,8 +93,8 @@ export class PointInTimeFinder<T = unknown, A = unknown>
         await this.close();
       }
 
-      // do not yield if batch is empty (skip first/last empty batch)
-      // unless there are aggregations, in which case we always want to return at least one page
+      // do not yield first page if empty, unless there are aggregations
+      // (in which case we always want to return at least one page)
       if (lastResultsCount > 0 || this.#findOptions.aggs) {
         yield results;
       }
