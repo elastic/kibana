@@ -50,7 +50,7 @@ export class ESQLAstAdapter {
     token: monaco.CancellationToken
   ) {
     const getAstFn = await this.getAstWorker(model);
-    return getHoverItem(model, position, token, getAstFn);
+    return getHoverItem(model, position, token, getAstFn, this.callbacks);
   }
 
   async autocomplete(

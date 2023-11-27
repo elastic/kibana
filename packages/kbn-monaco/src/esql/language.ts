@@ -15,8 +15,8 @@ import type { ESQLWorker } from './worker/esql_worker';
 
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
-import type { ESQLCallbacks } from './lib/ast/autocomplete/types';
 import type { ESQLMessage } from './lib/ast/types';
+import type { ESQLCallbacks } from './lib/ast/shared/types';
 import { ESQLAstAdapter } from './lib/monaco/esql_ast_provider';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();

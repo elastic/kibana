@@ -8,7 +8,7 @@
 
 import uniqBy from 'lodash/uniqBy';
 import type { monaco } from '../../../../monaco_imports';
-import type { AutocompleteCommandDefinition, ESQLCallbacks } from './types';
+import type { AutocompleteCommandDefinition } from './types';
 import { nonNullable } from '../ast_helpers';
 import {
   getColumnHit,
@@ -61,6 +61,12 @@ import {
 } from './factories';
 import { EDITOR_MARKER } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
+import {
+  getFieldsByTypeHelper,
+  getPolicyHelper,
+  getSourcesHelper,
+} from '../shared/resources_helpers';
+import { ESQLCallbacks } from '../shared/types';
 
 type GetSourceFn = () => Promise<AutocompleteCommandDefinition[]>;
 type GetFieldsByTypeFn = (
@@ -196,58 +202,31 @@ export async function suggest(
 }
 
 function getFieldsByTypeRetriever(resourceRetriever?: ESQLCallbacks) {
-  const cacheFields = new Map<string, ESQLRealField>();
-  const getFields = async () => {
-    if (!cacheFields.size) {
-      const fieldsOfType = await resourceRetriever?.getFieldsFor?.();
-      for (const field of fieldsOfType || []) {
-        cacheFields.set(field.name, field);
-      }
-    }
-  };
+  const helpers = getFieldsByTypeHelper(resourceRetriever);
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
-      const types = Array.isArray(expectedType) ? expectedType : [expectedType];
-      await getFields();
-      return buildFieldsDefinitions(
-        Array.from(cacheFields.values())
-          ?.filter(({ name, type }) => {
-            const ts = Array.isArray(type) ? type : [type];
-            return (
-              !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t))
-            );
-          })
-          .map(({ name }) => name) || []
-      );
+      const fields = await helpers.getFieldsByType(expectedType, ignored);
+      return buildFieldsDefinitions(fields);
     },
-    getFieldsMap: async () => {
-      await getFields();
-      const cacheCopy = new Map<string, ESQLRealField>();
-      cacheFields.forEach((value, key) => cacheCopy.set(key, value));
-      return cacheCopy;
-    },
+    getFieldsMap: helpers.getFieldsMap,
   };
 }
 
 function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
-  const getPolicies = async () => {
-    return (await resourceRetriever?.getPolicies?.()) || [];
-  };
+  const helpers = getPolicyHelper(resourceRetriever);
   return {
     getPolicies: async () => {
-      const policies = await getPolicies();
+      const policies = await helpers.getPolicies();
       return buildPoliciesDefinitions(policies);
     },
-    getPolicyMetadata: async (policyName: string) => {
-      const policies = await getPolicies();
-      return policies.find(({ name }) => name === policyName);
-    },
+    getPolicyMetadata: helpers.getPolicyMetadata,
   };
 }
 
 function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
+  const helper = getSourcesHelper(resourceRetriever);
   return async () => {
-    return buildSourcesDefinitions((await resourceRetriever?.getSources?.()) || []);
+    return buildSourcesDefinitions((await helper()) || []);
   };
 }
 

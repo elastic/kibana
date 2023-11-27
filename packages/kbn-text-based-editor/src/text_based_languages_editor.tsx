@@ -348,7 +348,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
-      getPolicies: async (ctx) => {
+      getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
         if (error || !policies) {
@@ -423,8 +423,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const hoverProvider = useMemo(
-    () => (language === 'esql' ? ESQLLang.getHoverProvider?.() : undefined),
-    [language]
+    () => (language === 'esql' ? ESQLLang.getHoverProvider?.(esqlCallbacks) : undefined),
+    [language, esqlCallbacks]
   );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
