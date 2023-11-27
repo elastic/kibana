@@ -85,7 +85,7 @@ export class ActionsClientLlm extends LLM {
     input: BaseLanguageModelInput,
     options?: BaseLLMCallOptions
   ): AsyncGenerator<string> {
-    console.log('do we do this? _streamIterator');
+    console.log('THIS SHOULD BE _streamIterator');
     return super._streamIterator(input, options);
   }
 
@@ -94,7 +94,7 @@ export class ActionsClientLlm extends LLM {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<GenerationChunk> {
-    console.log('do we do this? _streamResponseChunks');
+    console.log('THIS SHOULD BE _streamResponseChunks');
 
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
@@ -104,14 +104,17 @@ export class ActionsClientLlm extends LLM {
 
     this.#stream = actionStreamResult.data as Readable;
 
+    // Initialize an empty string to store the OpenAI buffer.
+    let openAIBuffer: string = '';
+    console.log('THIS SHOULD BE FIRST', this.#stream);
     for await (const data of (actionStreamResult.data as Readable).pipe(new PassThrough())) {
-      const choice = data.toString();
-      if (!choice) {
-        throw new Error('this seems bad');
-      }
-      console.log('CHUNK:', choice);
+      const decoded = data.toString();
+      const lines = decoded.split('\n');
+      lines[0] = openAIBuffer + lines[0];
+      openAIBuffer = lines.pop() || '';
+
       const chunk = new GenerationChunk({
-        text: choice,
+        text: getOpenAIChunks(lines).join(''),
       });
       yield chunk;
 
@@ -148,6 +151,7 @@ export class ActionsClientLlm extends LLM {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
+    console.log('THIS SHOULD BE _call');
     if (this.streaming) {
       // const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
       // const actionStreamResult = await actionsClient.execute(
@@ -164,6 +168,7 @@ export class ActionsClientLlm extends LLM {
       // await finished(this.#stream);
       // return responseBody;
       const stream = this._streamResponseChunks(prompt, options, runManager);
+      console.log('THIS SHOULD BE stream', stream);
       let finalResult: GenerationChunk | undefined;
       for await (const chunk of stream) {
         if (finalResult === undefined) {
@@ -199,3 +204,18 @@ export class ActionsClientLlm extends LLM {
     return content; // per the contact of _call, return a string
   }
 }
+
+const getOpenAIChunks = (lines: string[]): string[] => {
+  const nextChunk = lines
+    .map((str) => str.substring(6))
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      try {
+        const openaiResponse = JSON.parse(line);
+        return openaiResponse.choices[0]?.delta.content ?? '';
+      } catch (err) {
+        return '';
+      }
+    });
+  return nextChunk;
+};

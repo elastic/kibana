@@ -955,7 +955,7 @@
     "jsonwebtoken": "^9.0.0",
     "jsts": "^1.6.2",
     "kea": "^2.6.0",
-    "langchain": "^0.0.192",
+    "langchain": "^0.0.197-rc.1",
     "launchdarkly-js-client-sdk": "^3.1.4",
     "launchdarkly-node-server-sdk": "^7.0.3",
     "load-json-file": "^6.2.0",
