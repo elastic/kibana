@@ -54,7 +54,11 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string;
   secrets?: {
-    service_token?: OutputSecret;
+    service_token?:
+      | string
+      | {
+          id: string;
+        };
   };
 }
 
@@ -62,7 +66,11 @@ export interface NewLogstashOutput extends NewBaseOutput {
   type: OutputType['Logstash'];
   secrets?: {
     ssl?: {
-      key?: OutputSecret;
+      key?:
+        | string
+        | {
+            id: string;
+          };
     };
   };
 }
