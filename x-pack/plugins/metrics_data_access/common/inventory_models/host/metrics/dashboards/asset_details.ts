@@ -27,10 +27,15 @@ export const assetDetails = {
     metricsDataView?: DataView;
     logsDataView?: DataView;
   }) => {
-    const commonParams: Partial<ChartModel<XYLayerModel>> = {
-      visualOptions: {
-        showDottedLine: true,
-        missingValues: 'Linear',
+    const commonVisualOptions: Partial<ChartModel<XYLayerModel>>['visualOptions'] = {
+      showDottedLine: true,
+      missingValues: 'Linear',
+    };
+
+    const legend: Partial<ChartModel<XYLayerModel>>['visualOptions'] = {
+      legend: {
+        isVisible: true,
+        position: 'bottom',
       },
     };
 
@@ -38,30 +43,54 @@ export const assetDetails = {
       visualizationType: 'lnsXY',
       formulaIds: ['cpuUsage', 'memoryUsage', 'normalizedLoad1m'],
       dataView: metricsDataView,
-      ...commonParams,
+      visualOptions: commonVisualOptions,
     });
 
     const { logRate } = createBasicCharts({
       visualizationType: 'lnsXY',
       formulaIds: ['logRate'],
       dataView: logsDataView,
-      ...commonParams,
+      visualOptions: commonVisualOptions,
     });
 
     return createDashboardModel({
       charts: [
         cpuUsage,
-        { ...cpuUsageBreakdown.get({ dataView: metricsDataView }), ...commonParams },
+        {
+          ...cpuUsageBreakdown.get({ dataView: metricsDataView }),
+          visualOptions: { ...commonVisualOptions, ...legend },
+        },
         memoryUsage,
-        { ...memoryUsageBreakdown.get({ dataView: metricsDataView }), ...commonParams },
+        {
+          ...memoryUsageBreakdown.get({ dataView: metricsDataView }),
+          visualOptions: { ...commonVisualOptions, ...legend },
+        },
         normalizedLoad1m,
-        { ...loadBreakdown.get({ dataView: metricsDataView }), ...commonParams },
+        {
+          ...loadBreakdown.get({ dataView: metricsDataView }),
+          visualOptions: { ...commonVisualOptions, ...legend },
+        },
         logRate,
-        { ...diskSpaceUsageAvailable.get({ dataView: metricsDataView }), ...commonParams },
-        { ...diskUsageByMountPoint.get({ dataView: metricsDataView }), ...commonParams },
-        { ...diskThroughputReadWrite.get({ dataView: metricsDataView }), ...commonParams },
-        { ...diskIOReadWrite.get({ dataView: metricsDataView }), ...commonParams },
-        { ...rxTx.get({ dataView: metricsDataView }), ...commonParams },
+        {
+          ...diskSpaceUsageAvailable.get({ dataView: metricsDataView }),
+          visualOptions: { ...commonVisualOptions, ...legend },
+        },
+        {
+          ...diskUsageByMountPoint.get({ dataView: metricsDataView }),
+          visualOptions: { ...commonVisualOptions, ...legend },
+        },
+        {
+          ...diskThroughputReadWrite.get({ dataView: metricsDataView }),
+          visualOptions: { ...commonVisualOptions, ...legend },
+        },
+        {
+          ...diskIOReadWrite.get({ dataView: metricsDataView }),
+          visualOptions: { ...commonVisualOptions, ...legend },
+        },
+        {
+          ...rxTx.get({ dataView: metricsDataView }),
+          visualOptions: { ...commonVisualOptions, ...legend },
+        },
       ],
     });
   },

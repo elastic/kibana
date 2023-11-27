@@ -31,10 +31,11 @@ interface CreateBasicChartBase<TType extends ChartTypes> {
   };
 }
 
-type CreateBasicChartArgs<TType extends ChartTypes> = (TType extends typeof XY_ID
-  ? Pick<XYChartModel, 'visualOptions'>
-  : {}) &
-  CreateBasicChartBase<TType>;
+type CreateBasicXyChart = CreateBasicChartBase<typeof XY_ID> & Pick<XYChartModel, 'visualOptions'>;
+
+type CreateBasicChartArgs<TType extends ChartTypes> = TType extends typeof XY_ID
+  ? CreateBasicXyChart
+  : CreateBasicChartBase<TType>;
 
 export const createBasicCharts = <
   TType extends ChartTypes,

@@ -12,10 +12,12 @@ import { formulas } from '../../../kubernetes/node/metrics';
 
 export const assetDetailsKubernetesNode = {
   get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonParams: Partial<ChartModel<XYLayerModel>> = {
-      visualOptions: {
-        showDottedLine: true,
-        missingValues: 'Linear',
+    const commonVisualOptions: Partial<ChartModel<XYLayerModel>>['visualOptions'] = {
+      showDottedLine: true,
+      missingValues: 'Linear',
+      legend: {
+        isVisible: true,
+        position: 'bottom',
       },
     };
 
@@ -41,7 +43,7 @@ export const assetDetailsKubernetesNode = {
           ],
           dataView: metricsDataView,
           visualizationType: 'lnsXY',
-          ...commonParams,
+          visualOptions: commonVisualOptions,
         },
         {
           id: 'nodeMemoryCapacity',
@@ -62,7 +64,7 @@ export const assetDetailsKubernetesNode = {
           ],
           visualizationType: 'lnsXY',
           dataView: metricsDataView,
-          ...commonParams,
+          visualOptions: commonVisualOptions,
         },
         {
           id: 'nodeDiskCapacity',
@@ -87,7 +89,7 @@ export const assetDetailsKubernetesNode = {
           },
           visualizationType: 'lnsXY',
           dataView: metricsDataView,
-          ...commonParams,
+          visualOptions: commonVisualOptions,
         },
         {
           id: 'nodePodCapacity',
@@ -112,7 +114,7 @@ export const assetDetailsKubernetesNode = {
           },
           visualizationType: 'lnsXY',
           dataView: metricsDataView,
-          ...commonParams,
+          visualOptions: commonVisualOptions,
         },
       ],
     });

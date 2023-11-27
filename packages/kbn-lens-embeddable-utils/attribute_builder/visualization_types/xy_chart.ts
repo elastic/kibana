@@ -94,7 +94,12 @@ export class XYChart implements Chart<XYState> {
       curveType: this.chartConfig.visualOptions?.lineInterpolation,
       emphasizeFitting: !this.chartConfig.visualOptions?.showDottedLine,
       valueLabels: this.chartConfig.visualOptions?.valueLabels,
-      axisTitlesVisibilitySettings: this.chartConfig.visualOptions?.axisTitlesVisibilitySettings,
+      axisTitlesVisibilitySettings: this.chartConfig.visualOptions
+        ?.axisTitlesVisibilitySettings ?? {
+        x: false,
+        yLeft: false,
+        yRight: true,
+      },
       yLeftExtent: this.chartConfig.visualOptions?.yLeftExtent,
     };
   }
@@ -128,11 +133,6 @@ export const getXYVisualizationState = (
   },
   valueLabels: 'show',
   yLeftScale: 'linear',
-  axisTitlesVisibilitySettings: {
-    x: false,
-    yLeft: false,
-    yRight: true,
-  },
   tickLabelsVisibilitySettings: {
     x: true,
     yLeft: true,

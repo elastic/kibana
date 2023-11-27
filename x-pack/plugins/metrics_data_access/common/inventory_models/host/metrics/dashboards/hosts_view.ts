@@ -12,11 +12,9 @@ import { createBasicCharts } from '../charts';
 
 export const hostsView = {
   get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonParams: Partial<ChartModel<XYLayerModel>> = {
-      visualOptions: {
-        showDottedLine: true,
-        missingValues: 'Linear',
-      },
+    const commonVisualOptions: Partial<ChartModel<XYLayerModel>>['visualOptions'] = {
+      showDottedLine: true,
+      missingValues: 'Linear',
     };
 
     const options: XYLayerOptions = {
@@ -60,7 +58,7 @@ export const hostsView = {
       extra: {
         options,
       },
-      ...commonParams,
+      visualOptions: commonVisualOptions,
     });
 
     const { cpuUsage, normalizedLoad1m } = createBasicCharts({
@@ -70,7 +68,7 @@ export const hostsView = {
         options,
       },
       visualOptions: {
-        ...commonParams,
+        ...commonVisualOptions,
         yLeftExtent: {
           mode: 'dataBounds',
           lowerBound: 0,

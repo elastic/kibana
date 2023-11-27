@@ -18,7 +18,7 @@ export interface ChartProps extends Omit<ChartModel, 'visualOptions'> {
   visualOptions?: XYVisualOptions;
 }
 
-export const Chart = ({ id, title, layers, dataView }: ChartProps) => {
+export const Chart = ({ dataView, ...chartProps }: ChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { loading, searchSessionId } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
@@ -48,18 +48,16 @@ export const Chart = ({ id, title, layers, dataView }: ChartProps) => {
 
   return (
     <LensChart
-      id={`hostsView-metricChart-${id}`}
+      {...chartProps}
+      id={`hostsView-metricChart-${chartProps.id}`}
       borderRadius="m"
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       height={METRIC_CHART_HEIGHT}
-      layers={layers}
       loading={loading}
       filters={filters}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
-      title={title}
-      visualizationType="lnsXY"
     />
   );
 };
