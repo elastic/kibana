@@ -98,13 +98,19 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
           tlog(logger, `sending ${enrichedAlerts.length} elastic prebuilt alerts`);
           const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
-          for (const batch of batches) {
-            await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
+
+          const promises = batches.map(async (batch) => {
+            sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
+          });
+
+          try {
+            await Promise.all(promises);
+          } catch (error) {
+            tlog(logger, `An error occurred: ${error}`);
           }
         }
 
         await receiver.closePointInTime(pitId);
-
         return 0;
       } catch (err) {
         logger.error('could not complete prebuilt alerts telemetry task');
