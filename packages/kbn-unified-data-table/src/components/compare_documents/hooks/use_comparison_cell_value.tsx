@@ -16,9 +16,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { formatFieldValue, getFieldTypeName } from '@kbn/discover-utils';
+import { formatFieldValue } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { getFieldTypeName } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Change, diffChars, diffLines, diffWords } from 'diff';
