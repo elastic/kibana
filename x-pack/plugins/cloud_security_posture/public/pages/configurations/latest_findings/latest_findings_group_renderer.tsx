@@ -8,7 +8,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
   EuiSkeletonTitle,
   EuiText,
@@ -25,7 +24,6 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
@@ -112,11 +110,18 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       );
     case GROUPING_OPTIONS.CLOUD_ACCOUNT:
       return nullGroupMessage ? (
-        <>
-          {' '}
-          _
+        <div
+          css={css`
+            & .euiToolTipAnchor {
+              margin-top: -2px;
+              margin-left: 4px;
+              vertical-align: top;
+            }
+          `}
+        >
+          <strong>No Cloud account</strong>
           <EuiIconTip content={nullGroupMessage} position="right" />
-        </>
+        </div>
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
@@ -145,11 +150,18 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       );
     case GROUPING_OPTIONS.KUBERNETES:
       return nullGroupMessage ? (
-        <>
-          {' '}
-          _
+        <div
+          css={css`
+            & .euiToolTipAnchor {
+              margin-top: -2px;
+              margin-left: 4px;
+              vertical-align: top;
+            }
+          `}
+        >
+          <strong>No Kubernetes cluster</strong>
           <EuiIconTip content={nullGroupMessage} position="right" />
-        </>
+        </div>
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
