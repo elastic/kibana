@@ -92,6 +92,13 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    multi_fields: [
+      {
+        flat_name: `${ALERT_REASON}.text`,
+        name: 'text',
+        type: 'match_only_text',
+      },
+    ],
   },
   [ALERT_RULE_CATEGORY]: {
     type: 'keyword',
