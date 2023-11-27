@@ -47,8 +47,15 @@ const Fields = ({ fields, openSections, toggleSection }: FieldsProps) => {
         const currentVersion: string = get(fields, [fieldName, 'current_version'], '');
         const mergedVersion: string = get(fields, [fieldName, 'merged_version'], '');
 
-        const oldSource = JSON.stringify(currentVersion, null, 2);
-        const newSource = JSON.stringify(mergedVersion, null, 2);
+        const oldSource =
+          compareMethod === DiffMethod.JSON && typeof currentVersion === 'object'
+            ? currentVersion
+            : JSON.stringify(currentVersion, null, 2);
+
+        const newSource =
+          compareMethod === DiffMethod.JSON && typeof currentVersion === 'object'
+            ? mergedVersion
+            : JSON.stringify(mergedVersion, null, 2);
 
         return (
           <>
@@ -164,11 +171,19 @@ const WholeObjectDiff = ({
   openSections,
   toggleSection,
 }: WholeObjectDiffProps) => {
-  const oldSource = sortAndStringifyJson(oldRule);
-  const newSource = sortAndStringifyJson(newRule);
+  const compareMethod = useContext(CompareMethodContext);
+
+  const oldSource =
+    compareMethod === DiffMethod.JSON && typeof oldRule === 'object'
+      ? oldRule
+      : sortAndStringifyJson(oldRule);
+
+  const newSource =
+    compareMethod === DiffMethod.JSON && typeof newRule === 'object'
+      ? newRule
+      : sortAndStringifyJson(newRule);
 
   const styles = useContext(CustomStylesContext);
-  const compareMethod = useContext(CompareMethodContext);
 
   return (
     <>
