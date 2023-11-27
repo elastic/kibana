@@ -9,11 +9,11 @@
 import { isAbsolute } from 'path';
 import { RefResolver } from './ref_resolver';
 import { processDocument } from './process_document';
-import { createBundleRefsProcessor } from './document_processors/bundle_refs';
+import { BundleRefProcessor } from './document_processors/bundle_refs';
 import { createSkipNodeWithInternalPropProcessor } from './document_processors/skip_node_with_internal_prop';
 import { createModifyPartialProcessor } from './document_processors/modify_partial';
 import { createSkipInternalPathProcessor } from './document_processors/skip_internal_path';
-import { ResolvedDocument } from './types';
+import { ResolvedDocument, ResolvedRef } from './types';
 import { createRemovePropsProcessor } from './document_processors/remove_props';
 import { createModifyRequiredProcessor } from './document_processors/modify_required';
 import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
@@ -24,6 +24,10 @@ export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
     super(message);
   }
+}
+
+export interface BundledDocument extends ResolvedDocument {
+  bundledRefs: ResolvedRef[];
 }
 
 /**
@@ -40,7 +44,7 @@ export class SkipException extends Error {
  * @param absoluteDocumentPath document's absolute path
  * @returns bundled document
  */
-export async function bundleDocument(absoluteDocumentPath: string): Promise<ResolvedDocument> {
+export async function bundleDocument(absoluteDocumentPath: string): Promise<BundledDocument> {
   if (!isAbsolute(absoluteDocumentPath)) {
     throw new Error(
       `bundleDocument expects an absolute document path but got "${absoluteDocumentPath}"`
@@ -60,6 +64,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
     throw new SkipException(resolvedDocument.absolutePath, 'Document has no paths defined');
   }
 
+  const bundleRefsProcessor = new BundleRefProcessor(X_INLINE);
   const removeUnusedComponentsProcessor = new RemoveUnusedComponentsProcessor();
 
   await processDocument(resolvedDocument, refResolver, [
@@ -68,7 +73,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
     createRemovePropsProcessor([X_MODIFY, X_CODEGEN_ENABLED]),
-    createBundleRefsProcessor(X_INLINE),
+    bundleRefsProcessor,
     removeUnusedComponentsProcessor,
   ]);
 
@@ -84,7 +89,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
     );
   }
 
-  return resolvedDocument;
+  return { ...resolvedDocument, bundledRefs: bundleRefsProcessor.getBundledRefs() };
 }
 
 interface MaybeObjectWithPaths {

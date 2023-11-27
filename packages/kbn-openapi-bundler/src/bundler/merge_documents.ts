@@ -9,35 +9,24 @@
 import deepEqual from 'fast-deep-equal';
 import { basename, dirname, join } from 'path';
 import chalk from 'chalk';
-import { isPlainObjectType } from '../utils/is_plain_object_type';
-import { PlainObjectNode, ResolvedDocument } from './types';
+import { PlainObjectNode, ResolvedDocument, ResolvedRef } from './types';
+import { BundledDocument } from './bundle_document';
+import { insertRefByPointer } from '../utils/insert_by_json_pointer';
 
 type MergedDocuments = Record<string, ResolvedDocument>;
 
 type MergedResult = Record<string, PlainObjectNode>;
 
-interface Components {
-  schemas?: Record<string, PlainObjectNode>;
-}
-
-interface ComponentsWithSchemas extends PlainObjectNode {
-  schemas: Record<string, PlainObjectNode>;
-}
-
-export function mergeDocuments(resolvedDocuments: ResolvedDocument[]): MergedResult {
+export function mergeDocuments(bundledDocuments: BundledDocument[]): MergedResult {
   const mergedDocuments: MergedDocuments = {};
-  const sharedComponents: ComponentsWithSchemas = { schemas: {} };
+  const componentsMap = new Map<string, ResolvedRef>();
 
-  for (const resolvedDocument of resolvedDocuments) {
-    const sourceComponents = resolvedDocument.document.components;
+  for (const bundledDocument of bundledDocuments) {
+    mergeRefsToMap(bundledDocument.bundledRefs, componentsMap);
 
-    if (isPlainObjectType(sourceComponents)) {
-      mergeComponents(sourceComponents, sharedComponents);
-    }
+    delete bundledDocument.document.components;
 
-    delete resolvedDocument.document.components;
-
-    mergeDocument(resolvedDocument, mergedDocuments);
+    mergeDocument(bundledDocument, mergedDocuments);
   }
 
   const result: MergedResult = {};
@@ -46,7 +35,9 @@ export function mergeDocuments(resolvedDocuments: ResolvedDocument[]): MergedRes
     result[fileName] = mergedDocuments[fileName].document;
   }
 
-  result['shared_components.schema.yaml'] = sharedComponents;
+  result['shared_components.schema.yaml'] = {
+    components: componentsMapToComponents(componentsMap),
+  };
 
   return result;
 }
@@ -59,12 +50,12 @@ function mergeDocument(resolvedDocument: ResolvedDocument, mergeResult: MergedDo
     return;
   }
 
-  const nonConflicFileName = generateNonConflictingFilePath(
+  const nonConflictFileName = generateNonConflictingFilePath(
     resolvedDocument.absolutePath,
     mergeResult
   );
 
-  mergeResult[nonConflicFileName] = resolvedDocument;
+  mergeResult[nonConflictFileName] = resolvedDocument;
 }
 
 function generateNonConflictingFilePath(
@@ -82,26 +73,37 @@ function generateNonConflictingFilePath(
   return suggestedName;
 }
 
-function mergeComponents(
-  sourceComponents: Components,
-  resultComponents: ComponentsWithSchemas
-): void {
-  if (!sourceComponents.schemas) {
-    return;
-  }
+function mergeRefsToMap(bundledRefs: ResolvedRef[], componentsMap: Map<string, ResolvedRef>): void {
+  for (const bundledRef of bundledRefs) {
+    const existingRef = componentsMap.get(bundledRef.pointer);
 
-  for (const schema of Object.keys(sourceComponents.schemas)) {
-    if (!resultComponents.schemas[schema]) {
-      resultComponents.schemas[schema] = sourceComponents.schemas[schema];
+    if (!existingRef) {
+      componentsMap.set(bundledRef.pointer, bundledRef);
       continue;
     }
 
-    if (!deepEqual(resultComponents.schemas[schema], sourceComponents.schemas[schema])) {
-      throw new Error(
-        `❌ Unable to bundle documents due to conflicts in components schemas. Schema ${chalk.blue(
-          schema
-        )} is has different definitions`
-      );
+    if (deepEqual(existingRef.refNode, bundledRef.refNode)) {
+      continue;
     }
+
+    throw new Error(
+      `❌ Unable to bundle documents due to conflicts in references. Schema ${chalk.yellow(
+        bundledRef.pointer
+      )} is defined in ${chalk.blue(existingRef.absolutePath)} and in ${chalk.magenta(
+        bundledRef.absolutePath
+      )} but has not matching definitions.`
+    );
   }
+}
+
+function componentsMapToComponents(
+  componentsMap: Map<string, ResolvedRef>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const resolvedRef of componentsMap.values()) {
+    insertRefByPointer(resolvedRef.pointer, resolvedRef.refNode, result);
+  }
+
+  return result;
 }

@@ -9,8 +9,7 @@
 import chalk from 'chalk';
 import globby from 'globby';
 import { basename, dirname, join, resolve } from 'path';
-import { ResolvedDocument } from './bundler/types';
-import { bundleDocument, SkipException } from './bundler/bundle_document';
+import { BundledDocument, bundleDocument, SkipException } from './bundler/bundle_document';
 import { mergeDocuments } from './bundler/merge_documents';
 import { removeFilesByGlob } from './utils/remove_files_by_glob';
 import { logger } from './logger';
@@ -86,9 +85,9 @@ function logSchemas(schemaFilePaths: string[]): void {
 }
 
 function filterOutSkippedDocuments(
-  documents: Array<ResolvedDocument | undefined>
-): ResolvedDocument[] {
-  const processedDocuments: ResolvedDocument[] = [];
+  documents: Array<BundledDocument | undefined>
+): BundledDocument[] {
+  const processedDocuments: BundledDocument[] = [];
 
   for (const document of documents) {
     if (!document) {

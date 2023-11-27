@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNodeProcessor, Document, ResolvedRef, TraverseDocumentContext } from '../types';
+import { Document, ResolvedRef, TraverseDocumentContext, RefNode } from '../types';
 import { hasProp } from '../../utils/has_prop';
 import { isChildContext } from '../is_child_context';
 import { inlineRef } from './utils/inline_ref';
+import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
 
 /**
- * Creates a node processor to bundle and conditionally dereference document references.
+ * Node processor to bundle and conditionally dereference document references.
  *
  * Bundling means all external references like `../../some_file.schema.yaml#/components/schemas/SomeSchema` saved
  * to the result document under corresponding path `components` -> `schemas` -> `SomeSchema` and `$ref` property's
@@ -21,56 +22,53 @@ import { inlineRef } from './utils/inline_ref';
  * Conditional dereference means inlining references when `inliningPredicate()` returns `true`. If `inliningPredicate`
  * is not passed only bundling happens.
  */
-export function createBundleRefsProcessor(inliningPropName: string): DocumentNodeProcessor {
-  return {
-    ref(node, resolvedRef, context) {
-      if (!resolvedRef.pointer.startsWith('/components')) {
-        throw new Error(`$ref pointer must start with "/components"`);
-      }
+export class BundleRefProcessor {
+  private refs: ResolvedRef[] = [];
 
-      if (
-        hasProp(node, inliningPropName, true) ||
-        hasProp(resolvedRef.refNode, inliningPropName, true)
-      ) {
-        inlineRef(node, resolvedRef);
+  constructor(private inliningPropName: string) {}
 
-        delete node[inliningPropName];
-      } else {
-        const rootDocument = extractRootDocument(context);
-
-        if (!rootDocument.components) {
-          rootDocument.components = {};
-        }
-
-        node.$ref = saveComponent(resolvedRef, rootDocument.components as Record<string, unknown>);
-      }
-    },
-  };
-}
-
-function extractRootDocument(context: TraverseDocumentContext): Document {
-  while (isChildContext(context)) {
-    context = context.parentContext;
-  }
-
-  return context.resolvedDocument.document;
-}
-
-function saveComponent(ref: ResolvedRef, components: Record<string, unknown>): string {
-  const segments = ref.pointer.split('/').slice(2);
-  let target = components;
-
-  while (segments.length > 0) {
-    const segment = segments.shift() as string;
-
-    if (!target[segment]) {
-      target[segment] = {};
+  ref(node: RefNode, resolvedRef: ResolvedRef, context: TraverseDocumentContext): void {
+    if (!resolvedRef.pointer.startsWith('/components/schemas')) {
+      throw new Error(`$ref pointer must start with "/components/schemas"`);
     }
 
-    target = target[segment] as Record<string, unknown>;
+    if (
+      hasProp(node, this.inliningPropName, true) ||
+      hasProp(resolvedRef.refNode, this.inliningPropName, true)
+    ) {
+      inlineRef(node, resolvedRef);
+
+      delete node[this.inliningPropName];
+    } else {
+      const rootDocument = this.extractRootDocument(context);
+
+      if (!rootDocument.components) {
+        rootDocument.components = {};
+      }
+
+      node.$ref = this.saveComponent(
+        resolvedRef,
+        rootDocument.components as Record<string, unknown>
+      );
+      this.refs.push(resolvedRef);
+    }
   }
 
-  Object.assign(target, ref.refNode);
+  getBundledRefs(): ResolvedRef[] {
+    return this.refs;
+  }
 
-  return `#${ref.pointer}`;
+  private saveComponent(ref: ResolvedRef, components: Record<string, unknown>): string {
+    insertRefByPointer(ref.pointer, ref.refNode, components);
+
+    return `#${ref.pointer}`;
+  }
+
+  private extractRootDocument(context: TraverseDocumentContext): Document {
+    while (isChildContext(context)) {
+      context = context.parentContext;
+    }
+
+    return context.resolvedDocument.document;
+  }
 }
