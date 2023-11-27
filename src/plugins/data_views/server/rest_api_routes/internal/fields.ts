@@ -141,7 +141,7 @@ export const registerFields = async (
   getUserId: () => (request: KibanaRequest) => Promise<string | undefined>
 ) => {
   router.versioned
-    .get({ path, access: 'internal' })
+    .get({ path, access: 'internal', enableQueryVersion: true })
     .addVersion(
       { version: '1', validate: { request: { query: querySchema } } },
       handler(isRollupsEnabled, getUserId)
