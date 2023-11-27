@@ -53,7 +53,6 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const logger = appContextService.getLogger();
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new PackageRemovalError(`${pkgName} is not installed`);

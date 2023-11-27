@@ -416,7 +416,6 @@ export async function getPackageInfo({
   ignoreUnverified?: boolean;
   prerelease?: boolean;
 }): Promise<PackageInfo> {
-  const logger = appContextService.getLogger();
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
