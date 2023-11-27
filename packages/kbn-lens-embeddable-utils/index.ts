@@ -19,6 +19,7 @@ export type {
   MetricsLayerModel,
   LayerModel,
   XYChartModel,
+  MetricChartModel,
   ChartModel,
   ChartTypes,
 } from './attribute_builder/visualization_types';

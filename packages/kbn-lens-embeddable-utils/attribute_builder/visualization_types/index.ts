@@ -45,7 +45,7 @@ export interface XYChartModel extends ChartModelBase<XYLayerModel> {
   visualOptions?: XYVisualOptions;
   visualizationType: typeof XY_ID;
 }
-interface MetricChartModel extends ChartModelBase<MetricsLayerModel> {
+export interface MetricChartModel extends ChartModelBase<MetricsLayerModel> {
   visualizationType: typeof METRIC_ID;
 }
 

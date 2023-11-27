@@ -83,10 +83,6 @@ export const assetDetailsKubernetesNode = {
               layerType: 'data',
             },
           ],
-          visualOptions: {
-            showDottedLine: true,
-            missingValues: 'Linear',
-          },
           visualizationType: 'lnsXY',
           dataView: metricsDataView,
           visualOptions: commonVisualOptions,
@@ -108,10 +104,6 @@ export const assetDetailsKubernetesNode = {
               layerType: 'data',
             },
           ],
-          visualOptions: {
-            showDottedLine: true,
-            missingValues: 'Linear',
-          },
           visualizationType: 'lnsXY',
           dataView: metricsDataView,
           visualOptions: commonVisualOptions,
