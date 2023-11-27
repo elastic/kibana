@@ -32,9 +32,9 @@ export const DeploymentDetails = () => {
   }
 
   const button = (
-    <EuiHeaderLink onClick={() => setIsOpen(!isOpen)} iconType="iInCircle" iconSide="left" isActive>
-      {i18n.translate('xpack.fleet.integrations.endpointsButton', {
-        defaultMessage: 'Endpoints',
+    <EuiHeaderLink onClick={() => setIsOpen(!isOpen)} isActive>
+      {i18n.translate('xpack.fleet.integrations.connectionDetailsButton', {
+        defaultMessage: 'Connection details',
       })}
     </EuiHeaderLink>
   );
