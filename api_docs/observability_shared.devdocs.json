@@ -416,6 +416,53 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableProfilingSearchBar",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableProfilingSearchBar",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.EmbeddableProfilingSearchBarProps",
+            "text": "EmbeddableProfilingSearchBarProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.EmbeddableProfilingSearchBarProps",
+                "text": "EmbeddableProfilingSearchBarProps"
+              }
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.getContextMenuItemsFromActions",
         "type": "Function",
         "tags": [],
@@ -1914,6 +1961,138 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableProfilingSearchBarProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddableProfilingSearchBarProps",
+        "description": [],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.kuery",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.showDatePicker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showDatePicker",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.onQuerySubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onQuerySubmit",
+            "description": [],
+            "signature": [
+              "(params: { dateRange: { from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }; query: string; }) => void"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.EmbeddableProfilingSearchBarProps.onQuerySubmit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityShared",
+                    "id": "def-public.EmbeddableProfilingSearchBarProps.onQuerySubmit.$1.dateRange",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "dateRange",
+                    "description": [],
+                    "signature": [
+                      "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                    ],
+                    "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityShared",
+                    "id": "def-public.EmbeddableProfilingSearchBarProps.onQuerySubmit.$1.query",
+                    "type": "string",
+                    "tags": [],
+                    "label": "query",
+                    "description": [],
+                    "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.onRefresh",
+            "type": "Function",
+            "tags": [],
+            "label": "onRefresh",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.FetcherResult",
         "type": "Interface",
         "tags": [],
@@ -2614,6 +2793,23 @@
         ],
         "signature": [
           "\"EMBEDDABLE_FUNCTIONS\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_PROFILING_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_PROFILING_SEARCH_BAR",
+        "description": [
+          "Profiling search bar embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_PROFILING_SEARCH_BAR\""
         ],
         "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
         "deprecated": false,

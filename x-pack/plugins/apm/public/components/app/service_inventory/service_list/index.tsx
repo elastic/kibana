@@ -327,6 +327,7 @@ export function ServiceList({
   } = useApmParams('/services');
 
   const { kuery } = query;
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
