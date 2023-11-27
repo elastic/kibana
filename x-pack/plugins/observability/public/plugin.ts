@@ -115,7 +115,7 @@ export interface ObservabilityPublicPluginsSetup {
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   embeddable: EmbeddableSetup;
-  licensing: LicensingPluginSetup;
+  licensing?: LicensingPluginSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
