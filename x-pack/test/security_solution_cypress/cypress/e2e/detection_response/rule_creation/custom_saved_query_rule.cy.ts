@@ -24,7 +24,7 @@ import {
 
 import { editFirstRule, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,

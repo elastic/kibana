@@ -37,7 +37,7 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { deleteAlertsAndRules, deleteExceptionLists } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
