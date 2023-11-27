@@ -13,18 +13,25 @@ import { navLinksMock } from './navlinks';
 
 const activeNodes: ChromeProjectNavigationNode[][] = [];
 
+const defaultDeepLinks = {
+  ...navLinksMock.reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
+    acc[navLink.id] = navLink;
+    return acc;
+  }, {}),
+};
+
 export const getServicesMock = ({
-  navLinks = navLinksMock,
-}: { navLinks?: ChromeNavLink[] } = {}): NavigationServices => {
+  deepLinks = defaultDeepLinks,
+}: { deepLinks?: Readonly<Record<string, ChromeNavLink>> } = {}): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
   const recentlyAccessed$ = new BehaviorSubject([]);
-  const navLinks$ = new BehaviorSubject(navLinks);
+  const deepLinks$ = new BehaviorSubject(deepLinks);
 
   return {
     basePath,
     recentlyAccessed$,
-    navLinks$,
+    deepLinks$,
     navIsOpen: true,
     navigateToUrl,
     onProjectNavigationChange: jest.fn(),

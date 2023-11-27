@@ -22,7 +22,7 @@ interface Props {
   share: SharePluginStart;
 }
 
-export const EndpointsModal = ({ core, share, cloud, docLinks, closeModal }: Props) => {
+export const ConnectionDetailsModal = ({ core, share, cloud, docLinks, closeModal }: Props) => {
   return (
     <DeploymentDetailsKibanaProvider core={core} share={share} cloud={cloud} docLinks={docLinks}>
       <DeploymentDetailsModal closeModal={closeModal} />
