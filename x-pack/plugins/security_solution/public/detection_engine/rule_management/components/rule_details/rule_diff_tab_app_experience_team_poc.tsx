@@ -9,7 +9,8 @@ import React, { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { get } from 'lodash';
-import { Change, diffLines } from 'diff';
+import type { Change } from 'diff';
+import { diffLines } from 'diff';
 import {
   EuiSpacer,
   EuiAccordion,
