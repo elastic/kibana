@@ -55,14 +55,10 @@ export interface CalleeTree {
   TotalSamples: number;
   TotalCPU: number;
   SelfCPU: number;
-  AnnualCO2TonsExclusive: number[];
-  AnnualCO2TonsInclusive: number[];
-  AnnualCostsUSDInclusive: number[];
-  AnnualCostsUSDExclusive: number[];
-  SelfAnnualCO2Tons: number;
-  TotalAnnualCO2Tons: number;
-  SelfAnnualCostsUSD: number;
-  TotalAnnualCostsUSD: number;
+  SelfAnnualCO2kg: number[];
+  TotalAnnualCO2kg: number[];
+  SelfAnnualCostsUsd: number[];
+  TotalAnnualCostsUsd: number[];
 }
 
 /**

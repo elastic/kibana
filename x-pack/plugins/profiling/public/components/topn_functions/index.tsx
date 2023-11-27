@@ -358,6 +358,10 @@ export const TopNFunctionsGrid = forwardRef(
               functionName: selectedRow.frame.FunctionName,
               sourceFileName: selectedRow.frame.SourceFilename,
               sourceLine: selectedRow.frame.SourceLine,
+              selfAnnualCo2kg: selectedRow.selfAnnualCO2kg,
+              totalAnnualCo2kg: selectedRow.totalAnnualCO2kg,
+              selfAnnualCostUsd: selectedRow.selfAnnualCostUsd,
+              totalAnnualCostUsd: selectedRow.totalAnnualCostUsd,
             }}
             totalSeconds={totalSeconds}
             totalSamples={totalCount}

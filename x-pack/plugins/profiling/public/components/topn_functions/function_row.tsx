@@ -87,8 +87,8 @@ export function FunctionRow({
     return (
       <div>
         {shouldUseLegacyCo2Calculation
-          ? asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2)
-          : asWeight(functionRow.annualCO2Tons * 1000)}
+          ? asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2, 'kgs')
+          : asWeight(functionRow.totalAnnualCO2kg, 'kgs')}
       </div>
     );
   }
@@ -101,7 +101,7 @@ export function FunctionRow({
       <div>
         {shouldUseLegacyCo2Calculation
           ? asCost(functionRow.impactEstimates.selfCPU.annualizedDollarCost)
-          : asCost(functionRow.annualCostUsd)}
+          : asCost(functionRow.totalAnnualCostUsd)}
       </div>
     );
   }

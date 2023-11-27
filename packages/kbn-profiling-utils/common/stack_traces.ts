@@ -143,10 +143,10 @@ const createInlineTrace = (
     FileIDs: fileIDs,
     AddressOrLines: addressOrLines,
     Types: typeIDs,
-    AnnualCo2Tons: trace.annual_co2_tons,
-    AnnualCostUsd: trace.annual_costs_usd,
+    selfAnnualCo2kg: trace.annual_co2_tons * 1000,
+    selfAnnualCostUsd: trace.annual_costs_usd,
     Count: trace.count,
-  } as StackTrace;
+  };
 };
 
 /**

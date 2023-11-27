@@ -30,13 +30,21 @@ interface TopNFunctionAndFrameGroup {
   FrameGroupID: FrameGroupID;
   CountExclusive: number;
   CountInclusive: number;
-  AnnualCO2Tons: number;
-  AnnualCostUsd: number;
+  selfAnnualCO2kg: number;
+  selfAnnualCostUsd: number;
+  totalAnnualCO2kg: number;
+  totalAnnualCostUsd: number;
 }
 
 type TopNFunction = Pick<
   TopNFunctionAndFrameGroup,
-  'Frame' | 'CountExclusive' | 'CountInclusive' | 'AnnualCO2Tons' | 'AnnualCostUsd'
+  | 'Frame'
+  | 'CountExclusive'
+  | 'CountInclusive'
+  | 'selfAnnualCO2kg'
+  | 'selfAnnualCostUsd'
+  | 'totalAnnualCO2kg'
+  | 'totalAnnualCostUsd'
 > & {
   Id: string;
   Rank: number;
@@ -86,6 +94,9 @@ export function createTopNFunctions({
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
     const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
+    const selfAnnualCO2kg = stackTrace.AnnualCo2Tons * 1000;
+    const selfAnnualCostUsd = stackTrace.AnnualCostUsd;
+
     const lenStackTrace = stackTrace.FrameIDs.length;
 
     for (let i = 0; i < lenStackTrace; i++) {
@@ -124,8 +135,10 @@ export function createTopNFunctions({
           FrameGroupID: frameGroupID,
           CountExclusive: 0,
           CountInclusive: 0,
-          AnnualCO2Tons: stackTrace.AnnualCo2Tons,
-          AnnualCostUsd: stackTrace.AnnualCostUsd,
+          selfAnnualCO2kg: 0,
+          totalAnnualCO2kg: 0,
+          selfAnnualCostUsd: 0,
+          totalAnnualCostUsd: 0,
         };
 
         topNFunctions.set(frameGroupID, topNFunction);
@@ -134,11 +147,15 @@ export function createTopNFunctions({
       if (!uniqueFrameGroupsPerEvent.has(frameGroupID)) {
         uniqueFrameGroupsPerEvent.add(frameGroupID);
         topNFunction.CountInclusive += scaledCount;
+        topNFunction.totalAnnualCO2kg += selfAnnualCO2kg;
+        topNFunction.totalAnnualCostUsd += selfAnnualCostUsd;
       }
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
         topNFunction.CountExclusive += scaledCount;
+        topNFunction.selfAnnualCO2kg += selfAnnualCO2kg;
+        topNFunction.selfAnnualCostUsd += selfAnnualCostUsd;
       }
     }
   }
@@ -175,8 +192,10 @@ export function createTopNFunctions({
       CountExclusive: countExclusive,
       CountInclusive: countInclusive,
       Id: frameAndCount.FrameGroupID,
-      AnnualCO2Tons: frameAndCount.AnnualCO2Tons,
-      AnnualCostUsd: frameAndCount.AnnualCostUsd,
+      selfAnnualCO2kg: frameAndCount.selfAnnualCO2kg,
+      selfAnnualCostUsd: frameAndCount.selfAnnualCostUsd,
+      totalAnnualCO2kg: frameAndCount.totalAnnualCO2kg,
+      totalAnnualCostUsd: frameAndCount.totalAnnualCostUsd,
     };
   });
 

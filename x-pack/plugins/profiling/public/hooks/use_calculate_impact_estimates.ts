@@ -22,7 +22,7 @@ interface Params {
 export type CalculateImpactEstimates = ReturnType<typeof useCalculateImpactEstimate>;
 export type ImpactEstimates = ReturnType<CalculateImpactEstimates>;
 
-const ANNUAL_SECONDS = 60 * 60 * 24 * 365;
+export const ANNUAL_SECONDS = 60 * 60 * 24 * 365;
 
 // The cost of an x86 CPU core per hour, in US$.
 // (ARM is 60% less based graviton 3 data, see https://aws.amazon.com/ec2/graviton/)

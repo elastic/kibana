@@ -10,23 +10,23 @@ import {
   Datum,
   Flame,
   FlameLayerValue,
+  FlameSpec,
   PartialTheme,
   Settings,
   Tooltip,
-  FlameSpec,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
-import React, { useEffect, useMemo, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, useState } from 'react';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
-import { FlameGraphLegend } from './flame_graph_legend';
-import { FrameInformationWindow } from '../frame_information_window';
+import { Frame } from '../frame_information_window';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
-import { FlameGraphTooltip } from './flamegraph_tooltip';
 import { ComparisonMode } from '../normalization_menu';
+import { FlameGraphTooltip } from './flamegraph_tooltip';
+import { FlameGraphLegend } from './flame_graph_legend';
 
 interface Props {
   id: string;
@@ -90,7 +90,7 @@ export function FlameGraph({
 
   const [highlightedVmIndex, setHighlightedVmIndex] = useState<number | undefined>(undefined);
 
-  const selected: undefined | React.ComponentProps<typeof FrameInformationWindow>['frame'] =
+  const selected: Frame | undefined =
     primaryFlamegraph && highlightedVmIndex !== undefined
       ? {
           fileID: primaryFlamegraph.FileID[highlightedVmIndex],
@@ -102,6 +102,10 @@ export function FlameGraph({
           sourceLine: primaryFlamegraph.SourceLine[highlightedVmIndex],
           countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
           countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
+          selfAnnualCo2Tons: primaryFlamegraph.AnnualCO2TonsExclusive[highlightedVmIndex],
+          totalAnnualCo2Tons: primaryFlamegraph.AnnualCO2TonsInclusive[highlightedVmIndex],
+          selfAnnualCostUsd: primaryFlamegraph.AnnualCostsUSDExclusive[highlightedVmIndex],
+          totalAnnualCostUsd: primaryFlamegraph.AnnualCostsUSDInclusive[highlightedVmIndex],
         }
       : undefined;
 

@@ -74,8 +74,8 @@ export interface StackTrace {
   AddressOrLines: number[];
   /** types */
   Types: number[];
-  AnnualCo2Tons: number;
-  AnnualCostUsd: number;
+  selfAnnualCo2kg: number;
+  selfAnnualCostUsd: number;
   Count: number;
 }
 /**
@@ -90,8 +90,8 @@ export const emptyStackTrace: StackTrace = {
   AddressOrLines: [],
   /** Types */
   Types: [],
-  AnnualCo2Tons: 0,
-  AnnualCostUsd: 0,
+  selfAnnualCo2kg: 0,
+  selfAnnualCostUsd: 0,
   Count: 0,
 };
 
