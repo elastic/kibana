@@ -16,6 +16,7 @@ import {
   sendSlackMessage,
 } from './shared';
 import { GithubCommitType } from './info_sections/commit_info';
+import { getUsefulLinks } from './info_sections/useful_links';
 
 const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';
 const WIZARD_CTX_DEFAULT = 'wizard-main';
@@ -308,7 +309,7 @@ async function sendReleaseSlackAnnouncement({
     : 'a new release candidate';
 
   const mainMessage = [
-    `:ship_it_parrot: Promotion of a new ${compareLink} has been initiated!\n`,
+    `:ship_it_parrot: Promotion of a new ${compareLink} has been <${process.env.BUILDKITE_BUILD_URL}|initiated>!\n`,
     `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.\n`,
   ];
   if (isDryRun) {
@@ -327,6 +328,11 @@ async function sendReleaseSlackAnnouncement({
     'Merged at': mergedAtUtcString,
   };
 
+  const usefulLinksSection = getUsefulLinks({
+    previousCommitHash: currentCommitSha || 'main',
+    selectedCommitHash: targetCommitSha,
+  });
+
   sendSlackMessage({
     blocks: [
       {
@@ -336,6 +342,17 @@ async function sendReleaseSlackAnnouncement({
       {
         type: 'section',
         fields: Object.entries(linksSection).map(([name, link]) => textBlock(`*${name}*: `, link)),
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text:
+            '*Useful links:*' +
+            Object.entries(usefulLinksSection)
+              .map(([name, link]) => `<${link}|${name}>`)
+              .join('\n'),
+        },
       },
     ],
   }).catch((error) => {
