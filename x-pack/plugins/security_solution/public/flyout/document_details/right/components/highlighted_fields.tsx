@@ -15,6 +15,7 @@ import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlight
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
+import { SecurityCellActionType } from '../../../../actions/constants';
 import {
   CellActionsMode,
   SecurityCellActions,
@@ -42,6 +43,10 @@ export interface HighlightedFieldsTableRow {
      * Maintain backwards compatibility // TODO remove when possible
      */
     scopeId: string;
+    /**
+     * Boolean to indicate this field is shown in a preview
+     */
+    isPreview: boolean;
   };
 }
 
@@ -72,6 +77,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       values: string[] | null | undefined;
       scopeId: string;
       originalField: string;
+      isPreview: boolean;
     }) => (
       <SecurityCellActions
         data={{
@@ -83,6 +89,11 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
         visibleCellActions={6}
         sourcererScopeId={getSourcererScopeId(description.scopeId)}
         metadata={{ scopeId: description.scopeId }}
+        disabledActionTypes={
+          description.isPreview
+            ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN]
+            : []
+        }
       >
         <HighlightedFieldsCell
           values={description.values}
@@ -98,7 +109,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
 export const HighlightedFields: FC = () => {
-  const { dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useRightPanelContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { loading, rule: maybeRule } = useRuleWithFallback(ruleId);
 
@@ -107,8 +118,8 @@ export const HighlightedFields: FC = () => {
     investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
   });
   const items = useMemo(
-    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId),
-    [highlightedFields, scopeId]
+    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview),
+    [highlightedFields, scopeId, isPreview]
   );
 
   return (

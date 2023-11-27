@@ -56,7 +56,12 @@ import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
-import { getEuiGridColumns, getLeadControlColumns, getVisibleColumns } from './data_table_columns';
+import {
+  getEuiGridColumns,
+  getLeadControlColumns,
+  getVisibleColumns,
+  hasSourceTimeFieldValue,
+} from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
@@ -617,9 +622,15 @@ export const UnifiedDataTable = ({
     [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
+  const shouldShowTimeField = useMemo(
+    () =>
+      hasSourceTimeFieldValue(displayedColumns, dataView, columnTypes, showTimeCol, isPlainRecord),
+    [dataView, displayedColumns, isPlainRecord, showTimeCol, columnTypes]
+  );
+
   const visibleColumns = useMemo(
-    () => getVisibleColumns(displayedColumns, dataView, showTimeCol),
-    [dataView, displayedColumns, showTimeCol]
+    () => getVisibleColumns(displayedColumns, dataView, shouldShowTimeField),
+    [dataView, displayedColumns, shouldShowTimeField]
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(

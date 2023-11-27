@@ -169,7 +169,6 @@
     "@kbn/security-solution-features",
     "@kbn/content-management-plugin",
     "@kbn/discover-utils",
-    "@kbn/subscription-tracking",
     "@kbn/core-application-common",
     "@kbn/openapi-generator",
     "@kbn/es",

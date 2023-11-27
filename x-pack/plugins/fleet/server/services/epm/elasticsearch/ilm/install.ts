@@ -14,6 +14,7 @@ import { getAsset, getPathParts } from '../../archive';
 import { updateEsAssetReferences } from '../../packages/install';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import { PackageInvalidArchiveError } from '../../../../errors';
 
 export async function installILMPolicy(
   packageInfo: InstallablePackage,
@@ -57,7 +58,7 @@ export async function installILMPolicy(
           { logger }
         );
       } catch (err) {
-        throw new Error(err.message);
+        throw new PackageInvalidArchiveError(`Couldn't install ilm policies: ${err.message}`);
       }
     })
   );

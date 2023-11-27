@@ -5077,6 +5077,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/mock-idp-plugin@link:packages/kbn-mock-idp-plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/monaco@link:packages/kbn-monaco":
   version "0.0.0"
   uid ""
@@ -5930,10 +5934,6 @@
   uid ""
 
 "@kbn/storybook@link:packages/kbn-storybook":
-  version "0.0.0"
-  uid ""
-
-"@kbn/subscription-tracking@link:packages/kbn-subscription-tracking":
   version "0.0.0"
   uid ""
 
