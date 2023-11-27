@@ -76,13 +76,15 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
         });
       },
     },
-    pipeline:{
+    pipeline: {
       async click() {
         await testSubjects.click('create-a-pipeline-button');
       },
       async expectNavigateToCreatePipelinePage() {
-        expect(await browser.getCurrentUrl()).contain('/app/management/ingest/ingest_pipelines/create');
-      }
-    }
+        expect(await browser.getCurrentUrl()).contain(
+          '/app/management/ingest/ingest_pipelines/create'
+        );
+      },
+    },
   };
 }
