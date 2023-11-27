@@ -67,7 +67,6 @@
     "@kbn/ftr-common-functional-services",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-list-constants",
-    "@kbn/securitysolution-es-utils",
     "@kbn/expect",
     "@kbn/dev-cli-errors",
     "@kbn/ci-stats-reporter",
