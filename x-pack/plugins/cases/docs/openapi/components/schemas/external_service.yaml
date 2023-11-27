@@ -1,5 +1,6 @@
-type: object
-nullable: true
+type:
+  - "object"
+  - "null"
 properties:
   connector_id:
     type: string
@@ -15,7 +16,8 @@ properties:
     type: string
     format: date-time
   pushed_by:
-    type: object
+    type:
+      - "object"
+      - "null"
     properties:
       $ref: 'user_properties.yaml'
-    nullable: true
