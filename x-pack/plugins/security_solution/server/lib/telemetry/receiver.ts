@@ -18,7 +18,7 @@ import type {
   SearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -43,6 +43,7 @@ import type {
   PackageService,
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import moment from 'moment';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
   exceptionListItemToTelemetryEntry,
@@ -70,6 +71,7 @@ import type {
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
+import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 
 export interface ITelemetryReceiver {
   start(
@@ -176,6 +178,14 @@ export interface ITelemetryReceiver {
   };
 
   fetchTimelineEndpointAlerts(interval: number): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
+
+  fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
+
+  fetchTimelineAlerts(
+    index: string,
+    rangeFrom: string,
+    rangeTo: string
+  ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   buildProcessTree(
     entityId: string,
@@ -414,7 +424,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: '.logs-endpoint.diagnostic.collection-*',
+      index: `${DEFAULT_DIAGNOSTIC_INDEX}-*`,
       ignore_unavailable: true,
       size: telemetryConfiguration.telemetry_max_buffer_size,
       body: {
@@ -457,11 +467,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
+    const timeFrom = moment.utc().subtract(1, 'day').valueOf();
     const results = await this.exceptionListClient.findExceptionListItem({
-      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       page: 1,
       perPage: 10_000,
-      filter: undefined,
+      filter: `exception-list-agnostic.attributes.created_at >= ${timeFrom}`,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -483,11 +494,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createEndpointList();
 
+    const timeFrom = moment.utc().subtract(1, 'day').valueOf();
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,
       page: 1,
       perPage: this.maxRecords,
-      filter: undefined,
+      filter: `exception-list-agnostic.attributes.created_at >= ${timeFrom}`,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -563,9 +575,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
+    const timeFrom = `exception-list.attributes.created_at >= ${moment
+      .utc()
+      .subtract(24, 'hours')
+      .valueOf()}`;
+
     const results = await this.exceptionListClient?.findExceptionListsItem({
       listId: [listId],
-      filter: [],
+      filter: [timeFrom],
       perPage: this.maxRecords,
       page: 1,
       sortField: 'exception-list.created_at',
@@ -765,7 +782,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async fetchTimelineEndpointAlerts(interval: number) {
+  async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
@@ -776,7 +793,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // create and assign an initial point in time
     let pitId: OpenPointInTimeResponse['id'] = (
       await this.esClient.openPointInTime({
-        index: `${this.alertsIndex}*`,
+        index: `${index}*`,
         keep_alive: keepAlive,
       })
     ).id;
@@ -814,8 +831,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${interval}h`,
-                    lte: 'now',
+                    gte: rangeFrom,
+                    lte: rangeTo,
                   },
                 },
               },
@@ -875,7 +892,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
-    return alertsToReturn;
+    return alertsToReturn || [];
   }
 
   public async buildProcessTree(
