@@ -123,6 +123,13 @@ const deepLinks: ChromeNavLink[] = [
   createDeepLink('group:settings.tracing'),
 ];
 
+const deepLinks$ = of({
+  ...[...navLinksMock, ...deepLinks].reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
+    acc[navLink.id] = navLink;
+    return acc;
+  }, {}),
+});
+
 const simpleNavigationDefinition: ProjectNavigationDefinition<any> = {
   projectNavigationTree: [
     {
@@ -178,7 +185,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition<any> = {
 export const SimpleObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -326,7 +333,7 @@ const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
 export const GroupsExamples = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -576,7 +583,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
 export const ComplexObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -1079,7 +1086,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
 export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -1106,7 +1113,7 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
 export const WithUIComponentsTiny = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -1165,7 +1172,7 @@ export const WithUIComponentsTiny = (args: NavigationServices) => {
 export const WithUIComponents = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -1286,7 +1293,7 @@ export const WithUIComponents = (args: NavigationServices) => {
 export const MinimalUI = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },

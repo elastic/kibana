@@ -120,7 +120,7 @@ export const initNavNode = <
   ChildrenId extends string = Id
 >(
   node: NodeProps<LinkId, Id, ChildrenId>,
-  { cloudLinks, deepLinks }: { cloudLinks: CloudLinks; deepLinks: Readonly<ChromeNavLink[]> }
+  { cloudLinks, deepLinks }: { cloudLinks: CloudLinks; deepLinks: Record<string, ChromeNavLink> }
 ): ChromeProjectNavigationNode | null => {
   validateNodeProps(node);
 
@@ -134,7 +134,7 @@ export const initNavNode = <
     children,
     ...navNodeFromProps
   } = node;
-  const deepLink = deepLinks.find((dl) => dl.id === link);
+  const deepLink = link !== undefined ? deepLinks[link] : undefined;
   const sideNavStatus = getNodeStatus(
     {
       link,

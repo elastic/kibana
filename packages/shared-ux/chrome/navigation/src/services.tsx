@@ -8,6 +8,9 @@
 
 import React, { FC, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs';
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+
 import { NavigationKibanaDependencies, NavigationServices } from '../types';
 import { CloudLink, CloudLinks, getCloudLinks } from './cloud_links';
 
@@ -70,10 +73,22 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   }, [billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl]);
   const isSideNavCollapsed = useObservable(chrome.getIsSideNavCollapsed$(), true);
 
+  const navLinks$ = useMemo(() => chrome.navLinks.getNavLinks$(), [chrome.navLinks]);
+  const deepLinks$ = useMemo<NavigationServices['deepLinks$']>(() => {
+    return navLinks$.pipe(
+      map((navLinks) => {
+        return navLinks.reduce((acc, navLink) => {
+          acc[navLink.id] = navLink;
+          return acc;
+        }, {} as Record<string, ChromeNavLink>);
+      })
+    );
+  }, [navLinks$]);
+
   const value: NavigationServices = {
     basePath,
     recentlyAccessed$: chrome.recentlyAccessed.get$(),
-    navLinks$: chrome.navLinks.getNavLinks$(),
+    deepLinks$,
     navigateToUrl,
     navIsOpen: true,
     onProjectNavigationChange: serverless.setNavigation,

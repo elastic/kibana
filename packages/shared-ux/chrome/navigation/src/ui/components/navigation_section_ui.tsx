@@ -8,7 +8,6 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import useObservable from 'react-use/lib/useObservable';
 import { css } from '@emotion/css';
 import {
   EuiTitle,
@@ -18,7 +17,7 @@ import {
   type EuiCollapsibleNavItemProps,
   type EuiCollapsibleNavSubItemProps,
 } from '@elastic/eui';
-import type { ChromeProjectNavigationNode, ChromeNavLink } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
@@ -169,7 +168,6 @@ const nodeToEuiCollapsibleNavProps = (
     treeDepth,
     itemsAccordionState,
     activeNodes,
-    deepLinks,
   }: {
     navigateToUrl: NavigateToUrlFn;
     openPanel: PanelContext['open'];
@@ -178,7 +176,6 @@ const nodeToEuiCollapsibleNavProps = (
     treeDepth: number;
     itemsAccordionState: AccordionItemsState;
     activeNodes: ChromeProjectNavigationNode[][];
-    deepLinks: Readonly<ChromeNavLink[]>;
   }
 ): {
   items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced>;
@@ -245,7 +242,6 @@ const nodeToEuiCollapsibleNavProps = (
             treeDepth: treeDepth + 1,
             itemsAccordionState,
             activeNodes,
-            deepLinks,
           })
         )
         .filter(({ isVisible }) => isVisible)
@@ -349,8 +345,7 @@ interface Props {
 
 export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode }) => {
   const { activeNodes } = useNavigation();
-  const { navigateToUrl, isSideNavCollapsed, navLinks$ } = useServices();
-  const deepLinks = useObservable(navLinks$, []);
+  const { navigateToUrl, isSideNavCollapsed } = useServices();
 
   const { navNode } = useMemo(() => serializeNavNode(_navNode), [_navNode]);
   const { open: openPanel, close: closePanel } = usePanel();
@@ -451,7 +446,6 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       treeDepth: 0,
       itemsAccordionState,
       activeNodes,
-      deepLinks,
     });
   }, [
     navNode,
@@ -461,7 +455,6 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     isSideNavCollapsed,
     itemsAccordionState,
     activeNodes,
-    deepLinks,
   ]);
 
   const [props] = items;

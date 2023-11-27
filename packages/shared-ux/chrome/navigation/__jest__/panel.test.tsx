@@ -13,7 +13,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-
+import { PanelContentProvider } from '../src/ui';
 import {
   renderNavigation,
   errorHandler,
@@ -21,7 +21,6 @@ import {
   getMockFn,
   ProjectNavigationChangeListener,
 } from './utils';
-import { PanelContentProvider } from '../src/ui';
 
 describe('Panel', () => {
   test('should render group as panel opener', async () => {

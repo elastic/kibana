@@ -8,13 +8,12 @@
 import './setup_jest_mocks';
 import React from 'react';
 import { type RenderResult } from '@testing-library/react';
-import { type Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { navLinksMock } from '../mocks/src/navlinks';
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-
 import {
   getMockFn,
   renderNavigation,
@@ -23,6 +22,7 @@ import {
   type ProjectNavigationChangeListener,
 } from './utils';
 import { getServicesMock } from '../mocks/src/jest';
+import { NavigationServices } from '../types';
 
 const { cloudLinks: mockCloudLinks } = getServicesMock();
 
@@ -272,16 +272,19 @@ describe('builds navigation tree', () => {
   });
 
   test('should read the title from deeplink, prop or React children', async () => {
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      ...navLinksMock,
-      {
+    const deepLinks$: NavigationServices['deepLinks$'] = of({
+      ...navLinksMock.reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
+        acc[navLink.id] = navLink;
+        return acc;
+      }, {}),
+      item1: {
         id: 'item1',
         title: 'Title from deeplink',
         baseUrl: '',
         url: '',
         href: '',
       },
-    ]);
+    });
 
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
@@ -344,7 +347,7 @@ describe('builds navigation tree', () => {
 
       const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
-        services: { navLinks$ },
+        services: { deepLinks$ },
         onProjectNavigationChange,
       });
 
@@ -373,7 +376,7 @@ describe('builds navigation tree', () => {
             </Navigation.Group>
           </Navigation>
         ),
-        services: { navLinks$ },
+        services: { deepLinks$ },
         onProjectNavigationChange,
       });
 
@@ -385,15 +388,15 @@ describe('builds navigation tree', () => {
   });
 
   test('should not render the group if it does not have children AND no href or deeplink', async () => {
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      {
+    const deepLinks$: NavigationServices['deepLinks$'] = of({
+      item1: {
         id: 'item1',
         title: 'Title from deeplink',
         baseUrl: '',
         url: '',
         href: '',
       },
-    ]);
+    });
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
     const runTests = (type: TestType, { queryByTestId }: RenderResult) => {
@@ -442,7 +445,7 @@ describe('builds navigation tree', () => {
 
       const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
-        services: { navLinks$ },
+        services: { deepLinks$ },
         onProjectNavigationChange,
       });
 
@@ -467,7 +470,7 @@ describe('builds navigation tree', () => {
             </Navigation.Group>
           </Navigation>
         ),
-        services: { navLinks$ },
+        services: { deepLinks$ },
         onProjectNavigationChange,
       });
 

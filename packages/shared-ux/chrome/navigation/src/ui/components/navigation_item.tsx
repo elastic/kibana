@@ -32,9 +32,9 @@ function NavigationItemComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
-  const { cloudLinks, navigateToUrl, navLinks$ } = useNavigationServices();
+  const { cloudLinks, navigateToUrl, deepLinks$ } = useNavigationServices();
   const { unstyled: unstyledFromContext, register, activeNodes } = useNavigation();
-  const deepLinks = useObservable(navLinks$, []);
+  const deepLinks = useObservable(deepLinks$, {});
   const navNodeRef = useRef<ChromeProjectNavigationNode>();
   const { rootIndex, appendHorizontalRule } = props;
 

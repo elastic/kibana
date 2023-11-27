@@ -36,7 +36,7 @@ const jsxChildrenToNavigationNode = (
     rootIndex,
     treeDepth,
   }: { parentNodePath: string; jsxChildren?: ReactNode; rootIndex: number; treeDepth: number },
-  { cloudLinks, deepLinks }: { cloudLinks: CloudLinks; deepLinks: Readonly<ChromeNavLink[]> }
+  { cloudLinks, deepLinks }: { cloudLinks: CloudLinks; deepLinks: Record<string, ChromeNavLink> }
 ): ChromeProjectNavigationNode[] | undefined => {
   if (!jsxChildren) return undefined;
 
@@ -112,9 +112,9 @@ function NavigationGroupInternalComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
-  const { cloudLinks, navLinks$ } = useNavigationServices();
+  const { cloudLinks, deepLinks$ } = useNavigationServices();
   const { register } = useNavigation();
-  const deepLinks = useObservable(navLinks$, []);
+  const deepLinks = useObservable(deepLinks$, {});
   const { rootIndex = 0 } = props;
 
   const navNodeRef = useRef<ChromeProjectNavigationNode>();
