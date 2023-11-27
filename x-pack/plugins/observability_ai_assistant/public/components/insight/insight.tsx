@@ -280,7 +280,15 @@ function ChatContent({
   );
 }
 
-export function Insight({ messages, title }: { messages: Message[]; title: string }) {
+export function Insight({
+  messages,
+  title,
+  dataTestSubj,
+}: {
+  messages: Message[];
+  title: string;
+  dataTestSubj?: string;
+}) {
   const [hasOpened, setHasOpened] = useState(false);
 
   const connectors = useGenAIConnectors();
@@ -322,6 +330,7 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
       }}
       controls={<ConnectorSelectorBase {...connectors} />}
       loading={connectors.loading || chatService.loading}
+      dataTestSubj={dataTestSubj}
     >
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>

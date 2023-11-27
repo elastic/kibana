@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1 } from '../../../response';
-import { filterStateStore } from '../../../common/constants/v1';
+import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean(),
@@ -17,26 +17,7 @@ export const actionFrequencySchema = schema.object({
 });
 
 export const actionAlertsFilterSchema = schema.object({
-  query: schema.maybe(
-    schema.object({
-      kql: schema.string(),
-      filters: schema.arrayOf(
-        schema.object({
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          meta: schema.recordOf(schema.string(), schema.any()),
-          $state: schema.maybe(
-            schema.object({
-              store: schema.oneOf([
-                schema.literal(filterStateStore.APP_STATE),
-                schema.literal(filterStateStore.GLOBAL_STATE),
-              ]),
-            })
-          ),
-        })
-      ),
-      dsl: schema.maybe(schema.string()),
-    })
-  ),
+  query: schema.maybe(alertsFilterQuerySchemaV1),
   timeframe: schema.maybe(
     schema.object({
       days: schema.arrayOf(
