@@ -46,7 +46,7 @@ export const LogRateAnalysisTypeCallOut: FC<LogRateAnalysisTypeCallOutProps> = (
     });
     callOutText = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutContentFallback', {
       defaultMessage:
-        'The baseline time range does not contain any documents. Therefor the results show top log message categories and field values for the deviation time range.',
+        'The baseline time range does not contain any documents. Therefore the results show top log message categories and field values for the deviation time range.',
     });
   } else if (zeroDocsFallback && analysisType === LOG_RATE_ANALYSIS_TYPE.DIP) {
     callOutTitle = i18n.translate('xpack.aiops.analysis.analysisTypeDipFallbackCallOutTitle', {
@@ -54,7 +54,7 @@ export const LogRateAnalysisTypeCallOut: FC<LogRateAnalysisTypeCallOutProps> = (
     });
     callOutText = i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContentFallback', {
       defaultMessage:
-        'The deviation time range does not contain any documents. Therefor the results show top log message categories and field values for the baseline time range.',
+        'The deviation time range does not contain any documents. Therefore the results show top log message categories and field values for the baseline time range.',
     });
   } else {
     return null;
