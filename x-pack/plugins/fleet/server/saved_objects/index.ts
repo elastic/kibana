@@ -431,7 +431,6 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       importableAndExportable: false,
     },
     mappings: {
-      dynamic: false,
       properties: {
         name: { type: 'keyword' },
         version: { type: 'keyword' },
@@ -452,6 +451,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             deferred: { type: 'boolean' },
           },
         },
+        latest_install_failed_attempts: { type: 'object', enabled: false },
         installed_kibana: {
           dynamic: false,
           properties: {},
@@ -480,6 +480,18 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             },
           },
         },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              latest_install_failed_attempts: { type: 'object', enabled: false },
+            },
+          },
+        ],
       },
     },
     migrations: {
