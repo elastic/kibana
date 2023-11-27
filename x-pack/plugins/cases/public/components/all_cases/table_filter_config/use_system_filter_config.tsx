@@ -17,7 +17,7 @@ import { SeverityFilter } from '../severity_filter';
 import { AssigneesFilterPopover } from '../assignees_filter';
 import type { CurrentUserProfile } from '../../types';
 import type { AssigneesFilteringSelection } from '../../user_profiles/types';
-import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
+import type { FilterChangeHandler, FilterConfig } from './types';
 
 interface UseFilterConfigProps {
   availableSolutions: string[];
@@ -61,7 +61,7 @@ export const getSystemFilterConfig = ({
       deactivate: () => {
         onFilterOptionChange({ filterId: 'severity', selectedOptionKeys: [] });
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions, onChange }) => (
         <SeverityFilter selectedOptionKeys={filterOptions.severity} onChange={onChange} />
       ),
     },
@@ -73,7 +73,7 @@ export const getSystemFilterConfig = ({
       deactivate: () => {
         onFilterOptionChange({ filterId: 'status', selectedOptionKeys: [] });
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions, onChange }) => (
         <StatusFilter
           selectedOptionKeys={filterOptions?.status}
           onChange={onChange}
@@ -92,7 +92,7 @@ export const getSystemFilterConfig = ({
       deactivate: () => {
         handleSelectedAssignees([]);
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => {
+      render: ({ filterOptions, onChange }) => {
         return (
           <AssigneesFilterPopover
             selectedAssignees={selectedAssignees}
@@ -111,7 +111,7 @@ export const getSystemFilterConfig = ({
       deactivate: () => {
         onFilterOptionChange({ filterId: 'tags', selectedOptionKeys: [] });
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions, onChange }) => (
         <MultiSelectFilter
           buttonLabel={i18n.TAGS}
           id={'tags'}
@@ -131,7 +131,7 @@ export const getSystemFilterConfig = ({
       deactivate: () => {
         onFilterOptionChange({ filterId: 'category', selectedOptionKeys: [] });
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions, onChange }) => (
         <MultiSelectFilter
           buttonLabel={i18n.CATEGORIES}
           id={'category'}
@@ -151,7 +151,7 @@ export const getSystemFilterConfig = ({
       deactivate: () => {
         onFilterOptionChange({ filterId: 'owner', selectedOptionKeys: availableSolutions });
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions, onChange }) => (
         <SolutionFilter
           onChange={onChange}
           selectedOptionKeys={filterOptions?.owner}

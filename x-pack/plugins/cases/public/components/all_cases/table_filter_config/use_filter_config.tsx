@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterChangeHandler, FilterConfig, FilterConfigState } from './types';
