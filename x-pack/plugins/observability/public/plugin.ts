@@ -295,7 +295,7 @@ export class Plugin
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
 
     const assertPlatinumLicense = async () => {
-      const licensing = await pluginsSetup.licensing;
+      const licensing = await pluginsSetup.licensing!;
       const license = await firstValueFrom(licensing?.license$);
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');
