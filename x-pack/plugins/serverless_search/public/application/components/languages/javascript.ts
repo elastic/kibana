@@ -20,12 +20,15 @@ const searchResult = await client.search({
 
 console.log(searchResult.hits.hits)
 `,
-  configureClient: ({ url, apiKey }) => `const { Client } = require('@elastic/elasticsearch');
+  configureClient: ({
+    url,
+    apiKey,
+  }) => `const { Client } = require('@elastic/elasticsearch-serverless');
 const client = new Client({
-node: '${url}',
-auth: {
+  node: '${url}',
+  auth: {
     apiKey: '${apiKey}'
-}
+  }
 });`,
   docLink: docLinks.jsClient,
   github: {
@@ -44,34 +47,34 @@ const dataset = [
   {"name": "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227},
   {"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268},
   {"name": "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
-  ];
+];
 
 // Index with the bulk helper
 const result = await client.helpers.bulk({
-datasource: dataset,
-onDocument (doc) {
-  return { index: { _index: 'my-index-name' }};
-}
+  datasource: dataset,
+  onDocument (doc) {
+    return { index: { _index: 'my-index-name' }};
+  }
 });
 
 console.log(result);
 /**
 {
-total: 6,
-failed: 0,
-retry: 0,
-successful: 6,
-noop: 0,
-time: 191,
-bytes: 787,
-aborted: false
+  total: 6,
+  failed: 0,
+  retry: 0,
+  successful: 6,
+  noop: 0,
+  time: 191,
+  bytes: 787,
+  aborted: false
 }
 */`,
   ingestDataIndex: ({
     apiKey,
     url,
     indexName,
-  }) => `const { Client } = require('@elastic/elasticsearch');
+  }) => `const { Client } = require('@elastic/elasticsearch-serverless');
 const client = new Client({
   node: '${url}',
   auth: {
@@ -91,7 +94,7 @@ const result = await client.helpers.bulk({
 });
 console.log(result);
 `,
-  installClient: 'npm install @elastic/elasticsearch@8',
+  installClient: 'npm install @elastic/elasticsearch-serverless',
   name: i18n.translate('xpack.serverlessSearch.languages.javascript', {
     defaultMessage: 'JavaScript',
   }),
@@ -100,20 +103,20 @@ console.log(result);
 console.log(resp);
 /**
 {
-name: 'instance-0000000000',
-cluster_name: 'd9dcd35d12fe46dfaa28ec813f65d57b',
-cluster_uuid: 'iln8jaivThSezhTkzp0Knw',
-version: {
-  build_flavor: 'default',
-  build_type: 'docker',
-  build_hash: 'c94b4700cda13820dad5aa74fae6db185ca5c304',
-  build_date: '2022-10-24T16:54:16.433628434Z',
-  build_snapshot: false,
-  lucene_version: '9.4.1',
-  minimum_wire_compatibility_version: '7.17.0',
-  minimum_index_compatibility_version: '7.0.0'
-},
-tagline: 'You Know, for Search'
+  name: 'instance-0000000000',
+  cluster_name: 'd9dcd35d12fe46dfaa28ec813f65d57b',
+  cluster_uuid: 'iln8jaivThSezhTkzp0Knw',
+  version: {
+    build_flavor: 'default',
+    build_type: 'docker',
+    build_hash: 'c94b4700cda13820dad5aa74fae6db185ca5c304',
+    build_date: '2022-10-24T16:54:16.433628434Z',
+    build_snapshot: false,
+    lucene_version: '9.4.1',
+    minimum_wire_compatibility_version: '7.17.0',
+    minimum_index_compatibility_version: '7.0.0'
+  },
+  tagline: 'You Know, for Search'
 }
 */`,
 };

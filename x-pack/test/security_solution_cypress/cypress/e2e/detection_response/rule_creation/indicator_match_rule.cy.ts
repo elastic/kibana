@@ -68,7 +68,6 @@ import {
 import { duplicateSelectedRulesWithExceptions } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../tasks/api_calls/timelines';
-import { cleanKibana } from '../../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -112,6 +111,7 @@ import {
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
@@ -127,9 +127,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
     const expectedNumberOfAlerts = '1 alert';
 
     beforeEach(() => {
-      cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
       cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
+      deleteAlertsAndRules();
       login();
     });
 

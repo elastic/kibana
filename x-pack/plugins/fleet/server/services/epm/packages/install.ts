@@ -328,6 +328,7 @@ interface InstallUploadedArchiveParams {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  isBundledPackage?: boolean;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -460,7 +461,7 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
 async function installPackageCommon(options: {
   pkgName: string;
   pkgVersion: string;
-  installSource: 'registry' | 'upload' | 'custom';
+  installSource: InstallSource;
   installedPkg?: SavedObject<Installation>;
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;
@@ -596,7 +597,9 @@ async function installPackageCommon(options: {
         return { assets, status: 'installed', installType, installSource };
       })
       .catch(async (err: Error) => {
-        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`);
+        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
+          error: { stack_trace: err.stack },
+        });
         await handleInstallPackageFailure({
           savedObjectsClient,
           error: err,
@@ -638,10 +641,11 @@ async function installPackageByUpload({
   authorizationHeader,
   ignoreMappingUpdateErrors,
   skipDataStreamRollover,
+  isBundledPackage,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
-  const installSource = 'upload';
+  const installSource = isBundledPackage ? 'bundled' : 'upload';
   try {
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
     const pkgName = packageInfo.name;
@@ -747,6 +751,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         authorizationHeader,
         ignoreMappingUpdateErrors,
         skipDataStreamRollover,
+        isBundledPackage: true,
       });
 
       return { ...response, installSource: 'bundled' };

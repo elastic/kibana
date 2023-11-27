@@ -20,9 +20,10 @@ import {
   TABLE_ROWS,
   formFieldInputSelector,
   FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
+  customActionRunSavedQuerySelector,
 } from '../../screens/packs';
 import { API_VERSIONS } from '../../../common/constants';
-import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { navigateTo } from '../../tasks/navigation';
 import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
 import { changePackActiveStatus, preparePack } from '../../tasks/packs';
 import {
@@ -32,7 +33,7 @@ import {
   interceptPackId,
 } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
-import { getIdFormField } from '../../screens/live_query';
+import { getIdFormField, LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
@@ -96,7 +97,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
-    navigateToWithoutWaitForReact('/app/osquery');
+    navigateTo('/app/osquery');
   });
 
   after(() => {
@@ -196,18 +197,21 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       const queries = {
         Query1: {
           interval: 3600,
+          timeout: 60,
           query: 'select * from uptime;',
           removed: true,
           snapshot: false,
         },
         Query2: {
           interval: 3600,
+          timeout: 60,
           query: 'select * from uptime;',
           removed: false,
           snapshot: false,
         },
         Query3: {
           interval: 3600,
+          timeout: 60,
           query: 'select * from uptime;',
         },
       };
@@ -253,6 +257,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
       cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
       cy.getBySel('osquery-interval-field').click().clear().type('5');
       cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
@@ -366,6 +372,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
         cy.contains('Attach next query');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
         cy.contains('ID must be unique').should('not.exist');
         cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
@@ -470,9 +478,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
       it('', () => {
         preparePack(packName);
-        cy.react('CustomItemAction', {
-          props: { index: 0, item: { id: savedQueryName } },
-        })
+        cy.get(customActionRunSavedQuerySelector(savedQueryName))
           .should('exist')
           .within(() => {
             cy.get('a')
@@ -672,6 +678,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
         cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
           `${multipleMappingsSavedQueryName} {downArrow} {enter}`
         );

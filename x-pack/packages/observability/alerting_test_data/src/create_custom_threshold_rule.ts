@@ -38,7 +38,6 @@ export const createCustomThresholdRule = async (
     params: {
       criteria: ruleParams.params?.criteria || [
         {
-          aggType: Aggregators.CUSTOM,
           comparator: Comparator.GT,
           threshold: [1],
           timeSize: 1,

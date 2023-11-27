@@ -17,7 +17,6 @@ import {
   visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
 import { getNewRule } from '../../../objects/rule';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
@@ -29,6 +28,7 @@ import {
   deleteValueListsFile,
   importValueList,
   KNOWN_VALUE_LIST_FILES,
+  deleteValueLists,
 } from '../../../tasks/lists';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
@@ -47,12 +47,19 @@ const goToRulesAndOpenValueListModal = () => {
   openValueListsModal();
 };
 
-describe('Use Value list in exception entry', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    cleanKibana();
-    login();
-    createListsIndex();
+// FLAKY: https://github.com/elastic/kibana/issues/171252
+describe.skip('Use Value list in exception entry', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', 'exceptions');
+  });
+  beforeEach(() => {
+    login();
+    deleteValueLists([KNOWN_VALUE_LIST_FILES.TEXT]);
+    createListsIndex();
     importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
 
     createRule(
@@ -64,10 +71,6 @@ describe('Use Value list in exception entry', { tags: ['@ess', '@serverless'] },
         enabled: false,
       })
     ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
-  });
-
-  afterEach(() => {
-    cy.task('esArchiverUnload', 'exceptions');
   });
 
   it('Should use value list in exception entry, and validate deleting value list prompt', () => {

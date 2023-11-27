@@ -192,22 +192,24 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   };
 
-  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
-    useTimelineEvents({
-      dataViewId,
-      endDate: end,
-      eqlOptions: restEqlOption,
-      fields: getTimelineQueryFields(),
-      filterQuery: eqlQuery ?? '',
-      id: timelineId,
-      indexNames: selectedPatterns,
-      language: 'eql',
-      limit: itemsPerPage,
-      runtimeMappings,
-      skip: !canQueryTimeline(),
-      startDate: start,
-      timerangeKind,
-    });
+  const [
+    isQueryLoading,
+    { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    dataViewId,
+    endDate: end,
+    eqlOptions: restEqlOption,
+    fields: getTimelineQueryFields(),
+    filterQuery: eqlQuery ?? '',
+    id: timelineId,
+    indexNames: selectedPatterns,
+    language: 'eql',
+    limit: itemsPerPage,
+    runtimeMappings,
+    skip: !canQueryTimeline(),
+    startDate: start,
+    timerangeKind,
+  });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.eql, id: timelineId });
@@ -317,7 +319,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 <Footer
                   activePage={pageInfo?.activePage ?? 0}
                   data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
+                  updatedAt={refreshedAt}
                   height={footerHeight}
                   id={timelineId}
                   isLive={isLive}

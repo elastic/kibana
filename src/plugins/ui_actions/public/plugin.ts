@@ -9,8 +9,6 @@
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  categorizeFieldTrigger,
-  categorizeFieldValueTrigger,
   rowClickTrigger,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
@@ -40,8 +38,6 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
     this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);
-    this.service.registerTrigger(categorizeFieldTrigger);
-    this.service.registerTrigger(categorizeFieldValueTrigger);
     return this.service;
   }
 

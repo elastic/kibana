@@ -6,24 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
-  createAction,
   ACTION_CATEGORIZE_FIELD,
   ACTION_CATEGORIZE_FIELD_VALUE,
   type CategorizeFieldContext,
-} from '@kbn/ui-actions-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type { AiopsPluginStartDeps } from '../../types';
+} from '@kbn/ml-ui-actions';
+import { AiopsPluginStartDeps } from '../../types';
 import { showCategorizeFlyout } from './show_flyout';
 import { showCategorizeValuePopover } from './show_popover';
 
-export const categorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
+export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
   createAction<CategorizeFieldContext>({
     type: ACTION_CATEGORIZE_FIELD,
     id: ACTION_CATEGORIZE_FIELD,
     getDisplayName: () =>
       i18n.translate('xpack.aiops.categorizeFieldAction.displayName', {
-        defaultMessage: 'Categorize field',
+        defaultMessage: 'Pattern analysis',
       }),
     isCompatible: async ({ field }: CategorizeFieldContext) => {
       return field.esTypes?.includes('text') === true;

@@ -29,7 +29,7 @@ import type { Category, SparkLinesPerCategory } from '../../../common/api/log_ca
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
-} from '../../application/utils/url_state';
+} from '../../application/url_state/log_pattern_analysis';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -45,6 +45,7 @@ import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { CategoryFinder } from './category_finder';
+import { CreateCategorizationJobButton } from './create_categorization_job';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -280,10 +281,15 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
+        <CreateCategorizationJobButton
+          dataView={dataView}
+          field={selectedField}
+          query={searchQuery}
+          earliest={earliest}
+          latest={latest}
+        />
         <FieldValidationCallout validationResults={fieldValidationResult} />
-
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
-
         <InformationText
           loading={loading}
           categoriesLength={data?.categories?.length ?? null}

@@ -28,7 +28,7 @@ interface TableActionsProps {
   pinned: boolean;
   flattenedField: unknown;
   fieldMapping?: DataViewField;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   onToggleColumn: (field: string) => void;
   ignoredValue: boolean;
   onTogglePinned: (field: string) => void;
@@ -61,7 +61,8 @@ export const TableActions = ({
     useState<React.ReactElement | null>(null);
 
   // Filters pair
-  const filtersPairDisabled = !fieldMapping || !fieldMapping.filterable || ignoredValue;
+  const filtersPairDisabled =
+    !fieldMapping || !fieldMapping.filterable || ignoredValue || !onFilter;
   const filterAddLabel = i18n.translate(
     'unifiedDocViewer.docViews.table.filterForValueButtonTooltip',
     {
@@ -98,7 +99,7 @@ export const TableActions = ({
     'unifiedDocViewer.docViews.table.filterForFieldPresentButtonAriaLabel',
     { defaultMessage: 'Filter for field present' }
   );
-  const filtersExistsDisabled = !fieldMapping || !fieldMapping.filterable;
+  const filtersExistsDisabled = !fieldMapping || !fieldMapping.filterable || !onFilter;
   const filtersExistsToolTip =
     (filtersExistsDisabled &&
       (fieldMapping && fieldMapping.scripted
@@ -166,7 +167,9 @@ export const TableActions = ({
           icon: 'plusInCircle',
           disabled: filtersPairDisabled,
           'data-test-subj': `addFilterForValueButton-${field}`,
-          onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+')),
+          onClick: onFilter
+            ? onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+'))
+            : undefined,
         },
         {
           name: filterOutLabel,
@@ -174,7 +177,10 @@ export const TableActions = ({
           toolTipContent: filtersPairToolTip,
           icon: 'minusInCircle',
           disabled: filtersPairDisabled,
-          onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-')),
+          'data-test-subj': `addFilterOutValueButton-${field}`,
+          onClick: onFilter
+            ? onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-'))
+            : undefined,
         },
         {
           name: filterExistsLabel,
@@ -183,7 +189,7 @@ export const TableActions = ({
           icon: 'filter',
           disabled: filtersExistsDisabled,
           'data-test-subj': `addExistsFilterButton-${field}`,
-          onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
+          onClick: onFilter ? onClickAction(onFilter.bind({}, '_exists_', field, '+')) : undefined,
         },
         {
           name: toggleColumnsLabel,
@@ -196,6 +202,7 @@ export const TableActions = ({
           name: pinnedLabel,
           'aria-label': pinnedAriaLabel,
           icon: pinnedIconType,
+          'data-test-subj': `togglePinFilterButton-${field}`,
           onClick: onClickAction(togglePinned),
         },
       ],

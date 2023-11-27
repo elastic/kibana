@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useGetCaseConfiguration } from './use_get_case_configuration';
 import * as api from './api';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';

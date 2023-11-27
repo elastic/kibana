@@ -11,7 +11,11 @@ export const createSortClause = (
   tiebreakerField: string
 ) => ({
   sort: {
-    [timestampField]: sortDirection,
+    [timestampField]: {
+      order: sortDirection,
+      format: 'strict_date_optional_time_nanos',
+      numeric_type: 'date_nanos',
+    },
     [tiebreakerField]: sortDirection,
   },
 });

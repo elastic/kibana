@@ -25,66 +25,38 @@ export class AiopsPlugin
     core: AiopsCoreSetup,
     { embeddable, cases, licensing, uiActions }: AiopsPluginSetupDeps
   ) {
-    firstValueFrom(licensing.license$).then(async (license) => {
-      if (license.hasAtLeast('platinum')) {
-        if (embeddable) {
-          const { registerEmbeddable } = await import('./embeddable/register_embeddable');
-          registerEmbeddable(core, embeddable);
-        }
-
-        if (uiActions) {
-          const { registerAiopsUiActions } = await import('./ui_actions');
-          registerAiopsUiActions(uiActions, core);
-        }
-
-        if (cases) {
-          const [coreStart, pluginStart] = await core.getStartServices();
-          const { registerChangePointChartsAttachment } = await import(
-            './cases/register_change_point_charts_attachment'
-          );
-          registerChangePointChartsAttachment(cases, coreStart, pluginStart);
-        }
-      }
-    });
-  }
-
-  public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
-    // importing async to keep the aiops plugin size to a minimum
     Promise.all([
-      import('@kbn/ui-actions-plugin/public'),
-      import('./components/log_categorization'),
-      firstValueFrom(plugins.licensing.license$),
+      firstValueFrom(licensing.license$),
+      import('./embeddable/register_embeddable'),
+      import('./ui_actions'),
+      import('./cases/register_change_point_charts_attachment'),
+      core.getStartServices(),
     ]).then(
-      ([uiActionsImports, { categorizeFieldAction, categorizeFieldValueAction }, license]) => {
+      ([
+        license,
+        { registerEmbeddable },
+        { registerAiopsUiActions },
+        { registerChangePointChartsAttachment },
+        [coreStart, pluginStart],
+      ]) => {
         if (license.hasAtLeast('platinum')) {
-          const {
-            ACTION_CATEGORIZE_FIELD,
-            ACTION_CATEGORIZE_FIELD_VALUE,
-            CATEGORIZE_FIELD_TRIGGER,
-            CATEGORIZE_FIELD_VALUE_TRIGGER,
-          } = uiActionsImports;
-
-          if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD)) {
-            plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD);
+          if (embeddable) {
+            registerEmbeddable(core, embeddable);
           }
 
-          plugins.uiActions.addTriggerAction(
-            CATEGORIZE_FIELD_TRIGGER,
-            categorizeFieldAction(core, plugins)
-          );
-
-          if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD_VALUE)) {
-            plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD_VALUE);
+          if (uiActions) {
+            registerAiopsUiActions(uiActions, coreStart, pluginStart);
           }
 
-          plugins.uiActions.addTriggerAction(
-            CATEGORIZE_FIELD_VALUE_TRIGGER,
-            categorizeFieldValueAction(core, plugins)
-          );
+          if (cases) {
+            registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+          }
         }
       }
     );
+  }
 
+  public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     return {
       EmbeddableChangePointChart: getEmbeddableChangePointChart(core, plugins),
     };

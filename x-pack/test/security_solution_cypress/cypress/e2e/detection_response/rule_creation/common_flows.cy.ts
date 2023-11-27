@@ -19,7 +19,7 @@ import {
 } from '../../../screens/create_new_rule';
 import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   expandAdvancedSettings,
@@ -48,13 +48,13 @@ import { visit } from '../../../tasks/navigation';
 // them in the relevant /rule_creation/[RULE_TYPE].cy.ts test.
 describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     createTimeline(getTimeline())
       .then((response) => {
         return response.body.data.persistTimeline.timeline.savedObjectId;
       })
       .as('timelineId');
-    login();
     visit(CREATE_RULE_URL);
   });
 

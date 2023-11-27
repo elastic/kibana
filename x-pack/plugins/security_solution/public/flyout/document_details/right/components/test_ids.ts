@@ -12,11 +12,7 @@ import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 const FLYOUT_HEADER_TEST_ID = `${PREFIX}Header` as const;
 export const FLYOUT_HEADER_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}Title` as const;
-export const EXPAND_DETAILS_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ExpandDetailButton` as const;
-export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
-  `${FLYOUT_HEADER_TEST_ID}CollapseDetailButton` as const;
 export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
-export const SEVERITY_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}SeverityTitle` as const;
 export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
 export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
@@ -101,8 +97,6 @@ export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen` as const;
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel` as const;
-export const TECHNICAL_PREVIEW_ICON_TEST_ID =
-  `${INSIGHTS_ENTITIES_TEST_ID}TechnicalPreviewIcon` as const;
 
 /* Threat intelligence */
 
@@ -129,15 +123,12 @@ export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
 
 /* Visualizations section */
 
-const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
-export const VISUALIZATIONS_SECTION_TEST_ID = `${VISUALIZATIONS_TEST_ID}Title` as const;
-export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
-  `${VISUALIZATIONS_TEST_ID}TitleHeader` as const;
+export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
+export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = `${VISUALIZATIONS_TEST_ID}Header` as const;
 export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
 export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Loading` as const;
 
 export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
-export const SESSION_PREVIEW_UPSELL_TEST_ID = `${SESSION_PREVIEW_TEST_ID}UpSell` as const;
 
 /* Response section */
 

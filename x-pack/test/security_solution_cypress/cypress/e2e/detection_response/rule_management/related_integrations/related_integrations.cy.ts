@@ -26,14 +26,14 @@ import {
   disableRelatedIntegrations,
   enableRelatedIntegrations,
 } from '../../../../tasks/api_calls/kibana_advanced_settings';
-import { deleteAlertsAndRules } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
   PackagePolicyWithoutAgentPolicyId,
-} from '../../../../tasks/integrations';
+} from '../../../../tasks/api_calls/integrations';
 import {
   disableAutoRefresh,
   openIntegrationsPopover,
@@ -45,7 +45,7 @@ import {
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 
-describe('Related integrations', { tags: ['@ess', '@serverless'] }, () => {
+describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
   const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [
