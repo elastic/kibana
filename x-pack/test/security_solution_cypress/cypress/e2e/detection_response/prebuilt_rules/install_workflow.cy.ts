@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
+import { resetRulesTableState } from '../../../tasks/common';
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   getInstallSingleRuleButtonByRuleId,
@@ -28,6 +28,7 @@ import {
   clickAddElasticRulesButton,
 } from '../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
