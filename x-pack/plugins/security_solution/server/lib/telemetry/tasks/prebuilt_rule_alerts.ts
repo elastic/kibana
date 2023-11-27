@@ -103,11 +103,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
           });
 
-          try {
-            await Promise.all(promises);
-          } catch (error) {
-            tlog(logger, `An error occurred: ${error}`);
-          }
+          await Promise.all(promises);
         }
 
         await receiver.closePointInTime(pitId);
