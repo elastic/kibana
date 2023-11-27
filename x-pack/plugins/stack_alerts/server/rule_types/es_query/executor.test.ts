@@ -93,7 +93,6 @@ describe('es_query executor', () => {
     groupBy: 'all',
     searchConfiguration: {},
     esqlQuery: { esql: 'test-query' },
-    sourceFields: [],
   };
 
   describe('executor', () => {

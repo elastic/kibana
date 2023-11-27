@@ -5,44 +5,39 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiComboBox, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { validSourceFields } from '../../../common/constants';
-
-interface SourceFieldsOption {
-  label: string;
-}
+import { SourceField } from '../es_query/types';
 
 interface SourceFieldsProps {
   esFields: FieldOption[];
-  sourceFields?: string[];
-  onChangeSourceFields: (selectedSourceFields: string[]) => void;
+  onChangeSourceFields: (selectedSourceFields: SourceField[]) => void;
   errors: string | string[] | IErrorObject;
+  sourceFields?: SourceField[];
 }
 
 export const SourceFields: React.FC<SourceFieldsProps> = ({
   esFields,
-  sourceFields,
   onChangeSourceFields,
   errors,
+  sourceFields,
 }) => {
-  const sourceFieldsOptions = esFields.flatMap((field) => {
-    return validSourceFields.includes(field.name) ? [{ label: field.name }] : [];
-  });
-  const initialSelectedOptions = sourceFields?.map((field) => ({ label: field }));
-  const [selectedSourceFields, setSelectedSourceFields] = useState<SourceFieldsOption[]>(
-    initialSelectedOptions || []
-  );
+  const sourceFieldsOptions = esFields
+    .filter((f) => f.aggregatable)
+    .flatMap((f) => {
+      const validSourceField = validSourceFields.find(
+        (validatedField) => f.name === validatedField || f.name === `${validatedField}.keyword`
+      );
+      if (validSourceField) {
+        return [{ label: validSourceField, value: f.name }];
+      }
+      return [];
+    });
 
   return sourceFieldsOptions.length > 0 ? (
     <EuiFormRow
@@ -70,10 +65,17 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
           )}
           data-test-subj="sourceFields"
           isInvalid={errors.length > 0 && sourceFields !== undefined}
-          selectedOptions={selectedSourceFields}
-          onChange={(selectedOptions: Array<EuiComboBoxOptionOption<SourceFieldsOption>>) => {
-            setSelectedSourceFields(selectedOptions);
-            const fields = selectedOptions.map((field) => field.label);
+          selectedOptions={(sourceFields || []).map((f) => ({
+            label: f.label,
+            value: f.searchPath,
+          }))}
+          onChange={(selectedOptions) => {
+            const fields: SourceField[] = [];
+            selectedOptions.forEach((f) => {
+              if (f.value) {
+                fields.push({ label: f.label, searchPath: f.value });
+              }
+            });
             onChangeSourceFields(fields);
           }}
           options={sourceFieldsOptions}

@@ -33,7 +33,6 @@ const defaultParams: OnlyEsQueryRuleParams = {
   aggType: 'count',
   groupBy: 'all',
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-  sourceFields: [],
 };
 
 const logger = loggerMock.create();

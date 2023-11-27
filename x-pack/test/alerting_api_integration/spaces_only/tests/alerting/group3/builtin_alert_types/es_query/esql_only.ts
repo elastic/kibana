@@ -252,7 +252,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             esqlQuery: {
               esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
             },
-            sourceFields: [],
           },
         })
         .expect(400);
@@ -284,7 +283,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             esqlQuery: {
               esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
             },
-            sourceFields: [],
           },
         })
         .expect(400);
@@ -313,7 +311,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             esqlQuery: {
               esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
             },
-            sourceFields: [],
           },
         })
         .expect(400);
@@ -340,7 +337,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             threshold: [0],
             searchType: 'esqlQuery',
             timeField: 'date',
-            sourceFields: [],
           },
         })
         .expect(400);
@@ -439,7 +435,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             termSize: params.termSize,
             timeField: params.timeField || 'date',
             esqlQuery: { esql: params.esqlQuery },
-            sourceFields: [],
           },
         })
         .expect(200);

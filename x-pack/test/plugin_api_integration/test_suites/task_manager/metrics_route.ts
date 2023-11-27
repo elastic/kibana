@@ -174,7 +174,6 @@ export default function ({ getService }: FtrProviderContext) {
               timeField: '@timestamp',
               timeWindowSize: 5,
               timeWindowUnit: 'm',
-              sourceFields: [],
             },
           })
           .expect(200)

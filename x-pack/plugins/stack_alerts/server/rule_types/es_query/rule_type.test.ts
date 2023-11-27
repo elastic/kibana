@@ -133,7 +133,6 @@ describe('ruleType', () => {
         searchType: 'esQuery',
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
 
       expect(ruleType.validate.params.validate(params)).toBeTruthy();
@@ -155,7 +154,6 @@ describe('ruleType', () => {
         searchType: 'esQuery',
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
@@ -177,7 +175,6 @@ describe('ruleType', () => {
         excludeHitsFromPreviousRun: true,
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -213,7 +210,6 @@ describe('ruleType', () => {
         excludeHitsFromPreviousRun: true,
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -269,7 +265,6 @@ describe('ruleType', () => {
         excludeHitsFromPreviousRun: true,
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -329,7 +324,6 @@ describe('ruleType', () => {
         excludeHitsFromPreviousRun: true,
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -383,7 +377,6 @@ describe('ruleType', () => {
         excludeHitsFromPreviousRun: true,
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -470,7 +463,6 @@ describe('ruleType', () => {
         excludeHitsFromPreviousRun: true,
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -527,7 +519,6 @@ describe('ruleType', () => {
         excludeHitsFromPreviousRun: true,
         aggType: 'count',
         groupBy: 'all',
-        sourceFields: [],
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -610,7 +601,6 @@ describe('ruleType', () => {
       excludeHitsFromPreviousRun: true,
       aggType: 'count',
       groupBy: 'all',
-      sourceFields: [],
     };
 
     it('validator succeeds with valid search source params', async () => {
@@ -736,7 +726,6 @@ describe('ruleType', () => {
       excludeHitsFromPreviousRun: true,
       aggType: 'count',
       groupBy: 'all',
-      sourceFields: [],
     };
 
     it('validator succeeds with valid ESQL query params', async () => {

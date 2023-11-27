@@ -25,7 +25,6 @@ describe('es_query utils', () => {
     groupBy: 'all',
     searchConfiguration: {},
     esqlQuery: { esql: 'test-query' },
-    sourceFields: [],
   };
 
   describe('getParsedQuery', () => {

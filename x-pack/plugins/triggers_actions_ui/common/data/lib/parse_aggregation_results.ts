@@ -31,7 +31,7 @@ interface ParseAggregationResultsOpts {
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
   resultLimit?: number;
-  sourceFieldsParams?: string[];
+  sourceFieldsParams?: Array<{ label: string; searchPath: string }>;
   generateSourceFieldsFromHits?: boolean;
 }
 export const parseAggregationResults = ({
@@ -89,14 +89,14 @@ export const parseAggregationResults = ({
       if (generateSourceFieldsFromHits) {
         const fieldsSet = new Set<string>();
         groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
-          if (hit._source && hit._source[field]) {
-            fieldsSet.add(hit._source[field]);
+          if (hit._source && hit._source[field.label]) {
+            fieldsSet.add(hit._source[field.label]);
           }
         });
-        sourceFields[field] = Array.from(fieldsSet);
+        sourceFields[field.label] = Array.from(fieldsSet);
       } else {
-        if (groupBucket[field]?.buckets && groupBucket[field].buckets.length > 0) {
-          sourceFields[field] = groupBucket[field].buckets.map(
+        if (groupBucket[field.label]?.buckets && groupBucket[field.label].buckets.length > 0) {
+          sourceFields[field.label] = groupBucket[field.label].buckets.map(
             (bucket: { doc_count: number; key: string | number }) => bucket.key
           );
         }

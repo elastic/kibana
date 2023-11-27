@@ -27,7 +27,13 @@ import {
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
 import { Comparator } from '../../../../common/comparator_types';
-import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
+import {
+  CommonRuleParams,
+  EsQueryRuleMetaData,
+  EsQueryRuleParams,
+  SearchType,
+  SourceField,
+} from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -49,7 +55,7 @@ interface LocalStateAction {
   type: SearchSourceParamsAction['type'] | keyof CommonRuleParams;
   payload:
     | SearchSourceParamsAction['payload']
-    | (number[] | number | string | string[] | boolean | undefined);
+    | (number[] | number | string | string[] | boolean | SourceField[] | undefined);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -228,7 +234,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onChangeSourceFields = useCallback(
-    (selectedSourceFields: string[]) =>
+    (selectedSourceFields: SourceField[]) =>
       dispatch({ type: 'sourceFields', payload: selectedSourceFields }),
     []
   );

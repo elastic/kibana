@@ -99,9 +99,17 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.object({ esql: schema.string({ minLength: 1 }) }),
     schema.never()
   ),
-  sourceFields: schema.arrayOf(schema.string(), {
-    maxSize: MAX_SELECTABLE_SOURCE_FIELDS,
-  }),
+  sourceFields: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        label: schema.string(),
+        searchPath: schema.string(),
+      }),
+      {
+        maxSize: MAX_SELECTABLE_SOURCE_FIELDS,
+      }
+    )
+  ),
 };
 
 export const EsQueryRuleParamsSchema = schema.object(EsQueryRuleParamsSchemaProperties, {

@@ -104,7 +104,7 @@ export async function createEsQueryRule({
     .set('x-elastic-internal-origin', 'foo')
     .send({
       enabled,
-      params: { ...params, sourceFields: [] },
+      params,
       consumer,
       schedule: schedule || {
         interval: '1h',

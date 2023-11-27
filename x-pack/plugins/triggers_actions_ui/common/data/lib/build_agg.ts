@@ -20,7 +20,7 @@ export interface BuildAggregationOpts {
   aggField?: string;
   termSize?: number;
   termField?: string | string[];
-  sourceFieldsParams?: string[];
+  sourceFieldsParams?: Array<{ label: string; searchPath: string }>;
   topHitsSize?: number;
   condition?: {
     resultLimit?: number;
@@ -135,7 +135,9 @@ export const buildAggregation = ({
   // add sourceField aggregations
   if (sourceFieldsParams && sourceFieldsParams.length > 0) {
     sourceFieldsParams.forEach((field) => {
-      aggParent.aggs[field] = { terms: { field, size: MAX_SOURCE_FIELDS_TO_COPY } };
+      aggParent.aggs[field.label] = {
+        terms: { field: field.searchPath, size: MAX_SOURCE_FIELDS_TO_COPY },
+      };
     });
   }
 

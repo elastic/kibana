@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         ruleName: 'always fire',
         ruleParams:
-          '{"size":100,"thresholdComparator":">","threshold":[-1],"index":["alert-test-data"],"timeField":"date","esQuery":"{\\n  \\"query\\":{\\n    \\"match_all\\" : {}\\n  }\\n}","timeWindowSize":20,"timeWindowUnit":"s","sourceFields":[],"excludeHitsFromPreviousRun":true,"aggType":"count","groupBy":"all","searchType":"esQuery"}',
+          '{"size":100,"thresholdComparator":">","threshold":[-1],"index":["alert-test-data"],"timeField":"date","esQuery":"{\\n  \\"query\\":{\\n    \\"match_all\\" : {}\\n  }\\n}","timeWindowSize":20,"timeWindowUnit":"s","excludeHitsFromPreviousRun":true,"aggType":"count","groupBy":"all","searchType":"esQuery"}',
         spaceId: 'default',
         tags: '',
       });
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         ruleName: 'always fire',
         ruleParams:
-          '{"size":100,"thresholdComparator":">","threshold":[-1],"index":["alert-test-data"],"timeField":"date","esQuery":"{\\n  \\"query\\":{\\n    \\"match_all\\" : {}\\n  }\\n}","timeWindowSize":20,"timeWindowUnit":"s","sourceFields":[],"excludeHitsFromPreviousRun":true,"aggType":"count","groupBy":"all","searchType":"esQuery"}',
+          '{"size":100,"thresholdComparator":">","threshold":[-1],"index":["alert-test-data"],"timeField":"date","esQuery":"{\\n  \\"query\\":{\\n    \\"match_all\\" : {}\\n  }\\n}","timeWindowSize":20,"timeWindowUnit":"s","excludeHitsFromPreviousRun":true,"aggType":"count","groupBy":"all","searchType":"esQuery"}',
         spaceId: 'default',
         tags: '',
       });
@@ -269,7 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         ruleName: 'def',
         ruleParams:
-          '{"size":100,"thresholdComparator":">","threshold":[-1],"index":["alert-test-data"],"timeField":"date","esQuery":"{\\n  \\"query\\":{\\n    \\"match_all\\" : {}\\n  }\\n}","timeWindowSize":20,"timeWindowUnit":"s","sourceFields":[],"excludeHitsFromPreviousRun":true,"aggType":"count","groupBy":"all","searchType":"esQuery"}',
+          '{"size":100,"thresholdComparator":">","threshold":[-1],"index":["alert-test-data"],"timeField":"date","esQuery":"{\\n  \\"query\\":{\\n    \\"match_all\\" : {}\\n  }\\n}","timeWindowSize":20,"timeWindowUnit":"s","excludeHitsFromPreviousRun":true,"aggType":"count","groupBy":"all","searchType":"esQuery"}',
         spaceId: 'default',
         tags: 'fee,fi,fo',
       });
@@ -590,7 +590,6 @@ export default function ({ getService }: FtrProviderContext) {
             esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
             timeWindowSize: 20,
             timeWindowUnit: 's',
-            sourceFields: [],
           },
         },
       });

@@ -28,7 +28,6 @@ const DefaultParams: Writable<Partial<EsQueryRuleParams>> = {
   excludeHitsFromPreviousRun: true,
   aggType: 'count',
   groupBy: 'all',
-  sourceFields: [],
 };
 
 describe('ruleType Params validate()', () => {

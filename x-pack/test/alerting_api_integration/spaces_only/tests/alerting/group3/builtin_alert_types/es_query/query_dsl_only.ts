@@ -336,7 +336,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             searchType: params.searchType,
             aggType: params.aggType || 'count',
             groupBy: params.groupBy || 'all',
-            sourceFields: [],
             ...ruleParams,
           },
         })
