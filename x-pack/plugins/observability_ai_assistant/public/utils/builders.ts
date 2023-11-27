@@ -6,106 +6,98 @@
  */
 
 import { merge, uniqueId } from 'lodash';
-import { MessageRole, Conversation, FunctionDefinition } from '../../common/types';
-import { ChatTimelineItem } from '../components/chat/chat_timeline';
+import { DeepPartial } from 'utility-types';
+import { MessageRole, Conversation, FunctionDefinition, Message } from '../../common/types';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 
-type ChatItemBuildProps = Omit<Partial<ChatTimelineItem>, 'actions' | 'display' | 'currentUser'> & {
-  actions?: Partial<ChatTimelineItem['actions']>;
-  display?: Partial<ChatTimelineItem['display']>;
-  currentUser?: Partial<ChatTimelineItem['currentUser']>;
-} & Pick<ChatTimelineItem, 'role'>;
+type BuildMessageProps = DeepPartial<Message> & {
+  message: {
+    role: MessageRole;
+    function_call?: {
+      name: string;
+      trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
+    };
+  };
+};
 
-export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
+export function buildMessage(params: BuildMessageProps): Message {
   return merge(
     {
-      id: uniqueId(),
-      title: '',
-      actions: {
-        canCopy: true,
-        canEdit: false,
-        canGiveFeedback: false,
-        canRegenerate: params.role === MessageRole.Assistant,
-      },
-      display: {
-        collapsed: false,
-        hide: false,
-      },
-      currentUser: {
-        username: 'elastic',
-      },
-      loading: false,
+      '@timestamp': new Date().toISOString(),
     },
     params
   );
 }
 
-export function buildSystemChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
-  return buildChatItem({
-    role: MessageRole.System,
-    ...params,
-  });
+export function buildSystemMessage(
+  params?: Omit<BuildMessageProps, 'message'> & {
+    message: DeepPartial<Omit<Message['message'], 'role'>>;
+  }
+) {
+  return buildMessage(
+    merge({}, params, {
+      message: { role: MessageRole.System },
+    })
+  );
 }
 
-export function buildChatInitItem() {
-  return buildChatItem({
-    role: MessageRole.User,
-    title: 'started a conversation',
-    actions: {
-      canEdit: false,
-      canCopy: true,
-      canGiveFeedback: false,
-      canRegenerate: false,
-    },
-  });
+export function buildUserMessage(
+  params?: Omit<BuildMessageProps, 'message'> & {
+    message?: DeepPartial<Omit<Message['message'], 'role'>>;
+  }
+) {
+  return buildMessage(
+    merge(
+      {
+        message: {
+          content: "What's a function?",
+        },
+      },
+      params,
+      {
+        message: { role: MessageRole.User },
+      }
+    )
+  );
 }
 
-export function buildUserChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
-  return buildChatItem({
-    role: MessageRole.User,
-    content: "What's a function?",
-    actions: {
-      canCopy: true,
-      canEdit: true,
-      canGiveFeedback: false,
-      canRegenerate: true,
-    },
-    ...params,
-  });
+export function buildAssistantMessage(
+  params?: Omit<BuildMessageProps, 'message'> & {
+    message: DeepPartial<Omit<Message['message'], 'role'>>;
+  }
+) {
+  return buildMessage(
+    merge(
+      {
+        message: {
+          content: `In computer programming and mathematics, a function is a fundamental concept that represents a relationship between input values and output values. It takes one or more input values (also known as arguments or parameters) and processes them to produce a result, which is the output of the function. The input values are passed to the function, and the function performs a specific set of operations or calculations on those inputs to produce the desired output.
+          A function is often defined with a name, which serves as an identifier to call and use the function in the code. It can be thought of as a reusable block of code that can be executed whenever needed, and it helps in organizing code and making it more modular and maintainable.`,
+        },
+      },
+      params,
+      {
+        message: { role: MessageRole.Assistant },
+      }
+    )
+  );
 }
 
-export function buildAssistantChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
-  return buildChatItem({
-    role: MessageRole.Assistant,
-    content: `In computer programming and mathematics, a function is a fundamental concept that represents a relationship between input values and output values. It takes one or more input values (also known as arguments or parameters) and processes them to produce a result, which is the output of the function. The input values are passed to the function, and the function performs a specific set of operations or calculations on those inputs to produce the desired output.
-    A function is often defined with a name, which serves as an identifier to call and use the function in the code. It can be thought of as a reusable block of code that can be executed whenever needed, and it helps in organizing code and making it more modular and maintainable.`,
-    actions: {
-      canCopy: true,
-      canEdit: false,
-      canRegenerate: true,
-      canGiveFeedback: true,
-    },
-    ...params,
-  });
-}
-
-export function buildFunctionChatItem(params: Omit<ChatItemBuildProps, 'role'>) {
-  return buildChatItem({
-    role: MessageRole.User,
-    title: 'executed a function',
-    function_call: {
-      name: 'leftpad',
-      arguments: '{ foo: "bar" }',
-      trigger: MessageRole.Assistant,
-    },
-    ...params,
-  });
-}
-
-export function buildTimelineItems() {
-  return {
-    items: [buildSystemChatItem(), buildUserChatItem(), buildAssistantChatItem()],
-  };
+export function buildFunctionResponseMessage(
+  params?: Omit<BuildMessageProps, 'message'> & {
+    message: DeepPartial<Omit<Message['message'], 'role'>>;
+  }
+) {
+  return buildUserMessage(
+    merge(
+      {},
+      {
+        message: {
+          name: 'leftpad',
+        },
+        ...params,
+      }
+    )
+  );
 }
 
 export function buildConversation(params?: Partial<Conversation>) {

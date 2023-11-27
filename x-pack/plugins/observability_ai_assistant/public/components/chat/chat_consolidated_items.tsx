@@ -120,12 +120,12 @@ export function ChatConsolidatedItems({
               key={index}
               {...item}
               onFeedbackClick={(feedback) => {
-                onFeedback(item, feedback);
+                onFeedback(item.message, feedback);
               }}
               onRegenerateClick={() => {
-                onRegenerate(item);
+                onRegenerate(item.message);
               }}
-              onEditSubmit={(message) => onEditSubmit(item, message)}
+              onEditSubmit={(message) => onEditSubmit(item.message, message)}
               onStopGeneratingClick={onStopGenerating}
               onActionClick={onActionClick}
             />

@@ -22,7 +22,7 @@ interface Props {
     | undefined;
   loading: boolean;
   editing: boolean;
-  onSubmit: (message: Message) => Promise<void>;
+  onSubmit: (message: Message) => void;
   onActionClick: ChatActionClickHandler;
 }
 export function ChatItemContentInlinePromptEditor({
