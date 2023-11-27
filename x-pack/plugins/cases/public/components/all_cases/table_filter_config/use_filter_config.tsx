@@ -117,7 +117,10 @@ export const useFilterConfig = ({
     setActiveByFilterKey(newActiveByFilterKey);
   };
 
-  const selectableOptions = Array.from(filterConfigs.values())
+  const filterConfigArray = Array.from(filterConfigs.values()).filter(
+    (filter) => filter.isAvailable
+  );
+  const selectableOptions = filterConfigArray
     .map(({ key, label }) => ({
       key,
       label,
@@ -128,9 +131,7 @@ export const useFilterConfig = ({
       return a.key > b.key ? 1 : -1;
     });
   const source =
-    activeByFilterKey && activeByFilterKey.length > 0
-      ? activeByFilterKey
-      : Array.from(filterConfigs.values());
+    activeByFilterKey && activeByFilterKey.length > 0 ? activeByFilterKey : filterConfigArray;
   const activeFilters = source
     .filter((filter) => filter.isActive && filterConfigs.has(filter.key))
     .map((filter) => filterConfigs.get(filter.key)) as FilterConfig[];

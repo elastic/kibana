@@ -159,7 +159,7 @@ export const getSystemFilterConfig = ({
         />
       ),
     },
-  ].filter((filter) => filter.isAvailable) as FilterConfig[];
+  ];
 };
 
 export const useSystemFilterConfig = ({
