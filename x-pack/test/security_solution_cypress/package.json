@@ -25,7 +25,7 @@
     "cypress:open:serverless": "yarn cypress:serverless open --config-file ../../test/security_solution_cypress/cypress/cypress_serverless.config.ts --spec './cypress/e2e/**/*.cy.ts'",
     "cypress:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/!(investigations|explore|detection_response/rule_management)/**/*.cy.ts'",
     "cypress:run:cloud:serverless": "yarn cypress:cloud:serverless run --config-file ./cypress/cypress_ci_serverless.config.ts --env CLOUD_SERVERLESS=true",
-    "cypress:rule_management:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/rule_management/**/*.cy.ts'",
+    "cypress:rule_management:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/rule_management/!(prebuilt_rules)/**/*.cy.ts'",
     "cypress:rule_management:prebuilt_rules:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/**/*.cy.ts'",
     "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
     "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
