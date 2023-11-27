@@ -29,9 +29,3 @@ export const X_MODIFY = 'x-modify';
  *  in result bundled document.
  */
 export const X_CODEGEN_ENABLED = 'x-codegen-enabled';
-
-/**
- * `x-source-file-path` specifies component's source file path and used internally by the bundler to detect conflicts
- * in the result bundled document's components'
- */
-export const X_SOURCE_FILE_PATH = 'x-source-file-path';

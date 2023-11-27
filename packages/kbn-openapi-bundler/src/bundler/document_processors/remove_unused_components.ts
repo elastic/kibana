@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { OpenAPIV3 } from 'openapi-types';
 import { hasProp } from '../../utils/has_prop';
 import { isPlainObjectType } from '../../utils/is_plain_object_type';
-import { ResolvedRef } from '../types';
+import { PlainObjectNode, ResolvedRef } from '../types';
 
 /**
  * Helps to remove unused components.
@@ -30,7 +29,7 @@ export class RemoveUnusedComponentsProcessor {
     this.refs.add(resolvedRef.pointer);
   }
 
-  removeUnusedComponents(components: OpenAPIV3.ComponentsObject): void {
+  removeUnusedComponents(components: PlainObjectNode): void {
     if (!isPlainObjectType(components.schemas)) {
       return;
     }

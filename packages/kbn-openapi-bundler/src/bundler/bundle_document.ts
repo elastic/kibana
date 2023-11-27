@@ -18,6 +18,7 @@ import { createRemovePropsProcessor } from './document_processors/remove_props';
 import { createModifyRequiredProcessor } from './document_processors/modify_required';
 import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
 import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
+import { isPlainObjectType } from '../utils/is_plain_object_type';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
@@ -64,14 +65,14 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Reso
   await processDocument(resolvedDocument, refResolver, [
     createSkipNodeWithInternalPropProcessor(X_INTERNAL),
     createSkipInternalPathProcessor('/internal'),
-    createBundleRefsProcessor(X_INLINE),
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
     createRemovePropsProcessor([X_MODIFY, X_CODEGEN_ENABLED]),
+    createBundleRefsProcessor(X_INLINE),
     removeUnusedComponentsProcessor,
   ]);
 
-  if (resolvedDocument.document.components) {
+  if (isPlainObjectType(resolvedDocument.document.components)) {
     removeUnusedComponentsProcessor.removeUnusedComponents(resolvedDocument.document.components);
   }
 

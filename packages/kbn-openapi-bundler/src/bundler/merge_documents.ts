@@ -6,120 +6,88 @@
  * Side Public License, v 1.
  */
 
+import deepEqual from 'fast-deep-equal';
+import { basename, dirname, join } from 'path';
 import chalk from 'chalk';
-import { OpenAPIV3 } from 'openapi-types';
-import { logger } from '../logger';
-import { X_SOURCE_FILE_PATH } from './known_custom_props';
-import { Document } from './types';
+import { isPlainObjectType } from '../utils/is_plain_object_type';
+import { PlainObjectNode, ResolvedDocument } from './types';
 
-type HttpMethods = typeof HTTP_METHODS[number];
-const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
+type MergedDocuments = Record<string, ResolvedDocument>;
 
-export function mergeDocuments(documents: Document[]): Document {
-  const resultDocument: Document = {
-    openapi: '3.0.3',
-    info: {
-      title: 'Bundled specs file. See individual path.verb.tags for details',
-      version: 'not applicable',
-    },
-    paths: {},
-    components: {
-      schemas: {},
-    },
-  };
+type MergedResult = Record<string, PlainObjectNode>;
 
-  for (const document of documents) {
-    const openApiVersion = document.openapi;
-
-    if (!openApiVersion.startsWith('3.0.')) {
-      logger.warning('❗ Processing specs must have 3.0 OpenAPI version');
-    }
-
-    const title = document.info.title;
-    const version = document.info.version;
-
-    mergePaths(document.paths, resultDocument.paths, {
-      title,
-      version,
-    });
-    mergeComponents(document.components, resultDocument.components!);
-  }
-
-  for (const schema of Object.keys(resultDocument.components?.schemas ?? {})) {
-    deleteSourceFilePathProp(resultDocument.components!.schemas![schema] as OpenAPIV3.SchemaObject);
-  }
-
-  return resultDocument;
+interface Components {
+  schemas?: Record<string, PlainObjectNode>;
 }
 
-function mergePaths(
-  sourcePaths: OpenAPIV3.PathsObject,
-  resultPaths: OpenAPIV3.PathsObject,
-  extraTags: Record<string, unknown>
-): void {
-  for (const path of Object.keys(sourcePaths)) {
-    if (!sourcePaths[path]) {
-      continue;
-    }
-
-    if (!resultPaths[path]) {
-      resultPaths[path] = {};
-    }
-
-    try {
-      mergeVerbs(sourcePaths[path]!, resultPaths[path]!, extraTags);
-    } catch (e) {
-      throw new Error(`Unable to bundle path "${path}": ${e.message}`);
-    }
-  }
+interface ComponentsWithSchemas extends PlainObjectNode {
+  schemas: Record<string, PlainObjectNode>;
 }
 
-function mergeVerbs(
-  sourceVerbs: NonNullable<OpenAPIV3.PathItemObject>,
-  resultVerbs: NonNullable<OpenAPIV3.PathItemObject>,
-  extraTags: Record<string, unknown>
-): void {
-  for (const maybeVerb of Object.keys(sourceVerbs)) {
-    if (!(HTTP_METHODS as readonly string[]).includes(maybeVerb)) {
-      continue;
+export function mergeDocuments(resolvedDocuments: ResolvedDocument[]): MergedResult {
+  const mergedDocuments: MergedDocuments = {};
+  const sharedComponents: ComponentsWithSchemas = { schemas: {} };
+
+  for (const resolvedDocument of resolvedDocuments) {
+    const sourceComponents = resolvedDocument.document.components;
+
+    if (isPlainObjectType(sourceComponents)) {
+      mergeComponents(sourceComponents, sharedComponents);
     }
 
-    const verb = maybeVerb as HttpMethods;
+    delete resolvedDocument.document.components;
 
-    if (resultVerbs[verb]) {
-      throw new Error(`Unable to bundle verb "${verb}" due to duplication`);
-    }
-
-    if (!sourceVerbs[verb]) {
-      continue;
-    }
-
-    resultVerbs[verb] = sourceVerbs[verb];
-
-    addTags(extraTags, resultVerbs[verb]!);
+    mergeDocument(resolvedDocument, mergedDocuments);
   }
+
+  const result: MergedResult = {};
+
+  for (const fileName of Object.keys(mergedDocuments)) {
+    result[fileName] = mergedDocuments[fileName].document;
+  }
+
+  result['shared_components.schema.yaml'] = sharedComponents;
+
+  return result;
 }
 
-function addTags(tags: Record<string, unknown>, container: { tags?: unknown[] }): void {
-  if (!container.tags) {
-    container.tags = [];
-  }
+function mergeDocument(resolvedDocument: ResolvedDocument, mergeResult: MergedDocuments): void {
+  const fileName = basename(resolvedDocument.absolutePath);
 
-  for (const tagKey of Object.keys(tags)) {
-    container.tags.push(`[${tagKey}] ${tags[tagKey]}`);
-  }
-}
-
-function mergeComponents(
-  sourceComponents: OpenAPIV3.ComponentsObject | undefined,
-  resultComponents: OpenAPIV3.ComponentsObject
-): void {
-  if (!sourceComponents?.schemas) {
+  if (!mergeResult[fileName]) {
+    mergeResult[fileName] = resolvedDocument;
     return;
   }
 
-  if (!resultComponents.schemas) {
-    resultComponents.schemas = {};
+  const nonConflicFileName = generateNonConflictingFilePath(
+    resolvedDocument.absolutePath,
+    mergeResult
+  );
+
+  mergeResult[nonConflicFileName] = resolvedDocument;
+}
+
+function generateNonConflictingFilePath(
+  documentAbsolutePath: string,
+  mergeResult: MergedDocuments
+): string {
+  let pathToDocument = dirname(documentAbsolutePath);
+  let suggestedName = basename(documentAbsolutePath);
+
+  while (mergeResult[suggestedName]) {
+    suggestedName = `${basename(pathToDocument)}_${suggestedName}`;
+    pathToDocument = join(pathToDocument, '..');
+  }
+
+  return suggestedName;
+}
+
+function mergeComponents(
+  sourceComponents: Components,
+  resultComponents: ComponentsWithSchemas
+): void {
+  if (!sourceComponents.schemas) {
+    return;
   }
 
   for (const schema of Object.keys(sourceComponents.schemas)) {
@@ -128,42 +96,12 @@ function mergeComponents(
       continue;
     }
 
-    const sourceSchemaFilePath = getSourceFilePath(
-      sourceComponents.schemas[schema] as OpenAPIV3.SchemaObject
-    );
-    const resultSchemaFilePath = getSourceFilePath(
-      resultComponents.schemas[schema] as OpenAPIV3.SchemaObject
-    );
-
-    if (sourceSchemaFilePath !== resultSchemaFilePath) {
+    if (!deepEqual(resultComponents.schemas[schema], sourceComponents.schemas[schema])) {
       throw new Error(
         `❌ Unable to bundle documents due to conflicts in components schemas. Schema ${chalk.blue(
           schema
-        )} encountered in ${chalk.magenta(sourceSchemaFilePath)} and ${chalk.cyan(
-          resultSchemaFilePath
-        )}.`
+        )} is has different definitions`
       );
     }
-
-    resultComponents.schemas[schema] = sourceComponents.schemas[schema];
-  }
-}
-
-function getSourceFilePath(schema: OpenAPIV3.SchemaObject): string {
-  if (!(X_SOURCE_FILE_PATH in schema)) {
-    logger.warning(
-      `Unable to find ${chalk.blue(
-        X_SOURCE_FILE_PATH
-      )} in components schema. Conflicts will be overridden.`
-    );
-    return 'unknown';
-  }
-
-  return schema[X_SOURCE_FILE_PATH];
-}
-
-function deleteSourceFilePathProp(node: OpenAPIV3.SchemaObject): void {
-  if (X_SOURCE_FILE_PATH in node) {
-    delete node[X_SOURCE_FILE_PATH];
   }
 }

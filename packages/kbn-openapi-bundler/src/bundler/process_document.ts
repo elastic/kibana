@@ -42,14 +42,12 @@ export async function processDocument(
 ): Promise<void> {
   const nodesToVisit: TraverseItem[] = [
     {
-      // DocumentNode is a general abstraction simplifying logic in this file.
-      // OpenAPIV3.Document can't be casted directly to DocumentNode.
-      node: resolvedDocument.document as unknown as DocumentNode,
+      node: resolvedDocument.document,
       context: {
         resolvedDocument,
       },
       visitedDocumentNodes: new Set(),
-      parentNode: resolvedDocument.document as unknown as DocumentNode,
+      parentNode: resolvedDocument.document,
       parentKey: '',
     },
   ];

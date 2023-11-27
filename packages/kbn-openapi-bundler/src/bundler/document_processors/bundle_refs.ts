@@ -8,7 +8,6 @@
 
 import { DocumentNodeProcessor, Document, ResolvedRef, TraverseDocumentContext } from '../types';
 import { hasProp } from '../../utils/has_prop';
-import { X_SOURCE_FILE_PATH } from '../known_custom_props';
 import { isChildContext } from '../is_child_context';
 import { inlineRef } from './utils/inline_ref';
 
@@ -72,8 +71,6 @@ function saveComponent(ref: ResolvedRef, components: Record<string, unknown>): s
   }
 
   Object.assign(target, ref.refNode);
-
-  target[X_SOURCE_FILE_PATH] = ref.absolutePath;
 
   return `#${ref.pointer}`;
 }

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { OpenAPIV3 } from 'openapi-types';
-
 /**
  * A plain object node not containing `$ref` property
  */
@@ -31,9 +29,9 @@ export interface RefNode extends PlainObjectNode {
 export type DocumentNode = PlainObjectNode | ArrayNode | RefNode;
 
 /**
- * Stick to OpenAPI v3 document meaning it encompasses `3.0` and `3.1` versions
+ * Document abstraction. We don't mind OpenAPI `3.0` and `3.1` differences.
  */
-export type Document = OpenAPIV3.Document<Record<string, unknown>>;
+export type Document = Record<string, unknown>;
 
 export interface ResolvedDocument {
   /**

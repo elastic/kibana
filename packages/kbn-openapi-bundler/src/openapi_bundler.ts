@@ -9,7 +9,7 @@
 import chalk from 'chalk';
 import globby from 'globby';
 import { basename, dirname, join, resolve } from 'path';
-import { Document } from './bundler/types';
+import { ResolvedDocument } from './bundler/types';
 import { bundleDocument, SkipException } from './bundler/bundle_document';
 import { mergeDocuments } from './bundler/merge_documents';
 import { removeFilesByGlob } from './utils/remove_files_by_glob';
@@ -45,14 +45,14 @@ export const bundle = async (config: BundlerConfig) => {
 
   logger.debug(`Processing schemas...`);
 
-  const documents = await Promise.all(
+  const resolvedDocuments = await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) => {
       try {
         const resolvedDocument = await bundleDocument(schemaFilePath);
 
         logger.debug(`Processed ${chalk.bold(basename(schemaFilePath))}`);
 
-        return resolvedDocument.document;
+        return resolvedDocument;
       } catch (e) {
         if (e instanceof SkipException) {
           logger.info(`Skipped ${chalk.bold(e.documentPath)}: ${e.message}`);
@@ -64,7 +64,7 @@ export const bundle = async (config: BundlerConfig) => {
     })
   );
 
-  const processedDocuments = filterOutSkippedDocuments(documents);
+  const processedDocuments = filterOutSkippedDocuments(resolvedDocuments);
 
   logger.success(`Processed ${processedDocuments.length} schemas`);
 
@@ -85,8 +85,10 @@ function logSchemas(schemaFilePaths: string[]): void {
   }
 }
 
-function filterOutSkippedDocuments(documents: Array<Document | undefined>): Document[] {
-  const processedDocuments: Document[] = [];
+function filterOutSkippedDocuments(
+  documents: Array<ResolvedDocument | undefined>
+): ResolvedDocument[] {
+  const processedDocuments: ResolvedDocument[] = [];
 
   for (const document of documents) {
     if (!document) {

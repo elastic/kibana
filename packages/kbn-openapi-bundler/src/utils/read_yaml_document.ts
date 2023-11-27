@@ -8,11 +8,10 @@
 
 import fs from 'fs/promises';
 import { load } from 'js-yaml';
-import { OpenAPIV3 } from 'openapi-types';
 
-export async function readYamlDocument(filePath: string): Promise<OpenAPIV3.Document> {
-  // Typing load's result to OpenAPIV3.Document is optimistic as we can't be sure
-  // there is an OpenAPI spec inside a yaml file. We don't have this validation layer so far
+export async function readYamlDocument(filePath: string): Promise<Record<string, unknown>> {
+  // Typing load's result to Record<string, unknown> is optimistic as we can't be sure
+  // there is object inside a yaml file. We don't have this validation layer so far
   // but using JSON Schemas here should mitigate this problem.
   return load(await fs.readFile(filePath, { encoding: 'utf8' }));
 }
