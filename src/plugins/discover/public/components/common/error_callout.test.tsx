@@ -16,8 +16,6 @@ import { ErrorCallout } from './error_callout';
 
 const mockRenderSearchError = jest.fn();
 
-
-import { renderSearchError } from '@kbn/search-errors';
 jest.mock('@kbn/search-errors', () => {
   const originalModule = jest.requireActual('@kbn/search-errors');
   return {

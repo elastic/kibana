@@ -29,7 +29,11 @@ export function renderSearchError({
     };
   }
 
-  if (error.constructor.name === 'HttpFetchError' || error instanceof BfetchRequestError || error.constructor.name === 'BfetchRequestError') {
+  if (
+    error.constructor.name === 'HttpFetchError' ||
+    error instanceof BfetchRequestError ||
+    error.constructor.name === 'BfetchRequestError'
+  ) {
     const defaultMsg = i18n.translate('searchErrors.errors.fetchError', {
       defaultMessage: 'Check your network connection and try again.',
     });
