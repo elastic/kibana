@@ -70,15 +70,10 @@ export const useDashboardMenuItems = ({
   const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
   const hasOverlays = dashboard.select((state) => state.componentState.hasOverlays);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
-  const namespaces = dashboard.select((state) => state.componentState.namespaces);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const managed = dashboard.select((state) => state.componentState.managed);
   const disableTopNav = isSaveInProgress || hasOverlays;
-
-  const isShared = spacesApi && lastSavedId && namespaces && namespaces.length > 1;
-
-  console.log({ isShared });
 
   /**
    * Show the Dashboard app's share menu
@@ -127,51 +122,32 @@ export const useDashboardMenuItems = ({
    * Save the dashboard without any UI or popups.
    */
   const quickSaveDashboard = useCallback(() => {
-    if (isShared) {
-      confirmSaveForSharedDashboard({
-        onSave: () => {
-          setIsSaveInProgress(true);
-          dashboard.runQuickSave().then(() => {
-            updateSpacesForReferences();
-            setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE);
-          });
-        },
-        onClone: clone,
-      });
-    } else {
-      dashboard.runQuickSave().then(() => {
-        setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE);
-      });
-    }
-  }, [clone, confirmSaveForSharedDashboard, dashboard, isShared, updateSpacesForReferences]);
+    confirmSaveForSharedDashboard({
+      onSave: () => {
+        setIsSaveInProgress(true);
+        dashboard.runQuickSave().then(() => {
+          updateSpacesForReferences();
+          setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE);
+        });
+      },
+      onClone: clone,
+    });
+  }, [clone, confirmSaveForSharedDashboard, dashboard, updateSpacesForReferences]);
 
   /**
    * Show the dashboard's save modal
    */
   const saveDashboardAs = useCallback(() => {
-    if (isShared) {
-      confirmSaveForSharedDashboard({
-        onSave: () => {
-          dashboard.runSaveAs().then((result) => {
-            updateSpacesForReferences();
-            maybeRedirect(result);
-          });
-        },
-        onClone: clone,
-      });
-    } else {
-      dashboard.runSaveAs().then((result) => {
-        maybeRedirect(result);
-      });
-    }
-  }, [
-    isShared,
-    confirmSaveForSharedDashboard,
-    clone,
-    dashboard,
-    updateSpacesForReferences,
-    maybeRedirect,
-  ]);
+    confirmSaveForSharedDashboard({
+      onSave: () => {
+        dashboard.runSaveAs().then((result) => {
+          updateSpacesForReferences();
+          maybeRedirect(result);
+        });
+      },
+      onClone: clone,
+    });
+  }, [confirmSaveForSharedDashboard, clone, dashboard, updateSpacesForReferences, maybeRedirect]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:

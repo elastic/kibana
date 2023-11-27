@@ -17,24 +17,11 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiText,
-  EuiTitle,
-  EuiToolTipProps,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { MountPoint } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -52,9 +39,10 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
+import { ConfirmShareSaveModal } from './confirm_share_save_modal';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
-
+const ALL_SPACES_ID = '*';
+const UNKNOWN_SPACE = '?';
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
   embedSettings?: DashboardEmbedSettings;
@@ -102,10 +90,9 @@ export function InternalDashboardTopNav({
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
     spaces: { spacesApi },
     overlays: { openModal },
+    dashboardContentManagement: { getAttributesAndReferences },
   } = pluginServices.getServices();
   const spacesService = spacesApi?.ui.useSpaces();
-  const SpacesContextWrapper =
-    spacesApi?.ui.components.getSpacesContextProvider ?? getEmptyFunctionComponent;
 
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -301,76 +288,97 @@ export function InternalDashboardTopNav({
       onClone: () => void;
       onCancel?: () => void;
     }) => {
-      if (!spacesApi || !lastSavedId || !namespaces || namespaces.length < 2) return;
+      const sharedWithAllSpaces = namespaces?.includes(ALL_SPACES_ID);
+
+      const isShared = namespaces && (namespaces.length > 1 || sharedWithAllSpaces);
+
+      // Skip confirm modal, and just save
+      if (!spacesService || !lastSavedId || !isShared) {
+        onSave();
+        return;
+      }
 
       const { spacesManager } = spacesService;
-      // const spacesPermissions = await spacesManager.getSpaces({
-      //   purpose: 'shareSavedObjectsIntoSpace',
-      //   includeAuthorizedPurposes: true,
-      // });
-      // console.log({ spacesPermissions });
 
-      const insufficientPermissions = namespaces.includes('?');
+      let message;
+      const modalTitle = i18n.translate('dashboard.topNav.confirmSaveModalTitle', {
+        defaultMessage: `Save '{title}'?`,
+        values: { title },
+      });
+
+      // Add check for all space and space access
+
+      const { references } = await getAttributesAndReferences({
+        currentState: dashboard.getExplicitInput(),
+        lastSavedId,
+        saveOptions: {},
+      });
+
+      const shareableReferences = (
+        await spacesManager.getShareableReferences([
+          {
+            type: 'dashboard',
+            id: lastSavedId,
+          },
+        ])
+      ).objects;
+
+      const hasNewReference = references.some(({ id }) => {
+        const shareableRef = shareableReferences.find(
+          ({ id: refId }: { id: string }) => id === refId
+        );
+
+        if (!shareableRef) return true;
+
+        return namespaces.some((sharedSpace) => !shareableRef.spaces.includes(sharedSpace));
+      });
+
+      const hasHiddenSpace = namespaces.includes(UNKNOWN_SPACE);
+
+      if (!hasNewReference) {
+        // no unshared references added
+        message = i18n.translate('dashboard.topNav.confirmSaveModal.shareableChangesDescription', {
+          defaultMessage: `This dashboard is shared between {spacesCount} spaces. Any changes will also
+            be reflected in those spaces. Clone the dashboard if you don't want the changes to be
+            reflected in the rest of spaces.`,
+          values: { spacesCount: namespaces.length },
+        });
+      } else if (!hasHiddenSpace) {
+        // unshared shareable references added
+        message = i18n.translate(
+          'dashboard.topNav.confirmSaveModal.shareableReferenceDescription',
+          {
+            defaultMessage: `This dashboard is shared between {spacesCount} spaces, and the changes you are making involve sharing other 
+            saved objects too. You can choose to share them or you can clone the dashboard to keep your changes 
+            within the current space only.`,
+            values: { spacesCount: namespaces.length },
+          }
+        );
+      } else {
+        // unshareable references added
+        message = i18n.translate(
+          'dashboard.topNav.confirmSaveModal.unshareableReferenceDescription',
+          {
+            defaultMessage: `This dashboard is shared between {spacesCount} spaces, and some of your changes cannot be shared. 
+                    Please clone this dashboard to save your changes into the current space.`,
+            values: { spacesCount: namespaces.length },
+          }
+        );
+      }
 
       const session = openModal(
         toMountPoint(
-          <SpacesContextWrapper>
-            <EuiModal onClose={() => session.close()}>
-              <EuiModalHeader>
-                <EuiTitle>
-                  <h1>Save changes?</h1>
-                </EuiTitle>
-              </EuiModalHeader>
-              <EuiModalBody>
-                <EuiText>
-                  <p>You are attempting to save changes to a dashboard shared in these spaces:</p>
-                </EuiText>
-                {spacesApi?.ui.components.getSpaceList({ namespaces })}
-              </EuiModalBody>
-              <EuiModalFooter>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="danger"
-                      onClick={() => {
-                        if (onCancel) onCancel();
-                        session.close();
-                      }}
-                    >
-                      Cancel
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem />
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="primary"
-                      fill={insufficientPermissions}
-                      onClick={() => {
-                        onClone();
-                        session.close();
-                      }}
-                    >
-                      Clone & Save
-                    </EuiButton>
-                  </EuiFlexItem>
-                  {!insufficientPermissions ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        color="primary"
-                        fill
-                        onClick={() => {
-                          onSave();
-                          session.close();
-                        }}
-                      >
-                        Share & Save
-                      </EuiButton>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiModalFooter>
-            </EuiModal>
-          </SpacesContextWrapper>,
+          <ConfirmShareSaveModal
+            onClone={onClone}
+            onSave={onSave}
+            onCancel={onCancel}
+            onClose={() => session.close()}
+            message={message}
+            title={modalTitle}
+            spacesApi={spacesApi}
+            canSave={!(hasNewReference && hasHiddenSpace)}
+            namespaces={namespaces}
+          />,
           {
             theme$,
           }
@@ -381,7 +389,17 @@ export function InternalDashboardTopNav({
         }
       );
     },
-    [SpacesContextWrapper, lastSavedId, namespaces, openModal, spacesApi, spacesService, theme$]
+    [
+      dashboard,
+      lastSavedId,
+      namespaces,
+      spacesApi,
+      spacesService,
+      theme$,
+      title,
+      getAttributesAndReferences,
+      openModal,
+    ]
   );
 
   const updateSpacesForReferences = useCallback(async () => {
