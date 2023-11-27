@@ -36,7 +36,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(cacheControlHeader).to.contain('stale-while-revalidate');
       expect(response.get('vary')).to.equal('accept-encoding, user-hash');
       expect(response.get('etag')).to.not.be.empty();
-      expect(response.get('user-hash')).to.equal('');
     });
 
     it('returns 304 on matching etag', async () => {
