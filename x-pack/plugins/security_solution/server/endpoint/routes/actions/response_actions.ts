@@ -7,6 +7,9 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { SentinelOneActionsClient } from '../../services/actions/clients/sentinel_one_actions_client';
+import { EndpointError } from '../../../../common/endpoint/errors';
+import type { ResponseActionsClient } from '../../lib/response_actions/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { EndpointActionsClient } from '../../services/actions/clients';
 import type {
@@ -293,12 +296,35 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
-    const actionsClient = new EndpointActionsClient({
-      esClient,
-      casesClient,
-      endpointContext,
-      username: user?.username ?? 'unknown',
-    });
+    // const connectorActionsClient = (await context.actions).getActionsClient();
+    const agentType = req.body.agent_type ?? 'endpoint';
+    let actionsClient: ResponseActionsClient;
+
+    switch (agentType) {
+      case 'endpoint':
+        actionsClient = new EndpointActionsClient({
+          esClient,
+          casesClient,
+          endpointContext,
+          username: user?.username ?? 'unknown',
+        });
+        break;
+      case 'sentinel_one':
+        actionsClient = new SentinelOneActionsClient({
+          esClient,
+          casesClient,
+          endpointContext,
+          username: user?.username ?? 'unknown',
+        });
+        break;
+
+      default:
+        return errorHandler(
+          logger,
+          res,
+          new EndpointError(`No client defined for agentType: ${agentType}`)
+        );
+    }
 
     try {
       let action: ActionDetails;
