@@ -8,6 +8,8 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { indicesApi } from '../apis/management/index_management/lib/indices.api';
 import { indicesHelpers } from '../apis/management/index_management/lib/indices.helpers';
+import { componentTemplatesApi } from '../apis/management/index_management/lib/component_templates.api';
+import { componentTemplateHelpers } from '../apis/management/index_management/lib/component_template.helpers';
 
 export function IndexManagementProvider({ getService }: FtrProviderContext) {
   return {
@@ -15,5 +17,9 @@ export function IndexManagementProvider({ getService }: FtrProviderContext) {
       api: indicesApi(getService),
       helpers: indicesHelpers(getService),
     },
+    componentTemplates: {
+      api: componentTemplatesApi(getService),
+      helpers: componentTemplateHelpers(getService),
+    }
   };
 }
