@@ -67,6 +67,10 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           const { moreToFetch, newPitId, searchAfter, alerts } =
             await receiver.fetchPrebuiltRuleAlertsBatch(pitId, searchAfterValue);
 
+          if (alerts.length === 0) {
+            return 0;
+          }
+
           fetchMore = moreToFetch;
           searchAfterValue = searchAfter;
           pitId = newPitId;
