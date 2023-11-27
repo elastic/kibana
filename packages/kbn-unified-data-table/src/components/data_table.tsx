@@ -624,14 +624,8 @@ export const UnifiedDataTable = ({
 
   const shouldShowTimeField = useMemo(
     () =>
-      hasSourceTimeFieldValue(
-        displayedColumns,
-        dataView,
-        displayedRows,
-        showTimeCol,
-        isPlainRecord
-      ),
-    [dataView, displayedColumns, isPlainRecord, showTimeCol, displayedRows]
+      hasSourceTimeFieldValue(displayedColumns, dataView, columnTypes, showTimeCol, isPlainRecord),
+    [dataView, displayedColumns, isPlainRecord, showTimeCol, columnTypes]
   );
 
   const visibleColumns = useMemo(

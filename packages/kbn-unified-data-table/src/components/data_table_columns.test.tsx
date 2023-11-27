@@ -17,7 +17,6 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import { dataViewWithoutTimefieldMock } from '../../__mocks__/data_view_without_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
-import { DataTableRecord } from '@kbn/discover-utils/types';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(
@@ -118,12 +117,12 @@ describe('Data table columns', function () {
   });
 
   describe('hasSourceTimeFieldValue', () => {
-    function buildRows(dataView: DataView) {
-      const flattenedRow: Record<string, unknown> = {};
+    function buildColumnTypes(dataView: DataView) {
+      const columnTypes: Record<string, string> = {};
       for (const field of dataView.fields) {
-        flattenedRow[field.name] = '';
+        columnTypes[field.name] = '';
       }
-      return [{ flattened: flattenedRow }] as DataTableRecord[];
+      return columnTypes;
     }
 
     describe('dataView with timeField', () => {
@@ -133,7 +132,7 @@ describe('Data table columns', function () {
             hasSourceTimeFieldValue(
               ['extension', 'message'],
               dataViewWithTimefieldMock,
-              buildRows(dataViewWithTimefieldMock),
+              buildColumnTypes(dataViewWithTimefieldMock),
               showTimeCol,
               false
             )
@@ -147,7 +146,7 @@ describe('Data table columns', function () {
             hasSourceTimeFieldValue(
               ['extension', 'message'],
               dataViewWithTimefieldMock,
-              buildRows(dataViewWithTimefieldMock),
+              buildColumnTypes(dataViewWithTimefieldMock),
               showTimeCol,
               true
             )
@@ -161,7 +160,7 @@ describe('Data table columns', function () {
             hasSourceTimeFieldValue(
               ['_source'],
               dataViewWithTimefieldMock,
-              buildRows(dataViewWithTimefieldMock),
+              buildColumnTypes(dataViewWithTimefieldMock),
               showTimeCol,
               false
             )
@@ -176,7 +175,7 @@ describe('Data table columns', function () {
             hasSourceTimeFieldValue(
               ['_source'],
               dataViewWithTimefieldMock,
-              buildRows(dataViewWithTimefieldMock),
+              buildColumnTypes(dataViewWithTimefieldMock),
               showTimeCol,
               true
             )
@@ -192,7 +191,7 @@ describe('Data table columns', function () {
             hasSourceTimeFieldValue(
               ['extension', 'message'],
               dataViewWithoutTimefieldMock,
-              buildRows(dataViewWithoutTimefieldMock),
+              buildColumnTypes(dataViewWithoutTimefieldMock),
               showTimeCol,
               false
             )
@@ -206,7 +205,7 @@ describe('Data table columns', function () {
             hasSourceTimeFieldValue(
               ['extension', 'message'],
               dataViewWithoutTimefieldMock,
-              buildRows(dataViewWithoutTimefieldMock),
+              buildColumnTypes(dataViewWithoutTimefieldMock),
               showTimeCol,
               true
             )
@@ -220,7 +219,7 @@ describe('Data table columns', function () {
             hasSourceTimeFieldValue(
               ['_source'],
               dataViewWithoutTimefieldMock,
-              buildRows(dataViewWithoutTimefieldMock),
+              buildColumnTypes(dataViewWithoutTimefieldMock),
               showTimeCol,
               false
             )
@@ -234,7 +233,7 @@ describe('Data table columns', function () {
             hasSourceTimeFieldValue(
               ['_source'],
               dataViewWithoutTimefieldMock,
-              buildRows(dataViewWithoutTimefieldMock),
+              buildColumnTypes(dataViewWithoutTimefieldMock),
               showTimeCol,
               true
             )
