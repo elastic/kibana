@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard, EuiTextTruncate } from '@elastic/eui';
 import React, { ReactNode, useMemo, useState } from 'react';
 import { HoverAction, HoverActionType } from './hover_action';
 import {
@@ -18,21 +18,22 @@ import {
 import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
 
 interface HighlightFieldProps {
-  label: string | ReactNode;
   field: string;
-  value: unknown;
   formattedValue: string;
-  dataTestSubj: string;
+  icon?: ReactNode;
+  label: string | ReactNode;
+  value: unknown;
   width: number;
 }
 
 export function HighlightField({
-  label,
   field,
-  value,
   formattedValue,
-  dataTestSubj,
+  icon,
+  label,
+  value,
   width,
+  ...props
 }: HighlightFieldProps) {
   const filterForText = flyoutHoverActionFilterForText(value);
   const filterOutText = flyoutHoverActionFilterOutText(value);
@@ -89,14 +90,33 @@ export function HighlightField({
     [filterForText, filterOutText, actions, field, value, columnAdded]
   );
   return formattedValue ? (
-    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj={dataTestSubj}>
+    <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
           {label}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <HoverAction displayText={formattedValue} actions={hoverActions} width={width} />
+        <HoverAction actions={hoverActions}>
+          <EuiFlexGroup
+            responsive={false}
+            alignItems="center"
+            justifyContent="flexStart"
+            gutterSize="xs"
+          >
+            {icon && <EuiFlexItem grow={false}>{icon}</EuiFlexItem>}
+            <EuiFlexItem grow={false}>
+              <EuiTextTruncate text={formattedValue} truncation="end" width={width}>
+                {(truncatedText: string) => (
+                  <EuiText
+                    // Value returned from formatFieldValue is always sanitized
+                    dangerouslySetInnerHTML={{ __html: truncatedText }}
+                  />
+                )}
+              </EuiTextTruncate>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </HoverAction>
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
