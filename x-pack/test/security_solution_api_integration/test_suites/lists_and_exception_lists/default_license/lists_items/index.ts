@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Lists API', function () {
+  describe('Lists and Items API', function () {
     loadTestFile(require.resolve('./items'));
     loadTestFile(require.resolve('./lists'));
   });
