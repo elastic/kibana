@@ -30,7 +30,6 @@ import {
   validateAxes,
 } from './validate';
 import { logDatatable } from '../utils';
-import { shouldShowLegendActionDefault } from '../helpers/visualization';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
   const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
@@ -140,7 +139,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
       overrides: handlers.variables?.overrides as XYRender['value']['overrides'],
-      shouldShowLegendAction: handlers?.shouldShowLegendAction ?? shouldShowLegendActionDefault,
     },
   };
 };

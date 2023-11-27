@@ -133,6 +133,124 @@ describe('MaintenanceWindowClient - create', () => {
     );
   });
 
+  it('should create maintenance window with scoped query', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    await createMaintenanceWindow(mockContext, {
+      data: {
+        title: mockMaintenanceWindow.title,
+        duration: mockMaintenanceWindow.duration,
+        rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+        categoryIds: ['observability', 'securitySolution'],
+        scopedQuery: {
+          kql: "_id: '1234'",
+          filters: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'kibana.alert.action_group',
+                field: 'kibana.alert.action_group',
+                params: {
+                  query: 'test',
+                },
+                type: 'phrase',
+              },
+              $state: {
+                store: 'appState',
+              },
+              query: {
+                match_phrase: {
+                  'kibana.alert.action_group': 'test',
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        title: mockMaintenanceWindow.title,
+        duration: mockMaintenanceWindow.duration,
+        rRule: mockMaintenanceWindow.rRule,
+        enabled: true,
+        expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+        categoryIds: ['observability', 'securitySolution'],
+        ...updatedMetadata,
+      }),
+      {
+        id: expect.any(String),
+      }
+    );
+
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.kql
+    ).toEqual(`_id: '1234'`);
+
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.filters[0]
+    ).toEqual({
+      $state: { store: 'appState' },
+      meta: {
+        alias: null,
+        disabled: false,
+        field: 'kibana.alert.action_group',
+        key: 'kibana.alert.action_group',
+        negate: false,
+        params: { query: 'test' },
+        type: 'phrase',
+      },
+      query: { match_phrase: { 'kibana.alert.action_group': 'test' } },
+    });
+
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.dsl
+    ).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"_id\\":\\"'1234'\\"}}],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"kibana.alert.action_group\\":\\"test\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
+    );
+  });
+
+  it('should throw if trying to create a maintenance window with invalid scoped query', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    await expect(async () => {
+      await createMaintenanceWindow(mockContext, {
+        data: {
+          title: mockMaintenanceWindow.title,
+          duration: mockMaintenanceWindow.duration,
+          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+          categoryIds: ['observability', 'securitySolution'],
+          scopedQuery: {
+            kql: 'invalid: ',
+            filters: [],
+          },
+        },
+      });
+    }).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Error validating create maintenance scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      invalid: 
+      ---------^"
+    `);
+  });
+
   it('should throw if trying to create a maintenance window with invalid category ids', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
