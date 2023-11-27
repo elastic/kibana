@@ -224,7 +224,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     tokensFinder.close();
 
     const uninstallTokens: UninstallToken[] = tokenObject.map(
-      ({ id: _id, attributes, created_at: createdAt }) => {
+      ({ id: _id, attributes, created_at: createdAt, error }) => {
+        if (error) {
+          throw new UninstallTokenError(`Error when reading Uninstall Token: ${error.message}`);
+        }
+
         this.assertPolicyId(attributes);
         this.assertToken(attributes);
         this.assertCreatedAt(createdAt);
