@@ -79,7 +79,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       services,
       chartWidth,
       fromPage,
-      { onError, onLoading }
+      { onError, onLoading, onRenderComplete }
     );
 
   useEffect(() => {
@@ -106,8 +106,6 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [swimlaneData, perPage, fromPage, setSelectedCells]
   );
-
-  onRenderComplete();
 
   if (error) {
     return (
