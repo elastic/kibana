@@ -6,11 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { createBaseFlameGraph, createCalleeTree } from '@kbn/profiling-utils';
 import { kqlQuery } from '../../utils/query';
-import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { RegisterServicesParams } from '../register_services';
-import { searchStackTraces } from '../search_stack_traces';
 
 export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;
@@ -30,34 +27,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     const rangeToSecs = rangeToMs / 1000;
 
     const profilingEsClient = createProfilingEsClient({ esClient });
-
     const totalSeconds = rangeToSecs - rangeFromSecs;
-    // Use legacy stack traces API to fetch the flamegraph
-    if (useLegacyFlamegraphAPI) {
-      const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
-        await searchStackTraces({
-          client: profilingEsClient,
-          rangeFrom: rangeFromSecs,
-          rangeTo: rangeToSecs,
-          kuery,
-          sampleSize: targetSampleSize,
-          durationSeconds: totalSeconds,
-        });
-
-      return await withProfilingSpan('create_flamegraph', async () => {
-        const tree = createCalleeTree(
-          events,
-          stackTraces,
-          stackFrames,
-          executables,
-          totalFrames,
-          samplingRate
-        );
-
-        return createBaseFlameGraph(tree, samplingRate, totalSeconds);
-      });
-    }
-
     const flamegraph = await profilingEsClient.profilingFlamegraph({
       query: {
         bool: {
