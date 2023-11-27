@@ -32,7 +32,10 @@ import { HttpErrorRateChart } from '../charts/mobile_http_error_rate';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { MobileErrorGroupList } from './error_group_list';
 import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
-import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
+import {
+  getKueryWithMobileErrorFilter,
+  getKueryWithMobileFilters,
+} from '../../../../../common/utils/get_kuery_with_mobile_filters';
 
 type MobileErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/errors/groups/main_statistics'>;
@@ -181,6 +184,11 @@ export function MobileErrorsOverview() {
     [requestId],
     { preservePreviousData: false }
   );
+  const kueryForTreemap = getKueryWithMobileErrorFilter({
+    kuery: kueryWithMobileFilters,
+    groupId: undefined,
+  });
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -226,7 +234,7 @@ export function MobileErrorsOverview() {
             <EuiPanel hasBorder={true}>
               <MobileErrorTreemap
                 serviceName={serviceName}
-                kuery={kueryWithMobileFilters}
+                kuery={kueryForTreemap}
                 environment={environment}
                 start={start}
                 end={end}

@@ -18,7 +18,7 @@ import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
-import { MobileCrashesTreemap } from '../charts/mobile_crashes_treemap';
+import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
 import { MobileCrashGroupList } from './crash_group_list';
 import {
   FETCH_STATUS,
@@ -31,7 +31,10 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
+import {
+  getKueryWithMobileCrashFilter,
+  getKueryWithMobileFilters,
+} from '../../../../../common/utils/get_kuery_with_mobile_filters';
 
 type MobileCrashGroupMainStatistics =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics'>;
@@ -184,6 +187,12 @@ export function MobileCrashesOverview() {
     [requestId],
     { preservePreviousData: false }
   );
+
+  const kueryForTreemap = getKueryWithMobileCrashFilter({
+    kuery: kueryWithMobileFilters,
+    groupId: undefined,
+  });
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -215,9 +224,9 @@ export function MobileCrashesOverview() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <MobileCrashesTreemap
+              <MobileErrorTreemap
                 serviceName={serviceName}
-                kuery={kueryWithMobileFilters}
+                kuery={kueryForTreemap}
                 environment={environment}
                 start={start}
                 end={end}

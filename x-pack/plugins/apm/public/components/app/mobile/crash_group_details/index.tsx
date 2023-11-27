@@ -29,11 +29,13 @@ import type { APIReturnType } from '../../../../services/rest/create_call_apm_ap
 import { ErrorSampler } from './error_sampler';
 import { ErrorDistribution } from './distribution';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { MobileCrashesTreemap } from '../charts/mobile_crashes_treemap';
+import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
 import { maybe } from '../../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
-import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
-import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
+import {
+  getKueryWithMobileCrashFilter,
+  getKueryWithMobileFilters,
+} from '../../../../../common/utils/get_kuery_with_mobile_filters';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -153,6 +155,11 @@ export function CrashGroupDetails() {
     ]
   );
 
+  const kueryForTreemap = getKueryWithMobileCrashFilter({
+    kuery: kueryWithMobileFilters,
+    groupId,
+  });
+
   const {
     data: errorSamplesData = emptyErrorSamples,
     status: errorSamplesFetchStatus,
@@ -245,9 +252,9 @@ export function CrashGroupDetails() {
         </ChartPointerEventContextProvider>
         <EuiFlexItem grow={2}>
           <EuiPanel hasBorder={true}>
-            <MobileCrashesTreemap
+            <MobileErrorTreemap
               serviceName={serviceName}
-              kuery={`${kueryWithMobileFilters} and ${ERROR_GROUP_ID}: ${groupId}`}
+              kuery={`${kueryForTreemap}`}
               environment={environment}
               start={start}
               end={end}
