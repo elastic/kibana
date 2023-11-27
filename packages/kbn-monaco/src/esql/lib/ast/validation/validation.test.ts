@@ -259,6 +259,22 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from in*ex`, []);
     testErrorsAndWarnings(`from ind*ex`, []);
     testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
+
+    testErrorsAndWarnings(`from remote-*:indexes*`, [
+      'CCS indexes are not supported [remote-*:indexes*]',
+    ]);
+    testErrorsAndWarnings(`from remote-*:indexes`, [
+      'CCS indexes are not supported [remote-*:indexes]',
+    ]);
+    testErrorsAndWarnings(`from remote-ccs:indexes`, [
+      'CCS indexes are not supported [remote-ccs:indexes]',
+    ]);
+    testErrorsAndWarnings(`from a, remote-ccs:indexes`, [
+      'CCS indexes are not supported [remote-ccs:indexes]',
+    ]);
+    testErrorsAndWarnings(`from remote-ccs:indexes [METADATA _id]`, [
+      'CCS indexes are not supported [remote-ccs:indexes]',
+    ]);
   });
 
   describe('row', () => {
