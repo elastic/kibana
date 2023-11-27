@@ -465,10 +465,10 @@ export class ModelsProvider {
         (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
         (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
 
-      const { modelName, ...rest } = def;
+      const { modelName } = def;
 
       const modelDefinitionResponse = {
-        ...rest,
+        ...def,
         ...(recommended ? { recommended } : {}),
         name,
       };
