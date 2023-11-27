@@ -33,11 +33,11 @@ import * as i18n from './translations';
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 
 // import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
-import { RuleDiffTab as RuleDiffTab1 } from '../../../../rule_management/components/rule_details/rule_diff_tab_1';
-import { RuleDiffTab as RuleDiffTab2 } from '../../../../rule_management/components/rule_details/rule_diff_tab_2';
-import { RuleDiffTab as RuleDiffTab3 } from '../../../../rule_management/components/rule_details/rule_diff_tab_3';
-import { RuleDiffTab as RuleDiffTab4 } from '../../../../rule_management/components/rule_details/rule_diff_tab_4';
-import { RuleDiffTab as RuleDiffTab5 } from '../../../../rule_management/components/rule_details/rule_diff_tab_5';
+import { RuleDiffTabAppExperienceTeamPoc } from '../../../../rule_management/components/rule_details/rule_diff_tab_app_experience_team_poc';
+import { RuleDiffTabReactDiffViewerContinued } from '../../../../rule_management/components/rule_details/rule_diff_tab_react_diff_viewer_continued';
+import { RuleDiffTabReactDiffView } from '../../../../rule_management/components/rule_details/rule_diff_tab_react_diff_view';
+import { RuleDiffTabMonaco } from '../../../../rule_management/components/rule_details/rule_diff_tab_monaco';
+import { RuleDiffTabDiff2Html } from '../../../../rule_management/components/rule_details/rule_diff_tab_diff2html';
 // import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations.ts';
 
 export interface UpgradePrebuiltRulesTableState {
@@ -307,77 +307,84 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                 return defaultTabs;
               }
 
-              const diffTab1 = {
-                id: 'diff1',
-                name: 'elastic-poc',
-                content: (
-                  <TabContentPadding>
-                    <RuleDiffTab1
-                      currentRule={activeRule.current_rule}
-                      mergedRule={activeRule.target_rule}
-                      fields={diff.fields}
-                    />
-                  </TabContentPadding>
-                ),
-              };
-
-              const diffTab2 = {
-                id: 'diff2',
+              const diffTabReactDiffViewerContinued = {
+                id: 'react-diff-viewer-continued',
                 name: 'react-diff-viewer-continued',
                 content: (
                   <TabContentPadding>
-                    <RuleDiffTab2
-                      currentRule={activeRule.current_rule}
-                      mergedRule={activeRule.target_rule}
+                    <RuleDiffTabReactDiffViewerContinued
+                      oldRule={activeRule.current_rule}
+                      newRule={activeRule.target_rule}
                       fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
               };
 
-              const diffTab3 = {
-                id: 'diff3',
+              const diffTabReactDiffView = {
+                id: 'react-diff-view',
                 name: 'react-diff-view',
                 content: (
                   <TabContentPadding>
-                    <RuleDiffTab3
-                      currentRule={activeRule.current_rule}
-                      mergedRule={activeRule.target_rule}
+                    <RuleDiffTabReactDiffView
+                      oldRule={activeRule.current_rule}
+                      newRule={activeRule.target_rule}
                       fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
               };
 
-              const diffTab4 = {
-                id: 'diff4',
+              const diffTabMonaco = {
+                id: 'monaco',
                 name: 'monaco',
                 content: (
                   <TabContentPadding>
-                    <RuleDiffTab4
-                      currentRule={activeRule.current_rule}
-                      mergedRule={activeRule.target_rule}
+                    <RuleDiffTabMonaco
+                      oldRule={activeRule.current_rule}
+                      newRule={activeRule.target_rule}
                       fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
               };
 
-              const diffTab5 = {
-                id: 'diff5',
+              const diffTabDiff2Html = {
+                id: 'diff2html',
                 name: 'diff2html',
                 content: (
                   <TabContentPadding>
-                    <RuleDiffTab5
-                      currentRule={activeRule.current_rule}
-                      mergedRule={activeRule.target_rule}
+                    <RuleDiffTabDiff2Html
+                      oldRule={activeRule.current_rule}
+                      newRule={activeRule.target_rule}
                       fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
               };
 
-              return [diffTab2, diffTab3, diffTab4, diffTab5, diffTab1, ...defaultTabs];
+              const diffTabAppExperienceTeamPoc = {
+                id: 'app-experience-team-poc',
+                name: 'app-experience-team-poc',
+                content: (
+                  <TabContentPadding>
+                    <RuleDiffTabAppExperienceTeamPoc
+                      oldRule={activeRule.current_rule}
+                      newRule={activeRule.target_rule}
+                      fields={diff.fields}
+                    />
+                  </TabContentPadding>
+                ),
+              };
+
+              return [
+                diffTabReactDiffViewerContinued,
+                diffTabReactDiffView,
+                diffTabMonaco,
+                diffTabDiff2Html,
+                diffTabAppExperienceTeamPoc,
+                ...defaultTabs,
+              ];
             }}
           />
         )}
