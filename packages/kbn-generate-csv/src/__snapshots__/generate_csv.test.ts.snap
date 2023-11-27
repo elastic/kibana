@@ -77,10 +77,10 @@ Array [
     "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
   ],
   Array [
-    "Received total hits: 3. Received accuracy: unknown.",
+    "Received total hits: 3. Accuracy: unknown.",
   ],
   Array [
-    "Results metadata: {\\"header\\":{\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\",\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0}},\\"hitsMeta\\":{\\"total\\":3,\\"max_score\\":0}}",
+    "Result details: {\\"rawResponse\\":{\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0},\\"hits\\":{\\"total\\":3,\\"max_score\\":0},\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\"}}",
   ],
   Array [
     "Received PIT ID: [oju9fs3698s3[39 bytes]]",
@@ -98,10 +98,10 @@ Array [
     "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
   ],
   Array [
-    "Received total hits: 3. Received accuracy: unknown.",
+    "Received total hits: 3. Accuracy: unknown.",
   ],
   Array [
-    "Results metadata: {\\"header\\":{\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\",\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0}},\\"hitsMeta\\":{\\"total\\":3,\\"max_score\\":0}}",
+    "Result details: {\\"rawResponse\\":{\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0},\\"hits\\":{\\"total\\":3,\\"max_score\\":0},\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\"}}",
   ],
   Array [
     "Received PIT ID: [oju9fs3698s3[39 bytes]]",
@@ -116,10 +116,10 @@ Array [
     "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
   ],
   Array [
-    "Received total hits: 3. Received accuracy: unknown.",
+    "Received total hits: 3. Accuracy: unknown.",
   ],
   Array [
-    "Results metadata: {\\"header\\":{\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\",\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0}},\\"hitsMeta\\":{\\"total\\":3,\\"max_score\\":0}}",
+    "Result details: {\\"rawResponse\\":{\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0},\\"hits\\":{\\"total\\":3,\\"max_score\\":0},\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\"}}",
   ],
   Array [
     "Received PIT ID: [oju9fs3698s3[39 bytes]]",
