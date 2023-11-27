@@ -7,14 +7,13 @@
 
 import { SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID } from '@kbn/management-settings-ids';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const setKibanaSetting = (key: string, value: boolean | number | string) => {
   rootRequest({
     method: 'POST',
     url: 'internal/kibana/settings',
     body: { changes: { [key]: value } },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 

@@ -172,6 +172,7 @@ export const assetFiltersSingleKindRT = rt.exact(
     id: rt.string,
     ['cloud.provider']: rt.string,
     ['cloud.region']: rt.string,
+    ['orchestrator.cluster.name']: rt.string,
   })
 );
 
@@ -258,3 +259,21 @@ export const getServiceAssetsResponseRT = rt.type({
   services: rt.array(assetRT),
 });
 export type GetServiceAssetsResponse = rt.TypeOf<typeof getServiceAssetsResponseRT>;
+
+/**
+ * Pods
+ */
+export const getPodAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+export type GetPodAssetsQueryOptions = rt.TypeOf<typeof getPodAssetsQueryOptionsRT>;
+export const getPodAssetsResponseRT = rt.type({
+  pods: rt.array(assetRT),
+});
+export type GetPodAssetsResponse = rt.TypeOf<typeof getPodAssetsResponseRT>;

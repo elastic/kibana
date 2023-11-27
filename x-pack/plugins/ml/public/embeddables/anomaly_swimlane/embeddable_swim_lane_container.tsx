@@ -79,7 +79,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       services,
       chartWidth,
       fromPage,
-      { onRenderComplete, onError, onLoading }
+      { onError, onLoading }
     );
 
   useEffect(() => {
@@ -171,6 +171,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
           />
         }
         chartsService={chartsService}
+        onRenderComplete={onRenderComplete}
       />
     </div>
   );
