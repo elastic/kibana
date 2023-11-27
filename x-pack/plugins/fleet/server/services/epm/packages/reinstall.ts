@@ -11,6 +11,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { Installation } from '../../../types';
 import { pkgToPkgKey } from '../registry';
 
+import { PackageNotFoundError, PackageAlreadyInstalledError } from '../../../errors';
+
 import { getBundledPackageForInstallation } from './bundled_packages';
 
 import { installPackage } from './install';
@@ -29,9 +31,11 @@ export async function reinstallPackageForInstallation({
     const matchingBundledPackage = await getBundledPackageForInstallation(installation);
     if (!matchingBundledPackage) {
       if (installation.install_source === 'bundled') {
-        throw new Error(`Cannot reinstall: ${installation.name}, bundled package not found`);
+        throw new PackageNotFoundError(
+          `Cannot reinstall: ${installation.name}, bundled package not found`
+        );
       } else {
-        throw new Error('Cannot reinstall an uploaded package');
+        throw new PackageAlreadyInstalledError('Cannot reinstall an uploaded package');
       }
     }
   }
