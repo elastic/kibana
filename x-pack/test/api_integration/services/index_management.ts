@@ -19,6 +19,7 @@ export function IndexManagementProvider({ getService }: FtrProviderContext) {
     },
     datastreams: {
       helpers: datastreamsHelpers(getService),
+    },
     mappings: {
       api: mappingsApi(getService),
     },
