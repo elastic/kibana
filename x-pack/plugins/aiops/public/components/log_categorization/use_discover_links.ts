@@ -77,10 +77,11 @@ export function createFilter(
   const selectedRows = category === undefined ? selection : [category];
   const query = getCategoryQuery(field, selectedRows, mode);
   if (additionalField !== undefined) {
-    if (query.bool.must === undefined) {
-      query.bool.must = [];
-    }
-    query.bool.must.push({ term: { [additionalField.name]: additionalField.value } });
+    query.bool.must = [
+      {
+        term: { [additionalField.name]: additionalField.value },
+      },
+    ];
   }
   return {
     query,
