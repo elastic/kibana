@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import type { SharePluginSetup as PublicServerSharePluginSetup } from '@kbn/share-plugin/public';
+import type { SharePluginSetup as ServerSharePluginSetup } from '@kbn/share-plugin/server';
 
 export interface LogExplorerLocatorDependencies {
-  discover: DiscoverSetup;
+  share: PublicServerSharePluginSetup | ServerSharePluginSetup;
 }

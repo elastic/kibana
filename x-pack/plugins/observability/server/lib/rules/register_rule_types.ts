@@ -6,6 +6,7 @@
  */
 
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
@@ -27,10 +28,11 @@ import { sloRuleFieldMap } from './slo_burn_rate/field_map';
 
 export function registerRuleTypes(
   alertingPlugin: PluginSetupContract,
-  logger: Logger,
-  ruleDataService: IRuleDataService,
   basePath: IBasePath,
   config: ObservabilityConfig,
+  logger: Logger,
+  ruleDataService: IRuleDataService,
+  share: SharePluginSetup,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
   // SLO RULE
@@ -85,6 +87,7 @@ export function registerRuleTypes(
         config,
         logger,
         ruleDataClientThreshold,
+        share,
         alertsLocator
       )
     );

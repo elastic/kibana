@@ -5,10 +5,31 @@
  * 2.0.
  */
 
-import { Plugin } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
+import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
+import type { LogExplorerSetupDeps } from './types';
 
 export class LogExplorerServerPlugin implements Plugin {
-  setup() {}
+  private locators?: LogExplorerLocators;
+
+  setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {
+    const { share } = plugins;
+
+    // Register Locators
+    const logExplorerLocator = share.url.locators.create(
+      new LogExplorerLocatorDefinition({
+        share,
+      })
+    );
+
+    this.locators = {
+      logExplorerLocator,
+    };
+
+    return {
+      locators: this.locators,
+    };
+  }
 
   start() {}
 }

@@ -17,6 +17,7 @@ import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import {
   AlertsLocatorParams,
@@ -38,6 +39,7 @@ import {
   tagsActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
+  viewInAppUrlActionVariableDescription,
 } from './translations';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
@@ -70,6 +72,7 @@ export function thresholdRuleType(
   config: ObservabilityConfig,
   logger: Logger,
   ruleDataClient: IRuleDataClient,
+  share: SharePluginSetup,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
   const baseCriterion = {
@@ -149,7 +152,7 @@ export function thresholdRuleType(
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(
-      createCustomThresholdExecutor({ alertsLocator, basePath, logger, config })
+      createCustomThresholdExecutor({ alertsLocator, basePath, logger, config, share })
     ),
     doesSetRecoveryContext: true,
     actionVariables: {
@@ -169,6 +172,7 @@ export function thresholdRuleType(
         { name: 'orchestrator', description: orchestratorActionVariableDescription },
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
       ],
     },
     useSavedObjectReferences: {

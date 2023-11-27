@@ -13,6 +13,6 @@ export interface TopAlert<TAdditionalMetaFields extends Record<string, any> = {}
   start: number;
   lastUpdated: number;
   reason: string;
-  link?: string;
+  link?: string | Promise<string>;
   active: boolean;
 }

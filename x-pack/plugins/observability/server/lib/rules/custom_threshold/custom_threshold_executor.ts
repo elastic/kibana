@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { isEqual } from 'lodash';
 import {
   ALERT_ACTION_GROUP,
@@ -17,6 +19,7 @@ import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
+import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
@@ -53,10 +56,12 @@ export const createCustomThresholdExecutor = ({
   basePath,
   logger,
   config,
+  share,
 }: {
   basePath: IBasePath;
   logger: Logger;
   config: ObservabilityConfig;
+  share: SharePluginSetup;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }): LifecycleRuleExecutor<
   CustomThresholdRuleParams,
@@ -67,6 +72,8 @@ export const createCustomThresholdExecutor = ({
 > =>
   async function (options) {
     const startTime = Date.now();
+    const logExplorerLocator =
+      share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
 
     const {
       services,
@@ -132,21 +139,22 @@ export const createCustomThresholdExecutor = ({
         : [];
 
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
-    const dataView = initialSearchSource.getField('index')!.getIndexPattern();
-    const dataViewName = initialSearchSource.getField('index')!.name;
-    const timeFieldName = initialSearchSource.getField('index')?.timeFieldName;
-    if (!dataView) {
+    const dataView = initialSearchSource.getField('index')!;
+    const { id: dataViewId, timeFieldName } = dataView;
+    const dataViewIndexPattern = dataView.getIndexPattern();
+    const dataViewName = dataView.getName();
+    if (!dataViewIndexPattern) {
       throw new Error('No matched data view');
     } else if (!timeFieldName) {
       throw new Error('The selected data view does not have a timestamp field');
     }
 
-    // Calculate initial start and end date with no time window, as each criteria has it's own time window
+    // Calculate initial start and end date with no time window, as each criterion has its own time window
     const { dateStart, dateEnd } = getTimeRange();
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
-      dataView,
+      dataViewIndexPattern,
       timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
@@ -270,13 +278,20 @@ export const createCustomThresholdExecutor = ({
           group: groupByKeysObjectMapping[group],
           reason,
           timestamp,
-          value: alertResults.map((result, index) => {
+          value: alertResults.map((result) => {
             const evaluation = result[group];
             if (!evaluation) {
               return null;
             }
             return formatAlertResult(evaluation).currentValue;
           }),
+          viewInAppUrl: await getViewInAppUrl(
+            alertResults.length === 1 ? alertResults[0][group].metrics : [],
+            indexedStartedAt,
+            logExplorerLocator,
+            params.searchConfiguration.query.query,
+            params.searchConfiguration?.index?.title ?? dataViewId
+          ),
           ...additionalContext,
         });
       }

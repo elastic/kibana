@@ -6,6 +6,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import {
   LogExplorerLocatorParams,
@@ -29,10 +30,12 @@ export class LogExplorerLocatorDefinition implements LocatorDefinition<LogExplor
         }
       : undefined;
 
-    return this.deps.discover.locator?.getLocation({
-      ...params,
-      dataViewId: dataset,
-      dataViewSpec,
-    })!;
+    return this.deps.share.url.locators
+      .get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)
+      ?.getLocation({
+        ...params,
+        dataViewId: dataset,
+        dataViewSpec,
+      })!;
   };
 }

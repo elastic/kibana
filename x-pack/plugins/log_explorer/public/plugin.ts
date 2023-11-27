@@ -21,12 +21,12 @@ export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExpl
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {
-    const { share, discover } = plugins;
+    const { share } = plugins;
 
     // Register Locators
     const logExplorerLocator = share.url.locators.create(
       new LogExplorerLocatorDefinition({
-        discover,
+        share,
       })
     );
 

@@ -304,10 +304,11 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     registerRuleTypes(
       plugins.alerting,
-      this.logger,
-      ruleDataService,
       core.http.basePath,
       config,
+      this.logger,
+      ruleDataService,
+      plugins.share,
       alertsLocator
     );
     registerSloUsageCollector(plugins.usageCollection);
