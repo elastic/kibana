@@ -8,7 +8,7 @@
 import { getNewRule } from '../../../objects/rule';
 import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   fillScheduleRuleAndContinue,
   fillAboutRuleMinimumAndContinue,
