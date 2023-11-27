@@ -6,7 +6,7 @@
  */
 
 import { left, right } from 'fp-ts/lib/Either';
-import { errors, TransportResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';

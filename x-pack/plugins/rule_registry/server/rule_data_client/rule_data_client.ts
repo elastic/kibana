@@ -239,10 +239,11 @@ export class RuleDataClient implements IRuleDataClient {
             // TODO: #160572 - add support for version conflict errors, in case alert was updated
             // some other way between the time it was fetched and the time it was updated.
             // Redact part of reason message that echoes back value
-            const sanitizedResponse = sanitizeBulkErrorResponse(response);
-            const error = new errors.ResponseError(
-              sanitizedResponse as TransportResult<estypes.BulkResponse, unknown>
-            );
+            const sanitizedResponse = sanitizeBulkErrorResponse(response) as TransportResult<
+              estypes.BulkResponse,
+              unknown
+            >;
+            const error = new errors.ResponseError(sanitizedResponse);
             this.options.logger.error(error);
             return sanitizedResponse;
           } else {
