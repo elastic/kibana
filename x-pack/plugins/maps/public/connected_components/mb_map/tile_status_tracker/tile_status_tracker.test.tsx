@@ -12,6 +12,7 @@ import type { Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { TileStatusTracker } from './tile_status_tracker';
 import { ILayer } from '../../../classes/layers/layer';
+import type { IVectorSource } from '../../../classes/sources/vector_source';
 
 class MockMbMap {
   public listeners: Array<{ type: string; callback: (e: unknown) => void }> = [];
@@ -286,7 +287,7 @@ describe('TileStatusTracker', () => {
           isMvt() {
             return false;
           },
-        };
+        } as unknown as IVectorSource;
       };
       wrapper.setProps({ layerList: [geojsonLayer1] });
 
