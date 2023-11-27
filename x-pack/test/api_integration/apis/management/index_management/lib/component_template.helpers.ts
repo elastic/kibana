@@ -19,8 +19,7 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
   let indexTemplatesCreated: string[] = [];
   let datastreamCreated: string[] = [];
 
-  const removeComponentTemplate = (name: string) =>
-    es.cluster.deleteComponentTemplate({ name });
+  const removeComponentTemplate = (name: string) => es.cluster.deleteComponentTemplate({ name });
 
   const removeDatastream = (datastream: string) =>
     es.indices.deleteDataStream({ name: datastream });

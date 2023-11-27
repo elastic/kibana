@@ -16,7 +16,7 @@ export function componentTemplatesApi(getService: FtrProviderContext['getService
       .post(`${API_BASE_PATH}/component_templates`)
       .set('kbn-xsrf', 'xxx')
       .set('x-elastic-internal-origin', 'xxx')
-      .send({ name: name, ...options });
+      .send({ name, ...options });
 
   const getAllComponentTemplates = () =>
     supertest
@@ -36,8 +36,8 @@ export function componentTemplatesApi(getService: FtrProviderContext['getService
       .set('kbn-xsrf', 'xxx')
       .set('x-elastic-internal-origin', 'xxx')
       .send({
-        name: name,
-        ...options
+        name,
+        ...options,
       });
 
   const deleteComponentTemplate = (name: string) =>

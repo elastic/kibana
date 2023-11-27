@@ -7,15 +7,15 @@
 
 export default function ({ loadTestFile }) {
   describe('index management', () => {
-    // loadTestFile(require.resolve('./indices'));
-    // loadTestFile(require.resolve('./mapping'));
-    // loadTestFile(require.resolve('./settings'));
-    // loadTestFile(require.resolve('./stats'));
-    // loadTestFile(require.resolve('./data_streams'));
-    // loadTestFile(require.resolve('./templates'));
+    loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./mapping'));
+    loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./stats'));
+    loadTestFile(require.resolve('./data_streams'));
+    loadTestFile(require.resolve('./templates'));
     loadTestFile(require.resolve('./component_templates'));
-    // loadTestFile(require.resolve('./cluster_nodes'));
-    // loadTestFile(require.resolve('./index_details'));
-    // loadTestFile(require.resolve('./create_enrich_policy'));
+    loadTestFile(require.resolve('./cluster_nodes'));
+    loadTestFile(require.resolve('./index_details'));
+    loadTestFile(require.resolve('./create_enrich_policy'));
   });
 }
