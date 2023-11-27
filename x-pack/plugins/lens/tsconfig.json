@@ -92,7 +92,8 @@
     "@kbn/core-plugins-server",
     "@kbn/field-utils",
     "@kbn/shared-ux-button-toolbar",
-    "@kbn/cell-actions"
+    "@kbn/cell-actions",
+    "@kbn/presentation-containers"
   ],
   "exclude": [
     "target/**/*",
