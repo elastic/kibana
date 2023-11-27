@@ -47,7 +47,7 @@ export interface HomePluginStartDependencies {
 }
 
 export interface HomePluginSetupDependencies {
-  cloud?: CloudSetup;
+  cloud: CloudSetup;
   share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;

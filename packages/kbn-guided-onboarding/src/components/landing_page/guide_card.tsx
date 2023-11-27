@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EndpointsModal } from '@kbn/cloud-links-plugin/public';
+// import { EndpointsModal } from '@kbn/cloud-links-plugin/public/maybe_add_cloud_links/endpoints_modal';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
@@ -66,18 +66,18 @@ export const GuideCard = ({
   }
 
   const openESApiModal = useCallback(() => {
-    const session = openModal(
+    const modal = openModal(
       toMountPoint(
         <EndpointsModal
-          closeModal={() => session.close()}
           core={core}
-          docLinks={docLinks}
-          cloud={cloudStart}
           share={shareStart}
+          cloud={cloudStart}
+          docLinks={docLinks}
+          closeModal={() => modal.close()}
         />,
         {
-          theme,
-          i18n: i18nStart,
+          theme: core.theme,
+          i18n: core.i18n,
         }
       ),
       {
@@ -85,7 +85,7 @@ export const GuideCard = ({
         'data-test-subj': 'guideModalESApi',
       }
     );
-  }, [i18nStart, openModal, theme, cloudStart, core, docLinks, shareStart]);
+  }, [openModal, cloudStart, core, docLinks, shareStart]);
 
   const onClick = useCallback(async () => {
     setIsLoading(true);
@@ -95,7 +95,7 @@ export const GuideCard = ({
       await navigateToApp(card.navigateTo?.appId, {
         path: card.navigateTo.path,
       });
-    } else if (card.openModal) {
+    } else if (card.openEndpointModal) {
       openESApiModal();
     }
     setIsLoading(false);
@@ -105,7 +105,7 @@ export const GuideCard = ({
     card.navigateTo,
     guideState,
     navigateToApp,
-    card.openModal,
+    card.openEndpointModal,
     openESApiModal,
   ]);
 
