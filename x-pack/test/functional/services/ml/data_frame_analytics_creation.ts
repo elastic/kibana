@@ -623,22 +623,22 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
     },
 
-    async assertCreateIndexPatternSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox`, {
+    async assertCreateDataViewSwitchExists() {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateDataViewCheckbox`, {
         allowHidden: true,
       });
     },
 
-    async getCreateIndexPatternSwitchCheckState(): Promise<boolean> {
+    async getCreateDataViewSwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox',
+        'mlAnalyticsCreateJobWizardCreateDataViewCheckbox',
         'checked'
       );
       return state === 'true';
     },
 
-    async assertCreateIndexPatternSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await this.getCreateIndexPatternSwitchCheckState();
+    async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getCreateDataViewSwitchCheckState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
@@ -674,11 +674,11 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDestIndexSameAsIdCheckState(checkState);
     },
 
-    async setCreateIndexPatternSwitchState(checkState: boolean) {
-      if ((await this.getCreateIndexPatternSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox');
+    async setCreateDataViewSwitchState(checkState: boolean) {
+      if ((await this.getCreateDataViewSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlAnalyticsCreateJobWizardCreateDataViewCheckbox');
       }
-      await this.assertCreateIndexPatternSwitchCheckState(checkState);
+      await this.assertCreateDataViewSwitchCheckState(checkState);
     },
 
     async assertStartJobCheckboxExists() {
@@ -755,7 +755,6 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async assertCreationCalloutMessagesExist() {
       await testSubjects.existOrFail('analyticsWizardCreationCallout_0');
       await testSubjects.existOrFail('analyticsWizardCreationCallout_1');
-      await testSubjects.existOrFail('analyticsWizardCreationCallout_2');
     },
 
     async navigateToJobManagementPage() {

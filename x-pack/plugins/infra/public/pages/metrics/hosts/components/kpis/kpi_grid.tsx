@@ -8,6 +8,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { HostMetricsDocsLink } from '../../../../../components/lens';
 import { Kpi } from './kpi';
 import { HostCountProvider } from '../../hooks/use_host_count';
@@ -15,6 +16,8 @@ import { HostCountKpi } from './host_count_kpi';
 import { assetDetailsDashboards, KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 
 export const KPIGrid = () => {
+  const euiTheme = useTheme();
+
   return (
     <HostCountProvider>
       <HostMetricsDocsLink type="metrics" />
@@ -23,11 +26,13 @@ export const KPIGrid = () => {
         <EuiFlexItem>
           <HostCountKpi height={KPI_CHART_HEIGHT} />
         </EuiFlexItem>
-        {assetDetailsDashboards.host.hostKPICharts.map((chartProp, index) => (
-          <EuiFlexItem key={index}>
-            <Kpi {...chartProp} height={KPI_CHART_HEIGHT} />
-          </EuiFlexItem>
-        ))}
+        {assetDetailsDashboards.host
+          .hostKPICharts(euiTheme.eui.euiColorLightestShade)
+          .map((chartProp, index) => (
+            <EuiFlexItem key={index}>
+              <Kpi {...chartProp} height={KPI_CHART_HEIGHT} />
+            </EuiFlexItem>
+          ))}
       </EuiFlexGroup>
     </HostCountProvider>
   );

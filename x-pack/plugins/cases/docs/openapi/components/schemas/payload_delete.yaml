@@ -1,3 +1,4 @@
-type: object
+type:
+  - "object"
+  - "null"
 description: If the `action` is `delete` and the `type` is `delete_case`, the payload is nullable.
-nullable: true

@@ -12,9 +12,10 @@
       "dashboard",
       "embeddable",
       "kibanaReact",
+      "kibanaUtils",
       "presentationUtil",
       "uiActionsEnhanced",
-      "kibanaUtils"
+      "visualizations"
     ],
     "optionalPlugins": ["triggersActionsUi"],
     "requiredBundles": ["savedObjects"]
