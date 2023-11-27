@@ -249,6 +249,7 @@ const NodeDetailView = memo(function ({
       <StyledDescriptionList
         data-test-subj="resolver:node-detail"
         type="column"
+        columnWidths={['fit-content(10em)', 'auto']}
         align="left"
         titleProps={
           {

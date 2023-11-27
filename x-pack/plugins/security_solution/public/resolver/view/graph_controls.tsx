@@ -61,12 +61,6 @@ const StyledGraphControlsColumn = styled.div`
 
 const StyledEuiDescriptionListTitle = styled(EuiDescriptionListTitle)`
   text-transform: uppercase;
-  max-width: 25%;
-`;
-
-const StyledEuiDescriptionListDescription = styled(EuiDescriptionListDescription)`
-  min-width: 75%;
-  width: 75%;
 `;
 
 const StyledEuiButtonIcon = styled(EuiButtonIcon)<StyledGraphControlProps>`
@@ -386,52 +380,35 @@ const SchemaInformation = ({
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:schema-info"
           type="column"
+          columnWidths={['fit-content(10em)', 'auto']}
           align="left"
           compressed
         >
           <>
-            <StyledEuiDescriptionListTitle
-              data-test-subj="resolver:graph-controls:schema-info:title"
-              style={{ width: '30%' }}
-            >
+            <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:schema-info:title">
               {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaSource', {
                 defaultMessage: 'source',
               })}
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription
-              data-test-subj="resolver:graph-controls:schema-info:description"
-              style={{ width: '70%' }}
-            >
+            <EuiDescriptionListDescription data-test-subj="resolver:graph-controls:schema-info:description">
               <GeneratedText>{sourceAndSchema?.dataSource ?? unknownSchemaValue}</GeneratedText>
-            </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle
-              data-test-subj="resolver:graph-controls:schema-info:title"
-              style={{ width: '30%' }}
-            >
+            </EuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:schema-info:title">
               {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaID', {
                 defaultMessage: 'id',
               })}
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription
-              data-test-subj="resolver:graph-controls:schema-info:description"
-              style={{ width: '70%' }}
-            >
+            <EuiDescriptionListDescription data-test-subj="resolver:graph-controls:schema-info:description">
               <GeneratedText>{sourceAndSchema?.schema.id ?? unknownSchemaValue}</GeneratedText>
-            </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle
-              data-test-subj="resolver:graph-controls:schema-info:title"
-              style={{ width: '30%' }}
-            >
+            </EuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:schema-info:title">
               {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaEdge', {
                 defaultMessage: 'edge',
               })}
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription
-              data-test-subj="resolver:graph-controls:schema-info:description"
-              style={{ width: '70%' }}
-            >
+            <EuiDescriptionListDescription data-test-subj="resolver:graph-controls:schema-info:description">
               <GeneratedText>{sourceAndSchema?.schema.parent ?? unknownSchemaValue}</GeneratedText>
-            </StyledEuiDescriptionListDescription>
+            </EuiDescriptionListDescription>
           </>
         </StyledDescriptionList>
       </div>
@@ -493,14 +470,12 @@ const NodeLegend = ({
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:node-legend"
           type="column"
+          columnWidths={['fit-content(10em)', 'auto']}
           align="left"
           compressed
         >
           <>
-            <StyledEuiDescriptionListTitle
-              data-test-subj="resolver:graph-controls:node-legend:title"
-              style={{ width: '20% ' }}
-            >
+            <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:node-legend:title">
               <CubeForProcess
                 id={id}
                 size="2.5em"
@@ -508,9 +483,9 @@ const NodeLegend = ({
                 state="running"
               />
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription
+            <EuiDescriptionListDescription
               data-test-subj="resolver:graph-controls:node-legend:description"
-              style={{ width: '80%', lineHeight: '2.2em' }} // lineHeight to align center vertically
+              style={{ lineHeight: '2.2em' }} // lineHeight to align center vertically
             >
               <GeneratedText>
                 {i18n.translate(
@@ -520,11 +495,8 @@ const NodeLegend = ({
                   }
                 )}
               </GeneratedText>
-            </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle
-              data-test-subj="resolver:graph-controls:node-legend:title"
-              style={{ width: '20% ' }}
-            >
+            </EuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:node-legend:title">
               <CubeForProcess
                 id={id}
                 size="2.5em"
@@ -532,9 +504,9 @@ const NodeLegend = ({
                 state="terminated"
               />
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription
+            <EuiDescriptionListDescription
               data-test-subj="resolver:graph-controls:node-legend:description"
-              style={{ width: '80%', lineHeight: '2.2em' }}
+              style={{ lineHeight: '2.2em' }}
             >
               <GeneratedText>
                 {i18n.translate(
@@ -544,11 +516,8 @@ const NodeLegend = ({
                   }
                 )}
               </GeneratedText>
-            </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle
-              data-test-subj="resolver:graph-controls:node-legend:title"
-              style={{ width: '20% ' }}
-            >
+            </EuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:node-legend:title">
               <CubeForProcess
                 id={id}
                 size="2.5em"
@@ -556,9 +525,9 @@ const NodeLegend = ({
                 state="loading"
               />
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription
+            <EuiDescriptionListDescription
               data-test-subj="resolver:graph-controls:node-legend:description"
-              style={{ width: '80%', lineHeight: '2.2em' }}
+              style={{ lineHeight: '2.2em' }}
             >
               <GeneratedText>
                 {i18n.translate(
@@ -568,11 +537,8 @@ const NodeLegend = ({
                   }
                 )}
               </GeneratedText>
-            </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle
-              data-test-subj="resolver:graph-controls:node-legend:title"
-              style={{ width: '20% ' }}
-            >
+            </EuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:node-legend:title">
               <CubeForProcess
                 id={id}
                 size="2.5em"
@@ -580,16 +546,16 @@ const NodeLegend = ({
                 state="error"
               />
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription
+            <EuiDescriptionListDescription
               data-test-subj="resolver:graph-controls:node-legend:description"
-              style={{ width: '80%', lineHeight: '2.2em' }}
+              style={{ lineHeight: '2.2em' }}
             >
               <GeneratedText>
                 {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
                   defaultMessage: 'Error Process',
                 })}
               </GeneratedText>
-            </StyledEuiDescriptionListDescription>
+            </EuiDescriptionListDescription>
           </>
         </StyledDescriptionList>
       </div>
