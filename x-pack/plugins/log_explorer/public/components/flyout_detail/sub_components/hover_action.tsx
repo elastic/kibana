@@ -7,14 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiToolTip,
-  EuiButtonIcon,
-  useEuiTheme,
-  EuiTextTruncate,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiToolTip, EuiButtonIcon, useEuiTheme, EuiFlexItem } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 
 export interface HoverActionType {
@@ -26,12 +19,11 @@ export interface HoverActionType {
 }
 
 interface HoverActionProps {
-  displayText: string;
+  children: React.ReactNode;
   actions: HoverActionType[];
-  width: number;
 }
 
-export const HoverAction = ({ displayText, actions, width }: HoverActionProps) => {
+export const HoverAction = ({ children, actions }: HoverActionProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -49,14 +41,7 @@ export const HoverAction = ({ displayText, actions, width }: HoverActionProps) =
         },
       }}
     >
-      <EuiTextTruncate text={displayText} truncation="end" width={width}>
-        {(truncatedText: string) => (
-          <EuiText
-            // Value returned from formatFieldValue is always sanitized
-            dangerouslySetInnerHTML={{ __html: truncatedText }}
-          />
-        )}
-      </EuiTextTruncate>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       <EuiFlexGroup
         className="visibleOnHoverFocus"
         css={{
