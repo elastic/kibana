@@ -46,7 +46,7 @@ export function IndexFieldSelector({
           defaultValue={defaultValue}
           name={name}
           control={control}
-          rules={{ required: isRequired }}
+          rules={{ required: isRequired && !isDisabled }}
           render={({ field, fieldState }) => (
             <EuiComboBox<string>
               {...field}
