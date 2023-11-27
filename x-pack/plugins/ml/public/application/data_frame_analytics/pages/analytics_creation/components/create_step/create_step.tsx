@@ -15,20 +15,31 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import { ANALYTICS_STEPS } from '../../page';
+import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';
+import { useDataViewTimeFields } from '../../hooks/use_data_view_time_fields';
 import { CreateStepFooter } from '../create_step_footer';
 
 interface Props extends CreateAnalyticsFormProps {
   step: ANALYTICS_STEPS;
+  showCreateDataView?: boolean;
 }
 
-export const CreateStep: FC<Props> = ({ actions, state, step }) => {
-  const { createAnalyticsJob, startAnalyticsJob } = actions;
+export const CreateStep: FC<Props> = ({ actions, state, step, showCreateDataView = false }) => {
+  const canCreateDataView = useCanCreateDataView();
+  const { dataViewAvailableTimeFields, onTimeFieldChanged } = useDataViewTimeFields({
+    actions,
+    state,
+  });
+
+  const { createAnalyticsJob, setFormState, startAnalyticsJob } = actions;
   const { isAdvancedEditorValidJson, isJobCreated, isJobStarted, isValid, requestMessages } = state;
-  const { jobId, jobType } = state.form;
+  const { createDataView, destinationDataViewTitleExists, jobId, jobType, timeFieldName } =
+    state.form;
 
   const [startChecked, setStartChecked] = useState<boolean>(true);
   const [creationTriggered, setCreationTriggered] = useState<boolean>(false);
@@ -53,45 +64,62 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   return (
     <div data-test-subj="mlAnalyticsCreateJobWizardCreateStep active">
       {!isJobCreated && !isJobStarted && (
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              helpText={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.startCheckboxHelpText',
-                {
-                  defaultMessage:
-                    'If unselected, job can be started later by returning to the jobs list.',
-                }
-              )}
-            >
-              <EuiCheckbox
-                data-test-subj="mlAnalyticsCreateJobWizardStartJobCheckbox"
-                id={'dataframe-create-start-checkbox'}
-                label={i18n.translate('xpack.ml.dataframe.analytics.create.wizardStartCheckbox', {
-                  defaultMessage: 'Start immediately',
-                })}
-                checked={startChecked}
-                onChange={(e) => {
-                  setStartChecked(e.target.checked);
-                }}
+        <>
+          {showCreateDataView && (
+            <>
+              <CreateDataViewForm
+                canCreateDataView={canCreateDataView}
+                createDataView={createDataView}
+                dataViewTitleExists={destinationDataViewTitleExists}
+                setCreateDataView={() => setFormState({ createDataView: !createDataView })}
+                dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+                dataViewTimeField={timeFieldName}
+                onTimeFieldChanged={onTimeFieldChanged}
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              className="mlAnalyticsCreateWizard__footerButton"
-              disabled={!isValid || !isAdvancedEditorValidJson}
-              onClick={handleCreation}
-              fill
-              isLoading={creationTriggered}
-              data-test-subj="mlAnalyticsCreateJobWizardCreateButton"
-            >
-              {i18n.translate('xpack.ml.dataframe.analytics.create.wizardCreateButton', {
-                defaultMessage: 'Create',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiSpacer />
+            </>
+          )}
+
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                helpText={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.startCheckboxHelpText',
+                  {
+                    defaultMessage:
+                      'If unselected, job can be started later by returning to the jobs list.',
+                  }
+                )}
+              >
+                <EuiCheckbox
+                  data-test-subj="mlAnalyticsCreateJobWizardStartJobCheckbox"
+                  id={'dataframe-create-start-checkbox'}
+                  label={i18n.translate('xpack.ml.dataframe.analytics.create.wizardStartCheckbox', {
+                    defaultMessage: 'Start immediately',
+                  })}
+                  checked={startChecked}
+                  onChange={(e) => {
+                    setStartChecked(e.target.checked);
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                className="mlAnalyticsCreateWizard__footerButton"
+                disabled={!isValid || !isAdvancedEditorValidJson}
+                onClick={handleCreation}
+                fill
+                isLoading={creationTriggered}
+                data-test-subj="mlAnalyticsCreateJobWizardCreateButton"
+              >
+                {i18n.translate('xpack.ml.dataframe.analytics.create.wizardCreateButton', {
+                  defaultMessage: 'Create',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
       <EuiSpacer size="s" />
       <Messages messages={requestMessages} />

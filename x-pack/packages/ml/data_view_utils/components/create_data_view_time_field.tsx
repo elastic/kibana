@@ -42,7 +42,7 @@ export const CreateDataViewTimeField: FC<CreateDataViewTimeFieldProps> = ({
       label={
         <FormattedMessage
           id="xpack.ml.dataViewUtils.dataViewTimeFieldLabel"
-          defaultMessage="Time field for Kibana data view"
+          defaultMessage="Time field for data view"
         />
       }
       helpText={
