@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-export * from './src/subscription_elements';
+export const setTlsConfigMock = jest.fn();
 
-export {
-  SubscriptionTrackingContext,
-  SubscriptionTrackingProvider,
-  registerEvents,
-} from './src/services';
-
-export * from './types';
+jest.doMock('@kbn/server-http-tools', () => {
+  const actual = jest.requireActual('@kbn/server-http-tools');
+  return {
+    ...actual,
+    setTlsConfig: setTlsConfigMock,
+    createServer: jest.fn(actual.createServer),
+  };
+});

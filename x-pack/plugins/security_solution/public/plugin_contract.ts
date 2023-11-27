@@ -38,7 +38,7 @@ export class PluginContract {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
       isSidebarEnabled$: this.isSidebarEnabled$.asObservable(),
-      getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
+      getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
       upselling: this.upsellingService,
       dataQualityPanelConfig: this.dataQualityPanelConfig,
     };

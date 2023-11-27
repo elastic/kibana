@@ -19,7 +19,8 @@ import { RESPONSE_ACTION_TYPES } from '../../../../../common/api/detection_engin
 import { login, ROLE } from '../../tasks/login';
 
 describe('Form', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  describe('User with no access can not create an endpoint response action', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169334
+  describe.skip('User with no access can not create an endpoint response action', () => {
     before(() => {
       login(ROLE.endpoint_response_actions_no_access);
     });

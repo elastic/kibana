@@ -733,7 +733,6 @@
     "@kbn/status-plugin-a-plugin": "link:test/server_integration/plugins/status_plugin_a",
     "@kbn/status-plugin-b-plugin": "link:test/server_integration/plugins/status_plugin_b",
     "@kbn/std": "link:packages/kbn-std",
-    "@kbn/subscription-tracking": "link:packages/kbn-subscription-tracking",
     "@kbn/synthetics-plugin": "link:x-pack/plugins/synthetics",
     "@kbn/task-manager-fixture-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture",
     "@kbn/task-manager-performance-plugin": "link:x-pack/test/plugin_api_perf/plugins/task_manager_performance",
