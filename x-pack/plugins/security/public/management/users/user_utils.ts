@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { User } from '../../../common/model';
+import type { User } from '../../../common';
 
 export const isUserReserved = (user: User) => user.metadata?._reserved ?? false;
 
