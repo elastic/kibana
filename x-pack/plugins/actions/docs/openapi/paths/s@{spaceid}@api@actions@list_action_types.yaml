@@ -28,7 +28,8 @@ get:
                 enabledInLicense:
                   type: boolean
                   description: Indicates whether the connector is enabled in the license.
-                  example: true
+                  examples:
+                    - true
                 id:
                   type: string
                   description: The unique identifier for the connector type.

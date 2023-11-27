@@ -76,7 +76,10 @@
     "@kbn/advanced-settings-plugin",
     "@kbn/cloud-plugin",
     "@kbn/custom-icons",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/profiling-utils",
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/core-http-request-handler-context-server"
   ],
   "exclude": ["target/**/*"]
 }
