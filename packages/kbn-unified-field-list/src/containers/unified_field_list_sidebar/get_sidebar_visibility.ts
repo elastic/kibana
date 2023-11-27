@@ -14,7 +14,7 @@ export interface SidebarVisibility {
 }
 
 export interface GetSidebarStateParams {
-  localStorageKey: string;
+  localStorageKey?: string;
 }
 
 /**
@@ -24,13 +24,17 @@ export interface GetSidebarStateParams {
 export const getSidebarVisibility = ({
   localStorageKey,
 }: GetSidebarStateParams): SidebarVisibility => {
-  const isCollapsed$ = new BehaviorSubject<boolean>(getIsCollapsed(localStorageKey));
+  const isCollapsed$ = new BehaviorSubject<boolean>(
+    localStorageKey ? getIsCollapsed(localStorageKey) : false
+  );
 
   return {
     isCollapsed$,
     toggle: (isCollapsed) => {
       isCollapsed$.next(isCollapsed);
-      setIsCollapsed(localStorageKey, isCollapsed);
+      if (localStorageKey) {
+        setIsCollapsed(localStorageKey, isCollapsed);
+      }
     },
   };
 };

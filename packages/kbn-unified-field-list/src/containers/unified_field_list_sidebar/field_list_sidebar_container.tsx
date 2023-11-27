@@ -124,9 +124,9 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const [sidebarVisibility] = useState(() =>
     getSidebarVisibility({
-      localStorageKey: `${
-        stateService.creationOptions.localStorageKeyPrefix ?? 'unifiedFieldList'
-      }:sidebarClosed`,
+      localStorageKey: stateService.creationOptions.localStorageKeyPrefix
+        ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
+        : undefined,
     })
   );
   const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
