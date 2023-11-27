@@ -24,7 +24,6 @@ jest.mock('../../lib/kibana', () => {
 
   return {
     ...original,
-    mockCanUseCases: jest.fn(),
     useKibana: () => ({
       ...mockedUseKibana,
       services: {
