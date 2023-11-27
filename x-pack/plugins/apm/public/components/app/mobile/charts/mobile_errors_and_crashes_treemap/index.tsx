@@ -20,7 +20,7 @@ const ES_FIELD_MAPPING: Record<TreemapTypes, string> = {
   [TreemapTypes.Versions]: SERVICE_VERSION,
 };
 
-export function MobileErrorTreemap({
+export function MobileErrorsAndCrashesTreemap({
   kuery,
   serviceName,
   start,

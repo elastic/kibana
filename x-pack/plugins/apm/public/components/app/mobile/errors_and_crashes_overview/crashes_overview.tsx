@@ -18,7 +18,7 @@ import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
-import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
+import { MobileErrorsAndCrashesTreemap } from '../charts/mobile_errors_and_crashes_treemap';
 import { MobileCrashGroupList } from './crash_group_list';
 import {
   FETCH_STATUS,
@@ -28,7 +28,7 @@ import {
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { ErrorDistribution } from '../error_group_details/distribution';
+import { ErrorDistribution } from '../errors_and_crashes_group_details/shared/distribution';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import {
@@ -224,7 +224,7 @@ export function MobileCrashesOverview() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <MobileErrorTreemap
+              <MobileErrorsAndCrashesTreemap
                 serviceName={serviceName}
                 kuery={kueryForTreemap}
                 environment={environment}

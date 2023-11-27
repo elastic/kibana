@@ -13,8 +13,8 @@ import {
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo, useState } from 'react';
-import { APMError } from '../../../../../../typings/es_schemas/ui/apm_error';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import { APMError } from '../../../../../../../typings/es_schemas/ui/apm_error';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { ErrorSampleDetailTabContent } from './error_sample_detail';
 import { exceptionStacktraceTab, logStacktraceTab } from './error_tabs';
 

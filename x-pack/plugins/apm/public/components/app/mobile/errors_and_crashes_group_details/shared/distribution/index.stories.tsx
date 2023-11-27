@@ -7,8 +7,8 @@
 
 import React, { ComponentType } from 'react';
 import { ErrorDistribution } from '.';
-import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import { MockApmPluginStorybook } from '../../../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 
 export default {
   title: 'app/ErrorGroupDetails/distribution',

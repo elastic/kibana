@@ -7,15 +7,15 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
-import { useApmParams } from '../../../../../hooks/use_apm_params';
+import { fromQuery, toQuery } from '../../../../../shared/links/url_helpers';
+import { useApmParams } from '../../../../../../hooks/use_apm_params';
 import {
   FETCH_STATUS,
   isPending,
   useFetcher,
-} from '../../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
+} from '../../../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../../../hooks/use_time_range';
+import { useApmServiceContext } from '../../../../../../context/apm_service/use_apm_service_context';
 import { ErrorSampleDetails } from './error_sample_detail';
 
 interface Props {
@@ -37,7 +37,7 @@ export function ErrorSampler({
     path: { groupId },
     query,
   } = useApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
   );
 
   const { rangeFrom, rangeTo, environment, kuery, errorId } = query;

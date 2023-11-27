@@ -17,25 +17,25 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { ErrorSampler } from './error_sampler';
-import { ErrorDistribution } from './distribution';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
-import { maybe } from '../../../../../common/utils/maybe';
-import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
+import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
+import { useBreadcrumb } from '../../../../../context/breadcrumbs/use_breadcrumb';
+import { useApmParams } from '../../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../../hooks/use_apm_router';
+import { useCrashGroupDistributionFetcher } from '../../../../../hooks/use_crash_group_distribution_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { ErrorSampler } from '../shared/error_sampler';
+import { ErrorDistribution } from '../shared/distribution';
+import { ChartPointerEventContextProvider } from '../../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { MobileErrorsAndCrashesTreemap } from '../../charts/mobile_errors_and_crashes_treemap';
+import { maybe } from '../../../../../../common/utils/maybe';
+import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import {
   getKueryWithMobileCrashFilter,
   getKueryWithMobileFilters,
-} from '../../../../../common/utils/get_kuery_with_mobile_filters';
+} from '../../../../../../common/utils/get_kuery_with_mobile_filters';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -252,7 +252,7 @@ export function CrashGroupDetails() {
         </ChartPointerEventContextProvider>
         <EuiFlexItem grow={2}>
           <EuiPanel hasBorder={true}>
-            <MobileErrorTreemap
+            <MobileErrorsAndCrashesTreemap
               serviceName={serviceName}
               kuery={`${kueryForTreemap}`}
               environment={environment}

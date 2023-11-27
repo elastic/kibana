@@ -29,9 +29,9 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { HttpErrorRateChart } from '../charts/mobile_http_error_rate';
-import { ErrorDistribution } from '../error_group_details/distribution';
+import { ErrorDistribution } from '../errors_and_crashes_group_details/shared/distribution';
 import { MobileErrorGroupList } from './error_group_list';
-import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
+import { MobileErrorsAndCrashesTreemap } from '../charts/mobile_errors_and_crashes_treemap';
 import {
   getKueryWithMobileErrorFilter,
   getKueryWithMobileFilters,
@@ -232,7 +232,7 @@ export function MobileErrorsOverview() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <MobileErrorTreemap
+              <MobileErrorsAndCrashesTreemap
                 serviceName={serviceName}
                 kuery={kueryForTreemap}
                 environment={environment}
