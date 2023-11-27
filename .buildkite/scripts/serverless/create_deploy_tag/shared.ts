@@ -14,6 +14,8 @@ import { BuildkiteBuildExtract } from './info_sections/build_info';
 import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 const SELECTED_COMMIT_META_KEY = 'selected-commit-hash';
+const CURRENT_COMMIT_META_KEY = 'current-commit-hash';
+
 const DEPLOY_TAG_META_KEY = 'deploy-tag';
 const COMMIT_INFO_CTX = 'commit-info';
 
@@ -22,16 +24,6 @@ const octokit = getGithubClient();
 const exec = getExec(!process.env.CI);
 
 const buildkite = new BuildkiteClient({ exec });
-
-const buildStateToEmoji = (state: string) => {
-  return (
-    {
-      failure: '❌',
-      pending: '⏳',
-      success: '✅',
-    }[state] || '❓'
-  );
-};
 
 const buildkiteBuildStateToEmoji = (state: string) => {
   return (
@@ -54,11 +46,11 @@ export {
   octokit,
   exec,
   buildkite,
-  buildStateToEmoji,
   buildkiteBuildStateToEmoji,
   SELECTED_COMMIT_META_KEY,
   COMMIT_INFO_CTX,
   DEPLOY_TAG_META_KEY,
+  CURRENT_COMMIT_META_KEY,
 };
 
 export interface CommitWithStatuses extends GitCommitExtract {

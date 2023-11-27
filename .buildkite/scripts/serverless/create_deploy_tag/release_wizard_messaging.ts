@@ -9,6 +9,7 @@
 import {
   buildkite,
   COMMIT_INFO_CTX,
+  CURRENT_COMMIT_META_KEY,
   DEPLOY_TAG_META_KEY,
   octokit,
   SELECTED_COMMIT_META_KEY,
@@ -106,14 +107,15 @@ const states: Record<StateNames, StateShape> = {
     instruction: `<h3>Deploy tag successfully created!</h3>`,
     post: async () => {
       const deployTag = buildkite.getMetadata(DEPLOY_TAG_META_KEY);
+      const selectedCommit = buildkite.getMetadata(SELECTED_COMMIT_META_KEY);
+      const currentCommitSha = buildkite.getMetadata(CURRENT_COMMIT_META_KEY);
+
       buildkite.setAnnotation(
         WIZARD_CTX_INSTRUCTION,
         'success',
         `<h3>Deploy tag successfully created!</h3><br/>
 Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}'>here on buildkite.</a>`
       );
-
-      const selectedCommit = buildkite.getMetadata(SELECTED_COMMIT_META_KEY);
 
       if (!selectedCommit) {
         // If we get here with no selected commit set, it's either an unsynced change in keys, or some weird error.
@@ -122,14 +124,19 @@ Your deployment will appear <a href='https://buildkite.com/elastic/kibana-server
         );
       }
 
-      const commitData = (
+      const targetCommitData = (
         await octokit.repos.getCommit({
           owner: 'elastic',
           repo: 'kibana',
           ref: selectedCommit,
         })
       ).data;
-      sendReleaseSlackAnnouncement(commitData, deployTag);
+
+      await sendReleaseSlackAnnouncement({
+        targetCommitData,
+        currentCommitSha,
+        deployTag,
+      });
     },
     instructionStyle: 'success',
     display: true,
@@ -271,43 +278,64 @@ async function tryCall(fn: any, ...args: any[]) {
   }
 }
 
-function sendReleaseSlackAnnouncement(selectedCommit: GithubCommitType, deployTag: string | null) {
+async function sendReleaseSlackAnnouncement({
+  targetCommitData,
+  currentCommitSha,
+  deployTag,
+}: {
+  targetCommitData: GithubCommitType;
+  currentCommitSha: string | undefined | null;
+  deployTag: string | undefined | null;
+}) {
   const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
   const buildShortname = `kibana-serverless-release #${process.env.BUILDKITE_BUILD_NUMBER}`;
 
   const isDryRun = process.env.DRY_RUN?.match('(1|true)');
-  const mergedAtDate = selectedCommit.commit?.committer?.date;
-  const commitSha = selectedCommit.sha;
+  const mergedAtDate = targetCommitData.commit?.committer?.date;
   const mergedAtUtcString = mergedAtDate ? new Date(mergedAtDate).toUTCString() : 'unknown';
+  const targetCommitSha = targetCommitData.sha;
+  const targetCommitShort = targetCommitSha.slice(0, 12);
+  const compareResponse = (
+    await octokit.repos.compareCommits({
+      owner: 'elastic',
+      repo: 'kibana',
+      base: currentCommitSha || 'main',
+      head: targetCommitSha,
+    })
+  ).data;
+  const compareLink = currentCommitSha
+    ? `<${compareResponse.html_url}|${compareResponse.total_commits} commits>`
+    : 'a new release candidate';
+
+  const mainMessage = [
+    `:ship_it_parrot: Promotion of a new ${compareLink} has been initiated!\n`,
+    `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.\n`,
+  ];
+  if (isDryRun) {
+    mainMessage.unshift(
+      `*:memo:This is a dry run - no commit will actually be promoted. Please ignore!*\n`
+    );
+  } else {
+    mainMessage.push(`cc: @kibana-serverless-promotion-notify`);
+  }
+
+  const linksSection = {
+    'Initiated by': process.env.BUILDKITE_BUILD_CREATOR || 'unknown',
+    'Pre-release job': `<${process.env.BUILDKITE_BUILD_URL}|${buildShortname}>`,
+    'Git tag': `<https://github.com/elastic/kibana/releases/tag/${deployTag}|${deployTag}>`,
+    Commit: `<https://github.com/elastic/kibana/commit/${targetCommitShort}|${targetCommitShort}>`,
+    'Merged at': mergedAtUtcString,
+  };
 
   sendSlackMessage({
     blocks: [
       {
         type: 'section',
-        text: textBlock(
-          isDryRun
-            ? '*:memo:This is a dry run - no commit will actually be promoted. Please ignore!*'
-            : 'Attention @kibana-serverless-promotion-notify!',
-          `Promotion of a new <https://github.com/elastic/kibana/commit/${commitSha}|commit> to QA has been initiated!`,
-          `The details of the candidate selection can be found here: <${process.env.BUILDKITE_BUILD_URL}|${buildShortname}>`,
-          `Once promotion is complete, please begin any required manual testing.`,
-          `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.`
-        ),
+        text: textBlock(...mainMessage),
       },
       {
         type: 'section',
-        fields: [
-          textBlock(`*Initiated by:*`, process.env.BUILDKITE_BUILD_CREATOR || 'unknown'),
-          textBlock(
-            `*Git tag:*`,
-            `<https://github.com/elastic/kibana/releases/tag/${deployTag}|${deployTag}>`
-          ),
-          textBlock(
-            `*Commit:*`,
-            `<https://github.com/elastic/kibana/commit/${commitSha}|${commitSha.slice(0, 12)}>`
-          ),
-          textBlock(`*Merged at:*`, mergedAtUtcString),
-        ],
+        fields: Object.entries(linksSection).map(([name, link]) => textBlock(`*${name}*: `, link)),
       },
     ],
   }).catch((error) => {

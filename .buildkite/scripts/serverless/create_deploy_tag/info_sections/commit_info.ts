@@ -7,7 +7,7 @@
  */
 
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
-import { buildkite, octokit, SELECTED_COMMIT_META_KEY } from '../shared';
+import { buildkite, octokit, SELECTED_COMMIT_META_KEY, CURRENT_COMMIT_META_KEY } from '../shared';
 
 export type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];
 export type ListedGithubCommitType =
@@ -40,6 +40,7 @@ export async function getCurrentQARelease() {
   if (!sha) {
     throw new Error('Could not find QA hash in current releases file');
   } else {
+    buildkite.setMetadata(CURRENT_COMMIT_META_KEY, sha);
     return sha;
   }
 }
