@@ -21,7 +21,7 @@ export function IndexManagementProvider({ getService }: FtrProviderContext) {
     componentTemplates: {
       api: componentTemplatesApi(getService),
       helpers: componentTemplateHelpers(getService),
-    }
+    },
     mappings: {
       api: mappingsApi(getService),
     },
