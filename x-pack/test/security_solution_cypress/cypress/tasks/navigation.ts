@@ -9,8 +9,9 @@ import { encode } from '@kbn/rison';
 
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import { PAGE_TITLE } from '../screens/common/page';
 import { GET_STARTED_URL, hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
-import { constructUrlWithUser, getUrlWithRoute, User } from './login';
+import { constructUrlWithUser, getUrlWithRoute, login, User } from './login';
 
 export const visit = (
   url: string,
@@ -111,4 +112,14 @@ const disableNewFeaturesTours = (window: Window) => {
   tourStorageKeys.forEach((key) => {
     window.localStorage.setItem(key, JSON.stringify(tourConfig));
   });
+};
+
+export const waitForPageTitleToBeShown = () => {
+  cy.get(PAGE_TITLE).should('be.visible');
+};
+
+export const loadPageAs = (url: string, role?: SecurityRoleName) => {
+  login(role);
+  visitWithTimeRange(url, { role });
+  waitForPageTitleToBeShown();
 };
