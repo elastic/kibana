@@ -1,9 +1,9 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
     "title": "Cases",
     "description": "OpenAPI schema for Cases endpoints",
-    "version": "0.1",
+    "version": "0.2",
     "contact": {
       "name": "Cases Team"
     },
@@ -329,7 +329,7 @@
                       }
                     }
                   },
-                  "example": [
+                  "examples": [
                     {
                       "id": "06116b80-e1c3-11ec-be9b-9b1838238ee6",
                       "title": "security_case"
@@ -417,18 +417,24 @@
                         "properties": {
                           "fields": {
                             "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                            "nullable": true,
-                            "type": "object"
+                            "type": [
+                              "object",
+                              "null"
+                            ]
                           },
                           "id": {
                             "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
                             "type": "string",
-                            "example": "none"
+                            "examples": [
+                              "none"
+                            ]
                           },
                           "name": {
                             "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
                             "type": "string",
-                            "example": "none"
+                            "examples": [
+                              "none"
+                            ]
                           },
                           "type": {
                             "$ref": "#/components/schemas/connector_types"
@@ -438,7 +444,9 @@
                       "created_at": {
                         "type": "string",
                         "format": "date-time",
-                        "example": "2022-06-01T17:07:17.767Z"
+                        "examples": [
+                          "2022-06-01T17:07:17.767Z"
+                        ]
                       },
                       "created_by": {
                         "type": "object",
@@ -449,34 +457,54 @@
                         ],
                         "properties": {
                           "email": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              null
+                            ]
                           },
                           "full_name": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
-                          },
-                          "username": {
-                            "type": "string",
-                            "example": "elastic",
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              null
+                            ]
                           },
                           "profile_uid": {
                             "type": "string",
-                            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                            "examples": [
+                              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                            ]
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              "elastic"
+                            ]
                           }
                         }
                       },
                       "error": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": null
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "examples": [
+                          null
+                        ]
                       },
                       "id": {
                         "type": "string",
-                        "example": "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                        "examples": [
+                          "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                        ]
                       },
                       "mappings": {
                         "type": "array",
@@ -485,15 +513,21 @@
                           "properties": {
                             "action_type": {
                               "type": "string",
-                              "example": "overwrite"
+                              "examples": [
+                                "overwrite"
+                              ]
                             },
                             "source": {
                               "type": "string",
-                              "example": "title"
+                              "examples": [
+                                "title"
+                              ]
                             },
                             "target": {
                               "type": "string",
-                              "example": "summary"
+                              "examples": [
+                                "summary"
+                              ]
                             }
                           }
                         }
@@ -502,13 +536,20 @@
                         "$ref": "#/components/schemas/owners"
                       },
                       "updated_at": {
-                        "type": "string",
+                        "type": [
+                          "string",
+                          "null"
+                        ],
                         "format": "date-time",
-                        "nullable": true,
-                        "example": "2022-06-01T19:58:48.169Z"
+                        "examples": [
+                          "2022-06-01T19:58:48.169Z"
+                        ]
                       },
                       "updated_by": {
-                        "type": "object",
+                        "type": [
+                          "object",
+                          "null"
+                        ],
                         "required": [
                           "email",
                           "full_name",
@@ -516,30 +557,45 @@
                         ],
                         "properties": {
                           "email": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              null
+                            ]
                           },
                           "full_name": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
-                          },
-                          "username": {
-                            "type": "string",
-                            "example": "elastic",
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              null
+                            ]
                           },
                           "profile_uid": {
                             "type": "string",
-                            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                            "examples": [
+                              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                            ]
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              "elastic"
+                            ]
                           }
-                        },
-                        "nullable": true
+                        }
                       },
                       "version": {
                         "type": "string",
-                        "example": "WzIwNzMsMV0="
+                        "examples": [
+                          "WzIwNzMsMV0="
+                        ]
                       }
                     }
                   }
@@ -640,18 +696,24 @@
                       "properties": {
                         "fields": {
                           "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                          "nullable": true,
-                          "type": "object"
+                          "type": [
+                            "object",
+                            "null"
+                          ]
                         },
                         "id": {
                           "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
                           "type": "string",
-                          "example": "none"
+                          "examples": [
+                            "none"
+                          ]
                         },
                         "name": {
                           "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
                           "type": "string",
-                          "example": "none"
+                          "examples": [
+                            "none"
+                          ]
                         },
                         "type": {
                           "$ref": "#/components/schemas/connector_types"
@@ -661,7 +723,9 @@
                     "created_at": {
                       "type": "string",
                       "format": "date-time",
-                      "example": "2022-06-01T17:07:17.767Z"
+                      "examples": [
+                        "2022-06-01T17:07:17.767Z"
+                      ]
                     },
                     "created_by": {
                       "type": "object",
@@ -672,34 +736,54 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "profile_uid": {
                           "type": "string",
-                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          "examples": [
+                            "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            "elastic"
+                          ]
                         }
                       }
                     },
                     "error": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": null
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "examples": [
+                        null
+                      ]
                     },
                     "id": {
                       "type": "string",
-                      "example": "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                      "examples": [
+                        "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                      ]
                     },
                     "mappings": {
                       "type": "array",
@@ -708,15 +792,21 @@
                         "properties": {
                           "action_type": {
                             "type": "string",
-                            "example": "overwrite"
+                            "examples": [
+                              "overwrite"
+                            ]
                           },
                           "source": {
                             "type": "string",
-                            "example": "title"
+                            "examples": [
+                              "title"
+                            ]
                           },
                           "target": {
                             "type": "string",
-                            "example": "summary"
+                            "examples": [
+                              "summary"
+                            ]
                           }
                         }
                       }
@@ -725,13 +815,20 @@
                       "$ref": "#/components/schemas/owners"
                     },
                     "updated_at": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time",
-                      "nullable": true,
-                      "example": "2022-06-01T19:58:48.169Z"
+                      "examples": [
+                        "2022-06-01T19:58:48.169Z"
+                      ]
                     },
                     "updated_by": {
-                      "type": "object",
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "required": [
                         "email",
                         "full_name",
@@ -739,30 +836,45 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "profile_uid": {
                           "type": "string",
-                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          "examples": [
+                            "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            "elastic"
+                          ]
                         }
-                      },
-                      "nullable": true
+                      }
                     },
                     "version": {
                       "type": "string",
-                      "example": "WzIwNzMsMV0="
+                      "examples": [
+                        "WzIwNzMsMV0="
+                      ]
                     }
                   }
                 },
@@ -867,18 +979,24 @@
                       "properties": {
                         "fields": {
                           "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                          "nullable": true,
-                          "type": "object"
+                          "type": [
+                            "object",
+                            "null"
+                          ]
                         },
                         "id": {
                           "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
                           "type": "string",
-                          "example": "none"
+                          "examples": [
+                            "none"
+                          ]
                         },
                         "name": {
                           "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
                           "type": "string",
-                          "example": "none"
+                          "examples": [
+                            "none"
+                          ]
                         },
                         "type": {
                           "$ref": "#/components/schemas/connector_types"
@@ -888,7 +1006,9 @@
                     "created_at": {
                       "type": "string",
                       "format": "date-time",
-                      "example": "2022-06-01T17:07:17.767Z"
+                      "examples": [
+                        "2022-06-01T17:07:17.767Z"
+                      ]
                     },
                     "created_by": {
                       "type": "object",
@@ -899,34 +1019,54 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "profile_uid": {
                           "type": "string",
-                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          "examples": [
+                            "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            "elastic"
+                          ]
                         }
                       }
                     },
                     "error": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": null
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "examples": [
+                        null
+                      ]
                     },
                     "id": {
                       "type": "string",
-                      "example": "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                      "examples": [
+                        "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                      ]
                     },
                     "mappings": {
                       "type": "array",
@@ -935,15 +1075,21 @@
                         "properties": {
                           "action_type": {
                             "type": "string",
-                            "example": "overwrite"
+                            "examples": [
+                              "overwrite"
+                            ]
                           },
                           "source": {
                             "type": "string",
-                            "example": "title"
+                            "examples": [
+                              "title"
+                            ]
                           },
                           "target": {
                             "type": "string",
-                            "example": "summary"
+                            "examples": [
+                              "summary"
+                            ]
                           }
                         }
                       }
@@ -952,13 +1098,20 @@
                       "$ref": "#/components/schemas/owners"
                     },
                     "updated_at": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time",
-                      "nullable": true,
-                      "example": "2022-06-01T19:58:48.169Z"
+                      "examples": [
+                        "2022-06-01T19:58:48.169Z"
+                      ]
                     },
                     "updated_by": {
-                      "type": "object",
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "required": [
                         "email",
                         "full_name",
@@ -966,30 +1119,45 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "profile_uid": {
                           "type": "string",
-                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          "examples": [
+                            "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            "elastic"
+                          ]
                         }
-                      },
-                      "nullable": true
+                      }
                     },
                     "version": {
                       "type": "string",
-                      "example": "WzIwNzMsMV0="
+                      "examples": [
+                        "WzIwNzMsMV0="
+                      ]
                     }
                   }
                 },
@@ -1044,23 +1212,37 @@
                     ],
                     "properties": {
                       "email": {
-                        "type": "string",
-                        "example": null,
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "examples": [
+                          null
+                        ]
                       },
                       "full_name": {
-                        "type": "string",
-                        "example": null,
-                        "nullable": true
-                      },
-                      "username": {
-                        "type": "string",
-                        "example": "elastic",
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "examples": [
+                          null
+                        ]
                       },
                       "profile_uid": {
                         "type": "string",
-                        "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        "examples": [
+                          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        ]
+                      },
+                      "username": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "examples": [
+                          "elastic"
+                        ]
                       }
                     }
                   }
@@ -1569,8 +1751,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "nullable": true
+                "type": [
+                  "object",
+                  "null"
+                ]
               }
             }
           }
@@ -2103,7 +2287,7 @@
                       }
                     }
                   },
-                  "example": [
+                  "examples": [
                     {
                       "id": "06116b80-e1c3-11ec-be9b-9b1838238ee6",
                       "title": "security_case"
@@ -2194,18 +2378,24 @@
                         "properties": {
                           "fields": {
                             "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                            "nullable": true,
-                            "type": "object"
+                            "type": [
+                              "object",
+                              "null"
+                            ]
                           },
                           "id": {
                             "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
                             "type": "string",
-                            "example": "none"
+                            "examples": [
+                              "none"
+                            ]
                           },
                           "name": {
                             "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
                             "type": "string",
-                            "example": "none"
+                            "examples": [
+                              "none"
+                            ]
                           },
                           "type": {
                             "$ref": "#/components/schemas/connector_types"
@@ -2215,7 +2405,9 @@
                       "created_at": {
                         "type": "string",
                         "format": "date-time",
-                        "example": "2022-06-01T17:07:17.767Z"
+                        "examples": [
+                          "2022-06-01T17:07:17.767Z"
+                        ]
                       },
                       "created_by": {
                         "type": "object",
@@ -2226,34 +2418,54 @@
                         ],
                         "properties": {
                           "email": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              null
+                            ]
                           },
                           "full_name": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
-                          },
-                          "username": {
-                            "type": "string",
-                            "example": "elastic",
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              null
+                            ]
                           },
                           "profile_uid": {
                             "type": "string",
-                            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                            "examples": [
+                              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                            ]
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              "elastic"
+                            ]
                           }
                         }
                       },
                       "error": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": null
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "examples": [
+                          null
+                        ]
                       },
                       "id": {
                         "type": "string",
-                        "example": "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                        "examples": [
+                          "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                        ]
                       },
                       "mappings": {
                         "type": "array",
@@ -2262,15 +2474,21 @@
                           "properties": {
                             "action_type": {
                               "type": "string",
-                              "example": "overwrite"
+                              "examples": [
+                                "overwrite"
+                              ]
                             },
                             "source": {
                               "type": "string",
-                              "example": "title"
+                              "examples": [
+                                "title"
+                              ]
                             },
                             "target": {
                               "type": "string",
-                              "example": "summary"
+                              "examples": [
+                                "summary"
+                              ]
                             }
                           }
                         }
@@ -2279,13 +2497,20 @@
                         "$ref": "#/components/schemas/owners"
                       },
                       "updated_at": {
-                        "type": "string",
+                        "type": [
+                          "string",
+                          "null"
+                        ],
                         "format": "date-time",
-                        "nullable": true,
-                        "example": "2022-06-01T19:58:48.169Z"
+                        "examples": [
+                          "2022-06-01T19:58:48.169Z"
+                        ]
                       },
                       "updated_by": {
-                        "type": "object",
+                        "type": [
+                          "object",
+                          "null"
+                        ],
                         "required": [
                           "email",
                           "full_name",
@@ -2293,30 +2518,45 @@
                         ],
                         "properties": {
                           "email": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              null
+                            ]
                           },
                           "full_name": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
-                          },
-                          "username": {
-                            "type": "string",
-                            "example": "elastic",
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              null
+                            ]
                           },
                           "profile_uid": {
                             "type": "string",
-                            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                            "examples": [
+                              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                            ]
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "examples": [
+                              "elastic"
+                            ]
                           }
-                        },
-                        "nullable": true
+                        }
                       },
                       "version": {
                         "type": "string",
-                        "example": "WzIwNzMsMV0="
+                        "examples": [
+                          "WzIwNzMsMV0="
+                        ]
                       }
                     }
                   }
@@ -2420,18 +2660,24 @@
                       "properties": {
                         "fields": {
                           "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                          "nullable": true,
-                          "type": "object"
+                          "type": [
+                            "object",
+                            "null"
+                          ]
                         },
                         "id": {
                           "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
                           "type": "string",
-                          "example": "none"
+                          "examples": [
+                            "none"
+                          ]
                         },
                         "name": {
                           "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
                           "type": "string",
-                          "example": "none"
+                          "examples": [
+                            "none"
+                          ]
                         },
                         "type": {
                           "$ref": "#/components/schemas/connector_types"
@@ -2441,7 +2687,9 @@
                     "created_at": {
                       "type": "string",
                       "format": "date-time",
-                      "example": "2022-06-01T17:07:17.767Z"
+                      "examples": [
+                        "2022-06-01T17:07:17.767Z"
+                      ]
                     },
                     "created_by": {
                       "type": "object",
@@ -2452,34 +2700,54 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "profile_uid": {
                           "type": "string",
-                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          "examples": [
+                            "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            "elastic"
+                          ]
                         }
                       }
                     },
                     "error": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": null
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "examples": [
+                        null
+                      ]
                     },
                     "id": {
                       "type": "string",
-                      "example": "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                      "examples": [
+                        "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                      ]
                     },
                     "mappings": {
                       "type": "array",
@@ -2488,15 +2756,21 @@
                         "properties": {
                           "action_type": {
                             "type": "string",
-                            "example": "overwrite"
+                            "examples": [
+                              "overwrite"
+                            ]
                           },
                           "source": {
                             "type": "string",
-                            "example": "title"
+                            "examples": [
+                              "title"
+                            ]
                           },
                           "target": {
                             "type": "string",
-                            "example": "summary"
+                            "examples": [
+                              "summary"
+                            ]
                           }
                         }
                       }
@@ -2505,13 +2779,20 @@
                       "$ref": "#/components/schemas/owners"
                     },
                     "updated_at": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time",
-                      "nullable": true,
-                      "example": "2022-06-01T19:58:48.169Z"
+                      "examples": [
+                        "2022-06-01T19:58:48.169Z"
+                      ]
                     },
                     "updated_by": {
-                      "type": "object",
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "required": [
                         "email",
                         "full_name",
@@ -2519,30 +2800,45 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "profile_uid": {
                           "type": "string",
-                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          "examples": [
+                            "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            "elastic"
+                          ]
                         }
-                      },
-                      "nullable": true
+                      }
                     },
                     "version": {
                       "type": "string",
-                      "example": "WzIwNzMsMV0="
+                      "examples": [
+                        "WzIwNzMsMV0="
+                      ]
                     }
                   }
                 },
@@ -2650,18 +2946,24 @@
                       "properties": {
                         "fields": {
                           "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                          "nullable": true,
-                          "type": "object"
+                          "type": [
+                            "object",
+                            "null"
+                          ]
                         },
                         "id": {
                           "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
                           "type": "string",
-                          "example": "none"
+                          "examples": [
+                            "none"
+                          ]
                         },
                         "name": {
                           "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
                           "type": "string",
-                          "example": "none"
+                          "examples": [
+                            "none"
+                          ]
                         },
                         "type": {
                           "$ref": "#/components/schemas/connector_types"
@@ -2671,7 +2973,9 @@
                     "created_at": {
                       "type": "string",
                       "format": "date-time",
-                      "example": "2022-06-01T17:07:17.767Z"
+                      "examples": [
+                        "2022-06-01T17:07:17.767Z"
+                      ]
                     },
                     "created_by": {
                       "type": "object",
@@ -2682,34 +2986,54 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "profile_uid": {
                           "type": "string",
-                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          "examples": [
+                            "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            "elastic"
+                          ]
                         }
                       }
                     },
                     "error": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": null
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "examples": [
+                        null
+                      ]
                     },
                     "id": {
                       "type": "string",
-                      "example": "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                      "examples": [
+                        "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+                      ]
                     },
                     "mappings": {
                       "type": "array",
@@ -2718,15 +3042,21 @@
                         "properties": {
                           "action_type": {
                             "type": "string",
-                            "example": "overwrite"
+                            "examples": [
+                              "overwrite"
+                            ]
                           },
                           "source": {
                             "type": "string",
-                            "example": "title"
+                            "examples": [
+                              "title"
+                            ]
                           },
                           "target": {
                             "type": "string",
-                            "example": "summary"
+                            "examples": [
+                              "summary"
+                            ]
                           }
                         }
                       }
@@ -2735,13 +3065,20 @@
                       "$ref": "#/components/schemas/owners"
                     },
                     "updated_at": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time",
-                      "nullable": true,
-                      "example": "2022-06-01T19:58:48.169Z"
+                      "examples": [
+                        "2022-06-01T19:58:48.169Z"
+                      ]
                     },
                     "updated_by": {
-                      "type": "object",
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "required": [
                         "email",
                         "full_name",
@@ -2749,30 +3086,45 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            null
+                          ]
                         },
                         "profile_uid": {
                           "type": "string",
-                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          "examples": [
+                            "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "examples": [
+                            "elastic"
+                          ]
                         }
-                      },
-                      "nullable": true
+                      }
                     },
                     "version": {
                       "type": "string",
-                      "example": "WzIwNzMsMV0="
+                      "examples": [
+                        "WzIwNzMsMV0="
+                      ]
                     }
                   }
                 },
@@ -2909,23 +3261,37 @@
                     ],
                     "properties": {
                       "email": {
-                        "type": "string",
-                        "example": null,
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "examples": [
+                          null
+                        ]
                       },
                       "full_name": {
-                        "type": "string",
-                        "example": null,
-                        "nullable": true
-                      },
-                      "username": {
-                        "type": "string",
-                        "example": "elastic",
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "examples": [
+                          null
+                        ]
                       },
                       "profile_uid": {
                         "type": "string",
-                        "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        "examples": [
+                          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        ]
+                      },
+                      "username": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "examples": [
+                          "elastic"
+                        ]
                       }
                     }
                   }
@@ -3515,8 +3881,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "nullable": true
+                "type": [
+                  "object",
+                  "null"
+                ]
               }
             }
           }
@@ -3610,8 +3978,7 @@
             "$ref": "#/components/parameters/space_id"
           },
           {
-            "$ref": "#/components/parameters/page_index",
-            "example": "1"
+            "$ref": "#/components/parameters/page_index"
           },
           {
             "$ref": "#/components/parameters/page_size"
@@ -3679,7 +4046,8 @@
       "apiKeyAuth": {
         "type": "apiKey",
         "in": "header",
-        "name": "ApiKey"
+        "name": "Authorization",
+        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
       }
     },
     "parameters": {
@@ -3703,9 +4071,13 @@
             "type": "string",
             "minItems": 1,
             "maxItems": 100
-          }
-        },
-        "example": "d4e7abb0-b462-11ec-9a8d-698504725a43"
+          },
+          "examples": [
+            [
+              "d4e7abb0-b462-11ec-9a8d-698504725a43"
+            ]
+          ]
+        }
       },
       "assignees": {
         "in": "query",
@@ -3740,11 +4112,15 @@
               "items": {
                 "type": "string"
               },
-              "maxItems": 100
+              "maxItems": 100,
+              "examples": [
+                [
+                  "my-category"
+                ]
+              ]
             }
           ]
-        },
-        "example": "my-category"
+        }
       },
       "defaultSearchOperator": {
         "in": "query",
@@ -3752,9 +4128,11 @@
         "description": "he default operator to use for the simple_query_string.",
         "schema": {
           "type": "string",
-          "default": "OR"
-        },
-        "example": "OR"
+          "default": "OR",
+          "examples": [
+            "OR"
+          ]
+        }
       },
       "from": {
         "in": "query",
@@ -3762,7 +4140,9 @@
         "description": "Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression.\n",
         "schema": {
           "type": "string",
-          "example": "now-1d"
+          "examples": [
+            "now-1d"
+          ]
         }
       },
       "owner": {
@@ -3778,11 +4158,15 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/owners"
-              }
+              },
+              "examples": [
+                [
+                  "cases"
+                ]
+              ]
             }
           ]
-        },
-        "example": "cases"
+        }
       },
       "page_index": {
         "in": "query",
@@ -3791,7 +4175,10 @@
         "required": false,
         "schema": {
           "type": "integer",
-          "default": 1
+          "default": 1,
+          "examples": [
+            1
+          ]
         }
       },
       "page_size": {
@@ -3819,11 +4206,15 @@
               "items": {
                 "type": "string"
               },
-              "maxItems": 100
+              "maxItems": 100,
+              "examples": [
+                [
+                  "elastic"
+                ]
+              ]
             }
           ]
-        },
-        "example": "elastic"
+        }
       },
       "search": {
         "in": "query",
@@ -3880,9 +4271,11 @@
             "status",
             "severity"
           ],
-          "default": "createdAt"
-        },
-        "example": "updatedAt"
+          "default": "createdAt",
+          "examples": [
+            "updatedAt"
+          ]
+        }
       },
       "sort_order": {
         "in": "query",
@@ -3908,9 +4301,11 @@
             "closed",
             "in-progress",
             "open"
+          ],
+          "examples": [
+            "open"
           ]
-        },
-        "example": "open"
+        }
       },
       "tags": {
         "in": "query",
@@ -3926,20 +4321,26 @@
               "items": {
                 "type": "string"
               },
-              "maxItems": 100
+              "maxItems": 100,
+              "examples": [
+                [
+                  "tag-1"
+                ]
+              ]
             }
           ]
-        },
-        "example": "tag-1"
+        }
       },
       "to": {
         "in": "query",
         "name": "to",
         "description": "Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.\n",
         "schema": {
-          "type": "string"
-        },
-        "example": "now+1d"
+          "type": "string",
+          "examples": [
+            "now+1d"
+          ]
+        }
       },
       "alert_id": {
         "in": "path",
@@ -3948,7 +4349,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540"
+          "examples": [
+            "09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540"
+          ]
         }
       },
       "configuration_id": {
@@ -3958,7 +4361,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9"
+          "examples": [
+            "3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9"
+          ]
         }
       },
       "case_id": {
@@ -3968,7 +4373,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "9c235210-6834-11ea-a78c-6ffb38a34414"
+          "examples": [
+            "9c235210-6834-11ea-a78c-6ffb38a34414"
+          ]
         }
       },
       "includeComments": {
@@ -3988,7 +4395,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "71ec1870-725b-11ea-a0b2-c51ea50a58e2"
+          "examples": [
+            "71ec1870-725b-11ea-a0b2-c51ea50a58e2"
+          ]
         }
       },
       "connector_id": {
@@ -3998,7 +4407,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "abed3a70-71bd-11ea-a0b2-c51ea50a58e2"
+          "examples": [
+            "abed3a70-71bd-11ea-a0b2-c51ea50a58e2"
+          ]
         }
       },
       "user_action_types": {
@@ -4026,9 +4437,13 @@
               "title",
               "user"
             ]
-          }
-        },
-        "example": "create_case"
+          },
+          "examples": [
+            [
+              "create_case"
+            ]
+          ]
+        }
       },
       "space_id": {
         "in": "path",
@@ -4037,16 +4452,20 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "default"
+          "examples": [
+            "default"
+          ]
         }
       }
     },
     "schemas": {
       "assignees": {
-        "type": "array",
+        "type": [
+          "array",
+          "null"
+        ],
         "description": "An array containing users that are assigned to the case.",
         "maxItems": 10,
-        "nullable": true,
         "items": {
           "type": "object",
           "required": [
@@ -4056,7 +4475,9 @@
             "uid": {
               "type": "string",
               "description": "A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.",
-              "example": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+              "examples": [
+                "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+              ]
             }
           }
         }
@@ -4074,24 +4495,34 @@
         "properties": {
           "fields": {
             "description": "An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.",
-            "nullable": true,
-            "type": "string",
-            "example": null
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "id": {
             "description": "The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.",
             "type": "string",
-            "example": "none"
+            "examples": [
+              "none"
+            ]
           },
           "name": {
             "description": "The name of the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.",
             "type": "string",
-            "example": "none"
+            "examples": [
+              "none"
+            ]
           },
           "type": {
             "description": "The type of connector. To create a case without a connector, use `.none`. To update a case to remove the connector, specify `.none`.",
             "type": "string",
-            "example": ".none",
+            "examples": [
+              ".none"
+            ],
             "enum": [
               ".none"
             ]
@@ -4110,9 +4541,13 @@
         "type": "object",
         "properties": {
           "fields": {
-            "type": "string",
-            "nullable": true,
-            "example": null
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "id": {
             "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
@@ -4125,7 +4560,9 @@
           "type": {
             "description": "The type of connector.",
             "type": "string",
-            "example": ".cases-webhook",
+            "examples": [
+              ".cases-webhook"
+            ],
             "enum": [
               ".cases-webhook"
             ]
@@ -4154,18 +4591,24 @@
             "properties": {
               "issueType": {
                 "description": "The type of issue.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "parent": {
                 "description": "The key of the parent issue, when the issue type is sub-task.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "priority": {
                 "description": "The priority of the issue.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -4180,7 +4623,9 @@
           "type": {
             "description": "The type of connector.",
             "type": "string",
-            "example": ".jira",
+            "examples": [
+              ".jira"
+            ],
             "enum": [
               ".jira"
             ]
@@ -4200,8 +4645,10 @@
         "properties": {
           "fields": {
             "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
-            "type": "object",
-            "nullable": true,
+            "type": [
+              "object",
+              "null"
+            ],
             "required": [
               "issueTypes",
               "severityCode"
@@ -4231,7 +4678,9 @@
           "type": {
             "description": "The type of connector.",
             "type": "string",
-            "example": ".resilient",
+            "examples": [
+              ".resilient"
+            ],
             "enum": [
               ".resilient"
             ]
@@ -4262,28 +4711,38 @@
             "properties": {
               "category": {
                 "description": "The category of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "impact": {
                 "description": "The effect an incident had on business.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "severity": {
                 "description": "The severity of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "subcategory": {
                 "description": "The subcategory of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "urgency": {
                 "description": "The extent to which the incident resolution can be delayed.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -4298,7 +4757,9 @@
           "type": {
             "description": "The type of connector.",
             "type": "string",
-            "example": ".servicenow",
+            "examples": [
+              ".servicenow"
+            ],
             "enum": [
               ".servicenow"
             ]
@@ -4331,38 +4792,52 @@
             "properties": {
               "category": {
                 "description": "The category of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "destIp": {
                 "description": "Indicates whether cases will send a comma-separated list of destination IPs.",
-                "type": "boolean",
-                "nullable": true
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "malwareHash": {
                 "description": "Indicates whether cases will send a comma-separated list of malware hashes.",
-                "type": "boolean",
-                "nullable": true
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "malwareUrl": {
                 "description": "Indicates whether cases will send a comma-separated list of malware URLs.",
-                "type": "boolean",
-                "nullable": true
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "priority": {
                 "description": "The priority of the issue.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "sourceIp": {
                 "description": "Indicates whether cases will send a comma-separated list of source IPs.",
-                "type": "boolean",
-                "nullable": true
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "subcategory": {
                 "description": "The subcategory of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -4377,7 +4852,9 @@
           "type": {
             "description": "The type of connector.",
             "type": "string",
-            "example": ".servicenow-sir",
+            "examples": [
+              ".servicenow-sir"
+            ],
             "enum": [
               ".servicenow-sir"
             ]
@@ -4404,8 +4881,10 @@
             "properties": {
               "caseId": {
                 "description": "The case identifier for Swimlane connectors.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -4420,7 +4899,9 @@
           "type": {
             "description": "The type of connector.",
             "type": "string",
-            "example": ".swimlane",
+            "examples": [
+              ".swimlane"
+            ],
             "enum": [
               ".swimlane"
             ]
@@ -4435,7 +4916,9 @@
           "observability",
           "securitySolution"
         ],
-        "example": "cases"
+        "examples": [
+          "cases"
+        ]
       },
       "settings": {
         "type": "object",
@@ -4447,7 +4930,9 @@
           "syncAlerts": {
             "description": "Turns alert syncing on or off.",
             "type": "boolean",
-            "example": true
+            "examples": [
+              true
+            ]
           }
         }
       },
@@ -4566,10 +5051,12 @@
                   "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
                   "oneOf": [
                     {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "minLength": 1,
-                      "maxLength": 160,
-                      "nullable": true
+                      "maxLength": 160
                     },
                     {
                       "type": "boolean"
@@ -4583,27 +5070,43 @@
       },
       "case_response_closed_by_properties": {
         "title": "Case response properties for closed_by",
-        "type": "object",
-        "nullable": true,
+        "type": [
+          "object",
+          "null"
+        ],
         "properties": {
           "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "profile_uid": {
             "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+            "examples": [
+              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "elastic"
+            ]
           }
         },
         "required": [
@@ -4623,13 +5126,17 @@
             "type": "array",
             "items": {
               "type": "string",
-              "example": "a6e12ac4-7bce-457b-84f6-d7ce8deb8446"
+              "examples": [
+                "a6e12ac4-7bce-457b-84f6-d7ce8deb8446"
+              ]
             }
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2023-11-06T19:29:38.424Z"
+            "examples": [
+              "2023-11-06T19:29:38.424Z"
+            ]
           },
           "created_by": {
             "type": "object",
@@ -4640,48 +5147,73 @@
             ],
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "profile_uid": {
                 "type": "string",
-                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                "examples": [
+                  "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                ]
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "elastic"
+                ]
               }
             }
           },
           "id": {
             "type": "string",
-            "example": "73362370-ab1a-11ec-985f-97e55adae8b9"
+            "examples": [
+              "73362370-ab1a-11ec-985f-97e55adae8b9"
+            ]
           },
           "index": {
             "type": "array",
             "items": {
               "type": "string",
-              "example": ".internal.alerts-security.alerts-default-000001"
+              "examples": [
+                ".internal.alerts-security.alerts-default-000001"
+              ]
             }
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
           },
           "pushed_at": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "example": null,
-            "nullable": true
+            "examples": [
+              null
+            ]
           },
           "pushed_by": {
-            "type": "object",
+            "type": [
+              "object",
+              "null"
+            ],
             "required": [
               "email",
               "full_name",
@@ -4689,26 +5221,39 @@
             ],
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "profile_uid": {
                 "type": "string",
-                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                "examples": [
+                  "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                ]
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "elastic"
+                ]
               }
-            },
-            "nullable": true
+            }
           },
           "rule": {
             "type": "object",
@@ -4716,30 +5261,40 @@
               "id": {
                 "description": "The rule identifier.",
                 "type": "string",
-                "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
+                "examples": [
+                  "94d80550-aaf4-11ec-985f-97e55adae8b9"
+                ]
               },
               "name": {
                 "description": "The rule name.",
                 "type": "string",
-                "example": "security_rule"
+                "examples": [
+                  "security_rule"
+                ]
               }
             }
           },
           "type": {
             "type": "string",
-            "example": "alert",
+            "examples": [
+              "alert"
+            ],
             "enum": [
               "alert"
             ]
           },
           "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "updated_by": {
-            "type": "object",
-            "nullable": true,
+            "type": [
+              "object",
+              "null"
+            ],
             "required": [
               "email",
               "full_name",
@@ -4747,29 +5302,45 @@
             ],
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "profile_uid": {
                 "type": "string",
-                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                "examples": [
+                  "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                ]
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "elastic"
+                ]
               }
             }
           },
           "version": {
             "type": "string",
-            "example": "WzMwNDgsMV0="
+            "examples": [
+              "WzMwNDgsMV0="
+            ]
           }
         }
       },
@@ -4778,23 +5349,37 @@
         "type": "object",
         "properties": {
           "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "profile_uid": {
             "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+            "examples": [
+              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "elastic"
+            ]
           }
         },
         "required": [
@@ -4805,27 +5390,43 @@
       },
       "case_response_pushed_by_properties": {
         "title": "Case response properties for pushed_by",
-        "type": "object",
-        "nullable": true,
+        "type": [
+          "object",
+          "null"
+        ],
         "properties": {
           "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "profile_uid": {
             "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+            "examples": [
+              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "elastic"
+            ]
           }
         },
         "required": [
@@ -4836,27 +5437,43 @@
       },
       "case_response_updated_by_properties": {
         "title": "Case response properties for updated_by",
-        "type": "object",
-        "nullable": true,
+        "type": [
+          "object",
+          "null"
+        ],
         "properties": {
           "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              null
+            ]
           },
           "profile_uid": {
             "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+            "examples": [
+              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "elastic"
+            ]
           }
         },
         "required": [
@@ -4874,57 +5491,77 @@
         "properties": {
           "comment": {
             "type": "string",
-            "example": "A new comment."
+            "examples": [
+              "A new comment."
+            ]
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2022-05-13T09:16:17.416Z"
+            "examples": [
+              "2022-05-13T09:16:17.416Z"
+            ]
           },
           "created_by": {
             "$ref": "#/components/schemas/case_response_created_by_properties"
           },
           "id": {
             "type": "string",
-            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+            "examples": [
+              "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+            ]
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
           },
           "pushed_at": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "nullable": true,
-            "example": null
+            "examples": [
+              null
+            ]
           },
           "pushed_by": {
             "$ref": "#/components/schemas/case_response_pushed_by_properties"
           },
           "type": {
             "type": "string",
-            "example": "user",
+            "examples": [
+              "user"
+            ],
             "enum": [
               "user"
             ]
           },
           "updated_at": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "nullable": true,
-            "example": null
+            "examples": [
+              null
+            ]
           },
           "updated_by": {
             "$ref": "#/components/schemas/case_response_updated_by_properties"
           },
           "version": {
             "type": "string",
-            "example": "WzIwNDMxLDFd"
+            "examples": [
+              "WzIwNDMxLDFd"
+            ]
           }
         }
       },
       "external_service": {
-        "type": "object",
-        "nullable": true,
+        "type": [
+          "object",
+          "null"
+        ],
         "properties": {
           "connector_id": {
             "type": "string"
@@ -4946,29 +5583,45 @@
             "format": "date-time"
           },
           "pushed_by": {
-            "type": "object",
+            "type": [
+              "object",
+              "null"
+            ],
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "profile_uid": {
                 "type": "string",
-                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                "examples": [
+                  "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                ]
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "elastic"
+                ]
               }
-            },
-            "nullable": true
+            }
           }
         }
       },
@@ -5012,14 +5665,18 @@
             "$ref": "#/components/schemas/assignees"
           },
           "category": {
-            "type": "string",
-            "description": "The case category.",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The case category."
           },
           "closed_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "closed_by": {
             "$ref": "#/components/schemas/case_response_closed_by_properties"
@@ -5075,7 +5732,9 @@
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2022-05-13T09:16:17.416Z"
+            "examples": [
+              "2022-05-13T09:16:17.416Z"
+            ]
           },
           "created_by": {
             "$ref": "#/components/schemas/case_response_created_by_properties"
@@ -5103,10 +5762,12 @@
                   "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
                   "oneOf": [
                     {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "minLength": 1,
-                      "maxLength": 160,
-                      "nullable": true
+                      "maxLength": 160
                     },
                     {
                       "type": "boolean"
@@ -5118,20 +5779,28 @@
           },
           "description": {
             "type": "string",
-            "example": "A case description."
+            "examples": [
+              "A case description."
+            ]
           },
           "duration": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-            "nullable": true,
-            "example": 120
+            "examples": [
+              120
+            ]
           },
           "external_service": {
             "$ref": "#/components/schemas/external_service"
           },
           "id": {
             "type": "string",
-            "example": "66b9aa00-94fa-11ea-9f74-e7e108796192"
+            "examples": [
+              "66b9aa00-94fa-11ea-9f74-e7e108796192"
+            ]
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -5150,33 +5819,45 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "tag-1"
+            "examples": [
+              [
+                "tag-1"
+              ]
             ]
           },
           "title": {
             "type": "string",
-            "example": "Case title 1"
+            "examples": [
+              "Case title 1"
+            ]
           },
           "totalAlerts": {
             "type": "integer",
-            "example": 0
+            "examples": [
+              0
+            ]
           },
           "totalComment": {
             "type": "integer",
-            "example": 0
+            "examples": [
+              0
+            ]
           },
           "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "updated_by": {
             "$ref": "#/components/schemas/case_response_updated_by_properties"
           },
           "version": {
             "type": "string",
-            "example": "WzUzMiwxXQ=="
+            "examples": [
+              "WzUzMiwxXQ=="
+            ]
           }
         }
       },
@@ -5186,14 +5867,18 @@
         "properties": {
           "error": {
             "type": "string",
-            "example": "Unauthorized"
+            "examples": [
+              "Unauthorized"
+            ]
           },
           "message": {
             "type": "string"
           },
           "statusCode": {
             "type": "integer",
-            "example": 401
+            "examples": [
+              401
+            ]
           }
         }
       },
@@ -5280,10 +5965,12 @@
                         "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
                         "oneOf": [
                           {
-                            "type": "string",
+                            "type": [
+                              "string",
+                              "null"
+                            ],
                             "minLength": 1,
-                            "maxLength": 160,
-                            "nullable": true
+                            "maxLength": 160
                           },
                           {
                             "type": "boolean"
@@ -5349,7 +6036,9 @@
           "close-by-pushing",
           "close-by-user"
         ],
-        "example": "close-by-user"
+        "examples": [
+          "close-by-user"
+        ]
       },
       "connector_types": {
         "type": "string",
@@ -5363,7 +6052,9 @@
           ".servicenow-sir",
           ".swimlane"
         ],
-        "example": ".none"
+        "examples": [
+          ".none"
+        ]
       },
       "set_case_configuration_request": {
         "title": "Set case configuration request",
@@ -5384,18 +6075,24 @@
             "properties": {
               "fields": {
                 "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                "nullable": true,
-                "type": "object"
+                "type": [
+                  "object",
+                  "null"
+                ]
               },
               "id": {
                 "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
                 "type": "string",
-                "example": "none"
+                "examples": [
+                  "none"
+                ]
               },
               "name": {
                 "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
                 "type": "string",
-                "example": "none"
+                "examples": [
+                  "none"
+                ]
               },
               "type": {
                 "$ref": "#/components/schemas/connector_types"
@@ -5472,18 +6169,24 @@
             "properties": {
               "fields": {
                 "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                "nullable": true,
-                "type": "object"
+                "type": [
+                  "object",
+                  "null"
+                ]
               },
               "id": {
                 "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
                 "type": "string",
-                "example": "none"
+                "examples": [
+                  "none"
+                ]
               },
               "name": {
                 "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
                 "type": "string",
-                "example": "none"
+                "examples": [
+                  "none"
+                ]
               },
               "type": {
                 "$ref": "#/components/schemas/connector_types"
@@ -5539,7 +6242,9 @@
           "version": {
             "description": "The version of the connector. To retrieve the version value, use the get configuration API.\n",
             "type": "string",
-            "example": "WzIwMiwxXQ=="
+            "examples": [
+              "WzIwMiwxXQ=="
+            ]
           }
         }
       },
@@ -5576,7 +6281,9 @@
           }
         ],
         "x-technical-preview": true,
-        "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
+        "examples": [
+          "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
+        ]
       },
       "alert_indices": {
         "title": "Alert indices",
@@ -5604,12 +6311,16 @@
           "id": {
             "description": "The rule identifier.",
             "type": "string",
-            "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
+            "examples": [
+              "94d80550-aaf4-11ec-985f-97e55adae8b9"
+            ]
           },
           "name": {
             "description": "The rule name.",
             "type": "string",
-            "example": "security_rule"
+            "examples": [
+              "security_rule"
+            ]
           }
         }
       },
@@ -5640,7 +6351,9 @@
           "type": {
             "description": "The type of comment.",
             "type": "string",
-            "example": "alert",
+            "examples": [
+              "alert"
+            ],
             "enum": [
               "alert"
             ]
@@ -5656,7 +6369,9 @@
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
             "maxLength": 30000,
-            "example": "A new comment."
+            "examples": [
+              "A new comment."
+            ]
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -5664,7 +6379,9 @@
           "type": {
             "type": "string",
             "description": "The type of comment.",
-            "example": "user",
+            "examples": [
+              "user"
+            ],
             "enum": [
               "user"
             ]
@@ -5711,7 +6428,9 @@
           "id": {
             "type": "string",
             "description": "The identifier for the comment. To retrieve comment IDs, use the get comments API.\n",
-            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+            "examples": [
+              "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+            ]
           },
           "index": {
             "$ref": "#/components/schemas/alert_indices"
@@ -5728,12 +6447,16 @@
             "enum": [
               "alert"
             ],
-            "example": "alert"
+            "examples": [
+              "alert"
+            ]
           },
           "version": {
             "description": "The current comment version. To retrieve version values, use the get comments API.\n",
             "type": "string",
-            "example": "Wzk1LDFd"
+            "examples": [
+              "Wzk1LDFd"
+            ]
           }
         }
       },
@@ -5746,12 +6469,16 @@
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
             "maxLength": 30000,
-            "example": "A new comment."
+            "examples": [
+              "A new comment."
+            ]
           },
           "id": {
             "type": "string",
             "description": "The identifier for the comment. To retrieve comment IDs, use the get comments API.\n",
-            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+            "examples": [
+              "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+            ]
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -5762,12 +6489,16 @@
             "enum": [
               "user"
             ],
-            "example": "user"
+            "examples": [
+              "user"
+            ]
           },
           "version": {
             "description": "The current comment version. To retrieve version values, use the get comments API.\n",
             "type": "string",
-            "example": "Wzk1LDFd"
+            "examples": [
+              "Wzk1LDFd"
+            ]
           }
         },
         "required": [
@@ -5802,7 +6533,9 @@
           "push_to_service",
           "update"
         ],
-        "example": "create"
+        "examples": [
+          "create"
+        ]
       },
       "payload_alert_comment": {
         "type": "object",
@@ -5814,7 +6547,9 @@
                 "oneOf": [
                   {
                     "type": "string",
-                    "example": "1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d"
+                    "examples": [
+                      "1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d"
+                    ]
                   },
                   {
                     "type": "array",
@@ -5828,7 +6563,9 @@
                 "oneOf": [
                   {
                     "type": "string",
-                    "example": ".alerts-observability.logs.alerts-default"
+                    "examples": [
+                      ".alerts-observability.logs.alerts-default"
+                    ]
                   },
                   {
                     "type": "array",
@@ -5847,12 +6584,16 @@
                   "id": {
                     "description": "The rule identifier.",
                     "type": "string",
-                    "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
+                    "examples": [
+                      "94d80550-aaf4-11ec-985f-97e55adae8b9"
+                    ]
                   },
                   "name": {
                     "description": "The rule name.",
                     "type": "string",
-                    "example": "security_rule"
+                    "examples": [
+                      "security_rule"
+                    ]
                   }
                 }
               },
@@ -5881,9 +6622,11 @@
             "type": "object",
             "properties": {
               "fields": {
-                "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.",
-                "nullable": true,
-                "type": "object",
+                "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.\n",
+                "type": [
+                  "object",
+                  "null"
+                ],
                 "properties": {
                   "caseId": {
                     "description": "The case identifier for Swimlane connectors.",
@@ -5895,8 +6638,10 @@
                   },
                   "destIp": {
                     "description": "Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "impact": {
                     "description": "The effect an incident had on business for ServiceNow ITSM connectors.",
@@ -5915,13 +6660,17 @@
                   },
                   "malwareHash": {
                     "description": "Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "malwareUrl": {
                     "description": "Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "parent": {
                     "description": "The key of the parent issue, when the issue type is sub-task for Jira connectors.",
@@ -5941,8 +6690,10 @@
                   },
                   "sourceIp": {
                     "description": "Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "subcategory": {
                     "description": "The subcategory of the incident for ServiceNow ITSM connectors.",
@@ -5953,17 +6704,23 @@
                     "type": "string"
                   }
                 },
-                "example": null
+                "examples": [
+                  null
+                ]
               },
               "id": {
                 "description": "The identifier for the connector. To create a case without a connector, use `none`.",
                 "type": "string",
-                "example": "none"
+                "examples": [
+                  "none"
+                ]
               },
               "name": {
                 "description": "The name of the connector. To create a case without a connector, use `none`.",
                 "type": "string",
-                "example": "none"
+                "examples": [
+                  "none"
+                ]
               },
               "type": {
                 "$ref": "#/components/schemas/connector_types"
@@ -5982,9 +6739,11 @@
             "type": "object",
             "properties": {
               "fields": {
-                "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.",
-                "nullable": true,
-                "type": "object",
+                "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.\n",
+                "type": [
+                  "object",
+                  "null"
+                ],
                 "properties": {
                   "caseId": {
                     "description": "The case identifier for Swimlane connectors.",
@@ -5996,8 +6755,10 @@
                   },
                   "destIp": {
                     "description": "Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "impact": {
                     "description": "The effect an incident had on business for ServiceNow ITSM connectors.",
@@ -6016,13 +6777,17 @@
                   },
                   "malwareHash": {
                     "description": "Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "malwareUrl": {
                     "description": "Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "parent": {
                     "description": "The key of the parent issue, when the issue type is sub-task for Jira connectors.",
@@ -6042,8 +6807,10 @@
                   },
                   "sourceIp": {
                     "description": "Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "subcategory": {
                     "description": "The subcategory of the incident for ServiceNow ITSM connectors.",
@@ -6054,17 +6821,23 @@
                     "type": "string"
                   }
                 },
-                "example": null
+                "examples": [
+                  null
+                ]
               },
               "id": {
                 "description": "The identifier for the connector. To create a case without a connector, use `none`.",
                 "type": "string",
-                "example": "none"
+                "examples": [
+                  "none"
+                ]
               },
               "name": {
                 "description": "The name of the connector. To create a case without a connector, use `none`.",
                 "type": "string",
-                "example": "none"
+                "examples": [
+                  "none"
+                ]
               },
               "type": {
                 "$ref": "#/components/schemas/connector_types"
@@ -6089,11 +6862,13 @@
           "tags": {
             "type": "array",
             "items": {
-              "type": "string",
-              "example": [
+              "type": "string"
+            },
+            "examples": [
+              [
                 "tag-1"
               ]
-            }
+            ]
           },
           "title": {
             "type": "string"
@@ -6101,9 +6876,11 @@
         }
       },
       "payload_delete": {
-        "type": "object",
-        "description": "If the `action` is `delete` and the `type` is `delete_case`, the payload is nullable.",
-        "nullable": true
+        "type": [
+          "object",
+          "null"
+        ],
+        "description": "If the `action` is `delete` and the `type` is `delete_case`, the payload is nullable."
       },
       "payload_description": {
         "type": "object",
@@ -6153,8 +6930,10 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "tag-1"
+            "examples": [
+              [
+                "tag-1"
+              ]
             ]
           }
         }
@@ -6206,7 +6985,9 @@
           "settings",
           "severity"
         ],
-        "example": "create_case"
+        "examples": [
+          "create_case"
+        ]
       },
       "user_actions_response_properties": {
         "type": "object",
@@ -6227,43 +7008,67 @@
           },
           "action_id": {
             "type": "string",
-            "example": "22fd3e30-03b1-11ed-920c-974bfa104448"
+            "examples": [
+              "22fd3e30-03b1-11ed-920c-974bfa104448"
+            ]
           },
           "case_id": {
             "type": "string",
-            "example": "22df07d0-03b1-11ed-920c-974bfa104448"
+            "examples": [
+              "22df07d0-03b1-11ed-920c-974bfa104448"
+            ]
           },
           "comment_id": {
-            "type": "string",
-            "nullable": true,
-            "example": "578608d0-03b1-11ed-920c-974bfa104448"
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "578608d0-03b1-11ed-920c-974bfa104448"
+            ]
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2022-05-13T09:16:17.416Z"
+            "examples": [
+              "2022-05-13T09:16:17.416Z"
+            ]
           },
           "created_by": {
             "type": "object",
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "profile_uid": {
                 "type": "string",
-                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                "examples": [
+                  "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                ]
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "elastic"
+                ]
               }
             },
             "required": [
@@ -6341,36 +7146,56 @@
             "$ref": "#/components/schemas/actions"
           },
           "comment_id": {
-            "type": "string",
-            "nullable": true,
-            "example": "578608d0-03b1-11ed-920c-974bfa104448"
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "578608d0-03b1-11ed-920c-974bfa104448"
+            ]
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2022-05-13T09:16:17.416Z"
+            "examples": [
+              "2022-05-13T09:16:17.416Z"
+            ]
           },
           "created_by": {
             "type": "object",
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               },
               "profile_uid": {
                 "type": "string",
-                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                "examples": [
+                  "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                ]
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "elastic"
+                ]
               }
             },
             "required": [
@@ -6381,7 +7206,9 @@
           },
           "id": {
             "type": "string",
-            "example": "22fd3e30-03b1-11ed-920c-974bfa104448"
+            "examples": [
+              "22fd3e30-03b1-11ed-920c-974bfa104448"
+            ]
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -6431,7 +7258,9 @@
           },
           "version": {
             "type": "string",
-            "example": "WzM1ODg4LDFd"
+            "examples": [
+              "WzM1ODg4LDFd"
+            ]
           },
           "type": {
             "type": "string",
@@ -6449,7 +7278,9 @@
               "settings",
               "severity"
             ],
-            "example": "create_case"
+            "examples": [
+              "create_case"
+            ]
           }
         }
       }
