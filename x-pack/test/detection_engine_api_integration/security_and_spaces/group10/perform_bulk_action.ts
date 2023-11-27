@@ -23,7 +23,8 @@ import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/com
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
+// Should be updated once this file gets moved to the new  security_solution_api_integration folder
+import { deleteAllExceptions } from '../../../security_solution_api_integration/test_suites/lists_and_exception_lists/utils';
 import {
   binaryToString,
   createLegacyRuleAction,

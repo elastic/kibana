@@ -28,7 +28,8 @@ import {
   removeServerGeneratedProperties,
   ruleToNdjson,
 } from '../../utils';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
+// Should be updated once this file gets moved to the new  security_solution_api_integration folder
+import { deleteAllExceptions } from '../../../security_solution_api_integration/test_suites/lists_and_exception_lists/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 const getImportRuleBuffer = (connectorId: string) => {
