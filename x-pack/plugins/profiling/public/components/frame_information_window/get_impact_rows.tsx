@@ -25,10 +25,10 @@ interface Params {
   totalSeconds: number;
   calculateImpactEstimates: CalculateImpactEstimates;
   shouldUseLegacyCo2Calculation: boolean;
-  selfAnnualCo2kg: number;
-  totalAnnualCo2kg: number;
-  selfAnnualCostUsd: number;
-  totalAnnualCostUsd: number;
+  selfAnnualCO2Kgs: number;
+  totalAnnualCO2Kgs: number;
+  selfAnnualCostUSD: number;
+  totalAnnualCostUSD: number;
 }
 
 export function getImpactRows({
@@ -38,10 +38,10 @@ export function getImpactRows({
   totalSeconds,
   calculateImpactEstimates,
   shouldUseLegacyCo2Calculation,
-  selfAnnualCo2kg,
-  totalAnnualCo2kg,
-  selfAnnualCostUsd,
-  totalAnnualCostUsd,
+  selfAnnualCO2Kgs,
+  totalAnnualCO2Kgs,
+  selfAnnualCostUSD,
+  totalAnnualCostUSD,
 }: Params) {
   const { selfCPU, totalCPU } = calculateImpactEstimates({
     countInclusive,
@@ -118,7 +118,7 @@ export function getImpactRows({
         }
       ),
       value: asWeight(
-        shouldUseLegacyCo2Calculation ? totalCPU.co2 : totalAnnualCo2kg / annualSecondsRatio,
+        shouldUseLegacyCo2Calculation ? totalCPU.co2 : totalAnnualCO2Kgs / annualSecondsRatio,
         'kgs'
       ),
     },
@@ -129,7 +129,7 @@ export function getImpactRows({
         { defaultMessage: 'CO2 emission (excl. children)' }
       ),
       value: asWeight(
-        shouldUseLegacyCo2Calculation ? selfCPU.co2 : selfAnnualCo2kg / annualSecondsRatio,
+        shouldUseLegacyCo2Calculation ? selfCPU.co2 : selfAnnualCO2Kgs / annualSecondsRatio,
         'kgs'
       ),
     },
@@ -140,7 +140,7 @@ export function getImpactRows({
         { defaultMessage: 'Annualized CO2' }
       ),
       value: asWeight(
-        shouldUseLegacyCo2Calculation ? totalCPU.annualizedCo2 : totalAnnualCo2kg,
+        shouldUseLegacyCo2Calculation ? totalCPU.annualizedCo2 : totalAnnualCO2Kgs,
         'kgs'
       ),
     },
@@ -151,7 +151,7 @@ export function getImpactRows({
         { defaultMessage: 'Annualized CO2 (excl. children)' }
       ),
       value: asWeight(
-        shouldUseLegacyCo2Calculation ? selfCPU.annualizedCo2 : selfAnnualCo2kg,
+        shouldUseLegacyCo2Calculation ? selfCPU.annualizedCo2 : selfAnnualCO2Kgs,
         'kgs'
       ),
     },
@@ -164,7 +164,7 @@ export function getImpactRows({
       value: asCost(
         shouldUseLegacyCo2Calculation
           ? totalCPU.dollarCost
-          : totalAnnualCostUsd / annualSecondsRatio
+          : totalAnnualCostUSD / annualSecondsRatio
       ),
     },
     {
@@ -174,7 +174,7 @@ export function getImpactRows({
         { defaultMessage: 'Dollar cost (excl. children)' }
       ),
       value: asCost(
-        shouldUseLegacyCo2Calculation ? selfCPU.dollarCost : selfAnnualCostUsd / annualSecondsRatio
+        shouldUseLegacyCo2Calculation ? selfCPU.dollarCost : selfAnnualCostUSD / annualSecondsRatio
       ),
     },
     {
@@ -184,7 +184,7 @@ export function getImpactRows({
         { defaultMessage: 'Annualized dollar cost' }
       ),
       value: asCost(
-        shouldUseLegacyCo2Calculation ? totalCPU.annualizedDollarCost : totalAnnualCostUsd
+        shouldUseLegacyCo2Calculation ? totalCPU.annualizedDollarCost : totalAnnualCostUSD
       ),
     },
     {
@@ -194,7 +194,7 @@ export function getImpactRows({
         { defaultMessage: 'Annualized dollar cost (excl. children)' }
       ),
       value: asCost(
-        shouldUseLegacyCo2Calculation ? selfCPU.annualizedDollarCost : selfAnnualCostUsd
+        shouldUseLegacyCo2Calculation ? selfCPU.annualizedDollarCost : selfAnnualCostUSD
       ),
     },
   ];

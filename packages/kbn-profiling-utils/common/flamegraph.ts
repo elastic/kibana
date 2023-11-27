@@ -9,6 +9,7 @@
 import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
 import { createStackFrameMetadata, getCalleeLabel } from './profiling';
+import { convertTonsToKgs } from './utils';
 
 /**
  * Base Flamegraph
@@ -47,22 +48,37 @@ export interface BaseFlameGraph {
   TotalSamples: number;
   TotalCPU: number;
   SelfCPU: number;
-  AnnualCO2kgExclusive: number[];
-  AnnualCO2kgInclusive: number[];
+  AnnualCO2TonsExclusive: number[];
+  AnnualCO2TonsInclusive: number[];
   AnnualCostsUSDInclusive: number[];
   AnnualCostsUSDExclusive: number[];
-  SelfAnnualCO2kg: number;
-  TotalAnnualCO2kg: number;
+  SelfAnnualCO2Tons: number;
+  TotalAnnualCO2Tons: number;
   SelfAnnualCostsUSD: number;
   TotalAnnualCostsUSD: number;
 }
 
 /** Elasticsearch flamegraph */
-export interface ElasticFlameGraph extends BaseFlameGraph {
+export interface ElasticFlameGraph
+  extends Omit<
+    BaseFlameGraph,
+    | 'AnnualCO2TonsExclusive'
+    | 'AnnualCO2TonsInclusive'
+    | 'SelfAnnualCO2Tons'
+    | 'TotalAnnualCO2Tons'
+    | 'AnnualCostsUSDInclusive'
+    | 'AnnualCostsUSDExclusive'
+  > {
   /** ID */
   ID: string[];
   /** Label */
   Label: string[];
+  SelfAnnualCO2KgsItems: number[];
+  TotalAnnualCO2KgsItems: number[];
+  SelfAnnualCO2Kgs: number;
+  TotalAnnualCO2Kgs: number;
+  SelfAnnualCostsUSDItems: number[];
+  TotalAnnualCostsUSDItems: number[];
 }
 
 /**
@@ -99,12 +115,12 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
     TotalSamples: base.TotalSamples,
     SelfCPU: base.SelfCPU,
     TotalCPU: base.TotalCPU,
-    AnnualCO2TonsExclusive: base.AnnualCO2TonsExclusive,
-    AnnualCO2TonsInclusive: base.AnnualCO2TonsInclusive,
-    AnnualCostsUSDExclusive: base.AnnualCostsUSDExclusive,
-    AnnualCostsUSDInclusive: base.AnnualCostsUSDInclusive,
-    SelfAnnualCO2kg: base.SelfAnnualCO2Tons * 1000,
-    TotalAnnualCO2kg: base.TotalAnnualCO2Tons * 1000,
+    SelfAnnualCO2KgsItems: base.AnnualCO2TonsExclusive.map(convertTonsToKgs),
+    TotalAnnualCO2KgsItems: base.AnnualCO2TonsInclusive.map(convertTonsToKgs),
+    SelfAnnualCO2Kgs: convertTonsToKgs(base.SelfAnnualCO2Tons),
+    TotalAnnualCO2Kgs: convertTonsToKgs(base.TotalAnnualCO2Tons),
+    SelfAnnualCostsUSDItems: base.AnnualCostsUSDExclusive,
+    TotalAnnualCostsUSDItems: base.AnnualCostsUSDInclusive,
     SelfAnnualCostsUSD: base.SelfAnnualCostsUSD,
     TotalAnnualCostsUSD: base.TotalAnnualCostsUSD,
   };

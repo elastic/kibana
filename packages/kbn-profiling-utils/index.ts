@@ -30,6 +30,7 @@ export {
   TopNFunctionSortField,
   topNFunctionSortFieldRt,
 } from './common/functions';
+export { convertTonsToKgs } from './common/utils';
 
 export type {
   ProfilingStatusResponse,

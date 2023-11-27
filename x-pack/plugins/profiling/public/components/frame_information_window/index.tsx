@@ -28,10 +28,10 @@ export interface Frame {
   sourceLine: number;
   countInclusive: number;
   countExclusive: number;
-  selfAnnualCo2kg: number;
-  totalAnnualCo2kg: number;
-  selfAnnualCostUsd: number;
-  totalAnnualCostUsd: number;
+  selfAnnualCO2Kgs: number;
+  totalAnnualCO2Kgs: number;
+  selfAnnualCostUSD: number;
+  totalAnnualCostUSD: number;
 }
 
 export interface Props {
@@ -84,10 +84,10 @@ export function FrameInformationWindow({
     sourceLine,
     countInclusive,
     countExclusive,
-    selfAnnualCo2kg,
-    totalAnnualCo2kg,
-    selfAnnualCostUsd,
-    totalAnnualCostUsd,
+    selfAnnualCO2Kgs,
+    totalAnnualCO2Kgs,
+    selfAnnualCostUSD,
+    totalAnnualCostUSD,
   } = frame;
 
   const informationRows = getInformationRows({
@@ -107,10 +107,10 @@ export function FrameInformationWindow({
     totalSeconds,
     calculateImpactEstimates,
     shouldUseLegacyCo2Calculation,
-    selfAnnualCo2kg,
-    totalAnnualCo2kg,
-    selfAnnualCostUsd,
-    totalAnnualCostUsd,
+    selfAnnualCO2Kgs,
+    totalAnnualCO2Kgs,
+    selfAnnualCostUSD,
+    totalAnnualCostUSD,
   });
 
   return (

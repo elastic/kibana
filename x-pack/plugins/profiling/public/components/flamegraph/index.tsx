@@ -102,10 +102,10 @@ export function FlameGraph({
           sourceLine: primaryFlamegraph.SourceLine[highlightedVmIndex],
           countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
           countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
-          selfAnnualCo2Tons: primaryFlamegraph.AnnualCO2TonsExclusive[highlightedVmIndex],
-          totalAnnualCo2Tons: primaryFlamegraph.AnnualCO2TonsInclusive[highlightedVmIndex],
-          selfAnnualCostUsd: primaryFlamegraph.AnnualCostsUSDExclusive[highlightedVmIndex],
-          totalAnnualCostUsd: primaryFlamegraph.AnnualCostsUSDInclusive[highlightedVmIndex],
+          selfAnnualCO2Kgs: primaryFlamegraph.SelfAnnualCO2KgsItems[highlightedVmIndex],
+          totalAnnualCO2Kgs: primaryFlamegraph.TotalAnnualCO2KgsItems[highlightedVmIndex],
+          selfAnnualCostUSD: primaryFlamegraph.SelfAnnualCostsUSDItems[highlightedVmIndex],
+          totalAnnualCostUSD: primaryFlamegraph.TotalAnnualCostsUSDItems[highlightedVmIndex],
         }
       : undefined;
 
@@ -158,18 +158,18 @@ export function FlameGraph({
 
                       return (
                         <FlameGraphTooltip
-                          annualCO2TonsInclusive={
-                            primaryFlamegraph.AnnualCO2TonsInclusive[valueIndex]
+                          annualCO2KgsInclusive={
+                            primaryFlamegraph.TotalAnnualCO2KgsItems[valueIndex]
                           }
                           annualCostsUSDInclusive={
-                            primaryFlamegraph.AnnualCostsUSDInclusive[valueIndex]
+                            primaryFlamegraph.TotalAnnualCostsUSDItems[valueIndex]
                           }
                           baselineScaleFactor={baseline}
-                          comparisonAnnualCO2TonsInclusive={
-                            comparisonFlamegraph?.AnnualCO2TonsInclusive[valueIndex]
+                          comparisonAnnualCO2KgsInclusive={
+                            comparisonFlamegraph?.TotalAnnualCO2KgsItems[valueIndex]
                           }
                           comparisonAnnualCostsUSDInclusive={
-                            comparisonFlamegraph?.AnnualCostsUSDInclusive[valueIndex]
+                            comparisonFlamegraph?.TotalAnnualCostsUSDItems[valueIndex]
                           }
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
                           comparisonCountInclusive={comparisonNode?.CountInclusive}

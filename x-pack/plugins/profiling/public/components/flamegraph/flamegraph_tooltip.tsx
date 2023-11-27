@@ -31,10 +31,10 @@ import { TooltipRow } from './tooltip_row';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
-  annualCO2TonsInclusive: number;
+  annualCO2KgsInclusive: number;
   annualCostsUSDInclusive: number;
   baselineScaleFactor?: number;
-  comparisonAnnualCO2TonsInclusive?: number;
+  comparisonAnnualCO2KgsInclusive?: number;
   comparisonAnnualCostsUSDInclusive?: number;
   comparisonCountExclusive?: number;
   comparisonCountInclusive?: number;
@@ -53,10 +53,10 @@ interface Props {
 }
 
 export function FlameGraphTooltip({
-  annualCO2TonsInclusive,
+  annualCO2KgsInclusive,
   annualCostsUSDInclusive,
   baselineScaleFactor,
-  comparisonAnnualCO2TonsInclusive,
+  comparisonAnnualCO2KgsInclusive,
   comparisonAnnualCostsUSDInclusive,
   comparisonCountExclusive,
   comparisonCountInclusive,
@@ -190,16 +190,14 @@ export function FlameGraphTooltip({
             value={
               shouldUseLegacyCo2Calculation
                 ? impactEstimates.totalCPU.annualizedCo2
-                : annualCO2TonsInclusive * 1000
+                : annualCO2KgsInclusive
             }
             comparison={
               shouldUseLegacyCo2Calculation
                 ? comparisonImpactEstimates?.totalCPU.annualizedCo2
-                : comparisonAnnualCO2TonsInclusive
-                ? comparisonAnnualCO2TonsInclusive * 1000
-                : undefined
+                : comparisonAnnualCO2KgsInclusive
             }
-            formatValue={asWeight}
+            formatValue={(value) => asWeight(value, 'kgs')}
             showDifference
             formatDifferenceAsPercentage={false}
           />

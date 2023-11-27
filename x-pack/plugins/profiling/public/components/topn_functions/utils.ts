@@ -41,10 +41,10 @@ export interface IFunctionRow {
   selfCPUPerc: number;
   totalCPUPerc: number;
   impactEstimates?: ImpactEstimates;
-  selfAnnualCO2kg: number;
-  selfAnnualCostUsd: number;
-  totalAnnualCO2kg: number;
-  totalAnnualCostUsd: number;
+  selfAnnualCO2kgs: number;
+  selfAnnualCostUSD: number;
+  totalAnnualCO2kgs: number;
+  totalAnnualCostUSD: number;
   diff?: {
     rank: number;
     samples: number;
@@ -53,10 +53,10 @@ export interface IFunctionRow {
     selfCPUPerc: number;
     totalCPUPerc: number;
     impactEstimates?: ImpactEstimates;
-    selfAnnualCO2kg: number;
-    selfAnnualCostUsd: number;
-    totalAnnualCO2kg: number;
-    totalAnnualCostUsd: number;
+    selfAnnualCO2kgs: number;
+    selfAnnualCostUSD: number;
+    totalAnnualCO2kgs: number;
+    totalAnnualCostUSD: number;
   };
 }
 
@@ -123,10 +123,10 @@ export function getFunctionsRows({
           totalCPUPerc:
             totalCPUPerc -
             (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
-          selfAnnualCO2kg: comparisonRow.selfAnnualCO2kg,
-          selfAnnualCostUsd: comparisonRow.selfAnnualCostUsd,
-          totalAnnualCO2kg: comparisonRow.totalAnnualCO2kg,
-          totalAnnualCostUsd: comparisonRow.totalAnnualCostUsd,
+          selfAnnualCO2kgs: comparisonRow.selfAnnualCO2kgs,
+          selfAnnualCostUSD: comparisonRow.selfAnnualCostUSD,
+          totalAnnualCO2kgs: comparisonRow.totalAnnualCO2kgs,
+          totalAnnualCostUSD: comparisonRow.totalAnnualCostUSD,
         };
       }
     }
@@ -140,10 +140,10 @@ export function getFunctionsRows({
       selfCPU: topN.CountExclusive,
       totalCPU: topN.CountInclusive,
       impactEstimates,
-      selfAnnualCO2kg: topN.selfAnnualCO2kg,
-      selfAnnualCostUsd: topN.selfAnnualCostUsd,
-      totalAnnualCO2kg: topN.totalAnnualCO2kg,
-      totalAnnualCostUsd: topN.totalAnnualCostUsd,
+      selfAnnualCO2kgs: topN.selfAnnualCO2kgs,
+      selfAnnualCostUSD: topN.selfAnnualCostUSD,
+      totalAnnualCO2kgs: topN.totalAnnualCO2kgs,
+      totalAnnualCostUSD: topN.totalAnnualCostUSD,
       diff: calculateDiff(),
     };
   });
