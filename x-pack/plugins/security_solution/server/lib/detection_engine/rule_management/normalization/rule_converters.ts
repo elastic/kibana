@@ -657,7 +657,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     output_index: params.outputIndex,
     timeline_id: params.timelineId,
     timeline_title: params.timelineTitle,
-    meta: params.meta as { [x: string]: {} | undefined },
+    meta: params.meta,
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
     timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,

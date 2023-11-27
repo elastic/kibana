@@ -28,13 +28,7 @@
  */
 export type RequiredOptional<T> = { [K in keyof T]-?: [T[K]] } extends infer U
   ? U extends Record<keyof U, [unknown]>
-    ? {
-        [K in keyof U]: Record<string, unknown> extends U[K][0]
-          ? undefined extends U[K][0]
-            ? RequiredOptional<U[K][0]> | undefined
-            : RequiredOptional<U[K][0]>
-          : U[K][0];
-      }
+    ? { [K in keyof U]: U[K][0] }
     : never
   : never;
 
