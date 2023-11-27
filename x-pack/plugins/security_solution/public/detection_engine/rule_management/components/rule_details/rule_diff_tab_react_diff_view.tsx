@@ -34,14 +34,15 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
   EuiSwitch,
+  EuiRadioGroup,
 } from '@elastic/eui';
 import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
-import { markEditsByWord } from './mark_edits_by_word';
+import { markEditsBy, DiffMethod } from './mark_edits_by_word';
 
 const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
 
-const DiffByWordEnabledContext = React.createContext(false);
+const CompareMethodContext = React.createContext(DiffMethod.CHARS);
 
 interface UnfoldProps extends Omit<DecorationProps, 'children'> {
   start: number;
@@ -157,11 +158,7 @@ const useExpand = (hunks: HunkData[], oldSource: string, newSource: string) => {
   };
 };
 
-const useTokens = (
-  hunks: HunkData[],
-  tokenizeChangesBy: 'chars' | 'words' = 'chars',
-  oldSource: string
-) => {
+const useTokens = (hunks: HunkData[], compareMethod: DiffMethod, oldSource: string) => {
   if (!hunks) {
     return undefined;
   }
@@ -171,10 +168,12 @@ const useTokens = (
     highlight: false,
     enhancers: [
       /*
-        "markEditsByWord" is a slightly modified version of "markEdits" enhancer from react-diff-view 
+        "markEditsBy" is a slightly modified version of "markEdits" enhancer from react-diff-view 
         to enable word-level highlighting.
       */
-      tokenizeChangesBy === 'words' ? markEditsByWord(hunks) : markEdits(hunks, { type: 'block' }),
+      compareMethod === DiffMethod.CHARS
+        ? markEdits(hunks, { type: 'block' }) // Using built-in "markEdits" enhancer for char-level diffing
+        : markEditsBy(hunks, compareMethod), // Using custom "markEditsBy" enhancer for other-level diffing
     ],
   };
 
@@ -351,7 +350,8 @@ const CustomStyles = ({ children }: CustomStylesProps) => {
 };
 
 function DiffView({ oldSource, newSource }: DiffViewProps) {
-  const diffByWordEnabled = useContext(DiffByWordEnabledContext);
+  const compareMethod = useContext(CompareMethodContext);
+
   /*
     "react-diff-view" components consume diffs not as a strings, but as something they call "hunks".
     So we first need to convert our "before" and "after" strings into these "hunks".
@@ -378,7 +378,7 @@ function DiffView({ oldSource, newSource }: DiffViewProps) {
     Here we go over each hunk and extract tokens from it. For example, splitting strings into words,
     so we can later highlight changes on a word-by-word basis vs line-by-line.
   */
-  const tokens = useTokens(hunks, diffByWordEnabled ? 'words' : 'chars', oldSource);
+  const tokens = useTokens(hunks, compareMethod, oldSource);
 
   return (
     <Diff
@@ -543,21 +543,47 @@ export const RuleDiffTabReactDiffView = ({ fields, oldRule, newRule }: RuleDiffT
     }));
   };
 
-  const [diffByWordEnabled, setDiffByWordEnabled] = useState(false);
+  const options = [
+    {
+      id: DiffMethod.CHARS,
+      label: 'Chars',
+    },
+    {
+      id: DiffMethod.WORDS,
+      label: 'Words',
+    },
+    {
+      id: DiffMethod.WORDS_CUSTOM_USING_DMP,
+      label: 'Words, alternative method (using "diff-match-patch" library)',
+    },
+    {
+      id: DiffMethod.LINES,
+      label: 'Lines',
+    },
+    {
+      id: DiffMethod.SENTENCES,
+      label: 'Sentences',
+    },
+  ];
+
+  const [compareMethod, setCompareMethod] = useState<DiffMethod>(DiffMethod.CHARS);
 
   return (
     <>
       <EuiSpacer size="m" />
+      <EuiRadioGroup
+        options={options}
+        idSelected={compareMethod}
+        onChange={(optionId) => {
+          setCompareMethod(optionId as DiffMethod);
+        }}
+        legend={{
+          children: <span>{'Diffing algorthm'}</span>,
+        }}
+      />
+      <EuiSpacer size="m" />
       <CustomStyles>
-        <EuiSwitch
-          label="Diff by word"
-          checked={diffByWordEnabled}
-          onChange={() => {
-            setDiffByWordEnabled(!diffByWordEnabled);
-          }}
-        />
-        <EuiSpacer size="m" />
-        <DiffByWordEnabledContext.Provider value={diffByWordEnabled}>
+        <CompareMethodContext.Provider value={compareMethod}>
           <WholeObjectDiff
             oldRule={oldRule}
             newRule={newRule}
@@ -565,7 +591,7 @@ export const RuleDiffTabReactDiffView = ({ fields, oldRule, newRule }: RuleDiffT
             toggleSection={toggleSection}
           />
           <Fields fields={fields} openSections={openSections} toggleSection={toggleSection} />
-        </DiffByWordEnabledContext.Provider>
+        </CompareMethodContext.Provider>
       </CustomStyles>
     </>
   );
