@@ -7,6 +7,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 import { indicesApi } from '../apis/management/index_management/lib/indices.api';
+import { mappingsApi } from '../apis/management/index_management/lib/mappings.api';
 import { indicesHelpers } from '../apis/management/index_management/lib/indices.helpers';
 import { datastreamsHelpers } from '../apis/management/index_management/lib/datastreams.helpers';
 
@@ -18,6 +19,8 @@ export function IndexManagementProvider({ getService }: FtrProviderContext) {
     },
     datastreams: {
       helpers: datastreamsHelpers(getService),
+    mappings: {
+      api: mappingsApi(getService),
     },
   };
 }
