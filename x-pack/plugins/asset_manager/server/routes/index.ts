@@ -12,6 +12,7 @@ import { sampleAssetsRoutes } from './sample_assets';
 import { hostsRoutes } from './assets/hosts';
 import { servicesRoutes } from './assets/services';
 import { containersRoutes } from './assets/containers';
+import { podsRoutes } from './assets/pods';
 
 export function setupRoutes<T extends RequestHandlerContext>({
   router,
@@ -22,4 +23,5 @@ export function setupRoutes<T extends RequestHandlerContext>({
   hostsRoutes<T>({ router, assetClient });
   servicesRoutes<T>({ router, assetClient });
   containersRoutes<T>({ router, assetClient });
+  podsRoutes<T>({ router, assetClient });
 }

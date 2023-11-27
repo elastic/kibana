@@ -7,7 +7,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CloudLinkId } from '@kbn/core-chrome-browser';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 export interface CloudLink {
   title: string;
@@ -18,7 +17,12 @@ export type CloudLinks = {
   [id in CloudLinkId]?: CloudLink;
 };
 
-export const getCloudLinks = (cloud: CloudStart): CloudLinks => {
+export const getCloudLinks = (cloud: {
+  billingUrl?: string;
+  deploymentUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
+}): CloudLinks => {
   const { billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl } = cloud;
 
   const links: CloudLinks = {};

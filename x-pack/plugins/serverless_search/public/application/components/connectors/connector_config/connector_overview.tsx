@@ -71,6 +71,7 @@ export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({ connector 
       <EuiSpacer />
       <span>
         <EuiButton
+          data-test-subj="serverlessSearchConnectorOverviewSyncButton"
           color="primary"
           disabled={
             ![ConnectorStatus.CONFIGURED, ConnectorStatus.CONNECTED].includes(connector.status)
