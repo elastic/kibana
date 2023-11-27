@@ -122,7 +122,7 @@ export interface ExternalService {
   checkInstance: (res: AxiosResponse) => void;
   getApplicationInformation: () => Promise<GetApplicationInfoResponse>;
   checkIfApplicationIsInstalled: () => Promise<void>;
-  getIncidentByCorrelationId: (correlation_id: string) => Promise<ServiceNowIncident>;
+  getIncidentByCorrelationId: (correlationId: string) => Promise<ServiceNowIncident>;
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
