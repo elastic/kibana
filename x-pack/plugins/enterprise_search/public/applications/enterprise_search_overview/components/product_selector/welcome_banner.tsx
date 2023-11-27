@@ -7,15 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiText,
-  EuiImage,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AuthenticatedUser } from '@kbn/security-plugin/public';
@@ -38,45 +30,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, assetBasePat
               <h1>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.welcomeBanner.header.title"
-                  defaultMessage="Add data to Elasticsearch and then {search}, {vectorize}, or {visualize}"
-                  values={{
-                    search: (
-                      <EuiLink href="">
-                        <strong>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.welcomeBanner.header.searchLinkLabel',
-                            {
-                              defaultMessage: 'search',
-                            }
-                          )}
-                        </strong>
-                      </EuiLink>
-                    ),
-                    vectorize: (
-                      <EuiLink href="">
-                        <strong>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.welcomeBanner.header.vectorizeLinkLabel',
-                            {
-                              defaultMessage: 'vectorize',
-                            }
-                          )}
-                        </strong>
-                      </EuiLink>
-                    ),
-                    visualize: (
-                      <EuiLink href="">
-                        <strong>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.welcomeBanner.header.visualizeLinkLabel',
-                            {
-                              defaultMessage: 'visualize',
-                            }
-                          )}
-                        </strong>
-                      </EuiLink>
-                    ),
-                  }}
+                  defaultMessage="Add data to Elasticsearch and then search, vectorize, or visualize"
                 />
               </h1>
             </EuiTitle>
