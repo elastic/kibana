@@ -178,9 +178,10 @@ const configSchema = schema.object(
 
     versioned: schema.object({
       /**
-       * Which handler resolution algo to use: "newest" or "oldest".
+       * Which handler resolution algo to use for public routes: "newest" or "oldest".
        *
-       * @note in development we have an additional option "none" which is also the default.
+       * @note Internal routes always require a version to be specified.
+       * @note in development we have an additional option "none" which is also the default in dev.
        *       This prevents any fallbacks and requires that a version specified.
        *       Useful for ensuring that a given client always specifies a version.
        */
