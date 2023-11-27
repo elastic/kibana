@@ -138,45 +138,42 @@ export class SloSummaryCleanupTask {
   };
 
   fetchSloSummariesIds = async (searchAfter?: SortResults) => {
-    if (this.esClient) {
-      const result = await this.esClient.search({
-        size: 2000,
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        fields: ['slo.id', 'slo.revision'],
-        collapse: {
-          field: 'slo.id',
-        },
-        _source: false,
-        sort: [
-          {
-            'slo.id': {
-              order: 'desc',
-            },
-            'slo.revision': {
-              order: 'desc',
-            },
-            'slo.instanceId': {
-              order: 'desc',
-            },
-          },
-        ],
-        search_after: searchAfter,
-      });
-
-      const newSearchAfter = result.hits.hits[result.hits.hits.length - 1].sort;
-      return {
-        searchAfter: newSearchAfter,
-        sloSummaryIds: result.hits.hits.map(
-          ({ fields }) =>
-            `${fields?.['slo.id'][0]}${SEPARATOR}${fields?.['slo.revision'][0]}` as string
-        ),
-      };
-    } else {
+    if (!this.esClient) {
       return {
         searchAfter: undefined,
         sloSummaryIds: [] as string[],
       };
     }
+
+    const result = await this.esClient.search({
+      size: 2000,
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      fields: ['slo.id', 'slo.revision'],
+      _source: false,
+      sort: [
+        {
+          'slo.id': {
+            order: 'desc',
+          },
+          'slo.revision': {
+            order: 'desc',
+          },
+          'slo.instanceId': {
+            order: 'desc',
+          },
+        },
+      ],
+      search_after: searchAfter,
+    });
+
+    const newSearchAfter = result.hits.hits[result.hits.hits.length - 1].sort;
+    return {
+      searchAfter: newSearchAfter,
+      sloSummaryIds: result.hits.hits.map(
+        ({ fields }) =>
+          `${fields?.['slo.id'][0]}${SEPARATOR}${fields?.['slo.revision'][0]}` as string
+      ),
+    };
   };
 
   private get taskId() {
