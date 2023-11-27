@@ -79,6 +79,13 @@ it('matches snapshot', () => {
       },
       "kibana.alert.reason": Object {
         "array": false,
+        "multi_fields": Array [
+          Object {
+            "flat_name": "kibana.alert.reason.text",
+            "name": "text",
+            "type": "match_only_text",
+          },
+        ],
         "required": false,
         "type": "keyword",
       },
