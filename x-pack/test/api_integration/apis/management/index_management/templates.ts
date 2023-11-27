@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         template: {
           ...tmpTemplate2.template,
           settings: {
-            ...tmpTemplate2.template.settings,
+            ...tmpTemplate2.template?.settings,
             index: {
               lifecycle: {
                 name: 'my_policy',
