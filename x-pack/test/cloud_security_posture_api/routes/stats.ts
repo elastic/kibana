@@ -15,9 +15,44 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { benchmarkScoreMockData, complianceDashboardDataMock } from './mocks/benchmark_score_mock';
+import {
+  getBenchmarkScoreMockData,
+  cspmComplianceDashboardDataMock,
+  kspmComplianceDashboardDataMock,
+} from './mocks/benchmark_score_mock';
 import { findingsMockData } from './mocks/findings_mock';
 
+const removeRealtimeCalculatedFields = (trends: PostureTrend[]) => {
+  return trends.map((trend: PostureTrend) => {
+    const { timestamp, ...rest } = trend;
+    return rest;
+  });
+};
+
+const getNonTimestampResponseFields = (res: ComplianceDashboardData) => {
+  const resBenchmarks = res.benchmarks.flatMap((benchmark) => ({
+    ...benchmark,
+    trend: removeRealtimeCalculatedFields(benchmark.trend),
+  }));
+
+  const resClusters = res.clusters.flatMap((cluster) => {
+    const clusterWithoutTrend = {
+      ...cluster,
+      trend: removeRealtimeCalculatedFields(cluster.trend),
+    };
+    const { lastUpdate, ...clusterWithoutTime } = clusterWithoutTrend.meta;
+
+    return { ...clusterWithoutTrend, meta: clusterWithoutTime };
+  });
+
+  const trends = removeRealtimeCalculatedFields(res.trend);
+
+  return {
+    resBenchmarks,
+    resClusters,
+    trends,
+  };
+};
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -102,13 +137,13 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('GET /internal/cloud_security_posture/stats', () => {
-    describe('benchmarks', async () => {
+    describe('cspm benchmarks', async () => {
       beforeEach(async () => {
         await index.removeFindings();
         await index.removeScores();
 
         await waitForPluginInitialized();
-        await index.addScores(benchmarkScoreMockData);
+        await index.addScores(getBenchmarkScoreMockData('cspm'));
         await index.addFindings([findingsMockData[1]]);
       });
 
@@ -119,36 +154,42 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        const removeRealtimeCalculatedFields = (trends: PostureTrend[]) => {
-          return trends.map((trend: PostureTrend) => {
-            const { timestamp, ...rest } = trend;
-            return rest;
-          });
-        };
-
-        const resBenchmarks = res.benchmarks.flatMap((benchmark) => ({
-          ...benchmark,
-          trend: removeRealtimeCalculatedFields(benchmark.trend),
-        }));
-
-        const resClusters = res.clusters.flatMap((cluster) => {
-          const clusterWithoutTrend = {
-            ...cluster,
-            trend: removeRealtimeCalculatedFields(cluster.trend),
-          };
-          const { lastUpdate, ...clusterWithoutTime } = clusterWithoutTrend.meta;
-
-          return { ...clusterWithoutTrend, meta: clusterWithoutTime };
-        });
-
-        const trends = removeRealtimeCalculatedFields(res.trend);
+        const { resClusters, resBenchmarks, trends } = getNonTimestampResponseFields(res);
 
         expect({
           ...res,
           clusters: resClusters,
           benchmarks: resBenchmarks,
           trend: trends,
-        }).to.eql(complianceDashboardDataMock);
+        }).to.eql(cspmComplianceDashboardDataMock);
+      });
+    });
+
+    describe('kspm benchmarks', async () => {
+      beforeEach(async () => {
+        await index.removeFindings();
+        await index.removeScores();
+
+        await waitForPluginInitialized();
+        await index.addScores(getBenchmarkScoreMockData('kspm'));
+        await index.addFindings([findingsMockData[0]]);
+      });
+
+      it('should return KSPM benchmarks ', async () => {
+        const { body: res }: { body: ComplianceDashboardData } = await kibanaHttpClient
+          .get(`/internal/cloud_security_posture/stats/kspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const { resClusters, resBenchmarks, trends } = getNonTimestampResponseFields(res);
+
+        expect({
+          ...res,
+          clusters: resClusters,
+          benchmarks: resBenchmarks,
+          trend: trends,
+        }).to.eql(kspmComplianceDashboardDataMock);
       });
     });
   });
