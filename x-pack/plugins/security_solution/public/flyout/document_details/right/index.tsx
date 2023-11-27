@@ -37,7 +37,7 @@ export interface RightPanelProps extends FlyoutPanelProps {
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
+  const { eventId, getFieldsData, indexName, scopeId, isPreview } = useRightPanelContext();
 
   // for 8.10, we only render the flyout in its expandable mode if the document viewed is of type signal
   const documentIsSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
@@ -72,7 +72,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
         setSelectedTabId={setSelectedTabId}
       />
       <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
-      <PanelFooter />
+      <PanelFooter isPreview={isPreview} />
     </>
   );
 });

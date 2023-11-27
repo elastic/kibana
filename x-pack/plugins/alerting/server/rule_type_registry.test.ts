@@ -782,6 +782,7 @@ describe('Create Lifecycle', () => {
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
+            "fieldsForAAD": undefined,
             "hasAlertsMappings": true,
             "hasFieldsForAAD": false,
             "id": "test",

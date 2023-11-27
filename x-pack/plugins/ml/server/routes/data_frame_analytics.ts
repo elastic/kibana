@@ -18,35 +18,35 @@ import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import type { RouteInitialization } from '../types';
 import {
-  dataAnalyticsJobConfigSchema,
-  dataAnalyticsJobUpdateSchema,
-  dataAnalyticsEvaluateSchema,
-  dataAnalyticsExplainSchema,
-  analyticsIdSchema,
-  analyticsMapQuerySchema,
+  dataFrameAnalyticsJobConfigSchema,
+  dataFrameAnalyticsJobUpdateSchema,
+  dataFrameAnalyticsEvaluateSchema,
+  dataFrameAnalyticsExplainSchema,
+  dataFrameAnalyticsIdSchema,
+  dataFrameAnalyticsMapQuerySchema,
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
-  jobsExistSchema,
-  analyticsQuerySchema,
-  analyticsNewJobCapsParamsSchema,
-  analyticsNewJobCapsQuerySchema,
-} from './schemas/data_analytics_schema';
+  dataFrameAnalyticsJobsExistSchema,
+  dataFrameAnalyticsQuerySchema,
+  dataFrameAnalyticsNewJobCapsParamsSchema,
+  dataFrameAnalyticsNewJobCapsQuerySchema,
+} from './schemas/data_frame_analytics_schema';
 import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
-import { DataViewHandler } from '../models/data_frame_analytics/index_patterns';
+import { DataViewHandler } from '../models/data_frame_analytics/data_view_handler';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
 
-function getDataViewId(dataViewsService: DataViewsService, patternName: string) {
+async function getDataViewId(dataViewsService: DataViewsService, patternName: string) {
   const iph = new DataViewHandler(dataViewsService);
-  return iph.getDataViewId(patternName);
+  return await iph.getDataViewId(patternName);
 }
 
-function deleteDestDataViewById(dataViewsService: DataViewsService, dataViewId: string) {
+async function deleteDestDataViewById(dataViewsService: DataViewsService, dataViewId: string) {
   const iph = new DataViewHandler(dataViewsService);
-  return iph.deleteDataViewById(dataViewId);
+  return await iph.deleteDataViewById(dataViewId);
 }
 
 function getExtendedMap(
@@ -144,7 +144,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            query: analyticsQuerySchema,
+            query: dataFrameAnalyticsQuerySchema,
           },
         },
       },
@@ -185,8 +185,8 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
-            query: analyticsQuerySchema,
+            params: dataFrameAnalyticsIdSchema,
+            query: dataFrameAnalyticsQuerySchema,
           },
         },
       },
@@ -262,7 +262,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
+            params: dataFrameAnalyticsIdSchema,
           },
         },
       },
@@ -305,8 +305,8 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
-            body: dataAnalyticsJobConfigSchema,
+            params: dataFrameAnalyticsIdSchema,
+            body: dataFrameAnalyticsJobConfigSchema,
           },
         },
       },
@@ -352,7 +352,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            body: dataAnalyticsEvaluateSchema,
+            body: dataFrameAnalyticsEvaluateSchema,
           },
         },
       },
@@ -397,7 +397,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            body: dataAnalyticsExplainSchema,
+            body: dataFrameAnalyticsExplainSchema,
           },
         },
       },
@@ -440,7 +440,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
+            params: dataFrameAnalyticsIdSchema,
             query: deleteDataFrameAnalyticsJobSchema,
           },
         },
@@ -449,11 +449,11 @@ export function dataFrameAnalyticsRoutes(
         async ({ mlClient, client, request, response, getDataViewsService }) => {
           try {
             const { analyticsId } = request.params;
-            const { deleteDestIndex, deleteDestIndexPattern } = request.query;
+            const { deleteDestIndex, deleteDestDataView } = request.query;
             let destinationIndex: string | undefined;
             const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
             const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
-            const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+            const destDataViewDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
               success: false,
             };
 
@@ -473,7 +473,7 @@ export function dataFrameAnalyticsRoutes(
               return response.customError(wrapError(e));
             }
 
-            if (deleteDestIndex || deleteDestIndexPattern) {
+            if (deleteDestIndex || deleteDestDataView) {
               // If user checks box to delete the destinationIndex associated with the job
               if (destinationIndex && deleteDestIndex) {
                 // Verify if user has privilege to delete the destination index
@@ -494,16 +494,16 @@ export function dataFrameAnalyticsRoutes(
               }
 
               // Delete the index pattern if there's an index pattern that matches the name of dest index
-              if (destinationIndex && deleteDestIndexPattern) {
+              if (destinationIndex && deleteDestDataView) {
                 try {
                   const dataViewsService = await getDataViewsService();
                   const dataViewId = await getDataViewId(dataViewsService, destinationIndex);
                   if (dataViewId) {
                     await deleteDestDataViewById(dataViewsService, dataViewId);
                   }
-                  destIndexPatternDeleted.success = true;
+                  destDataViewDeleted.success = true;
                 } catch (deleteDestIndexPatternError) {
-                  destIndexPatternDeleted.error = deleteDestIndexPatternError;
+                  destDataViewDeleted.error = deleteDestIndexPatternError;
                 }
               }
             }
@@ -521,7 +521,7 @@ export function dataFrameAnalyticsRoutes(
             const results = {
               analyticsJobDeleted,
               destIndexDeleted,
-              destIndexPatternDeleted,
+              destDataViewDeleted,
             };
             return response.ok({
               body: results,
@@ -555,7 +555,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
+            params: dataFrameAnalyticsIdSchema,
           },
         },
       },
@@ -597,7 +597,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
+            params: dataFrameAnalyticsIdSchema,
             query: stopsDataFrameAnalyticsJobQuerySchema,
           },
         },
@@ -640,8 +640,8 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
-            body: dataAnalyticsJobUpdateSchema,
+            params: dataFrameAnalyticsIdSchema,
+            body: dataFrameAnalyticsJobUpdateSchema,
           },
         },
       },
@@ -686,7 +686,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
+            params: dataFrameAnalyticsIdSchema,
           },
         },
       },
@@ -728,7 +728,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            body: jobsExistSchema,
+            body: dataFrameAnalyticsJobsExistSchema,
           },
         },
       },
@@ -785,8 +785,8 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsIdSchema,
-            query: analyticsMapQuerySchema,
+            params: dataFrameAnalyticsIdSchema,
+            query: dataFrameAnalyticsMapQuerySchema,
           },
         },
       },
@@ -851,8 +851,8 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            params: analyticsNewJobCapsParamsSchema,
-            query: analyticsNewJobCapsQuerySchema,
+            params: dataFrameAnalyticsNewJobCapsParamsSchema,
+            query: dataFrameAnalyticsNewJobCapsQuerySchema,
           },
         },
       },
@@ -906,7 +906,7 @@ export function dataFrameAnalyticsRoutes(
         version: '1',
         validate: {
           request: {
-            body: dataAnalyticsJobConfigSchema,
+            body: dataFrameAnalyticsJobConfigSchema,
           },
         },
       },
