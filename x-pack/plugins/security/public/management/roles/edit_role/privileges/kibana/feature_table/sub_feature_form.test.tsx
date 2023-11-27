@@ -13,7 +13,7 @@ import { KibanaFeature } from '@kbn/features-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SubFeatureForm } from './sub_feature_form';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { SecuredSubFeature } from '../../../../model';

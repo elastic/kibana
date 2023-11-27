@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { useEffect, useState } from 'react';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 

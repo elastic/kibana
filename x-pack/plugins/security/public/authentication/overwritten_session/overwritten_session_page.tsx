@@ -12,9 +12,9 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { parseNext } from '../../../common/parse_next';
-import type { AuthenticationServiceSetup } from '../authentication_service';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {

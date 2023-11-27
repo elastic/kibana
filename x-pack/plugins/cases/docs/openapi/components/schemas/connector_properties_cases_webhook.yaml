@@ -8,9 +8,11 @@ description: Defines properties for connectors when type is `.cases-webhook`.
 type: object
 properties:
   fields:
-    type: string
-    nullable: true
-    example: null  
+    type:
+      - "string"
+      - "null"
+    examples:
+      - null  
   id:
     description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
     type: string
@@ -20,6 +22,7 @@ properties:
   type:
     description: The type of connector.
     type: string
-    example: .cases-webhook
+    examples:
+      - .cases-webhook
     enum:
       - .cases-webhook
