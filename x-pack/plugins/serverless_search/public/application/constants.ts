@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 export const API_KEY_PLACEHOLDER = 'your_api_key';
 export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
 export const CLOUD_ID_PLACEHOLDER = '<CLOUD_ID>';
