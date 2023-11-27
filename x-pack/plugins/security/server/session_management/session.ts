@@ -11,6 +11,7 @@ import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { SessionCookie } from './session_cookie';
@@ -21,7 +22,6 @@ import {
   SessionUnexpectedError,
 } from './session_errors';
 import type { SessionIndex, SessionIndexValue } from './session_index';
-import type { AuditServiceSetup } from '..';
 import type { AuthenticationProvider } from '../../common';
 import { userSessionConcurrentLimitLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';

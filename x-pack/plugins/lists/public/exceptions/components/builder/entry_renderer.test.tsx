@@ -20,7 +20,7 @@ import {
   isOperator,
   matchesOperator,
 } from '@kbn/securitysolution-list-utils';
-import { validateFilePathInput } from '@kbn/securitysolution-utils';
+import { validatePotentialWildcardInput } from '@kbn/securitysolution-utils';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -1050,7 +1050,7 @@ describe('BuilderEntryItem', () => {
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {
     const mockSetWarningsExists = jest.fn();
 
-    (validateFilePathInput as jest.Mock).mockReturnValue('some warning message');
+    (validatePotentialWildcardInput as jest.Mock).mockReturnValue('some warning message');
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -1099,7 +1099,7 @@ describe('BuilderEntryItem', () => {
   test('it does not invoke "setWarningsExist" when valid value in field value input', async () => {
     const mockSetWarningsExists = jest.fn();
 
-    (validateFilePathInput as jest.Mock).mockReturnValue(undefined);
+    (validatePotentialWildcardInput as jest.Mock).mockReturnValue(undefined);
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}

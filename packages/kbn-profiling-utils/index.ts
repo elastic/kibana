@@ -30,6 +30,8 @@ export {
   createTopNFunctions,
   TopNFunctionSortField,
   topNFunctionSortFieldRt,
+  TopNComparisonFunctionSortField,
+  topNComparisonFunctionSortFieldRt,
 } from './common/functions';
 
 export type { CalleeTree } from './common/callee';

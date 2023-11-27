@@ -25,38 +25,45 @@ import { FlyoutTitle } from '../../../shared/components/flyout_title';
  * Document details flyout right section header
  */
 export const HeaderTitle: FC = memo(() => {
-  const { dataFormattedForFieldBrowser, eventId, scopeId } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, eventId, scopeId, isPreview } = useRightPanelContext();
   const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
 
   const ruleTitle = useMemo(
-    () => (
-      <RenderRuleName
-        contextId={scopeId}
-        eventId={eventId}
-        fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
-        fieldType={'string'}
-        isAggregatable={false}
-        isDraggable={false}
-        linkValue={ruleId}
-        value={ruleName}
-        openInNewTab
-      >
+    () =>
+      isPreview ? (
         <FlyoutTitle
           title={ruleName}
           iconType={'warning'}
-          isLink
           data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}
         />
-      </RenderRuleName>
-    ),
-    [ruleName, ruleId, eventId, scopeId]
+      ) : (
+        <RenderRuleName
+          contextId={scopeId}
+          eventId={eventId}
+          fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
+          fieldType={'string'}
+          isAggregatable={false}
+          isDraggable={false}
+          linkValue={ruleId}
+          value={ruleName}
+          openInNewTab
+        >
+          <FlyoutTitle
+            title={ruleName}
+            iconType={'warning'}
+            isLink
+            data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}
+          />
+        </RenderRuleName>
+      ),
+    [ruleName, ruleId, eventId, scopeId, isPreview]
   );
 
   const eventTitle = (
     <EuiTitle size="s">
-      <h2 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+      <h2>
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.header.headerTitle"
           defaultMessage="Event details"
@@ -71,12 +78,16 @@ export const HeaderTitle: FC = memo(() => {
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
-      {isAlert && !isEmpty(ruleName) ? ruleTitle : eventTitle}
+      <div data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+        {isAlert && !isEmpty(ruleName) ? ruleTitle : eventTitle}
+      </div>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <DocumentStatus />
-        </EuiFlexItem>
+        {isAlert && !isPreview && (
+          <EuiFlexItem grow={false}>
+            <DocumentStatus />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <RiskScore />
         </EuiFlexItem>

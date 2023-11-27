@@ -12,8 +12,8 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { UserProfileServiceStart } from '@kbn/security-plugin-types-server';
 
-import type { UserProfileServiceStart } from './user_profile_service';
 import { UserProfileService } from './user_profile_service';
 import { UserSettingService } from './user_setting_service';
 import type { UserProfileWithSecurity } from '../../common';

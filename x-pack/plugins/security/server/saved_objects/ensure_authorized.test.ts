@@ -6,6 +6,10 @@
  */
 
 import type { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
 import type { EnsureAuthorizedResult } from './ensure_authorized';
 import {
@@ -13,9 +17,7 @@ import {
   getEnsureAuthorizedActionResult,
   isAuthorizedForObjectInAllSpaces,
 } from './ensure_authorized';
-import type { CheckSavedObjectsPrivileges } from '../authorization';
 import { Actions } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
 
 describe('ensureAuthorized', () => {
   function setupDependencies() {
