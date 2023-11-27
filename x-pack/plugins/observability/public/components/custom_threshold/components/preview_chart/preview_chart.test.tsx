@@ -9,7 +9,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { CUSTOM_AGGREGATOR } from '../../../../../common/custom_threshold_rule/constants';
 import { Comparator, Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
@@ -55,7 +54,6 @@ describe('Preview chart', () => {
 
   it('should display no data message', async () => {
     const expression: MetricExpression = {
-      aggType: CUSTOM_AGGREGATOR,
       metrics: [
         {
           name: 'A',

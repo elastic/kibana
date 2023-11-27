@@ -240,6 +240,7 @@ t3_analyst:
       privileges:
         - read
         - write
+        - maintenance
     - names:
         - .lists*
         - .items*
@@ -293,12 +294,16 @@ threat_intelligence_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .lists*
-        - .items*
         - packetbeat-*
         - winlogbeat-*
       privileges:
         - read
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -317,8 +322,7 @@ threat_intelligence_analyst:
     - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
-        - feature_siem.read
-        - feature_siem.read_alerts
+        - feature_siem.all
         - feature_siem.endpoint_list_read
         - feature_siem.blocklist_all
         - feature_securitySolutionCases.all
@@ -603,6 +607,7 @@ endpoint_operations_analyst:
       privileges:
         - read
         - write
+        - maintenance
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -653,11 +658,15 @@ endpoint_policy_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
-        - .lists*
-        - .items*
         - risk-score.risk-score-*
       privileges:
         - read
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
     - names:
         - .alerts-security*
         - .siem-signals-*
