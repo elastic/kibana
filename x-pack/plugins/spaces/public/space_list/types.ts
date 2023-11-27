@@ -36,4 +36,8 @@ export interface SpaceListProps {
    * Style for the cursor when mousing over space avatars.
    */
   cursorStyle?: string;
+  /**
+   * The direction the list of space avatars is displayed
+   */
+  direction?: 'vertical' | 'horizontal';
 }

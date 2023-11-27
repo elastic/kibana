@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
@@ -21,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SpaceListProps } from './types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
+import { APPEND_ACTIVE_SPACE } from '../share_saved_objects_to_space/components/selectable_spaces_control';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import { useSpaces } from '../spaces_context';
 import type { SpacesData, SpacesDataEntry } from '../types';
@@ -45,6 +47,7 @@ export const SpaceListInternal = ({
   behaviorContext,
   listOnClick = () => {},
   cursorStyle,
+  direction = 'horizontal',
 }: SpaceListProps) => {
   const { spacesDataPromise } = useSpaces();
 
@@ -60,6 +63,16 @@ export const SpaceListInternal = ({
   if (!shareToSpacesData) {
     return null;
   }
+
+  const getMoreSpacesLabel = (count: number) => (
+    <FormattedMessage
+      id="xpack.spaces.spaceList.showMoreSpacesLink"
+      defaultMessage="+{count} more"
+      values={{
+        count,
+      }}
+    />
+  );
 
   const isSharedToAllSpaces = namespaces.includes(ALL_SPACES_ID);
   const unauthorizedSpacesCount = namespaces.filter(
@@ -105,31 +118,30 @@ export const SpaceListInternal = ({
 
     if (displayLimit && authorizedSpaceTargets.length > displayLimit) {
       button = isExpanded ? (
-        <EuiButtonEmpty
-          size="xs"
-          onClick={() => setIsExpanded(false)}
-          style={{ alignSelf: 'center' }}
-        >
-          <FormattedMessage
-            id="xpack.spaces.spaceList.showLessSpacesLink"
-            defaultMessage="show less"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size={direction === 'horizontal' ? 'xs' : 's'}
+            onClick={() => setIsExpanded(false)}
+            style={{ alignSelf: 'center' }}
+          >
+            <FormattedMessage
+              id="xpack.spaces.spaceList.showLessSpacesLink"
+              defaultMessage="Show less"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       ) : (
-        <EuiButtonEmpty
-          size="xs"
-          onClick={() => setIsExpanded(true)}
-          style={{ alignSelf: 'center' }}
-        >
-          <FormattedMessage
-            id="xpack.spaces.spaceList.showMoreSpacesLink"
-            defaultMessage="+{count} more"
-            values={{
-              count:
-                authorizedSpaceTargets.length + unauthorizedSpacesCount - displayedSpaces.length,
-            }}
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size={direction === 'horizontal' ? 'xs' : 's'}
+            onClick={() => setIsExpanded(true)}
+            style={{ alignSelf: 'center' }}
+          >
+            {getMoreSpacesLabel(
+              authorizedSpaceTargets.length + unauthorizedSpacesCount - displayedSpaces.length
+            )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       );
     }
   }
@@ -145,7 +157,7 @@ export const SpaceListInternal = ({
             />
           }
         >
-          <EuiBadge color="#DDD">+{unauthorizedSpacesCount}</EuiBadge>
+          <EuiBadge color="#DDD">{getMoreSpacesLabel(unauthorizedSpacesCount)}</EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
@@ -155,19 +167,37 @@ export const SpaceListInternal = ({
 
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+      <EuiFlexGroup
+        wrap
+        responsive={false}
+        gutterSize="s"
+        direction={direction === 'horizontal' ? 'row' : 'column'}
+        alignItems="flexStart"
+      >
         {displayedSpaces.map((space) => {
           const isDisabled = space.isFeatureDisabled;
           return (
             <EuiFlexItem grow={false} key={space.id}>
-              <LazySpaceAvatar
-                space={space}
-                isDisabled={isDisabled}
-                size={'s'}
-                onClick={listOnClick}
-                onKeyPress={listOnClick}
-                {...styleProps}
-              />
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <LazySpaceAvatar
+                    space={space}
+                    isDisabled={isDisabled}
+                    size={'s'}
+                    onClick={listOnClick}
+                    onKeyPress={listOnClick}
+                    {...styleProps}
+                  />
+                </EuiFlexItem>
+                {direction === 'vertical' ? (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">{space.name}</EuiText>
+                    </EuiFlexItem>
+                    {space.isActiveSpace ? <EuiFlexItem>{APPEND_ACTIVE_SPACE}</EuiFlexItem> : null}
+                  </>
+                ) : null}
+              </EuiFlexGroup>
             </EuiFlexItem>
           );
         })}

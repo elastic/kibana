@@ -49,7 +49,7 @@ interface Props {
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
 const ROW_HEIGHT = 40;
-const APPEND_ACTIVE_SPACE = (
+export const APPEND_ACTIVE_SPACE = (
   <EuiBadge color="hollow">
     {i18n.translate('xpack.spaces.shareToSpace.currentSpaceBadge', {
       defaultMessage: 'This space',
