@@ -510,7 +510,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private assertToken(attributes: UninstallTokenSOAttributes | undefined) {
     if (!attributes?.token && !attributes?.token_plain) {
-      throw new UninstallTokenError('Uninstall Token is missing the token.');
+      throw new UninstallTokenError(
+        'Invalid uninstall token: Saved object is missing the `token` attribute.'
+      );
     }
   }
 
