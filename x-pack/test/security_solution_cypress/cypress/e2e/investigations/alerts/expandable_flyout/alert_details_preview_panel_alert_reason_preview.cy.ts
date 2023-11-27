@@ -32,8 +32,15 @@ describe(
 
     describe('alert reason preview', () => {
       it('should display alert reason preview', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER).scrollIntoView();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER)
+          .should('contain.text', 'Alert reason')
+          .and('contain.text', 'process')
+          .and('contain.text', 'zsh')
+          .and('contain.text', '80')
+          .and('contain.text', 'test')
+          .and('contain.text', 'siem-kibana')
+          .and('contain.text', 'high')
+          .and('contain.text', rule.name);
       });
     });
   }

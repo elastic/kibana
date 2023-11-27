@@ -134,7 +134,8 @@ const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
-describe('Case View Page activity tab', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/171575
+describe.skip('Case View Page activity tab', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
 
   beforeAll(() => {

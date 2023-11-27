@@ -719,14 +719,6 @@
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/subscription-tracking",
-                "path": "packages/kbn-subscription-tracking/src/use_go_to_subscription.ts"
-              },
-              {
-                "plugin": "@kbn/subscription-tracking",
-                "path": "packages/kbn-subscription-tracking/src/use_impression.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
@@ -1361,6 +1353,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-execution-context-browser-internal",
+                "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
+              },
+              {
                 "plugin": "@kbn/core-application-browser-internal",
                 "path": "packages/core/application/core-application-browser-internal/src/register_analytics_context_provider.ts"
               },
@@ -1391,10 +1387,6 @@
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-execution-context-browser-internal",
-                "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
               },
               {
                 "plugin": "@kbn/core-chrome-browser-internal",
