@@ -10,6 +10,7 @@
     "optionalPlugins": [
       "cloud",
       "security",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "kibanaReact"

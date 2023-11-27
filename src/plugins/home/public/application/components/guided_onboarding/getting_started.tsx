@@ -29,7 +29,6 @@ import {
   GuideCardConstants,
   guideCards,
 } from '@kbn/guided-onboarding/src/components/landing_page/guide_cards.constants';
-import { css } from '@emotion/react';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -234,9 +233,6 @@ export const GettingStarted = () => {
           docLinks={docLinks}
           cloudStart={cloudStart}
           shareStart={shareStart}
-          css={css`
-            justifycontent: center;
-          `}
         />
         <EuiSpacer />
         <div className="eui-textCenter">

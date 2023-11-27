@@ -85,7 +85,7 @@ export const GuideCard = ({
         'data-test-subj': 'guideModalESApi',
       }
     );
-  }, [card.title, i18nStart, openModal, theme]);
+  }, [i18nStart, openModal, theme, cloudStart, core, docLinks, shareStart]);
 
   const onClick = useCallback(async () => {
     setIsLoading(true);
@@ -151,12 +151,7 @@ export const GuideCard = ({
             </EuiTextColor>
           )}
           {isComplete && (
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              responsive={false}
-              justifyContent="center"
-            >
+            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
               <EuiFlexItem grow={false}>
                 <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
               </EuiFlexItem>
