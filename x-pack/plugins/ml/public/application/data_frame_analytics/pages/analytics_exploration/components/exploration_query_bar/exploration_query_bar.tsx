@@ -25,7 +25,7 @@ import { removeFilterFromQueryString } from '../../../../../explorer/explorer_ut
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 export interface ExplorationQueryBarProps {
-  indexPattern: DataView;
+  dataView: DataView;
   setSearchQuery: (update: {
     queryString: string;
     query?: estypes.QueryDslQueryContainer;
@@ -41,7 +41,7 @@ export interface ExplorationQueryBarProps {
 }
 
 export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
-  indexPattern,
+  dataView,
   setSearchQuery,
   filters,
   query,
@@ -99,7 +99,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         case SEARCH_QUERY_LANGUAGE.KUERY:
           convertedQuery = toElasticsearchQuery(
             fromKueryExpression(query.query as string),
-            indexPattern
+            dataView
           );
           break;
         case SEARCH_QUERY_LANGUAGE.LUCENE:
@@ -181,7 +181,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
             <QueryStringInput
               bubbleSubmitEvent={false}
               query={searchInput}
-              indexPatterns={[indexPattern]}
+              indexPatterns={[dataView]}
               onChange={searchChangeHandler}
               onSubmit={searchSubmitHandler}
               placeholder={
