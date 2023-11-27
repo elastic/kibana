@@ -296,7 +296,7 @@ export class Plugin
 
     const assertPlatinumLicense = async () => {
       const licensing = await pluginsSetup.licensing;
-      const license = await firstValueFrom(licensing.license$);
+      const license = await firstValueFrom(licensing?.license$);
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');
       if (hasPlatinumLicense) {
