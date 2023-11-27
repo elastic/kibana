@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -24,15 +23,12 @@ export default function ({ getService }: FtrProviderContext) {
       esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
 
-    // disabled since caching is disabled. Try to load uiSettings so this test can be enabled
-    it.skip('are present', async () => {
-      const response = await supertest
-        .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({
-          pattern: '*',
-          include_unmapped: true,
-        });
+    it('are present', async () => {
+      const response = await supertest.get(FIELDS_PATH).query({
+        pattern: '*',
+        include_unmapped: true,
+        apiVersion: INITIAL_REST_VERSION_INTERNAL,
+      });
 
       const cacheControlHeader = response.get('cache-control');
 
@@ -44,21 +40,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns 304 on matching etag', async () => {
-      const response = await supertest
-        .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({
-          pattern: '*',
-          include_unmapped: true,
-        });
+      const response = await supertest.get(FIELDS_PATH).query({
+        pattern: '*',
+        include_unmapped: true,
+        apiVersion: INITIAL_REST_VERSION_INTERNAL,
+      });
 
       await supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .set('If-None-Match', response.get('etag'))
         .query({
           pattern: '*',
           include_unmapped: true,
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(304);
     });

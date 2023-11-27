@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -27,27 +26,28 @@ export default function ({ getService }: FtrProviderContext) {
     it('requires a pattern query param', () =>
       supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({})
+        .query({
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
         .expect(400));
 
     it('accepts include_unmapped param', () =>
       supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: '*',
           include_unmapped: true,
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(200));
 
     it('rejects unexpected query params', () =>
       supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: randomness.word(),
           [randomness.word()]: randomness.word(),
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(400));
 
@@ -55,50 +55,50 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts a JSON formatted fields query param', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: JSON.stringify(['baz']),
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(200));
 
       it('accepts meta_fields query param in string array', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: ['baz', 'foo'],
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(200));
 
       it('accepts single array fields query param', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: ['baz'],
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(200));
 
       it('accepts single fields query param', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: 'baz',
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(200));
 
       it('rejects a comma-separated list of fields', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             fields: 'foo,bar',
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(400));
     });
@@ -107,40 +107,40 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts a JSON formatted meta_fields query param', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             meta_fields: JSON.stringify(['meta']),
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(200));
 
       it('accepts meta_fields query param in string array', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             meta_fields: ['_id', 'meta'],
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(200));
 
       it('accepts single meta_fields query param', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             meta_fields: ['_id'],
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(200));
 
       it('rejects a comma-separated list of meta_fields', () =>
         supertest
           .get(FIELDS_PATH)
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
           .query({
             pattern: '*',
             meta_fields: 'foo,bar',
+            apiVersion: INITIAL_REST_VERSION_INTERNAL,
           })
           .expect(400));
     });

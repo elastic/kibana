@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -27,8 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('flags fields with mismatched types as conflicting', () =>
       supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({ pattern: 'logs-*' })
+        .query({ pattern: 'logs-*', apiVersion: INITIAL_REST_VERSION_INTERNAL })
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({
