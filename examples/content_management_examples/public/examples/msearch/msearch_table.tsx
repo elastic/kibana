@@ -13,6 +13,11 @@ import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-br
 
 const LISTING_LIMIT = 1000;
 
+// TODO Currently each consumer of TableListView needs to pass an itemIsShareable handler to the TableListView.
+// Ideally, the contentClient would use the ISavedObjectTypeRegistry.isShareable method to tell us if the saved
+// object type is shareable. For this demo we are hard-coding the shareable object types.
+const shareableSavedObjects = ['index-pattern'];
+
 export const MSearchTable = () => {
   const contentClient = useContentClient();
 
@@ -59,6 +64,7 @@ export const MSearchTable = () => {
       entityNamePlural={`ContentItems`}
       title={`MSearch Demo`}
       urlStateEnabled={false}
+      itemIsShareable={({ type }) => shareableSavedObjects.includes(type)}
       emptyPrompt={<>No data found. Try to install some sample data first.</>}
       onClickTitle={(item) => {
         alert(`Clicked item ${item.attributes.title} (${item.id})`);

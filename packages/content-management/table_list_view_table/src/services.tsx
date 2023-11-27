@@ -44,6 +44,7 @@ export interface TagListProps {
  */
 export interface Services {
   canEditAdvancedSettings: boolean;
+  canShareToSpaces?: boolean;
   getListingLimitSettingsUrl: () => string;
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
@@ -231,6 +232,9 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
       >
         <TableListViewProvider
           canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+          canShareToSpaces={Boolean(
+            core.application.capabilities.savedObjectsManagement.shareIntoSpace
+          )}
           getListingLimitSettingsUrl={() =>
             core.application.getUrlForApp('management', {
               path: `/kibana/settings?query=savedObjects:listingLimit`,

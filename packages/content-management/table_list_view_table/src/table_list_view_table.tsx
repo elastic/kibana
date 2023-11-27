@@ -98,6 +98,11 @@ export interface TableListViewTableProps<
   itemIsEditable?(item: T): boolean;
 
   /**
+   * Handler to set whether item can be shared into other Spaces.
+   */
+  itemIsShareable?(item: T): boolean;
+
+  /**
    * Name for the column containing the "title" value.
    */
   titleColumnName?: string;
@@ -274,6 +279,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   createItem,
   editItem,
   itemIsEditable,
+  itemIsShareable,
   deleteItems,
   getDetailViewLink,
   onClickTitle,
@@ -316,6 +322,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const {
     canEditAdvancedSettings,
+    canShareToSpaces,
     getListingLimitSettingsUrl,
     getTagIdsFromReferences,
     searchQueryParser,
@@ -528,28 +535,28 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       columns.push(customTableColumn);
     }
 
-    if (spacesApi) {
+    if (spacesApi && !spacesApi.hasOnlyDefaultSpace) {
       columns.push({
         field: tableColumnMetadata.spaces.field,
         name: i18n.translate('contentManagement.tableList.spacesColumnTitle', {
           defaultMessage: 'Spaces',
         }),
         width: '20%',
-        render: (
-          field: string,
-          record: { id: string; attributes: { title: string }; type: string; namespaces: string[] }
-        ) => (
-          <SpacesList
-            capabilities={undefined}
-            spacesApi={spacesApi}
-            spaceIds={record.namespaces}
-            type={record.type}
-            noun={record.type}
-            id={record.id}
-            title={record.attributes.title}
-            refresh={() => fetchItems()}
-          />
-        ),
+        render: (field: string, record: T) =>
+          !itemIsShareable || !itemIsShareable(record) ? (
+            <></>
+          ) : (
+            <SpacesList
+              canShareToSpaces={canShareToSpaces}
+              spacesApi={spacesApi}
+              spaceIds={record.namespaces}
+              type={record.type}
+              noun={record.type}
+              id={record.id}
+              title={record.attributes.title}
+              refresh={() => fetchItems()}
+            />
+          ),
       });
     }
 
@@ -645,6 +652,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     searchQuery.text,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
+    itemIsShareable,
+    canShareToSpaces,
     fetchItems,
     DateFormatterComp,
     isEditable,

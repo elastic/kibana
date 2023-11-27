@@ -7,13 +7,11 @@
  */
 
 import React, { FC, useState } from 'react';
-
-import type { Capabilities } from '@kbn/core/public';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
 
 interface Props {
   spacesApi: SpacesPluginStart;
-  capabilities: Capabilities | undefined;
+  canShareToSpaces?: boolean;
   spaceIds: string[];
   type: string;
   noun: string;
@@ -24,7 +22,7 @@ interface Props {
 
 export const SpacesList: FC<Props> = ({
   spacesApi,
-  capabilities,
+  canShareToSpaces,
   type,
   noun,
   spaceIds,
@@ -53,8 +51,7 @@ export const SpacesList: FC<Props> = ({
     onClose,
   };
 
-  const canAssignSpaces = !capabilities || !!capabilities.savedObjectsManagement.shareIntoSpace;
-  const clickProperties = canAssignSpaces
+  const clickProperties = canShareToSpaces
     ? { cursorStyle: 'pointer', listOnClick: () => setShowFlyout(true) }
     : { cursorStyle: 'not-allowed' };
   return (
