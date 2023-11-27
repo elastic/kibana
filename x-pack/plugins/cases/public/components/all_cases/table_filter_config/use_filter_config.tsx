@@ -46,7 +46,6 @@ export const useFilterConfig = ({
     []
   );
 
-  // this effect is used to clean up filters that are no longer available
   useEffect(() => {
     const newFilterConfig = mergeSystemAndCustomFieldConfigs({
       systemFilterConfig,
