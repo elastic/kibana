@@ -8,11 +8,11 @@
 import React, { FC, useState } from 'react';
 import {
   EuiButton,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
@@ -91,9 +91,10 @@ export const CreateStep: FC<Props> = ({ actions, state, step, showCreateDataView
                   }
                 )}
               >
-                <EuiCheckbox
-                  data-test-subj="mlAnalyticsCreateJobWizardStartJobCheckbox"
-                  id={'dataframe-create-start-checkbox'}
+                <EuiSwitch
+                  data-test-subj="mlAnalyticsCreateJobWizardStartJobSwitch"
+                  name="mlAnalyticsCreateJobWizardStartJobSwitch"
+                  disabled={canCreateDataView === false}
                   label={i18n.translate('xpack.ml.dataframe.analytics.create.wizardStartCheckbox', {
                     defaultMessage: 'Start immediately',
                   })}
