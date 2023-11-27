@@ -5,4 +5,5 @@ description: >
   The date must be specified as a KQL data range or date match expression.
 schema:
   type: string
-  example: now-1d
+  examples:
+    - now-1d

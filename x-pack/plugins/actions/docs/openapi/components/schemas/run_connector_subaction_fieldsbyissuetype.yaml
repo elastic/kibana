@@ -18,5 +18,6 @@ properties:
       id:
         type: string
         description: The Jira issue type identifier.
-        example: 10024
+        examples:
+          - 10024
   
