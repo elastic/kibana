@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 
-import { initElasticsearchHelpers, getRandomString } from './lib';
-import { registerHelpers } from './templates.helpers';
+import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { templatesApi } from './lib/templates.api';
+import { templatesHelpers } from './lib/templates.helpers';
+import { getRandomString } from './lib/random';
 
-export default function ({ getService }) {
-  const supertest = getService('supertest');
-
-  const { catTemplate } = initElasticsearchHelpers(getService);
-
+export default function ({ getService }: FtrProviderContext) {
+  const { catTemplate } = templatesHelpers(getService);
   const {
     getAllTemplates,
     getOneTemplate,
@@ -23,7 +23,7 @@ export default function ({ getService }) {
     deleteTemplates,
     updateTemplate,
     cleanUpTemplates,
-  } = registerHelpers({ supertest });
+  } = templatesApi(getService);
 
   describe('index templates', () => {
     after(async () => await cleanUpTemplates());
@@ -72,7 +72,7 @@ export default function ({ getService }) {
 
         // Index templates (composable)
         const indexTemplateFound = allTemplates.templates.find(
-          (template) => template.name === indexTemplate.name
+          (template: TemplateDeserialized) => template.name === indexTemplate.name
         );
 
         if (!indexTemplateFound) {
@@ -102,7 +102,7 @@ export default function ({ getService }) {
 
         // Legacy index templates
         const legacyTemplateFound = allTemplates.legacyTemplates.find(
-          (template) => template.name === legacyTemplate.name
+          (template: TemplateDeserialized) => template.name === legacyTemplate.name
         );
 
         if (!legacyTemplateFound) {
@@ -132,7 +132,7 @@ export default function ({ getService }) {
 
         // Index template with lifecycle
         const templateWithLifecycle = allTemplates.templates.find(
-          (template) => template.name === indexTemplateWithLifecycle.name
+          (template: TemplateDeserialized) => template.name === indexTemplateWithLifecycle.name
         );
 
         if (!templateWithLifecycle) {
@@ -236,7 +236,8 @@ export default function ({ getService }) {
 
       it('should validate the request payload', async () => {
         const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()], true);
+        // need to cast as any to avoid errors after deleting index patterns
+        const payload = getTemplatePayload(templateName, [getRandomString()], true) as any;
 
         delete payload.indexPatterns; // index patterns are required
 
@@ -257,7 +258,7 @@ export default function ({ getService }) {
             },
           },
         };
-        payload.template.mappings = { ...payload.template.mappings, runtime };
+        payload.template!.mappings = { ...payload.template!.mappings, runtime };
         const { body } = await createTemplate(payload).expect(400);
 
         expect(body.attributes).an('object');
@@ -279,8 +280,8 @@ export default function ({ getService }) {
         const { name, version } = indexTemplate;
 
         expect(
-          catTemplateResponse.find(({ name: templateName }) => templateName === name).version
-        ).to.equal(version.toString());
+          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
+        ).to.equal(version?.toString());
 
         // Update template with new version
         const updatedVersion = 2;
@@ -291,7 +292,7 @@ export default function ({ getService }) {
         ({ body: catTemplateResponse } = await catTemplate(templateName));
 
         expect(
-          catTemplateResponse.find(({ name: templateName }) => templateName === name).version
+          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
         ).to.equal(updatedVersion.toString());
       });
 
@@ -306,8 +307,8 @@ export default function ({ getService }) {
         const { name, version } = legacyIndexTemplate;
 
         expect(
-          catTemplateResponse.find(({ name: templateName }) => templateName === name).version
-        ).to.equal(version.toString());
+          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
+        ).to.equal(version?.toString());
 
         // Update template with new version
         const updatedVersion = 2;
@@ -319,7 +320,7 @@ export default function ({ getService }) {
         ({ body: catTemplateResponse } = await catTemplate(templateName));
 
         expect(
-          catTemplateResponse.find(({ name: templateName }) => templateName === name).version
+          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
         ).to.equal(updatedVersion.toString());
       });
 
@@ -336,12 +337,12 @@ export default function ({ getService }) {
         };
 
         // Add runtime field
-        payload.template.mappings = { ...payload.template.mappings, runtime };
+        payload.template!.mappings = { ...payload.template!.mappings, runtime };
 
         await createTemplate(payload).expect(200);
 
         // Update template with an error in the runtime field script
-        payload.template.mappings.runtime.myRuntimeField.script = 'emit("hello with error';
+        payload.template!.mappings.runtime.myRuntimeField.script = 'emit("hello with error';
         const { body } = await updateTemplate(payload, templateName).expect(400);
 
         expect(body.attributes).an('object');
@@ -363,7 +364,7 @@ export default function ({ getService }) {
         let { body: catTemplateResponse } = await catTemplate(templateName);
 
         expect(
-          catTemplateResponse.find((template) => template.name === payload.name).name
+          catTemplateResponse.find((template) => template.name === payload.name)?.name
         ).to.equal(templateName);
 
         const { status: deleteStatus, body: deleteBody } = await deleteTemplates([
@@ -373,7 +374,7 @@ export default function ({ getService }) {
           throw new Error(`Error deleting template: ${deleteBody.message}`);
         }
 
-        expect(deleteBody.errors).to.be.empty;
+        expect(deleteBody.errors).to.be.empty();
         expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
 
         ({ body: catTemplateResponse } = await catTemplate(templateName));
@@ -392,14 +393,14 @@ export default function ({ getService }) {
         let { body: catTemplateResponse } = await catTemplate(templateName);
 
         expect(
-          catTemplateResponse.find((template) => template.name === payload.name).name
+          catTemplateResponse.find((template) => template.name === payload.name)?.name
         ).to.equal(templateName);
 
         const { body } = await deleteTemplates([
           { name: templateName, isLegacy: payload._kbnMeta.isLegacy },
         ]).expect(200);
 
-        expect(body.errors).to.be.empty;
+        expect(body.errors).to.be.empty();
         expect(body.templatesDeleted[0]).to.equal(templateName);
 
         ({ body: catTemplateResponse } = await catTemplate(templateName));

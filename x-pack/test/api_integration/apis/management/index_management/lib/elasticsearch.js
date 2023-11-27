@@ -36,8 +36,6 @@ export const initElasticsearchHelpers = (getService) => {
         console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
 
-  const catTemplate = (name) => es.cat.templates({ name, format: 'json' }, { meta: true });
-
   const createIndexTemplate = (indexTemplate, shouldCacheTemplate) => {
     if (shouldCacheTemplate) {
       indexTemplatesCreated.push(indexTemplate.name);
@@ -86,7 +84,6 @@ export const initElasticsearchHelpers = (getService) => {
     createDatastream,
     deleteDatastream,
     cleanupDatastreams,
-    catTemplate,
     createIndexTemplate,
     deleteIndexTemplate,
     cleanUpIndexTemplates,
