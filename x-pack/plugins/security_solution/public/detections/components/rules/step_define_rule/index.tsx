@@ -184,6 +184,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isAlertSuppressionForThresholdRuleFeatureEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForThresholdRuleEnabled'
   );
+  const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
+
   const isThresholdRule = getIsThresholdRule(ruleType);
 
   const { getFields, reset, setFieldValue } = form;
@@ -437,7 +439,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
       <EuiRadioGroup
         disabled={
-          !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
+          !isAlertSuppressionLicenseValid ||
           groupByFields == null ||
           groupByFields.length === 0 ||
           isThresholdRule
@@ -458,7 +460,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   durationValueField={groupByDurationValue}
                   durationUnitField={groupByDurationUnit}
                   isDisabled={
-                    !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
+                    !isAlertSuppressionLicenseValid ||
                     (!enableThresholdSuppression && groupByFields?.length === 0) ||
                     groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
                   }
@@ -474,16 +476,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         data-test-subj="groupByDurationOptions"
       />
     ),
-    [license, groupByFields, isThresholdRule, enableThresholdSuppression]
+    [isAlertSuppressionLicenseValid, groupByFields, isThresholdRule, enableThresholdSuppression]
   );
 
   const AlertSuppressionMissingFields = useCallback(
     ({ suppressionMissingFields }) => (
       <EuiRadioGroup
         disabled={
-          !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
-          groupByFields == null ||
-          groupByFields.length === 0
+          !isAlertSuppressionLicenseValid || groupByFields == null || groupByFields.length === 0
         }
         idSelected={suppressionMissingFields.value}
         options={[
@@ -502,7 +502,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         data-test-subj="suppressionMissingFieldsOptions"
       />
     ),
-    [license, groupByFields]
+    [isAlertSuppressionLicenseValid, groupByFields]
   );
 
   const dataViewIndexPatternToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
@@ -765,7 +765,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
-  const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
   const isAlertSuppressionEnabled =
     isQueryRule(ruleType) || (isThresholdRule && isAlertSuppressionForThresholdRuleFeatureEnabled);
 

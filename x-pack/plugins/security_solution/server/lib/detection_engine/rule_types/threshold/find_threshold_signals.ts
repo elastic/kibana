@@ -116,6 +116,7 @@ export const findThresholdSignals = async ({
       } else if (searchResultHasAggs<ThresholdMultiBucketAggregationResult>(searchResult)) {
         const thresholdTerms = searchResult.aggregations?.thresholdTerms;
         sortKeys = thresholdTerms?.after_key;
+
         buckets.push(
           ...((searchResult.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [])
         );
