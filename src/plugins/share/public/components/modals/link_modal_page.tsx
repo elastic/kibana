@@ -69,41 +69,41 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
 
-interface UrlParams {
-  [extensionName: string]: {
-    [queryParam: string]: boolean;
+  interface UrlParams {
+    [extensionName: string]: {
+      [queryParam: string]: boolean;
+    };
+  }
+
+  const makeUrlEmbeddable = (url: string): string => {
+    const embedParam = '?embed=true';
+    const urlHasQueryString = url.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return url.replace('?', `${embedParam}&`);
+    }
+
+    return `${url}${embedParam}`;
   };
-}
 
-const makeUrlEmbeddable = (url: string): string => {
-  const embedParam = '?embed=true';
-  const urlHasQueryString = url.indexOf('?') !== -1;
+  const makeIframeTag = (url?: string) => {
+    if (!url) {
+      return;
+    }
 
-  if (urlHasQueryString) {
-    return url.replace('?', `${embedParam}&`);
-  }
+    return `<iframe src="${shortUrl}" height="600" width="800"></iframe>`;
+  };
 
-  return `${url}${embedParam}`;
-};
-
-const makeIframeTag = (url?: string) => {
-  if (!url) {
-    return;
-  }
-
-  return `<iframe src="${shortUrl}" height="600" width="800"></iframe>`;
-};
-
-const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
-  return (
-    <EuiFlexGroup gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false}>{child}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIconTip content={tipContent} position="bottom" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
+    return (
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={tipContent} position="bottom" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   const getUrlParamExtensions = (url: string): string => {
     return urlParams
@@ -125,7 +125,7 @@ const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) 
     url = isEmbedded ? makeUrlEmbeddable(url) : url;
     url = urlParams ? getUrlParamExtensions(url) : url;
 
-    return shortUrl = url;
+    return (shortUrl = url);
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
@@ -248,7 +248,7 @@ const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) 
       url = makeIframeTag(url);
     }
 
-    setUrl(url)
+    setUrl(url);
   };
 
   const handleShortUrlChange = async (evt: EuiSwitchEvent) => {
@@ -270,14 +270,13 @@ const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) 
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
-    const switchLabel =
-     Boolean(isCreatingShortUrl) ? (
-        <span>
-          <EuiLoadingSpinner size="s" /> {shortUrlLabel}
-        </span>
-      ) : (
-        shortUrlLabel
-      );
+    const switchLabel = Boolean(isCreatingShortUrl) ? (
+      <span>
+        <EuiLoadingSpinner size="s" /> {shortUrlLabel}
+      </span>
+    ) : (
+      shortUrlLabel
+    );
     const switchComponent = (
       <EuiSwitch
         label={switchLabel}
