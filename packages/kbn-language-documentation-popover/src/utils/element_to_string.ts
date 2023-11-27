@@ -7,6 +7,10 @@
  */
 import React, { isValidElement } from 'react';
 
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
+
 /**
  * Gets the JSX.Element as the input. It returns the markdown as string.
  * If the children are not markdown it will return an empty string.
@@ -20,14 +24,11 @@ export function elementToString(element?: JSX.Element): string {
     return String(props.markdown);
   } else if (props && 'children' in props && Array.isArray(props.children)) {
     return props.children.reduce((text: string, child: React.ReactNode): string => {
-      let newText = '';
-      const validChildren = React.Children.toArray(child).filter(Boolean);
+      const validChildren = React.Children.toArray(child).filter(nonNullable);
       if (isValidElement(child) && validChildren.length > 0) {
-        newText = elementToString(child);
-      } else {
-        newText = '';
+        return text.concat(elementToString(child));
       }
-      return text.concat(newText);
+      return text;
     }, '');
   }
   return '';
