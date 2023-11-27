@@ -26,6 +26,7 @@ import { deleteDashboards } from './lib/delete_dashboards';
 import { loadDashboardState } from './lib/load_dashboard_state';
 import { updateDashboardMeta } from './lib/update_dashboard_meta';
 import { DashboardContentManagementCache } from './dashboard_content_management_cache';
+import { getAttributesAndReferences } from './lib/get_attributes_and_references';
 
 export type DashboardContentManagementServiceFactory = KibanaPluginServiceFactory<
   DashboardContentManagementService,
@@ -88,5 +89,14 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
     deleteDashboards: (ids) => deleteDashboards(ids, contentManagement),
     updateDashboardMeta: (props) =>
       updateDashboardMeta(props, { contentManagement, savedObjectsTagging, embeddable }),
+    getAttributesAndReferences: ({ currentState, lastSavedId, saveOptions }) =>
+      getAttributesAndReferences({
+        currentState,
+        lastSavedId,
+        saveOptions,
+        data,
+        embeddable,
+        savedObjectsTagging,
+      }),
   };
 };
