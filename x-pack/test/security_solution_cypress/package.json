@@ -37,6 +37,6 @@
     "cypress:run:qa:serverless:investigations": "yarn cypress:qa:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
     "cypress:run:qa:serverless:explore": "yarn cypress:qa:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:run:qa:serverless:rule_management": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/!(prebuilt_rules)/**/*.cy.ts'",
-    "cypress:run:qa:serverless:rule_management:prebuilt_rules": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/prebuilt_rules/**/*.cy.ts'"
+    "cypress:run:qa:serverless:rule_management:prebuilt_rules": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/**/*.cy.ts'"
   }
 }
