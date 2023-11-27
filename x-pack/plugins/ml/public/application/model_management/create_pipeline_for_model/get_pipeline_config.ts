@@ -8,11 +8,15 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { InferecePipelineCreationState } from './state';
 
-export function getPipelineConfig(state: InferecePipelineCreationState): estypes.IngestPipeline {
+export function getPipelineConfig(
+  state: InferecePipelineCreationState,
+  pipelineConfig?: estypes.IngestPipeline
+): estypes.IngestPipeline {
   const { ignoreFailure, modelId, onFailure, pipelineDescription, initialPipelineConfig } = state;
+  const updatedPipelineConfig = { ...(initialPipelineConfig ?? {}), ...(pipelineConfig ?? {}) };
   const processor =
-    initialPipelineConfig?.processors && initialPipelineConfig.processors?.length
-      ? initialPipelineConfig?.processors[0]
+    updatedPipelineConfig?.processors && updatedPipelineConfig.processors?.length
+      ? updatedPipelineConfig?.processors[0]
       : {};
 
   return {

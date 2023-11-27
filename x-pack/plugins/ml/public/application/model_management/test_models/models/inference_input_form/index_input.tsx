@@ -28,13 +28,20 @@ import type { InferrerType } from '..';
 import { useIndexInput, InferenceInputFormIndexControls } from '../index_input';
 import { RUNNING_STATE } from '../inference_base';
 import { InputFormControls } from './input_form_controls';
+import { useTestTrainedModelsContext } from '../../test_trained_models_context';
 
 interface Props {
   inferrer: InferrerType;
 }
 
 export const IndexInputForm: FC<Props> = ({ inferrer }) => {
-  const data = useIndexInput({ inferrer });
+  const { currentContext } = useTestTrainedModelsContext();
+
+  const data = useIndexInput({
+    inferrer,
+    defaultSelectedDataViewId: currentContext.defaultSelectedDataViewId,
+    defaultSelectedField: currentContext.defaultSelectedField,
+  });
   const { reloadExamples, selectedField } = data;
 
   const [errorText, setErrorText] = useState<string | null>(null);
@@ -60,7 +67,11 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
   return (
     <EuiForm component={'form'} onSubmit={run}>
       <>{infoComponent}</>
-      <InferenceInputFormIndexControls inferrer={inferrer} data={data} />
+      <InferenceInputFormIndexControls
+        inferrer={inferrer}
+        data={data}
+        disableIndexSelection={currentContext.defaultSelectedDataViewId !== undefined}
+      />
 
       <EuiSpacer size="m" />
 
@@ -72,6 +83,7 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
               createPipelineButtonDisabled={
                 runningState === RUNNING_STATE.RUNNING || isValid === false
               }
+              showCreatePipelineButton
               inferrer={inferrer}
             />
           </EuiFlexGroup>

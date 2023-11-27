@@ -93,12 +93,11 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
 
   const handleSetStep = (currentStep: AddInferencePipelineSteps) => {
     setStep(currentStep);
-    if (currentStep !== ADD_INFERENCE_PIPELINE_STEPS.CREATE) {
-      testTrainedModelsContext?.setCurrentContext({
-        ...testTrainedModelsContext.currentContext,
-        pipelineConfig: getPipelineConfig(formState),
-      });
-    }
+
+    testTrainedModelsContext?.setCurrentContext({
+      ...testTrainedModelsContext.currentContext,
+      pipelineConfig: getPipelineConfig(formState, pipelineConfig),
+    });
   };
 
   const { pipelineName: pipelineNameError } = useMemo(() => {

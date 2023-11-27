@@ -72,6 +72,7 @@ export abstract class InferenceBase<TInferResponse> {
   private isValid$ = new BehaviorSubject<boolean>(false);
   private pipeline$ = new BehaviorSubject<estypes.IngestPipeline>({});
   private supportedFieldTypes: ES_FIELD_TYPES[] = [ES_FIELD_TYPES.TEXT];
+  private selectedDataViewId: string | undefined;
 
   protected readonly info: string[] = [];
 
@@ -161,6 +162,15 @@ export abstract class InferenceBase<TInferResponse> {
     this.inferenceResult$.next(null);
     this.inferenceError$.next(null);
     this.runningState$.next(RUNNING_STATE.STOPPED);
+  }
+
+  public setSelectedDataViewId(dataViewId: string) {
+    // Data view selected for testing
+    this.selectedDataViewId = dataViewId;
+  }
+
+  public getSelectedDataViewId() {
+    return this.selectedDataViewId;
   }
 
   public setInputField(field: string | undefined) {

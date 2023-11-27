@@ -17,12 +17,14 @@ interface Props {
   testButtonDisabled: boolean;
   createPipelineButtonDisabled: boolean;
   inferrer: InferrerType;
+  showCreatePipelineButton?: boolean;
 }
 
 export const InputFormControls: FC<Props> = ({
   testButtonDisabled,
   createPipelineButtonDisabled,
   inferrer,
+  showCreatePipelineButton,
 }) => {
   const testTrainedModelsContext = useTestTrainedModelsContext();
 
@@ -41,7 +43,8 @@ export const InputFormControls: FC<Props> = ({
           />
         </EuiButton>
       </EuiFlexItem>
-      {!testTrainedModelsContext?.currentContext.createPipelineFlyoutOpen ? (
+      {!testTrainedModelsContext?.currentContext.createPipelineFlyoutOpen &&
+      showCreatePipelineButton ? (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             disabled={createPipelineButtonDisabled}
@@ -49,6 +52,8 @@ export const InputFormControls: FC<Props> = ({
             onClick={() =>
               testTrainedModelsContext?.setCurrentContext({
                 pipelineConfig: inferrer.getPipeline(),
+                defaultSelectedDataViewId: inferrer.getSelectedDataViewId(),
+                defaultSelectedField: inferrer.getInputField(),
                 createPipelineFlyoutOpen: true,
               })
             }

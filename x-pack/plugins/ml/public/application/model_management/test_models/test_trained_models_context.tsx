@@ -11,6 +11,8 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 export interface TestTrainedModelsContextType {
   pipelineConfig: estypes.IngestPipeline | undefined;
   createPipelineFlyoutOpen: boolean;
+  defaultSelectedDataViewId?: string;
+  defaultSelectedField?: string;
 }
 export const TestTrainedModelsContext = createContext<
   | {

@@ -13,6 +13,7 @@ import { EuiFormRow, EuiSelect, EuiSpacer, EuiTab, EuiTabs, useEuiPaddingSize } 
 import { SelectedModel } from './selected_model';
 import { type ModelItem } from '../models_list';
 import { INPUT_TYPE } from './models/inference_base';
+import { useTestTrainedModelsContext } from './test_trained_models_context';
 
 interface ContentProps {
   model: ModelItem;
@@ -23,12 +24,14 @@ export const TestTrainedModelContent: FC<ContentProps> = ({ model }) => {
   const mediumPadding = useEuiPaddingSize('m');
 
   const [inputType, setInputType] = useState<INPUT_TYPE>(INPUT_TYPE.TEXT);
+  const testTrainedModelsContext = useTestTrainedModelsContext();
+  const isCreateMode = testTrainedModelsContext?.currentContext.createPipelineFlyoutOpen;
 
   const onlyShowTab: INPUT_TYPE | undefined = useMemo(() => {
-    return (model.type ?? []).includes(SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION)
+    return (model.type ?? []).includes(SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) || isCreateMode
       ? INPUT_TYPE.INDEX
       : undefined;
-  }, [model]);
+  }, [model, isCreateMode]);
   return (
     <>
       {' '}
