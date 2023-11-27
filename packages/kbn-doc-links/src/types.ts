@@ -494,9 +494,7 @@ export interface DocLinks {
     mapperSize: string;
   };
   readonly snapshotRestore: Record<string, string>;
-  readonly ingest: {
-    readonly pipelines: string;
-  };
+  readonly ingest: Record<string, string>;
   readonly fleet: Readonly<{
     beatsAgentComparison: string;
     guide: string;
