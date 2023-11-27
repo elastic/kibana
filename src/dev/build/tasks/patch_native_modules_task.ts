@@ -48,7 +48,7 @@ const packages: Package[] = [
     archives: {
       'linux-x64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.9/linux-x64-108.gz',
-        sha256: '954a3dce8231210562adcbff1f45e78113bd394d787d7b2e4d900f4b134a1d99',
+        sha256: '136b6cf61b54bf610071a950400518add65d44a4923f11ef658769df1a037f0b',
       },
       // Linux ARM builds are currently done manually as Github Actions used in upstream project
       // do not natively support an Linux ARM target.
@@ -64,8 +64,7 @@ const packages: Package[] = [
       // * upload the `linux-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'linux-arm64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.9/linux-arm64-108.gz',
-        sha256: '3f73e303fdfea8233ee169dbc672a2b8ad26fa0b3089a8c46c0d295e15591176',
-        // future sha256 for 115 version will be 234d37bd95f761fd5af972b53b5e1a86069551bfddf7b9913ac8b72130333dcf
+        sha256: '311822ac689bd49a534ecf400b4732a288ad218f711b0e593e41dd3a6b739d97',
       },
       'darwin-x64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.9/darwin-x64-108.gz',
