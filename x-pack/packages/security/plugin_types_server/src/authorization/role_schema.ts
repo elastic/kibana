@@ -9,7 +9,7 @@ import _ from 'lodash';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import { GLOBAL_RESOURCE } from '../../common/constants';
+import { GLOBAL_RESOURCE } from './constants';
 
 /**
  * Elasticsearch specific portion of the role definition.

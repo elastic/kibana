@@ -8,12 +8,12 @@
 import type { Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-
-import type { SecurityLicense } from '../../common/licensing';
 import type {
   PrivilegeDeprecationsRolesByFeatureIdRequest,
   PrivilegeDeprecationsRolesByFeatureIdResponse,
-} from '../../common/model';
+} from '@kbn/security-plugin-types-server';
+
+import type { SecurityLicense } from '../../common';
 import { transformElasticsearchRoleToRole } from '../authorization';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
