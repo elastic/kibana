@@ -18,6 +18,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DataTableRecord } from '@kbn/discover-utils/types';
 import { ExpandButton } from './data_table_expand_button';
 import { UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
@@ -267,17 +268,23 @@ export function getEuiGridColumns({
   );
 }
 
-export function getVisibleColumns(
+export function hasSourceTimeFieldValue(
   columns: string[],
   dataView: DataView,
+  rows: DataTableRecord[],
   showTimeCol: boolean,
-  isPlainRecord: boolean = false
+  isPlainRecord: boolean
 ) {
   const timeFieldName = dataView.timeFieldName;
-
-  if (isPlainRecord) {
-    return columns;
+  if (!isPlainRecord || !columns.includes('_source') || !timeFieldName) {
+    return showTimeCol;
   }
+  // flattened is the _source content in this case
+  return rows.some((row) => timeFieldName in row.flattened);
+}
+
+export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
+  const timeFieldName = dataView.timeFieldName;
 
   if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
     return [timeFieldName, ...columns];
