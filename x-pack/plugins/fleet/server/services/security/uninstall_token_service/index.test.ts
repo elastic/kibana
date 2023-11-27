@@ -528,7 +528,9 @@ describe('UninstallTokenService', () => {
         it('rejects if any of the tokens is missing', async () => {
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
-          ).rejects.toThrowError('Uninstall Token is missing the token.');
+          ).rejects.toThrowError(
+            'Invalid uninstall token: Saved object is missing the `token` attribute.'
+          );
         });
       });
 
@@ -544,7 +546,9 @@ describe('UninstallTokenService', () => {
         it('rejects if token is missing', async () => {
           await expect(
             uninstallTokenService.checkTokenValidityForPolicy(missingTokensPolicyId)
-          ).rejects.toThrowError('Uninstall Token is missing the token.');
+          ).rejects.toThrowError(
+            'Invalid uninstall token: Saved object is missing the `token` attribute.'
+          );
         });
       });
     });
