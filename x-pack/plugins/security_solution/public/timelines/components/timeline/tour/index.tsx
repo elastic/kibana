@@ -12,6 +12,7 @@
 
 import React, { useEffect, useCallback, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { timelineTourSteps } from './step_config';
@@ -86,7 +87,11 @@ const TimelineTourComp = () => {
     [finishTour, nextStep]
   );
 
-  if (!tourState.isTourActive) {
+  const nextEl = timelineTourSteps[tourState.currentTourStep - 1]?.anchor;
+
+  const isElementAtCurrentStepMounted = useIsElementMounted(nextEl);
+
+  if (!tourState.isTourActive || !isElementAtCurrentStepMounted) {
     return null;
   }
 
@@ -96,6 +101,9 @@ const TimelineTourComp = () => {
         if (tourState.currentTourStep !== idx + 1) return null;
         return (
           <EuiTourStep
+            panelProps={{
+              'data-test-subj': `timeline-tour-step-${idx + 1}`,
+            }}
             key={idx}
             step={steps.step}
             isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
@@ -104,7 +112,7 @@ const TimelineTourComp = () => {
             onFinish={finishTour}
             title={steps.title}
             content={steps.content}
-            anchor={steps.anchor}
+            anchor={`#${steps.anchor}`}
             subtitle={'Timeline has changed'}
             footerAction={getFooterAction(steps.step)}
           />
