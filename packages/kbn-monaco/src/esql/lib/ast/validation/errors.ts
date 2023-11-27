@@ -163,6 +163,15 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
+    case 'ccsNotSupportedForCommand':
+      return {
+        message: i18n.translate('monaco.esql.validation.ccsNotSupportedForCommand', {
+          defaultMessage: 'CCS indexes are not supported [{value}]',
+          values: {
+            value: out.value,
+          },
+        }),
+      };
   }
   return { message: '' };
 }

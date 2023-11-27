@@ -40,7 +40,7 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage:
         'Retrieves data from one or more datasets. A dataset is a collection of data that you want to search. The only supported dataset is an index. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
     }),
-    examples: ['from logs', 'from logs-*', 'from logs_*, events-*', 'from remote*:logs*'],
+    examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     signature: {
       multipleParams: true,
