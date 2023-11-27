@@ -70,8 +70,14 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
+  /**
+   * Enables the alert type column in KPI visualizations on Alerts Page
+   */
   alertTypeEnabled: false,
-
+  /**
+   * Enables expandable flyout in create rule page, alert preview
+   */
+  expandableFlyoutInCreateRuleEnabled: false,
   /*
    * Enables new Set of filters on the Alerts page.
    *

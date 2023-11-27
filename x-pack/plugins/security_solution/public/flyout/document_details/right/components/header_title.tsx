@@ -11,7 +11,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
@@ -29,34 +28,47 @@ import { FlyoutTitle } from '../../../shared/components/flyout_title';
  * Document details flyout right section header
  */
 export const HeaderTitle: FC = memo(() => {
-  const { dataFormattedForFieldBrowser, eventId, scopeId, refetchFlyoutData, getFieldsData } =
-    useRightPanelContext();
+  const {
+    dataFormattedForFieldBrowser,
+    eventId,
+    scopeId,
+    isPreview,
+    refetchFlyoutData,
+    getFieldsData,
+  } = useRightPanelContext();
   const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
 
   const ruleTitle = useMemo(
-    () => (
-      <RenderRuleName
-        contextId={scopeId}
-        eventId={eventId}
-        fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
-        fieldType={'string'}
-        isAggregatable={false}
-        isDraggable={false}
-        linkValue={ruleId}
-        value={ruleName}
-        openInNewTab
-      >
+    () =>
+      isPreview ? (
         <FlyoutTitle
           title={ruleName}
           iconType={'warning'}
-          isLink
           data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}
         />
-      </RenderRuleName>
-    ),
-    [ruleName, ruleId, eventId, scopeId]
+      ) : (
+        <RenderRuleName
+          contextId={scopeId}
+          eventId={eventId}
+          fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
+          fieldType={'string'}
+          isAggregatable={false}
+          isDraggable={false}
+          linkValue={ruleId}
+          value={ruleName}
+          openInNewTab
+        >
+          <FlyoutTitle
+            title={ruleName}
+            iconType={'warning'}
+            isLink
+            data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}
+          />
+        </RenderRuleName>
+      ),
+    [ruleName, ruleId, eventId, scopeId, isPreview]
   );
 
   const eventTitle = (
@@ -91,13 +103,15 @@ export const HeaderTitle: FC = memo(() => {
       </div>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <DocumentStatus />
-        </EuiFlexItem>
+        {isAlert && !isPreview && (
+          <EuiFlexItem grow={false}>
+            <DocumentStatus />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <RiskScore />
         </EuiFlexItem>
-        {isAlert && scopeId !== TableId.rulePreview && (
+        {isAlert && !isPreview && (
           <EuiFlexItem grow={false}>
             <Assignees
               eventId={eventId}
