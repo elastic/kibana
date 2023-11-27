@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
@@ -21,6 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   WelcomeBanner,
   IngestData,
@@ -53,7 +55,7 @@ import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorsCallout } from './connectors_callout';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
-import { PipelineOverview } from './pipeline_overview';
+import { PipelineButtonOverview } from './pipeline_button_overview';
 import { PipelinePanel } from './pipeline_panel';
 
 export const ElasticsearchOverview = () => {
@@ -346,16 +348,35 @@ export const ElasticsearchOverview = () => {
         data-test-subj="pipeline-client-section"
       >
         <OverviewPanel
-          description={i18n.translate('xpack.serverlessSearch.pipeline.description', {
-            defaultMessage:
-              "Use ingest pipelines to preprocess your data before it's indexed into Elasticsearch, which is often much easier than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents.",
-          })}
-          leftPanelContent={<PipelinePanel assetBasePath={assetBasePath} docLinks={docLinks} />}
+          description={
+            <FormattedMessage
+              id="xpack.serverlessSearch.pipeline.description"
+              defaultMessage="Use {ingestPipelinesLink} to preprocess your data before it's indexed into Elasticsearch, which is often much easier than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents."
+              values={{
+                ingestPipelinesLink: (
+                  <EuiLink
+                    data-test-subj="serverlessSearchElasticsearchOverviewIngestPipelinesLink"
+                    href={
+                      'https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html'
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.serverlessSearch.pipeline.description.ingestPipelinesLink.link',
+                      {
+                        defaultMessage: 'ingest pipelines',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+          leftPanelContent={<PipelinePanel assetBasePath={assetBasePath} />}
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.pipeline.title', {
             defaultMessage: 'Transform and enrich your data',
           })}
-          children={<PipelineOverview application={application} http={http} />}
+          children={<PipelineButtonOverview />}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
