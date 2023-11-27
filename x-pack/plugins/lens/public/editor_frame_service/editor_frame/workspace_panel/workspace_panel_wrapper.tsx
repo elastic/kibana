@@ -241,6 +241,7 @@ export function WorkspacePanelWrapper({
           css={{ height: '100%' }}
         >
           <EuiFlexItem
+            data-test-subj="lnsWorkspacePanelWrapper__innerContent"
             grow={false}
             css={{
               flexGrow: 0,

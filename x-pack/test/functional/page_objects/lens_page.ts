@@ -1929,5 +1929,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await this.closeDimensionEditor();
     },
+
+    async getWorkspaceVisContainerDimensions() {
+      const visContainer = await testSubjects.find('lnsWorkspacePanelWrapper__innerContent');
+      const [width, height] = await Promise.all([
+        visContainer.getComputedStyle('width'),
+        visContainer.getComputedStyle('height'),
+      ]);
+
+      return { width, height };
+    },
   });
 }
