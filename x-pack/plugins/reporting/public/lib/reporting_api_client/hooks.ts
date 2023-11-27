@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
 import { INTERNAL_ROUTES } from '../../../common/constants';
-import { IlmPolicyStatusResponse } from '../../../common/types';
 import { useKibana, useRequest, UseRequestResponse } from '../../shared_imports';
 
 export const useCheckIlmPolicyStatus = (): UseRequestResponse<IlmPolicyStatusResponse> => {
   const {
     services: { http },
   } = useKibana();
+
   return useRequest(http, { path: INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS, method: 'get' });
 };

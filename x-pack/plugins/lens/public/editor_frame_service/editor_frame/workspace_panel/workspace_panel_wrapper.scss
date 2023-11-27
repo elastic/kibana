@@ -179,3 +179,10 @@
     transform: translateY(10%);
   }
 }
+
+.lnsVisualizationToolbar--fixed {
+  position: fixed;
+  width: 100%;
+  z-index: 1;
+  background-color: $euiColorLightestShade;
+}

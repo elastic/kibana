@@ -75,6 +75,7 @@
     "@kbn/serverless",
     "@kbn/logging",
     "@kbn/chart-expressions-common",
+    "@kbn/search-response-warnings",
   ],
   "exclude": [
     "target/**/*",

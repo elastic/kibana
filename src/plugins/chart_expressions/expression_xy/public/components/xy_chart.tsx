@@ -211,7 +211,6 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
-  shouldShowLegendAction,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -888,7 +887,6 @@ export function XYChart({
                     fieldFormats,
                     formattedDatatables,
                     titles,
-                    shouldShowLegendAction,
                     singleTable
                   )
                 : undefined

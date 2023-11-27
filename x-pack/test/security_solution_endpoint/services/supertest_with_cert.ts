@@ -15,3 +15,11 @@ export function KibanaSupertestWithCertProvider({ getService }: FtrProviderConte
 
   return supertest.agent(kibanaServerUrl, { ca });
 }
+
+export function KibanaSupertestWithCertWithoutAuthProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+  const kibanaServerUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+  const ca = config.get('servers.kibana').certificateAuthorities;
+
+  return supertest.agent(kibanaServerUrl, { ca });
+}

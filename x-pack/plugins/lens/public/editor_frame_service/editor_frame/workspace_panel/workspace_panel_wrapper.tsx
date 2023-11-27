@@ -54,10 +54,11 @@ export interface WorkspacePanelWrapperProps {
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
+  isFixedPosition?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
   const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization } = props;
+  const { activeVisualization, isFixedPosition } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -78,7 +79,12 @@ export function VisualizationToolbar(props: {
   return (
     <>
       {ToolbarComponent && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          className={classNames({
+            'lnsVisualizationToolbar--fixed': isFixedPosition,
+          })}
+        >
           {ToolbarComponent({
             frame: props.framePublicAPI,
             state: visualization.state,

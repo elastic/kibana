@@ -37,8 +37,6 @@ import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
-import { useQuery } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
 import { useLocation } from 'react-router-dom';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
@@ -53,6 +51,8 @@ import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
+import { ConnectorsCallout } from './connectors_callout';
+import { ConnectorIngestionPanel } from './connectors_ingestion';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -82,12 +82,6 @@ export const ElasticsearchOverview = () => {
     }
   }, [hash]);
 
-  const { data: _data } = useQuery({
-    queryKey: ['fetchConnectors'],
-    queryFn: () =>
-      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
-  });
-
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
@@ -100,7 +94,7 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="select-client-section"
       >
-        <SelectClientPanel docLinks={docLinks} http={http}>
+        <SelectClientPanel docLinks={docLinks} http={http} callout={<ConnectorsCallout />}>
           <EuiFlexItem>
             <LanguageGrid
               assetBasePath={assetBasePath}
@@ -309,6 +303,7 @@ export const ElasticsearchOverview = () => {
           docLinks={docLinks}
           application={application}
           sharePlugin={share}
+          additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
@@ -451,7 +446,11 @@ const OverviewFooter = () => {
       <EuiFlexGroup gutterSize="m" alignItems="center">
         {cloud.usersAndRolesUrl && (
           <FooterButtonContainer>
-            <EuiButtonEmpty iconType="users" href={cloud.usersAndRolesUrl}>
+            <EuiButtonEmpty
+              data-test-subj="serverlessSearchOverviewFooterInviteMoreUsersButton"
+              iconType="users"
+              href={cloud.usersAndRolesUrl}
+            >
               {i18n.translate('xpack.serverlessSearch.overview.footer.links.inviteUsers', {
                 defaultMessage: 'Invite more users',
               })}
@@ -459,14 +458,22 @@ const OverviewFooter = () => {
           </FooterButtonContainer>
         )}
         <FooterButtonContainer>
-          <EuiButtonEmpty iconType="heart" href="https://www.elastic.co/community/">
+          <EuiButtonEmpty
+            data-test-subj="serverlessSearchOverviewFooterJoinOurCommunityButton"
+            iconType="heart"
+            href="https://www.elastic.co/community/"
+          >
             {i18n.translate('xpack.serverlessSearch.overview.footer.links.community', {
               defaultMessage: 'Join our community',
             })}
           </EuiButtonEmpty>
         </FooterButtonContainer>
         <FooterButtonContainer>
-          <EuiButtonEmpty iconType="faceHappy" href={docLinks.kibanaFeedback}>
+          <EuiButtonEmpty
+            data-test-subj="serverlessSearchOverviewFooterGiveFeedbackButton"
+            iconType="faceHappy"
+            href={docLinks.kibanaFeedback}
+          >
             {i18n.translate('xpack.serverlessSearch.overview.footer.links.feedback', {
               defaultMessage: 'Give feedback',
             })}

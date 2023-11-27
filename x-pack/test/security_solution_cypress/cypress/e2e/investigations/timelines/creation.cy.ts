@@ -24,7 +24,7 @@ import {
 } from '../../../screens/timeline';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
-import { deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
@@ -75,7 +75,8 @@ describe('Timelines', (): void => {
     deleteTimelines();
   });
 
-  describe('Toggle create timeline from plus icon', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169866
+  describe.skip('Toggle create timeline from plus icon', () => {
     context('Privileges: CRUD', { tags: '@ess' }, () => {
       beforeEach(() => {
         login();
@@ -152,7 +153,7 @@ describe('Timelines', (): void => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);
-      openTimelineUsingToggle();
+      createNewTimeline();
     });
 
     it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {
