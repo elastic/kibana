@@ -71,6 +71,7 @@ import type {
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
+import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 
 export interface ITelemetryReceiver {
   start(
@@ -164,7 +165,11 @@ export interface ITelemetryReceiver {
 
   fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
-  fetchTimelineEndpointAlerts(interval: number): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
+  fetchTimelineAlerts(
+    index: string,
+    rangeFrom: string,
+    rangeTo: string
+  ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   buildProcessTree(
     entityId: string,
@@ -178,6 +183,8 @@ export interface ITelemetryReceiver {
   ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
 
   fetchValueListMetaData(interval: number): Promise<ValueListResponse>;
+
+  getAlertsIndex(): string | undefined;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -223,6 +230,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public getAlertsIndex(): string | undefined {
+    return this.alertsIndex;
   }
 
   public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {
@@ -397,7 +408,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: '.logs-endpoint.diagnostic.collection-*',
+      index: `${DEFAULT_DIAGNOSTIC_INDEX}-*`,
       ignore_unavailable: true,
       size: telemetryConfiguration.telemetry_max_buffer_size,
       body: {
@@ -705,7 +716,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
-  public async fetchTimelineEndpointAlerts(interval: number) {
+  async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
@@ -716,7 +727,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // create and assign an initial point in time
     let pitId: OpenPointInTimeResponse['id'] = (
       await this.esClient.openPointInTime({
-        index: `${this.alertsIndex}*`,
+        index: `${index}*`,
         keep_alive: keepAlive,
       })
     ).id;
@@ -754,8 +765,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${interval}h`,
-                    lte: 'now',
+                    gte: rangeFrom,
+                    lte: rangeTo,
                   },
                 },
               },
@@ -815,7 +826,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
-    return alertsToReturn;
+    return alertsToReturn || [];
   }
 
   public async buildProcessTree(

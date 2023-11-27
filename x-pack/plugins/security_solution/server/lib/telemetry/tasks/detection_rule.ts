@@ -43,6 +43,12 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
       const startTime = Date.now();
       const taskName = 'Security Solution Detection Rule Lists Telemetry';
+
+      tlog(
+        logger,
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
