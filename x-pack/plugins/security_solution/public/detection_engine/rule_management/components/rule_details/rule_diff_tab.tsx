@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { Change, diffLines } from 'diff';
+import type { Change } from 'diff';
+import { diffLines } from 'diff';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSpacer, useEuiBackgroundColor, tint } from '@elastic/eui';
