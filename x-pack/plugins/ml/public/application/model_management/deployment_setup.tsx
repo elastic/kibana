@@ -84,7 +84,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
       new Array(THREADS_MAX_EXPONENT)
         .fill(null)
         .map((v, i) => Math.pow(2, i))
-        .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => v)
+        .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => true)
         .map((value) => {
           const id = value.toString();
 
