@@ -41,6 +41,7 @@ export interface CustomLangModuleType<Deps = unknown>
 }
 
 export interface EditorError {
+  severity: monaco.MarkerSeverity;
   startLineNumber: number;
   startColumn: number;
   endLineNumber: number;

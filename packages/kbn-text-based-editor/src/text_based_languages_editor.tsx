@@ -364,9 +364,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (parserErrors.length) {
         markers.push(...parserErrors);
       }
-      if (parserWarnings.length) {
-        markers.push(...parserWarnings);
-      }
       if (active) {
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
