@@ -37,11 +37,32 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   }
   const aggMetrics: NamedAggregation[] = [
     {
+      groupByField: {
+        cardinality: {
+          field,
+        },
+      },
       failedFindings: {
         filter: {
           term: {
             'result.evaluation': { value: 'failed' },
           },
+        },
+      },
+      passedFindings: {
+        filter: {
+          term: {
+            'result.evaluation': { value: 'passed' },
+          },
+        },
+      },
+      complianceScore: {
+        bucket_script: {
+          buckets_path: {
+            passed: 'passedFindings>_count',
+            failed: 'failedFindings>_count',
+          },
+          script: 'params.passed / (params.passed + params.failed)',
         },
       },
     },
@@ -115,6 +136,8 @@ export const useLatestFindingsGrouping = ({
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
+    onResetFilters,
+    error,
   } = useCloudSecurityGrouping({
     dataView,
     groupingTitle,
@@ -126,24 +149,14 @@ export const useLatestFindingsGrouping = ({
   });
 
   const groupingQuery = getGroupingQuery({
-    additionalFilters: [
-      query,
-      // {
-      //   bool: {
-      //     must: [],
-      //     must_not: [],
-      //     should: [],
-      //     filter: [{ exists: { field: selectedGroup } }],
-      //   },
-      // },
-    ],
+    additionalFilters: query ? [query] : [],
     groupByField: selectedGroup,
     uniqueValue,
     from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
     to: 'now',
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
-    sort: [{ _count: { order: 'desc' } }, { _key: { order: 'asc' } }],
+    sort: [{ groupByField: { order: 'desc' } }, { complianceScore: { order: 'asc' } }],
     statsAggregations: getAggregationsByGroupField(selectedGroup),
     rootAggregations: [
       {
@@ -187,5 +200,7 @@ export const useLatestFindingsGrouping = ({
     setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,
+    onResetFilters,
+    error,
   };
 };
