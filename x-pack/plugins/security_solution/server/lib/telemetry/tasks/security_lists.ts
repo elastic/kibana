@@ -76,8 +76,8 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_TRUSTED_APPLICATION
           );
-          tlog(logger, `Trusted Apps: ${trustedAppsJson}`);
           trustedApplicationsCount = trustedAppsJson.length;
+          tlog(logger, `Trusted Apps: ${trustedApplicationsCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -101,8 +101,8 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_ENDPOINT_EXCEPTION
           );
-          tlog(logger, `EP Exceptions: ${epExceptionsJson}`);
           endpointExceptionsCount = epExceptionsJson.length;
+          tlog(logger, `EP Exceptions: ${endpointExceptionsCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -126,8 +126,8 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_ENDPOINT_EVENT_FILTER
           );
-          tlog(logger, `EP Event Filters: ${epFiltersJson}`);
           endpointEventFiltersCount = epFiltersJson.length;
+          tlog(logger, `EP Event Filters: ${endpointEventFiltersCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
