@@ -28,7 +28,7 @@ export const ModelDeploymentInProgress = ({
               <h3>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployingTitle',
-                  { defaultMessage: 'Your ELSER v2 model is deploying.' }
+                  { defaultMessage: 'Your ELSER model is deploying.' }
                 )}
               </h3>
             </EuiText>
