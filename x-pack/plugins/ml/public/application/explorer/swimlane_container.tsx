@@ -160,6 +160,7 @@ export interface SwimlaneProps {
   showYAxis?: boolean;
   yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
   chartsService: ChartsPluginStart;
+  onRenderComplete?: () => void;
 }
 
 /**
@@ -187,6 +188,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   showLegend = true,
   'data-test-subj': dataTestSubj,
   yAxisWidth,
+  onRenderComplete,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -453,6 +455,11 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
                         locale={i18n.getLocale()}
+                        onRenderChange={(isRendered) => {
+                          if (isRendered && onRenderComplete) {
+                            onRenderComplete();
+                          }
+                        }}
                       />
 
                       <Heatmap
