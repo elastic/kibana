@@ -42,13 +42,8 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
 
   const { createAnalyticsJob, setFormState, startAnalyticsJob } = actions;
   const { isAdvancedEditorValidJson, isJobCreated, isJobStarted, isValid, requestMessages } = state;
-  const {
-    createIndexPattern,
-    destinationIndex,
-    destinationIndexPatternTitleExists,
-    jobId,
-    jobType,
-  } = state.form;
+  const { createDataView, destinationIndex, destinationDataViewTitleExists, jobId, jobType } =
+    state.form;
 
   const [startChecked, setStartChecked] = useState<boolean>(true);
   const [creationTriggered, setCreationTriggered] = useState<boolean>(false);
@@ -56,7 +51,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
 
   useEffect(() => {
     if (canCreateDataView === false) {
-      setFormState({ createIndexPattern: false });
+      setFormState({ createDataView: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [capabilities]);
@@ -106,7 +101,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                     onChange={(e) => {
                       setStartChecked(e.target.checked);
                       if (e.target.checked === false) {
-                        setFormState({ createIndexPattern: false });
+                        setFormState({ createDataView: false });
                       }
                     }}
                   />
@@ -117,8 +112,8 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                   <EuiFormRow
                     fullWidth
                     isInvalid={
-                      (createIndexPattern && destinationIndexPatternTitleExists) ||
-                      createIndexPattern === false ||
+                      (createDataView && destinationDataViewTitleExists) ||
+                      createDataView === false ||
                       canCreateDataView === false
                     }
                     error={[
@@ -134,7 +129,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                             </EuiText>,
                           ]
                         : []),
-                      ...(createIndexPattern && destinationIndexPatternTitleExists
+                      ...(createDataView && destinationDataViewTitleExists
                         ? [
                             i18n.translate(
                               'xpack.ml.dataframe.analytics.create.dataViewExistsError',
@@ -146,7 +141,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                             ),
                           ]
                         : []),
-                      ...(!createIndexPattern && !destinationIndexPatternTitleExists
+                      ...(!createDataView && !destinationDataViewTitleExists
                         ? [
                             <EuiText size="xs" color="warning">
                               {i18n.translate(
@@ -163,7 +158,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                   >
                     <EuiCheckbox
                       disabled={isJobCreated || canCreateDataView === false}
-                      name="mlDataFrameAnalyticsCreateIndexPattern"
+                      name="mlDataFrameAnalyticsCreateDataView"
                       id={'dataframe-create-data-view-checkbox'}
                       label={i18n.translate(
                         'xpack.ml.dataframe.analytics.create.createDataViewLabel',
@@ -171,9 +166,9 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                           defaultMessage: 'Create data view',
                         }
                       )}
-                      checked={createIndexPattern === true}
-                      onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-                      data-test-subj="mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox"
+                      checked={createDataView === true}
+                      onChange={() => setFormState({ createDataView: !createDataView })}
+                      data-test-subj="mlAnalyticsCreateJobWizardCreateDataViewCheckbox"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -186,7 +181,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
               disabled={
                 !isValid ||
                 !isAdvancedEditorValidJson ||
-                (destinationIndexPatternTitleExists === true && createIndexPattern === true)
+                (destinationDataViewTitleExists === true && createDataView === true)
               }
               onClick={handleCreation}
               fill

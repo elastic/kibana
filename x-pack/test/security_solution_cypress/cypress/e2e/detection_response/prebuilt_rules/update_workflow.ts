@@ -15,11 +15,12 @@ import {
   UPGRADE_SELECTED_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
+import { resetRulesTableState } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   assertRulesNotPresentInRuleUpdatesTable,
