@@ -50,7 +50,7 @@ export const TIMELINE_TOUR_SAVE_TIMELINE_STEP_TITLE = i18n.translate(
 );
 
 export const TIMELINE_TOUR_SAVE_TIMELINE_STEP_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.timeline.tour.saveTimeline.title',
+  'xpack.securitySolution.timeline.tour.saveTimeline.description',
   {
     defaultMessage:
       'Click Save to manually Save existing timeline, edit its name and description. You also have the option to save it as a new timeline.',
@@ -65,7 +65,7 @@ export const TIMELINE_TOUR_CHANGE_DATA_VIEW_TITLE = i18n.translate(
 );
 
 export const TIMELINE_TOUR_CHANGE_DATA_VIEW_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.timeline.tour.saveTimeline.title',
+  'xpack.securitySolution.timeline.tour.changeDataView.description',
   {
     defaultMessage: 'Click here is to change data view or add/remove index patterns',
   }
