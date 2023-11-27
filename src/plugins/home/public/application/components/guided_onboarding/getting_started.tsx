@@ -31,6 +31,7 @@ import {
 } from '@kbn/guided-onboarding/src/components/landing_page/guide_cards.constants';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
+import { css } from '@emotion/react';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
@@ -203,7 +204,7 @@ export const GettingStarted = () => {
   }
 
   return (
-    <KibanaPageTemplate panelled={false} grow>
+    <KibanaPageTemplate panelled={false} grow justifyContent="center">
       <EuiPageTemplate.Section alignment="center" data-test-subj="guided-onboarding--landing-page">
         <EuiTitle size="l" className="eui-textCenter">
           <h1>{title}</h1>
@@ -233,6 +234,7 @@ export const GettingStarted = () => {
           docLinks={docLinks}
           cloudStart={cloudStart}
           shareStart={shareStart}
+          css={css`justifyContent: center;`}
         />
         <EuiSpacer />
         <div className="eui-textCenter">

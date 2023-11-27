@@ -6,8 +6,8 @@
     "id": "home",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["dataViews", "share", "urlForwarding", "cloudLinks"],
+    "requiredPlugins": ["dataViews", "share", "urlForwarding"],
     "optionalPlugins": ["usageCollection", "customIntegrations", "cloud", "guidedOnboarding"],
-    "requiredBundles": ["kibanaReact", "cloudLinks"]
+    "requiredBundles": ["kibanaReact"]
   }
 }

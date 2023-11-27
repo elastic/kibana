@@ -5,12 +5,11 @@
   "description": "Adds the links to the Elastic Cloud console",
   "plugin": {
     "id": "cloudLinks",
-    "server": true,
+    "server": false,
     "browser": true,
     "optionalPlugins": [
       "cloud",
       "security",
-      "guidedOnboarding"
     ],
     "requiredBundles": [
       "kibanaReact"

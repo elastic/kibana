@@ -122,10 +122,12 @@ export const GuideCard = ({
     }
     @media (max-width: ${euiTheme.breakpoint.s}px) {
       max-width: 335px;
+      justify-content: center;
     }
     @media (min-width: 768px) and (max-width: 1210px) {
       max-width: 230px;
       height: 175px;
+      justify-content: center;
     }
   `;
 
