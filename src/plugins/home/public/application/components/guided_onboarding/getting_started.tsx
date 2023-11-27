@@ -29,9 +29,9 @@ import {
   GuideCardConstants,
   guideCards,
 } from '@kbn/guided-onboarding/src/components/landing_page/guide_cards.constants';
+import { css } from '@emotion/react';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
-import { css } from '@emotion/react';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
@@ -234,7 +234,9 @@ export const GettingStarted = () => {
           docLinks={docLinks}
           cloudStart={cloudStart}
           shareStart={shareStart}
-          css={css`justifyContent: center;`}
+          css={css`
+            justifycontent: center;
+          `}
         />
         <EuiSpacer />
         <div className="eui-textCenter">
