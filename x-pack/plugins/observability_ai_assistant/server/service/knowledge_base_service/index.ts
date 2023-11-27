@@ -424,6 +424,7 @@ export class KnowledgeBaseService {
       await this.dependencies.esClient.delete({
         index: this.dependencies.resources.aliases.kb,
         id,
+        refresh: 'wait_for',
       });
 
       return Promise.resolve();
