@@ -3136,7 +3136,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"host\" | \"tag\" | \"image\" | \"resources\"> | undefined"
+              ", \"host\" | \"tag\" | \"image\" | \"resources\" | \"kibanaUrl\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
