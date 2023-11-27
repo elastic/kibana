@@ -321,12 +321,12 @@ const CustomStyles = ({ children }: CustomStylesProps) => {
 
     .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit,
     .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
-      text-decoration: line-through;
       background: transparent;
     }
 
     .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit {
       color: ${euiTheme.colors.dangerText};
+      text-decoration: line-through;
     }
 
     .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
