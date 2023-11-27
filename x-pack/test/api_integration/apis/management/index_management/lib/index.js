@@ -8,5 +8,3 @@
 export { initElasticsearchHelpers } from './elasticsearch';
 
 export { getRandomString } from './random';
-
-export { wait } from './utils';

@@ -14,12 +14,12 @@ import { templatesHelpers } from './lib/templates.helpers';
 import { getRandomString } from './lib/random';
 
 export default function ({ getService }: FtrProviderContext) {
-  const { catTemplate } = templatesHelpers(getService);
+  const log = getService('log');
+  const { catTemplate, getTemplatePayload } = templatesHelpers(getService);
   const {
     getAllTemplates,
     getOneTemplate,
     createTemplate,
-    getTemplatePayload,
     deleteTemplates,
     updateTemplate,
     cleanUpTemplates,
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         true
       );
       const tmpTemplate = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()]);
-      const indexTemplateWithLifecycle = {
+      const indexTemplateWithDSL = {
         ...tmpTemplate,
         dataStream: {},
         template: {
@@ -49,21 +49,31 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       };
+      const tmpTemplate2 = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()]);
+      const indexTemplateWithILM = {
+        ...tmpTemplate2,
+        template: {
+          ...tmpTemplate2.template,
+          settings: {
+            ...tmpTemplate2.template.settings,
+            index: {
+              lifecycle: {
+                name: 'my_policy',
+              },
+            },
+          },
+        },
+      };
 
       beforeEach(async () => {
-        const res1 = await createTemplate(indexTemplate);
-        if (res1.status !== 200) {
-          throw new Error(res1.body.message);
-        }
-
-        const res2 = await createTemplate(legacyTemplate);
-        if (res2.status !== 200) {
-          throw new Error(res2.body.message);
-        }
-
-        const res3 = await createTemplate(indexTemplateWithLifecycle);
-        if (res3.status !== 200) {
-          throw new Error(res3.body.message);
+        try {
+          await createTemplate(indexTemplate);
+          await createTemplate(legacyTemplate);
+          await createTemplate(indexTemplateWithDSL);
+          await createTemplate(indexTemplateWithILM);
+        } catch (err) {
+          log.debug('[Setup error] Error creating index template');
+          throw err;
         }
       });
 
@@ -75,15 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
           (template: TemplateDeserialized) => template.name === indexTemplate.name
         );
 
-        if (!indexTemplateFound) {
-          throw new Error(
-            `Index template "${indexTemplate.name}" not found in ${JSON.stringify(
-              allTemplates.templates,
-              null,
-              2
-            )}`
-          );
-        }
+        expect(indexTemplateFound).to.be.ok();
 
         const expectedKeys = [
           'name',
@@ -91,7 +93,6 @@ export default function ({ getService }: FtrProviderContext) {
           'hasSettings',
           'hasAliases',
           'hasMappings',
-          'ilmPolicy',
           'priority',
           'composedOf',
           'version',
@@ -105,15 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
           (template: TemplateDeserialized) => template.name === legacyTemplate.name
         );
 
-        if (!legacyTemplateFound) {
-          throw new Error(
-            `Legacy template "${legacyTemplate.name}" not found in ${JSON.stringify(
-              allTemplates.legacyTemplates,
-              null,
-              2
-            )}`
-          );
-        }
+        expect(legacyTemplateFound).to.be.ok();
 
         const expectedLegacyKeys = [
           'name',
@@ -121,7 +114,6 @@ export default function ({ getService }: FtrProviderContext) {
           'hasSettings',
           'hasAliases',
           'hasMappings',
-          'ilmPolicy',
           'order',
           'version',
           '_kbnMeta',
@@ -130,27 +122,20 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(Object.keys(legacyTemplateFound).sort()).to.eql(expectedLegacyKeys);
 
-        // Index template with lifecycle
-        const templateWithLifecycle = allTemplates.templates.find(
-          (template: TemplateDeserialized) => template.name === indexTemplateWithLifecycle.name
+        // Index template with DSL
+        const templateWithDSL = allTemplates.templates.find(
+          (template: TemplateDeserialized) => template.name === indexTemplateWithDSL.name
         );
 
-        if (!templateWithLifecycle) {
-          throw new Error(
-            `Index template with lifecycle "${
-              indexTemplateWithLifecycle.name
-            }" not found in ${JSON.stringify(allTemplates.templates, null, 2)}`
-          );
-        }
+        expect(templateWithDSL).to.be.ok();
 
-        const expectedWithLifecycleKeys = [
+        const expectedWithDSLKeys = [
           'name',
           'indexPatterns',
           'lifecycle',
           'hasSettings',
           'hasAliases',
           'hasMappings',
-          'ilmPolicy',
           'priority',
           'composedOf',
           'dataStream',
@@ -158,7 +143,29 @@ export default function ({ getService }: FtrProviderContext) {
           '_kbnMeta',
         ].sort();
 
-        expect(Object.keys(templateWithLifecycle).sort()).to.eql(expectedWithLifecycleKeys);
+        expect(Object.keys(templateWithDSL).sort()).to.eql(expectedWithDSLKeys);
+
+        // Index template with ILM
+        const templateWithILM = allTemplates.templates.find(
+          (template: TemplateDeserialized) => template.name === indexTemplateWithILM.name
+        );
+
+        expect(templateWithILM).to.be.ok();
+
+        const expectedWithILMKeys = [
+          'name',
+          'indexPatterns',
+          'ilmPolicy',
+          'hasSettings',
+          'hasAliases',
+          'hasMappings',
+          'priority',
+          'composedOf',
+          'version',
+          '_kbnMeta',
+        ].sort();
+
+        expect(Object.keys(templateWithILM).sort()).to.eql(expectedWithILMKeys);
       });
     });
 
@@ -175,7 +182,6 @@ export default function ({ getService }: FtrProviderContext) {
           'indexPatterns',
           'template',
           'composedOf',
-          'ilmPolicy',
           'priority',
           'version',
           '_kbnMeta',
@@ -196,7 +202,6 @@ export default function ({ getService }: FtrProviderContext) {
           'name',
           'indexPatterns',
           'template',
-          'ilmPolicy',
           'order',
           'version',
           '_kbnMeta',
@@ -227,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should throw a 409 conflict when trying to create 2 templates with the same name', async () => {
         const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()], true);
+        const payload = getTemplatePayload(templateName, [getRandomString()]);
 
         await createTemplate(payload);
 
@@ -237,7 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should validate the request payload', async () => {
         const templateName = `template-${getRandomString()}`;
         // need to cast as any to avoid errors after deleting index patterns
-        const payload = getTemplatePayload(templateName, [getRandomString()], true) as any;
+        const payload = getTemplatePayload(templateName, [getRandomString()]) as any;
 
         delete payload.indexPatterns; // index patterns are required
 
@@ -325,7 +330,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should parse the ES error and return the cause', async () => {
-        const templateName = `template-update-parse-es-error}`;
+        const templateName = `template-update-parse-es-error`;
         const payload = getTemplatePayload(templateName, ['update-parse-es-error']);
         const runtime = {
           myRuntimeField: {

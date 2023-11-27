@@ -6,7 +6,7 @@
  */
 
 import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
-import { API_BASE_PATH, INDEX_PATTERNS } from '../constants';
+import { API_BASE_PATH } from '../constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function templatesApi(getService: FtrProviderContext['getService']) {
@@ -17,58 +17,6 @@ export function templatesApi(getService: FtrProviderContext['getService']) {
 
   const getOneTemplate = (name: string, isLegacy: boolean = false) =>
     supertest.get(`${API_BASE_PATH}/index_templates/${name}?legacy=${isLegacy}`);
-
-  const getTemplatePayload = (
-    name: string,
-    indexPatterns: string[] = INDEX_PATTERNS,
-    isLegacy: boolean = false
-  ) => {
-    const baseTemplate: TemplateDeserialized = {
-      name,
-      indexPatterns,
-      version: 1,
-      template: {
-        settings: {
-          number_of_shards: 1,
-          index: {
-            lifecycle: {
-              name: 'my_policy',
-            },
-          },
-        },
-        mappings: {
-          _source: {
-            enabled: false,
-          },
-          properties: {
-            host_name: {
-              type: 'keyword',
-            },
-            created_at: {
-              type: 'date',
-              format: 'EEE MMM dd HH:mm:ss Z yyyy',
-            },
-          },
-        },
-        aliases: {
-          alias1: {},
-        },
-      },
-      _kbnMeta: {
-        isLegacy,
-        type: 'default',
-        hasDatastream: false,
-      },
-    };
-
-    if (isLegacy) {
-      baseTemplate.order = 1;
-    } else {
-      baseTemplate.priority = 1;
-    }
-
-    return baseTemplate;
-  };
 
   const createTemplate = (template: TemplateDeserialized) => {
     templatesCreated.push({ name: template.name, isLegacy: template._kbnMeta.isLegacy });
@@ -100,7 +48,6 @@ export function templatesApi(getService: FtrProviderContext['getService']) {
   return {
     getAllTemplates,
     getOneTemplate,
-    getTemplatePayload,
     createTemplate,
     updateTemplate,
     deleteTemplates,
