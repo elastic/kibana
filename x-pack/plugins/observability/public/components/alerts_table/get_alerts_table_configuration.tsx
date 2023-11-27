@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   AlertsTableConfigurationRegistry,
+  GetRenderCellValue,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
@@ -28,9 +28,11 @@ export const getAlertsTableConfiguration = (
   id: observabilityFeatureId,
   cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
   columns,
-  getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (alertId: string) => void }) => {
-    return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });
-  }) as unknown as GetRenderCellValue,
+  getRenderCellValue: ({ setFlyoutAlert }) =>
+    getRenderCellValue({
+      observabilityRuleTypeRegistry,
+      setFlyoutAlert,
+    }) as ReturnType<GetRenderCellValue>,
   sort: [
     {
       [TIMESTAMP]: {
