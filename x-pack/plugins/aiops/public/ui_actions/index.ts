@@ -43,6 +43,6 @@ export function registerAiopsUiActions(
 
   uiActions.addTriggerAction(
     CATEGORIZE_FIELD_VALUE_TRIGGER,
-    categorizeFieldValueAction(core, plugins)
+    categorizeFieldValueAction(coreStart, pluginStart)
   );
 }
