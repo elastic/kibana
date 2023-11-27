@@ -8,5 +8,4 @@
 
 export { ESQL_LANG_ID, ESQL_THEME_ID } from './lib/constants';
 export { ESQLLang } from './language';
-export type { ESQLCallbacks } from './lib/ast/autocomplete/types';
 export { buildESQlTheme } from './lib/monaco/esql_theme';
