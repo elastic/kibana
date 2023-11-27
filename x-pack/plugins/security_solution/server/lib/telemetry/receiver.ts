@@ -68,8 +68,9 @@ import type {
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
-import { DEFAULT_DIAGNOSTIC_INDEX, ENDPOINT_METRICS_INDEX } from '../../../common/constants';
+import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
+import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 
 export interface ITelemetryReceiver {
   start(

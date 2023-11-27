@@ -9,8 +9,11 @@ import type { Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_TIMELINE, TASK_METRICS_CHANNEL } from '../constants';
-import { DEFAULT_DIAGNOSTIC_INDEX } from '../../../../common/constants';
+import {
+  DEFAULT_DIAGNOSTIC_INDEX,
+  TELEMETRY_CHANNEL_TIMELINE,
+  TASK_METRICS_CHANNEL,
+} from '../constants';
 import { createTaskMetric, ranges, TelemetryTimelineFetcher, tlog } from '../helpers';
 
 export function createTelemetryDiagnosticTimelineTaskConfig() {
