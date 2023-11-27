@@ -63,11 +63,13 @@ export class TileStatusTracker extends Component<Props> {
   }
 
   componentDidUpdate() {
-    this.props.layerList.forEach(layer => {
+    this.props.layerList.forEach((layer) => {
       const source = layer.getSource();
-      if (source.isESSource() && 
+      if (
+        source.isESSource() &&
         typeof (source as IVectorSource).isMvt === 'function' &&
-        !(source as IVectorSource).isMvt()) {
+        !(source as IVectorSource).isMvt()
+      ) {
         // clear tile cache when layer is not tiled
         this._tileErrorCache.clearLayer(layer.getId(), this._updateTileStatusForAllLayers);
       }

@@ -276,7 +276,7 @@ describe('TileStatusTracker', () => {
       await sleep(300);
 
       expect(tileErrorsMap.get('layer1')?.length).toBe(1);
-      
+
       const geojsonLayer1 = createMockLayer('layer1', 'layer1Source');
       geojsonLayer1.getSource = () => {
         return {
@@ -285,9 +285,9 @@ describe('TileStatusTracker', () => {
           },
           isMvt() {
             return false;
-          }
+          },
         };
-      }
+      };
       wrapper.setProps({ layerList: [geojsonLayer1] });
 
       // simulate delay. Cache-checking is debounced.
