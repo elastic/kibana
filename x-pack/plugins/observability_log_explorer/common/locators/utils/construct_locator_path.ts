@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import { DatasetLocatorParams, ExtraControlOption } from '@kbn/deeplinks-observability/locators';
+import {
+  DatasetLocatorParams,
+  FilterControls,
+  ListFilterControl,
+} from '@kbn/deeplinks-observability/locators';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { availableControlsPanels, DatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
+import {
+  AvailableControlPanels,
+  availableControlsPanels,
+  DatasetSelectionPlain,
+} from '@kbn/log-explorer-plugin/common';
 import {
   OBSERVABILITY_LOG_EXPLORER_APP_ID,
   OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
 } from '../../constants';
 import { urlSchemaV1 } from '../../url_schema';
 import { deepCompactObject } from '../../utils/deep_compact_object';
+
+type ControlsPageState = NonNullable<urlSchemaV1.UrlSchema['controls']>;
 
 interface LocatorPathConstructionParams {
   datasetSelection: DatasetSelectionPlain;
@@ -24,7 +34,7 @@ interface LocatorPathConstructionParams {
 export const constructLocatorPath = async (params: LocatorPathConstructionParams) => {
   const {
     datasetSelection,
-    locatorParams: { extraControls, filters, query, refreshInterval, timeRange, columns, origin },
+    locatorParams: { filterControls, filters, query, refreshInterval, timeRange, columns, origin },
     useHash,
   } = params;
 
@@ -37,7 +47,7 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
       refreshInterval,
       time: timeRange,
       columns: columns?.map((field) => ({ field })),
-      controls: getControlsPageStateFromExtraControlsParams(extraControls ?? []),
+      controls: getControlsPageStateFromFilterControlsParams(filterControls ?? {}),
     })
   );
 
@@ -57,21 +67,26 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
   };
 };
 
-const getControlsPageStateFromExtraControlsParams = (extraControlOptions: ExtraControlOption[]) => {
-  return extraControlOptions.reduce<NonNullable<urlSchemaV1.UrlSchema['controls']>>(
-    (controlsPageState, extraControlOption) => {
-      if (extraControlOption.type === 'simple-include-namespaces') {
-        controlsPageState[availableControlsPanels.NAMESPACE] = {
-          mode: 'include',
-          selection: {
-            type: 'options',
-            selectedOptions: extraControlOption.namespaces,
-          },
-        };
-      }
+const getControlsPageStateFromFilterControlsParams = (
+  filterControls: FilterControls
+): ControlsPageState => ({
+  ...(filterControls.namespace != null
+    ? getFilterControlPageStateFromListFilterControlsParams(
+        availableControlsPanels.NAMESPACE,
+        filterControls.namespace
+      )
+    : {}),
+});
 
-      return controlsPageState;
+const getFilterControlPageStateFromListFilterControlsParams = (
+  controlId: AvailableControlPanels[keyof AvailableControlPanels],
+  listFilterControl: ListFilterControl
+): ControlsPageState => ({
+  [controlId]: {
+    mode: listFilterControl.mode,
+    selection: {
+      type: 'options',
+      selectedOptions: listFilterControl.values,
     },
-    {}
-  );
-};
+  },
+});

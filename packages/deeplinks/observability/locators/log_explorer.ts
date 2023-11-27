@@ -14,11 +14,15 @@ export type RefreshInterval = {
   value: number;
 };
 
-// this would become a union once we support more special controls
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ExtraControlOption = {
-  type: 'simple-include-namespaces';
-  namespaces: string[];
+export type FilterControls = {
+  namespace?: ListFilterControl;
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ListFilterControl = {
+  mode: 'include';
+  values: string[];
 };
 
 export const LOG_EXPLORER_LOCATOR_ID = 'LOG_EXPLORER_LOCATOR';
@@ -41,13 +45,13 @@ export interface LogExplorerNavigationParams extends SerializableRecord {
    */
   columns?: string[];
   /**
-   * Optionally apply filters.
+   * Optionally apply free-form filters.
    */
   filters?: Filter[];
   /**
-   * Optionally apply extra state modifiers
+   * Optionally apply curated filter controls
    */
-  extraControls?: ExtraControlOption[];
+  filterControls?: FilterControls;
 }
 
 export interface LogExplorerLocatorParams extends LogExplorerNavigationParams {
