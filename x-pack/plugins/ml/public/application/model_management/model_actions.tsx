@@ -481,7 +481,7 @@ export function useModelActions({
           );
         },
         enabled: (item) => {
-          return item.state !== MODEL_STATE.STARTED;
+          return canStartStopTrainedModels && item.state !== MODEL_STATE.STARTED;
         },
       },
       {
