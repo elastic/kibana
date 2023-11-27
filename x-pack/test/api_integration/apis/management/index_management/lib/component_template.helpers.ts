@@ -29,7 +29,10 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
   const removeIndexTemplate = (name: string) =>
     es.indices.deleteIndexTemplate({ name }, { meta: true });
 
-  const addComponentTemplate = (componentTemplate: ClusterPutComponentTemplateRequest, shouldCacheTemplate: boolean) => {
+  const addComponentTemplate = (
+    componentTemplate: ClusterPutComponentTemplateRequest,
+    shouldCacheTemplate: boolean
+  ) => {
     if (shouldCacheTemplate) {
       componentTemplatesCreated.push(componentTemplate.name);
     }
