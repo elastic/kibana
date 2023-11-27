@@ -15,20 +15,15 @@ import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { timelineTourSteps } from './step_config';
+import { timelineTourSteps, tourConfig } from './step_config';
 import * as i18n from './translations';
 
 interface TourState {
   currentTourStep: number;
   isTourActive: boolean;
-  tourPopoverWidth: 300;
+  tourPopoverWidth: number;
+  tourSubtitle: string;
 }
-
-const tourConfig = {
-  currentTourStep: 1,
-  isTourActive: true,
-  tourPopoverWidth: 300,
-};
 
 const TimelineTourComp = () => {
   const {
@@ -111,9 +106,9 @@ const TimelineTourComp = () => {
             stepsTotal={timelineTourSteps.length}
             onFinish={finishTour}
             title={steps.title}
-            content={steps.content}
+            content={<p>{steps.content}</p>}
             anchor={`#${steps.anchor}`}
-            subtitle={'Timeline has changed'}
+            subtitle={tourConfig.tourSubtitle}
             footerAction={getFooterAction(steps.step)}
           />
         );
