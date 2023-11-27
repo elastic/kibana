@@ -67,7 +67,9 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         indices,
       };
 
-      const etag = calculateHash(Buffer.from(JSON.stringify(body)));
+      const bodyAsString = JSON.stringify(body);
+
+      const etag = calculateHash(Buffer.from(bodyAsString));
 
       const headers: Record<string, string> = {
         'content-type': 'application/json',
@@ -100,7 +102,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       }
 
       return response.ok({
-        body,
+        body: bodyAsString,
         headers,
       });
     } catch (error) {
