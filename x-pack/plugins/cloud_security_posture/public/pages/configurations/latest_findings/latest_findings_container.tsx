@@ -16,6 +16,7 @@ import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
 import { LatestFindingsTable } from './latest_findings_table';
 import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { ErrorCallout } from '../layout/error_callout';
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const renderChildComponent = useCallback(
@@ -44,7 +45,19 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     onChangeGroupsPage,
     setUrlQuery,
     isGroupLoading,
+    onResetFilters,
+    error,
   } = useLatestFindingsGrouping({ dataView, groupPanelRenderer, groupStatsRenderer });
+
+  if (error) {
+    return (
+      <>
+        <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
+        <EuiSpacer size="m" />
+        <ErrorCallout error={error} />
+      </>
+    );
+  }
 
   if (isGroupSelected) {
     return (
@@ -55,35 +68,6 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             <EuiSpacer size="m" />
             <FindingsDistributionBar distributionOnClick={() => {}} passed={0} failed={0} />
             {defaultLoadingRenderer()}
-            {/* <CloudSecurityGrouping
-              data={{
-                groupByFields: {
-                  buckets: [
-                    {
-                      key: 'test',
-                      doc_count: 1,
-                      failedFindings: {
-                        doc_count: 1,
-                      },
-                    },
-                  ],
-                },
-                groupsCount: {
-                  value: 1,
-                },
-                unitsCount: {
-                  value: 1,
-                },
-              }}
-              grouping={grouping}
-              renderChildComponent={renderChildComponent}
-              onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
-              onChangeGroupsPage={onChangeGroupsPage}
-              activePageIndex={activePageIndex}
-              isFetching={true}
-              pageSize={pageSize}
-              selectedGroup={selectedGroup}
-            /> */}
           </div>
         ) : (
           <div>
@@ -103,6 +87,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
               isFetching={isFetching}
               pageSize={pageSize}
               selectedGroup={selectedGroup}
+              onResetFilters={onResetFilters}
             />
           </div>
         )}
