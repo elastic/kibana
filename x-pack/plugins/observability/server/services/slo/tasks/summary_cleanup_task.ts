@@ -121,7 +121,6 @@ export class SloSummaryCleanupTask {
         this.logger.info(
           `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summaries from the summary index`
         );
-        this.logger.info(JSON.stringify(sloSummaryIdsToDelete));
 
         await this.esClient.deleteByQuery({
           index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
