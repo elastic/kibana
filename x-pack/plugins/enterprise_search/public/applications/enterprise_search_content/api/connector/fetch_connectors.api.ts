@@ -16,7 +16,6 @@ export interface FetchConnectorsApiLogicArgs {
   from: number;
   size: number;
 }
-// TODO
 export interface FetchConnectorsApiLogicResponse {
   connectors: Connector[];
   meta: Meta;
