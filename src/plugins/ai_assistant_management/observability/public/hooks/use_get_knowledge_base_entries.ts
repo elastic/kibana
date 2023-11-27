@@ -6,23 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+} from '@tanstack/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useAppContext } from '../context/app_context';
 import { KnowledgeBaseEntry } from '../../common/types';
 
-export interface UseGetKnowledgeBaseEntriesResponse {
-  isLoading: boolean;
-  isRefetching: boolean;
-  isSuccess: boolean;
-  isError: boolean;
-  entries: KnowledgeBaseEntry[] | undefined;
-}
-
-export function useGetKnowledgeBaseEntries(query: string): UseGetKnowledgeBaseEntriesResponse {
+export function useGetKnowledgeBaseEntries(query: string) {
   const { http } = useAppContext();
 
-  const { isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+  const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query],
     queryFn: async ({ signal }) => {
       const response = await http.get<{ entries: KnowledgeBaseEntry[] }>(
@@ -44,6 +41,7 @@ export function useGetKnowledgeBaseEntries(query: string): UseGetKnowledgeBaseEn
 
   return {
     entries: data?.entries,
+    refetch,
     isLoading,
     isRefetching,
     isSuccess,

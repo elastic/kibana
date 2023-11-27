@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/ai-assistant-management-plugin",
-  "owner": "@elastic/obs-ai-assistant",
+  "owner": "@elastic/obs-knowledge-team",
   "plugin": {
     "id": "aiAssistantManagementSelection",
     "server": false,

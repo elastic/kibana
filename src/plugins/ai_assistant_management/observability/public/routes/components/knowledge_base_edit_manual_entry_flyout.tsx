@@ -52,7 +52,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
       });
       onClose();
     } catch (_) {
-      /* empty */
+      // Error toast should be displayed by the React Query hook.
     }
   };
 

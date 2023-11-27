@@ -60,7 +60,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
       await mutateAsync({ entries });
       onClose();
     } catch (_) {
-      /* empty */
+      // Error toast should be displayed by the React Query hook.
     }
   };
 

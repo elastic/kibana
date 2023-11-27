@@ -44,7 +44,7 @@ export function KnowledgeBaseTab() {
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { entries = [], isLoading } = useGetKnowledgeBaseEntries(searchQuery);
+  const { entries = [], isLoading, refetch } = useGetKnowledgeBaseEntries(searchQuery);
   const categories = categorizeEntries({ entries });
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
@@ -82,6 +82,13 @@ export function KnowledgeBaseTab() {
         if (category.entries.length === 1 && category.entries[0].labels.type === 'manual') {
           return <EuiIcon type="documentation" color="primary" />;
         }
+        if (
+          category.entries.length === 1 &&
+          category.entries[0].labels.type === 'assistant_summarization'
+        ) {
+          return <EuiIcon type="sparkles" color="primary" />;
+        }
+
         return <EuiIcon type="logoElastic" />;
       },
       width: '40px',
@@ -97,10 +104,17 @@ export function KnowledgeBaseTab() {
         defaultMessage: 'Number of entries',
       }),
       width: '140px',
-      render: (category: KnowledgeBaseEntryCategory) =>
-        category.entries.length === 1 && category.entries[0].labels.type === 'manual' ? null : (
-          <EuiBadge>{category.entries.length}</EuiBadge>
-        ),
+      render: (category: KnowledgeBaseEntryCategory) => {
+        if (
+          category.entries.length === 1 &&
+          (category.entries[0].labels.type === 'manual' ||
+            category.entries[0].labels.type === 'assistant_summarization')
+        ) {
+          return null;
+        }
+
+        return <EuiBadge>{category.entries.length}</EuiBadge>;
+      },
     },
     {
       field: '@timestamp',
@@ -129,6 +143,22 @@ export function KnowledgeBaseTab() {
           );
         }
 
+        if (
+          category.entries.length === 1 &&
+          category.entries[0].labels.type === 'assistant_summarization'
+        ) {
+          return (
+            <EuiBadge color="hollow">
+              {i18n.translate(
+                'aiAssistantManagementObservability.kbTab.columns.assistantSummarization',
+                {
+                  defaultMessage: 'Assistant',
+                }
+              )}
+            </EuiBadge>
+          );
+        }
+
         return (
           <EuiBadge>
             {i18n.translate('aiAssistantManagementObservability.columns.systemBadgeLabel', {
@@ -152,7 +182,7 @@ export function KnowledgeBaseTab() {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow>
               <EuiFieldSearch
                 fullWidth
@@ -170,10 +200,24 @@ export function KnowledgeBaseTab() {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <EuiButton color="success" iconType="refresh" onClick={() => refetch()}>
+                {i18n.translate(
+                  'aiAssistantManagementObservability.knowledgeBaseTab.reloadButtonLabel',
+                  { defaultMessage: 'Reload' }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiPopover
                 isOpen={newEntryPopoverOpen}
+                closePopover={() => setNewEntryPopoverOpen(false)}
                 button={
-                  <EuiButton onClick={handleClickNewEntry}>
+                  <EuiButton
+                    fill
+                    iconSide="right"
+                    iconType="arrowDown"
+                    onClick={handleClickNewEntry}
+                  >
                     {i18n.translate(
                       'aiAssistantManagementObservability.knowledgeBaseTab.newEntryButtonLabel',
                       {
@@ -242,7 +286,8 @@ export function KnowledgeBaseTab() {
 
       {selectedCategory ? (
         selectedCategory.entries.length === 1 &&
-        selectedCategory.entries[0].labels.type === 'manual' ? (
+        (selectedCategory.entries[0].labels.type === 'manual' ||
+          selectedCategory.entries[0].labels.type === 'assistant_summarization') ? (
           <KnowledgeBaseEditManualEntryFlyout
             entry={selectedCategory.entries[0]}
             onClose={() => setSelectedCategory(undefined)}
