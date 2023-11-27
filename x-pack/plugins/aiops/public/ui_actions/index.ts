@@ -9,6 +9,7 @@ import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   categorizeFieldTrigger,
+  categorizeFieldValueTrigger,
   CATEGORIZE_FIELD_TRIGGER,
   CATEGORIZE_FIELD_VALUE_TRIGGER,
 } from '@kbn/ml-ui-actions/src/aiops/ui_actions';
@@ -35,12 +36,12 @@ export function registerAiopsUiActions(
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editChangePointChartPanelAction);
 
   uiActions.registerTrigger(categorizeFieldTrigger);
-
   uiActions.addTriggerAction(
     CATEGORIZE_FIELD_TRIGGER,
     createCategorizeFieldAction(coreStart, pluginStart)
   );
 
+  uiActions.registerTrigger(categorizeFieldValueTrigger);
   uiActions.addTriggerAction(
     CATEGORIZE_FIELD_VALUE_TRIGGER,
     categorizeFieldValueAction(coreStart, pluginStart)
