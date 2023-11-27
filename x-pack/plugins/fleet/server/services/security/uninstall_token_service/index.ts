@@ -134,6 +134,20 @@ export interface UninstallTokenServiceInterface {
    * If encryption is available, checks for any plain text uninstall tokens and encrypts them
    */
   encryptTokens(): Promise<void>;
+
+  /**
+   * Check whether the selected policy has a valid uninstall token. Rejects returning promise if not.
+   *
+   * @param policyId policy Id to check
+   */
+  checkTokenValidityForPolicy(policyId: string): Promise<void>;
+
+  /**
+   * Check whether all policies have a valid uninstall token. Rejects returning promise if not.
+   *
+   * @param policyId policy Id to check
+   */
+  checkTokenValidityForAllPolicies(): Promise<void>;
 }
 
 export class UninstallTokenService implements UninstallTokenServiceInterface {
@@ -473,6 +487,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     });
 
     return this._soClient;
+  }
+
+  public async checkTokenValidityForPolicy(policyId: string): Promise<void> {
+    await this.getDecryptedTokensForPolicyIds([policyId]);
+  }
+
+  public async checkTokenValidityForAllPolicies(): Promise<void> {
+    const policyIds = await this.getAllPolicyIds();
+    await this.getDecryptedTokensForPolicyIds(policyIds);
   }
 
   private get isEncryptionAvailable(): boolean {

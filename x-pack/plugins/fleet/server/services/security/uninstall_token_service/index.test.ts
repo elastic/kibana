@@ -499,5 +499,54 @@ describe('UninstallTokenService', () => {
         });
       });
     });
+
+    describe('check validity of tokens', () => {
+      let okayTokensPolicyId: string;
+      let missingTokensPolicyId: string;
+
+      beforeEach(() => {
+        const so = getDefaultSO(canEncrypt);
+        so.attributes.token = undefined;
+        so.attributes.token_plain = undefined;
+        missingTokensPolicyId = so.attributes.policy_id;
+
+        const so2 = getDefaultSO2(canEncrypt);
+        okayTokensPolicyId = so2.attributes.policy_id;
+
+        mockCreatePointInTimeFinderAsInternalUser([so, so2]);
+      });
+
+      describe('checkTokenValidityForAllPolicies', () => {
+        it('resolves if all of the tokens are available', async () => {
+          mockCreatePointInTimeFinderAsInternalUser();
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).resolves.not.toThrowError();
+        });
+
+        it('rejects if any of the tokens is missing', async () => {
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).rejects.toThrowError('Uninstall Token is missing the token.');
+        });
+      });
+
+      describe('checkTokenValidityForPolicy', () => {
+        it('resolves if token is available', async () => {
+          mockCreatePointInTimeFinderAsInternalUser();
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(okayTokensPolicyId)
+          ).resolves.not.toThrowError();
+        });
+
+        it('rejects if token is missing', async () => {
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(missingTokensPolicyId)
+          ).rejects.toThrowError('Uninstall Token is missing the token.');
+        });
+      });
+    });
   });
 });
