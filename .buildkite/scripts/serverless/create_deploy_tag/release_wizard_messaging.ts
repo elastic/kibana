@@ -309,7 +309,7 @@ async function sendReleaseSlackAnnouncement({
     : 'a new release candidate';
 
   const mainMessage = [
-    `:ship_it_parrot: Promotion of a new ${compareLink} has been <${process.env.BUILDKITE_BUILD_URL}|initiated>!\n`,
+    `:ship_it_parrot: Promotion of ${compareLink} has been <${process.env.BUILDKITE_BUILD_URL}|initiated>!\n`,
     `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.\n`,
   ];
   if (isDryRun) {
@@ -348,9 +348,9 @@ async function sendReleaseSlackAnnouncement({
         text: {
           type: 'mrkdwn',
           text:
-            '*Useful links:*' +
+            '*Useful links:*\n\n' +
             Object.entries(usefulLinksSection)
-              .map(([name, link]) => `<${link}|${name}>`)
+              .map(([name, link]) => ` • <${link}|${name}>`)
               .join('\n'),
         },
       },
