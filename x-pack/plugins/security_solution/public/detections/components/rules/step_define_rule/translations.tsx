@@ -195,6 +195,13 @@ export const GROUP_BY_FIELD_LICENSE_WARNING = i18n.translate(
   }
 );
 
+export const ENABLE_THRESHOLD_SUPPRESSION_LICENSE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppression.licenseWarning',
+  {
+    defaultMessage: 'Alert suppression is enabled with Platinum license or above',
+  }
+);
+
 export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined) =>
   fields?.length ? (
     <FormattedMessage

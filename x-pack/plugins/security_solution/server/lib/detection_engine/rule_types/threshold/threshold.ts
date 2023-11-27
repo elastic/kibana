@@ -6,9 +6,12 @@
  */
 
 import { isEmpty } from 'lodash';
+import { firstValueFrom } from 'rxjs';
+
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type {
   AlertInstanceContext,
@@ -64,6 +67,7 @@ export const thresholdExecutor = async ({
   inputIndexFields,
   spaceId,
   runOpts,
+  licensing,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -85,6 +89,7 @@ export const thresholdExecutor = async ({
   inputIndexFields: DataViewFieldBase[];
   spaceId: string;
   runOpts: RunOpts<ThresholdRuleParams>;
+  licensing: LicensingPluginSetup;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -94,6 +99,9 @@ export const thresholdExecutor = async ({
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
     }
+
+    const license = await firstValueFrom(licensing.license$);
+    const hasPlatinumLicense = license.hasAtLeast('platinum');
 
     // Get state or build initial state (on upgrade)
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
@@ -146,7 +154,8 @@ export const thresholdExecutor = async ({
 
     const createResult =
       alertSuppression?.duration &&
-      runOpts?.experimentalFeatures?.alertSuppressionForThresholdRuleEnabled
+      runOpts?.experimentalFeatures?.alertSuppressionForThresholdRuleEnabled &&
+      hasPlatinumLicense
         ? await bulkCreateSuppressedThresholdAlerts({
             buckets,
             completeRule,

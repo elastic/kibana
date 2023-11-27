@@ -16,6 +16,7 @@ import {
   EuiButtonGroup,
   EuiText,
   EuiRadioGroup,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
@@ -764,6 +765,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
+  const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
   const isAlertSuppressionEnabled =
     isQueryRule(ruleType) || (isThresholdRule && isAlertSuppressionForThresholdRuleFeatureEnabled);
 
@@ -939,16 +941,26 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <EuiSpacer size="m" />
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled && isThresholdRule} fullWidth>
-            <CommonUseField
-              path="enableThresholdSuppression"
-              componentProps={{
-                idAria: 'detectionEngineStepDefineRuleThresholdEnableSuppression',
-                'data-test-subj': 'detectionEngineStepDefineRuleThresholdEnableSuppression',
-                euiFieldProps: {
-                  label: i18n.getEnableThresholdSuppressionLabel(thresholdFields),
-                },
-              }}
-            />
+            <EuiToolTip
+              content={
+                !isAlertSuppressionLicenseValid
+                  ? i18n.ENABLE_THRESHOLD_SUPPRESSION_LICENSE_WARNING
+                  : null
+              }
+              position="right"
+            >
+              <CommonUseField
+                path="enableThresholdSuppression"
+                componentProps={{
+                  idAria: 'detectionEngineStepDefineRuleThresholdEnableSuppression',
+                  'data-test-subj': 'detectionEngineStepDefineRuleThresholdEnableSuppression',
+                  euiFieldProps: {
+                    label: i18n.getEnableThresholdSuppressionLabel(thresholdFields),
+                    disabled: !isAlertSuppressionLicenseValid,
+                  },
+                }}
+              />
+            </EuiToolTip>
           </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
@@ -961,9 +973,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               componentProps={{
                 browserFields: termsAggregationFields,
                 disabledText: i18n.GROUP_BY_FIELD_LICENSE_WARNING,
-                isDisabled:
-                  !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) &&
-                  groupByFields?.length === 0,
+                isDisabled: !isAlertSuppressionLicenseValid,
               }}
             />
           </RuleTypeEuiFormRow>

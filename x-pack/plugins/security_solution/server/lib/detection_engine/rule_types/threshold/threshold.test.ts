@@ -9,6 +9,7 @@ import dateMath from '@kbn/datemath';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
 import { getThresholdRuleParams, getCompleteRuleMock } from '../../rule_schema/mocks';
@@ -32,6 +33,7 @@ describe('threshold_executor', () => {
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
+  const licensing = licensingMock.createSetup();
 
   beforeEach(() => {
     alertServices = alertsMock.createRuleExecutorServices();
@@ -107,6 +109,7 @@ describe('threshold_executor', () => {
         inputIndexFields: [],
         spaceId: 'default',
         runOpts: {} as RunOpts<ThresholdRuleParams>,
+        licensing,
       });
       expect(response.state).toEqual({
         initialized: true,
@@ -171,6 +174,7 @@ describe('threshold_executor', () => {
         inputIndexFields: [],
         spaceId: 'default',
         runOpts: {} as RunOpts<ThresholdRuleParams>,
+        licensing,
       });
       expect(result.warningMessages).toEqual([
         `The following exceptions won't be applied to rule execution: ${
