@@ -249,10 +249,16 @@ export const ConfigurePipeline: React.FC = () => {
         tabs={tabs}
         autoFocus="selected"
         onTabClick={(tab) => {
-          setInferencePipelineConfiguration({
-            ...EMPTY_PIPELINE_CONFIGURATION,
-            existingPipeline: tab.id === ConfigurePipelineTabId.USE_EXISTING,
-          });
+          const isExistingPipeline = tab.id === ConfigurePipelineTabId.USE_EXISTING;
+          if (isExistingPipeline !== configuration.existingPipeline) {
+            const pipelineConfig = EMPTY_PIPELINE_CONFIGURATION;
+            pipelineConfig.existingPipeline = isExistingPipeline;
+            if (!isExistingPipeline) {
+              pipelineConfig.pipelineName = indexName;
+            }
+
+            setInferencePipelineConfiguration(pipelineConfig);
+          }
         }}
       />
       <EuiFlexGroup>
