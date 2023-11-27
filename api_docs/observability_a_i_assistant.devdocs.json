@@ -19,7 +19,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; title: string; } & ",
+          "[]; title: string; dataTestSubj?: string | undefined; } & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
