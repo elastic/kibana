@@ -207,7 +207,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: expect.stringMatching(/(?=.*invalid)(?=.*DataStream)/i),
+        details: 'Invalid value "undefined" supplied to "MonitorType"',
       });
     });
 
@@ -223,7 +223,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: expect.stringMatching(/(?=.*invalid)(?=.*non-HTTP)(?=.*DataStream)/i),
+        details: 'Invalid value "non-HTTP" supplied to "MonitorType"',
       });
     });
 
