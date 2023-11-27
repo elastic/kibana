@@ -6,7 +6,10 @@
  */
 
 import React, { useState } from 'react';
-import ReactDiffViewer from 'react-diff-viewer-continued';
+import * as Diff2Html from 'diff2html';
+import { get } from 'lodash';
+import { formatLines, diffLines } from 'unidiff';
+import 'diff2html/bundles/css/diff2html.min.css';
 import {
   EuiSpacer,
   EuiAccordion,
@@ -16,50 +19,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
-
-import * as i18n from './translations';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 
 const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
-
-const FIELD_CONFIG_BY_NAME = {
-  eql_query: {
-    label: 'EQL query',
-    compareMethod: 'diffWordsWithSpace',
-  },
-  kql_query: {
-    label: 'KQL query',
-    compareMethod: 'diffWordsWithSpace',
-  },
-  description: {
-    label: 'Description',
-    compareMethod: 'diffWordsWithSpace',
-  },
-  name: {
-    label: 'Name',
-    compareMethod: 'diffWordsWithSpace',
-  },
-  note: {
-    label: 'Investigation guide',
-    compareMethod: 'diffWordsWithSpace',
-  },
-  references: {
-    label: i18n.REFERENCES_FIELD_LABEL,
-    compareMethod: 'diffJson',
-  },
-  risk_score: {
-    // JSON.stringify(fields.risk_score.current_version)
-    label: i18n.RISK_SCORE_FIELD_LABEL,
-    compareMethod: 'diffJson',
-  },
-  threat: {
-    label: 'THREAT',
-    compareMethod: 'diffJson',
-  },
-  severity: {
-    label: 'Severity',
-    compareMethod: 'diffWords',
-  },
-};
 
 interface FieldsProps {
   fields: Partial<RuleFieldsDiff>;
@@ -75,30 +37,38 @@ const Fields = ({ fields, openSections, toggleSection }: FieldsProps) => {
   return (
     <>
       {visibleFields.map((fieldName) => {
+        const currentVersion: string = get(fields, [fieldName, 'current_version'], '');
+        const mergedVersion: string = get(fields, [fieldName, 'merged_version'], '');
+
+        const oldSource = JSON.stringify(currentVersion, null, 2);
+        const newSource = JSON.stringify(mergedVersion, null, 2);
+
+        const unifiedDiffString = formatLines(diffLines(oldSource, newSource), { context: 3 });
+
+        const diffHtml = Diff2Html.html(unifiedDiffString, {
+          inputFormat: 'json',
+          drawFileList: false,
+          fileListToggle: false,
+          fileListStartVisible: false,
+          fileContentToggle: false,
+          matching: 'lines', // "lines" or "words"
+          diffStyle: 'word', // "word" or "char"
+          outputFormat: 'side-by-side',
+          synchronisedScroll: true,
+          highlight: true,
+          renderNothingWhenEmpty: false,
+        });
+
         return (
           <>
             <ExpandableSection
-              title={FIELD_CONFIG_BY_NAME[fieldName]?.label ?? fieldName.toUpperCase()}
+              title={fieldName}
               isOpen={openSections[fieldName]}
               toggle={() => {
                 toggleSection(fieldName);
               }}
             >
-              <ReactDiffViewer
-                oldValue={
-                  typeof fields[fieldName].current_version === 'string'
-                    ? fields[fieldName].current_version
-                    : JSON.stringify(fields[fieldName].current_version, null, 2)
-                }
-                newValue={
-                  typeof fields[fieldName].merged_version === 'string'
-                    ? fields[fieldName].merged_version
-                    : JSON.stringify(fields[fieldName].merged_version, null, 2)
-                }
-                splitView={true}
-                hideLineNumbers={true}
-                compareMethod={FIELD_CONFIG_BY_NAME[fieldName]?.compareMethod ?? 'diffChars'}
-              />
+              <div id="code-diff" dangerouslySetInnerHTML={{ __html: diffHtml }} />
             </ExpandableSection>
             <EuiHorizontalRule margin="m" />
           </>
@@ -139,7 +109,41 @@ const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectio
   );
 };
 
-const WholeObjectDiff = ({ currentRule, mergedRule, openSections, toggleSection }) => {
+const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
+  JSON.stringify(jsObject, Object.keys(jsObject).sort(), 2);
+
+interface WholeObjectDiffProps {
+  oldRule: RuleResponse;
+  newRule: RuleResponse;
+  openSections: Record<string, boolean>;
+  toggleSection: (sectionName: string) => void;
+}
+
+const WholeObjectDiff = ({
+  oldRule,
+  newRule,
+  openSections,
+  toggleSection,
+}: WholeObjectDiffProps) => {
+  const unifiedDiffString = formatLines(
+    diffLines(sortAndStringifyJson(oldRule), sortAndStringifyJson(newRule)),
+    { context: 3 }
+  );
+
+  const diffHtml = Diff2Html.html(unifiedDiffString, {
+    inputFormat: 'json',
+    drawFileList: false,
+    fileListToggle: false,
+    fileListStartVisible: false,
+    fileContentToggle: false,
+    matching: 'lines', // "lines" or "words"
+    diffStyle: 'word', // "word" or "char"
+    outputFormat: 'side-by-side',
+    synchronisedScroll: true,
+    highlight: true,
+    renderNothingWhenEmpty: false,
+  });
+
   return (
     <>
       <ExpandableSection
@@ -149,13 +153,7 @@ const WholeObjectDiff = ({ currentRule, mergedRule, openSections, toggleSection 
           toggleSection('whole');
         }}
       >
-        <ReactDiffViewer
-          oldValue={JSON.stringify(currentRule, Object.keys(currentRule).sort(), 2)}
-          newValue={JSON.stringify(mergedRule, Object.keys(mergedRule).sort(), 2)}
-          splitView={true}
-          hideLineNumbers={true}
-          compareMethod={'diffJson'}
-        />
+        <div id="code-diff" dangerouslySetInnerHTML={{ __html: diffHtml }}></div>
       </ExpandableSection>
       <EuiHorizontalRule margin="m" />
     </>
@@ -163,10 +161,12 @@ const WholeObjectDiff = ({ currentRule, mergedRule, openSections, toggleSection 
 };
 
 interface RuleDiffTabProps {
+  oldRule: RuleResponse;
+  newRule: RuleResponse;
   fields: Partial<RuleFieldsDiff>;
 }
 
-export const RuleDiffTab = ({ fields, currentRule, mergedRule }: RuleDiffTabProps) => {
+export const RuleDiffTabDiff2Html = ({ fields, oldRule, newRule }: RuleDiffTabProps) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(
     Object.keys(fields).reduce((sections, fieldName) => ({ ...sections, [fieldName]: true }), {})
   );
@@ -182,8 +182,8 @@ export const RuleDiffTab = ({ fields, currentRule, mergedRule }: RuleDiffTabProp
     <>
       <EuiSpacer size="m" />
       <WholeObjectDiff
-        currentRule={currentRule}
-        mergedRule={mergedRule}
+        oldRule={oldRule}
+        newRule={newRule}
         openSections={openSections}
         toggleSection={toggleSection}
       />

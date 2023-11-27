@@ -6,9 +6,10 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Change, diffLines } from 'diff';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { get } from 'lodash';
+import { Change, diffLines } from 'diff';
 import {
   EuiSpacer,
   EuiAccordion,
@@ -20,42 +21,9 @@ import {
   tint,
 } from '@elastic/eui';
 import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
-
-import * as i18n from './translations';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 
 const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
-
-const FIELD_CONFIG_BY_NAME = {
-  eql_query: {
-    label: 'EQL query',
-    compareMethod: 'diffWordsWithSpace',
-  },
-  name: {
-    label: 'Name',
-    compareMethod: 'diffWordsWithSpace',
-  },
-  note: {
-    label: 'Investigation guide',
-    compareMethod: 'diffWordsWithSpace',
-  },
-  references: {
-    label: i18n.REFERENCES_FIELD_LABEL,
-    compareMethod: 'diffJson',
-  },
-  risk_score: {
-    // JSON.stringify(fields.risk_score.current_version)
-    label: i18n.RISK_SCORE_FIELD_LABEL,
-    compareMethod: 'diffJson',
-  },
-  threat: {
-    label: 'THREAT',
-    compareMethod: 'diffJson',
-  },
-  severity: {
-    label: 'Severity_',
-    compareMethod: 'diffWords',
-  },
-};
 
 const indicatorCss = css`
   position: absolute;
@@ -168,33 +136,21 @@ const Fields = ({ fields, openSections, toggleSection }: FieldsProps) => {
     (fieldName) => !HIDDEN_FIELDS.includes(fieldName)
   );
 
-  // return (
-  //   <>
-  //     {visibleFields.map((fieldName) => (
-  //       <div>
-  //         {fieldName} {typeof fields[fieldName]?.current_version}
-  //       </div>
-  //     ))}
-  //   </>
-  // );
-
   return (
     <>
       {visibleFields.map((fieldName) => {
-        const diff = diffLines(
-          typeof fields[fieldName].current_version === 'string'
-            ? fields[fieldName].current_version
-            : JSON.stringify(fields[fieldName].current_version, null, 2),
-          typeof fields[fieldName].merged_version === 'string'
-            ? fields[fieldName].merged_version
-            : JSON.stringify(fields[fieldName].merged_version, null, 2),
-          { ignoreWhitespace: false }
-        );
+        const currentVersion: string = get(fields, [fieldName, 'current_version'], '');
+        const mergedVersion: string = get(fields, [fieldName, 'merged_version'], '');
+
+        const oldSource = JSON.stringify(currentVersion, null, 2);
+        const newSource = JSON.stringify(mergedVersion, null, 2);
+
+        const diff = diffLines(oldSource, newSource, { ignoreWhitespace: false });
 
         return (
           <>
             <ExpandableSection
-              title={FIELD_CONFIG_BY_NAME[fieldName]?.label ?? fieldName.toUpperCase()}
+              title={fieldName}
               isOpen={openSections[fieldName]}
               toggle={() => {
                 toggleSection(fieldName);
@@ -251,8 +207,26 @@ const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectio
   );
 };
 
-const WholeObjectDiff = ({ currentRule, mergedRule, openSections, toggleSection }) => {
-  const diff = diffLines(JSON.stringify(currentRule), JSON.stringify(mergedRule), {
+const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
+  JSON.stringify(jsObject, Object.keys(jsObject).sort(), 2);
+
+interface WholeObjectDiffProps {
+  oldRule: RuleResponse;
+  newRule: RuleResponse;
+  openSections: Record<string, boolean>;
+  toggleSection: (sectionName: string) => void;
+}
+
+const WholeObjectDiff = ({
+  oldRule,
+  newRule,
+  openSections,
+  toggleSection,
+}: WholeObjectDiffProps) => {
+  const oldSource = sortAndStringifyJson(oldRule);
+  const newSource = sortAndStringifyJson(newRule);
+
+  const diff = diffLines(JSON.stringify(oldSource), JSON.stringify(newSource), {
     ignoreWhitespace: false,
   });
 
@@ -283,10 +257,12 @@ const WholeObjectDiff = ({ currentRule, mergedRule, openSections, toggleSection 
 };
 
 interface RuleDiffTabProps {
+  oldRule: RuleResponse;
+  newRule: RuleResponse;
   fields: Partial<RuleFieldsDiff>;
 }
 
-export const RuleDiffTab = ({ fields, currentRule, mergedRule }: RuleDiffTabProps) => {
+export const RuleDiffTabAppExperienceTeamPoc = ({ fields, oldRule, newRule }: RuleDiffTabProps) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(
     Object.keys(fields).reduce((sections, fieldName) => ({ ...sections, [fieldName]: true }), {})
   );
@@ -302,8 +278,8 @@ export const RuleDiffTab = ({ fields, currentRule, mergedRule }: RuleDiffTabProp
     <>
       <EuiSpacer size="m" />
       <WholeObjectDiff
-        currentRule={currentRule}
-        mergedRule={mergedRule}
+        oldRule={oldRule}
+        newRule={newRule}
         openSections={openSections}
         toggleSection={toggleSection}
       />

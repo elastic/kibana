@@ -8975,6 +8975,11 @@
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
   integrity sha512-sq+kwx8zA9BSugT9N+Jr8/uWjbHMZ+N/meJEzRyT3gmLq/WMtx/iSIpvdpmBUi/cvXl6Kzpvve8G2ESkabFwmg==
 
+"@types/diff@^5.0.8":
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-5.0.8.tgz#28dc501cc3e7c62d4c5d096afe20755170acf276"
+  integrity sha512-kR0gRf0wMwpxQq6ME5s+tWk9zVCfJUl98eRkD05HWWRbhPB/eu4V1IbyZAsvzC1Gn4znBJ0HN01M4DGXdBEV8Q==
+
 "@types/ejs@^3.0.6":
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
@@ -14888,6 +14893,11 @@ diacritics@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/diacritics/-/diacritics-1.3.0.tgz#3efa87323ebb863e6696cebb0082d48ff3d6f7a1"
   integrity sha1-PvqHMj67hj5mls67AILUj/PW96E=
+
+diff-match-patch-line-and-word@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/diff-match-patch-line-and-word/-/diff-match-patch-line-and-word-0.1.3.tgz#0f267c26ab7840785667cccd8c9dc1fb8b288964"
+  integrity sha512-CR+842NECOQO9qOvlyOf/9IAXMEW8km1Em9YrH8J4wVaeICXtEVJ8H9AZ5Xa0QBTSZUe4DFijGM5dZD5Dl3bEg==
 
 diff-match-patch@^1.0.0, diff-match-patch@^1.0.4, diff-match-patch@^1.0.5:
   version "1.0.5"
@@ -25396,10 +25406,10 @@ react-colorful@^5.1.2:
   resolved "https://registry.yarnpkg.com/react-colorful/-/react-colorful-5.5.1.tgz#29d9c4e496f2ca784dd2bb5053a3a4340cfaf784"
   integrity sha512-M1TJH2X3RXEt12sWkpa6hLc/bbYS0H6F4rIqjQZ+RxNBstpY67d9TrFXtqdZwhpmBXcCwEi7stKqFue3ZRkiOg==
 
-react-diff-view@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/react-diff-view/-/react-diff-view-3.1.0.tgz#d8c6eb2108179c7bf99c202ba70dcc9ec673c0e2"
-  integrity sha512-xIouC5F8gSXJ4DNlZWjyGyqRT9HVQ6v6Fo2ko+XDQpRmsJjYcd32YiQnCV1kwXOjoWPfhTCouyFT3dgyOZpRgA==
+react-diff-view@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/react-diff-view/-/react-diff-view-3.2.0.tgz#8fbf04782d78423903a59202ce7533f6312c1cc3"
+  integrity sha512-p58XoqMxgt71ujpiDQTs9Za3nqTawt1E4bTzKsYSqr8I8br6cjQj1b66HxGnV8Yrc6MD6iQPqS1aZiFoGqEw+g==
   dependencies:
     classnames "^2.3.2"
     diff-match-patch "^1.0.5"
