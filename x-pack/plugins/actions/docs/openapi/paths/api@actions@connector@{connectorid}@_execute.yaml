@@ -23,6 +23,8 @@ post:
             $ref: '../components/examples/run_index_connector_request.yaml'
           runJiraConnectorRequest:
             $ref: '../components/examples/run_jira_connector_request.yaml'
+          runPagerDutyConnectorRequest:
+            $ref: '../components/examples/run_pagerduty_connector_request.yaml'
           runServerLogConnectorRequest:
             $ref: '../components/examples/run_server_log_connector_request.yaml'
           runServiceNowITOMConnectorRequest:
@@ -65,6 +67,8 @@ post:
               $ref: '../components/examples/run_index_connector_response.yaml'
             runJiraConnectorResponse:
               $ref: '../components/examples/run_jira_connector_response.yaml'
+            runPagerDutyConnectorResponse:
+              $ref: '../components/examples/run_pagerduty_connector_response.yaml'
             runServerLogConnectorResponse:
               $ref: '../components/examples/run_server_log_connector_response.yaml'
             runServiceNowITOMConnectorResponse:
