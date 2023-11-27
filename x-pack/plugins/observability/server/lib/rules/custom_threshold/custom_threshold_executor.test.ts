@@ -21,7 +21,6 @@ import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import { CUSTOM_AGGREGATOR } from '../../../../common/custom_threshold_rule/constants';
 import {
   Aggregators,
   Comparator,
@@ -1883,7 +1882,6 @@ declare global {
 }
 
 const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
-  aggType: CUSTOM_AGGREGATOR,
   comparator: Comparator.GT,
   metrics: [
     {
@@ -1898,7 +1896,6 @@ const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
 };
 
 const customThresholdCountCriterion: CustomMetricExpressionParams = {
-  aggType: CUSTOM_AGGREGATOR,
   comparator: Comparator.GT,
   metrics: [
     {

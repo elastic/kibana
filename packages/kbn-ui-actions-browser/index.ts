@@ -15,7 +15,5 @@ export {
   visualizeGeoFieldTrigger,
   ROW_CLICK_TRIGGER,
   rowClickTrigger,
-  CATEGORIZE_FIELD_TRIGGER,
-  categorizeFieldTrigger,
   defaultTrigger,
 } from './src/triggers';

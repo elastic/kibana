@@ -40,12 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('classification job', function () {
     before(async () => {
       await ml.api.createAndRunDFAJob(classificationJobConfig as DataFrameAnalyticsConfig);
-      await ml.testResources.createIndexPatternIfNeeded(classificationJobConfig.dest!.index!);
+      await ml.testResources.createDataViewIfNeeded(classificationJobConfig.dest!.index!);
     });
 
     after(async () => {
       await ml.api.deleteDataFrameAnalyticsJobES(classificationJobConfig.id as string);
-      await ml.testResources.deleteIndexPatternByTitle(classificationJobConfig.dest!.index!);
+      await ml.testResources.deleteDataViewByTitle(classificationJobConfig.dest!.index!);
       await ml.api.deleteIndices(classificationJobConfig.dest!.index!);
       await ml.api.cleanMlIndices();
     });
