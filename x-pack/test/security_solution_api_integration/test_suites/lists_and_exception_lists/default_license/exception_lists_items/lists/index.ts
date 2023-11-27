@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Lists API', function () {
     loadTestFile(require.resolve('./duplicate_exception_list'));
