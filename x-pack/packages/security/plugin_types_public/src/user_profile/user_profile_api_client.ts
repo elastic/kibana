@@ -11,7 +11,7 @@ import type {
   UserProfileWithSecurity,
   UserProfile,
 } from '@kbn/security-plugin-types-common';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 export interface UserProfileAPIClient {
   readonly userProfile$: Observable<UserProfileData | null>;
