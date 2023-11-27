@@ -9,7 +9,6 @@
 import uniqBy from 'lodash/uniqBy';
 import capitalize from 'lodash/capitalize';
 import { nonNullable } from '../ast_helpers';
-import type { ESQLCallbacks } from '../autocomplete/types';
 import { CommandOptionsDefinition, SignatureArgType } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
@@ -56,6 +55,7 @@ import type {
   ReferenceMaps,
   ValidationResult,
 } from './types';
+import type { ESQLCallbacks } from '../shared/types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,

@@ -11,6 +11,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { MapCache } from 'lodash';
 
 export type MonacoMessage = monaco.editor.IMarkerData;
 
@@ -197,4 +198,31 @@ export const getIndicesForAutocomplete = async (dataViews: DataViewsPublicPlugin
     isRollupIndex: () => false,
   });
   return indices.filter((index) => !index.name.startsWith('.')).map((i) => i.name);
+};
+
+export const extractESQLQueryToExecute = (
+  model: monaco.editor.ITextModel | undefined,
+  options: { sourcesOnly?: boolean } | { customQuery?: string } = {}
+) => {
+  if ('customQuery' in options && options.customQuery) {
+    return options.customQuery;
+  }
+  const pipes = model?.getValue().split('|');
+  pipes?.pop();
+  if (pipes && 'sourcesOnly' in options && options.sourcesOnly) {
+    return pipes[0];
+  }
+  return pipes?.join('|');
+};
+
+// refresh the esql cache entry after 10 minutes
+const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+
+export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
+  if (cache.has(esqlQuery)) {
+    const cacheEntry = cache.get(esqlQuery);
+    if (Date.now() - cacheEntry.timestamp > CACHE_INVALIDATE_DELAY) {
+      cache.delete(esqlQuery);
+    }
+  }
 };
