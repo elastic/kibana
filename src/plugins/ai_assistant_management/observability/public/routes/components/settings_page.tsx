@@ -41,7 +41,7 @@ export function SettingsPage() {
           }),
           onClick: (e) => {
             e.preventDefault();
-            navigateToApp('management', { path: '/kibana/aiAssistantManagement' });
+            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
           },
         },
         {

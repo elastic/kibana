@@ -42,12 +42,14 @@ export class AiAssistantManagementObservabilityPlugin
     core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>,
     { home, management }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
+    const title = i18n.translate('aiAssistantManagementObservability.app.title', {
+      defaultMessage: 'AI Assistant for Observability',
+    });
+
     if (home) {
       home.featureCatalogue.register({
         id: 'ai_assistant_observability',
-        title: i18n.translate('aiAssistantManagementObservability.app.title', {
-          defaultMessage: 'AI Assistant for Observability',
-        }),
+        title,
         description: i18n.translate('aiAssistantManagementObservability.app.description', {
           defaultMessage: 'Manage your AI Assistant for Observability.',
         }),
@@ -58,11 +60,10 @@ export class AiAssistantManagementObservabilityPlugin
       });
     }
 
-    const kibanaSection = management.sections.section.kibana;
-
-    kibanaSection.registerApp({
+    management.sections.section.kibana.registerApp({
       id: 'aiAssistantManagementObservability',
-      title: '', // Keep empty to hide from the side navigation
+      title,
+      hide: true,
       order: 1,
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./app');

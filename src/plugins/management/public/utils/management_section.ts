@@ -43,6 +43,6 @@ export class ManagementSection extends ManagementItem {
   }
 
   getAppsEnabled() {
-    return this.apps.filter((app) => app.enabled && app.title);
+    return this.apps.filter((app) => app.enabled);
   }
 }
