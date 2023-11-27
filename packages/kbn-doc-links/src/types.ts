@@ -569,6 +569,7 @@ export interface DocLinks {
     readonly rubyOverview: string;
     readonly rustGuide: string;
     readonly rustOverview: string;
+    readonly eland: string;
   };
   readonly endpoints: {
     readonly troubleshooting: string;
