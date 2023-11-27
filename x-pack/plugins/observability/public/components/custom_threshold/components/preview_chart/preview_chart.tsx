@@ -44,6 +44,9 @@ const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
   return aggType;
 };
 
+export const getBufferThreshold = (threshold?: number): string =>
+  (Math.ceil((threshold || 0) * 1.1 * 100) / 100).toFixed(2).toString();
+
 export function PreviewChart({
   metricExpression,
   dataView,
@@ -147,7 +150,7 @@ export function PreviewChart({
       const bufferRefLine = new XYReferenceLinesLayer({
         data: [
           {
-            value: Math.round((threshold[0] || 0) * 1.1).toString(),
+            value: getBufferThreshold(threshold[0]),
             color: 'transparent',
             fill,
             format,
