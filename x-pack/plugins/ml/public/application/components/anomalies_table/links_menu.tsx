@@ -231,7 +231,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         return;
       }
 
-      const field = await findMessageField(dataView);
+      const field = findMessageField(dataView);
       if (field !== null) {
         setMessageField(field);
       }

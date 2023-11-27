@@ -132,9 +132,9 @@ export function isCcsIndexPattern(indexPattern: string) {
   return indexPattern.includes(':');
 }
 
-export async function findMessageField(
+export function findMessageField(
   dataView: DataView
-): Promise<{ dataView: DataView; field: DataViewField } | null> {
+): { dataView: DataView; field: DataViewField } | null {
   const foundFields: Record<string, DataViewField | null> = { message: null, errorMessage: null };
 
   for (const f of dataView.fields) {
