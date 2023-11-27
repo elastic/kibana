@@ -41,8 +41,8 @@ import type {
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
 import { docLinks } from '../../../common/doc_links';
-import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
+import { useAssetBasePath } from '../hooks/use_asset_base_path';
 import {
   API_KEY_PLACEHOLDER,
   CLOUD_ID_PLACEHOLDER,
@@ -69,7 +69,7 @@ export const ElasticsearchOverview = () => {
       cloudId: cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER,
     };
   }, [cloud]);
-  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
+  const assetBasePath = useAssetBasePath();
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
@@ -356,9 +356,8 @@ export const ElasticsearchOverview = () => {
                 ingestPipelinesLink: (
                   <EuiLink
                     data-test-subj="serverlessSearchElasticsearchOverviewIngestPipelinesLink"
-                    href={
-                      'https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html'
-                    }
+                    href={docLinks.ingestionPipelines}
+                    target="_blank"
                   >
                     {i18n.translate(
                       'xpack.serverlessSearch.pipeline.description.ingestPipelinesLink.link',
@@ -371,7 +370,7 @@ export const ElasticsearchOverview = () => {
               }}
             />
           }
-          leftPanelContent={<PipelinePanel assetBasePath={assetBasePath} />}
+          leftPanelContent={<PipelinePanel />}
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.pipeline.title', {
             defaultMessage: 'Transform and enrich your data',

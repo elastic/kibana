@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface PipelinePanelProps {
-  assetBasePath: string;
-}
+import { useAssetBasePath } from '../hooks/use_asset_base_path';
 
-export const PipelinePanel: React.FC<PipelinePanelProps> = ({ assetBasePath }) => {
+export const PipelinePanel: React.FC = () => {
+  const assetBasePath = useAssetBasePath();
+
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">
