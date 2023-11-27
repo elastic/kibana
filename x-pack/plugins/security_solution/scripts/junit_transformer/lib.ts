@@ -16,6 +16,7 @@ import * as t from 'io-ts';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import globby from 'globby';
+import del from 'del';
 
 /**
  * Updates the `name` and `classname` attributes of each testcase.
@@ -195,6 +196,9 @@ ${boilerplate}
 
     if ('error' in maybeValidationResult) {
       logError(maybeValidationResult.error);
+      // Sending broken XML to Failed Test Reporter will cause a job to fail
+      await del(path);
+      log.warning(`${path} file was deleted.`);
       // If there is an error, continue trying to process other files.
       continue;
     }
@@ -203,9 +207,11 @@ ${boilerplate}
 
     const { processed, hadTestCases } = isReportAlreadyProcessed(reportJson);
     if (hadTestCases === false) {
-      log.warning(`${path} had no test cases. Skipping it.
+      log.warning(`${path} had no test cases.
 ${boilerplate}
 `);
+      await del(path);
+      log.warning(`${path} file was deleted.`);
       // If there is an error, continue trying to process other files.
       continue;
     }
@@ -222,6 +228,9 @@ ${boilerplate}
 
     if ('error' in maybeSpecFilePath) {
       logError(maybeSpecFilePath.error);
+      // Sending broken XML to Failed Test Reporter will cause a job to fail
+      await del(path);
+      log.warning(`${path} file was deleted.`);
       // If there is an error, continue trying to process other files.
       continue;
     }

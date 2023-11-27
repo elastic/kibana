@@ -25,8 +25,8 @@ export const closeIndices =
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage', {
-        defaultMessage: 'Successfully closed: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully closed {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
   };
