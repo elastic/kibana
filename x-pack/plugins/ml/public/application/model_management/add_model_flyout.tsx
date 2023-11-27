@@ -95,7 +95,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
 
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby={'addTrainedModelFlyout'}>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id={'addTrainedModelFlyout'}>
             <FormattedMessage
@@ -104,8 +104,6 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
             />
           </h2>
         </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
         <EuiTabs>
           {tabs.map((tab) => (
             <EuiTab
@@ -117,9 +115,8 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
             </EuiTab>
           ))}
         </EuiTabs>
-        <EuiSpacer size={'l'} />
-        {selectedTabContent}
-      </EuiFlyoutBody>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
