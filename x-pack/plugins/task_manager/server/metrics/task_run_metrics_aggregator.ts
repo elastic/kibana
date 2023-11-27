@@ -95,25 +95,21 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     const success = isOk((taskEvent as TaskRun).event);
     const taskType = task.taskType.replaceAll('.', '__');
     const taskTypeGroup = getTaskTypeGroup(taskType);
-    let ignoreError = false;
 
     // increment the total counters
     this.incrementCounters(TaskRunKeys.TOTAL, taskType, taskTypeGroup);
 
-    if (!success) {
+    // increment success counters
+    if (success) {
+      this.incrementCounters(TaskRunKeys.SUCCESS, taskType, taskTypeGroup);
+    } else {
       if (isUserError((taskRunResult as ErroredTask).error)) {
-        ignoreError = true;
         // increment the user error counters
         this.incrementCounters(TaskRunKeys.USER_ERRORS, taskType, taskTypeGroup);
       } else {
         // increment the framework error counters
         this.incrementCounters(TaskRunKeys.FRAMEWORK_ERRORS, taskType, taskTypeGroup);
       }
-    }
-
-    // increment success counters
-    if (success || ignoreError) {
-      this.incrementCounters(TaskRunKeys.SUCCESS, taskType, taskTypeGroup);
     }
 
     // increment expired counters
