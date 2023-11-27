@@ -1132,6 +1132,23 @@ export default function (providerContext: FtrProviderContext) {
         // @ts-ignore _source unknown type
         expect(secret._source.value).to.equal('pass');
       });
+
+      it('should create service_token secret correctly', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Remote Elasticsearch With Service Token Secret',
+            type: 'remote_elasticsearch',
+            hosts: ['https://remote-es:9200'],
+            secrets: { service_token: 'token' },
+          });
+
+        const secretId = res.body.item.secrets.service_token.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('token');
+      });
     });
 
     describe('DELETE /outputs/{outputId}', () => {

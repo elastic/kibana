@@ -73,6 +73,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           onUsePlainText={onUsePlainText}
         >
           <EuiFieldText
+            data-test-subj="serviceTokenSecretInput"
             fullWidth
             {...inputs.serviceTokenSecretInput.props}
             placeholder={i18n.translate(
