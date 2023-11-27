@@ -27,7 +27,7 @@ const timelineId = 'timeline-1';
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
-  const { dataAsNestedObject } = useRightPanelContext();
+  const { dataAsNestedObject, isPreview } = useRightPanelContext();
 
   // decide whether to show the analyzer preview or not
   const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject);
@@ -64,17 +64,18 @@ export const AnalyzerPreviewContainer: React.FC = () => {
           />
         ),
         iconType: 'timeline',
-        ...(isEnabled && {
-          link: {
-            callback: goToAnalyzerTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
-                defaultMessage="Show analyzer graph"
-              />
-            ),
-          },
-        }),
+        ...(isEnabled &&
+          !isPreview && {
+            link: {
+              callback: goToAnalyzerTab,
+              tooltip: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
+                  defaultMessage="Show analyzer graph"
+                />
+              ),
+            },
+          }),
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >

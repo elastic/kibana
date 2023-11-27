@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { RightPanelContext } from '../context';
 import { PREVALENCE_TEST_ID } from './test_ids';
-import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
@@ -167,7 +167,7 @@ describe('<PrevalenceOverview />', () => {
 
     getByTestId(TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: PREVALENCE_TAB_ID },
       params: {
         id: 'eventId',

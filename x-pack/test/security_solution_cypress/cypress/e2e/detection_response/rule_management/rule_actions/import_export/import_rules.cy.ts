@@ -11,7 +11,7 @@ import {
   importRules,
   importRulesWithOverwriteAll,
 } from '../../../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { deleteExceptionList } from '../../../../../tasks/api_calls/exceptions';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
@@ -21,10 +21,6 @@ const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 const IMPORTED_EXCEPTION_ID = 'b8dfd17f-1e11-41b0-ae7e-9e7f8237de49';
 
 describe('Import rules', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

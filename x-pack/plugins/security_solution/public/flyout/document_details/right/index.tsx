@@ -12,6 +12,7 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { EventKind } from '../shared/constants/event_kinds';
 import { getField } from '../shared/utils';
 import { useRightPanelContext } from './context';
+import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
 import type { RightPanelTabsType } from './tabs';
@@ -19,7 +20,7 @@ import { tabs } from './tabs';
 import { PanelFooter } from './footer';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
-export const RightPanelKey: RightPanelProps['key'] = 'document-details-right';
+export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
 
 export interface RightPanelProps extends FlyoutPanelProps {
   key: 'document-details-right';
@@ -36,7 +37,7 @@ export interface RightPanelProps extends FlyoutPanelProps {
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
+  const { eventId, getFieldsData, indexName, scopeId, isPreview } = useRightPanelContext();
 
   // for 8.10, we only render the flyout in its expandable mode if the document viewed is of type signal
   const documentIsSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
@@ -50,7 +51,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   const setSelectedTabId = (tabId: RightPanelTabsType[number]['id']) => {
     openRightPanel({
-      id: RightPanelKey,
+      id: DocumentDetailsRightPanelKey,
       path: {
         tab: tabId,
       },
@@ -64,14 +65,14 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   return (
     <>
+      <PanelNavigation flyoutIsExpandable={documentIsSignal} />
       <PanelHeader
-        flyoutIsExpandable={documentIsSignal}
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}
       />
       <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
-      <PanelFooter />
+      <PanelFooter isPreview={isPreview} />
     </>
   );
 });

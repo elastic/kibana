@@ -176,7 +176,6 @@ export const createStoreFactory = async (
 const timelineActionsWithNonserializablePayloads = [
   timelineActions.updateTimeline.type,
   timelineActions.addTimeline.type,
-  timelineActions.updateAutoSaveMsg.type,
   timelineActions.initializeTimelineSettings.type,
 ];
 
@@ -200,14 +199,6 @@ const actionSanitizer = (action: AnyAction) => {
         payload: {
           ...payload,
           timeline: sanitizeTimelineModel(payload.timeline),
-        },
-      };
-    } else if (type === timelineActions.updateAutoSaveMsg.type) {
-      return {
-        ...action,
-        payload: {
-          ...payload,
-          newTimelineModel: sanitizeTimelineModel(payload.newTimelineModel),
         },
       };
     } else if (type === timelineActions.initializeTimelineSettings.type) {

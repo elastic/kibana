@@ -337,6 +337,7 @@ export enum RegistryDataStreamKeys {
   dataset_is_prefix = 'dataset_is_prefix',
   routing_rules = 'routing_rules',
   lifecycle = 'lifecycle',
+  agent = 'agent',
 }
 
 export interface RegistryDataStream {
@@ -355,6 +356,12 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
   [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
+  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
+  [RegistryDataStreamKeys.agent]?: RegistryAgent;
+}
+
+export interface RegistryAgent {
+  privileges?: { root?: boolean };
 }
 
 export interface RegistryElasticsearch {

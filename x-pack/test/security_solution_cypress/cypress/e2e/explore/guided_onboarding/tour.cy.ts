@@ -21,7 +21,6 @@ import {
   goToStep,
   startTour,
 } from '../../../tasks/guided_onboarding';
-import { cleanKibana } from '../../../tasks/common';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL, DASHBOARDS_URL } from '../../../urls/navigation';
@@ -32,7 +31,6 @@ import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 
 describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     createRule(getNewRule({ query: 'user.name:*' }));
   });

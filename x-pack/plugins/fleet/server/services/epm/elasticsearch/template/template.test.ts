@@ -897,7 +897,30 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing dimension field on a keyword - tsdb disabled', () => {
+    const literalYml = `
+- name: example.id
+  type: keyword
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, false);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -921,7 +944,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -955,7 +978,40 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field - tsdb disabled', () => {
+    const literalYml = `
+- name: total.norm.pct
+  type: scaled_float
+  metric_type: gauge
+  unit: percent
+  format: percent
+`;
+    const expectedMapping = {
+      properties: {
+        total: {
+          properties: {
+            norm: {
+              properties: {
+                pct: {
+                  scaling_factor: 1000,
+                  type: 'scaled_float',
+                  meta: {
+                    unit: 'percent',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, false);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -982,7 +1038,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -1151,7 +1207,12 @@ describe('EPM template', () => {
   runtime: true
 `;
     const runtimeFieldMapping = {
-      properties: {},
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
       dynamic_templates: [
         {
           'labels.*': {
@@ -1177,7 +1238,12 @@ describe('EPM template', () => {
   object_type: scaled_float
 `;
     const runtimeFieldMapping = {
-      properties: {},
+      properties: {
+        numeric_labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
       dynamic_templates: [
         {
           numeric_labels: {
@@ -1205,7 +1271,12 @@ describe('EPM template', () => {
   default_metric: "max"
 `;
     const runtimeFieldMapping = {
-      properties: {},
+      properties: {
+        aggregate: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
       dynamic_templates: [
         {
           'aggregate.*': {
@@ -1226,7 +1297,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 
-  it('tests processing groub sub fields in a dynamic template', () => {
+  it('tests processing group sub fields in a dynamic template', () => {
     const textWithRuntimeFieldsLiteralYml = `
 - name: group.*.network
   type: group
@@ -1236,7 +1307,12 @@ describe('EPM template', () => {
     metric_type: counter
 `;
     const runtimeFieldMapping = {
-      properties: {},
+      properties: {
+        group: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
       dynamic_templates: [
         {
           'group.*.network.bytes': {
@@ -1248,11 +1324,31 @@ describe('EPM template', () => {
             },
           },
         },
+        {
+          'group.*.network': {
+            path_match: 'group.*.network',
+            match_mapping_type: 'object',
+            mapping: {
+              type: 'object',
+              dynamic: true,
+            },
+          },
+        },
+        {
+          'group.*': {
+            path_match: 'group.*',
+            match_mapping_type: 'object',
+            mapping: {
+              type: 'object',
+              dynamic: true,
+            },
+          },
+        },
       ],
     };
     const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 

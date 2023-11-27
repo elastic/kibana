@@ -191,7 +191,9 @@ describe('Bulk patch rules route', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('0: Invalid input');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '0.type: Invalid literal value, expected "eql", 0.language: Invalid literal value, expected "eql", 0.type: Invalid literal value, expected "query", 0.type: Invalid literal value, expected "saved_query", 0.type: Invalid literal value, expected "threshold", and 5 more'
+      );
     });
 
     test('allows rule type of query and custom from and interval', async () => {

@@ -62,6 +62,17 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       top: 2px;
     `,
   },
+  leftHeaderSection: css`
+    // needed to enable breadcrumbs truncation
+    min-width: 0;
+    flex-shrink: 1;
+  `,
+  breadcrumbsSectionItem: css`
+    min-width: 0; // needed to enable breadcrumbs truncation
+  `,
+  redirectAppLinksContainer: css`
+    min-width: 0; // needed to enable breadcrumbs truncation
+  `,
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
@@ -181,7 +192,7 @@ export const ProjectHeader = ({
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position="fixed" className="header__firstBar">
-            <EuiHeaderSection grow={false}>
+            <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <Router history={application.history}>
                 <ProjectNavigation toggleSideNav={toggleSideNav}>{children}</ProjectNavigation>
               </Router>
@@ -196,12 +207,11 @@ export const ProjectHeader = ({
                 />
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsLeft$} />
-              </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem>
-                <RedirectAppLinks coreStart={{ application }}>
+              <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
+                <RedirectAppLinks
+                  coreStart={{ application }}
+                  css={headerCss.redirectAppLinksContainer}
+                >
                   <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
                 </RedirectAppLinks>
               </EuiHeaderSectionItem>

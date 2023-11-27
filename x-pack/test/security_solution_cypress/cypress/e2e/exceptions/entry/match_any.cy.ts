@@ -26,7 +26,7 @@ import {
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 import { CONFIRM_BTN } from '../../../screens/exceptions';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { ALERTS_COUNT } from '../../../screens/alerts';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
