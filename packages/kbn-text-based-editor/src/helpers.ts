@@ -191,13 +191,13 @@ export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string 
   return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
 };
 
-export const getIndicesForAutocomplete = async (dataViews: DataViewsPublicPluginStart) => {
+export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   const indices = await dataViews.getIndices({
     showAllIndices: false,
     pattern: '*',
     isRollupIndex: () => false,
   });
-  return indices.filter((index) => !index.name.startsWith('.')).map((i) => i.name);
+  return indices.map((index) => ({ name: index.name, hidden: index.name.startsWith('.') }));
 };
 
 export const extractESQLQueryToExecute = (

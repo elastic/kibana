@@ -704,7 +704,7 @@ async function retrieveSources(
     return new Set();
   }
   const sources = (await callbacks?.getSources?.()) || [];
-  return new Set(sources);
+  return new Set(sources.map(({ name }) => name));
 }
 
 function validateFieldsShadowing(

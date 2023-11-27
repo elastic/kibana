@@ -43,7 +43,12 @@ function getCallbackMocks() {
             { name: 'yetAnotherField', type: 'number' },
           ]
     ),
-    getSources: jest.fn(async () => ['a', 'index', 'otherIndex']),
+    getSources: jest.fn(async () =>
+      ['a', 'index', 'otherIndex', '.secretIndex'].map((name) => ({
+        name,
+        hidden: name.startsWith('.'),
+      }))
+    ),
     getPolicies: jest.fn(async () => [
       {
         name: 'policy',
@@ -275,6 +280,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from remote-ccs:indexes [METADATA _id]`, [
       'CCS indexes are not supported [remote-ccs:indexes]',
     ]);
+    testErrorsAndWarnings('from .secretIndex', []);
   });
 
   describe('row', () => {
