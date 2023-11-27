@@ -8,13 +8,12 @@
 import './setup_jest_mocks';
 import React from 'react';
 import { type RenderResult } from '@testing-library/react';
-import { type Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { navLinksMock } from '../mocks/src/navlinks';
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-
 import {
   getMockFn,
   renderNavigation,
@@ -23,6 +22,7 @@ import {
   type ProjectNavigationChangeListener,
 } from './utils';
 import { getServicesMock } from '../mocks/src/jest';
+import { NavigationServices } from '../types';
 
 const { cloudLinks: mockCloudLinks } = getServicesMock();
 
@@ -110,65 +110,38 @@ describe('builds navigation tree', () => {
           Object {
             "children": Array [
               Object {
-                "children": undefined,
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item1",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item1",
-                ],
+                "path": "group1.item1",
                 "sideNavStatus": "visible",
                 "title": "Item 1",
               },
               Object {
-                "children": undefined,
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item2",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item2",
-                ],
+                "path": "group1.item2",
                 "sideNavStatus": "visible",
                 "title": "Item 2",
               },
               Object {
                 "children": Array [
                   Object {
-                    "children": undefined,
                     "deepLink": undefined,
                     "href": "https://foo",
                     "id": "item1",
-                    "isActive": false,
-                    "isGroup": false,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "item1",
-                    ],
+                    "path": "group1.group1A.item1",
                     "sideNavStatus": "visible",
                     "title": "Group 1A Item 1",
                   },
                   Object {
                     "children": Array [
                       Object {
-                        "children": undefined,
                         "deepLink": undefined,
                         "href": "https://foo",
                         "id": "item1",
-                        "isActive": false,
-                        "isGroup": false,
-                        "path": Array [
-                          "group1",
-                          "group1A",
-                          "group1A_1",
-                          "item1",
-                        ],
+                        "path": "group1.group1A.group1A_1.item1",
                         "sideNavStatus": "visible",
                         "title": "Group 1A_1 Item 1",
                       },
@@ -176,38 +149,25 @@ describe('builds navigation tree', () => {
                     "deepLink": undefined,
                     "href": undefined,
                     "id": "group1A_1",
-                    "isActive": false,
-                    "isGroup": true,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "group1A_1",
-                    ],
+                    "path": "group1.group1A.group1A_1",
                     "sideNavStatus": "visible",
                     "title": "Group1A_1",
                   },
                 ],
                 "deepLink": undefined,
+                "defaultIsCollapsed": false,
                 "href": undefined,
                 "id": "group1A",
-                "isActive": true,
-                "isGroup": true,
-                "path": Array [
-                  "group1",
-                  "group1A",
-                ],
+                "path": "group1.group1A",
                 "sideNavStatus": "visible",
                 "title": "Group1A",
               },
             ],
             "deepLink": undefined,
+            "defaultIsCollapsed": false,
             "href": undefined,
             "id": "group1",
-            "isActive": true,
-            "isGroup": true,
-            "path": Array [
-              "group1",
-            ],
+            "path": "group1",
             "sideNavStatus": "visible",
             "title": "",
             "type": "navGroup",
@@ -246,65 +206,38 @@ describe('builds navigation tree', () => {
           Object {
             "children": Array [
               Object {
-                "children": undefined,
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item1",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item1",
-                ],
+                "path": "group1.item1",
                 "sideNavStatus": "visible",
                 "title": "Item 1",
               },
               Object {
-                "children": undefined,
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item2",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item2",
-                ],
+                "path": "group1.item2",
                 "sideNavStatus": "visible",
                 "title": "Item 2",
               },
               Object {
                 "children": Array [
                   Object {
-                    "children": undefined,
                     "deepLink": undefined,
                     "href": "https://foo",
                     "id": "item1",
-                    "isActive": false,
-                    "isGroup": false,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "item1",
-                    ],
+                    "path": "group1.group1A.item1",
                     "sideNavStatus": "visible",
                     "title": "Group 1A Item 1",
                   },
                   Object {
                     "children": Array [
                       Object {
-                        "children": undefined,
                         "deepLink": undefined,
                         "href": "https://foo",
                         "id": "item1",
-                        "isActive": false,
-                        "isGroup": false,
-                        "path": Array [
-                          "group1",
-                          "group1A",
-                          "group1A_1",
-                          "item1",
-                        ],
+                        "path": "group1.group1A.group1A_1.item1",
                         "sideNavStatus": "visible",
                         "title": "Group 1A_1 Item 1",
                       },
@@ -312,13 +245,7 @@ describe('builds navigation tree', () => {
                     "deepLink": undefined,
                     "href": undefined,
                     "id": "group1A_1",
-                    "isActive": false,
-                    "isGroup": true,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "group1A_1",
-                    ],
+                    "path": "group1.group1A.group1A_1",
                     "sideNavStatus": "visible",
                     "title": "Group1A_1",
                   },
@@ -326,24 +253,16 @@ describe('builds navigation tree', () => {
                 "deepLink": undefined,
                 "href": undefined,
                 "id": "group1A",
-                "isActive": false,
-                "isGroup": true,
-                "path": Array [
-                  "group1",
-                  "group1A",
-                ],
+                "path": "group1.group1A",
                 "sideNavStatus": "visible",
                 "title": "Group1A",
               },
             ],
             "deepLink": undefined,
+            "defaultIsCollapsed": false,
             "href": undefined,
             "id": "group1",
-            "isActive": true,
-            "isGroup": true,
-            "path": Array [
-              "group1",
-            ],
+            "path": "group1",
             "sideNavStatus": "visible",
             "title": "",
           },
@@ -353,16 +272,19 @@ describe('builds navigation tree', () => {
   });
 
   test('should read the title from deeplink, prop or React children', async () => {
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      ...navLinksMock,
-      {
+    const deepLinks$: NavigationServices['deepLinks$'] = of({
+      ...navLinksMock.reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
+        acc[navLink.id] = navLink;
+        return acc;
+      }, {}),
+      item1: {
         id: 'item1',
         title: 'Title from deeplink',
         baseUrl: '',
         url: '',
         href: '',
       },
-    ]);
+    });
 
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
@@ -425,7 +347,7 @@ describe('builds navigation tree', () => {
 
       const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
-        services: { navLinks$ },
+        services: { deepLinks$ },
         onProjectNavigationChange,
       });
 
@@ -454,7 +376,7 @@ describe('builds navigation tree', () => {
             </Navigation.Group>
           </Navigation>
         ),
-        services: { navLinks$ },
+        services: { deepLinks$ },
         onProjectNavigationChange,
       });
 
@@ -466,15 +388,15 @@ describe('builds navigation tree', () => {
   });
 
   test('should not render the group if it does not have children AND no href or deeplink', async () => {
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      {
+    const deepLinks$: NavigationServices['deepLinks$'] = of({
+      item1: {
         id: 'item1',
         title: 'Title from deeplink',
         baseUrl: '',
         url: '',
         href: '',
       },
-    ]);
+    });
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
     const runTests = (type: TestType, { queryByTestId }: RenderResult) => {
@@ -523,7 +445,7 @@ describe('builds navigation tree', () => {
 
       const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
-        services: { navLinks$ },
+        services: { deepLinks$ },
         onProjectNavigationChange,
       });
 
@@ -548,7 +470,7 @@ describe('builds navigation tree', () => {
             </Navigation.Group>
           </Navigation>
         ),
-        services: { navLinks$ },
+        services: { deepLinks$ },
         onProjectNavigationChange,
       });
 
@@ -663,11 +585,7 @@ describe('builds navigation tree', () => {
       const renderResult = renderNavigation({
         navigationElement: (
           <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                <Navigation.RecentlyAccessed />
-              </Navigation.Group>
-            </Navigation.Group>
+            <Navigation.RecentlyAccessed />
           </Navigation>
         ),
         services: { recentlyAccessed$ },
