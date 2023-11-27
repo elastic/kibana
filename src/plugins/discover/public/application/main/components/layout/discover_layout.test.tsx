@@ -39,14 +39,11 @@ import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mo
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
-import * as localStorageModule from 'react-use/lib/useLocalStorage';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
 }));
-
-jest.spyOn(localStorageModule, 'default');
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -78,9 +75,10 @@ async function mountComponent(
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
   );
-  (localStorageModule.default as jest.Mock).mockImplementation(
-    jest.fn(() => [prevSidebarClosed, jest.fn()])
-  );
+
+  if (typeof prevSidebarClosed === 'boolean') {
+    localStorage.setItem('discover:sidebarClosed', String(prevSidebarClosed));
+  }
 
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 

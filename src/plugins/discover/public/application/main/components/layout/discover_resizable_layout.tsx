@@ -15,17 +15,20 @@ import {
 import React, { ReactNode, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject } from 'rxjs';
+import { SidebarToggleState } from '../../../types';
 
 export const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 
 export const DiscoverResizableLayout = ({
   container,
-  isSidebarCollapsed,
+  sidebarToggleState$,
   sidebarPanel,
   mainPanel,
 }: {
   container: HTMLElement | null;
-  isSidebarCollapsed: boolean;
+  sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   sidebarPanel: ReactNode;
   mainPanel: ReactNode;
 }) => {
@@ -42,6 +45,9 @@ export const DiscoverResizableLayout = ({
   const minMainPanelWidth = euiTheme.base * 30;
 
   const [sidebarWidth, setSidebarWidth] = useLocalStorage(SIDEBAR_WIDTH_KEY, defaultSidebarWidth);
+
+  const sidebarToggleState = useObservable(sidebarToggleState$);
+  const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const layoutMode =

@@ -8,26 +8,30 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/services/discover_app_state_container';
 import { DiscoverStateContainer } from '../../application/main/services/discover_state';
+import { SidebarToggleState } from '../../application/types';
 
 export interface PanelsToggleProps {
   stateContainer: DiscoverStateContainer;
-  isSidebarCollapsed: boolean;
-  onToggleSidebar: (isSidebarCollapsed: boolean) => void;
+  sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
 }
 
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   stateContainer,
-  isSidebarCollapsed,
-  onToggleSidebar,
+  sidebarToggleState$,
 }) => {
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
   const onToggleChart = useCallback(() => {
     stateContainer.appState.update({ hideChart: !isChartHidden });
   }, [stateContainer, isChartHidden]);
+
+  const sidebarToggleState = useObservable(sidebarToggleState$);
+  const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
 
   return (
     <IconButtonGroup
@@ -44,7 +48,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
                 }),
                 iconType: 'transitionLeftIn',
                 'data-test-subj': 'dscShowSidebarButton',
-                onClick: () => onToggleSidebar(false),
+                onClick: () => sidebarToggleState?.toggle?.(false),
               },
             ]
           : []),

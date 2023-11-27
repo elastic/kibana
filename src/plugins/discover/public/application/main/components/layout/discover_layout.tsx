@@ -7,18 +7,7 @@
  */
 import './discover_layout.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHideFor,
-  EuiPage,
-  EuiPageBody,
-  EuiPanel,
-  useEuiBackgroundColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -33,7 +22,7 @@ import {
 } from '@kbn/discover-utils';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
+import { BehaviorSubject } from 'rxjs';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -48,7 +37,7 @@ import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
-import { FetchStatus } from '../../../types';
+import { FetchStatus, SidebarToggleState } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
@@ -79,7 +68,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     inspector,
     docLinks,
   } = useDiscoverServices();
-  const { euiTheme } = useEuiTheme();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
@@ -203,30 +191,15 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return () => onAddColumn(draggingFieldName);
   }, [onAddColumn, draggingFieldName, currentColumns]);
 
-  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
-    useState<UnifiedFieldListSidebarContainerApi | null>(null);
-
-  const isSidebarCollapsed = useObservable(
-    unifiedFieldListSidebarContainerApi?.isSidebarCollapsed$ ?? of(true),
-    true
-  );
-
-  const onToggleSidebar: UnifiedFieldListSidebarContainerApi['toggleSidebar'] = useCallback(
-    (isCollapsed) => {
-      unifiedFieldListSidebarContainerApi?.toggleSidebar?.(isCollapsed);
-    },
-    [unifiedFieldListSidebarContainerApi]
+  const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
+    () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
   const panelsToggle = useMemo(() => {
     return (
-      <PanelsToggle
-        stateContainer={stateContainer}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={onToggleSidebar}
-      />
+      <PanelsToggle stateContainer={stateContainer} sidebarToggleState$={sidebarToggleState$} />
     );
-  }, [stateContainer, isSidebarCollapsed, onToggleSidebar]);
+  }, [stateContainer, sidebarToggleState$]);
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
@@ -318,41 +291,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           />
           <DiscoverResizableLayout
             container={sidebarContainer}
-            isSidebarCollapsed={isSidebarCollapsed}
+            sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
-              <EuiFlexGroup
-                gutterSize="none"
-                css={css`
-                  height: 100%;
-                  display: ${isSidebarCollapsed ? 'none' : 'flex'};
-                `}
-              >
-                <EuiFlexItem>
-                  <SidebarMemoized
-                    documents$={stateContainer.dataState.data$.documents$}
-                    onAddField={onAddColumn}
-                    columns={currentColumns}
-                    onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-                    onRemoveField={onRemoveColumn}
-                    onChangeDataView={stateContainer.actions.onChangeDataView}
-                    selectedDataView={dataView}
-                    trackUiMetric={trackUiMetric}
-                    onFieldEdited={onFieldEdited}
-                    onDataViewCreated={stateContainer.actions.onDataViewCreated}
-                    availableFields$={stateContainer.dataState.data$.availableFields$}
-                    unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
-                    setUnifiedFieldListSidebarContainerApi={setUnifiedFieldListSidebarContainerApi}
-                  />
-                </EuiFlexItem>
-                <EuiHideFor sizes={['xs', 's']}>
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      border-right: ${euiTheme.border.thin};
-                    `}
-                  />
-                </EuiHideFor>
-              </EuiFlexGroup>
+              <SidebarMemoized
+                documents$={stateContainer.dataState.data$.documents$}
+                onAddField={onAddColumn}
+                columns={currentColumns}
+                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onRemoveField={onRemoveColumn}
+                onChangeDataView={stateContainer.actions.onChangeDataView}
+                selectedDataView={dataView}
+                trackUiMetric={trackUiMetric}
+                onFieldEdited={onFieldEdited}
+                onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                availableFields$={stateContainer.dataState.data$.availableFields$}
+                sidebarToggleState$={sidebarToggleState$}
+              />
             }
             mainPanel={
               <div className="dscPageContent__wrapper">
