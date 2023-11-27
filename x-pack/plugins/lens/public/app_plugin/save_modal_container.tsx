@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
@@ -58,6 +59,7 @@ export function SaveModalContainer({
   let title = '';
   let description;
   let savedObjectId;
+  const [initializing, setInitializing] = useState(true);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnownDoc);
   if (lastKnownDoc) {
     title = lastKnownDoc.title;
@@ -92,9 +94,15 @@ export function SaveModalContainer({
       getPersisted({
         initialInput,
         lensServices,
-      }).then((persisted) => {
-        if (persisted?.doc && isMounted) setLastKnownDoc(persisted.doc);
-      });
+      })
+        .then((persisted) => {
+          if (persisted?.doc && isMounted) setLastKnownDoc(persisted.doc);
+        })
+        .finally(() => {
+          setInitializing(false);
+        });
+    } else {
+      setInitializing(false);
     }
 
     return () => {
@@ -134,6 +142,10 @@ export function SaveModalContainer({
       });
     }
   };
+
+  if (initializing) {
+    return <EuiLoadingSpinner />;
+  }
 
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
 
