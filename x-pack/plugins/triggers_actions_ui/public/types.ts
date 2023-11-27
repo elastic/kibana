@@ -574,12 +574,14 @@ export type AlertsTableProps = {
   featureIds?: ValidFeatureId[];
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
+export type SetFlyoutAlert = (alertId: string) => void;
+
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
 export type GetRenderCellValue = ({
   setFlyoutAlert,
 }: {
-  setFlyoutAlert?: (alertId: string) => void;
-}) => (props: unknown) => React.ReactNode;
+  setFlyoutAlert: SetFlyoutAlert;
+}) => (...args: unknown[]) => React.ReactNode;
 
 export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>

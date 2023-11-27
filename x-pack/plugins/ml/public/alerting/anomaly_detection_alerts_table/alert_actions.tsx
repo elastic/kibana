@@ -26,7 +26,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
-import { type Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { Alert, SetFlyoutAlert } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 
@@ -35,7 +35,7 @@ export interface AlertActionsProps {
   ecsData: Ecs;
   id?: string;
   refresh: () => void;
-  setFlyoutAlert: React.Dispatch<React.SetStateAction<any | undefined>>;
+  setFlyoutAlert: SetFlyoutAlert;
 }
 
 const CASES_ACTIONS_ENABLED = false;
