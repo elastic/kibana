@@ -56,7 +56,7 @@ export {
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
   getLanguageDisplayName,
-  cleanupESQLQuery,
+  cleanupESQLQueryForLensSuggestions,
 } from './src/es_query';
 
 export {

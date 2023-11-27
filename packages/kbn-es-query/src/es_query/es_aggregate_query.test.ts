@@ -12,7 +12,7 @@ import {
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
-  cleanupESQLQuery,
+  cleanupESQLQueryForLensSuggestions,
 } from './es_aggregate_query';
 
 describe('sql query helpers', () => {
@@ -117,15 +117,17 @@ describe('sql query helpers', () => {
     });
   });
 
-  describe('cleanupESQLQuery', () => {
+  describe('cleanupESQLQueryForLensSuggestions', () => {
     it('should not remove anything if a drop command is not present', () => {
-      expect(cleanupESQLQuery('from a | eval b = 1')).toBe('from a | eval b = 1');
+      expect(cleanupESQLQueryForLensSuggestions('from a | eval b = 1')).toBe('from a | eval b = 1');
     });
 
     it('should remove multiple drop statement if present', () => {
-      expect(cleanupESQLQuery('from a | drop @timestamp | drop a | drop b | keep c | drop d')).toBe(
-        'from a | keep c '
-      );
+      expect(
+        cleanupESQLQueryForLensSuggestions(
+          'from a | drop @timestamp | drop a | drop b | keep c | drop d'
+        )
+      ).toBe('from a | keep c ');
     });
   });
 });

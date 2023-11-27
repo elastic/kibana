@@ -67,7 +67,7 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   return '';
 }
 
-export function cleanupESQLQuery(esql?: string): string {
+export function cleanupESQLQueryForLensSuggestions(esql?: string): string {
   const pipes = (esql || '').split('|');
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
 }

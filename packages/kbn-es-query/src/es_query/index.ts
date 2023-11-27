@@ -20,7 +20,7 @@ export {
   getIndexPatternFromSQLQuery,
   getLanguageDisplayName,
   getIndexPatternFromESQLQuery,
-  cleanupESQLQuery,
+  cleanupESQLQueryForLensSuggestions,
 } from './es_aggregate_query';
 export { fromCombinedFilter } from './from_combined_filter';
 export type {
