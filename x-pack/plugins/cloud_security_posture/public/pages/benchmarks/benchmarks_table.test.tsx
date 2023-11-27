@@ -94,7 +94,9 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(item.benchmark_evaluation)).toBeInTheDocument();
+    expect(
+      screen.getByText(getBenchmarkPlurals(item.benchmark_id, item.benchmark_evaluation))
+    ).toBeInTheDocument();
   });
 
   it('renders compliance', () => {

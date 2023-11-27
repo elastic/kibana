@@ -11,20 +11,15 @@ import {
   type EuiBasicTableProps,
   type Pagination,
   type CriteriaWithPagination,
-  EuiLink,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
-import { generatePath } from 'react-router-dom';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { BenchmarkVersion2, BenchmarkScore } from '../../../common/types';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { benchmarksNavigation } from '../../common/navigation/constants';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
@@ -49,37 +44,38 @@ interface BenchmarksTableProps
   'data-test-subj'?: string;
 }
 
-const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
-  const { http } = useKibana().services;
-  const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
+// Commented Out until the full table is made
+// const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
+//   const { http } = useKibana().services;
+//   const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
 
-  return <EuiLink href={http.basePath.prepend([fleetBase, path].join(''))}>{name}</EuiLink>;
-};
+//   return <EuiLink href={http.basePath.prepend([fleetBase, path].join(''))}>{name}</EuiLink>;
+// };
 
-const IntegrationButtonLink = ({
-  packageName,
-  policyId,
-  packagePolicyId,
-}: {
-  packageName: string;
-  packagePolicyId: string;
-  policyId: string;
-}) => {
-  const { application } = useKibana().services;
+// const IntegrationButtonLink = ({
+//   packageName,
+//   policyId,
+//   packagePolicyId,
+// }: {
+//   packageName: string;
+//   packagePolicyId: string;
+//   policyId: string;
+// }) => {
+//   const { application } = useKibana().services;
 
-  return (
-    <EuiLink
-      href={application.getUrlForApp('security', {
-        path: generatePath(benchmarksNavigation.rules.path, {
-          packagePolicyId,
-          policyId,
-        }),
-      })}
-    >
-      {packageName}
-    </EuiLink>
-  );
-};
+//   return (
+//     <EuiLink
+//       href={application.getUrlForApp('security', {
+//         path: generatePath(benchmarksNavigation.rules.path, {
+//           packagePolicyId,
+//           policyId,
+//         }),
+//       })}
+//     >
+//       {packageName}
+//     </EuiLink>
+//   );
+// };
 
 const ErrorMessageComponent = (error: { error: unknown }) => (
   <FullSizeCenteredPage>
@@ -149,7 +145,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     render: (benchmarkId: string) => {
       return (
         <>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <CISBenchmarkIcon type={benchmarkId} size={'l'} />
             </EuiFlexItem>
@@ -214,8 +210,8 @@ export const BenchmarksTable = ({
     totalItemCount,
   };
 
-  const onChange = ({ page, sort }: CriteriaWithPagination<BenchmarkVersion2>) => {
-    setQuery({ page: { ...page, index: page.index + 1 }, sort });
+  const onChange = ({ page }: CriteriaWithPagination<BenchmarkVersion2>) => {
+    setQuery({ page: { ...page, index: page.index + 1 } });
   };
 
   if (error) {
