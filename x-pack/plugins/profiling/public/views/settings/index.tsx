@@ -12,7 +12,6 @@ import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPerCoreWatt,
-  profilingUseLegacyFlamegraphAPI,
   profilingUseLegacyCo2Calculation,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -23,7 +22,7 @@ import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_te
 import { BottomBarActions } from './bottom_bar_actions';
 
 const co2Settings = [profilingCo2PerKWH, profilingDatacenterPUE, profilingPerCoreWatt];
-const generalSettings = [profilingUseLegacyFlamegraphAPI, profilingUseLegacyCo2Calculation];
+const generalSettings = [profilingUseLegacyCo2Calculation];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });

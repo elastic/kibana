@@ -589,10 +589,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:profilingUseLegacyFlamegraphAPI': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:profilingUseLegacyCo2Calculation': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

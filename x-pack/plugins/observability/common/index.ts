@@ -41,7 +41,6 @@ export {
   enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
-  profilingUseLegacyFlamegraphAPI,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPerCoreWatt,

@@ -20,19 +20,12 @@ export interface FetchFlamechartParams {
   co2PerKWH: number;
   perCoreWatt: number;
   datacenterPUE: number;
-  useLegacyFlamegraphAPI?: boolean;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
-  return async ({
-    esClient,
-    rangeFromMs,
-    rangeToMs,
-    kuery,
-    useLegacyFlamegraphAPI = false,
-  }: FetchFlamechartParams) => {
+  return async ({ esClient, rangeFromMs, rangeToMs, kuery }: FetchFlamechartParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
 

@@ -10,7 +10,6 @@ import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPerCoreWatt,
-  profilingUseLegacyFlamegraphAPI,
 } from '@kbn/observability-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
@@ -41,11 +40,10 @@ export function registerFlameChartSearchRoute({
       const { timeFrom, timeTo, kuery } = request.query;
 
       const core = await context.core;
-      const [co2PerKWH, perCoreWatt, datacenterPUE, useLegacyFlamegraphAPI] = await Promise.all([
+      const [co2PerKWH, perCoreWatt, datacenterPUE] = await Promise.all([
         core.uiSettings.client.get<number>(profilingCo2PerKWH),
         core.uiSettings.client.get<number>(profilingPerCoreWatt),
         core.uiSettings.client.get<number>(profilingDatacenterPUE),
-        core.uiSettings.client.get<boolean>(profilingUseLegacyFlamegraphAPI),
       ]);
 
       try {
@@ -55,7 +53,6 @@ export function registerFlameChartSearchRoute({
           rangeFromMs: timeFrom,
           rangeToMs: timeTo,
           kuery,
-          useLegacyFlamegraphAPI,
           co2PerKWH,
           perCoreWatt,
           datacenterPUE,
