@@ -85,11 +85,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns a flattened version of the fields in es', async () => {
       await supertest
         .get(FIELDS_PATH)
-        .query({ pattern: 'basic_index' })
+        .query({ pattern: 'basic_index', apiVersion: INITIAL_REST_VERSION_INTERNAL })
         .expect(200, {
           fields: testFields,
           indices: ['basic_index'],
-          apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .then(ensureFieldsAreSorted);
     });
