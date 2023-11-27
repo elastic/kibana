@@ -97,7 +97,6 @@ export const createMockTelemetryReceiver = (
     buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
     fetchValueListMetaData: jest.fn(),
-    getAlertsIndex: jest.fn().mockReturnValue('test-alerts-index'),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 
