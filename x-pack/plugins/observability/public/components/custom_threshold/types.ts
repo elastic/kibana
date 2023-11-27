@@ -74,8 +74,6 @@ export interface InfraClientStartDeps {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  // TODO:: check if needed => https://github.com/elastic/kibana/issues/159340
-  // telemetry: ITelemetryClient;
 }
 
 export type RendererResult = React.ReactElement<any> | null;
