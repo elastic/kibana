@@ -32,12 +32,15 @@
         {
           "http": {
             "method": "GET",
-            "path": "/internal/data_views/_fields_for_wildcard?pattern=kibana*",
+            "path": "/internal/data_views/_fields_for_wildcard",
+            "query": "?pattern=kibana*",
             "headers": {
               "Cookie": "",
               "Kbn-Version": "",
               "Accept-Encoding": "gzip, deflate, br",
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "elastic-api-version": "1",
+              "x-elastic-internal-origin": "kibana"
             },
             "statusCode": 200
           }
