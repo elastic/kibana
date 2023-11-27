@@ -67,6 +67,7 @@ export {
   isValidAlertIndexName,
   InstallShutdownError,
 } from './alerts_service';
+export { sanitizeBulkErrorResponse } from './alerts_client';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
