@@ -18,10 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
+import { ADD_PANEL_TRIGGER, addPanelMenuTrigger } from '../../triggers';
 
 interface Props {
   isDisabled?: boolean;
@@ -52,6 +54,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
       getByGroup: getVisTypesByGroup,
       showNewVisModal,
     },
+    uiActions,
   } = pluginServices.getServices();
 
   const { euiTheme } = useEuiTheme();
@@ -63,6 +66,9 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
   const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
     UnwrappedEmbeddableFactory[]
   >([]);
+  const [uiActionsMenuItems, setUiActionsMenuItems] = useState<EuiContextMenuPanelItemDescriptor[]>(
+    []
+  );
 
   useEffect(() => {
     Promise.all(
@@ -120,6 +126,43 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
   const aggBasedPanelID = 1;
 
   let panelCount = 1 + aggBasedPanelID;
+  const lensFactory = unwrappedEmbeddableFactories.find(({ factory }) => factory.type === 'lens');
+
+  useEffect(() => {
+    const actionContext = {
+      factories: embeddableFactories,
+    };
+
+    async function loadPanelActions() {
+      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
+        ADD_PANEL_TRIGGER,
+        actionContext
+      );
+      const actionsWithContext = registeredActions?.map((action) => ({
+        action,
+        context: actionContext,
+        trigger: addPanelMenuTrigger,
+      }));
+      if (actionsWithContext?.length && lensFactory) {
+        const menuItems = actionsWithContext.map((item) => {
+          const context: ActionExecutionContext<object> = {
+            ...item.context,
+            trigger: addPanelMenuTrigger,
+          };
+          const actionName = item.action.getDisplayName(context);
+          return {
+            name: actionName,
+            icon: item.action.getIconType(context),
+            onClick: item.action.execute(context),
+            'data-test-subj': `create-action-${actionName}`,
+            toolTipContent: item.action?.getDisplayNameTooltip?.(context),
+          };
+        }) as unknown as EuiContextMenuPanelItemDescriptor[];
+        setUiActionsMenuItems(menuItems);
+      }
+    }
+    loadPanelActions();
+  }, [embeddableFactories, lensFactory, uiActions]);
 
   factories.forEach(({ factory }) => {
     const { grouping } = factory;
@@ -236,6 +279,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
       })),
 
       ...promotedVisTypes.map(getVisTypeMenuItem),
+      ...uiActionsMenuItems,
     ];
     if (aggsBasedVisTypes.length > 0) {
       initialPanelItems.push({

@@ -106,6 +106,7 @@ import type {
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/action';
+import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
@@ -598,6 +599,12 @@ export class LensPlugin {
     );
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
 
+    const createESQLPanelAction = new CreateESQLPanelAction(
+      startDependencies,
+      core.overlays,
+      core.theme
+    );
+    startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createESQLPanelAction);
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerAction(
