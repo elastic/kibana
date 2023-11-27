@@ -14,6 +14,9 @@ import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
 import { cleanString, isTruthy } from '../helpers/utils';
 
+export const RULE_WARNING_MESSAGE =
+  'Strings should be translated with i18n. Use the autofix suggestion or add your own.';
+
 export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
@@ -44,17 +47,16 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
 
         // Check if i18n has already been imported into the file
-        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, mode } =
+        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
           getI18nImportFixer({
             sourceCode,
-            mode: 'i18n.translate',
+            translationFunction: 'i18n.translate',
           });
 
         // Show warning to developer and offer autofix suggestion
         report({
           node: node as any,
-          message:
-            'Strings should be translated with i18n. Use the autofix suggestion or add your own.',
+          message: RULE_WARNING_MESSAGE,
           fix(fixer) {
             return [
               fixer.replaceText(
@@ -62,7 +64,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
                 `${whiteSpaces}{i18n.translate('${translationIdSuggestion}', { defaultMessage: '${value}' })}`
               ),
               !hasI18nImportLine && rangeToAddI18nImportLine
-                ? mode === 'replace'
+                ? replaceMode === 'replace'
                   ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)
                   : fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)
                 : null,
@@ -103,17 +105,16 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
 
         // Check if i18n has already been imported into the file.
-        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, mode } =
+        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
           getI18nImportFixer({
             sourceCode,
-            mode: 'i18n.translate',
+            translationFunction: 'i18n.translate',
           });
 
         // Show warning to developer and offer autofix suggestion
         report({
           node: node as any,
-          message:
-            'Strings should be translated with i18n. Use the autofix suggestion or add your own.',
+          message: RULE_WARNING_MESSAGE,
           fix(fixer) {
             return [
               fixer.replaceTextRange(
@@ -121,7 +122,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
                 `{i18n.translate('${translationIdSuggestion}', { defaultMessage: '${val}' })}`
               ),
               !hasI18nImportLine && rangeToAddI18nImportLine
-                ? mode === 'replace'
+                ? replaceMode === 'replace'
                   ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)
                   : fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)
                 : null,
