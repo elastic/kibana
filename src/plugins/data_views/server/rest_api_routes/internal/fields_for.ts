@@ -97,7 +97,7 @@ const FieldDescriptorSchema = schema.object({
   ),
 });
 
-const validate: FullValidationConfig<any, any, any> = {
+export const validate: FullValidationConfig<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request

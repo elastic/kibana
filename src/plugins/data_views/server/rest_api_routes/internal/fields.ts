@@ -16,7 +16,7 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
-import { parseFields, IBody, IQuery, querySchema } from './fields_for';
+import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {
@@ -131,5 +131,10 @@ export const registerFields = async (
   >,
   isRollupsEnabled: () => boolean
 ) => {
-  router.get({ path, validate: { query: querySchema } }, handler(isRollupsEnabled));
+  router.versioned
+    .get({ path, access: 'internal', enableQueryVersion: true })
+    .addVersion(
+      { version: '1', validate: { request: { query: querySchema }, response: validate.response } },
+      handler(isRollupsEnabled)
+    );
 };
