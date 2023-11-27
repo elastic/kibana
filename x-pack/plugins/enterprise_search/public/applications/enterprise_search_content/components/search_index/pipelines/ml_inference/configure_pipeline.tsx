@@ -130,31 +130,6 @@ export const ConfigurePipeline: React.FC = () => {
             <EuiFormRow
               fullWidth
               label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel',
-                { defaultMessage: 'Select a trained ML Model' }
-              )}
-            >
-              <EuiSuperSelect
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
-                fullWidth
-                hasDividers
-                disabled={inputsDisabled}
-                itemLayoutAlign="top"
-                onChange={(value) =>
-                  setInferencePipelineConfiguration({
-                    ...configuration,
-                    inferenceConfig: undefined,
-                    modelID: value,
-                    fieldMappings: undefined,
-                  })
-                }
-                options={modelOptions}
-                valueOfSelected={modelID === '' ? MODEL_SELECT_PLACEHOLDER_VALUE : modelID}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.nameLabel',
                 {
                   defaultMessage: 'Name',
@@ -197,6 +172,31 @@ export const ConfigurePipeline: React.FC = () => {
                     pipelineName: e.target.value,
                   })
                 }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel',
+                { defaultMessage: 'Select a trained ML Model' }
+              )}
+            >
+              <EuiSuperSelect
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
+                fullWidth
+                hasDividers
+                disabled={inputsDisabled}
+                itemLayoutAlign="top"
+                onChange={(value) =>
+                  setInferencePipelineConfiguration({
+                    ...configuration,
+                    inferenceConfig: undefined,
+                    modelID: value,
+                    fieldMappings: undefined,
+                  })
+                }
+                options={modelOptions}
+                valueOfSelected={modelID === '' ? MODEL_SELECT_PLACEHOLDER_VALUE : modelID}
               />
             </EuiFormRow>
           </EuiForm>
