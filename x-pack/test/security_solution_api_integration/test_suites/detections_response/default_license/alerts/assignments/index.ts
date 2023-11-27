@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Actions API', function () {
+  describe('Alert assignments API', function () {
     loadTestFile(require.resolve('./assignments'));
     loadTestFile(require.resolve('./assignments_ess'));
     loadTestFile(require.resolve('./assignments_serverless'));

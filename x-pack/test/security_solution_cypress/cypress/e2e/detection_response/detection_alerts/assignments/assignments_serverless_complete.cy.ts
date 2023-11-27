@@ -62,8 +62,7 @@ describe(
         const editors = [
           ROLES.t1_analyst,
           ROLES.t2_analyst,
-          // TODO: uncomment when https://github.com/elastic/kibana/pull/170778 has been merged
-          // ROLES.t3_analyst,
+          ROLES.t3_analyst,
           ROLES.rule_author,
           ROLES.soc_manager,
           ROLES.detections_admin,

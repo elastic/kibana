@@ -87,8 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
         await successfulAssignWithRole(ROLES.t2_analyst);
       });
 
-      // TODO: Remove @brokenInServerless once https://github.com/elastic/kibana/pull/170778 has been merged
-      it('@brokenInServerless should allow `ROLES.t3_analyst` to assign alerts', async () => {
+      it('should allow `ROLES.t3_analyst` to assign alerts', async () => {
         await successfulAssignWithRole(ROLES.t3_analyst);
       });
 
