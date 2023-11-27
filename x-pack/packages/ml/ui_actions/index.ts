@@ -16,4 +16,7 @@ export {
   CATEGORIZE_FIELD_TRIGGER,
   categorizeFieldTrigger,
   type CategorizeFieldContext,
+  ACTION_CATEGORIZE_FIELD_VALUE,
+  CATEGORIZE_FIELD_VALUE_TRIGGER,
+  categorizeFieldValueTrigger,
 } from './src/aiops/ui_actions';
