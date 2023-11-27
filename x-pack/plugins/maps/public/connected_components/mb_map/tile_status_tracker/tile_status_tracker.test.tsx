@@ -249,6 +249,53 @@ describe('TileStatusTracker', () => {
       expect(tileErrorsMap.get('layer2')).toBeUndefined();
     });
 
+    test('should clear layer tile errors when layer is not tiled', async () => {
+      const mockMbMap = new MockMbMap();
+      const layer1 = createMockLayer('layer1', 'layer1Source');
+
+      const wrapper = mount(
+        <TileStatusTracker
+          mbMap={mockMbMap as unknown as MbMap}
+          layerList={[layer1]}
+          onTileStateChange={onTileStateChange}
+        />
+      );
+
+      mockMbMap.emit(
+        'sourcedataloading',
+        createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE)
+      );
+      mockMbMap.emit('error', {
+        ...createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE),
+        error: {
+          message: 'simulated error',
+        },
+      });
+
+      // simulate delay. Cache-checking is debounced.
+      await sleep(300);
+
+      expect(tileErrorsMap.get('layer1')?.length).toBe(1);
+      
+      const geojsonLayer1 = createMockLayer('layer1', 'layer1Source');
+      geojsonLayer1.getSource = () => {
+        return {
+          isESSource() {
+            return true;
+          },
+          isMvt() {
+            return false;
+          }
+        };
+      }
+      wrapper.setProps({ layerList: [geojsonLayer1] });
+
+      // simulate delay. Cache-checking is debounced.
+      await sleep(300);
+
+      expect(tileErrorsMap.get('layer1')).toBeUndefined();
+    });
+
     test('should only return tile errors within map zoom', async () => {
       const mockMbMap = new MockMbMap();
 

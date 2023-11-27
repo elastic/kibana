@@ -62,6 +62,18 @@ export class TileStatusTracker extends Component<Props> {
     this.props.mbMap.on('moveend', this._onMoveEnd);
   }
 
+  componentDidUpdate() {
+    this.props.layerList.forEach(layer => {
+      const source = layer.getSource();
+      if (source.isESSource() && 
+        typeof (source as IVectorSource).isMvt === 'function' &&
+        !(source as IVectorSource).isMvt()) {
+        // clear tile cache when layer is not tiled
+        this._tileErrorCache.clearLayer(layer.getId(), this._updateTileStatusForAllLayers);
+      }
+    });
+  }
+
   componentWillUnmount() {
     this._isMounted = false;
     this.props.mbMap.off('error', this._onError);
