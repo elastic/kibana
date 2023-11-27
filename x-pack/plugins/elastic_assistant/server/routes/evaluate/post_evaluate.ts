@@ -27,7 +27,7 @@ import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { fetchLangSmithDataset, getConnectorName, getLlmType } from './utils';
+import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
 import { RequestBody } from '../../lib/langchain/types';
 
 /**
@@ -53,44 +53,41 @@ export const postEvaluateRoute = (
     },
     async (context, request, response) => {
       // TODO: Limit route based on experimental feature
-      const resp = buildResponse(response);
       const logger: Logger = (await context.elasticAssistant).logger;
-
-      const evaluationId = uuidv4();
-      const {
-        evalModel,
-        evaluationType,
-        outputIndex,
-        datasetName,
-        projectName = 'default',
-        runName = evaluationId,
-      } = request.query;
-      const { dataset: customDataset = [], evalPrompt } = request.body;
-      const connectorIds = request.query.models?.split(',') || [];
-      const agentNames = request.query.agents?.split(',') || [];
-
-      // Fetch dataset from langsmith
-      const langsmithDataset = await fetchLangSmithDataset(datasetName, logger);
-      const dataset = datasetName != null ? langsmithDataset : customDataset;
-
-      logger.info('postEvaluateRoute:');
-      logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
-      logger.info(`request.body:\n${JSON.stringify(request.body, null, 2)}`);
-      logger.info(`Evaluation ID: ${evaluationId}`);
-
-      const totalExecutions = connectorIds.length * agentNames.length * dataset.length;
-      logger.info('Creating agents:');
-      logger.info(`\tconnectors/models: ${connectorIds.length}`);
-      logger.info(`\tagents: ${agentNames.length}`);
-      logger.info(`\tdataset: ${dataset.length}`);
-      logger.warn(`\ttotal baseline agent executions: ${totalExecutions} `);
-      if (totalExecutions > 50) {
-        logger.warn(
-          `Total baseline agent executions >= 50! This may take a while, and cost some money...`
-        );
-      }
-
       try {
+        const evaluationId = uuidv4();
+        const {
+          evalModel,
+          evaluationType,
+          outputIndex,
+          datasetName,
+          projectName = 'default',
+          runName = evaluationId,
+        } = request.query;
+        const { dataset: customDataset = [], evalPrompt } = request.body;
+        const connectorIds = request.query.models?.split(',') || [];
+        const agentNames = request.query.agents?.split(',') || [];
+
+        const dataset =
+          datasetName != null ? await fetchLangSmithDataset(datasetName, logger) : customDataset;
+
+        logger.info('postEvaluateRoute:');
+        logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
+        logger.info(`request.body:\n${JSON.stringify(request.body, null, 2)}`);
+        logger.info(`Evaluation ID: ${evaluationId}`);
+
+        const totalExecutions = connectorIds.length * agentNames.length * dataset.length;
+        logger.info('Creating agents:');
+        logger.info(`\tconnectors/models: ${connectorIds.length}`);
+        logger.info(`\tagents: ${agentNames.length}`);
+        logger.info(`\tdataset: ${dataset.length}`);
+        logger.warn(`\ttotal baseline agent executions: ${totalExecutions} `);
+        if (totalExecutions > 50) {
+          logger.warn(
+            `Total baseline agent executions >= 50! This may take a while, and cost some money...`
+          );
+        }
+
         // Get the actions plugin start contract from the request context for the agents
         const actions = (await context.elasticAssistant).actions;
 
@@ -155,6 +152,7 @@ export const postEvaluateRoute = (
                       ...(connectorName != null ? [connectorName] : []),
                       runName,
                     ],
+                    tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
                   },
                 }),
               metadata: {
@@ -205,6 +203,7 @@ export const postEvaluateRoute = (
         logger.error(err);
         const error = transformError(err);
 
+        const resp = buildResponse(response);
         return resp.error({
           body: { success: false, error: error.message },
           statusCode: error.statusCode,

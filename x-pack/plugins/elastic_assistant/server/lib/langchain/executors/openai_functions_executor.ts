@@ -10,7 +10,6 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool, Tool } from 'langchain/tools';
 
-import { LangChainTracer } from 'langchain/callbacks';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
@@ -88,19 +87,10 @@ export const callOpenAIFunctionsExecutor = async ({
     verbose: false,
   });
 
-  /*
-   Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
-   If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
+  // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
 
-   Custom LangChainTracer is only necessary to add the `exampleId` so Dataset 'Test' runs are written to LangSmith
-   If `exampleId` is present (and a corresponding example exists in LangSmith) trace is written to the Dataset's `Tests`
-   section, otherwise it is written to the `Project` provided
-  */
-  const tracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-  const lcTracer = new LangChainTracer({
-    projectName: traceOptions?.runName ?? 'default', // Shows as the 'test' run's 'name' in langsmith ui
-    exampleId: traceOptions?.exampleId,
-  });
   let traceData;
 
   // Wrap executor call with an APM span for instrumentation
@@ -117,7 +107,7 @@ export const callOpenAIFunctionsExecutor = async ({
     return executor.call(
       { input: latestMessage[0].content },
       {
-        callbacks: [lcTracer, tracer],
+        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
         runName: OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID,
         tags: traceOptions?.tags ?? [],
       }

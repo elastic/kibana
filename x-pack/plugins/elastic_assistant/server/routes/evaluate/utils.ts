@@ -11,6 +11,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { Run } from 'langsmith/schemas';
 import { ToolingLog } from '@kbn/tooling-log';
+import { LangChainTracer } from 'langchain/callbacks';
 import { Dataset } from '../../schemas/evaluate/post_evaluate';
 
 /**
@@ -58,9 +59,10 @@ export const fetchLangSmithDataset = async (
   datasetName: string | undefined,
   logger: Logger
 ): Promise<Dataset> => {
-  if (datasetName === undefined) {
-    return [];
+  if (datasetName === undefined || !isLangSmithEnabled()) {
+    throw new Error('LangSmith dataset name not provided or LangSmith not enabled');
   }
+
   try {
     const client = new Client();
 
@@ -116,5 +118,50 @@ export const writeLangSmithFeedback = async (
   } catch (e) {
     logger.error(`Error writing feedback to LangSmith: ${e.message}`);
     return '';
+  }
+};
+
+/**
+ * Returns a custom LangChainTracer which adds the `exampleId` so Dataset 'Test' runs are written to LangSmith
+ * If `exampleId` is present (and a corresponding example exists in LangSmith) trace is written to the Dataset's `Tests`
+ * section, otherwise it is written to the `Project` provided
+ *
+ * @param projectName Name of project to trace results to
+ * @param exampleId Dataset exampleId to associate trace with
+ * @param logger
+ */
+export const getLangSmithTracer = (
+  projectName: string | undefined,
+  exampleId: string | undefined,
+  logger: Logger | ToolingLog
+): LangChainTracer[] => {
+  try {
+    if (!isLangSmithEnabled()) {
+      return [];
+    }
+    const lcTracer = new LangChainTracer({
+      projectName: projectName ?? 'default', // Shows as the 'test' run's 'name' in langsmith ui
+      exampleId,
+    });
+
+    return [lcTracer];
+  } catch (e) {
+    // Note: creating a tracer can fail if the LangSmith env vars are not set correctly
+    logger.error(`Error creating LangSmith tracer: ${e.message}`);
+  }
+
+  return [];
+};
+
+/**
+ * Returns true if LangSmith/tracing is enabled
+ */
+export const isLangSmithEnabled = (): boolean => {
+  try {
+    // Just checking if apiKey is available, if better way to check for enabled that is not env var please update
+    const config = Client.getDefaultClientConfig();
+    return config.apiKey != null;
+  } catch (e) {
+    return false;
   }
 };

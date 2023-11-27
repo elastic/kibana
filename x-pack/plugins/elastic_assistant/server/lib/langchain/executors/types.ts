@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
+import type { LangChainTracer } from 'langchain/callbacks';
 import { RequestBody, ResponseBody } from '../types';
 
 export interface AgentExecutorParams {
@@ -48,4 +49,5 @@ export interface TraceOptions {
   projectName?: string;
   runName?: string;
   tags?: string[];
+  tracers?: LangChainTracer[];
 }

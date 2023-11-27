@@ -130,7 +130,8 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   const sampleDataset = [
     {
       input:
-        'I want to see a query for metrics-apm*, filtering on metricset.name:transaction and metricset.interval:1m, showing the average duration (via transaction.duration.histogram), in 50 buckets. Only return the ESQL query, and do not wrap in a codeblock.',
+        'As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, and really make sure you check your knowledge really well on all the functions I am asking for. check it multiple times if you need to. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema. Ensure the answers are formatted in a way which is easily copyable.\n\n' +
+        'Write an ESQL query for detecting cryptomining activity on an AWS EC2 instance.',
       reference:
         'FROM metrics-apm*\n| WHERE metricset.name == ""transaction"" AND metricset.interval == ""1m""\n| EVAL bucket = AUTO_BUCKET(transaction.duration.histogram, 50, <start-date>, <end-date>)\n| STATS avg_duration = AVG(transaction.duration.histogram) BY bucket',
     },

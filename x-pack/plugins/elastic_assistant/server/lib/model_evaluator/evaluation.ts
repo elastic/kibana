@@ -16,7 +16,7 @@ import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types
 import { Dataset } from '../../schemas/evaluate/post_evaluate';
 import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
 import { ResponseBody } from '../langchain/types';
-import { writeLangSmithFeedback } from '../../routes/evaluate/utils';
+import { isLangSmithEnabled, writeLangSmithFeedback } from '../../routes/evaluate/utils';
 
 export interface PerformEvaluationParams {
   agentExecutorEvaluators: AgentExecutorEvaluatorWithMetadata[];
@@ -177,16 +177,22 @@ export const performEvaluation = async ({
           prediction,
           reference,
         },
-        { callbacks: [evalTracer, runCollector], tags: ['security-assistant-evaluation'] }
-      );
-      // Write to LangSmith
-      const langSmithLink = await writeLangSmithFeedback(
-        runCollector.tracedRuns[0],
-        evaluationId,
-        logger
+        {
+          callbacks: [...(isLangSmithEnabled() ? [evalTracer, runCollector] : [])],
+          tags: ['security-assistant-evaluation'],
+        }
       );
       result.evaluation = evaluation;
-      result.langSmithLink = langSmithLink;
+
+      // Write to LangSmith
+      if (isLangSmithEnabled()) {
+        const langSmithLink = await writeLangSmithFeedback(
+          runCollector.tracedRuns[0],
+          evaluationId,
+          logger
+        );
+        result.langSmithLink = langSmithLink;
+      }
     }
   } else if (evaluationType === 'esql-validator') {
     logger.info('Evaluation type: esql-validator');
