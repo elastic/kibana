@@ -6,26 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
+import { get } from 'lodash';
 
-import {
-  OptionsListRequestBody,
-  OptionsListSuggestions,
-  OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE,
-} from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
-import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
+import { getDefaultSearchTechnique } from '../../common/options_list/suggestions_searching';
+import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
 import {
   getEscapedWildcardQuery,
   getIpBuckets,
   getSortType,
 } from './options_list_suggestion_query_helpers';
+import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
 
 /**
  * Suggestion aggregations
  */
-export const getExpensiveSuggestionAggregationBuilder = ({ fieldSpec }: OptionsListRequestBody) => {
+export const getExpensiveSuggestionAggregationBuilder = ({
+  fieldSpec,
+  searchString,
+  searchTechnique,
+}: OptionsListRequestBody) => {
+  if (searchTechnique === 'exact' && searchString && searchString.length > 0) {
+    return expensiveSuggestionAggSubtypes.exactEqualSearch;
+  }
+
   if (fieldSpec?.type === 'number') {
     return expensiveSuggestionAggSubtypes.number;
   }
@@ -39,6 +44,58 @@ export const getExpensiveSuggestionAggregationBuilder = ({ fieldSpec }: OptionsL
 };
 
 const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
+  exactEqualSearch: {
+    buildAggregation: ({ fieldName, fieldSpec, searchString }: OptionsListRequestBody) => {
+      // if (searchString && isNaN(Number(searchString))) {
+      //   // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
+      //   // simply don't return an aggregation query for the ES search request
+      //   return undefined;
+      // }
+
+      return {
+        suggestions: {
+          filter: {
+            term: {
+              [fieldName]: { value: searchString, case_insensitive: fieldSpec?.type === 'string' },
+            },
+          },
+          aggs: {
+            field_value: {
+              terms: {
+                field: fieldName,
+              },
+            },
+          },
+        },
+      };
+    },
+    parse: (rawEsResult, request: OptionsListRequestBody) => {
+      if (!request.searchString) {
+        throw new Error('this should never happen');
+      }
+
+      const docCount = get(rawEsResult, 'aggregations.suggestions.doc_count');
+      if (!docCount) {
+        return {
+          suggestions: [],
+          totalCardinality: 0,
+        };
+      }
+      return {
+        suggestions: [
+          {
+            value:
+              request.fieldSpec?.type === 'string'
+                ? get(rawEsResult, 'aggregations.suggestions.field_value.buckets')[0].key
+                : request.searchString,
+            docCount,
+          },
+        ],
+        totalCardinality: 1,
+      };
+    },
+  },
+
   /**
    * The "textOrKeywordOrNested" query / parser should be used whenever the field is built on some type of string field,
    * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.
@@ -73,7 +130,8 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         textOrKeywordQuery = {
           filteredSuggestions: {
             filter: {
-              [(searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE) as string]: {
+              [(searchTechnique ??
+                getDefaultSearchTechnique(fieldSpec?.type ?? 'string')) as string]: {
                 [fieldName]: {
                   value:
                     searchTechnique === 'wildcard'
@@ -126,7 +184,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
    */
   number: {
     buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => {
-      if (searchString && !new RegExp('^d+$').test(searchString)) {
+      if (searchString && isNaN(Number(searchString))) {
         // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
         // simply don't return an aggregation query for the ES search request
         return undefined;

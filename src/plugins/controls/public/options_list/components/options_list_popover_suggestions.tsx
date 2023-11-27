@@ -41,6 +41,7 @@ export const OptionsListPopoverSuggestions = ({
   const hideExists = optionsList.select((state) => state.explicitInput.hideExists);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
   const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
   const dataViewId = optionsList.select((state) => state.output.dataViewId);
@@ -52,11 +53,11 @@ export const OptionsListPopoverSuggestions = ({
 
   const canLoadMoreSuggestions = useMemo(
     () =>
-      searchString.valid && totalCardinality
+      searchString.valid && totalCardinality && !showOnlySelected
         ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
-    [availableOptions, totalCardinality, searchString]
+    [availableOptions, totalCardinality, searchString, showOnlySelected]
   );
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
@@ -85,7 +86,7 @@ export const OptionsListPopoverSuggestions = ({
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
     const options: EuiSelectableOption[] = (suggestions ?? []).map((suggestion) => {
-      if (typeof suggestion === 'string') {
+      if (typeof suggestion !== 'object') {
         // this means that `showOnlySelected` is true, and doc count is not known when this is the case
         suggestion = { value: suggestion };
       }
@@ -145,6 +146,19 @@ export const OptionsListPopoverSuggestions = ({
     }
   }, [loadMoreSuggestions, totalCardinality]);
 
+  const renderOption = useCallback(
+    (option, searchStringValue) => {
+      if (searchTechnique === 'exact') return option.label;
+
+      return (
+        <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
+          {option.label}
+        </EuiHighlight>
+      );
+    },
+    [searchTechnique]
+  );
+
   useEffect(() => {
     const container = listRef.current;
     if (!isLoading && canLoadMoreSuggestions) {
@@ -166,13 +180,7 @@ export const OptionsListPopoverSuggestions = ({
       <div ref={listRef}>
         <EuiSelectable
           options={selectableOptions}
-          renderOption={(option) => {
-            return (
-              <EuiHighlight search={option.key === 'exists-option' ? '' : searchString.value}>
-                {option.label}
-              </EuiHighlight>
-            );
-          }}
+          renderOption={(option) => renderOption(option, searchString.value)}
           listProps={{ onFocusBadge: false }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
             fieldName,

@@ -12,7 +12,7 @@ import { Filter } from '@kbn/es-query';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { OptionsListReduxState, OptionsListComponentState } from './types';
-import { getIpRangeQuery } from '../../common/options_list/ip_search';
+import { getIpRangeQuery, getIsValidIp } from '../../common/options_list/ip_search';
 import {
   OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortingType,
@@ -40,10 +40,16 @@ export const optionsListReducers = {
       action.payload.length > 0 && // empty string search is never invalid
       state.componentState.field
     ) {
-      if (state.componentState.field?.type === 'ip')
-        state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
-      else if (state.componentState.field?.type === 'number')
+      if (state.componentState.field?.type === 'ip') {
+        if (state.explicitInput.searchTechnique === 'exact') {
+          console.log('hereeee', getIsValidIp(action.payload));
+          state.componentState.searchString.valid = getIsValidIp(action.payload);
+        } else {
+          state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
+        }
+      } else if (state.componentState.field?.type === 'number') {
         state.componentState.searchString.valid = !isNaN(Number(action.payload));
+      }
     } else {
       state.componentState.searchString.valid = true;
     }

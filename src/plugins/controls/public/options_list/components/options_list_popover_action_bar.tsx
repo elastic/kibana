@@ -21,7 +21,7 @@ import {
 import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
-import { OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE } from '../../../common/options_list/types';
+import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -44,14 +44,13 @@ export const OptionsListPopoverActionBar = ({
 
   const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
   const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
-
   const allowExpensiveQueries = optionsList.select(
     (state) => state.componentState.allowExpensiveQueries
   );
 
   return (
     <div className="optionsList__actions">
-      {fieldSpec?.type !== 'date' && (
+      {fieldSpec && fieldSpec.type !== 'date' && (
         <EuiFormRow className="optionsList__searchRow" fullWidth>
           <EuiFieldSearch
             isInvalid={!searchString.valid}
@@ -61,9 +60,9 @@ export const OptionsListPopoverActionBar = ({
             onChange={(event) => updateSearchString(event.target.value)}
             value={searchString.value}
             data-test-subj="optionsList-control-search-input"
-            placeholder={OptionsListStrings.popover.searchPlaceholder[
-              searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
-            ].getPlaceholderText()}
+            placeholder={OptionsListStrings.popover.getSearchPlaceholder(
+              searchTechnique ?? getDefaultSearchTechnique(fieldSpec.type)
+            )}
           />
         </EuiFormRow>
       )}

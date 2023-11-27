@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { i18n } from '@kbn/i18n';
 
 export const OptionsListStrings = {
   control: {
     getSeparator: (type?: string) => {
-      if (type === 'date') {
+      if (type === 'date' || type === 'number') {
         return i18n.translate('controls.optionsList.control.dateSeparator', {
           defaultMessage: ';  ',
         });
@@ -127,6 +128,16 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectionsEmpty', {
         defaultMessage: 'You have no selections',
       }),
+    getInvalidSearchMessage: (fieldType: string, searchTechnique: string) => {
+      if (fieldType === 'ip' && searchTechnique === 'exact') {
+        return i18n.translate('controls.optionsList.popover.invalidSearch.ip', {
+          defaultMessage: 'Your search string is not a valid IP address.',
+        });
+      }
+      return i18n.translate('controls.optionsList.popover.invalidSearch.invalidCharacters', {
+        defaultMessage: 'Your search string contains invalid characters.',
+      });
+    },
     getAllOptionsButtonTitle: () =>
       i18n.translate('controls.optionsList.popover.allOptionsTitle', {
         defaultMessage: 'Show all options',
@@ -135,19 +146,24 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectedOptionsTitle', {
         defaultMessage: 'Show only selected options',
       }),
-    searchPlaceholder: {
-      prefix: {
-        getPlaceholderText: () =>
-          i18n.translate('controls.optionsList.popover.prefixSearchPlaceholder', {
+    getSearchPlaceholder: (searchTechnique: OptionsListSearchTechnique) => {
+      switch (searchTechnique) {
+        case 'prefix': {
+          return i18n.translate('controls.optionsList.popover.prefixSearchPlaceholder', {
             defaultMessage: 'Starts with...',
-          }),
-      },
-      wildcard: {
-        getPlaceholderText: () =>
-          i18n.translate('controls.optionsList.popover.wildcardSearchPlaceholder', {
+          });
+        }
+        case 'wildcard': {
+          return i18n.translate('controls.optionsList.popover.wildcardSearchPlaceholder', {
             defaultMessage: 'Contains...',
-          }),
-      },
+          });
+        }
+        case 'exact': {
+          return i18n.translate('controls.optionsList.popover.exactSearchPlaceholder', {
+            defaultMessage: 'Equals...',
+          });
+        }
+      }
     },
     getCardinalityLabel: (totalOptions: number) =>
       i18n.translate('controls.optionsList.popover.cardinalityLabel', {
