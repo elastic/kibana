@@ -434,7 +434,7 @@
                     "label": "criteria",
                     "description": [],
                     "signature": [
-                      "{ aggType: string; comparator: ",
+                      "{ comparator: ",
                       "Comparator",
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
@@ -597,7 +597,7 @@
                     "label": "criteria",
                     "description": [],
                     "signature": [
-                      "{ aggType: string; comparator: ",
+                      "{ comparator: ",
                       "Comparator",
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
@@ -774,7 +774,7 @@
                     "label": "criteria",
                     "description": [],
                     "signature": [
-                      "{ aggType: string; comparator: ",
+                      "{ comparator: ",
                       "Comparator",
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
@@ -937,7 +937,7 @@
                     "label": "criteria",
                     "description": [],
                     "signature": [
-                      "{ aggType: string; comparator: ",
+                      "{ comparator: ",
                       "Comparator",
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
@@ -1100,7 +1100,7 @@
                     "label": "criteria",
                     "description": [],
                     "signature": [
-                      "{ aggType: string; comparator: ",
+                      "{ comparator: ",
                       "Comparator",
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
@@ -1277,7 +1277,7 @@
                     "label": "criteria",
                     "description": [],
                     "signature": [
-                      "{ aggType: string; comparator: ",
+                      "{ comparator: ",
                       "Comparator",
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
