@@ -8,7 +8,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import type { ConnectionRequestParams } from '@elastic/transport';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 type SanitizedConnectionRequestParams = Pick<
   ConnectionRequestParams,

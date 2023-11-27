@@ -28,6 +28,7 @@ webpack_cli(
     "//packages/kbn-datemath",
     "//packages/kbn-analytics",
     "//packages/kbn-es-query",
+    "//packages/kbn-search-errors",
     "//packages/kbn-std",
     "//packages/kbn-safer-lodash-set",
     "//packages/kbn-peggy",

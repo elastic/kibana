@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from '@kbn/core/public';
-import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import { IEsError } from './types';
 import { getRootCause } from './utils';
 
@@ -22,6 +21,13 @@ import { getRootCause } from './utils';
  */
 export function isEsError(e: any): e is IEsError {
   return !!e.attributes;
+}
+
+export class KbnError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
 }
 
 export class EsError extends KbnError {
