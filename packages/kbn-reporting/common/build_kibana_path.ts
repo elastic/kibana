@@ -17,10 +17,3 @@ export const buildKibanaPath = ({ basePath, appPath, spaceId }: Args) => {
     ? `${basePath}${appPath}`
     : `${basePath}/s/${spaceId}${appPath}`;
 };
-
-export const CATEGORIZE_FIELD_VALUE_TRIGGER = 'CATEGORIZE_FIELD_VALUE_TRIGGER';
-export const categorizeFieldValueTrigger: Trigger = {
-  id: CATEGORIZE_FIELD_VALUE_TRIGGER,
-  title: 'Run pattern analysis',
-  description: 'Triggered when user wants to run pattern analysis on a field.',
-};

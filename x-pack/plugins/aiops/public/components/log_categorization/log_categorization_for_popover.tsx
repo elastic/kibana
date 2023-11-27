@@ -26,10 +26,6 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 
 import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
 
-import {
-  type LogCategorizationPageUrlState,
-  getDefaultLogCategorizationAppState,
-} from '../../application/utils/url_state';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -40,6 +36,10 @@ import type { EventRate } from './use_categorize_request';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { MiniHistogram } from '../mini_histogram';
 import { createFilter, QueryMode, QUERY_MODE } from './use_discover_links';
+import {
+  getDefaultLogCategorizationAppState,
+  LogCategorizationPageUrlState,
+} from '../../application/url_state/log_pattern_analysis';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
