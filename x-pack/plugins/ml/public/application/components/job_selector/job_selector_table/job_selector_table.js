@@ -47,7 +47,10 @@ export function JobSelectorTable({
 
   const {
     services: {
-      application: { navigateToApp },
+      application: {
+        navigateToApp,
+        capabilities: { ml: mlCapabilities },
+      },
     },
   } = useMlKibana();
 
@@ -269,7 +272,11 @@ export function JobSelectorTable({
           iconType="iInCircle"
         >
           <EuiText textAlign="center">
-            <EuiButton color="primary" onClick={navigateToWizard}>
+            <EuiButton
+              color="primary"
+              onClick={navigateToWizard}
+              disabled={!mlCapabilities.canCreateJob}
+            >
               <FormattedMessage
                 id="xpack.ml.jobSelector.createJobButtonLabel"
                 defaultMessage="Create job"
