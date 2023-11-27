@@ -17,7 +17,7 @@ import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
+import { FlyoutHeaderPanel } from '../flyout/header';
 import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -192,19 +192,18 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         ref={containerElement}
       >
         <TimelineSavingProgress timelineId={timelineId} />
-        {timelineType === TimelineType.template && (
-          <TimelineTemplateBadge className="timeline-template-badge">
-            {i18n.TIMELINE_TEMPLATE}
-          </TimelineTemplateBadge>
-        )}
         <div className="timeline-body" data-test-subj="timeline-body">
+          {timelineType === TimelineType.template && (
+            <TimelineTemplateBadge className="timeline-template-badge">
+              {i18n.TIMELINE_TEMPLATE}
+            </TimelineTemplateBadge>
+          )}
           {resolveConflictComponent}
           <HideShowContainer
             $isVisible={!timelineFullScreen}
             data-test-subj="timeline-hide-show-container"
           >
             <FlyoutHeaderPanel timelineId={timelineId} />
-            <FlyoutHeader timelineId={timelineId} />
           </HideShowContainer>
 
           <TabsContent

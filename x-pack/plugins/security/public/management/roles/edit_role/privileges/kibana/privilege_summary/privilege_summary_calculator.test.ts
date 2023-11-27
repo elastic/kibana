@@ -6,7 +6,7 @@
  */
 
 import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 
