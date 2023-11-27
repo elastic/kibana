@@ -76,13 +76,18 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) =
               defaultMessage: 'Description',
             })}
             labelAppend={
-              <EuiButtonEmpty size="xs" onClick={() => setIsEditing(true)}>
+              <EuiButtonEmpty
+                data-test-subj="serverlessSearchEditDescriptionButton"
+                size="xs"
+                onClick={() => setIsEditing(true)}
+              >
                 {EDIT_LABEL}
               </EuiButtonEmpty>
             }
           >
             {isEditing ? (
               <EuiFieldText
+                data-test-subj="serverlessSearchEditDescriptionFieldText"
                 onChange={(event) => setNewDescription(event.target.value)}
                 value={newDescription || ''}
               />
@@ -102,6 +107,7 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) =
                 `}
               >
                 <EuiButton
+                  data-test-subj="serverlessSearchEditDescriptionButton"
                   color="primary"
                   fill
                   onClick={() => mutate(newDescription)}
@@ -119,6 +125,7 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) =
                 `}
               >
                 <EuiButton
+                  data-test-subj="serverlessSearchEditDescriptionButton"
                   size="s"
                   isLoading={isLoading}
                   onClick={() => {
