@@ -690,7 +690,9 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       verification_status: attributes.verification_status,
       verification_key_id: attributes.verification_key_id,
       experimental_data_stream_features: attributes.experimental_data_stream_features,
+      latest_install_failed_attempts: attributes.latest_install_failed_attempts,
     };
+
     return {
       // When savedObject gets removed, replace `pkg` with `...omit(pkg, 'savedObject')`
       ...pkg,
