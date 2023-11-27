@@ -40,6 +40,7 @@ interface StateShape {
   instruction?: string;
   instructionStyle?: 'success' | 'warning' | 'error' | 'info';
   display: boolean;
+  skipWhenAutomated?: boolean;
   pre?: (state: StateShape) => Promise<void | boolean>;
   post?: (state: StateShape) => Promise<void | boolean>;
 }
@@ -72,6 +73,7 @@ const states: Record<StateNames, StateShape> = {
     description: 'Waiting for the Release Manager to select a release candidate commit.',
     instruction: `Please find, copy and enter a commit SHA to the buildkite input box to proceed.`,
     instructionStyle: 'warning',
+    skipWhenAutomated: true,
     display: true,
   },
   collect_commit_info: {
@@ -93,6 +95,7 @@ const states: Record<StateNames, StateShape> = {
     description: 'Waiting for the Release Manager to confirm the release.',
     instruction: `Please review the collected information above and unblock the release on Buildkite, if you're satisfied.`,
     instructionStyle: 'warning',
+    skipWhenAutomated: true,
     display: true,
   },
   create_deploy_tag: {
@@ -228,9 +231,11 @@ export async function transition(targetStateName: StateNames, data?: any) {
 
 function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | undefined>) {
   const wizardHeader = `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
+  const isAutomated = process.env.AUTO_PROMOTE_RC?.match(/(1|true)/i);
 
   const wizardSteps = Object.keys(states)
     .filter((stateName) => states[stateName].display)
+    .filter((stateName) => !(isAutomated && states[stateName].skipWhenAutomated))
     .map((stateName) => {
       const stateInfo = states[stateName];
       const stateStatus = stateData[stateName];

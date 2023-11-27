@@ -8,7 +8,7 @@ steps:
     commands:
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state initialize
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state collect_commits
-      - ts-node .buildkite/scripts/serverless/create_deploy_tag/list_commit_candidates.ts 40
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/list_commit_candidates.ts 50
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state wait_for_selection
     key: select_commit
     env:

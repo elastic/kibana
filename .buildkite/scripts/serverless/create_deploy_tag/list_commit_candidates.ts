@@ -34,7 +34,7 @@ async function main(commitCountArg: string) {
     input: commitListWithBuildResultsHtml,
   });
 
-  if (process.env.AUTO_PROMOTE_RC === 'true') {
+  if (process.env.AUTO_PROMOTE_RC?.match(/(1|true)/i)) {
     console.log('--- Finding suitable candidate for auto-promotion');
 
     const suitableCandidate = commitsWithStatuses.find((commit) => {
