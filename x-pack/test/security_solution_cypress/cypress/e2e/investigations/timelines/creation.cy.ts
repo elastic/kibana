@@ -25,7 +25,7 @@ import {
 import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
-import { deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';

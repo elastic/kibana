@@ -39,11 +39,11 @@ describe('Lens flyout', () => {
           newDatasourceState: 'newDatasourceState',
         })
       );
-      expect(updaterFn).toHaveBeenCalledWith('newDatasourceState', null);
+      expect(updaterFn).toHaveBeenCalledWith('newDatasourceState', null, 'testVis');
       store.dispatch(
         updateVisualizationState({ visualizationId: 'testVis', newState: 'newVisState' })
       );
-      expect(updaterFn).toHaveBeenCalledWith('newDatasourceState', 'newVisState');
+      expect(updaterFn).toHaveBeenCalledWith('newDatasourceState', 'newVisState', 'testVis');
     });
 
     test('updater is not run if it does not modify visualization or datasource state', () => {
