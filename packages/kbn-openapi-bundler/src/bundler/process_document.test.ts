@@ -69,7 +69,7 @@ describe('processDocument', () => {
         TestRef: refNode,
       },
       refNode,
-      pointer: '/components/schemas/TestComponent',
+      pointer: '/TestRef',
     });
 
     await processDocument(
@@ -123,6 +123,99 @@ describe('processDocument', () => {
         id: 't1',
       },
     });
+  });
+
+  it('handles recursive documents', async () => {
+    const nodeA: Record<string, unknown> = {
+      foo: 'bar',
+    };
+    const nodeB: Record<string, unknown> = {
+      bar: ' foo',
+    };
+
+    nodeA.circular = nodeB;
+    nodeB.circular = nodeA;
+
+    const document = {
+      nodeA,
+      nodeB,
+    };
+
+    await processDocument(
+      {
+        absolutePath: '/path/to/document',
+        document: document as unknown as Document,
+      },
+      new RefResolver(),
+      []
+    );
+
+    expect(document).toBeDefined();
+  });
+
+  it('handles self-recursive references', async () => {
+    const document = {
+      node: {
+        $ref: '#/TestComponentCircular',
+      },
+      TestComponentCircular: {
+        $ref: '#/TestComponentCircular',
+      },
+    };
+    const refResolver = new RefResolver();
+
+    (refResolver.resolveRef as jest.Mock).mockResolvedValue({
+      absolutePath: '/path/to/document',
+      document,
+      refNode: {
+        $ref: '#/TestComponentCircular',
+      },
+      pointer: '/TestComponentCircular',
+    });
+
+    await processDocument(
+      {
+        absolutePath: '/path/to/document',
+        document: document as unknown as Document,
+      },
+      refResolver,
+      []
+    );
+
+    expect(document).toBeDefined();
+  });
+
+  it('handles recursive references', async () => {
+    const document: Record<string, unknown> = {
+      node: {
+        $ref: '#/TestComponentCircular',
+      },
+      TestComponentCircular: {
+        $ref: '#/AnotherTestComponentCircular',
+      },
+      AnotherTestComponentCircular: {
+        $ref: '#/TestComponentCircular',
+      },
+    };
+    const refResolver = new RefResolver();
+
+    (refResolver.resolveRef as jest.Mock).mockImplementation((_, pointer) => ({
+      absolutePath: '/path/to/document',
+      document,
+      refNode: document[pointer.slice(1)],
+      pointer,
+    }));
+
+    await processDocument(
+      {
+        absolutePath: '/path/to/document',
+        document: document as unknown as Document,
+      },
+      refResolver,
+      []
+    );
+
+    expect(document).toBeDefined();
   });
 });
 
