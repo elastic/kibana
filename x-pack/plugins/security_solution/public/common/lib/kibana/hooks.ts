@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
 import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import {
