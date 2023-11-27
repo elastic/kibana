@@ -372,6 +372,7 @@ export const mockGlobalState: State = {
         itemsPerPageOptions: [10, 25, 50, 100],
         savedSearchId: null,
         isDiscoverSavedSearchLoaded: false,
+        isDataProviderVisible: true,
       },
     },
     insertTimeline: null,
