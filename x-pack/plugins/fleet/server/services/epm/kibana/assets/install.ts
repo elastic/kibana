@@ -35,6 +35,7 @@ import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
+import { KibanaSOReferenceError } from '../../../../errors';
 
 import { withPackageSpan } from '../../packages/utils';
 
@@ -340,7 +341,7 @@ export async function installKibanaSavedObjects({
     );
 
     if (otherErrors?.length) {
-      throw new Error(
+      throw new KibanaSOReferenceError(
         `Encountered ${
           otherErrors.length
         } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
@@ -383,7 +384,7 @@ export async function installKibanaSavedObjects({
         });
 
       if (resolveErrors?.length) {
-        throw new Error(
+        throw new KibanaSOReferenceError(
           `Encountered ${
             resolveErrors.length
           } errors resolving reference errors: ${formatImportErrorsForLog(resolveErrors)}`
