@@ -116,9 +116,7 @@ export const useFilterConfig = ({
     setActiveByFilterKey(newActiveByFilterKey);
   };
 
-  const filterConfigArray = Array.from(filterConfigs.values()).filter(
-    (filter) => filter.isAvailable
-  );
+  const filterConfigArray = Array.from(filterConfigs.values());
   const selectableOptions = filterConfigArray
     .map(({ key, label }) => ({
       key,
