@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  LogExplorerController,
-  LogExplorerControllerContext,
-} from '@kbn/log-explorer-plugin/public';
 import { QueryState } from '@kbn/data-plugin/common';
 import {
+  LogExplorerController,
   LogExplorerPublicState,
   LogExplorerPublicStateUpdate,
 } from '@kbn/log-explorer-plugin/public';
@@ -45,7 +42,7 @@ export type ObservabilityLogExplorerEvent =
     }
   | {
       type: 'LOG_EXPLORER_STATE_CHANGED';
-      state: LogExplorerControllerContext;
+      state: LogExplorerPublicState;
     };
 
 export type ObservabilityLogExplorerTypeState =

@@ -7,7 +7,8 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
-import { EMPTY, from, map, shareReplay } from 'rxjs';
+import equal from 'fast-deep-equal';
+import { distinctUntilChanged, EMPTY, from, map, shareReplay } from 'rxjs';
 import { interpret } from 'xstate';
 import { DatasetsService } from '../services/datasets';
 import { createLogExplorerControllerStateMachine } from '../state_machines/log_explorer_controller';
@@ -67,10 +68,11 @@ export const createLogExplorerControllerFactory =
 
     const service = interpret(machine, {
       devTools: getDevToolsOptions(),
-    }).start();
+    });
 
     const logExplorerState$ = from(service).pipe(
       map(({ context }) => getPublicStateFromContext(context)),
+      distinctUntilChanged(equal),
       shareReplay(1)
     );
 
@@ -86,23 +88,3 @@ export const createLogExplorerControllerFactory =
   };
 
 export type CreateLogExplorerController = ReturnType<typeof createLogExplorerControllerFactory>;
-
-// const createInitialContext = (
-//   initialState: InitialState | undefined
-// ): LogExplorerControllerContext => {
-//   if (initialState != null) {
-//     // const { datasetSelection, ...remainingInitialState } = initialState;
-
-//     return {
-//       ...DEFAULT_CONTEXT,
-//       ...getContextFromPublicState(initialState),
-//       // ...remainingInitialState,
-//       // datasetSelection:
-//       //   datasetSelection != null
-//       //     ? hydrateDatasetSelection(datasetSelection)
-//       //     : DEFAULT_CONTEXT.datasetSelection,
-//     };
-//   }
-
-//   return DEFAULT_CONTEXT;
-// };
