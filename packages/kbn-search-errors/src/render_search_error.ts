@@ -19,7 +19,7 @@ export function renderSearchError({
   error: Error;
   application: ApplicationStart;
 }): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
-  if (error instanceof EsError || error.constructor.name === 'EsError') {
+  if (error instanceof EsError) {
     return {
       title: i18n.translate('searchErrors.search.esErrorTitle', {
         defaultMessage: 'Cannot retrieve search results',
@@ -29,11 +29,7 @@ export function renderSearchError({
     };
   }
 
-  if (
-    error.constructor.name === 'HttpFetchError' ||
-    error instanceof BfetchRequestError ||
-    error.constructor.name === 'BfetchRequestError'
-  ) {
+  if ( error.constructor.name === 'HttpFetchError' || error instanceof BfetchRequestError) {
     const defaultMsg = i18n.translate('searchErrors.errors.fetchError', {
       defaultMessage: 'Check your network connection and try again.',
     });
