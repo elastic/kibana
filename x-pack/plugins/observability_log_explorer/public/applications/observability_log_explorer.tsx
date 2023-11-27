@@ -10,7 +10,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ObservablityLogExplorerMainRoute } from '../routes/main';
+import { DatasetQualityRoute, ObservablityLogExplorerMainRoute } from '../routes/main';
 import {
   ObservabilityLogExplorerAppMountParameters,
   ObservabilityLogExplorerPluginStart,
@@ -71,6 +71,11 @@ export const ObservabilityLogExplorerApp = ({
               path="/"
               exact={true}
               render={() => <ObservablityLogExplorerMainRoute appParams={appParams} core={core} />}
+            />
+            <Route
+              path="/dataset-quality"
+              exact={true}
+              render={() => <DatasetQualityRoute core={core} />}
             />
           </Routes>
         </Router>

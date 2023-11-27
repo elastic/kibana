@@ -44,7 +44,6 @@ export * from './get_rule_for_signal_testing_with_timestamp_override';
 export * from './get_rule_with_web_hook_action';
 export * from './get_rule_with_legacy_investigation_fields';
 export * from './get_saved_query_rule_for_signal_testing';
-export * from './get_signal_status';
 export * from './get_signals_by_id';
 export * from './get_signals_by_ids';
 export * from './get_signals_by_rule_ids';
