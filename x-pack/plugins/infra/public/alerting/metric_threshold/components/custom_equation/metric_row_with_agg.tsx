@@ -81,10 +81,11 @@ export const MetricRowWithAgg = ({
 
   const handleAggChange = useCallback(
     (el: React.ChangeEvent<HTMLSelectElement>) => {
+      const customMetricAggType = el.target.value as CustomMetricAggTypes;
       onChange({
         name,
-        field,
-        aggType: el.target.value as CustomMetricAggTypes,
+        field: customMetricAggType === Aggregators.COUNT ? undefined : field,
+        aggType: customMetricAggType,
       });
     },
     [name, field, onChange]
