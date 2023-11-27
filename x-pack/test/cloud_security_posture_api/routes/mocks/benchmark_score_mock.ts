@@ -18,20 +18,6 @@ export const benchmarkScoreMockData = [
       },
     },
     score_by_benchmark_id: {
-      cis_gcp: {
-        v2_0_0: {
-          total_findings: 1196,
-          passed_findings: 162,
-          failed_findings: 1034,
-        },
-      },
-      cis_azure: {
-        v2_0_0: {
-          total_findings: 132,
-          passed_findings: 68,
-          failed_findings: 64,
-        },
-      },
       cis_aws: {
         v1_5_0: {
           total_findings: 1,
