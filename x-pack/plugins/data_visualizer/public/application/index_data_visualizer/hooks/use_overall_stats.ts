@@ -63,6 +63,7 @@ export function rateLimitingForkJoin<T>(
 }
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
+  esql = false,
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
   probability?: number | null
@@ -127,9 +128,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         samplingOption.seed,
         probability
       );
-
-      // @TODO: remove
-      console.log(`--@@documentCountStats`, documentCountStats);
 
       const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
         data.search

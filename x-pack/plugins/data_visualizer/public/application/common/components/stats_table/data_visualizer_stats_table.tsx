@@ -343,7 +343,11 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             return <TopValuesPreview config={item} />;
           }
 
-          if (item.type === SUPPORTED_FIELD_TYPES.NUMBER) {
+          // @TODO: fix so that for esql, type is number, secondary type is double, float, etc.
+          if (
+            item.type === SUPPORTED_FIELD_TYPES.NUMBER ||
+            item.secondaryType === SUPPORTED_FIELD_TYPES.NUMBER
+          ) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
               // If the cardinality is only low, show the top values instead of a distribution chart
               return item.stats?.distribution?.percentiles.length <= 2 ? (

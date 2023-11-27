@@ -275,6 +275,7 @@ export const useDataVisualizerGridData = (
   );
 
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
+    false,
     fieldStatsRequest,
     lastRefresh,
     dataVisualizerListState.probability
@@ -532,10 +533,10 @@ export const useDataVisualizerGridData = (
           const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
           return loadedFullStats
             ? {
-                ...c,
-                loading: false,
-                stats: { ...c.stats, ...loadedFullStats },
-              }
+              ...c,
+              loading: false,
+              stats: { ...c.stats, ...loadedFullStats },
+            }
             : c;
         });
       }

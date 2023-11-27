@@ -49,6 +49,8 @@ export const { Provider: InternalStateProvider, useSelector: useInternalStateSel
   createStateContainerReactHelpers<ReduxLikeStateContainer<InternalState>>();
 
 export function getInternalStateContainer() {
+  debugger;
+
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,

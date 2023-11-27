@@ -13,77 +13,104 @@ import seedrandom from 'seedrandom';
 import { isDefined } from '@kbn/ml-is-defined';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { lastValueFrom } from 'rxjs';
+import { AggregateQuery } from '@kbn/es-query';
 import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
 import type {
   DocumentCountStats,
   OverallStatsSearchStrategyParams,
 } from '../../../../../common/types/field_stats';
+import { isESQLQuery } from './esql_utils';
 
 const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
 
-const getESQLDocumentCountStats = async (
+export const getESQLDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
-  params: OverallStatsSearchStrategyParams,
+  query: AggregateQuery,
+  timeFieldName: string | undefined,
+  intervalMs: number | undefined,
   searchOptions: ISearchOptions
-): Promise<DocumentCountStats> => {
-  const {
-    index,
-    timeFieldName,
-    earliest: earliestMs,
-    latest: latestMs,
-    runtimeFieldMap,
-    searchQuery,
-    intervalMs,
-  } = params;
+): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
+  // const timeFields = columnsResp.rawResponse.columns
+  //   .filter((c) => c.type === 'date')
+  //   .sort((a, b) => {
+  //     if (a.name === '@timestamp') return 1;
+  //     if (b.name === '@timestamp') return 1;
 
-  const esqlBaseQuery = `from ${index}`;
-  const aggQuery = `| EVAL _timestamp_=TO_DOUBLE(DATE_TRUNC(${intervalMs} milliseconds, ${timeFieldName})) | stats rows = count(*) by _timestamp_ | LIMIT 10000`;
+  //     return -1;
+  //   });
 
-  const esqlResults = await lastValueFrom(
-    search.search(
-      {
-        params: {
-          query: esqlBaseQuery + aggQuery,
-          time_zone: 'UTC',
-          locale: 'en',
-          filter: {
-            bool: {
-              must: [],
-              filter: [],
-              should: [],
-              must_not: [],
-            },
+  if (!isESQLQuery(query)) {
+    throw Error('No ESQL query provided');
+  }
+  const esqlBaseQuery = query.esql;
+  let earliestMs = Infinity;
+  let latestMs = -Infinity;
+
+  if (timeFieldName) {
+    const aggQuery = `| EVAL _timestamp_=TO_DOUBLE(DATE_TRUNC(${intervalMs} milliseconds, ${timeFieldName})) | stats rows = count(*) by _timestamp_ | LIMIT 10000`;
+
+    const esqlResults = await lastValueFrom(
+      search.search(
+        {
+          params: {
+            query: esqlBaseQuery + aggQuery,
+            time_zone: 'UTC',
+            locale: 'en',
           },
         },
-      },
-      { ...searchOptions, strategy: 'esql' }
-    )
-  );
+        { ...searchOptions, strategy: 'esql' }
+      )
+    );
 
-  let totalCount = 0;
-  const _buckets = {};
-  esqlResults.rawResponse.values.forEach((val) => {
-    const [count, bucket] = val;
-    _buckets[bucket] = count;
-    totalCount += count;
-  });
-  const result: DocumentCountStats = {
-    interval: intervalMs,
-    probability: 1,
-    randomlySampled: false,
-    timeRangeEarliest: earliestMs,
-    timeRangeLatest: latestMs,
-    buckets: _buckets,
-    totalCount,
-  };
-  return result;
+    let totalCount = 0;
+    const _buckets = {};
+    // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
+    esqlResults.rawResponse.values.forEach((val) => {
+      const [count, bucket] = val;
+      _buckets[bucket] = count;
+      totalCount += count;
+      if (bucket < earliestMs) {
+        earliestMs = bucket;
+      }
+      if (bucket >= latestMs) {
+        latestMs = bucket;
+      }
+    });
+    const result: DocumentCountStats = {
+      interval: intervalMs,
+      probability: 1,
+      randomlySampled: false,
+      timeRangeEarliest: earliestMs,
+      timeRangeLatest: latestMs,
+      buckets: _buckets,
+      totalCount,
+    };
+    return { documentCountStats: result, totalCount };
+  } else {
+    //  If not time field, get the total count
+    const esqlResults = await lastValueFrom(
+      search.search(
+        {
+          params: {
+            query: esqlBaseQuery + '| STATS _count_ = COUNT(*)  | LIMIT 1',
+            time_zone: 'UTC',
+            locale: 'en',
+          },
+        },
+        { ...searchOptions, strategy: 'esql' }
+      )
+    );
+
+    // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
+    return { documentCountStats: undefined, totalCount: esqlResults.rawResponse.values[0][0] };
+  }
 };
 export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
   searchOptions: ISearchOptions,
-  browserSessionSeed: string,
+  browserSessionSeed?: string,
   probability?: number | null,
   minimumRandomSamplerDocCount?: number
 ): Promise<DocumentCountStats> => {
@@ -104,8 +131,6 @@ export const getDocumentCountStats = async (
 
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
-  // @TODO:
-  return await getESQLDocumentCountStats(search, params, searchOptions);
   const query = {
     bool: {
       filter: filterCriteria,
