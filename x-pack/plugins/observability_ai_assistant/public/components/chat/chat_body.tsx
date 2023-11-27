@@ -259,6 +259,33 @@ export function ChatBody({
     );
   }
 
+  if (conversation.error) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        className={containerClassName}
+        justifyContent="center"
+      >
+        <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationTitle', {
+              defaultMessage: 'Conversation not found',
+            })}
+            iconType="warning"
+          >
+            {i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationContent', {
+              defaultMessage:
+                'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
+              values: { conversationId: initialConversationId },
+            })}
+          </EuiCallOut>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
       {connectors.selectedConnector ? (

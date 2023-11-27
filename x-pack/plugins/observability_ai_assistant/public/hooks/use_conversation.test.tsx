@@ -25,7 +25,7 @@ import { ChatState } from './use_chat';
 import { createMockChatService } from '../service/create_mock_chat_service';
 import { Subject } from 'rxjs';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
-import { omit } from 'lodash';
+import { merge, omit } from 'lodash';
 
 let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
 
@@ -271,13 +271,55 @@ describe('useConversation', () => {
 
   describe('when chat completes without an initial conversation id', () => {
     const subject: Subject<PendingMessage> = new Subject();
-    beforeEach(() => {
-      mockService.callApi.mockImplementation(async (endpoint, request) => ({
-        conversation: {
-          id: 'my-conversation-id',
+    const expectedMessages = [
+      {
+        '@timestamp': expect.any(String),
+        message: {
+          role: MessageRole.System,
+          content: '',
         },
-        messages: (request as any).params.body.messages,
-      }));
+      },
+      {
+        '@timestamp': expect.any(String),
+        message: {
+          role: MessageRole.User,
+          content: 'Hello',
+        },
+      },
+      {
+        '@timestamp': expect.any(String),
+        message: {
+          role: MessageRole.Assistant,
+          content: 'Goodbye',
+        },
+      },
+      {
+        '@timestamp': expect.any(String),
+        message: {
+          role: MessageRole.User,
+          content: 'Hello again',
+        },
+      },
+      {
+        '@timestamp': expect.any(String),
+        message: {
+          role: MessageRole.Assistant,
+          content: 'Goodbye again',
+        },
+      },
+    ];
+    beforeEach(() => {
+      mockService.callApi.mockImplementation(async (endpoint, request) =>
+        merge(
+          {
+            conversation: {
+              id: 'my-conversation-id',
+            },
+            messages: expectedMessages,
+          },
+          (request as any).params.body
+        )
+      );
 
       hookResult = renderHook(useConversation, {
         initialProps: {
@@ -309,44 +351,6 @@ describe('useConversation', () => {
     });
 
     it('the conversation is created including the initial messages', async () => {
-      const expectedMessages = [
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            role: MessageRole.System,
-            content: '',
-          },
-        },
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            role: MessageRole.User,
-            content: 'Hello',
-          },
-        },
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            role: MessageRole.Assistant,
-            content: 'Goodbye',
-          },
-        },
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            role: MessageRole.User,
-            content: 'Hello again',
-          },
-        },
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            role: MessageRole.Assistant,
-            content: 'Goodbye again',
-          },
-        },
-      ];
-
       act(() => {
         hookResult.result.current.next(
           hookResult.result.current.messages.concat({
@@ -388,6 +392,8 @@ describe('useConversation', () => {
           signal: null,
         },
       ]);
+
+      expect(hookResult.result.current.conversation.error).toBeUndefined();
 
       expect(hookResult.result.current.messages).toEqual(expectedMessages);
     });

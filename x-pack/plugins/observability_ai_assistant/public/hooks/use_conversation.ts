@@ -109,10 +109,10 @@ export function useConversation({
     });
 
     return (
-      initialConversationId
+      displayedConversationId
         ? update(
             merge(
-              { conversation: { id: initialConversationId } },
+              { conversation: { id: displayedConversationId } },
               nextConversationObject
             ) as Conversation
           )
@@ -197,10 +197,10 @@ export function useConversation({
             throw error;
           });
       },
-      [initialConversationId, initialTitle],
+      [displayedConversationId, initialTitle],
       {
         defaultValue: () => {
-          if (!initialConversationId) {
+          if (!displayedConversationId) {
             const nextConversation = createNewConversation({ title: initialTitle });
             return nextConversation;
           }
