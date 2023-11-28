@@ -14,7 +14,7 @@ import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { PreviewPanelKey } from '../../preview';
+import { DocumentDetailsPreviewPanelKey } from '../../preview';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
@@ -82,7 +82,7 @@ describe('<Reason />', () => {
     getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID).click();
 
     expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-      id: PreviewPanelKey,
+      id: DocumentDetailsPreviewPanelKey,
       path: { tab: 'alert-reason-preview' },
       params: {
         id: panelContextValue.eventId,

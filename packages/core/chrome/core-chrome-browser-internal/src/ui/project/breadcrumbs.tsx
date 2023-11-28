@@ -43,5 +43,18 @@ export function Breadcrumbs({ breadcrumbs$ }: Props) {
     };
   });
 
-  return <EuiBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
+  return (
+    <EuiBreadcrumbs
+      breadcrumbs={crumbs}
+      data-test-subj="breadcrumbs"
+      // reduce number of visible breadcrumbs due to increased max-width of the root breadcrumbs
+      responsive={{
+        xs: 1,
+        s: 2,
+        m: 3,
+        l: 4,
+        xl: 7,
+      }}
+    />
+  );
 }
