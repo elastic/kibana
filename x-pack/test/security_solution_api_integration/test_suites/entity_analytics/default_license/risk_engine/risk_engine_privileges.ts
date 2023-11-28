@@ -83,7 +83,6 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess privileges_apis', () => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const riskEngineRoutesNoAuth = riskEngineRouteHelpersFactoryNoAuth(supertestWithoutAuth);
-    const logger = getService('log');
     const security = getService('security');
 
     const createRole = async ({ name, privileges }: { name: string; privileges: any }) => {
