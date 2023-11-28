@@ -1206,7 +1206,7 @@ describe('rule_form', () => {
             minimumScheduleInterval: { value: '1m', enforce: false },
           }}
           dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
