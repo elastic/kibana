@@ -10,6 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { SuperTest, Test } from 'supertest';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   data as telemetryMockData,
@@ -82,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
 
       await createPackagePolicy(
-        supertest,
+        supertest as SuperTest<Test>,
         agentPolicyId,
         'cspm',
         'cloudbeat/cis_aws',

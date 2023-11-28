@@ -9,6 +9,8 @@ import { format as formatUrl } from 'url';
 import supertest, { type SuperAgentTest } from 'supertest';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+export type FtrSuperAgentTest = Pick<SuperAgentTest, 'get' | 'delete' | 'post' | 'patch' | 'put'>;
+
 /**
  * Return a new SuperAgentTest instance for every API call to avoid cookie caching.
  * If you want to verify cookies are empty use the following code:
@@ -37,7 +39,7 @@ const initSuperAgentTest = (kbnUrl: string, ca?: string[]) => {
       const agent = supertest.agent(kbnUrl, { ca });
       return agent.put(url);
     },
-  } as Pick<SuperAgentTest, 'get' | 'delete' | 'post' | 'patch' | 'put'>;
+  } as FtrSuperAgentTest;
 };
 
 export function SupertestProvider({ getService }: FtrProviderContext) {

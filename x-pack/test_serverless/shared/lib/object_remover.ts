@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SuperTest, Test } from 'supertest';
+import { type FtrSuperAgentTest } from '../services/supertest';
 
 import { getUrlPathPrefixForSpace } from './space_path_prefix';
 
@@ -18,10 +18,10 @@ interface ObjectToRemove {
 }
 
 export class ObjectRemover {
-  private readonly supertest: SuperTest<Test>;
+  private readonly supertest: FtrSuperAgentTest;
   private objectsToRemove: ObjectToRemove[] = [];
 
-  constructor(supertest: SuperTest<Test>) {
+  constructor(supertest: FtrSuperAgentTest) {
     this.supertest = supertest;
   }
 
@@ -60,7 +60,7 @@ export class ObjectRemover {
 }
 
 interface DeleteObjectParams {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   url: string;
   plugin: string;
 }

@@ -10,6 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
@@ -72,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId4 = agentPolicyResponse4.item.id;
 
       await createPackagePolicy(
-        supertest,
+        supertest as SuperTest<Test>,
         agentPolicyId,
         'cspm',
         'cloudbeat/cis_aws',
@@ -82,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await createPackagePolicy(
-        supertest,
+        supertest as SuperTest<Test>,
         agentPolicyId2,
         'kspm',
         'cloudbeat/cis_k8s',
@@ -92,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await createPackagePolicy(
-        supertest,
+        supertest as SuperTest<Test>,
         agentPolicyId3,
         'vuln_mgmt',
         'cloudbeat/vuln_mgmt_aws',
@@ -102,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await createPackagePolicy(
-        supertest,
+        supertest as SuperTest<Test>,
         agentPolicyId4,
         'kspm',
         'cloudbeat/cis_k8s',

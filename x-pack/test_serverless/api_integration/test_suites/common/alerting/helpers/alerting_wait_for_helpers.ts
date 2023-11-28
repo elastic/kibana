@@ -6,13 +6,13 @@
  */
 
 import pRetry from 'p-retry';
-import type { SuperTest, Test } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { runRule } from './alerting_api_helper';
+import { FtrSuperAgentTest } from '../../../../../shared/services/supertest';
 
 export async function waitForDocumentInIndex({
   esClient,
@@ -372,7 +372,7 @@ export async function waitForNumRuleRuns({
   esClient,
   testStart,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   numOfRuns: number;
   ruleId: string;
   esClient: Client;

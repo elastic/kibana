@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import type { SuperTest, Test } from 'supertest';
 
 interface CreateEsQueryRuleParams {
   size: number;
@@ -32,7 +31,7 @@ export async function createIndexConnector({
   name,
   indexName,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   name: string;
   indexName: string;
 }) {
@@ -56,7 +55,7 @@ export async function createSlackConnector({
   supertest,
   name,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   name: string;
 }) {
   const { body } = await supertest
@@ -87,7 +86,7 @@ export async function createEsQueryRule({
   notifyWhen,
   enabled = true,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleTypeId: string;
   name: string;
   params: CreateEsQueryRuleParams;
@@ -120,6 +119,7 @@ export async function createEsQueryRule({
 }
 
 import { v4 as uuidv4 } from 'uuid';
+import { FtrSuperAgentTest } from '../../../../../shared/services/supertest';
 export const generateUniqueKey = () => uuidv4().replace(/-/g, '');
 
 export async function createAnomalyRule({
@@ -134,7 +134,7 @@ export async function createAnomalyRule({
   ruleTypeId = 'apm.anomaly',
   params,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -183,7 +183,7 @@ export async function createLatencyThresholdRule({
   ruleTypeId = 'apm.transaction_duration',
   params,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -232,7 +232,7 @@ export async function createInventoryRule({
   ruleTypeId = 'metrics.alert.inventory.threshold',
   params,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -286,7 +286,7 @@ export async function disableRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -302,7 +302,7 @@ export async function updateEsQueryRule({
   ruleId,
   updates,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
   updates: any;
 }) {
@@ -340,7 +340,7 @@ export async function runRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
 }) {
   const response = await supertest
@@ -355,7 +355,7 @@ export async function muteRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -370,7 +370,7 @@ export async function enableRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -386,7 +386,7 @@ export async function muteAlert({
   ruleId,
   alertId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
   alertId: string;
 }) {
@@ -402,7 +402,7 @@ export async function unmuteRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -417,7 +417,7 @@ export async function snoozeRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -442,7 +442,7 @@ export async function findRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSuperAgentTest;
   ruleId: string;
 }) {
   if (!ruleId) {
