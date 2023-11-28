@@ -9,7 +9,8 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
 
-import { E5_MODEL_ID, ELSER_MODEL_ID, fetchMlModels } from './fetch_ml_models';
+import { fetchMlModels } from './fetch_ml_models';
+import { E5_MODEL_ID, ELSER_MODEL_ID } from './utils';
 
 describe('fetchMlModels', () => {
   const mockTrainedModelsProvider = {

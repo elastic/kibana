@@ -6,87 +6,18 @@
  */
 
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
-import { i18n } from '@kbn/i18n';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
-
-export const ELSER_MODEL_ID = '.elser_model_2';
-export const E5_MODEL_ID = '.multilingual-e5-small';
-const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
-
-const MODEL_TITLES_BY_TYPE: Record<string, string | undefined> = {
-  fill_mask: i18n.translate('xpack.enterpriseSearch.content.ml_inference.fill_mask', {
-    defaultMessage: 'Fill Mask',
-  }),
-  lang_ident: i18n.translate('xpack.enterpriseSearch.content.ml_inference.lang_ident', {
-    defaultMessage: 'Language Identification',
-  }),
-  ner: i18n.translate('xpack.enterpriseSearch.content.ml_inference.ner', {
-    defaultMessage: 'Named Entity Recognition',
-  }),
-  question_answering: i18n.translate(
-    'xpack.enterpriseSearch.content.ml_inference.question_answering',
-    {
-      defaultMessage: 'Question Answering',
-    }
-  ),
-  text_classification: i18n.translate(
-    'xpack.enterpriseSearch.content.ml_inference.text_classification',
-    {
-      defaultMessage: 'Text Classification',
-    }
-  ),
-  text_embedding: i18n.translate('xpack.enterpriseSearch.content.ml_inference.text_embedding', {
-    defaultMessage: 'Dense Vector Text Embedding',
-  }),
-  text_expansion: i18n.translate('xpack.enterpriseSearch.content.ml_inference.text_expansion', {
-    defaultMessage: 'Elastic Learned Sparse EncodeR (ELSER)',
-  }),
-  zero_shot_classification: i18n.translate(
-    'xpack.enterpriseSearch.content.ml_inference.zero_shot_classification',
-    {
-      defaultMessage: 'Zero-Shot Text Classification',
-    }
-  ),
-};
-
-const BASE_MODEL = {
-  deploymentState: MlModelDeploymentState.NotDeployed,
-  nodeAllocationCount: 0,
-  startTime: 0,
-  targetAllocationCount: 0,
-  threadsPerAllocation: 0,
-  isPlaceholder: false,
-  hasStats: false,
-};
-
-const ELSER_V2_MODEL_PLACEHOLDER: MlModel = {
-  ...BASE_MODEL,
-  modelId: ELSER_MODEL_ID,
-  type: SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION,
-  title: 'Elastic Learned Sparse EncodeR (ELSER)',
-  description: i18n.translate('xpack.enterpriseSearch.modelCard.elserPlaceholder.description', {
-    defaultMessage:
-      'ELSER is designed to efficiently use context in natural language queries with better results than BM25 alone.',
-  }),
-  license: 'Elastic',
-  isPlaceholder: true,
-};
-
-const E5_MODEL_PLACEHOLDER: MlModel = {
-  ...BASE_MODEL,
-  modelId: E5_MODEL_ID,
-  type: SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING,
-  title: 'E5 Multilingual Embedding',
-  description: i18n.translate('xpack.enterpriseSearch.modelCard.e5Placeholder.description', {
-    defaultMessage: 'Multilingual dense vector embedding generator.',
-  }),
-  license: 'MIT',
-  modelDetailsPageUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
-  isPlaceholder: true,
-};
+import {
+  BASE_MODEL,
+  ELSER_MODEL_ID,
+  ELSER_MODEL_PLACEHOLDER,
+  E5_MODEL_ID,
+  E5_MODEL_PLACEHOLDER,
+  LANG_IDENT_MODEL_ID,
+  MODEL_TITLES_BY_TYPE,
+} from './utils';
 
 /**
  * Fetches and enriches trained model information and deployment status. Pins promoted models (ELSER, E5) to the top. If a promoted model doesn't exist, a placeholder will be used.
@@ -102,7 +33,7 @@ export const fetchMlModels = async (
   }
 
   // This array will contain all models, let's add placeholders first
-  const models: MlModel[] = [ELSER_V2_MODEL_PLACEHOLDER, E5_MODEL_PLACEHOLDER];
+  const models: MlModel[] = [ELSER_MODEL_PLACEHOLDER, E5_MODEL_PLACEHOLDER];
 
   // Fetch all models and their deployment stats using the ML client
   const modelsResponse = await trainedModelsProvider.getTrainedModels({});
