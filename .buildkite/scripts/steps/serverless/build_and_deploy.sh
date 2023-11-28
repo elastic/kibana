@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
-set -x
+
 
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/docker_image.sh
@@ -105,5 +105,3 @@ EOF
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-observability" && deploy "observability"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
-
-set +x
