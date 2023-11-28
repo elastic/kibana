@@ -202,10 +202,10 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         soDoc = await this.getCurrentKeyPairObj();
       },
       {
-        maxDelay: 60 * 60 * 1000, // 1 hour in milliseconds
-        startingDelay: 1000, // 1 second
+        startingDelay: 300, // 0.3 second
+        maxDelay: 1000, // 1 second
         jitter: 'full',
-        numOfAttempts: Infinity,
+        numOfAttempts: 10,
         retry: (_err: Error, attempt: number) => {
           // not logging the error since we don't control what's in the error and it might contain sensitive data
           // ESO already logs specific caught errors before passing the error along
