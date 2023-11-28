@@ -12,6 +12,14 @@ export const getSLOMappingsTemplate = (name: string) => ({
   template: {
     mappings: {
       properties: {
+        event: {
+          properties: {
+            ingested: {
+              type: 'date',
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
         '@timestamp': {
           type: 'date',
           format: 'date_optional_time||epoch_millis',
@@ -50,33 +58,8 @@ export const getSLOMappingsTemplate = (name: string) => ({
             revision: {
               type: 'long',
             },
-            groupBy: {
-              type: 'keyword',
-              ignore_above: 256,
-            },
             instanceId: {
               type: 'keyword',
-              ignore_above: 256,
-            },
-            name: {
-              type: 'keyword',
-              ignore_above: 256,
-            },
-            description: {
-              type: 'keyword',
-              ignore_above: 256,
-            },
-            tags: {
-              type: 'keyword',
-              ignore_above: 256,
-            },
-            indicator: {
-              properties: {
-                type: {
-                  type: 'keyword',
-                  ignore_above: 256,
-                },
-              },
             },
             objective: {
               properties: {

@@ -17,11 +17,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
           properties: {
             name: {
               type: 'keyword',
-              ignore_above: 256,
             },
             environment: {
               type: 'keyword',
-              ignore_above: 256,
             },
           },
         },
@@ -29,11 +27,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
           properties: {
             name: {
               type: 'keyword',
-              ignore_above: 256,
             },
             type: {
               type: 'keyword',
-              ignore_above: 256,
             },
           },
         },
@@ -48,23 +44,23 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
             },
             groupBy: {
               type: 'keyword',
-              ignore_above: 256,
             },
             instanceId: {
               type: 'keyword',
-              ignore_above: 256,
             },
             name: {
-              type: 'keyword',
-              ignore_above: 256,
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                },
+              },
             },
             description: {
-              type: 'keyword',
-              ignore_above: 256,
+              type: 'text',
             },
             tags: {
               type: 'keyword',
-              ignore_above: 256,
             },
             indicator: {
               properties: {
@@ -115,10 +111,17 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
         },
         status: {
           type: 'keyword',
-          ignore_above: 32,
         },
         isTempDoc: {
           type: 'boolean',
+        },
+        latestSliTimestamp: {
+          type: 'date',
+          format: 'date_optional_time||epoch_millis',
+        },
+        summaryUpdatedAt: {
+          type: 'date',
+          format: 'date_optional_time||epoch_millis',
         },
       },
     },
