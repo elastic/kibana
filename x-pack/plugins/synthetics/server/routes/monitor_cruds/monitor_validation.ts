@@ -167,12 +167,16 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     url: rawUrl,
     ssl: rawSSL,
     host: rawHost,
+    inline_script: inlineScript,
     custom_heartbeat_id: _customHeartbeatId,
     ...rawConfig
   } = flattenedConfig;
   if (rawUrl) {
     // since api accept url key as well
     rawConfig[ConfigKey.URLS] = rawUrl;
+  }
+  if (inlineScript) {
+    rawConfig[ConfigKey.SOURCE_INLINE] = inlineScript;
   }
   if (rawHost) {
     // since api accept url key as well

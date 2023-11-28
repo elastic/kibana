@@ -15,6 +15,7 @@ import {
 
 const keysToOmit = [
   ConfigKey.URLS,
+  ConfigKey.SOURCE_INLINE,
   ConfigKey.HOSTS,
   ConfigKey.CONFIG_HASH,
   ConfigKey.JOURNEY_ID,
@@ -22,6 +23,20 @@ const keysToOmit = [
 ];
 
 type Result = MonitorFields & { url?: string; host?: string };
+
+export const transformPublicKeys = (result: Result) => {
+  if (result[ConfigKey.URLS]) {
+    result.url = result[ConfigKey.URLS];
+  }
+  if (result[ConfigKey.SOURCE_INLINE]) {
+    result.inline_script = result[ConfigKey.SOURCE_INLINE];
+  }
+  if (result[ConfigKey.HOSTS]) {
+    result.host = result[ConfigKey.HOSTS];
+  }
+  return omit(result, keysToOmit) as Result;
+};
+
 export function mapSavedObjectToMonitor(
   so: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>
 ) {
@@ -29,13 +44,8 @@ export function mapSavedObjectToMonitor(
     created_at: so.created_at,
     updated_at: so.updated_at,
   }) as Result;
-  if (result[ConfigKey.URLS]) {
-    result.url = result[ConfigKey.URLS];
-  }
-  if (result[ConfigKey.HOSTS]) {
-    result.host = result[ConfigKey.HOSTS];
-  }
-  result = omit(result, keysToOmit) as Result;
+  result = transformPublicKeys(result);
+
   // omit undefined value or null value
   return omitBy(result, removeMonitorEmptyValues);
 }

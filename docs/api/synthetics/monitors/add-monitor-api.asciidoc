@@ -175,7 +175,7 @@ You may provide either `locations` or `private_locations`, and you may also prov
 
 *Browser Monitor Fields*:
 
-`source.inline.script`:: (Required, string): The inline script.
+`inline_script`:: (Required, string): The inline script.
 
 `screenshots`:: (Optional, string, default: "on"): Screenshot option, either "on",  "off" or "only-on-failure".
 
@@ -241,7 +241,7 @@ POST /api/synthetics/monitors
 {
   "type": "browser",
   "name": "Example journey",
-  "source.inline.script": "step('Go to https://google.com.co', async () => {\n  await page.goto('https://www.google.com');\n});"
+  "inline_script": "step('Go to https://google.com.co', async () => {\n  await page.goto('https://www.google.com');\n});"
 }
 --------------------------------------------------
 

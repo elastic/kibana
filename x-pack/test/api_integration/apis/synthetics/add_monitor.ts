@@ -22,17 +22,12 @@ import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import {
+  removeMonitorEmptyValues,
+  transformPublicKeys,
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-
-export const monitorKeysToOmit = [
-  ConfigKey.URLS,
-  ConfigKey.HOSTS,
-  ConfigKey.CONFIG_HASH,
-  ConfigKey.JOURNEY_ID,
-  ConfigKey.FORM_MONITOR_TYPE,
-];
 
 export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statusCode = 200) => {
   const result = await supertestAPI
@@ -58,10 +53,7 @@ export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statu
 };
 
 export const omitMonitorKeys = (monitor: any) => {
-  if (monitor.urls) {
-    monitor.url = monitor.urls;
-  }
-  return omitBy(omit(monitor, monitorKeysToOmit), removeMonitorEmptyValues);
+  return omitBy(transformPublicKeys(monitor), removeMonitorEmptyValues);
 };
 
 export default function ({ getService }: FtrProviderContext) {

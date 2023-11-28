@@ -8,7 +8,10 @@ import expect from '@kbn/expect';
 import { omitBy } from 'lodash';
 
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import {
+  removeMonitorEmptyValues,
+  transformPublicKeys,
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 
@@ -192,6 +195,24 @@ export default function ({ getService }: FtrProviderContext) {
           locations: ['localhost'],
           name: 'simple journey',
           'source.inline.script': 'step("simple journey", async () => {});',
+        };
+        const { body: result } = await addMonitorAPI(monitor);
+
+        expect(transformPublicKeys(result)).eql(
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+          })
+        );
+      });
+
+      it('base browser monitor with inline_script', async () => {
+        const monitor = {
+          type: 'browser',
+          locations: ['localhost'],
+          name: 'simple journey inline_script',
+          inline_script: 'step("simple journey", async () => {});',
         };
         const { body: result } = await addMonitorAPI(monitor);
 
