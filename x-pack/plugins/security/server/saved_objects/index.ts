@@ -7,9 +7,9 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import { SavedObjectsSecurityExtension } from './saved_objects_security_extension';
-import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 
 interface SetupSavedObjectsParams {

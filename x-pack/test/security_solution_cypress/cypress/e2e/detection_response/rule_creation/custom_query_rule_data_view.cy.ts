@@ -52,7 +52,11 @@ import {
   getRulesManagementTableRows,
   goToRuleDetailsOf,
 } from '../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules, deleteDataView, postDataView } from '../../../tasks/common';
+import {
+  deleteAlertsAndRules,
+  deleteDataView,
+  postDataView,
+} from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   createRuleWithoutEnabling,

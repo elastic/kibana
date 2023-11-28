@@ -6,7 +6,6 @@
  */
 
 import { cleanup, generate } from '@kbn/infra-forge';
-import { CUSTOM_AGGREGATOR } from '@kbn/observability-plugin/common/custom_threshold_rule/constants';
 import {
   Aggregators,
   Comparator,
@@ -85,9 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: CUSTOM_AGGREGATOR,
-                comparator: Comparator.GT,
-                threshold: [2],
+                comparator: Comparator.OUTSIDE_RANGE,
+                threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
@@ -178,9 +176,8 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
-                comparator: '>',
-                threshold: [2],
+                comparator: Comparator.OUTSIDE_RANGE,
+                threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: 'count' }],

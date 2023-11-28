@@ -10,7 +10,7 @@ import {
   BrowserAdvancedFields,
   BrowserSimpleFields,
   CommonFields,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPAdvancedFields,
   HTTPMethod,
@@ -129,7 +129,7 @@ export const ALLOWED_SCHEDULES_IN_MINUTES = [
 ];
 
 export const DEFAULT_COMMON_FIELDS: CommonFields = {
-  [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   [ConfigKey.ENABLED]: true,
   [ConfigKey.ALERT_CONFIG]: { status: { enabled: true }, tls: { enabled: true } },
@@ -171,7 +171,7 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
       file_name: '',
     },
   },
-  [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+  [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
   [ConfigKey.PORT]: null,
   [ConfigKey.SCHEDULE]: {
     unit: ScheduleUnit.MINUTES,
@@ -192,7 +192,7 @@ export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
   },
   [ConfigKey.URLS]: '',
   [ConfigKey.MAX_REDIRECTS]: '0',
-  [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
   [ConfigKey.PORT]: null,
 };
@@ -224,7 +224,7 @@ export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
 export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {
   ...DEFAULT_COMMON_FIELDS,
   [ConfigKey.HOSTS]: '',
-  [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+  [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.ICMP,
   [ConfigKey.WAIT]: '1',
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
 };
@@ -236,7 +236,7 @@ export const DEFAULT_TCP_SIMPLE_FIELDS: TCPSimpleFields = {
   },
   [ConfigKey.HOSTS]: '',
   [ConfigKey.URLS]: '',
-  [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
+  [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.TCP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
   [ConfigKey.PORT]: null,
 };
@@ -267,21 +267,21 @@ export const DEFAULT_TLS_FIELDS: TLSFields = {
 };
 
 export const DEFAULT_FIELDS: MonitorDefaults = {
-  [DataStream.HTTP]: {
+  [MonitorTypeEnum.HTTP]: {
     ...DEFAULT_HTTP_SIMPLE_FIELDS,
     ...DEFAULT_HTTP_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
   },
-  [DataStream.TCP]: {
+  [MonitorTypeEnum.TCP]: {
     ...DEFAULT_TCP_SIMPLE_FIELDS,
     ...DEFAULT_TCP_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
   },
-  [DataStream.ICMP]: {
+  [MonitorTypeEnum.ICMP]: {
     ...DEFAULT_ICMP_SIMPLE_FIELDS,
     ...DEFAULT_ICMP_ADVANCED_FIELDS,
   },
-  [DataStream.BROWSER]: {
+  [MonitorTypeEnum.BROWSER]: {
     ...DEFAULT_BROWSER_SIMPLE_FIELDS,
     ...DEFAULT_BROWSER_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
