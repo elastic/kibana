@@ -7,17 +7,31 @@
 
 import expect from '@kbn/expect';
 
-import { indicesHelpers } from './lib/indices.helpers';
-import { registerHelpers } from './settings.helpers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }) {
-  const supertest = getService('supertest');
-
-  const { createIndex, deleteAllIndices } = indicesHelpers(getService);
-
-  const { getIndexSettings, updateIndexSettings } = registerHelpers({ supertest });
+export default function ({ getService }: FtrProviderContext) {
+  const indexManagementService = getService('indexManagement');
 
   describe('settings', () => {
+    let getIndexSettings: typeof indexManagementService['settings']['api']['getIndexSettings'];
+    let updateIndexSettings: typeof indexManagementService['settings']['api']['updateIndexSettings'];
+    let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
+    let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
+
+    before(async () => {
+      ({
+        settings: {
+          api: {
+            getIndexSettings,
+            updateIndexSettings,
+          },
+        },
+        indices: {
+          helpers: { createIndex, deleteAllIndices },
+        },
+      } = indexManagementService);
+    });
+
     after(async () => await deleteAllIndices());
 
     it('should fetch an index settings', async () => {
@@ -108,5 +122,6 @@ export default function ({ getService }) {
       const { body: body2 } = await getIndexSettings(index);
       expect(body2.settings.index.number_of_replicas).to.be('2');
     });
+
   });
 }
