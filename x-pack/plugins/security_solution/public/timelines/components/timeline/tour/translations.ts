@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const TIMELINE_TOUR_SUBTITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.subTitle',
   {
-    defaultMessage: 'Timeline has Changed',
+    defaultMessage: 'Timeline has changed',
   }
 );
 
@@ -18,13 +18,6 @@ export const TIMELINE_TOUR_TIMELINE_ACTIONS_STEP_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.newTimeline.title',
   {
     defaultMessage: 'Timeline actions have moved',
-  }
-);
-
-export const TIMELINE_TOUR_TIMELINE_ACTIONS_STEP_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.timeline.tour.newTimeline.description',
-  {
-    defaultMessage: 'Create a new Timeline/Timeline template or Open an existing timeline here',
   }
 );
 
@@ -46,14 +39,6 @@ export const TIMELINE_TOUR_SAVE_TIMELINE_STEP_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.saveTimeline.title',
   {
     defaultMessage: 'Save Timeline',
-  }
-);
-
-export const TIMELINE_TOUR_SAVE_TIMELINE_STEP_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.timeline.tour.saveTimeline.description',
-  {
-    defaultMessage:
-      'Click Save to manually Save existing timeline, edit its name and description. You also have the option to save it as a new timeline.',
   }
 );
 
@@ -81,4 +66,27 @@ export const TIMELINE_TOUR_FINISH = i18n.translate('xpack.securitySolution.timel
 
 export const TIMELINE_TOUR_EXIT = i18n.translate('xpack.securitySolution.timeline.tour.exit', {
   defaultMessage: 'Exit tour',
+});
+
+export const TIMELINE_TOUR_SAVE = i18n.translate('xpack.securitySolution.timeline.tour.save', {
+  defaultMessage: 'Save',
+});
+
+export const TIMELINE_TOUR_NEW = i18n.translate('xpack.securitySolution.timeline.tour.new', {
+  defaultMessage: 'New',
+});
+
+export const TIMELINE_TOUR_OPEN = i18n.translate('xpack.securitySolution.timeline.tour.open', {
+  defaultMessage: 'Open',
+});
+
+export const TIMELINE_TOUR_SAVE_AS_NEW = i18n.translate(
+  'xpack.securitySolution.timeline.tour.saveAsNew',
+  {
+    defaultMessage: 'Save as new',
+  }
+);
+
+export const TIMELINE_TOUR_EDIT = i18n.translate('xpack.securitySolution.timeline.tour.edit', {
+  defaultMessage: 'Edit',
 });

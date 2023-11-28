@@ -106,7 +106,7 @@ const TimelineTourComp = () => {
             stepsTotal={timelineTourSteps.length}
             onFinish={finishTour}
             title={steps.title}
-            content={<p>{steps.content}</p>}
+            content={steps.content}
             anchor={`#${steps.anchor}`}
             subtitle={tourConfig.tourSubtitle}
             footerAction={getFooterAction(steps.step)}
