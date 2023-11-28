@@ -7,13 +7,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { useKibana as mockUseKibana } from '../../../../common/lib/kibana';
 import { TestProviders, mockIndexNames, mockIndexPattern } from '../../../../common/mock';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { allCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TimelineActionMenu } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 const mockedUseKibana = mockUseKibana();
@@ -21,8 +21,8 @@ const mockCanUseCases = jest.fn();
 
 jest.mock('../../../../common/containers/sourcerer');
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana/kibana_react', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana/kibana_react');
 
   return {
     ...original,
@@ -73,6 +73,7 @@ describe('Action menu', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   describe('AddToCaseButton', () => {
     it('renders the button when the user has create and read permissions', () => {
       mockCanUseCases.mockReturnValue(allCasesPermissions());
