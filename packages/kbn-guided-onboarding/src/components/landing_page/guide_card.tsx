@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiModal,
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
@@ -21,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-// import { EndpointsModal } from '@kbn/cloud-links-plugin/public/maybe_add_cloud_links/endpoints_modal';
+import { DeploymentDetailsModal } from '@kbn/cloud/deployment_details';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
@@ -54,10 +53,10 @@ export const GuideCard = ({
   openModal,
   i18nStart,
   theme,
-  // core,
-  // docLinks,
-  // shareStart,
-}: GuideCardsProps & { card: GuideCardConstants }) => {
+}: // core,
+// docLinks,
+// shareStart,
+GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
   let guideState: GuideState | undefined;
@@ -67,20 +66,16 @@ export const GuideCard = ({
 
   const openESApiModal = useCallback(() => {
     const modal = openModal(
-      toMountPoint(
-        <EuiModal
-          onClose={() => modal.close()} children={undefined}        />,
-        {
-          theme: theme,
-          i18n: i18nStart,
-        }
-      ),
+      toMountPoint(<DeploymentDetailsModal closeModal={() => modal.close} />, {
+        theme,
+        i18n: i18nStart,
+      }),
       {
         maxWidth: 400,
         'data-test-subj': 'guideModalESApi',
       }
     );
-  }, [openModal]);
+  }, [openModal, i18nStart, theme]);
 
   const onClick = useCallback(async () => {
     setIsLoading(true);
