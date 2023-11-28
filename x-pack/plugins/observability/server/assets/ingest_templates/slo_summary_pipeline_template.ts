@@ -7,6 +7,7 @@
 
 import { SLO_RESOURCES_VERSION } from '../constants';
 
+// TODO one summary pipeline per SLO will be created
 export const getSLOSummaryPipelineTemplate = (id: string) => ({
   id,
   description: 'SLO summary ingest pipeline',

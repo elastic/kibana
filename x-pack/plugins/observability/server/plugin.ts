@@ -23,16 +23,16 @@ import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/serve
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   ApmRuleType,
   ES_QUERY_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
@@ -52,11 +52,7 @@ import { getObservabilityServerRouteRepository } from './routes/get_global_obser
 import { registerRoutes } from './routes/register_routes';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
-import {
-  DefaultResourceInstaller,
-  DefaultSLOInstaller,
-  DefaultSummaryTransformInstaller,
-} from './services/slo';
+import { DefaultResourceInstaller, DefaultSLOInstaller } from './services/slo';
 
 import { uiSettings } from './ui_settings';
 
@@ -360,15 +356,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
 
       const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-      const sloSummaryInstaller = new DefaultSummaryTransformInstaller(
-        esInternalClient,
-        this.logger
-      );
-      const sloInstaller = new DefaultSLOInstaller(
-        sloResourceInstaller,
-        sloSummaryInstaller,
-        this.logger
-      );
+      const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
       sloInstaller.install();
     });
 

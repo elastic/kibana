@@ -15,7 +15,6 @@ import {
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-  SLO_SUMMARY_INGEST_PIPELINE_NAME,
 } from '../../assets/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
@@ -58,10 +57,6 @@ describe('resourceInstaller', () => {
     expect(mockClusterClient.ingest.putPipeline).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ id: SLO_INGEST_PIPELINE_NAME })
-    );
-    expect(mockClusterClient.ingest.putPipeline).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ id: SLO_SUMMARY_INGEST_PIPELINE_NAME })
     );
   });
 });
