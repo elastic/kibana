@@ -14,7 +14,7 @@ import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { PrivilegeDisplay } from './privilege_display';
 import { PrivilegeSpaceTable } from './privilege_space_table';
-import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 

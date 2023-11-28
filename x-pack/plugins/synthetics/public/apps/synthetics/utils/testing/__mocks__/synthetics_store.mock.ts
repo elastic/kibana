@@ -8,7 +8,7 @@
 import { SyntheticsAppState } from '../../../state/root_reducer';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   DEFAULT_THROTTLING,
   LocationStatus,
   ScheduleUnit,
@@ -227,7 +227,7 @@ function getMonitorDetailsMockSlice() {
           check_group: '051aba1c-0b74-11ed-9f0e-ba4e6fa109d5',
           id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           timespan: { lt: '2022-07-24T17:24:06.094Z', gte: '2022-07-24T17:14:06.094Z' },
-          type: DataStream.BROWSER,
+          type: MonitorTypeEnum.BROWSER,
           status: 'up',
         },
         url: {
@@ -293,7 +293,7 @@ function getMonitorDetailsMockSlice() {
             check_group: '051aba1c-0b74-11ed-9f0e-ba4e6fa109d5',
             id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
             timespan: { lt: '2022-07-24T17:24:06.094Z', gte: '2022-07-24T17:14:06.094Z' },
-            type: DataStream.BROWSER,
+            type: MonitorTypeEnum.BROWSER,
             status: 'up',
           },
           url: {
@@ -348,7 +348,7 @@ function getMonitorDetailsMockSlice() {
             id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
             check_group: '9eb87e53-0b72-11ed-b34f-aa618b4334ae',
             timespan: { lt: '2022-07-24T17:14:05.020Z', gte: '2022-07-24T17:04:05.020Z' },
-            type: DataStream.BROWSER,
+            type: MonitorTypeEnum.BROWSER,
             status: 'up',
           },
           url: {
@@ -403,7 +403,7 @@ function getMonitorDetailsMockSlice() {
             timespan: { lt: '2022-07-24T17:11:49.702Z', gte: '2022-07-24T17:01:49.702Z' },
             check_group: '4e00ac5a-0b72-11ed-a97e-5203642c687d',
             id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
-            type: DataStream.BROWSER,
+            type: MonitorTypeEnum.BROWSER,
             status: 'up',
           },
           url: {
@@ -436,7 +436,7 @@ function getMonitorDetailsMockSlice() {
     syntheticsMonitor: {
       id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
-      type: DataStream.BROWSER,
+      type: MonitorTypeEnum.BROWSER,
       enabled: true,
       schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
       'service.name': '',

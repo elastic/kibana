@@ -7,6 +7,7 @@
 
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 
 import type { DropResult } from '@elastic/eui';
 
@@ -128,7 +129,11 @@ export const ColumnsPopover: React.FC<Props> = ({
       </EuiPopoverTitle>
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiFlexGroup
-          css={{ width: 300 }}
+          css={css`
+            width: 300px;
+            height: 40vh;
+          `}
+          className="eui-yScrollWithShadows"
           data-test-subj="column-selection-popover-drag-drop-context"
         >
           <EuiFlexItem>
