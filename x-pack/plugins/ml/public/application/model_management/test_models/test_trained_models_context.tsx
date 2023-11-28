@@ -23,11 +23,11 @@ export const TestTrainedModelsContext = createContext<
 >(undefined);
 
 export function useTestTrainedModelsContext() {
-  const testTraindedModelsContext = useContext(TestTrainedModelsContext);
+  const testTrainedModelsContext = useContext(TestTrainedModelsContext);
 
-  if (testTraindedModelsContext === undefined) {
+  if (testTrainedModelsContext === undefined) {
     throw new Error('TestTrainedModelsContext has not been initialized.');
   }
 
-  return testTraindedModelsContext;
+  return testTrainedModelsContext;
 }

@@ -241,11 +241,15 @@ export function useIndexInput({
           }));
         setFieldNames(tempFieldNames);
 
-        const fieldName = tempFieldNames.length === 1 ? tempFieldNames[0].value : undefined;
+        const fieldName =
+          defaultSelectedField &&
+          tempFieldNames.find((field) => field.value === defaultSelectedField)
+            ? defaultSelectedField
+            : tempFieldNames[0].value;
         inferrer.setInputField(fieldName);
       }
     },
-    [selectedDataView, inferrer]
+    [selectedDataView, inferrer, defaultSelectedField]
   );
 
   useEffect(

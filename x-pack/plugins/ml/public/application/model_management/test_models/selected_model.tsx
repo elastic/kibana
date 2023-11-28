@@ -76,9 +76,9 @@ export const SelectedModel: FC<Props> = ({
           break;
       }
     } else if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-      return new LangIdentInference(trainedModels, model, inputType, deploymentId, pipeline);
+      return new LangIdentInference(trainedModels, model, inputType, deploymentId);
     }
-  }, [inputType, model, trainedModels, deploymentId, pipeline]);
+  }, [inputType, model, trainedModels, deploymentId]);
 
   const updatedPipeline = useObservable(
     inferrer?.getPipeline$() ?? DEFAULT_PIPELINE_OBS,
