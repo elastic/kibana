@@ -64,9 +64,30 @@ export const SEARCH_KQL_SELECTED_TEXT = i18n.translate(
   }
 );
 
-export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
-  'xpack.securitySolution.timeline.searchOrFilter.filterOrSearchWithKql',
+export const DATA_PROVIDER_HIDDEN_POPULATED = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.dataProviderToggle.hiddenAndPopulated',
   {
-    defaultMessage: 'Filter or Search with KQL',
+    defaultMessage: 'Query Builder is hidden. Click here to see the existing Queries',
+  }
+);
+
+export const DATA_PROVIDER_VISIBLE = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.dataProviderToggle.visible',
+  {
+    defaultMessage: 'Click here to hide Query builder',
+  }
+);
+
+export const DATA_PROVIDER_HIDDEN_EMPTY = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.dataProviderToggle.hiddenAndEmpty',
+  {
+    defaultMessage: 'Click here to show the empty Query builder',
+  }
+);
+
+export const ERROR_PROCESSING_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.errorProcessingDataView',
+  {
+    defaultMessage: 'Error processing Index Patterns',
   }
 );

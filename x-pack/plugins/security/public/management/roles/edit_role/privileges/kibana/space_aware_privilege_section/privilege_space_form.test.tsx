@@ -13,7 +13,7 @@ import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { SpaceSelector } from './space_selector';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import { createFeature, kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { FeatureTable } from '../feature_table';

@@ -30,7 +30,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
-import type { Role } from '../../../../common/model';
+import type { Role } from '../../../../common';
 import {
   getExtendedRoleDeprecationNotice,
   isRoleDeprecated,

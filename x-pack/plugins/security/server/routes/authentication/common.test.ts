@@ -12,7 +12,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineCommonRoutes } from './common';
-import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import {

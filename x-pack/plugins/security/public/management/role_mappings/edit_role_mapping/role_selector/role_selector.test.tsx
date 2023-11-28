@@ -14,7 +14,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleSelector } from './role_selector';
 import { RoleTemplateEditor } from './role_template_editor';
-import type { Role, RoleMapping } from '../../../../../common/model';
+import type { Role, RoleMapping } from '../../../../../common';
 import type { RolesAPIClient } from '../../../roles';
 import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
 

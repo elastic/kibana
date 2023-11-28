@@ -47,7 +47,7 @@ import {
   FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 
-import { deleteAlertsAndRules, reload } from '../../../tasks/common';
+import { reload } from '../../../tasks/common';
 import {
   createExceptionList,
   createExceptionListItem,
@@ -55,6 +55,7 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../objects/exception';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // Test Skipped until we fix the Flyout rerendering issue

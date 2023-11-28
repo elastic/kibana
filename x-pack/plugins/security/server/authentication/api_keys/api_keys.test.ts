@@ -16,8 +16,8 @@ import {
 import type { Logger } from '@kbn/logging';
 
 import { APIKeys } from './api_keys';
+import type { SecurityLicense } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
-import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
