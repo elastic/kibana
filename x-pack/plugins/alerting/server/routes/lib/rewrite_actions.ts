@@ -9,6 +9,7 @@ import { omit } from 'lodash';
 import { NormalizedAlertAction } from '../../rules_client';
 import { RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';
+import { RuleActionTypes } from '../../../common';
 
 export const rewriteActionsReq = (
   actions?: TypeOf<typeof actionsSchema>
@@ -27,6 +28,42 @@ export const rewriteActionsReq = (
           }
         : {}),
       ...(alertsFilter ? { alertsFilter } : {}),
+    };
+  });
+};
+
+export const rewriteActionsReqWithSystemActions = (
+  actions: TypeOf<typeof actionsSchema>,
+  isSystemAction: (connectorId: string) => boolean
+): NormalizedAlertAction[] => {
+  if (!actions) return [];
+
+  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
+    if (isSystemAction(action.id)) {
+      return {
+        id: action.id,
+        params: action.params,
+        ...(action.uuid ? { uuid: action.uuid } : {}),
+        type: RuleActionTypes.SYSTEM,
+      };
+    }
+
+    return {
+      group: action.group ?? 'default',
+      id: action.id,
+      params: action.params,
+      ...(action.uuid ? { uuid: action.uuid } : {}),
+      ...(frequency
+        ? {
+            frequency: {
+              summary: frequency.summary,
+              throttle: frequency.throttle,
+              notifyWhen: frequency.notify_when,
+            },
+          }
+        : {}),
+      ...(alertsFilter ? { alertsFilter } : {}),
+      type: RuleActionTypes.DEFAULT,
     };
   });
 };

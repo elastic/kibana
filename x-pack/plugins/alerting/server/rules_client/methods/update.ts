@@ -14,6 +14,8 @@ import {
   RuleTypeParams,
   RuleNotifyWhenType,
   IntervalSchedule,
+  RuleSystemAction,
+  RuleActionTypes,
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -37,6 +39,12 @@ import {
   validateScheduleLimit,
   ValidateScheduleLimitResult,
 } from '../../application/rule/methods/get_schedule_frequency';
+import { validateSystemActions } from '../../lib/validate_system_actions';
+import { denormalizeActions } from '../lib/denormalize_actions';
+import {
+  transformDomainActionsToRawActions,
+  transformRawActionsToDomainActions,
+} from '../../application/rule/transforms';
 
 type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
@@ -211,12 +219,22 @@ async function updateAlert<Params extends RuleTypeParams>(
 ): Promise<PartialRule<Params>> {
   const { attributes, version } = currentRule;
   const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
+  const actionsClient = await context.getActionsClient();
+
+  const systemActions = initialData.actions.filter(
+    (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
+  );
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
+  await validateSystemActions({
+    actionsClient,
+    connectorAdapterRegistry: context.connectorAdapterRegistry,
+    systemActions,
+  });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
@@ -230,11 +248,14 @@ async function updateAlert<Params extends RuleTypeParams>(
   }
 
   // Extract saved object references for this rule
-  const {
-    references,
-    params: updatedParams,
-    actions,
-  } = await extractReferences(context, ruleType, data.actions, validatedAlertTypeParams);
+  const { references, params: updatedParams } = await extractReferences(
+    context,
+    ruleType,
+    data.actions,
+    validatedAlertTypeParams
+  );
+
+  const { actions: actionsWithRefs } = await denormalizeActions(context, data.actions);
 
   const username = await context.getUserName();
 
@@ -262,7 +283,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     ...data,
     ...apiKeyAttributes,
     params: updatedParams as RawRule['params'],
-    actions,
+    actions: actionsWithRefs,
     notifyWhen,
     revision,
     updatedBy: username,
@@ -278,7 +299,7 @@ async function updateAlert<Params extends RuleTypeParams>(
   try {
     updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
       'alert',
-      createAttributes,
+      { ...createAttributes, actions: transformDomainActionsToRawActions(createAttributes) },
       {
         id,
         overwrite: true,
@@ -311,8 +332,7 @@ async function updateAlert<Params extends RuleTypeParams>(
       `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
     );
   }
-
-  return getPartialRuleFromRaw(
+  const rules = getPartialRuleFromRaw<Params>(
     context,
     id,
     ruleType,
@@ -321,4 +341,15 @@ async function updateAlert<Params extends RuleTypeParams>(
     false,
     true
   );
+
+  return {
+    ...rules,
+    actions: transformRawActionsToDomainActions({
+      ruleId: id,
+      references: updatedObject.references,
+      actions: updatedObject.attributes.actions,
+      omitGeneratedValues: false,
+      isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    }),
+  };
 }

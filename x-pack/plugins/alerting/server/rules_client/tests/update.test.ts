@@ -92,6 +92,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
 };
@@ -106,6 +107,7 @@ setGlobalDate();
 describe('update()', () => {
   let rulesClient: RulesClient;
   let actionsClient: jest.Mocked<ActionsClient>;
+
   const existingAlert = {
     id: '1',
     type: 'alert',
@@ -127,6 +129,7 @@ describe('update()', () => {
           params: {
             foo: true,
           },
+          type: 'default' as const,
           frequency: {
             summary: false,
             notifyWhen: RuleNotifyWhen.CHANGE,
@@ -317,6 +320,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
           {
             group: 'default',
@@ -324,6 +328,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
           {
             group: 'default',
@@ -331,6 +336,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
         ],
       },
@@ -345,6 +351,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
             "actionTypeId": "test",
@@ -353,6 +361,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
             "actionTypeId": "test2",
@@ -361,6 +371,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -533,10 +545,8 @@ describe('update()', () => {
         isSystemAction: false,
       },
     ]);
-    actionsClient.isPreconfigured.mockReset();
-    actionsClient.isPreconfigured.mockReturnValueOnce(false);
-    actionsClient.isPreconfigured.mockReturnValueOnce(true);
-    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    actionsClient.isPreconfigured.mockImplementation((id: string) => id === 'preconfigured');
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -609,6 +619,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
           {
             group: 'default',
@@ -616,6 +627,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
           {
             group: 'custom',
@@ -623,6 +635,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
         ],
       },
@@ -697,6 +710,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
             "actionTypeId": "test",
@@ -705,6 +720,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
             "actionTypeId": "test",
@@ -713,6 +730,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -734,7 +753,7 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
+    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(6);
   });
 
   test('should update a rule with some system actions', async () => {
@@ -775,7 +794,7 @@ describe('update()', () => {
         isSystemAction: false,
       },
       {
-        id: 'system_action-id',
+        id: 'system_action:id',
         actionTypeId: 'test',
         config: {},
         isMissingSecrets: false,
@@ -785,10 +804,9 @@ describe('update()', () => {
         isSystemAction: true,
       },
     ]);
-    actionsClient.isSystemAction.mockReset();
-    actionsClient.isSystemAction.mockReturnValueOnce(false);
-    actionsClient.isSystemAction.mockReturnValueOnce(true);
-    actionsClient.isSystemAction.mockReturnValueOnce(true);
+
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -857,16 +875,17 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
           {
-            group: 'default',
-            id: 'system_action-id',
+            id: 'system_action:id',
             params: {},
+            type: 'system',
           },
           {
-            group: 'custom',
-            id: 'system_action-id',
+            id: 'system_action:id',
             params: {},
+            type: 'system',
           },
         ],
       },
@@ -887,15 +906,13 @@ describe('update()', () => {
             uuid: '106',
           },
           {
-            group: 'default',
-            actionRef: 'system_action:system_action-id',
+            actionRef: 'system_action:system_action:id',
             actionTypeId: 'test',
             params: {},
             uuid: '107',
           },
           {
-            group: 'custom',
-            actionRef: 'system_action:system_action-id',
+            actionRef: 'system_action:system_action:id',
             actionTypeId: 'test',
             params: {},
             uuid: '108',
@@ -937,18 +954,24 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
             "actionTypeId": "test",
             "group": "default",
             "id": "system_action-id",
             "params": Object {},
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
             "actionTypeId": "test",
             "group": "custom",
             "id": "system_action-id",
             "params": Object {},
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -970,7 +993,7 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
+    expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(11);
   });
 
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
@@ -1072,6 +1095,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
         ],
       },
@@ -1136,6 +1160,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -1214,6 +1240,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
         ],
       },
@@ -1228,6 +1255,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "apiKey": "MTIzOmFiYw==",
@@ -1374,6 +1403,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
         ],
       },
@@ -1389,6 +1419,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "apiKey": null,
@@ -1490,6 +1522,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
               },
               {
                 group: 'default',
@@ -1497,6 +1530,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
               },
               {
                 group: 'default',
@@ -1504,6 +1538,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
               },
             ],
           },
@@ -1553,6 +1588,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
             },
           ],
         },
@@ -1664,6 +1700,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
             frequency: {
               summary: false,
               notifyWhen: 'onActionGroupChange',
@@ -1809,6 +1846,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
             frequency: {
               summary: false,
               notifyWhen: 'onThrottleInterval',
@@ -1821,6 +1859,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
             frequency: {
               summary: false,
               notifyWhen: 'onThrottleInterval',
@@ -1833,6 +1872,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
             frequency: {
               summary: false,
               notifyWhen: 'onThrottleInterval',
@@ -1871,6 +1911,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',
@@ -2004,6 +2045,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',
@@ -2039,6 +2081,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',
@@ -2076,6 +2119,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
                 frequency: {
                   summary: false,
                   notifyWhen: 'onActionGroupChange',
@@ -2088,6 +2132,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
                 frequency: {
                   summary: false,
                   notifyWhen: 'onActionGroupChange',
@@ -2122,6 +2167,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
                 frequency: {
                   summary: false,
                   notifyWhen: 'onActionGroupChange',
@@ -2134,6 +2180,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
               },
             ],
           },
@@ -2170,6 +2217,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
               },
             ],
           },
@@ -2206,6 +2254,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
                 frequency: {
                   summary: false,
                   notifyWhen: 'onActionGroupChange',
@@ -2218,6 +2267,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: 'default',
               },
             ],
           },
@@ -2254,6 +2304,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',
@@ -2331,6 +2382,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
             },
             {
               group: 'default',
@@ -2338,6 +2390,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
             },
             {
               group: 'default',
@@ -2345,6 +2398,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
             },
           ],
         },
@@ -2370,10 +2424,8 @@ describe('update()', () => {
         isSystemAction: false,
       },
     ]);
-    actionsClient.isPreconfigured.mockReset();
-    actionsClient.isPreconfigured.mockReturnValueOnce(false);
-    actionsClient.isPreconfigured.mockReturnValueOnce(true);
-    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    actionsClient.isPreconfigured.mockImplementation((id: string) => id === 'preconfigured');
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -2430,6 +2482,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
         ],
       },
@@ -2487,6 +2540,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -2508,7 +2563,7 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(1);
+    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(2);
   });
 
   test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
@@ -2625,6 +2680,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
           {
             group: 'default',
@@ -2632,6 +2688,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
           {
             group: 'default',
@@ -2639,6 +2696,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
         ],
       },
@@ -2673,6 +2731,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
             },
             {
               group: 'default',
@@ -2680,6 +2739,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
             },
             {
               group: 'default',
@@ -2687,6 +2747,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
             },
           ],
         },
@@ -2959,6 +3020,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
             frequency: {
               notifyWhen: 'onActiveAlert',
               throttle: null,
@@ -2972,6 +3034,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
             frequency: {
               notifyWhen: 'onActiveAlert',
               throttle: null,
@@ -3155,6 +3218,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: 'default',
           },
         ],
       },
@@ -3169,6 +3233,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "apiKey": "MTIzOmFiYw==",
@@ -3273,6 +3339,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: 'default',
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',

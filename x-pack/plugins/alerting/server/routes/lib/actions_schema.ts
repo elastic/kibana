@@ -12,7 +12,7 @@ import { validateHours } from './validate_hours';
 
 export const actionsSchema = schema.arrayOf(
   schema.object({
-    group: schema.string(),
+    group: schema.maybe(schema.string()),
     id: schema.string(),
     params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
     frequency: schema.maybe(
