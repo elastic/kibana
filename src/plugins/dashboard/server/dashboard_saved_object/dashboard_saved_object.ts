@@ -55,6 +55,9 @@ export const createDashboardSavedObjectType = ({
           value: { type: 'integer', index: false, doc_values: false },
         },
       },
+      someNewMapping: {
+        type: 'text',
+      },
       controlGroupInput: {
         properties: {
           controlStyle: { type: 'keyword', index: false, doc_values: false },
