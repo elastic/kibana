@@ -33,7 +33,7 @@ export const DiscoverTopNavServerless = ({
   }
 
   return (
-    <EuiHeader css={{ boxShadow: 'none' }}>
+    <EuiHeader css={{ boxShadow: 'none' }} data-test-subj="discoverTopNavServerless">
       {customizationContext.showLogExplorerTabs && (
         <EuiHeaderSection>
           <EuiHeaderSectionItem>

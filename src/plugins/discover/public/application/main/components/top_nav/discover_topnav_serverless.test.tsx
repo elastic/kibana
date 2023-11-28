@@ -7,14 +7,13 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { DiscoverTopNavServerless } from './discover_topnav_serverless';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
+import { render, screen, waitFor } from '@testing-library/react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -40,17 +39,18 @@ describe('DiscoverTopNavServerless', () => {
     });
   });
 
-  it('should not render when serverless plugin is not defined', () => {
+  it('should not render when serverless plugin is not defined', async () => {
     const props = getProps();
-    const component = mountWithIntl(
+    render(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNavServerless {...props} />
       </DiscoverMainProvider>
     );
-    expect(component.find(DiscoverTopNavServerless).isEmptyRender()).toBe(true);
+    const topNav = screen.queryByTestId('discoverTopNavServerless');
+    expect(topNav).toBeNull();
   });
 
-  it('should render when serverless plugin is defined and displayMode is "standalone"', () => {
+  it('should render when serverless plugin is defined and displayMode is "standalone"', async () => {
     mockUseKibana.mockReturnValue({
       services: {
         ...mockDiscoverService,
@@ -58,15 +58,16 @@ describe('DiscoverTopNavServerless', () => {
       },
     });
     const props = getProps();
-    const component = mountWithIntl(
+    render(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNavServerless {...props} />
       </DiscoverMainProvider>
     );
-    expect(component.find(DiscoverTopNavServerless).isEmptyRender()).toBe(false);
+    const topNav = screen.queryByTestId('discoverTopNavServerless');
+    expect(topNav).not.toBeNull();
   });
 
-  it('should not render when serverless plugin is defined and displayMode is not "standalone"', () => {
+  it('should not render when serverless plugin is defined and displayMode is not "standalone"', async () => {
     mockUseKibana.mockReturnValue({
       services: {
         ...mockDiscoverService,
@@ -75,16 +76,17 @@ describe('DiscoverTopNavServerless', () => {
     });
     const props = getProps();
     props.stateContainer.customizationContext.displayMode = 'embedded';
-    const component = mountWithIntl(
+    render(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNavServerless {...props} />
       </DiscoverMainProvider>
     );
-    expect(component.find(DiscoverTopNavServerless).isEmptyRender()).toBe(true);
+    const topNav = screen.queryByTestId('discoverTopNavServerless');
+    expect(topNav).toBeNull();
   });
 
   describe('LogExplorerTabs', () => {
-    it('should render when showLogExplorerTabs is true', () => {
+    it('should render when showLogExplorerTabs is true', async () => {
       mockUseKibana.mockReturnValue({
         services: {
           ...mockDiscoverService,
@@ -93,16 +95,20 @@ describe('DiscoverTopNavServerless', () => {
       });
       const props = getProps();
       props.stateContainer.customizationContext.showLogExplorerTabs = true;
-      const component = mountWithIntl(
+      render(
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverTopNavServerless {...props} />
         </DiscoverMainProvider>
       );
-      expect(component.find(DiscoverTopNavServerless)).toHaveLength(1);
-      expect(component.find(LogExplorerTabs)).toHaveLength(1);
+      const topNav = screen.queryByTestId('discoverTopNavServerless');
+      expect(topNav).not.toBeNull();
+      await waitFor(() => {
+        const logExplorerTabs = screen.queryByTestId('logExplorerTabs');
+        expect(logExplorerTabs).not.toBeNull();
+      });
     });
 
-    it('should not render when showLogExplorerTabs is false', () => {
+    it('should not render when showLogExplorerTabs is false', async () => {
       mockUseKibana.mockReturnValue({
         services: {
           ...mockDiscoverService,
@@ -110,13 +116,17 @@ describe('DiscoverTopNavServerless', () => {
         },
       });
       const props = getProps();
-      const component = mountWithIntl(
+      render(
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverTopNavServerless {...props} />
         </DiscoverMainProvider>
       );
-      expect(component.find(DiscoverTopNavServerless)).toHaveLength(1);
-      expect(component.find(LogExplorerTabs)).toHaveLength(0);
+      const topNav = screen.queryByTestId('discoverTopNavServerless');
+      expect(topNav).not.toBeNull();
+      await waitFor(() => {
+        const logExplorerTabs = screen.queryByTestId('logExplorerTabs');
+        expect(logExplorerTabs).toBeNull();
+      });
     });
   });
 });

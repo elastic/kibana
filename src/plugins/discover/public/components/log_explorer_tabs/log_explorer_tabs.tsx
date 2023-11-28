@@ -57,7 +57,7 @@ export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTa
   });
 
   return (
-    <EuiTabs bottomBorder={false}>
+    <EuiTabs bottomBorder={false} data-test-subj="logExplorerTabs">
       <EuiTab
         isSelected={selectedTab === 'discover'}
         href={discoverUrl}
