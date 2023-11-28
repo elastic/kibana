@@ -88,4 +88,41 @@ describe('output handler', () => {
 
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
   });
+
+  it('should return error if both service_token and secrets.service_token is provided for remote_elasticsearch output', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postOutputHandler(
+      mockContext,
+      {
+        body: {
+          type: 'remote_elasticsearch',
+          service_token: 'token1',
+          secrets: { service_token: 'token2' },
+        },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({
+      body: { message: 'Cannot specify both service_token and secrets.service_token' },
+      statusCode: 400,
+    });
+  });
+
+  it('should return ok if one of service_token and secrets.service_token is provided for remote_elasticsearch output', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postOutputHandler(
+      mockContext,
+      { body: { type: 'remote_elasticsearch', secrets: { service_token: 'token2' } } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
 });
