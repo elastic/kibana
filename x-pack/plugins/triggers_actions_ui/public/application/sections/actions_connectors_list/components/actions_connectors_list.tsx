@@ -6,7 +6,7 @@
  */
 
 import { ClassNames } from '@emotion/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -206,6 +206,21 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
 
+  const canExecuteConnector = useCallback(
+    (actionTypeId: string) => {
+      if (actionTypesIndex && actionTypesIndex[actionTypeId]) {
+        if (actionTypeId === '.sentinelone') {
+          return canSave;
+        }
+
+        return canExecute;
+      }
+
+      return false;
+    },
+    [actionTypesIndex, canExecute, canSave]
+  );
+
   const actionsTableColumns = [
     {
       field: 'name',
@@ -347,7 +362,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               </>
             ) : (
               <RunOperation
-                canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
+                canExecute={canExecuteConnector(item.actionTypeId)}
                 item={item}
                 onRun={() => editItem(item, EditConnectorTabs.Test)}
               />

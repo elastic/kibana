@@ -13,4 +13,8 @@ export interface ResponseBody {
   status: string;
   data: string;
   connector_id: string;
+  trace_data?: {
+    transaction_id: string;
+    trace_id: string;
+  };
 }

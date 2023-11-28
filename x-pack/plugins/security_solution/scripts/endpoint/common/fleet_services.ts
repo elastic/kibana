@@ -396,6 +396,16 @@ export const getAgentVersionMatchingCurrentStack = async (
   return version;
 };
 
+// Generates a file name using system arch and an agent version.
+export const getAgentFileName = (agentVersion: string): string => {
+  const downloadArch =
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
+    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  const fileName = `elastic-agent-${agentVersion}-linux-${downloadArch}`;
+
+  return fileName;
+};
+
 interface ElasticArtifactSearchResponse {
   manifest: {
     'last-update-time': string;
@@ -437,11 +447,9 @@ export const getAgentDownloadUrl = async (
   log?: ToolingLog
 ): Promise<GetAgentDownloadUrlResponse> => {
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
-  const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
-    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  const fileNameNoExtension = `elastic-agent-${agentVersion}-linux-${downloadArch}`;
-  const agentFile = `${fileNameNoExtension}.tar.gz`;
+
+  const fileNameWithoutExtension = getAgentFileName(agentVersion);
+  const agentFile = `${fileNameWithoutExtension}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
   log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
@@ -467,7 +475,7 @@ export const getAgentDownloadUrl = async (
   return {
     url: searchResult.packages[agentFile].url,
     fileName: agentFile,
-    dirName: fileNameNoExtension,
+    dirName: fileNameWithoutExtension,
   };
 };
 

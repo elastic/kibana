@@ -28,10 +28,7 @@ import {
 import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
-import type {
-  CreateAndEnrollEndpointHostOptions,
-  CreateAndEnrollEndpointHostResponse,
-} from '../../../../scripts/endpoint/common/endpoint_host_services';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import {
   createAndEnrollEndpointHost,
   destroyEndpointHost,
@@ -79,6 +76,11 @@ import {
   indexFleetEndpointPolicy,
 } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
+import type {
+  CreateAndEnrollEndpointHostCIOptions,
+  CreateAndEnrollEndpointHostCIResponse,
+} from './create_and_enroll_endpoint_host_ci';
+import { createAndEnrollEndpointHostCI } from './create_and_enroll_endpoint_host_ci';
 
 /**
  * Test Role/User loader for cypress. Checks to see if running in serverless and handles it as appropriate
@@ -386,40 +388,48 @@ ${s1Info.status}
     },
 
     createEndpointHost: async (
-      options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
-    ): Promise<CreateAndEnrollEndpointHostResponse> => {
+      options: Omit<CreateAndEnrollEndpointHostCIOptions, 'log' | 'kbnClient'>
+    ): Promise<CreateAndEnrollEndpointHostCIResponse> => {
       const { kbnClient, log } = await stackServicesPromise;
 
       let retryAttempt = 0;
-      const attemptCreateEndpointHost = async (): Promise<CreateAndEnrollEndpointHostResponse> => {
-        try {
-          log.info(`Creating endpoint host, attempt ${retryAttempt}`);
-          const newHost = await createAndEnrollEndpointHost({
-            useClosestVersionMatch: true,
-            ...options,
-            log,
-            kbnClient,
-          });
-          await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
-          return newHost;
-        } catch (err) {
-          log.info(`Caught error when setting up the agent: ${err}`);
-          if (retryAttempt === 0 && err.agentId) {
-            retryAttempt++;
-            await destroyEndpointHost(kbnClient, {
-              hostname: err.hostname || '', // No hostname in CI env for vagrant
-              agentId: err.agentId,
-            });
-            log.info(`Deleted endpoint host ${err.agentId} and retrying`);
-            return attemptCreateEndpointHost();
-          } else {
-            log.info(
-              `${retryAttempt} attempts of creating endpoint host failed, reason for the last failure was ${err}`
-            );
-            throw err;
+      const attemptCreateEndpointHost =
+        async (): Promise<CreateAndEnrollEndpointHostCIResponse> => {
+          try {
+            log.info(`Creating endpoint host, attempt ${retryAttempt}`);
+            const newHost = process.env.CI
+              ? await createAndEnrollEndpointHostCI({
+                  useClosestVersionMatch: true,
+                  ...options,
+                  log,
+                  kbnClient,
+                })
+              : await createAndEnrollEndpointHost({
+                  useClosestVersionMatch: true,
+                  ...options,
+                  log,
+                  kbnClient,
+                });
+            await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
+            return newHost;
+          } catch (err) {
+            log.info(`Caught error when setting up the agent: ${err}`);
+            if (retryAttempt === 0 && err.agentId) {
+              retryAttempt++;
+              await destroyEndpointHost(kbnClient, {
+                hostname: err.hostname || '', // No hostname in CI env for vagrant
+                agentId: err.agentId,
+              });
+              log.info(`Deleted endpoint host ${err.agentId} and retrying`);
+              return attemptCreateEndpointHost();
+            } else {
+              log.info(
+                `${retryAttempt} attempts of creating endpoint host failed, reason for the last failure was ${err}`
+              );
+              throw err;
+            }
           }
-        }
-      };
+        };
 
       return attemptCreateEndpointHost();
     },
