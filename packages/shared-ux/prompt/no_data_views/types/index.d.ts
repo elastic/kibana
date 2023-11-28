@@ -34,7 +34,7 @@ interface DataViewEditorOptions {
  * Abstract external services for this component.
  */
 export interface NoDataViewsPromptServices {
-  defaultDataView: Promise<DataView>
+  defaultDataView: Promise<DataView>;
   /** True if the user has permission to create a new Data View, false otherwise. */
   canCreateNewDataView: boolean;
   /** A method to open the Data View Editor flow. */
@@ -73,8 +73,8 @@ export interface NoDataViewsPromptKibanaDependencies {
   defaultDataView: {
     dataView: {
       getDefaultDataView: () => boolean;
-    }
-  }
+    };
+  };
 }
 
 export interface NoDataViewsPromptComponentProps {
