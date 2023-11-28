@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @kbn/eslint/module_migration */
-import { conf, language } from 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
+import { markdownConf, markdownLanguage } from '@kbn/monaco';
 
-export { conf as languageConfiguration, language as lexerRules };
+export { markdownConf as languageConfiguration, markdownLanguage as lexerRules };
