@@ -70,7 +70,7 @@ const getErrorMessage = (results: Record<string, CompareResult>): string => {
       }
       if (result.missingFromModelVersion.length) {
         memo.push(
-          `- ${typeName}: found mappings from  mappings definition not present in any model version: ${result.missingFromModelVersion.join(
+          `- ${typeName}: found mappings from root definition not present in any model version: ${result.missingFromModelVersion.join(
             ','
           )}`
         );
