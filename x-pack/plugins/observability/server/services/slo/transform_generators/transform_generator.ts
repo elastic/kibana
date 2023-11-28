@@ -32,12 +32,6 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
-      'slo.groupBy': {
-        type: 'keyword',
-        script: {
-          source: `emit('${!!slo.groupBy ? slo.groupBy : ALL_VALUE}')`,
-        },
-      },
       ...(mustIncludeAllInstanceId && {
         'slo.instanceId': {
           type: 'keyword',
@@ -46,62 +40,6 @@ export abstract class TransformGenerator {
           },
         },
       }),
-      'slo.name': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.name}')`,
-        },
-      },
-      'slo.description': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.description}')`,
-        },
-      },
-      'slo.tags': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.tags}')`,
-        },
-      },
-      'slo.indicator.type': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.indicator.type}')`,
-        },
-      },
-      'slo.objective.target': {
-        type: 'double',
-        script: {
-          source: `emit(${slo.objective.target})`,
-        },
-      },
-      ...(slo.objective.timesliceWindow && {
-        'slo.objective.sliceDurationInSeconds': {
-          type: 'long',
-          script: {
-            source: `emit(${slo.objective.timesliceWindow!.asSeconds()})`,
-          },
-        },
-      }),
-      'slo.budgetingMethod': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.budgetingMethod}')`,
-        },
-      },
-      'slo.timeWindow.duration': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.timeWindow.duration.format()}')`,
-        },
-      },
-      'slo.timeWindow.type': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.timeWindow.type}')`,
-        },
-      },
     };
   }
 
@@ -125,21 +63,7 @@ export abstract class TransformGenerator {
     return {
       'slo.id': { terms: { field: 'slo.id' } },
       'slo.revision': { terms: { field: 'slo.revision' } },
-      'slo.groupBy': { terms: { field: 'slo.groupBy' } },
       'slo.instanceId': { terms: { field: instanceIdField } },
-      'slo.name': { terms: { field: 'slo.name' } },
-      'slo.description': { terms: { field: 'slo.description' } },
-      'slo.tags': { terms: { field: 'slo.tags' } },
-      'slo.indicator.type': { terms: { field: 'slo.indicator.type' } },
-      'slo.objective.target': { terms: { field: 'slo.objective.target' } },
-      ...(slo.objective.timesliceWindow && {
-        'slo.objective.sliceDurationInSeconds': {
-          terms: { field: 'slo.objective.sliceDurationInSeconds' },
-        },
-      }),
-      'slo.budgetingMethod': { terms: { field: 'slo.budgetingMethod' } },
-      'slo.timeWindow.duration': { terms: { field: 'slo.timeWindow.duration' } },
-      'slo.timeWindow.type': { terms: { field: 'slo.timeWindow.type' } },
       ...extraGroupByFields,
       // @timestamp field defined in the destination index
       '@timestamp': {

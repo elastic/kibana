@@ -61,29 +61,6 @@ export const getSLOMappingsTemplate = (name: string) => ({
             instanceId: {
               type: 'keyword',
             },
-            objective: {
-              properties: {
-                target: {
-                  type: 'double',
-                },
-                sliceDurationInSeconds: {
-                  type: 'long',
-                },
-              },
-            },
-            budgetingMethod: {
-              type: 'keyword',
-            },
-            timeWindow: {
-              properties: {
-                duration: {
-                  type: 'keyword',
-                },
-                type: {
-                  type: 'keyword',
-                },
-              },
-            },
             numerator: {
               type: 'long',
             },
