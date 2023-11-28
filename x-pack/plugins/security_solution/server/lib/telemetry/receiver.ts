@@ -177,10 +177,6 @@ export interface ITelemetryReceiver {
     type: string;
   };
 
-  fetchTimelineEndpointAlerts(interval: number): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
-
-  fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
-
   fetchTimelineAlerts(
     index: string,
     rangeFrom: string,
