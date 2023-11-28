@@ -26,6 +26,12 @@ import {
   PartialRule,
 } from '../types';
 import { transformRuleActions } from './rule/transforms';
+import { RuleResponse } from '../../common/routes/rule/response';
+
+type RuleBody = TypeOf<typeof bodySchema>;
+interface RuleUpdateOptionsResult extends Omit<UpdateOptions<RuleTypeParams>, 'data'> {
+  data: RuleBody;
+}
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -55,10 +61,7 @@ const bodySchema = schema.object({
 });
 
 const rewriteBodyReq = (
-  result: {
-    id: string;
-    data: TypeOf<typeof bodySchema>;
-  },
+  result: RuleUpdateOptionsResult,
   isSystemAction: (connectorId: string) => boolean
 ): UpdateOptions<RuleTypeParams> => {
   const { notify_when: notifyWhen, actions, ...rest } = result.data;
@@ -72,7 +75,6 @@ const rewriteBodyReq = (
   };
 };
 
-import { RuleResponseV1 } from '../../common/routes/rule/response';
 const rewriteBodyRes = ({
   actions,
   alertTypeId,
@@ -93,7 +95,7 @@ const rewriteBodyRes = ({
   nextRun,
   ...rest
 }: PartialRule<RuleTypeParams>): Omit<
-  AsApiContract<PartialRule<RuleTypeParams> & { actions?: RuleResponseV1['actions'] }>,
+  AsApiContract<PartialRule<RuleTypeParams> & { actions?: RuleResponse['actions'] }>,
   'actions'
 > => ({
   ...rest,
