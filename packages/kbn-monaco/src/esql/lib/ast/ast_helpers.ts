@@ -205,7 +205,7 @@ export function createColumnStar(ctx: TerminalNode): ESQLColumn {
     text: ctx.text,
     location: getPosition(ctx.symbol),
     incomplete: ctx.text === '',
-    quoted: Boolean(getQuotedText(ctx)),
+    quoted: false,
   };
 }
 
