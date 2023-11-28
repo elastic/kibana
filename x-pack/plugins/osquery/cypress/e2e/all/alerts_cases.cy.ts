@@ -67,11 +67,10 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
       const [caseName, caseDescription] = generateRandomStringName(2);
       cy.getBySel('expand-event').first().click({ force: true });
       cy.getBySel('take-action-dropdown-btn').click();
-      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('osquery-action-item').click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('exist');
       cy.contains(/^\d+ agen(t|ts) selected/);
-      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel(RUN_PACKS_SELECTABLE).click();
       cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
