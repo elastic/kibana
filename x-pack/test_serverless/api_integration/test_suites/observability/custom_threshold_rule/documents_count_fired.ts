@@ -84,8 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                comparator: Comparator.GT,
-                threshold: [2],
+                comparator: Comparator.OUTSIDE_RANGE,
+                threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
@@ -176,8 +176,8 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                comparator: '>',
-                threshold: [2],
+                comparator: Comparator.OUTSIDE_RANGE,
+                threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: 'count' }],

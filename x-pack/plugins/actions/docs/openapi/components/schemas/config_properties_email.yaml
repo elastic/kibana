@@ -8,8 +8,9 @@ properties:
     description: >
       The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format.
       If `service` is `exchange_server`, this property is required.
-    type: string
-    nullable: true
+    type:
+      - "string"
+      - "null"
   from:
     description: >
       The from address for all emails sent by the connector. It must be specified in `user@host-name` format.
@@ -27,8 +28,9 @@ properties:
     type: string
   oauthTokenUrl:
     # description: TBD
-    type: string
-    nullable: true
+    type:
+      - "string"
+      - "null"
   port:
     description: >
       The port to connect to on the service provider.
@@ -55,5 +57,6 @@ properties:
     description: >
       The tenant identifier, which is part of OAuth 2.0 client credentials authentication, in GUID format.
       If `service` is `exchange_server`, this property is required.
-    type: string
-    nullable: true
+    type:
+      - "string"
+      - "null"
