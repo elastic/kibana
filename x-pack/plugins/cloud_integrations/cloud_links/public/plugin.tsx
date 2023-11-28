@@ -43,7 +43,7 @@ export class CloudLinksPlugin
           'data-test-subj': 'cloudOnboardingSetupGuideLink',
           priority: 1000, // We want this link to be at the very top.
         });
-      } 
+      }
     }
 
     if (security) {

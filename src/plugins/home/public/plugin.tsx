@@ -22,6 +22,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import React from 'react';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import { ConfigSchema } from '../config';
@@ -37,7 +38,6 @@ import {
   WelcomeService,
   WelcomeServiceSetup,
 } from './services';
-import React from 'react';
 
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
@@ -83,14 +83,8 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [
-          coreStart,
-          {
-            dataViews,
-            urlForwarding: urlForwardingStart,
-            guidedOnboarding,
-          },
-        ] = await core.getStartServices();
+        const [coreStart, { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding }] =
+          await core.getStartServices();
         setServices({
           share,
           trackUiMetric,
@@ -171,7 +165,7 @@ export class HomePublicPlugin
 
   public start({ application: { capabilities } }: CoreStart) {
     this.featuresCatalogueRegistry.start({ capabilities });
-    const esEndpointModal = (<EndpointsModal />);
+    const esEndpointModal = <EndpointsModal />;
 
     return { featureCatalogue: this.featuresCatalogueRegistry, esEndpointModal };
   }
