@@ -186,7 +186,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     const response = await initDashboard({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
-      dashboardId,s
+      dashboardId,
       genAIProvider: 'OpenAI',
     });
 
