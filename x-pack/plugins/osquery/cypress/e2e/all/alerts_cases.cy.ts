@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { SAVED_QUERY_DROPDOWN_SELECT } from '../../screens/packs';
 import { initializeDataViews } from '../../tasks/login';
-import { OSQUERY_FLYOUT_BODY_EDITOR, RUN_PACKS_SELECTABLE } from '../../screens/live_query';
 import {
   cleanupCase,
-  cleanupPack,
   cleanupRule,
+  cleanupSavedQuery,
   loadCase,
-  loadPack,
   loadRule,
-  packFixture,
+  loadSavedQuery,
 } from '../../tasks/api_fixtures';
 import {
   addToCase,
@@ -27,17 +26,16 @@ import { generateRandomStringName, interceptCaseId } from '../../tasks/integrati
 
 describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
-  let packId: string;
-  let packName: string;
-  const packData = packFixture();
+  let savedQueryId: string;
+  let savedQueryName: string;
   before(() => {
     initializeDataViews();
   });
 
   beforeEach(() => {
-    loadPack(packData).then((data) => {
-      packId = data.saved_object_id;
-      packName = data.name;
+    loadSavedQuery().then((data) => {
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
     });
     loadRule(true).then((data) => {
       ruleId = data.id;
@@ -46,7 +44,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
   });
 
   afterEach(() => {
-    cleanupPack(packId);
+    cleanupSavedQuery(savedQueryId);
     cleanupRule(ruleId);
   });
 
@@ -69,12 +67,9 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
-      cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('exist');
       cy.contains(/^\d+ agen(t|ts) selected/);
-      cy.getBySel(RUN_PACKS_SELECTABLE).click();
-      cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
-      cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
+      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click().type(`${savedQueryName}{downArrow}{enter}`);
       submitQuery();
       cy.get('[aria-label="Add to Case"]').first().click();
       cy.getBySel('cases-table-add-case-filter-bar').click();
