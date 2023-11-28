@@ -21,7 +21,6 @@ import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
-import { omitEmptyValues } from './helper/monitor';
 import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -118,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await addMonitorAPI(newMonitor);
 
       expect(apiResponse.body).eql(
-        omitEmptyValues({
+        omitMonitorKeys({
           ...newMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
