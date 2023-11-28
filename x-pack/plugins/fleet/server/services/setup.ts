@@ -6,12 +6,15 @@
  */
 
 import fs from 'fs/promises';
+
 import apm from 'elastic-apm-node';
 
 import { compact } from 'lodash';
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import type { UninstallTokenError } from '../../common/errors';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
@@ -54,7 +57,10 @@ import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
-    PreconfigurationError | DefaultPackagesInstallationError | UpgradeManagedPackagePoliciesResult
+    | PreconfigurationError
+    | DefaultPackagesInstallationError
+    | UpgradeManagedPackagePoliciesResult
+    | { error: UninstallTokenError }
   >;
 }
 
@@ -196,9 +202,17 @@ async function createSetupSideEffects(
     logger.debug('Checking for and encrypting plain text uninstall tokens');
     await appContextService.getUninstallTokenService()?.encryptTokens();
   }
+
+  logger.debug('Checking validity of Uninstall Tokens');
+  try {
+    await appContextService.getUninstallTokenService()?.checkTokenValidityForAllPolicies();
+  } catch (error) {
+    nonFatalErrors.push({ error });
+  }
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade agent policy schema', 'preconfiguration');
+
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
