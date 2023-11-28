@@ -10,6 +10,7 @@ import {
   urlSchemaV1,
 } from '@kbn/observability-log-explorer-plugin/common';
 import rison from '@kbn/rison';
+import querystring from 'querystring';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -218,11 +219,13 @@ export function ObservabilityLogExplorerPageObject({
     async navigateTo(options: NavigateToAppOptions = {}) {
       const { pageState, ...extraOptions } = options;
 
-      const queryStringParams = rison.encode({
-        [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: urlSchemaV1.urlSchemaRT.encode({
-          ...defaultPageState,
-          ...pageState,
-        }),
+      const queryStringParams = querystring.stringify({
+        [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: rison.encode(
+          urlSchemaV1.urlSchemaRT.encode({
+            ...defaultPageState,
+            ...pageState,
+          })
+        ),
       });
 
       return await PageObjects.common.navigateToApp('observabilityLogExplorer', {

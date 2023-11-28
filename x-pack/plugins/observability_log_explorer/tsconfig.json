@@ -20,7 +20,6 @@
     "@kbn/dataset-quality-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
-    "@kbn/es-query",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/io-ts-utils",

@@ -56,7 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.navigateTo({
           pageState: {
             datasetSelection: {
-              // @ts-expect-error
               selectionType: 'invalid',
             },
           },

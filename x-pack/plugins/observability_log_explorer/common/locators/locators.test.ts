@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
-import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import {
   AllDatasetsLocatorParams,
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import {
-  OBSERVABILITY_LOG_EXPLORER_APP_ID,
-  OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
-} from '../constants';
+import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../constants';
 import { AllDatasetsLocatorDefinition } from './all_datasets/all_datasets_locator';
 import { SingleDatasetLocatorDefinition } from './single_dataset';
 import { DatasetLocatorDependencies } from './types';
@@ -112,7 +107,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying filters', async () => {
+    it('should allow specifying filters', async () => {
       const params: AllDatasetsLocatorParams = {
         filters: [
           {
@@ -121,59 +116,23 @@ describe('Observability Logs Explorer Locators', () => {
               disabled: false,
               negate: false,
             },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
           },
           {
             meta: {
               alias: 'bar',
               disabled: false,
               negate: false,
-            },
-            $state: {
-              store: FilterStateStore.GLOBAL_STATE,
             },
           },
         ],
       };
 
       const { allDatasetsLocator } = await setup();
-      const { path } = await allDatasetsLocator.getLocation(params);
+      const location = await allDatasetsLocator.getLocation(params);
 
-      const { pageState } = getStatesFromKbnUrl(path, [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY], {
-        getFromHashQuery: false,
-      });
-
-      expect(pageState).toEqual({
-        filters: [
-          {
-            $state: {
-              store: 'appState',
-            },
-            meta: {
-              alias: 'foo',
-              disabled: false,
-              negate: false,
-            },
-          },
-        ],
-        index: 'BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA',
-      });
-      expect(pageState).toEqual({
-        filters: [
-          {
-            $state: {
-              store: 'globalState',
-            },
-            meta: {
-              alias: 'bar',
-              disabled: false,
-              negate: false,
-            },
-          },
-        ],
-      });
+      expect(location.path).toMatchInlineSnapshot(
+        `"/?pageState=(datasetSelection:(selectionType:all),filters:!((meta:(alias:foo,disabled:!f,negate:!f)),(meta:(alias:bar,disabled:!f,negate:!f))),v:1)"`
+      );
     });
   });
 
@@ -279,60 +238,23 @@ describe('Observability Logs Explorer Locators', () => {
               disabled: false,
               negate: false,
             },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
           },
           {
             meta: {
               alias: 'bar',
               disabled: false,
               negate: false,
-            },
-            $state: {
-              store: FilterStateStore.GLOBAL_STATE,
             },
           },
         ],
       };
 
       const { singleDatasetLocator } = await setup();
-      const { path } = await singleDatasetLocator.getLocation(params);
+      const location = await singleDatasetLocator.getLocation(params);
 
-      const { pageState } = getStatesFromKbnUrl(path, [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY], {
-        getFromHashQuery: false,
-      });
-
-      expect(pageState).toEqual({
-        filters: [
-          {
-            $state: {
-              store: 'appState',
-            },
-            meta: {
-              alias: 'foo',
-              disabled: false,
-              negate: false,
-            },
-          },
-        ],
-        index:
-          'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA',
-      });
-      expect(pageState).toEqual({
-        filters: [
-          {
-            $state: {
-              store: 'globalState',
-            },
-            meta: {
-              alias: 'bar',
-              disabled: false,
-              negate: false,
-            },
-          },
-        ],
-      });
+      expect(location.path).toMatchInlineSnapshot(
+        `"/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),filters:!((meta:(alias:foo,disabled:!f,negate:!f)),(meta:(alias:bar,disabled:!f,negate:!f))),v:1)"`
+      );
     });
   });
 });
