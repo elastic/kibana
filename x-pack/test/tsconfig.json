@@ -149,6 +149,5 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-common",
-    "@kbn/securitysolution-es-utils",
   ]
 }
