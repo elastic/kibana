@@ -163,6 +163,15 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
+    case 'ccsNotSupportedForCommand':
+      return {
+        message: i18n.translate('monaco.esql.validation.ccsNotSupportedForCommand', {
+          defaultMessage: 'ES|QL does not yet support querying remote indices [{value}]',
+          values: {
+            value: out.value,
+          },
+        }),
+      };
   }
   return { message: '' };
 }

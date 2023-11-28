@@ -34,6 +34,7 @@ import {
   sourceExists,
   columnExists,
   hasWildcard,
+  hasCCSSource,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -467,33 +468,44 @@ function validateSource(
       })
     );
   } else {
-    const isWildcardAndNotSupported =
-      hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
-    if (isWildcardAndNotSupported) {
+    const hasCCS = hasCCSSource(source.name);
+    if (hasCCS) {
       messages.push(
         getMessageFromId({
-          messageId: 'wildcardNotSupportedForCommand',
-          values: { command: commandName, value: source.name },
+          messageId: 'ccsNotSupportedForCommand',
+          values: { value: source.name },
           locations: source.location,
         })
       );
     } else {
-      if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
+      const isWildcardAndNotSupported =
+        hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
+      if (isWildcardAndNotSupported) {
         messages.push(
           getMessageFromId({
-            messageId: 'unknownIndex',
-            values: { name: source.name },
+            messageId: 'wildcardNotSupportedForCommand',
+            values: { command: commandName, value: source.name },
             locations: source.location,
           })
         );
-      } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownPolicy',
-            values: { name: source.name },
-            locations: source.location,
-          })
-        );
+      } else {
+        if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownIndex',
+              values: { name: source.name },
+              locations: source.location,
+            })
+          );
+        } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownPolicy',
+              values: { name: source.name },
+              locations: source.location,
+            })
+          );
+        }
       }
     }
   }
@@ -692,7 +704,7 @@ async function retrieveSources(
     return new Set();
   }
   const sources = (await callbacks?.getSources?.()) || [];
-  return new Set(sources);
+  return new Set(sources.map(({ name }) => name));
 }
 
 function validateFieldsShadowing(

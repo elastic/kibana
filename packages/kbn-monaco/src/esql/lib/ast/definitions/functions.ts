@@ -104,7 +104,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     name: 'substring',
     description: i18n.translate('monaco.esql.definitions.substringDoc', {
       defaultMessage:
-        'Returns a substring of a string, specified by a start position and an optional length. This example returns the first three characters of every last name.',
+        'Returns a substring of a string, specified by a start position and an optional length.',
     }),
     signatures: [
       {
@@ -144,7 +144,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'prefix', type: 'string' },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval new_string = starts_with(field, "a")'],
+        examples: ['from index | eval starts_with_a = starts_with(field, "a")'],
       },
     ],
   },
@@ -161,7 +161,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'prefix', type: 'string' },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval new_string = ends_with(field, "a")'],
+        examples: ['from index | eval ends_with_a = ends_with(field, "a")'],
       },
     ],
   },
@@ -246,7 +246,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index" | EVAL double = to_double(field)`],
+        examples: [`from index | EVAL double = to_double(field)`],
       },
     ],
   },
@@ -260,7 +260,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index" | EVAL integer = to_integer(field)`],
+        examples: [`from index | EVAL integer = to_integer(field)`],
       },
     ],
   },
@@ -273,7 +273,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index" | EVAL long = to_long(field)`],
+        examples: [`from index | EVAL long = to_long(field)`],
       },
     ],
   },
@@ -300,7 +300,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index" | EVAL unsigned_long = to_unsigned_long(field)`],
+        examples: [`from index | EVAL unsigned_long = to_unsigned_long(field)`],
       },
     ],
   },
@@ -313,7 +313,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'ip',
-        examples: [`from index" | EVAL ip = to_ip(field)`],
+        examples: [`from index | EVAL ip = to_ip(field)`],
       },
     ],
   },
@@ -352,7 +352,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
         examples: [
-          `ROW date = DATE_PARSE("2022-05-06", "yyyy-MM-dd") | EVAL year = DATE_EXTRACT("year", date)`,
+          `ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06") | EVAL year = DATE_EXTRACT("year", date)`,
         ],
       },
     ],
@@ -369,7 +369,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'format_string', type: 'string', optional: true },
         ],
         returnType: 'string',
-        examples: ['from index | eval hired = date_format(hire_date, "YYYY-MM-dd")'],
+        examples: ['from index | eval hired = date_format("YYYY-MM-dd", hire_date)'],
       },
     ],
   },
@@ -402,7 +402,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'date',
         examples: [
-          `from index | eval year_hired = date_parse(hire_date, yyyy-MM-dd'T'HH:mm:ss.SSS'Z')`,
+          `from index | eval year_hired = date_parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", hire_date)`,
         ],
       },
     ],
@@ -895,7 +895,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     name: 'mv_sum',
     description: i18n.translate('monaco.esql.definitions.mvSumDoc', {
       defaultMessage:
-        'Converts a multivalued field into a single valued field containing the minimum value.',
+        'Converts a multivalued field into a single valued field containing the sum of all of the values.',
     }),
     signatures: [
       {
