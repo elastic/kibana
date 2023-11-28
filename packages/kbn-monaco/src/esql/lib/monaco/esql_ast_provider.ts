@@ -7,12 +7,48 @@
  */
 
 import type { ESQLCallbacks } from '../../../..';
-import type { monaco } from '../../../monaco_imports';
+import { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../../worker/esql_worker';
 import { suggest } from '../ast/autocomplete/autocomplete';
 import { getHoverItem } from '../ast/hover';
 import { getSignatureHelp } from '../ast/signature';
+import { ESQLMessage } from '../ast/types';
 import { validateAst } from '../ast/validation/validation';
+
+// from linear offset to Monaco position
+export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
+  const lines = expression.split(/\n/);
+  let remainingChars = offset;
+  let lineNumber = 1;
+  for (const line of lines) {
+    if (line.length >= remainingChars) {
+      return new monaco.Position(lineNumber, remainingChars + 1);
+    }
+    remainingChars -= line.length + 1;
+    lineNumber++;
+  }
+
+  throw new Error('Algorithm failure');
+}
+
+function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: ESQLMessage[]) {
+  const fallbackPosition = { column: 0, lineNumber: 0 };
+  return messages.map((e) => {
+    const startPosition = e.location ? offsetToRowColumn(code, e.location.min) : fallbackPosition;
+    const endPosition = e.location
+      ? offsetToRowColumn(code, e.location.max || 0)
+      : fallbackPosition;
+    return {
+      message: e.text,
+      startColumn: startPosition.column,
+      startLineNumber: startPosition.lineNumber,
+      endColumn: endPosition.column + 1,
+      endLineNumber: endPosition.lineNumber,
+      severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
+      _source: 'client' as const,
+    };
+  });
+}
 
 export class ESQLAstAdapter {
   constructor(
@@ -31,8 +67,11 @@ export class ESQLAstAdapter {
   }
 
   async validate(model: monaco.editor.ITextModel, code: string) {
-    const { ast } = await this.getAst(model, code);
-    return validateAst(ast, this.callbacks);
+    const { ast, errors: syntaxErrors } = await this.getAst(model, code);
+    const { errors, warnings } = await validateAst(ast, this.callbacks);
+    const monacoErrors = wrapAsMonacoMessage('error', code, errors);
+    const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
+    return { errors: syntaxErrors.concat(monacoErrors), warnings: monacoWarnings };
   }
 
   async suggestSignature(
