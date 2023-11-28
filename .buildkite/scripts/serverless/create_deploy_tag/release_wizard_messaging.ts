@@ -107,7 +107,10 @@ const states: Record<StateNames, StateShape> = {
     description: 'The initial step release is completed, follow up jobs will be triggered soon.',
     instruction: `<h3>Deploy tag successfully created!</h3>`,
     post: async () => {
-      const deployTag = buildkite.getMetadata(DEPLOY_TAG_META_KEY);
+      // The deployTag here is only for communication, if it's missing, it's not a big deal, but it's an error
+      const deployTag =
+        buildkite.getMetadata(DEPLOY_TAG_META_KEY) ||
+        (console.error(`${DEPLOY_TAG_META_KEY} not found in buildkite meta-data`), 'unknown');
       const selectedCommit = buildkite.getMetadata(SELECTED_COMMIT_META_KEY);
       const currentCommitSha = buildkite.getMetadata(CURRENT_COMMIT_META_KEY);
 
@@ -286,7 +289,7 @@ async function sendReleaseSlackAnnouncement({
 }: {
   targetCommitData: GithubCommitType;
   currentCommitSha: string | undefined | null;
-  deployTag: string | undefined | null;
+  deployTag: string;
 }) {
   const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
   const buildShortname = `kibana-serverless-release #${process.env.BUILDKITE_BUILD_NUMBER}`;

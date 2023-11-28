@@ -24,19 +24,23 @@ export function getUsefulLinks({
 }: {
   previousCommitHash: string;
   selectedCommitHash: string;
-}) {
+}): Record<string, string> {
   return {
     'Commits contained in deploy': `https://github.com/elastic/kibana/compare/${previousCommitHash}...${selectedCommitHash}`,
     'Argo Workflow (use Elastic Cloud Staging VPN)': `https://argo-workflows.us-central1.gcp.qa.cld.elstc.co/workflows?label=hash%3D${selectedCommitHash}`,
     'GPCTL Deployment Status dashboard for nonprod': getLinkForGPCTLNonProd(selectedCommitHash),
     'GPCTL Deployment Status dashboard for prod': getLinkForGPCTLProd(selectedCommitHash),
-    'Quality Gate pipeline': `https://buildkite.com/elastic/kibana-serverless-gate/builds?commit=${selectedCommitHash}`,
+    'Quality Gate pipeline': `https://buildkite.com/elastic/kibana-tests/builds?branch=main`,
+    'Kibana Serverless Release pipeline': `https://buildkite.com/elastic/kibana-serverless-release/builds?commit=${selectedCommitHash}`,
   };
 }
 
 export function getUsefulLinksHtml(
   heading: string,
-  data: { previousCommitHash: string; selectedCommitHash: string }
+  data: {
+    previousCommitHash: string;
+    selectedCommitHash: string;
+  }
 ) {
   return (
     `<h4>${heading}</h4>` +
