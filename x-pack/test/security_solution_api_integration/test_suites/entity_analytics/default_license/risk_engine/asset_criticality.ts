@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless asset_criticality', () => {
+  describe('@ess @serverless @skipInQA asset_criticality Asset Criticality APIs', () => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
       await cleanAssetCriticality({ log, es });
