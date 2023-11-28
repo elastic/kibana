@@ -64,7 +64,7 @@ import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPMethod,
   ScreenshotOption,
@@ -869,7 +869,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: {
         validResponseStatusCheck: (value) => {
-          const validateFn = validate[DataStream.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
+          const validateFn = validate[MonitorTypeEnum.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
           if (validateFn) {
             return !validateFn({
               [ConfigKey.RESPONSE_STATUS_CHECK]: value,
@@ -1049,7 +1049,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: {
         validParams: (value) => {
-          const validateFn = validate[DataStream.BROWSER][ConfigKey.PARAMS];
+          const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PARAMS];
           if (validateFn) {
             return validateFn({
               [ConfigKey.PARAMS]: value,
@@ -1335,7 +1335,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: {
         validPlaywrightOptions: (value) => {
-          const validateFn = validate[DataStream.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
+          const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
           if (validateFn) {
             return validateFn({
               [ConfigKey.PLAYWRIGHT_OPTIONS]: value,

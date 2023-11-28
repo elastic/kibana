@@ -95,8 +95,8 @@
     "@kbn/panel-loader",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
-    "@kbn/discover-utils",
-    "@kbn/shared-ux-button-toolbar"
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/discover-utils"
   ],
   "exclude": [
     "target/**/*"
