@@ -16,14 +16,8 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import {
-  AlertsLocatorParams,
-  observabilityFeatureId,
-  observabilityPaths,
-} from '../../../../common';
+import { observabilityFeatureId, observabilityPaths } from '../../../../common';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
@@ -42,7 +36,10 @@ import {
   viewInAppUrlActionVariableDescription,
 } from './translations';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
-import { createCustomThresholdExecutor } from './custom_threshold_executor';
+import {
+  createCustomThresholdExecutor,
+  CustomThresholdLocators,
+} from './custom_threshold_executor';
 import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
 
@@ -71,8 +68,7 @@ export function thresholdRuleType(
   config: ObservabilityConfig,
   logger: Logger,
   ruleDataClient: IRuleDataClient,
-  share: SharePluginSetup,
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>
+  locators: CustomThresholdLocators
 ) {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
@@ -131,7 +127,7 @@ export function thresholdRuleType(
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(
-      createCustomThresholdExecutor({ alertsLocator, basePath, logger, config, share })
+      createCustomThresholdExecutor({ basePath, logger, config, locators })
     ),
     doesSetRecoveryContext: true,
     actionVariables: {

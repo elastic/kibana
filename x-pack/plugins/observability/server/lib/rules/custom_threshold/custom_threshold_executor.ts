@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { isEqual } from 'lodash';
+import { LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
@@ -51,18 +50,21 @@ import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
+export interface CustomThresholdLocators {
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  logExplorerLocator?: LocatorPublic<LogExplorerLocatorParams>;
+}
+
 export const createCustomThresholdExecutor = ({
-  alertsLocator,
   basePath,
   logger,
   config,
-  share,
+  locators: { alertsLocator, logExplorerLocator },
 }: {
   basePath: IBasePath;
   logger: Logger;
   config: ObservabilityConfig;
-  share: SharePluginSetup;
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  locators: CustomThresholdLocators;
 }): LifecycleRuleExecutor<
   CustomThresholdRuleParams,
   CustomThresholdRuleTypeState,
@@ -72,8 +74,6 @@ export const createCustomThresholdExecutor = ({
 > =>
   async function (options) {
     const startTime = Date.now();
-    const logExplorerLocator =
-      share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
 
     const {
       services,
