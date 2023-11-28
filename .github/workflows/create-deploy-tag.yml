@@ -22,7 +22,7 @@ concurrency:
 jobs:
   create-deploy-tag:
     # Temporary, we need a way to limit this to a GitHub team instead of specific users
-    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck","jbudz","mistic","delanni","Ikuni17","pheyos","dmlemeshko"]', github.triggering_actor)
+    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck","jbudz","mistic","delanni","Ikuni17","pheyos","dmlemeshko","mikecote"]', github.triggering_actor)
     runs-on: ubuntu-latest
     permissions:
       contents: write

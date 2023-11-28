@@ -252,7 +252,6 @@ describe('SLO Details Page', () => {
       settings,
       updatedAt,
       instanceId,
-      version,
       ...newSlo
     } = slo;
 

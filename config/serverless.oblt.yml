@@ -5,8 +5,6 @@ enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
 xpack.securitySolution.enabled: false
-xpack.uptime.enabled: false
-xpack.legacy_uptime.enabled: false
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability

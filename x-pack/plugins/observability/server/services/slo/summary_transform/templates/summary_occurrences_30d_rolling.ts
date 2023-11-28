@@ -130,11 +130,6 @@ export const SUMMARY_OCCURRENCES_30D_ROLLING: TransformPutTransformRequest = {
           },
         },
       },
-      latestSliTimestamp: {
-        max: {
-          field: '@timestamp',
-        },
-      },
     },
   },
   description:
@@ -142,8 +137,8 @@ export const SUMMARY_OCCURRENCES_30D_ROLLING: TransformPutTransformRequest = {
   frequency: '1m',
   sync: {
     time: {
-      field: 'event.ingested',
-      delay: '65s',
+      field: '@timestamp',
+      delay: '125s',
     },
   },
   settings: {

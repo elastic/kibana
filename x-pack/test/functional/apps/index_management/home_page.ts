@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { SLO_SUMMARY_ENRICH_POLICY_NAME } from '@kbn/observability-plugin/server/assets/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -16,7 +15,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
   const security = getService('security');
-  const es = getService('es');
 
   describe('Home page', function () {
     before(async () => {
@@ -96,10 +94,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Enrich policies', () => {
-      before(async () => {
-        await es.ingest.deletePipeline({ id: '.slo-*' }, { ignore: [404] });
-        await es.enrich.deletePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME }, { ignore: [404] });
-      });
       it('renders the enrich policies tab', async () => {
         // Navigate to the component templates tab
         await pageObjects.indexManagement.changeTabs('enrich_policiesTab');

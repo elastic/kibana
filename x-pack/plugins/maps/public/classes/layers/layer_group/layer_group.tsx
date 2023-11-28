@@ -28,7 +28,7 @@ import {
 import { ISource, SourceEditorArgs } from '../../sources/source';
 import { type DataRequestContext } from '../../../actions';
 import { getLayersExtent } from '../../../actions/get_layers_extent';
-import { ILayer, LayerIcon, LayerError } from '../layer';
+import { ILayer, LayerIcon, LayerMessage } from '../layer';
 import { IStyle } from '../../styles/style';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
@@ -299,14 +299,33 @@ export class LayerGroup implements ILayer {
     });
   }
 
-  getErrors(): LayerError[] {
+  getErrors(): LayerMessage[] {
     return this.hasErrors()
       ? [
           {
             title: i18n.translate('xpack.maps.layerGroup.childrenErrorMessage', {
               defaultMessage: `An error occurred when loading nested layers`,
             }),
-            error: '',
+            body: '',
+          },
+        ]
+      : [];
+  }
+
+  hasWarnings(): boolean {
+    return this._children.some((child) => {
+      return child.hasWarnings();
+    });
+  }
+
+  getWarnings(): LayerMessage[] {
+    return this.hasWarnings()
+      ? [
+          {
+            title: i18n.translate('xpack.maps.layerGroup.incompleteResultsWarning', {
+              defaultMessage: `Nested layer(s) had issues returning data and results might be incomplete.`,
+            }),
+            body: '',
           },
         ]
       : [];

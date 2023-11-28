@@ -34,6 +34,14 @@ const panelViewStyle = css`
     font-size: 90% !important;
   }
   text-overflow: ellipsis;
+  .euiFlexGroup {
+    flex-wrap: inherit;
+  }
+
+  .euiFlexItem {
+    inline-size: inherit;
+    flex-basis: inherit;
+  }
 `;
 
 /**

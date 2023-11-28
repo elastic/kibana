@@ -9,27 +9,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
+import { paramsSearchQueryMock } from './__mocks__/params_search_query';
 
 import { fetchIndexInfo, getRandomDocsRequest } from './fetch_index_info';
-
-const params: AiopsLogRateAnalysisSchema = {
-  index: 'the-index',
-  timeFieldName: 'the-time-field-name',
-  start: 1577836800000,
-  end: 1609459200000,
-  baselineMin: 10,
-  baselineMax: 20,
-  deviationMin: 30,
-  deviationMax: 40,
-  includeFrozen: false,
-  searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
-};
 
 describe('fetch_index_info', () => {
   describe('getRandomDocsRequest', () => {
     it('returns the most basic request body for a sample of random documents', () => {
-      const req = getRandomDocsRequest(params);
+      const req = getRandomDocsRequest(paramsSearchQueryMock);
 
       expect(req).toEqual({
         body: {
@@ -40,13 +27,20 @@ describe('fetch_index_info', () => {
               query: {
                 bool: {
                   filter: [
-                    { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
+                    {
+                      bool: {
+                        filter: [],
+                        minimum_should_match: 1,
+                        must_not: [],
+                        should: [{ term: { 'the-term': { value: 'the-value' } } }],
+                      },
+                    },
                     {
                       range: {
                         'the-time-field-name': {
                           format: 'epoch_millis',
-                          gte: 1577836800000,
-                          lte: 1609459200000,
+                          gte: 0,
+                          lte: 50,
                         },
                       },
                     },
@@ -59,7 +53,7 @@ describe('fetch_index_info', () => {
           size: 1000,
           track_total_hits: true,
         },
-        index: params.index,
+        index: paramsSearchQueryMock.index,
         ignore_throttled: undefined,
         ignore_unavailable: true,
       });
@@ -105,7 +99,10 @@ describe('fetch_index_info', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const { totalDocCount, fieldCandidates } = await fetchIndexInfo(esClientMock, params);
+      const { totalDocCount, fieldCandidates } = await fetchIndexInfo(
+        esClientMock,
+        paramsSearchQueryMock
+      );
 
       expect(fieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
       expect(totalDocCount).toEqual(5000000);

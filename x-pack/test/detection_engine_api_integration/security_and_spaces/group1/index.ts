@@ -14,7 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // action migration code. We are monitoring legacy action telemetry to clean up once we see their
     // existence being near 0.
 
-    loadTestFile(require.resolve('./check_privileges'));
     loadTestFile(require.resolve('./create_rules_bulk'));
     loadTestFile(require.resolve('./delete_rules'));
     loadTestFile(require.resolve('./delete_rules_bulk'));

@@ -15,22 +15,15 @@ import { TransformManager } from './transform_manager';
 
 describe('CreateSLO', () => {
   let esClientMock: ElasticsearchClientMock;
-  let esSystemClientMock: ElasticsearchClientMock;
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let createSLO: CreateSLO;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    esSystemClientMock = elasticsearchServiceMock.createElasticsearchClient();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    createSLO = new CreateSLO(
-      esClientMock,
-      esSystemClientMock,
-      mockRepository,
-      mockTransformManager
-    );
+    createSLO = new CreateSLO(esClientMock, mockRepository, mockTransformManager);
   });
 
   describe('happy path', () => {
@@ -66,7 +59,6 @@ describe('CreateSLO', () => {
       expect(mockTransformManager.start).toHaveBeenCalledWith('slo-transform-id');
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
       expect(esClientMock.index.mock.calls[0]).toMatchSnapshot();
-      expect(esSystemClientMock.enrich.executePolicy.mock.calls[0]).toMatchSnapshot();
     });
 
     it('overrides the default values when provided', async () => {

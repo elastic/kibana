@@ -78,7 +78,7 @@ export const SUMMARY_TIMESLICES_MONTHLY_ALIGNED: TransformPutTransformRequest = 
           },
           script: {
             source: `
-              Date d = new Date();
+              Date d = new Date(); 
               Instant instant = Instant.ofEpochMilli(d.getTime());
               LocalDateTime now = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
               LocalDateTime startOfMonth = now
@@ -88,7 +88,7 @@ export const SUMMARY_TIMESLICES_MONTHLY_ALIGNED: TransformPutTransformRequest = 
                 .withSecond(0);
               LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
               double sliceDurationInMinutes = params.sliceDurationInSeconds / 60;
-
+              
               return Math.ceil(Duration.between(startOfMonth, startOfNextMonth).toMinutes() / sliceDurationInMinutes);
             `,
           },
@@ -158,11 +158,6 @@ export const SUMMARY_TIMESLICES_MONTHLY_ALIGNED: TransformPutTransformRequest = 
             'if (params.sliValue == -1) { return 0 } else if (params.sliValue >= params.objective) { return 4 } else if (params.errorBudgetRemaining > 0) { return 2 } else { return 1 }',
         },
       },
-      latestSliTimestamp: {
-        max: {
-          field: '@timestamp',
-        },
-      },
     },
   },
   description:
@@ -170,8 +165,8 @@ export const SUMMARY_TIMESLICES_MONTHLY_ALIGNED: TransformPutTransformRequest = 
   frequency: '1m',
   sync: {
     time: {
-      field: 'event.ingested',
-      delay: '65s',
+      field: '@timestamp',
+      delay: '125s',
     },
   },
   settings: {

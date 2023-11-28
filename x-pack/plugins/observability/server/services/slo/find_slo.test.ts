@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { ALL_VALUE, Paginated } from '@kbn/slo-schema';
-import { SLO_MODEL_VERSION } from '../../assets/constants';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createSummarySearchClientMock } from './mocks';
 import { SLORepository } from './slo_repository';
-import { SLOSummary, SummarySearchClient } from './summary_search_client';
+import { Paginated, SLOSummary, SummarySearchClient } from './summary_search_client';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -96,7 +95,6 @@ describe('FindSLO', () => {
             revision: slo.revision,
             groupBy: slo.groupBy,
             instanceId: ALL_VALUE,
-            version: SLO_MODEL_VERSION,
           },
         ],
       });

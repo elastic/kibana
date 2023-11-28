@@ -31,13 +31,15 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
   comboBoxWrapperRef = React.createRef<HTMLDivElement>();
 
   public render() {
-    const { suggestions } = this.state;
+    const { suggestions, isLoading } = this.state;
     const { values, intl, onChange, fullWidth, onParamsUpdate, compressed, disabled } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
 
     return (
       <div ref={this.comboBoxWrapperRef}>
         <StringComboBox
+          async
+          isLoading={isLoading}
           fullWidth={fullWidth}
           compressed={compressed}
           placeholder={intl.formatMessage({

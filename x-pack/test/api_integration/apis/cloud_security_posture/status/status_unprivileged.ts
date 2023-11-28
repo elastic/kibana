@@ -247,8 +247,8 @@ export default function (providerContext: FtrProviderContext) {
           `expected unprivileged but got ${res.cspm.status} instead`
         );
         expect(res.vuln_mgmt.status).to.eql(
-          'not-installed',
-          `expected not-installed but got ${res.vuln_mgmt.status} instead`
+          'unprivileged',
+          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
 
         assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');

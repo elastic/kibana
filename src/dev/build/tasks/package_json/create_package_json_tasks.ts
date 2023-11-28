@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { PluginPackage } from '@kbn/repo-packages';
 import { findUsedDependencies } from './find_used_dependencies';
 import { read, write, Task } from '../../lib';
 
@@ -13,7 +14,7 @@ export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
 
   async run(config, log, build) {
-    const plugins = config.getDistPluginsFromRepo();
+    const plugins = config.getDistPluginsFromRepo() as PluginPackage[];
     const distPkgIds = new Set(config.getDistPackagesFromRepo().map((p) => p.id));
     const pkg = config.getKibanaPkg();
 

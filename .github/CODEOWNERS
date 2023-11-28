@@ -54,6 +54,7 @@ x-pack/plugins/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
 examples/bfetch_explorer @elastic/appex-sharedux
 src/plugins/bfetch @elastic/appex-sharedux
+packages/kbn-calculate-auto @elastic/obs-ux-management-team
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
@@ -301,6 +302,7 @@ x-pack/plugins/cross_cluster_replication @elastic/platform-deployment-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 x-pack/plugins/custom_branding @elastic/appex-sharedux
+packages/kbn-custom-icons @elastic/obs-ux-logs-team
 packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 src/plugins/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
@@ -344,6 +346,7 @@ packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
+packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 x-pack/packages/kbn-elastic-assistant @elastic/security-solution
 x-pack/plugins/elastic_assistant @elastic/security-solution
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
@@ -365,7 +368,7 @@ src/plugins/es_ui_shared @elastic/platform-deployment-management
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
-packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team
+packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
@@ -533,7 +536,9 @@ x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/runtime_field_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
+x-pack/packages/ml/ui_actions @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/obs-ux-infra_services-team
 x-pack/plugins/monitoring @elastic/obs-ux-infra_services-team
@@ -638,6 +643,9 @@ packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/platform-deployment-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
 x-pack/plugins/security @elastic/kibana-security
+x-pack/packages/security/plugin_types_common @elastic/kibana-security
+x-pack/packages/security/plugin_types_public @elastic/kibana-security
+x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
@@ -748,7 +756,6 @@ test/server_integration/plugins/status_plugin_b @elastic/kibana-core
 packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
-packages/kbn-subscription-tracking @elastic/security-threat-hunting-investigations
 x-pack/plugins/synthetics @elastic/obs-ux-infra_services-team
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
@@ -882,6 +889,9 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 /x-pack/test_serverless/api_integration/test_suites/common/scripts_tests @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_oss @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_xpack @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/context @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/discover @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/discover_ml_uptime/discover @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/data_view_field_editor_example @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/discover_customization_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/field_formats @elastic/kibana-data-discovery
@@ -889,6 +899,7 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 /x-pack/test_serverless/functional/test_suites/common/examples/search @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
 
 # Visualizations
 /src/plugins/visualize/ @elastic/kibana-visualizations
@@ -1386,6 +1397,8 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/de
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/user_roles  @elastic/security-detection-engine
+x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/detection_engine/scripts/roles_users @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
@@ -1409,7 +1422,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/de
 /x-pack/plugins/security_solution/server/routes @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/server/utils @elastic/security-detections-response @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/detections_response/utils @elastic/security-detections-response
-
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry @elastic/security-detections-response
 
 ## Security Solution sub teams - security-defend-workflows
 /x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
@@ -1432,6 +1445,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/ut
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry @elastic/security-data-analytics
 
 ## Security Solution sub teams - security-engineering-productivity
 /x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
@@ -1458,6 +1472,7 @@ x-pack/plugins/security_solution/public/overview/components/entity_analytics
 x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
 x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
+x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
