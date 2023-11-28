@@ -19,7 +19,10 @@
     "@kbn/core-overlays-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-i18n-browser",
-    "@kbn/cloud"
+    "@kbn/cloud",
+    "@kbn/share-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/core-lifecycle-browser"
   ],
   "exclude": [
     "target/**/*",
