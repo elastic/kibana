@@ -10,7 +10,13 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import type { KafkaOutput, Output, OutputSecretPath } from '../../common/types';
+import type {
+  KafkaOutput,
+  NewLogstashOutput,
+  NewRemoteElasticsearchOutput,
+  Output,
+  OutputSecretPath,
+} from '../../common/types';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
 
@@ -280,11 +286,14 @@ function getOutputSecretPaths(
 ): OutputSecretPath[] {
   const outputSecretPaths: OutputSecretPath[] = [];
 
-  if ((outputType === 'kafka' || outputType === 'logstash') && output.secrets?.ssl?.key) {
-    outputSecretPaths.push({
-      path: 'secrets.ssl.key',
-      value: output.secrets.ssl.key,
-    });
+  if (outputType === 'logstash') {
+    const logstashOutput = output as NewLogstashOutput;
+    if (logstashOutput?.secrets?.ssl?.key) {
+      outputSecretPaths.push({
+        path: 'secrets.ssl.key',
+        value: logstashOutput.secrets.ssl.key,
+      });
+    }
   }
 
   if (outputType === 'kafka') {
@@ -293,6 +302,22 @@ function getOutputSecretPaths(
       outputSecretPaths.push({
         path: 'secrets.password',
         value: kafkaOutput.secrets.password,
+      });
+    }
+    if (kafkaOutput?.secrets?.ssl?.key) {
+      outputSecretPaths.push({
+        path: 'secrets.ssl.key',
+        value: kafkaOutput.secrets.ssl.key,
+      });
+    }
+  }
+
+  if (outputType === 'remote_elasticsearch') {
+    const remoteESOutput = output as NewRemoteElasticsearchOutput;
+    if (remoteESOutput.secrets?.service_token) {
+      outputSecretPaths.push({
+        path: 'secrets.service_token',
+        value: remoteESOutput.secrets.service_token,
       });
     }
   }
@@ -337,6 +362,15 @@ export function getOutputSecretReferences(output: Output): PolicySecretReference
   if (output.type === 'kafka' && typeof output?.secrets?.password === 'object') {
     outputSecretPaths.push({
       id: output.secrets.password.id,
+    });
+  }
+
+  if (
+    output.type === 'remote_elasticsearch' &&
+    typeof output?.secrets?.service_token === 'object'
+  ) {
+    outputSecretPaths.push({
+      id: output.secrets.service_token.id,
     });
   }
 
