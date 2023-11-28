@@ -136,14 +136,13 @@ export const Assignees: FC<AssigneesProps> = memo(
                 togglePopover={togglePopover}
                 isDisabled={!hasIndexWrite || !isPlatinumPlus}
                 toolTipMessage={
-                  !isPlatinumPlus && upsellingMessage
-                    ? upsellingMessage
-                    : i18n.translate(
-                        'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
-                        {
-                          defaultMessage: 'Assign alert',
-                        }
-                      )
+                  upsellingMessage ??
+                  i18n.translate(
+                    'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
+                    {
+                      defaultMessage: 'Assign alert',
+                    }
+                  )
                 }
               />
             }
