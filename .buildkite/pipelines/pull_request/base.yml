@@ -132,7 +132,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
-      queue: n2-4-virt-test
+      queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 10
