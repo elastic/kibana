@@ -27,7 +27,7 @@ export function getUsefulLinks({
 }): Record<string, string> {
   return {
     'Commits contained in deploy': `https://github.com/elastic/kibana/compare/${previousCommitHash}...${selectedCommitHash}`,
-    'Argo Workflow (use Elastic Cloud Staging VPN)': `https://argo-workflows.us-central1.gcp.qa.cld.elstc.co/workflows?label=hash%3D${selectedCommitHash}`,
+    'Argo Workflow (use Elastic Cloud Staging VPN)': `https://argo-workflows.cd.internal.qa.elastic.cloud/workflows?label=hash%3D${selectedCommitHash}`,
     'GPCTL Deployment Status dashboard for nonprod': getLinkForGPCTLNonProd(selectedCommitHash),
     'GPCTL Deployment Status dashboard for prod': getLinkForGPCTLProd(selectedCommitHash),
     'Quality Gate pipeline': `https://buildkite.com/elastic/kibana-tests/builds?branch=main`,

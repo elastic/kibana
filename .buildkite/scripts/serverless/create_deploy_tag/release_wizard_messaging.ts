@@ -308,11 +308,11 @@ async function sendReleaseSlackAnnouncement({
     })
   ).data;
   const compareLink = currentCommitSha
-    ? `<${compareResponse.html_url}|${compareResponse.total_commits} commits>`
+    ? `<${compareResponse.html_url}|${compareResponse.total_commits} new commits>`
     : 'a new release candidate';
 
   const mainMessage = [
-    `:ship_it_parrot: Promotion of ${compareLink} has been <${process.env.BUILDKITE_BUILD_URL}|initiated>!\n`,
+    `:ship_it_parrot: Promotion of ${compareLink} to QA has been <${process.env.BUILDKITE_BUILD_URL}|initiated>!\n`,
     `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.\n`,
   ];
   if (isDryRun) {
@@ -344,7 +344,7 @@ async function sendReleaseSlackAnnouncement({
       },
       {
         type: 'section',
-        fields: Object.entries(linksSection).map(([name, link]) => textBlock(`*${name}*: `, link)),
+        fields: Object.entries(linksSection).map(([name, link]) => textBlock(`*${name}*:`, link)),
       },
       {
         type: 'section',
