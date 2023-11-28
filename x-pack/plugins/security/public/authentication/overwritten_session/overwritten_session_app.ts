@@ -7,8 +7,7 @@
 
 import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-
-import type { AuthenticationServiceSetup } from '../authentication_service';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 interface CreateDeps {
   application: ApplicationSetup;
