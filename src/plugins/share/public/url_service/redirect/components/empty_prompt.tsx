@@ -9,7 +9,6 @@
 import * as React from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 
@@ -28,7 +27,6 @@ export interface ErrorProps {
   title?: string;
   body?: string;
   error: Error;
-  http: HttpStart;
 }
 
 export const RedirectEmptyPrompt: React.FC<ErrorProps> = ({
@@ -39,6 +37,11 @@ export const RedirectEmptyPrompt: React.FC<ErrorProps> = ({
   // eslint-disable-next-line no-console
   console.error('Short URL Redirect Error', props.error);
 
+  // Using the current URL containing "/app/r/", make a URL to the root basePath
+  // by trimming that part to end up at the Home app or project home.
+  const currentUrl = window.location.href;
+  const newUrl = currentUrl.replace(/\/app\/r\/.*/, '');
+
   return (
     <NotFoundPrompt
       title={<h2>{title}</h2>}
@@ -46,7 +49,7 @@ export const RedirectEmptyPrompt: React.FC<ErrorProps> = ({
       actions={
         <EuiButtonEmpty
           iconType="arrowLeft"
-          href={props.http.basePath.get()}
+          href={newUrl}
           data-test-subj="redirectErrorEmptyPromptButton"
         >
           {i18n.translate('share.urlService.redirect.components.Error.homeButton', {

@@ -36,7 +36,6 @@ export class RedirectManager {
         const { render } = await import('./render');
         const unmount = render(params.element, {
           manager: this,
-          http: core.http,
           theme: core.theme,
           customBranding: core.customBranding,
         });
