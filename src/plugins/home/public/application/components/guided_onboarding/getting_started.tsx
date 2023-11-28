@@ -66,7 +66,9 @@ export const GettingStarted = () => {
   const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>();
   const { search } = useLocation();
   const query = parse(search);
-  const [filter, setFilter] = useState<GuideFilterValues>(query.useCase as GuideFilterValues);
+  const [filter, setFilter] = useState<GuideFilterValues>(
+    (query.useCase as GuideFilterValues) ?? 'search'
+  );
   const history = useHistory();
 
   useEffect(() => {
