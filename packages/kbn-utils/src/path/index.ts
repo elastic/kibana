@@ -17,7 +17,7 @@ const isString = (v: any): v is string => typeof v === 'string';
 
 const buildConfigPaths = () => {
   return [
-    process.env.KBN_PATH_CONF && join(process.env.KBN_PATH_CONF, 'kibana.yml'),
+    process.env.KBN_PATH_CONF && resolve(process.env.KBN_PATH_CONF, 'kibana.yml'),
     join(REPO_ROOT, 'config/kibana.yml'),
     '/etc/kibana/kibana.yml',
   ].filter(isString);
