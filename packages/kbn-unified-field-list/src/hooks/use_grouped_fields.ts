@@ -119,21 +119,21 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       return dataViewId ? hasFieldDataHandler(dataViewId, field.name) : true;
     };
 
-    const isNewField = (field: T) => {
-      return dataViewId ? fieldsExistenceReader.isNewField(dataViewId, field.name) : false;
-    };
-
     const selectedFields = sortedSelectedFields || [];
-    const sortedFields = [...(allFields || [])].sort(sortFields);
+    const newFields = dataViewId ? fieldsExistenceReader.getNewFields(dataViewId) : [];
+    const fieldsToSort =
+      allFields && newFields.length
+        ? allFields.map((field) => {
+            return (dataView?.getFieldByName(field.name) as unknown as T) ?? field;
+          })
+        : allFields;
+    const sortedFields = [...(fieldsToSort || [])].sort(sortFields);
+
     const groupedFields = {
       ...getDefaultFieldGroups(),
       ...groupBy(sortedFields, (field) => {
         if (!sortedSelectedFields && onSelectedFieldFilter && onSelectedFieldFilter(field)) {
           selectedFields.push(field);
-        }
-
-        if (isNewField && isNewField(field)) {
-          return 'newFields';
         }
 
         if (onSupportedFieldFilter && !onSupportedFieldFilter(field)) {
@@ -309,7 +309,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         defaultNoFieldsMessage: i18n.translate('unifiedFieldList.useGroupedFields.noNewFields', {
           defaultMessage: `There are no new fields.`,
         }),
-        loadMappingFn: () => Promise.resolve(true),
       },
     };
 

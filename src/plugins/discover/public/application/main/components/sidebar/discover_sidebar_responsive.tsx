@@ -222,12 +222,21 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
-      dispatchSidebarStateAction({
-        type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
-        payload: {
-          dataView: selectedDataView,
-        },
-      });
+      if (selectedDataView?.id === selectedDataViewRef.current?.id) {
+        dispatchSidebarStateAction({
+          type: DiscoverSidebarReducerActionType.DATA_VIEW_UPDATED,
+          payload: {
+            dataView: selectedDataView,
+          },
+        });
+      } else {
+        dispatchSidebarStateAction({
+          type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
+          payload: {
+            dataView: selectedDataView,
+          },
+        });
+      }
       selectedDataViewRef.current = selectedDataView;
     }
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);

@@ -12,8 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import {
-  EuiCallOut,
-  EuiLink,
   EuiButton,
   EuiButtonProps,
   EuiFlexGroup,
@@ -230,7 +228,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       },
       [searchMode, stateService.creationOptions.disableMultiFieldsGroupingByParent]
     );
-
   const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DataViewField>({
     dataViewId: (searchMode === 'documents' && dataView?.id) || null, // passing `null` for text-based queries
     allFields,
@@ -252,7 +249,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
-      <li key={`field${field.name}`} data-attr-field={field.name}>
+      <li key={`field${field.name}${field.type}`} data-attr-field={field.name}>
         <UnifiedFieldListItem
           stateService={stateService}
           searchMode={searchMode}
@@ -388,13 +385,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                     <FieldListFilters {...fieldListFiltersProps} compressed={compressed} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                {onRefreshDataView && (
-                  <EuiCallOut color="success" iconType="info">
-                    <p>
-                      <EuiLink onClick={onRefreshDataView}>Load new fields</EuiLink>.
-                    </p>
-                  </EuiCallOut>
-                )}
               </>
             }
             className="unifiedFieldListSidebar__list"

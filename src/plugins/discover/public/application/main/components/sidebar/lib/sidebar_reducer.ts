@@ -13,6 +13,7 @@ import { getDataViewFieldList, getTextBasedQueryFieldList } from './get_field_li
 export enum DiscoverSidebarReducerActionType {
   RESET = 'RESET',
   DATA_VIEW_SWITCHED = 'DATA_VIEW_SWITCHED',
+  DATA_VIEW_UPDATED = 'DATA_VIEW_UPDATED',
   DOCUMENTS_LOADED = 'DOCUMENTS_LOADED',
   DOCUMENTS_LOADING = 'DOCUMENTS_LOADING',
 }
@@ -26,6 +27,12 @@ type DiscoverSidebarReducerAction =
     }
   | {
       type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED;
+      payload: {
+        dataView: DataView | null | undefined;
+      };
+    }
+  | {
+      type: DiscoverSidebarReducerActionType.DATA_VIEW_UPDATED;
       payload: {
         dataView: DataView | null | undefined;
       };
@@ -84,10 +91,17 @@ export function discoverSidebarReducer(
             fieldCounts: null,
             allFields: null,
             status:
-              state.status === DiscoverSidebarReducerStatus.COMPLETED
+              state.status === DiscoverSidebarReducerStatus.COMPLETED &&
+              state.dataView?.id !== action.payload.dataView?.id
                 ? DiscoverSidebarReducerStatus.INITIAL
                 : state.status,
           };
+    case DiscoverSidebarReducerActionType.DATA_VIEW_UPDATED:
+      return {
+        ...state,
+        dataView: action.payload.dataView,
+        allFields: getDataViewFieldList(action.payload.dataView, state.fieldCounts),
+      };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING:
       return {
         ...state,

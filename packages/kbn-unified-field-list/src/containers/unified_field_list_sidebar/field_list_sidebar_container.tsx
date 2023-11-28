@@ -122,10 +122,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
   );
-  const [showNewFieldsFlyout, setShowNewFieldsFlyout] = useState<boolean>(false);
-  const onNewFields = useCallback(() => {
-    setShowNewFieldsFlyout(true);
-  }, []);
+  const onNewFields = useCallback(() => {}, []);
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const { isSidebarCollapsed, onToggleSidebar } = useSidebarToggle({ stateService });
@@ -251,10 +248,9 @@ const UnifiedFieldListSidebarContainer = forwardRef<
 
   const onRefreshDataViewWrapped = useCallback(() => {
     if (onRefreshDataView) {
-      setShowNewFieldsFlyout(false);
       onRefreshDataView();
     }
-  }, [onRefreshDataView, setShowNewFieldsFlyout]);
+  }, [onRefreshDataView]);
 
   if (!dataView) {
     return null;
@@ -270,7 +266,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     onDeleteField: deleteField,
     compressed: stateService.creationOptions.compressed ?? false,
     buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
-    onRefreshDataView: showNewFieldsFlyout ? onRefreshDataViewWrapped : undefined,
+    onRefreshDataView: onRefreshDataViewWrapped,
   };
 
   if (stateService.creationOptions.showSidebarToggleButton) {

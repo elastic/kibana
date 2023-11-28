@@ -7,7 +7,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuntimeField } from '@kbn/data-views-plugin/common';
+import { DataViewField, RuntimeField } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 
@@ -49,7 +49,6 @@ export async function fetchFieldExistence({
   metaFields: string[];
   dataViewsService: DataViewsContract;
 }) {
-  const allFields = buildFieldList(dataView, metaFields);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
     pattern: '',
@@ -58,11 +57,17 @@ export async function fetchFieldExistence({
   const newFields = existingFieldList.filter(
     (field) => dataView.getFieldByName(field.name) === undefined
   );
+  if (newFields.length) {
+    await dataViewsService.refreshFields(dataView, false);
+  }
+  const allFields = buildFieldList(dataView, metaFields);
   return {
-    indexPatternTitle: dataView.title,
+    indexPatternTitle: dataView.getIndexPattern(),
     existingFieldNames: existingFields(existingFieldList, allFields),
-    hasNewFields: Boolean(newFields.length),
-    newFields,
+    hasNewFields: newFields.length > 0,
+    newFields: newFields.map(
+      (field) => dataView.getFieldByName(field.name) ?? new DataViewField(field)
+    ),
   };
 }
 

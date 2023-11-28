@@ -71,7 +71,7 @@ export interface FieldsGroupDetails {
   hideDetails?: boolean;
   defaultNoFieldsMessage?: string;
   hideIfEmpty?: boolean;
-  loadMappingFn?: () => void;
+  loadMappingFn?: () => Promise<undefined>;
 }
 
 export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails {

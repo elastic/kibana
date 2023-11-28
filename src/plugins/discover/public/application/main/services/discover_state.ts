@@ -358,7 +358,6 @@ export function getDiscoverStateContainer({
       await updateAdHocDataViewId();
     }
     addLog('[getDiscoverStateContainer] onRefreshDataViewFields finished');
-    fetchData();
   };
 
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
