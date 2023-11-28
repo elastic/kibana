@@ -1098,6 +1098,10 @@ describe('validation logic', () => {
       'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
     ]);
 
+    testErrorsAndWarnings('from a | stats count(*)', []);
+    testErrorsAndWarnings('from a | stats var0 = count(*)', []);
+    testErrorsAndWarnings('from a | stats var0 = avg(numberField), count(*)', []);
+
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
       for (const { params, returnType } of signatures) {
         const fieldMapping = getFieldMapping(params);
