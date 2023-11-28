@@ -12,11 +12,29 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useUrlState } from '../../../../utils/use_url_state';
-import {
-  availableControlsPanels,
-  helpMessages,
-} from '../components/search_bar/control_panels_config';
+
+export const availableControlsPanels = {
+  HOST_OS_NAME: 'host.os.name',
+  CLOUD_PROVIDER: 'cloud.provider',
+  SERVICE_NAME: 'service.name',
+};
+
+export const helpMessages = {
+  [availableControlsPanels.SERVICE_NAME]: {
+    text: `${i18n.translate('xpack.infra.hostsViewPage.table.tooltip.documentationLabel', {
+      defaultMessage: 'services only',
+    })}`,
+    link: {
+      text: `${i18n.translate('xpack.infra.hostsViewPage.table.tooltip.documentationLink', {
+        defaultMessage: 'APM-instrumented',
+      })}`,
+      href: 'https://ela.st/docs-infra-apm',
+      ['data-test-subj']: 'hostsViewTooltipDocumentationLink',
+    },
+  },
+};
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
@@ -127,7 +145,7 @@ const cleanControlPanels = (controlPanels: ControlPanels) => {
     const { dataViewId, helpMessage, ...rest } = explicitInput;
     return {
       ...acc,
-      [key]: { ...controlPanelConfig, ...rest },
+      [key]: { ...rest },
     };
   }, {});
 };

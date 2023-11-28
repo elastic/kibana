@@ -24,7 +24,6 @@ import { ControlTitle } from './control_title';
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
   enableActions?: boolean;
-  helpMessage?: JSX.Element;
   embeddableId: string;
   embeddableType: string;
 }
@@ -34,7 +33,6 @@ export const ControlFrame = ({
   enableActions,
   embeddableId,
   embeddableType,
-  helpMessage,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
@@ -43,6 +41,8 @@ export const ControlFrame = ({
   const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
   const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
   const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  const helpMessage = panels[embeddableId].explicitInput.helpMessage;
 
   const embeddable = useChildEmbeddable({
     untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),

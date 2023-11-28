@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
-import { EuiFormLabel, EuiPopover, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiFormLabel, EuiPopover, EuiIcon, EuiToolTip, EuiLink } from '@elastic/eui';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
+import { ControlInput } from '../../types';
 
 const TitleWithPopoverMessage = ({
   title,
@@ -17,12 +18,12 @@ const TitleWithPopoverMessage = ({
   embeddableId,
 }: {
   title?: string;
-  helpMessage?: JSX.Element;
+  helpMessage: ControlInput['helpMessage'];
   embeddableId: string;
 }) => {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
-  return title ? (
+  return helpMessage?.text ? (
     <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
       <>
         {title}
@@ -47,7 +48,20 @@ const TitleWithPopoverMessage = ({
           anchorPosition="upCenter"
           panelStyle={{ maxWidth: 250 }}
         >
-          <span>{helpMessage}</span>
+          {helpMessage?.link ? (
+            <>
+              <EuiLink
+                data-test-subj={helpMessage.link['data-test-subj']}
+                href={helpMessage.link.href}
+                target="_blank"
+              >
+                {helpMessage.link.text}
+              </EuiLink>{' '}
+              <>{helpMessage.text}</>
+            </>
+          ) : (
+            <>{helpMessage.text}</>
+          )}
         </EuiPopover>
       </>
     </EuiFormLabel>
@@ -59,7 +73,7 @@ export const ControlTitle = ({
   helpMessage,
   embeddableId,
 }: {
-  helpMessage?: JSX.Element;
+  helpMessage?: ControlInput['helpMessage'];
   title?: string;
   embeddableId: string;
 }) => {

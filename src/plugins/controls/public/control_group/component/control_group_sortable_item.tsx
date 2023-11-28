@@ -74,7 +74,6 @@ const SortableControlInner = forwardRef<
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
     const title = panels[embeddableId].explicitInput.title;
-    const helpMessage = panels[embeddableId].explicitInput.helpMessage;
 
     const dragHandle = (
       <button
@@ -110,7 +109,6 @@ const SortableControlInner = forwardRef<
           embeddableId={embeddableId}
           embeddableType={embeddableType}
           customPrepend={isEditable ? dragHandle : undefined}
-          helpMessage={helpMessage}
         />
       </EuiFlexItem>
     );
