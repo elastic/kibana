@@ -9,4 +9,11 @@ export {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   type CreateCategorizationADJobContext,
-} from './src/ui_actions';
+} from './src/ml/ui_actions';
+
+export {
+  ACTION_CATEGORIZE_FIELD,
+  CATEGORIZE_FIELD_TRIGGER,
+  categorizeFieldTrigger,
+  type CategorizeFieldContext,
+} from './src/aiops/ui_actions';

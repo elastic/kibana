@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-*'," +
           "interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
       );
-      await appsMenu.clickLink('Discover');
+      await appsMenu.clickLink('Discover', { category: 'kibana' });
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await filterBar.hasFilter('extension.raw', '', undefined, true)).to.be(true);
       expect(await filterBar.isFilterPinned('extension.raw')).to.be(true);

@@ -530,6 +530,16 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
+export interface InstallFailedAttempt {
+  created_at: string;
+  target_version: string;
+  error: {
+    name: string;
+    message: string;
+    stack?: string;
+  };
+}
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
@@ -549,6 +559,7 @@ export interface Installation {
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   internal?: boolean;
   removable?: boolean;
+  latest_install_failed_attempts?: InstallFailedAttempt[];
 }
 
 export interface PackageUsageStats {

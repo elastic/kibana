@@ -242,6 +242,11 @@ describe('mappingFromFieldMap', () => {
                 },
                 reason: {
                   type: 'keyword',
+                  fields: {
+                    text: {
+                      type: 'match_only_text',
+                    },
+                  },
                 },
                 rule: {
                   properties: {

@@ -15,10 +15,17 @@ import { useHostIsolationTools } from '../../../timelines/components/side_panel/
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { useUiSetting } from '../../../common/lib/kibana';
 
+interface PanelFooterProps {
+  /**
+   * Boolean that indicates whether flyout is in preview and action should be hidden
+   */
+  isPreview: boolean;
+}
+
 /**
  *
  */
-export const PanelFooter: FC = () => {
+export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
   const { closeFlyout, openRightPanel } = useExpandableFlyoutContext();
   const {
     eventId,
@@ -48,7 +55,7 @@ export const PanelFooter: FC = () => {
     [eventId, indexName, openRightPanel, scopeId, showHostIsolationPanel]
   );
 
-  return (
+  return !isPreview ? (
     <EuiPanel
       hasShadow={false}
       borderRadius="none"
@@ -68,5 +75,5 @@ export const PanelFooter: FC = () => {
         refetchFlyoutData={refetchFlyoutData}
       />
     </EuiPanel>
-  );
+  ) : null;
 };

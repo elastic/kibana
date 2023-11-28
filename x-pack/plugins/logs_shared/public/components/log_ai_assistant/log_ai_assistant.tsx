@@ -77,12 +77,20 @@ export const LogAIAssistant = withProviders(({ doc }: LogAIAssistantProps) => {
     <EuiFlexGroup direction="column" gutterSize="m">
       {aiAssistant.isEnabled() && explainLogMessageMessages ? (
         <EuiFlexItem grow={false}>
-          <ContextualInsight title={explainLogMessageTitle} messages={explainLogMessageMessages} />
+          <ContextualInsight
+            title={explainLogMessageTitle}
+            messages={explainLogMessageMessages}
+            dataTestSubj="obsAiAssistantInsightButtonExplainLogMessage"
+          />
         </EuiFlexItem>
       ) : null}
       {aiAssistant.isEnabled() && similarLogMessageMessages ? (
         <EuiFlexItem grow={false}>
-          <ContextualInsight title={similarLogMessagesTitle} messages={similarLogMessageMessages} />
+          <ContextualInsight
+            title={similarLogMessagesTitle}
+            messages={similarLogMessageMessages}
+            dataTestSubj="obsAiAssistantInsightButtonSimilarLogMessage"
+          />
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
