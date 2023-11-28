@@ -7,7 +7,6 @@
 
 import { format as formatUrl } from 'url';
 import supertest, { type SuperAgentTest } from 'supertest';
-import request from 'superagent';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 /**
@@ -18,21 +17,21 @@ import { FtrProviderContext } from '../../functional/ftr_provider_context';
  */
 const initSuperAgentTest = (kbnUrl: string, ca?: string[]) => {
   return {
-    get(url: string, callback?: request.CallbackHandler | undefined) {
+    get(url: string) {
       const agent = supertest.agent(kbnUrl, { ca });
-      return agent.get(url, callback);
+      return agent.get(url);
     },
-    delete(url: string, callback?: request.CallbackHandler | undefined) {
+    delete(url: string) {
       const agent = supertest.agent(kbnUrl, { ca });
-      return agent.delete(url, callback);
+      return agent.delete(url);
     },
-    post(url: string, callback?: request.CallbackHandler | undefined) {
+    post(url: string) {
       const agent = supertest.agent(kbnUrl, { ca });
-      return agent.post(url, callback);
+      return agent.post(url);
     },
-    put(url: string, callback?: request.CallbackHandler | undefined) {
+    put(url: string) {
       const agent = supertest.agent(kbnUrl, { ca });
-      return agent.put(url, callback);
+      return agent.put(url);
     },
   } as Pick<SuperAgentTest, 'get' | 'delete' | 'post' | 'put'>;
 };
