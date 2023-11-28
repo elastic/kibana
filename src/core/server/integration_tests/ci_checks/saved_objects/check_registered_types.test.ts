@@ -84,7 +84,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "dashboard": "0611794ce10d25a36da0770c91376c575e92e8f2",
         "endpoint:user-artifact-manifest": "1c3533161811a58772e30cdc77bac4631da3ef2b",
         "enterprise_search_telemetry": "9ac912e1417fc8681e0cd383775382117c9e3d3d",
-        "epm-packages": "2449bb565f987eff70b1b39578bb17e90c404c6e",
+        "epm-packages": "c23d3d00c051a08817335dba26f542b64b18a56a",
         "epm-packages-assets": "7a3e58efd9a14191d0d1a00b8aaed30a145fd0b1",
         "event-annotation-group": "715ba867d8c68f3c9438052210ea1c30a9362582",
         "event_loop_delays_daily": "01b967e8e043801357503de09199dfa3853bab88",
