@@ -916,6 +916,26 @@ describe('validation logic', () => {
             expectedErrors
           );
         }
+
+        // test that wildcard won't work as arg
+        if (fieldMapping.length === 1) {
+          const fieldMappingWithWildcard = [...fieldMapping];
+          fieldMappingWithWildcard[0].name = '*';
+
+          testErrorsAndWarnings(
+            `from a | eval var = ${
+              getFunctionSignatures(
+                {
+                  name,
+                  ...defRest,
+                  signatures: [{ params: fieldMappingWithWildcard, returnType }],
+                },
+                { withTypes: false }
+              )[0].declaration
+            }`,
+            [`Using wildcards (*) in ${name} is not allowed`]
+          );
+        }
       }
     }
     for (const op of ['>', '>=', '<', '<=', '==']) {
@@ -1187,6 +1207,27 @@ describe('validation logic', () => {
             }`,
             expectedErrors
           );
+
+          // test that only count() accepts wildcard as arg
+          // just check that the function accepts only 1 arg as the parser cannot handle multiple args with * as start arg
+          if (fieldMapping.length === 1) {
+            const fieldMappingWithWildcard = [...fieldMapping];
+            fieldMappingWithWildcard[0].name = '*';
+
+            testErrorsAndWarnings(
+              `from a | stats var = ${
+                getFunctionSignatures(
+                  {
+                    name,
+                    ...defRest,
+                    signatures: [{ params: fieldMappingWithWildcard, returnType }],
+                  },
+                  { withTypes: false }
+                )[0].declaration
+              }`,
+              name === 'count' ? [] : [`Using wildcards (*) in ${name} is not allowed`]
+            );
+          }
         }
       }
     }
