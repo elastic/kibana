@@ -97,9 +97,13 @@ describe('callAgentExecutor', () => {
       kbResource: ESQL_RESOURCE,
     });
 
-    expect(mockCall).toHaveBeenCalledWith({
-      input: '\n\nDo you know my name?',
-    });
+    // We don't care about the `config` argument, so we use `expect.anything()`
+    expect(mockCall).toHaveBeenCalledWith(
+      {
+        input: '\n\nDo you know my name?',
+      },
+      expect.anything()
+    );
   });
 
   it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
@@ -115,9 +119,13 @@ describe('callAgentExecutor', () => {
       kbResource: ESQL_RESOURCE,
     });
 
-    expect(mockCall).toHaveBeenCalledWith({
-      input: 'What is my name?',
-    });
+    // We don't care about the `config` argument, so we use `expect.anything()`
+    expect(mockCall).toHaveBeenCalledWith(
+      {
+        input: 'What is my name?',
+      },
+      expect.anything()
+    );
   });
 
   it('returns the expected response body', async () => {

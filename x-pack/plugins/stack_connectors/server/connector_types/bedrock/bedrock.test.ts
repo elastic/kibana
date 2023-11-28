@@ -5,13 +5,10 @@
  * 2.0.
  */
 import aws from 'aws4';
-import { Transform } from 'stream';
+import { PassThrough, Transform } from 'stream';
 import { BedrockConnector } from './bedrock';
-import { waitFor } from '@testing-library/react';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/bedrock/schema';
 import {
@@ -105,7 +102,7 @@ describe('BedrockConnector', () => {
       let stream;
       beforeEach(() => {
         stream = createStreamMock();
-        stream.write(encodeBedrockResponse(mockResponseString));
+        stream.write(new Uint8Array([1, 2, 3]));
         mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
         // @ts-ignore
         connector.request = mockRequest;
@@ -199,16 +196,9 @@ describe('BedrockConnector', () => {
         });
       });
 
-      it('transforms the response into a string', async () => {
+      it('responds with a readable stream', async () => {
         const response = await connector.invokeStream(aiAssistantBody);
-
-        let responseBody: string = '';
-        response.on('data', (data: string) => {
-          responseBody += data.toString();
-        });
-        await waitFor(() => {
-          expect(responseBody).toEqual(mockResponseString);
-        });
+        expect(response instanceof PassThrough).toEqual(true);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -363,17 +353,4 @@ function createStreamMock() {
       transform.end();
     },
   };
-}
-
-function encodeBedrockResponse(completion: string) {
-  return new EventStreamCodec(toUtf8, fromUtf8).encode({
-    headers: {},
-    body: Uint8Array.from(
-      Buffer.from(
-        JSON.stringify({
-          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
-        })
-      )
-    ),
-  });
 }

@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { ReservedRoleBadge } from './reserved_role_badge';
-import type { Role } from '../../../../common/model';
+import type { Role } from '../../../../common';
 
 const reservedRole: Role = {
   name: '',

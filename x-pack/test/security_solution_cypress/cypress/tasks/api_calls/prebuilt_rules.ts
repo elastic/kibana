@@ -13,17 +13,12 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common/d
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const getPrebuiltRulesStatus = () => {
   return rootRequest<PrePackagedRulesStatusResponse>({
     method: 'GET',
     url: 'api/detection_engine/rules/prepackaged/_status',
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
-    },
   });
 };
 
@@ -43,13 +38,11 @@ export const installAllPrebuiltRulesRequest = () =>
   rootRequest<PerformRuleInstallationResponseBody>({
     method: 'POST',
     url: PERFORM_RULE_INSTALLATION_URL,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '1',
-    },
     body: {
       mode: 'ALL_RULES',
+    },
+    headers: {
+      'elastic-api-version': '1',
     },
   });
 
@@ -63,17 +56,15 @@ export const installSpecificPrebuiltRulesRequest = (rules: Array<typeof SAMPLE_P
   rootRequest<PerformRuleInstallationResponseBody>({
     method: 'POST',
     url: PERFORM_RULE_INSTALLATION_URL,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '1',
-    },
     body: {
       mode: 'SPECIFIC_RULES',
       rules: rules.map((rule) => ({
         rule_id: rule['security-rule'].rule_id,
         version: rule['security-rule'].version,
       })),
+    },
+    headers: {
+      'elastic-api-version': '1',
     },
   });
 
@@ -128,8 +119,6 @@ export const createNewRuleAsset = ({
           method: 'PUT',
           url,
           headers: {
-            'kbn-xsrf': 'cypress-creds',
-            'x-elastic-internal-origin': 'security-solution',
             'Content-Type': 'application/json',
           },
           failOnStatusCode: false,
@@ -182,7 +171,7 @@ export const bulkCreateRuleAssets = ({
       return rootRequest({
         method: 'POST',
         url,
-        headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         failOnStatusCode: false,
         body: bulkIndexRequestBody,
       }).then((response) => response.status === 200);
@@ -197,8 +186,6 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
     method: 'GET',
     url,
     headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
       'Content-Type': 'application/json',
     },
     failOnStatusCode: false,

@@ -225,7 +225,7 @@ export const AgentUpgradeStatus: React.FC<{
     [agentUpgradeStartedAt, agentUpgradedAt]
   );
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
-  const minVersion = undefined; // Change this to a string in order for a tooltip to render for upgrading agents with no upgrade details.
+  const minVersion = '8.12';
 
   if (isAgentUpgradable) {
     return (
@@ -249,7 +249,7 @@ export const AgentUpgradeStatus: React.FC<{
     );
   }
 
-  if (minVersion && isAgentUpgrading) {
+  if (isAgentUpgrading) {
     return (
       <EuiIconTip
         type="iInCircle"
