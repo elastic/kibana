@@ -26,6 +26,7 @@ import {
   DEFAULT_PREVIEW_INDEX,
   ASSISTANT_FEATURE_ID,
 } from '../../../../../common/constants';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -128,6 +129,7 @@ jest.mock('../../../../explore/containers/risk_score', () => {
     }),
   };
 });
+jest.mock('../../../../common/hooks/use_upselling');
 
 const defaultProps = {
   scopeId: TimelineId.test,
@@ -181,6 +183,7 @@ describe('event details panel component', () => {
       },
     });
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+    (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
   });
   afterEach(() => {
     jest.clearAllMocks();
