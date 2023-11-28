@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
-import { useKibana } from '@kbn/kibana-react-plugin/public'
 
 import { DocumentationLink } from './documentation_link';
 import { useServices } from './services';
@@ -37,18 +36,19 @@ export const NoDataViewsPrompt = ({
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
   const services = useServices();
-  const { showESQLViewLocator, defaultDataView } = services;
+  const { showESQLViewLocator, dataViews } = services;
   let actions;
 
   if (canCreateNewDataView && showESQLView) {
     const onClickEsql = async () => {
+      const defaultDataView = dataViews.getDefaultDataView({ displayErrors: false });
       const params = {
         query: {
-          esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
+          esql: `from ${defaultDataView.getDefaultDatagetIndexPattern()} | limit 10`,
         },
         dataViewSpec: defaultDataView?.toSpec(),
       };
-      const discoverLocation = await showESQLViewLocator.locator?.getLocation(params);
+      const discoverLocation = await showESQLViewLocator?.locator.getLocation(params);
       return await showESQLViewLocator.navigate({
         query: {
           esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,

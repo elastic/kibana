@@ -356,7 +356,6 @@ export const IndexPatternTable = ({
           dataViewsDocLink={docLinks.links.indexPatterns.introduction}
           emptyPromptColor={'subdued'}
           showESQLView={true}
-          defaultDataView={dataViews.getDefaultDataView({ displayErrors : false})}
         />
       </>
     );

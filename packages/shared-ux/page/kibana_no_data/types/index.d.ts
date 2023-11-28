@@ -24,7 +24,8 @@ export interface Services {
   hasUserDataView: () => Promise<boolean>;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
-  defaultDataView: Promise<DataView>;
+  /** Needed to redirect Kibana to ES|QL */
+  defaultDataView: DataView;
 }
 
 /**
@@ -34,7 +35,6 @@ export type KibanaNoDataPageServices = Services & NoDataCardServices & NoDataVie
 
 export interface KibanaDependencies {
   dataViews: {
-    defaultDataView: Promise<DataView>;
     hasData: {
       hasESData: () => Promise<boolean>;
       hasUserDataView: () => Promise<boolean>;
@@ -61,6 +61,4 @@ export interface KibanaNoDataPageProps {
   allowAdHocDataView?: boolean;
   /** Set to true if the kibana is customly branded */
   showPlainSpinner: boolean;
-  /** Show ES|QL button */
-  showESQLView: boolean;
 }

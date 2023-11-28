@@ -49,7 +49,7 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
 }) => {
   const { dataViews } = dependencies;
   const value: Services = {
-    defaultDataView: dataViews.defaultDataView,
+    defaultDataView: dataViews,
     hasESData: dataViews.hasData.hasESData,
     hasUserDataView: dataViews.hasData.hasUserDataView,
   };

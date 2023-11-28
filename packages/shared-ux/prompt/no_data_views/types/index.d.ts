@@ -9,16 +9,6 @@
 import { EuiEmptyPromptProps } from '@elastic/eui';
 
 /**
- * TODO: `DataView` is a class exported by `src/plugins/data_views/public`.  Since this service
- * is contained in this package-- and packages can only depend on other packages and never on
- * plugins-- we have to set this to `unknown`.  If and when `DataView` is exported from a
- * stateless package, we can remove this.
- *
- * @see: https://github.com/elastic/kibana/issues/127695
- */
-type DataView = unknown;
-
-/**
  * A subset of the `DataViewEditorOptions` interface relevant to our service and components.
  *
  * @see: src/plugins/data_view_editor/public/types.ts
@@ -34,7 +24,6 @@ interface DataViewEditorOptions {
  * Abstract external services for this component.
  */
 export interface NoDataViewsPromptServices {
-  defaultDataView: Promise<DataView>
   /** True if the user has permission to create a new Data View, false otherwise. */
   canCreateNewDataView: boolean;
   /** A method to open the Data View Editor flow. */
@@ -42,6 +31,8 @@ export interface NoDataViewsPromptServices {
   /** A link to information about Data Views in Kibana */
   dataViewsDocLink: string;
   showESQLViewLocator: DiscoverAppLocator;
+  // defaultDataView: DataView;
+  dataViews: DataViewsServicePublic;
 }
 /**
  * Kibana-specific service types.
@@ -70,11 +61,7 @@ export interface NoDataViewsPromptKibanaDependencies {
       };
     };
   };
-  defaultDataView: {
-    dataView: {
-      getDefaultDataView: () => boolean;
-    }
-  }
+  dataView: DataViewsServicePublic;
 }
 
 export interface NoDataViewsPromptComponentProps {
@@ -88,7 +75,6 @@ export interface NoDataViewsPromptComponentProps {
   emptyPromptColor?: EuiEmptyPromptProps['color'];
   /** Show a button to the user to navigate to the ES|QL Discover */
   showESQLView: boolean;
-  defaultDataView: Promise<DataView>;
 }
 
 // TODO: https://github.com/elastic/kibana/issues/127695
