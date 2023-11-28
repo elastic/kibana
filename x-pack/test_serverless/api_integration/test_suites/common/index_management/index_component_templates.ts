@@ -12,12 +12,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const CACHE_TEMPLATES = true;
 
 export default function ({ getService }: FtrProviderContext) {
-  const log = getService('log');
   const indexManagementService = getService('indexManagement');
 
   describe('component templates', () => {
     // Api methods
-    let createComponentTemplate: typeof indexManagementService['componentTemplates']['api']['createComponentTemplate'];
     let getAllComponentTemplates: typeof indexManagementService['componentTemplates']['api']['getAllComponentTemplates'];
     let getOneComponentTemplate: typeof indexManagementService['componentTemplates']['api']['getOneComponentTemplate'];
     let updateComponentTemplate: typeof indexManagementService['componentTemplates']['api']['updateComponentTemplate'];
@@ -27,7 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
     let addDatastream: typeof indexManagementService['componentTemplates']['helpers']['addDatastream'];
     let addIndexTemplate: typeof indexManagementService['componentTemplates']['helpers']['addIndexTemplate'];
     let addComponentTemplate: typeof indexManagementService['componentTemplates']['helpers']['addComponentTemplate'];
-    let removeComponentTemplate: typeof indexManagementService['componentTemplates']['helpers']['removeComponentTemplate'];
     let cleanupDatastreams: typeof indexManagementService['componentTemplates']['helpers']['cleanupDatastreams'];
     let cleanUpIndexTemplates: typeof indexManagementService['componentTemplates']['helpers']['cleanUpIndexTemplates'];
     let cleanUpComponentTemplates: typeof indexManagementService['componentTemplates']['helpers']['cleanUpComponentTemplates'];
@@ -36,7 +33,6 @@ export default function ({ getService }: FtrProviderContext) {
       ({
         componentTemplates: {
           api: {
-            createComponentTemplate,
             getAllComponentTemplates,
             getOneComponentTemplate,
             updateComponentTemplate,
@@ -47,7 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
             addDatastream,
             addIndexTemplate,
             addComponentTemplate,
-            removeComponentTemplate,
             cleanupDatastreams,
             cleanUpIndexTemplates,
             cleanUpComponentTemplates,
