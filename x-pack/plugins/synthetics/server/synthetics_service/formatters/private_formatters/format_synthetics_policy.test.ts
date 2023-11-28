@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, DataStream } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
 
@@ -13,7 +13,7 @@ describe('formatSyntheticsPolicy', () => {
   it('formats browser policy', () => {
     const { formattedPolicy } = formatSyntheticsPolicy(
       testNewPolicy,
-      DataStream.BROWSER,
+      MonitorTypeEnum.BROWSER,
       browserConfig,
       gParams
     );
@@ -468,7 +468,7 @@ describe('formatSyntheticsPolicy', () => {
   it.each([true, false])('formats http policy', (isTLSEnabled) => {
     const { formattedPolicy } = formatSyntheticsPolicy(
       testNewPolicy,
-      DataStream.HTTP,
+      MonitorTypeEnum.HTTP,
       {
         ...httpPolicy,
         [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },

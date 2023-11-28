@@ -9,7 +9,7 @@ import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   CodeEditorMode,
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPFields,
   TLSVersion,
@@ -34,7 +34,7 @@ export const getNormalizeHTTPFields = ({
   namespace,
   version,
 }: NormalizedProjectProps): NormalizerResult<HTTPFields> => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
+  const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.HTTP];
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
   const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
@@ -61,7 +61,7 @@ export const getNormalizeHTTPFields = ({
   const normalizedFields = {
     ...yamlConfig,
     ...commonFields,
-    [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+    [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
     [ConfigKey.URLS]: getOptionalArrayField(monitor.urls) || defaultFields[ConfigKey.URLS],
     [ConfigKey.MAX_REDIRECTS]: formatMaxRedirects(monitor[ConfigKey.MAX_REDIRECTS]),
@@ -78,7 +78,7 @@ export const getNormalizeHTTPFields = ({
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
     [ConfigKey.METADATA]: {
-      ...DEFAULT_FIELDS[DataStream.HTTP][ConfigKey.METADATA],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP][ConfigKey.METADATA],
       is_tls_enabled: getHasTLSFields(monitor),
     },
   };
@@ -118,7 +118,7 @@ export const formatMaxRedirects = (value?: string | number): string => {
     return `${value}`;
   }
 
-  const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
+  const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.HTTP];
 
   return value ?? defaultFields[ConfigKey.MAX_REDIRECTS];
 };

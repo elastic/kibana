@@ -6,7 +6,7 @@
  */
 
 import {
-  DataStream,
+  MonitorTypeEnum,
   ScreenshotOption,
   Locations,
   LocationStatus,
@@ -89,7 +89,7 @@ describe('browser normalizers', () => {
         locations: ['us_central', 'us_east'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
-        type: DataStream.BROWSER,
+        type: MonitorTypeEnum.BROWSER,
         hash: testHash,
       },
       {
@@ -105,7 +105,7 @@ describe('browser normalizers', () => {
         privateLocations: ['Germany'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
-        type: DataStream.BROWSER,
+        type: MonitorTypeEnum.BROWSER,
         hash: testHash,
       },
     ];
@@ -122,7 +122,7 @@ describe('browser normalizers', () => {
       expect(actual).toEqual([
         {
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.BROWSER],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
             journey_id: 'test-id-1',
             ignore_https_errors: true,
             origin: 'project',
@@ -170,7 +170,7 @@ describe('browser normalizers', () => {
         },
         {
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.BROWSER],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
             journey_id: 'test-id-2',
             ignore_https_errors: false,
             origin: 'project',
@@ -228,7 +228,7 @@ describe('browser normalizers', () => {
         },
         {
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.BROWSER],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
             journey_id: 'test-id-3',
             ignore_https_errors: false,
             origin: 'project',
@@ -305,7 +305,7 @@ describe('browser normalizers', () => {
       expect(actual).toEqual([
         {
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.BROWSER],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
             journey_id: 'test-id-1',
             ignore_https_errors: true,
             origin: 'project',
@@ -375,7 +375,7 @@ describe('browser normalizers', () => {
       expect(actual).toEqual([
         {
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.BROWSER],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
             journey_id: 'test-id-1',
             ignore_https_errors: true,
             origin: 'project',
