@@ -11,6 +11,19 @@ import type { TestData } from '../../types';
 
 import type { LogRateAnalysisDataGenerator } from '../../../../services/aiops/log_rate_analysis_data_generator';
 
+import { analysisGroupsTableTextfieldGaps } from './__mocks__/analysis_groups_table_textfield_gaps';
+import { analysisGroupsTableNotextfieldGaps } from './__mocks__/analysis_groups_table_notextfield_gaps';
+import { analysisGroupsTableTextfieldNogaps } from './__mocks__/analysis_groups_table_textfield_nogaps';
+import { analysisGroupsTableNotextfieldNogaps } from './__mocks__/analysis_groups_table_notextfield_nogaps';
+import { filteredAnalysisGroupsTableTextfieldGaps } from './__mocks__/filtered_analysis_groups_table_textfield_gaps';
+import { filteredAnalysisGroupsTableNotextfieldGaps } from './__mocks__/filtered_analysis_groups_table_notextfield_gaps';
+import { filteredAnalysisGroupsTableTextfieldNogaps } from './__mocks__/filtered_analysis_groups_table_textfield_nogaps';
+import { filteredAnalysisGroupsTableNotextfieldNogaps } from './__mocks__/filtered_analysis_groups_table_notextfield_nogaps';
+import { analysisTableTextfieldGaps } from './__mocks__/analysis_table_textfield_gaps';
+import { analysisTableNotextfieldGaps } from './__mocks__/analysis_table_notextfield_gaps';
+import { analysisTableTextfieldNogaps } from './__mocks__/analysis_table_textfield_nogaps';
+import { analysisTableNotextfieldNogaps } from './__mocks__/analysis_table_notextfield_nogaps';
+
 const REFERENCE_TS = 1669018354793;
 const DAY_MS = 86400000;
 
@@ -24,298 +37,29 @@ export const getArtificialLogDataViewTestData = (
 ): TestData => {
   function getAnalysisGroupsTable() {
     if (gaps) {
-      return textField
-        ? [
-            {
-              group:
-                'message: an unexpected error occuredurl: home.phpuser: Maryresponse_code: 500version: v1.0.0',
-              docCount: '29',
-            },
-            {
-              group:
-                'message: an unexpected error occuredurl: home.phpuser: Paulresponse_code: 500version: v1.0.0',
-              docCount: '29',
-            },
-            {
-              group:
-                'message: an unexpected error occuredurl: login.phpuser: Paulresponse_code: 500version: v1.0.0',
-              docCount: '29',
-            },
-            {
-              group:
-                'url: home.phpuser: Paulresponse_code: 500message: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '30',
-            },
-            {
-              group:
-                'user: Peterresponse_code: 200url: home.phpmessage: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '30',
-            },
-            {
-              group:
-                'user: Peterresponse_code: 200url: login.phpmessage: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '30',
-            },
-            {
-              group:
-                'user: Peterresponse_code: 404url: home.phpmessage: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '30',
-            },
-            {
-              group:
-                'user: Peterresponse_code: 404url: login.phpmessage: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '30',
-            },
-            {
-              group:
-                'user: Peterurl: user.phpresponse_code: 200message: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '30',
-            },
-            {
-              group:
-                'user: Peterurl: user.phpresponse_code: 404message: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '30',
-            },
-          ]
-        : [
-            { group: 'response_code: 500url: home.phpuser: Maryversion: v1.0.0', docCount: '47' },
-            { group: 'response_code: 500url: home.phpuser: Paulversion: v1.0.0', docCount: '59' },
-            { group: 'response_code: 500url: login.phpuser: Maryversion: v1.0.0', docCount: '35' },
-            { group: 'response_code: 500url: login.phpuser: Paulversion: v1.0.0', docCount: '39' },
-            { group: 'user: Peterurl: home.phpresponse_code: 200version: v1.0.0', docCount: '30' },
-            { group: 'user: Peterurl: home.phpresponse_code: 404version: v1.0.0', docCount: '30' },
-            { group: 'user: Peterurl: login.phpresponse_code: 200version: v1.0.0', docCount: '30' },
-            { group: 'user: Peterurl: login.phpresponse_code: 404version: v1.0.0', docCount: '30' },
-            { group: 'user: Peterurl: user.phpresponse_code: 200version: v1.0.0', docCount: '30' },
-            { group: 'user: Peterurl: user.phpresponse_code: 404version: v1.0.0', docCount: '30' },
-          ];
+      return textField ? analysisGroupsTableTextfieldGaps : analysisGroupsTableNotextfieldGaps;
     }
-
-    return [
-      textField
-        ? {
-            group: 'message: an unexpected error occuredurl: home.phpresponse_code: 500',
-            docCount: '634',
-          }
-        : {
-            group: 'response_code: 500url: home.php',
-            docCount: '792',
-          },
-      textField
-        ? {
-            group: 'message: an unexpected error occuredurl: login.phpresponse_code: 500',
-            docCount: '632',
-          }
-        : {
-            group: 'url: login.phpresponse_code: 500',
-            docCount: '790',
-          },
-      {
-        docCount: '636',
-        group: 'user: Peterurl: home.php',
-      },
-      {
-        docCount: '632',
-        group: 'user: Peterurl: login.php',
-      },
-    ];
+    return textField ? analysisGroupsTableTextfieldNogaps : analysisGroupsTableNotextfieldNogaps;
   }
 
   function getFilteredAnalysisGroupsTable() {
     if (gaps) {
       return textField
-        ? [
-            {
-              group:
-                'message: an unexpected error occuredurl: home.phpresponse_code: 500version: v1.0.0',
-              docCount: '58',
-            },
-            {
-              group:
-                'message: an unexpected error occuredurl: login.phpresponse_code: 500version: v1.0.0',
-              docCount: '58',
-            },
-            {
-              group:
-                'response_code: 200url: home.phpmessage: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '46',
-            },
-            {
-              group:
-                'response_code: 200url: login.phpmessage: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '35',
-            },
-            {
-              group:
-                'response_code: 404url: home.phpmessage: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '63',
-            },
-            {
-              group:
-                'response_code: 404url: login.phpmessage: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '40',
-            },
-            {
-              group:
-                'url: home.phpresponse_code: 500message: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '48',
-            },
-            {
-              group:
-                'url: user.phpresponse_code: 200message: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '40',
-            },
-            {
-              group:
-                'url: user.phpresponse_code: 404message: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '51',
-            },
-            {
-              group:
-                'url: user.phpresponse_code: 500message: Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200version: v1.0.0',
-              docCount: '41',
-            },
-          ]
-        : [
-            { group: 'url: home.phpresponse_code: 200version: v1.0.0', docCount: '46' },
-            { group: 'url: home.phpresponse_code: 404version: v1.0.0', docCount: '63' },
-            { group: 'url: home.phpresponse_code: 500version: v1.0.0', docCount: '106' },
-            { group: 'url: login.phpresponse_code: 200version: v1.0.0', docCount: '35' },
-            { group: 'url: login.phpresponse_code: 404version: v1.0.0', docCount: '40' },
-            { group: 'url: login.phpresponse_code: 500version: v1.0.0', docCount: '74' },
-            { group: 'url: user.phpresponse_code: 200version: v1.0.0', docCount: '40' },
-            { group: 'url: user.phpresponse_code: 404version: v1.0.0', docCount: '51' },
-            { group: 'url: user.phpresponse_code: 500version: v1.0.0', docCount: '41' },
-          ];
+        ? filteredAnalysisGroupsTableTextfieldGaps
+        : filteredAnalysisGroupsTableNotextfieldGaps;
     }
 
     return textField
-      ? [
-          {
-            group: '* url: home.phpmessage: an unexpected error occuredresponse_code: 500',
-            docCount: '634',
-          },
-          {
-            group: '* url: login.phpmessage: an unexpected error occuredresponse_code: 500',
-            docCount: '632',
-          },
-        ]
-      : [
-          { group: '* url: home.phpresponse_code: 500', docCount: '792' },
-          { group: '* url: login.phpresponse_code: 500', docCount: '790' },
-        ];
+      ? filteredAnalysisGroupsTableTextfieldNogaps
+      : filteredAnalysisGroupsTableNotextfieldNogaps;
   }
 
   function getAnalysisTable() {
     if (gaps) {
-      return textField
-        ? [
-            {
-              fieldName: 'message',
-              fieldValue: 'Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-            {
-              fieldName: 'response_code',
-              fieldValue: '500',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-            {
-              fieldName: 'url',
-              fieldValue: 'home.php',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-            {
-              fieldName: 'user',
-              fieldValue: 'Paul',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-            {
-              fieldName: 'version',
-              fieldValue: 'v1.0.0',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-          ]
-        : [
-            {
-              fieldName: 'response_code',
-              fieldValue: '500',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-            {
-              fieldName: 'url',
-              fieldValue: 'home.php',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-            {
-              fieldName: 'user',
-              fieldValue: 'Paul',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-            {
-              fieldName: 'version',
-              fieldValue: 'v1.0.0',
-              logRate: 'Chart type:bar chart',
-              pValue: '1.00',
-              impact: '',
-            },
-          ];
+      return textField ? analysisTableTextfieldGaps : analysisTableNotextfieldGaps;
     }
 
-    return [
-      ...(textField
-        ? [
-            {
-              fieldName: 'message',
-              fieldValue: 'an unexpected error occured',
-              logRate: 'Chart type:bar chart',
-              pValue: '0.00000100',
-              impact: 'Medium',
-            },
-            {
-              fieldName: 'response_code',
-              fieldValue: '500',
-              logRate: 'Chart type:bar chart',
-              pValue: '3.61e-12',
-              impact: 'High',
-            },
-          ]
-        : []),
-      {
-        fieldName: 'url',
-        fieldValue: 'home.php',
-        impact: 'Low',
-        logRate: 'Chart type:bar chart',
-        pValue: '0.00974',
-      },
-      ...(textField
-        ? []
-        : [
-            {
-              fieldName: 'user',
-              fieldValue: 'Peter',
-              impact: 'High',
-              logRate: 'Chart type:bar chart',
-              pValue: '2.63e-21',
-            },
-          ]),
-    ];
+    return textField ? analysisTableTextfieldNogaps : analysisTableNotextfieldNogaps;
   }
 
   function getFieldSelectorPopover() {
