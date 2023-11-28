@@ -19,7 +19,7 @@ interface CloudLinksDepsSetup {
   security?: SecurityPluginSetup;
 }
 
-interface CloudLinksDepsStart {
+export interface CloudLinksDepsStart {
   cloud: CloudStart;
   security?: SecurityPluginStart;
   share: SharePluginStart;
@@ -43,9 +43,7 @@ export class CloudLinksPlugin
           'data-test-subj': 'cloudOnboardingSetupGuideLink',
           priority: 1000, // We want this link to be at the very top.
         });
-      } else if (guidedOnboarding?.getEsEndpointModal) {
-        guidedOnboarding?.getEsEndpointModal(core, share, cloud, core.docLinks);
-      }
+      } 
     }
 
     if (security) {

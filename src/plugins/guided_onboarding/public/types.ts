@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { CoreStart, DocLinksStart, HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import type {
   GuideState,
   GuideId,
@@ -24,13 +24,13 @@ export interface GuidedOnboardingPluginSetup {
 }
 
 export interface GuidedOnboardingPluginStart {
-  getEsEndpointModal: (
-    core: CoreStart,
-    share: SharePluginStart,
-    cloud: CloudStart,
-    docLinks: DocLinksStart,
-    onClose?: () => {}
-  ) => any;
+  // getEsEndpointModal: (
+  //   core: CoreStart,
+  //   share: SharePluginStart,
+  //   cloud: CloudStart,
+  //   docLinks: DocLinksStart,
+  //   onClose?: () => {}
+  // ) => any;
   guidedOnboardingApi?: GuidedOnboardingApi;
 }
 

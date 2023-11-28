@@ -47,7 +47,7 @@ export class GuidedOnboardingPlugin
     core: CoreStart,
     { cloud, sharePluginStart }: AppPluginStartDependencies
   ): GuidedOnboardingPluginStart {
-    const { chrome, http, theme, application, notifications, docLinks } = core;
+    const { chrome, http, theme, application, notifications } = core;
 
     // Guided onboarding UI is only available on cloud and if the access to the Kibana feature is granted
     const isEnabled = !!(cloud?.isCloudEnabled && application.capabilities[PLUGIN_FEATURE].enabled);
@@ -71,12 +71,6 @@ export class GuidedOnboardingPlugin
     // Return methods that should be available to other plugins
     return {
       guidedOnboardingApi: apiService,
-      getEsEndpointModal: this.start(core, { cloud, sharePluginStart }).getEsEndpointModal(
-        core,
-        sharePluginStart,
-        cloud,
-        docLinks
-      ),
     };
   }
 

@@ -59,9 +59,7 @@ export interface HomeKibanaServices {
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
-  core: CoreStart;
-  cloudStart: CloudStart;
-  shareStart: SharePluginStart;
+  // getEsEndpointModal: (core: CoreStart, Share: SharePluginStart, cloud: CloudStart, docLinks: CoreStart['docLinks'] ) => JSX.Element;
 }
 
 let services: HomeKibanaServices | null = null;

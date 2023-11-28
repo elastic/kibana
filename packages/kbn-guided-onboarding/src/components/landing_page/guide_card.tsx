@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiModal,
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
@@ -53,10 +54,9 @@ export const GuideCard = ({
   openModal,
   i18nStart,
   theme,
-  core,
-  docLinks,
-  cloudStart,
-  shareStart,
+  // core,
+  // docLinks,
+  // shareStart,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
@@ -68,16 +68,11 @@ export const GuideCard = ({
   const openESApiModal = useCallback(() => {
     const modal = openModal(
       toMountPoint(
-        <EndpointsModal
-          core={core}
-          share={shareStart}
-          cloud={cloudStart}
-          docLinks={docLinks}
-          closeModal={() => modal.close()}
-        />,
+        <EuiModal
+          onClose={() => modal.close()} children={undefined}        />,
         {
-          theme: core.theme,
-          i18n: core.i18n,
+          theme: theme,
+          i18n: i18nStart,
         }
       ),
       {
@@ -85,7 +80,7 @@ export const GuideCard = ({
         'data-test-subj': 'guideModalESApi',
       }
     );
-  }, [openModal, cloudStart, core, docLinks, shareStart]);
+  }, [openModal]);
 
   const onClick = useCallback(async () => {
     setIsLoading(true);

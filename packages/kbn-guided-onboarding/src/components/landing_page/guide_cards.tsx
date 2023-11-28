@@ -15,10 +15,6 @@ import { ApplicationStart } from '@kbn/core-application-browser';
 import { OverlayStart } from '@kbn/core-overlays-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { GuideId, GuideState } from '../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
@@ -35,10 +31,10 @@ export interface GuideCardsProps {
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
-  core: CoreStart;
-  docLinks: DocLinksStart;
-  cloudStart: CloudStart;
-  shareStart: SharePluginStart;
+  // core: CoreStart;
+  // docLinks: DocLinksStart;
+  // cloudStart: CloudStart;
+  // shareStart: SharePluginStart;
 }
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;
