@@ -8,6 +8,7 @@
 
 import { join } from 'path';
 import { accessSync, constants } from 'fs';
+import { rm, mkdtemp, writeFile } from 'fs/promises';
 import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory, buildDataPaths } from '.';
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -55,38 +56,6 @@ describe('Custom data path finder', () => {
     process.argv = originalArgv;
   });
 
-  it('overrides path.data with absolute path when provided as command line argument', () => {
-    process.argv = ['--foo', 'bar', '--path.data', '/some/data/path', '--baz', 'xyz'];
-
-    /*
-     * Test buildDataPaths since getDataPath returns the first valid directory and
-     * custom paths do not exist in environment. Custom directories are built during env init.
-     */
-    expect(buildDataPaths()).toMatchInlineSnapshot(`
-      Array [
-        "/some/data/path",
-        <absolute path>/data,
-        "/var/lib/kibana",
-      ]
-    `);
-  });
-
-  it('overrides path.data with relative path when provided as command line argument', () => {
-    process.argv = ['--foo', 'bar', '--path.data', 'data2', '--baz', 'xyz'];
-
-    /*
-     * Test buildDataPaths since getDataPath returns the first valid directory and
-     * custom paths do not exist in environment. Custom directories are built during env init.
-     */
-    expect(buildDataPaths()).toMatchInlineSnapshot(`
-      Array [
-        <absolute path>/data2,
-        <absolute path>/data,
-        "/var/lib/kibana",
-      ]
-    `);
-  });
-
   it('ignores the path.data flag when no value is provided', () => {
     process.argv = ['--foo', 'bar', '--path.data', '--baz', 'xyz'];
 
@@ -98,17 +67,78 @@ describe('Custom data path finder', () => {
     `);
   });
 
-  it('overrides path.data with absolute path when when provided by kibana.yml', () => {
-    process.env.KBN_PATH_CONF = join(__dirname, '__fixtures__');
+  describe('overrides path.data when provided as command line argument', () => {
+    it('with absolute path', () => {
+      process.argv = ['--foo', 'bar', '--path.data', '/some/data/path', '--baz', 'xyz'];
 
-    expect(buildDataPaths()).toMatchInlineSnapshot(`
-      Array [
-        "/path/from/yml",
-        <absolute path>/data,
-        "/var/lib/kibana",
-      ]
-    `);
+      /*
+       * Test buildDataPaths since getDataPath returns the first valid directory and
+       * custom paths do not exist in environment. Custom directories are built during env init.
+       */
+      expect(buildDataPaths()).toMatchInlineSnapshot(`
+              Array [
+                "/some/data/path",
+                <absolute path>/data,
+                "/var/lib/kibana",
+              ]
+          `);
+    });
 
-    delete process.env.KBN_PATH_CONF;
+    it('with relative path', () => {
+      process.argv = ['--foo', 'bar', '--path.data', 'data2', '--baz', 'xyz'];
+
+      /*
+       * Test buildDataPaths since getDataPath returns the first valid directory and
+       * custom paths do not exist in environment. Custom directories are built during env init.
+       */
+      expect(buildDataPaths()).toMatchInlineSnapshot(`
+              Array [
+                <absolute path>/data2,
+                <absolute path>/data,
+                "/var/lib/kibana",
+              ]
+          `);
+    });
+  });
+
+  describe('overrides path.data when provided by kibana.yml', () => {
+    let tempDir: string;
+    let tempConfigFile: string;
+
+    beforeAll(async () => {
+      tempDir = await mkdtemp('config-test');
+      tempConfigFile = join(tempDir, 'kibana.yml');
+    });
+
+    afterAll(async () => {
+      await rm(tempDir, { recursive: true });
+      delete process.env.KBN_PATH_CONF;
+    });
+
+    it('with absolute path', async () => {
+      process.env.KBN_PATH_CONF = tempDir;
+      await writeFile(tempConfigFile, `path.data: /path/from/yml`);
+
+      expect(buildDataPaths()).toMatchInlineSnapshot(`
+              Array [
+                "/path/from/yml",
+                <absolute path>/data,
+                "/var/lib/kibana",
+              ]
+          `);
+    });
+
+    it('with relative path', async () => {
+      process.env.KBN_PATH_CONF = tempDir;
+      await writeFile(tempConfigFile, `path.data: data2`);
+
+      expect(buildDataPaths()).toMatchInlineSnapshot(`
+        Array [
+          <absolute path>/data2,
+          <absolute path>/data,
+          "/var/lib/kibana",
+        ]
+      `);
+    });
   });
 });
