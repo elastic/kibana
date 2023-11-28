@@ -99,7 +99,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1Description', {
-      defaultMessage: 'Embedding Model E5',
+      defaultMessage: 'E5 multilingual embedding model',
     }),
   },
   '.multilingual-e5-small_linux-x86_64': {
@@ -113,7 +113,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1Description', {
-      defaultMessage: 'Embedding Model E5, optimized for linux-x86_64',
+      defaultMessage: 'E5 multilingual embedding model, optimized for linux-x86_64',
     }),
   },
 } as const);
