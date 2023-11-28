@@ -10,7 +10,21 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
 import { JobSelectorTable } from './job_selector_table';
 
-jest.mock('../../../contexts/kibana');
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: jest.fn(() => {
+    return {
+      services: {
+        application: {
+          capabilities: {
+            ml: {
+              canCreateJob: true,
+            },
+          },
+        },
+      },
+    };
+  }),
+}));
 
 const props = {
   ganttBarWidth: 299,
