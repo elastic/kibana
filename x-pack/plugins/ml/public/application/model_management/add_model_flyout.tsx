@@ -215,7 +215,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                     />
                   </EuiLink>
                 </p>
-                <EuiSpacer size={'m'} />
+                <EuiSpacer size={'l'} />
               </div>
             ) : null}
 
@@ -229,7 +229,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                 ),
               }}
             >
-              {models.map((model) => {
+              {models.map((model, index) => {
                 return (
                   <React.Fragment key={model.model_id}>
                     <EuiCheckableCard
@@ -288,11 +288,12 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                       checked={model.model_id === selectedModelId}
                       onChange={setSelectedModelId.bind(null, model.model_id)}
                     />
-                    <EuiSpacer size="m" />
+                    {index < models.length - 1 ? <EuiSpacer size="m" /> : null}
                   </React.Fragment>
                 );
               })}
             </EuiFormFieldset>
+            <EuiSpacer size="xl" />
           </React.Fragment>
         );
       })}
