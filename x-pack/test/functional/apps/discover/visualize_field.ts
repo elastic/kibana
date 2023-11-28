@@ -304,5 +304,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('lnsSuggestion-donut');
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
+
+    it('should default title when saving chart in Discover (even when modal is closed and reopened)', async () => {
+      await PageObjects.discover.selectTextBaseLang();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
+      await testSubjects.click('TextBasedLangEditor-expand');
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      let title = await testSubjects.getAttribute('savedObjectTitle', 'value');
+      expect(title).to.equal('Bar vertical stacked');
+      await testSubjects.click('saveCancelButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      title = await testSubjects.getAttribute('savedObjectTitle', 'value');
+      expect(title).to.equal('Bar vertical stacked');
+    });
   });
 }

@@ -187,7 +187,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       machineLearningStart: `${ELASTICSEARCH_DOCS}nlp-example.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ELASTICSEARCH_DOCS}ingest-pipeline-search-inference.html`,
-      mlDocumentEnrichmentUpdateMappings: `${ELASTICSEARCH_DOCS}ingest-pipeline-search-inference.html#ingest-pipeline-search-inference-update-mapping`,
       searchApplicationsTemplates: `${ELASTICSEARCH_DOCS}search-application-api.html`,
       searchApplicationsSearchApi: `${ELASTICSEARCH_DOCS}search-application-security.html`,
       searchApplications: `${ELASTICSEARCH_DOCS}search-application-overview.html`,
@@ -518,6 +517,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
       nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
+      nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -813,6 +813,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
       rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
       rustOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/overview.html`,
+      eland: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/eland/${DOC_LINK_VERSION}/index.html`,
     },
     endpoints: {
       troubleshooting: `${SECURITY_SOLUTION_DOCS}ts-management.html#ts-endpoints`,
