@@ -30,6 +30,7 @@ const baseNavItems = [
   {
     href: '/app/enterprise_search/overview',
     id: 'overview',
+    items: undefined,
     name: 'Overview',
   },
   {
@@ -38,6 +39,7 @@ const baseNavItems = [
       {
         href: '/app/enterprise_search/content/search_indices',
         id: 'search_indices',
+        items: undefined,
         name: 'Indices',
       },
       {
@@ -55,11 +57,13 @@ const baseNavItems = [
       {
         href: '/app/enterprise_search/applications/search_applications',
         id: 'searchApplications',
+        items: undefined,
         name: 'Search Applications',
       },
       {
         href: '/app/enterprise_search/analytics',
         id: 'analyticsCollections',
+        items: undefined,
         name: 'Behavioral Analytics',
       },
     ],
@@ -71,16 +75,19 @@ const baseNavItems = [
       {
         href: '/app/enterprise_search/elasticsearch',
         id: 'elasticsearch',
+        items: undefined,
         name: 'Elasticsearch',
       },
       {
         href: '/app/enterprise_search/vector_search',
         id: 'vectorSearch',
+        items: undefined,
         name: 'Vector Search',
       },
       {
         href: '/app/enterprise_search/ai_search',
         id: 'aiSearch',
+        items: undefined,
         name: 'AI Search',
       },
     ],
@@ -92,11 +99,13 @@ const baseNavItems = [
       {
         href: '/app/enterprise_search/app_search',
         id: 'app_search',
+        items: undefined,
         name: 'App Search',
       },
       {
         href: '/app/enterprise_search/workplace_search',
         id: 'workplace_search',
+        items: undefined,
         name: 'Workplace Search',
       },
     ],
@@ -217,6 +226,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     const engineName = 'my-test-engine';
     const navItems = useEnterpriseSearchApplicationNav(engineName);
     expect(navItems?.map((ni) => ni.name)).toEqual([
+      'Overview',
       'Content',
       'Applications',
       'Getting started',
@@ -273,6 +283,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     const engineName = 'my-test-engine';
     const navItems = useEnterpriseSearchApplicationNav(engineName, true);
     expect(navItems?.map((ni) => ni.name)).toEqual([
+      'Overview',
       'Content',
       'Applications',
       'Getting started',
@@ -340,12 +351,26 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
 
   it('returns basic nav all params are empty', () => {
     const navItems = useEnterpriseSearchAnalyticsNav();
-    expect(navItems).toEqual(baseNavItems);
+    // filter out settings item because we're setting hasDefaultIngestPipeline to false
+    expect(navItems).toEqual(
+      baseNavItems.map((item) =>
+        item.id === 'content'
+          ? { ...item, items: item.items?.filter((contentItem) => contentItem.id !== 'settings') }
+          : item
+      )
+    );
   });
 
   it('returns basic nav if only name provided', () => {
+    // filter out settings item because we're setting hasDefaultIngestPipeline to false
     const navItems = useEnterpriseSearchAnalyticsNav('my-test-collection');
-    expect(navItems).toEqual(baseNavItems);
+    expect(navItems).toEqual(
+      baseNavItems.map((item) =>
+        item.id === 'content'
+          ? { ...item, items: item.items?.filter((contentItem) => contentItem.id !== 'settings') }
+          : item
+      )
+    );
   });
 
   it('returns nav with sub items when name and paths provided', () => {
