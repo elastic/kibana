@@ -11,11 +11,7 @@ import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import {
-  KibanaServices,
-  useKibana,
-  useGetUserCasesPermissions,
-} from '../../../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
 import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
@@ -170,6 +166,9 @@ describe('event details panel component', () => {
           ui: {
             getCasesContext: () => mockCasesContext,
           },
+          cases: {
+            helpers: { canUseCases: jest.fn().mockReturnValue(allCasesPermissions()) },
+          },
         },
         timelines: {
           getHoverActions: jest.fn().mockReturnValue({
@@ -182,12 +181,13 @@ describe('event details panel component', () => {
         },
       },
     });
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
     (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   test('it renders the take action dropdown in the timeline version', () => {
     const wrapper = render(
       <TestProviders>
