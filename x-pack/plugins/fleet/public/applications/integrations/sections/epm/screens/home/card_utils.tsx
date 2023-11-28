@@ -36,7 +36,7 @@ import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../..
 import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
-import { ReactNode } from 'react-markdown';
+import type { ReactNode } from 'react-markdown';
 
 export interface IntegrationCardItem {
   url: string;
