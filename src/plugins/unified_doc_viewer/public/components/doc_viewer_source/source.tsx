@@ -37,6 +37,8 @@ interface SourceViewerProps {
 export const MAX_LINES_CLASSIC_TABLE = 500;
 // Displayed margin of the code editor to the window bottom when rendered in the document explorer flyout
 export const MARGIN_BOTTOM = 25;
+// Minimum height for the source content to guarantee minimum space when the flyout is scrollable.
+export const MIN_HEIGHT = 400;
 
 export const DocViewerSource = ({
   id,

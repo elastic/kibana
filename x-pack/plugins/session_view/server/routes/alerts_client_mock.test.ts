@@ -65,6 +65,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   ruleDataService: ruleDataServiceMock.create(),
   esClient: esClientMock,
   getRuleType: jest.fn(),
+  getRuleList: jest.fn(),
   getAlertIndicesAlias: getAlertIndicesAliasMock,
 };
 

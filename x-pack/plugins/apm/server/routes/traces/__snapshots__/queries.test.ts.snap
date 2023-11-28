@@ -3,8 +3,11 @@
 exports[`trace queries fetches a trace 1`] = `
 Object {
   "apm": Object {
-    "events": Array [
-      "error",
+    "sources": Array [
+      Object {
+        "documentType": "error",
+        "rollupInterval": "none",
+      },
     ],
   },
   "body": Object {

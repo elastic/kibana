@@ -3733,6 +3733,10 @@
                 "path": "x-pack/plugins/asset_manager/server/routes/assets/containers.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/pods.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/plugins/banners/server/routes/info.ts"
               },
