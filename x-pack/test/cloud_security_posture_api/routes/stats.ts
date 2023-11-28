@@ -10,15 +10,20 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
+  BenchmarkData,
+  Cluster,
   ComplianceDashboardData,
+  ComplianceDashboardDataV2,
   PostureTrend,
 } from '@kbn/cloud-security-posture-plugin/common/types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   getBenchmarkScoreMockData,
-  cspmComplianceDashboardDataMock,
-  kspmComplianceDashboardDataMock,
+  kspmComplianceDashboardDataMockV1,
+  kspmComplianceDashboardDataMockV2,
+  cspmComplianceDashboardDataMockV1,
+  cspmComplianceDashboardDataMockV2,
 } from './mocks/benchmark_score_mock';
 import { findingsMockData } from './mocks/findings_mock';
 
@@ -29,13 +34,8 @@ const removeRealtimeCalculatedFields = (trends: PostureTrend[]) => {
   });
 };
 
-const getNonTimestampResponseFields = (res: ComplianceDashboardData) => {
-  const resBenchmarks = res.benchmarks.flatMap((benchmark) => ({
-    ...benchmark,
-    trend: removeRealtimeCalculatedFields(benchmark.trend),
-  }));
-
-  const resClusters = res.clusters.flatMap((cluster) => {
+const removeRealtimeClusterFields = (clusters: Cluster[]) =>
+  clusters.flatMap((cluster) => {
     const clusterWithoutTrend = {
       ...cluster,
       trend: removeRealtimeCalculatedFields(cluster.trend),
@@ -45,14 +45,12 @@ const getNonTimestampResponseFields = (res: ComplianceDashboardData) => {
     return { ...clusterWithoutTrend, meta: clusterWithoutTime };
   });
 
-  const trends = removeRealtimeCalculatedFields(res.trend);
+const removeRealtimeBenchmarkFields = (benchmarks: BenchmarkData[]) =>
+  benchmarks.flatMap((benchmark) => ({
+    ...benchmark,
+    trend: removeRealtimeCalculatedFields(benchmark.trend),
+  }));
 
-  return {
-    resBenchmarks,
-    resClusters,
-    trends,
-  };
-};
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -137,7 +135,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('GET /internal/cloud_security_posture/stats', () => {
-    describe('cspm benchmarks', async () => {
+    describe('CSPM Compliance Dashboard Stats API', async () => {
       beforeEach(async () => {
         await index.removeFindings();
         await index.removeScores();
@@ -147,25 +145,42 @@ export default function (providerContext: FtrProviderContext) {
         await index.addFindings([findingsMockData[1]]);
       });
 
-      it('should return CSPM benchmarks ', async () => {
+      it('should return CSPM cluster V1 ', async () => {
         const { body: res }: { body: ComplianceDashboardData } = await kibanaHttpClient
           .get(`/internal/cloud_security_posture/stats/cspm`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-
-        const { resClusters, resBenchmarks, trends } = getNonTimestampResponseFields(res);
+        const resClusters = removeRealtimeClusterFields(res.clusters);
+        const trends = removeRealtimeCalculatedFields(res.trend);
 
         expect({
           ...res,
           clusters: resClusters,
+          trend: trends,
+        }).to.eql(cspmComplianceDashboardDataMockV1);
+      });
+
+      it('should return CSPM benchmarks V2 ', async () => {
+        const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient
+          .get(`/internal/cloud_security_posture/stats/cspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
+
+        const trends = removeRealtimeCalculatedFields(res.trend);
+
+        expect({
+          ...res,
           benchmarks: resBenchmarks,
           trend: trends,
-        }).to.eql(cspmComplianceDashboardDataMock);
+        }).to.eql(cspmComplianceDashboardDataMockV2);
       });
     });
 
-    describe('kspm benchmarks', async () => {
+    describe('KSPM Compliance Dashboard Stats API', async () => {
       beforeEach(async () => {
         await index.removeFindings();
         await index.removeScores();
@@ -175,21 +190,39 @@ export default function (providerContext: FtrProviderContext) {
         await index.addFindings([findingsMockData[0]]);
       });
 
-      it('should return KSPM benchmarks ', async () => {
+      it('should return KSPM clusters V1 ', async () => {
         const { body: res }: { body: ComplianceDashboardData } = await kibanaHttpClient
           .get(`/internal/cloud_security_posture/stats/kspm`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        const { resClusters, resBenchmarks, trends } = getNonTimestampResponseFields(res);
+        const resClusters = removeRealtimeClusterFields(res.clusters);
+        const trends = removeRealtimeCalculatedFields(res.trend);
 
         expect({
           ...res,
           clusters: resClusters,
+          trend: trends,
+        }).to.eql(kspmComplianceDashboardDataMockV1);
+      });
+
+      it('should return KSPM benchmarks V2 ', async () => {
+        const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient
+          .get(`/internal/cloud_security_posture/stats/kspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
+
+        const trends = removeRealtimeCalculatedFields(res.trend);
+
+        expect({
+          ...res,
           benchmarks: resBenchmarks,
           trend: trends,
-        }).to.eql(kspmComplianceDashboardDataMock);
+        }).to.eql(kspmComplianceDashboardDataMockV2);
       });
     });
   });

@@ -91,6 +91,12 @@ export interface ComplianceDashboardData {
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   clusters: Cluster[];
   trend: PostureTrend[];
+}
+
+export interface ComplianceDashboardDataV2 {
+  stats: Stats;
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
+  trend: PostureTrend[];
   benchmarks: BenchmarkData[];
 }
 

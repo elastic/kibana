@@ -70,7 +70,7 @@ const mockBenchmarkBuckets: BenchmarkBucket[] = [
 ];
 
 describe('getBenchmarksFromAggs', () => {
-  it('should return value matching ComplianceDashboardData["benchmarks"]', async () => {
+  it('should return value matching ComplianceDashboardDataV2["benchmarks"]', async () => {
     const benchmarks = getBenchmarksFromAggs(mockBenchmarkBuckets);
     expect(benchmarks).toEqual([
       {

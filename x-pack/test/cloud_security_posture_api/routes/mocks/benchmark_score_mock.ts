@@ -43,7 +43,7 @@ export const getBenchmarkScoreMockData = (postureType: string) => [
   },
 ];
 
-export const cspmComplianceDashboardDataMock = {
+export const cspmComplianceDashboardDataMockV1 = {
   stats: {
     totalFailed: 0,
     totalPassed: 1,
@@ -102,6 +102,33 @@ export const cspmComplianceDashboardDataMock = {
       ],
     },
   ],
+  trend: [
+    {
+      totalFindings: 1,
+      totalFailed: 0,
+      totalPassed: 1,
+      postureScore: 100,
+    },
+  ],
+};
+
+export const cspmComplianceDashboardDataMockV2 = {
+  stats: {
+    totalFailed: 0,
+    totalPassed: 1,
+    totalFindings: 1,
+    postureScore: 100,
+    resourcesEvaluated: 1,
+  },
+  groupedFindingsEvaluation: [
+    {
+      name: 'Another upper case section',
+      totalFindings: 1,
+      totalFailed: 0,
+      totalPassed: 1,
+      postureScore: 100,
+    },
+  ],
   benchmarks: [
     {
       meta: {
@@ -145,7 +172,7 @@ export const cspmComplianceDashboardDataMock = {
   ],
 };
 
-export const kspmComplianceDashboardDataMock = {
+export const kspmComplianceDashboardDataMockV1 = {
   stats: {
     totalFailed: 0,
     totalPassed: 1,
@@ -200,6 +227,33 @@ export const kspmComplianceDashboardDataMock = {
           postureScore: 100,
         },
       ],
+    },
+  ],
+  trend: [
+    {
+      totalFindings: 1,
+      totalFailed: 0,
+      totalPassed: 1,
+      postureScore: 100,
+    },
+  ],
+};
+
+export const kspmComplianceDashboardDataMockV2 = {
+  stats: {
+    totalFailed: 0,
+    totalPassed: 1,
+    totalFindings: 1,
+    postureScore: 100,
+    resourcesEvaluated: 1,
+  },
+  groupedFindingsEvaluation: [
+    {
+      name: 'Upper case section',
+      totalFindings: 1,
+      totalFailed: 0,
+      totalPassed: 1,
+      postureScore: 100,
     },
   ],
   benchmarks: [
