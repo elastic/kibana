@@ -10,7 +10,6 @@ import React from 'react';
 
 import { TestProviders } from '../../../mock';
 import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
-import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { RelatedCases } from './related_cases';
 import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 import { CASES_LOADING, CASES_COUNT } from './translations';
@@ -19,13 +18,14 @@ import { AlertsCasesTourSteps } from '../../guided_onboarding_tour/tour_config';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetRelatedCases = jest.fn();
+const mockCanUseCases = jest.fn();
+
 jest.mock('../../guided_onboarding_tour');
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
 
   return {
     ...original,
-    useGetUserCasesPermissions: jest.fn(),
     useToasts: jest.fn().mockReturnValue({ addWarning: jest.fn() }),
     useKibana: () => ({
       ...mockedUseKibana,
@@ -35,6 +35,7 @@ jest.mock('../../../lib/kibana', () => {
           api: {
             getRelatedCases: mockGetRelatedCases,
           },
+          helpers: { canUseCases: mockCanUseCases },
         },
       },
     }),
@@ -47,7 +48,7 @@ window.HTMLElement.prototype.scrollIntoView = scrollToMock;
 
 describe('Related Cases', () => {
   beforeEach(() => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+    mockCanUseCases.mockReturnValue(readCasesPermissions());
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.viewCase,
       incrementStep: () => null,
@@ -58,7 +59,7 @@ describe('Related Cases', () => {
   });
   describe('When user does not have cases read permissions', () => {
     beforeEach(() => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(noCasesPermissions());
+      mockCanUseCases.mockReturnValue(noCasesPermissions());
     });
     test('should not show related cases when user does not have permissions', async () => {
       await act(async () => {
