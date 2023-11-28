@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
   const hoursToMillisecond = (hours: number) => hours * 60 * 60 * 1000;
+  const retry = getService('retry');
 
   const dataOldKspm = [
     {
@@ -58,10 +59,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe.skip('Old Data', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
+    let latestFindingsTable: typeof findings.latestFindingsTable;
+    let notInstalledCSP: typeof findings.notInstalledCSP;
 
     before(async () => {
       findings = pageObjects.findings;
-
+      latestFindingsTable = findings.latestFindingsTable;
+      notInstalledCSP = findings.notInstalledCSP;
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
       await findings.waitForPluginInitialized();
     });
@@ -77,7 +81,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await findings.index.add(dataOldKspm);
 
         await findings.navigateToLatestFindingsPage();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await retry.waitFor(
+          'Findings table to be loaded',
+          async () => (await notInstalledCSP.getElement()) !== undefined
+        );
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
       it('returns no Findings CSPM', async () => {
@@ -86,7 +94,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await findings.index.add(dataOldCspm);
 
         await findings.navigateToLatestFindingsPage();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await retry.waitFor(
+          'Findings table to be loaded',
+          async () => (await notInstalledCSP.getElement()) !== undefined
+        );
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
     });
