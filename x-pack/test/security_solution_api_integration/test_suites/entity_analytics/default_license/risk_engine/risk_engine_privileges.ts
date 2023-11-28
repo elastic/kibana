@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { SecurityService } from '../../../../../../../test/common/services/security/security';
 import { riskEngineRouteHelpersFactoryNoAuth } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -85,17 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const riskEngineRoutesNoAuth = riskEngineRouteHelpersFactoryNoAuth(supertestWithoutAuth);
     const logger = getService('log');
-    let security: SecurityService;
-    try {
-      security = getService('security');
-    } catch (e) {
-      // even though this test doesn't have the @serverless tag I cannot get it to stop running
-      // with serverless config. This is a hack to skip the test if security service is not available
-      logger.info(
-        'Skipping privileges test as security service not available (likely run with serverless config)'
-      );
-      return;
-    }
+    const security = getService('security');
 
     const createRole = async ({ name, privileges }: { name: string; privileges: any }) => {
       return await security.role.create(name, privileges);
