@@ -39,24 +39,6 @@ export const PROGRESS_TRACKER_LABEL = i18n.translate(
   { defaultMessage: 'PROGRESS' }
 );
 
-export const STEP_TIME_MIN = (min: number) =>
-  i18n.translate(
-    'xpack.securitySolutionServerless.getStarted.togglePanel.progressTracker.stepTimeMin',
-    {
-      defaultMessage: 'About {min} {min, plural, =1 {min} other {mins}}',
-      values: { min },
-    }
-  );
-
-export const TASKS_LEFT = (tasks: number) =>
-  i18n.translate(
-    'xpack.securitySolutionServerless.getStarted.togglePanel.progressTracker.stepsLeft',
-    {
-      defaultMessage: '{tasks} {tasks, plural, =1 {task} other {tasks}} left',
-      values: { tasks },
-    }
-  );
-
 export const SECTION_1_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.section1.title',
   {
