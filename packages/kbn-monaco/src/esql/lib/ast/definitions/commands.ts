@@ -248,7 +248,7 @@ export const commandDefinitions: CommandDefinition[] = [
   {
     name: 'enrich',
     description: i18n.translate('monaco.esql.definitions.enrichDoc', {
-     defaultMessage:
+      defaultMessage:
         'Enrich table with another table. Before you can use enrich, you need to create and execute an enrich policy.',
     }),
     examples: [
