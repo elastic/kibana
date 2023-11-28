@@ -36,7 +36,7 @@ export const useHostIsolationAction = ({
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
-  const hasActionsAllPrivileges = useKibana().services.application.capabilities.actions.save;
+  const hasActionsAllPrivileges = useKibana().services.application?.capabilities?.actions?.save;
 
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'

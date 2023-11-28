@@ -51,7 +51,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   // ENDPOINT-related field //
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   {
-    id: 'observer.serial_number',
+    id: SENTINEL_ONE_AGENT_ID_FIELD,
     label: i18n.AGENT_STATUS,
   },
   // ** //

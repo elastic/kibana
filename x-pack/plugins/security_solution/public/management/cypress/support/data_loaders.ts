@@ -13,7 +13,11 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getHostVmClient, createVm } from '../../../../scripts/endpoint/common/vm_services';
+import {
+  getHostVmClient,
+  createVm,
+  generateVmName,
+} from '../../../../scripts/endpoint/common/vm_services';
 import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
@@ -316,9 +320,7 @@ export const dataLoadersForRealEndpoints = (
         log,
       });
 
-      const vmName = `${userInfo()
-        .username.toLowerCase()
-        .replaceAll('.', '-')}-sentinelone-${Math.random().toString().substring(2, 6)}`;
+      const vmName = generateVmName('sentinelone');
 
       const hostVm = await createVm({
         type: 'multipass',
