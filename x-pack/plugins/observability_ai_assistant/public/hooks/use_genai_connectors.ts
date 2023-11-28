@@ -36,6 +36,8 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
   const controller = useMemo(() => new AbortController(), []);
 
   const fetchConnectors = useCallback(async () => {
+    setLoading(true);
+
     assistant
       .callApi('GET /internal/observability_ai_assistant/connectors', {
         signal: controller.signal,
@@ -61,8 +63,6 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
   }, [assistant, controller.signal, setSelectedConnector]);
 
   useEffect(() => {
-    setLoading(true);
-
     fetchConnectors();
 
     return () => {
