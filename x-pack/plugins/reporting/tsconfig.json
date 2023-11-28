@@ -50,7 +50,6 @@
     "@kbn/reporting-mocks-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/reporting-public",
-    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",
