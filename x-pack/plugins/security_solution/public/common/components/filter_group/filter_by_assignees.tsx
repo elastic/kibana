@@ -9,11 +9,13 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiToolTip } from '@elastic/eui';
 
 import { TEST_IDS } from './constants';
 import { AssigneesPopover } from '../assignees/assignees_popover';
 import type { AssigneesIdsSelection } from '../assignees/types';
+import { useLicense } from '../../hooks/use_license';
+import { useUpsellingMessage } from '../../hooks/use_upselling';
 
 export interface FilterByAssigneesPopoverProps {
   /**
@@ -32,6 +34,9 @@ export interface FilterByAssigneesPopoverProps {
  */
 export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
   ({ assignedUserIds, onSelectionChange }) => {
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const upsellingMessage = useUpsellingMessage('alert_assignments');
+
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
@@ -51,19 +56,30 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
           assignedUserIds={assignedUserIds}
           showUnassignedOption={true}
           button={
-            <EuiFilterButton
-              data-test-subj={TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON}
-              iconType="arrowDown"
-              badgeColor="subdued"
-              onClick={togglePopover}
-              isSelected={isPopoverOpen}
-              hasActiveFilters={selectedAssignees.length > 0}
-              numActiveFilters={selectedAssignees.length}
+            <EuiToolTip
+              position="bottom"
+              content={
+                upsellingMessage ??
+                i18n.translate('xpack.securitySolution.filtersGroup.assignees.popoverTooltip', {
+                  defaultMessage: 'Filter by assignee',
+                })
+              }
             >
-              {i18n.translate('xpack.securitySolution.filtersGroup.assignees.buttonTitle', {
-                defaultMessage: 'Assignees',
-              })}
-            </EuiFilterButton>
+              <EuiFilterButton
+                data-test-subj={TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON}
+                iconType="arrowDown"
+                badgeColor="subdued"
+                disabled={!isPlatinumPlus}
+                onClick={togglePopover}
+                isSelected={isPopoverOpen}
+                hasActiveFilters={selectedAssignees.length > 0}
+                numActiveFilters={selectedAssignees.length}
+              >
+                {i18n.translate('xpack.securitySolution.filtersGroup.assignees.buttonTitle', {
+                  defaultMessage: 'Assignees',
+                })}
+              </EuiFilterButton>
+            </EuiToolTip>
           }
           isPopoverOpen={isPopoverOpen}
           closePopover={togglePopover}

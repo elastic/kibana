@@ -13,6 +13,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
@@ -27,27 +28,21 @@ import {
   ASSIGNEES_TITLE_TEST_ID,
 } from './test_ids';
 
-const UpdateAssigneesButton: FC<{ togglePopover: () => void; isDisabled: boolean }> = memo(
-  ({ togglePopover, isDisabled }) => (
-    <EuiToolTip
-      position="bottom"
-      content={i18n.translate(
-        'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
-        {
-          defaultMessage: 'Assign alert',
-        }
-      )}
-    >
-      <EuiButtonIcon
-        aria-label="Update assignees"
-        data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
-        iconType={'plusInCircle'}
-        onClick={togglePopover}
-        isDisabled={isDisabled}
-      />
-    </EuiToolTip>
-  )
-);
+const UpdateAssigneesButton: FC<{
+  isDisabled: boolean;
+  toolTipMessage: string;
+  togglePopover: () => void;
+}> = memo(({ togglePopover, isDisabled, toolTipMessage }) => (
+  <EuiToolTip position="bottom" content={toolTipMessage}>
+    <EuiButtonIcon
+      aria-label="Update assignees"
+      data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
+      iconType={'plusInCircle'}
+      onClick={togglePopover}
+      isDisabled={isDisabled}
+    />
+  </EuiToolTip>
+));
 UpdateAssigneesButton.displayName = 'UpdateAssigneesButton';
 
 export interface AssigneesProps {
@@ -73,6 +68,7 @@ export interface AssigneesProps {
 export const Assignees: FC<AssigneesProps> = memo(
   ({ eventId, assignedUserIds, onAssigneesUpdated }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const upsellingMessage = useUpsellingMessage('alert_assignments');
 
     const { hasIndexWrite } = useAlertsPrivileges();
     const setAlertAssignees = useSetAlertAssignees();
@@ -139,6 +135,15 @@ export const Assignees: FC<AssigneesProps> = memo(
               <UpdateAssigneesButton
                 togglePopover={togglePopover}
                 isDisabled={!hasIndexWrite || !isPlatinumPlus}
+                toolTipMessage={
+                  upsellingMessage ??
+                  i18n.translate(
+                    'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
+                    {
+                      defaultMessage: 'Assign alert',
+                    }
+                  )
+                }
               />
             }
             isPopoverOpen={isPopoverOpen}

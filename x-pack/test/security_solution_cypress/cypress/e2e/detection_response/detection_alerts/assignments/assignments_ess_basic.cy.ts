@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { login } from '../../../../tasks/login';
 import { getNewRule } from '../../../../objects/rule';
 import { expandFirstAlert } from '../../../../tasks/alerts';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -20,6 +21,21 @@ import {
 describe('Alert user assignment - Basic License', { tags: ['@ess'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+    login();
+    cy.request({
+      method: 'POST',
+      url: '/api/license/start_basic?acknowledge=true',
+      headers: {
+        'kbn-xsrf': 'cypress-creds',
+        'x-elastic-internal-origin': 'security-solution',
+      },
+    }).then(({ body }) => {
+      cy.log(`body: ${JSON.stringify(body)}`);
+      expect(body).contains({
+        acknowledged: true,
+        basic_was_started: true,
+      });
+    });
   });
 
   after(() => {
@@ -31,15 +47,6 @@ describe('Alert user assignment - Basic License', { tags: ['@ess'] }, () => {
     deleteAlertsAndRules();
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     waitForAlertsToPopulate();
-
-    cy.request({
-      method: 'POST',
-      url: '/api/license/start_basic?acknowledge=true',
-      headers: {
-        'kbn-xsrf': 'cypress-creds',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-    });
   });
 
   it('user with Basic license should not be able to update assignees', () => {

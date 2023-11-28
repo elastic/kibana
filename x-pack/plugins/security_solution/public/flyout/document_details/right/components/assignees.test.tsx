@@ -19,6 +19,7 @@ import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk
 import { TestProviders } from '../../../../common/mock';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../../common/components/assignees/test_ids';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import {
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
@@ -31,6 +32,7 @@ jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profile
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/hooks/use_upselling');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockUserProfiles = [
@@ -75,6 +77,7 @@ describe('<Assignees />', () => {
     });
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
 
     setAlertAssigneesMock = jest.fn().mockReturnValue(Promise.resolve());
     (useSetAlertAssignees as jest.Mock).mockReturnValue(setAlertAssigneesMock);

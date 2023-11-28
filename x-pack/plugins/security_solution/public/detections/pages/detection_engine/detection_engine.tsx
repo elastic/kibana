@@ -32,7 +32,6 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { isEqual } from 'lodash';
-import { useLicense } from '../../../common/hooks/use_license';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
@@ -139,8 +138,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
   const handleSelectedAssignees = useCallback(
@@ -468,14 +465,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <Display show={!globalFullScreen}>
               <HeaderPage title={i18n.PAGE_TITLE}>
                 <EuiFlexGroup gutterSize="m">
-                  {isPlatinumPlus && (
-                    <EuiFlexItem>
-                      <FilterByAssigneesPopover
-                        assignedUserIds={assignees}
-                        onSelectionChange={handleSelectedAssignees}
-                      />
-                    </EuiFlexItem>
-                  )}
+                  <EuiFlexItem>
+                    <FilterByAssigneesPopover
+                      assignedUserIds={assignees}
+                      onSelectionChange={handleSelectedAssignees}
+                    />
+                  </EuiFlexItem>
                   <EuiFlexItem>
                     <SecuritySolutionLinkButton
                       onClick={goToRules}
