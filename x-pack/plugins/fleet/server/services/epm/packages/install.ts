@@ -247,7 +247,7 @@ export async function handleInstallPackageFailure({
   // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
-    if (installType === 'install' || installType === 'reinstall') {
+    if (installType === 'install') {
       logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
       return;
@@ -260,6 +260,10 @@ export async function handleInstallPackageFailure({
       status: 'install_failed',
       latestInstallFailedAttempts,
     });
+
+    if (installType === 'reinstall') {
+      logger.error(`Failed to reinstall ${pkgkey}: [${error.toString()}]`, { error });
+    }
 
     if (installType === 'update') {
       if (!installedPkg) {
