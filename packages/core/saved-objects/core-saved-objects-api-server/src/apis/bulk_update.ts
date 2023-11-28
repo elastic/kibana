@@ -15,10 +15,7 @@ import type { SavedObjectsUpdateOptions, SavedObjectsUpdateResponse } from './up
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<
-    SavedObjectsUpdateOptions<T>,
-    'version' | 'references' | 'migrationVersionCompatibility'
-  > {
+  extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -42,6 +39,8 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }
 
 /**

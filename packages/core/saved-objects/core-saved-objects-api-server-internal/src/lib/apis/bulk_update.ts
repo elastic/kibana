@@ -83,21 +83,13 @@ export const performBulkUpdate = async <T>(
     migration: migrationHelper,
   } = helpers;
   const { securityExtension } = extensions;
-
+  const { migrationVersionCompatibility } = options;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const time = getCurrentTime();
 
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
-    const {
-      type,
-      id,
-      attributes,
-      references,
-      version,
-      namespace: objectNamespace,
-      migrationVersionCompatibility,
-    } = object;
+    const { type, id, attributes, references, version, namespace: objectNamespace } = object;
     let error: DecoratedError | undefined;
 
     if (!allowedTypes.includes(type)) {
@@ -213,15 +205,8 @@ export const performBulkUpdate = async <T>(
         return expectedBulkGetResult;
       }
 
-      const {
-        esRequestIndex,
-        id,
-        type,
-        version,
-        documentToSave,
-        objectNamespace,
-        migrationVersionCompatibility,
-      } = expectedBulkGetResult.value;
+      const { esRequestIndex, id, type, version, documentToSave, objectNamespace } =
+        expectedBulkGetResult.value;
 
       let namespaces: string[] | undefined;
       const versionProperties = getExpectedVersionProperties(version);
