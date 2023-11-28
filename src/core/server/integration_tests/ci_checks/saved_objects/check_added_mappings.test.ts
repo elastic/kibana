@@ -95,14 +95,14 @@ const getErrorMessage = (results: Record<string, CompareResult>): string => {
     .filter(([_, result]) => result.error)
     .reduce<string[]>((memo, [typeName, result]) => {
       if (result.missingFromDefinition.length) {
-        errors.push(
+        memo.push(
           `- ${typeName}: found mappings from model version not present in mappings definition: ${result.missingFromDefinition.join(
             ','
           )}`
         );
       }
       if (result.missingFromModelVersion.length) {
-        errors.push(
+        memo.push(
           `- ${typeName}: found mappings from  mappings definition not present in any model version: ${result.missingFromModelVersion.join(
             ','
           )}`
