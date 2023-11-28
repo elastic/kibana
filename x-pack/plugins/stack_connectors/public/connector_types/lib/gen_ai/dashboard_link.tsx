@@ -22,7 +22,7 @@ export const DashboardLink: React.FC<Props> = ({
   connectorName,
   selectedProvider = '',
 }) => {
-  const { dashboardUrl } = useGetDashboard({ connectorId });
+  const { dashboardUrl } = useGetDashboard({ connectorId, selectedProvider });
   const {
     services: {
       application: { navigateToUrl },

@@ -57,5 +57,6 @@ export function getConnectorType(): BedrockConnector {
     },
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
+    actionReadOnlyExtraComponent: lazy(() => import('../lib/gen_ai/dashboard_link')),
   };
 }
