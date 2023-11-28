@@ -104,10 +104,6 @@ export async function _installPackage({
   try {
     // if some installation already exists
     if (installedPkg) {
-      if (installType === 'update' && pkgVersion === '1.17.0') {
-        // throw new Error('Test error ');
-      }
-
       const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
       const hasExceededTimeout =
         Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
