@@ -67,7 +67,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }> = [
         { id: 'lnsDatatable', ...UNCONSTRAINED },
         { id: 'line', ...VERTICAL_16_9 },
-        { id: 'verticalBullet', searchText: 'gauge', ...UNCONSTRAINED },
+        {
+          id: 'verticalBullet',
+          searchText: 'gauge',
+          // these dimensions are slightly below the requested 300x600
+          // that is because the window size isn't large enough to fit the requested dimensions
+          // and the chart is forced to shrink.
+          //
+          // this is a good thing because it makes this a test case for aspect ratio preservation
+          // even when specific pixel dimensions are requested.
+          expectedWidth: '263.5px',
+          expectedHeight: '527px',
+        },
         { id: 'bar_horizontal_percentage_stacked', searchText: 'bar', ...HORIZONTAL_16_9 },
         { id: 'lnsLegacyMetric', ...UNCONSTRAINED },
         { id: 'bar_horizontal_stacked', ...HORIZONTAL_16_9 },
@@ -83,7 +94,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { id: 'area_percentage_stacked', searchText: 'area', ...VERTICAL_16_9 },
         { id: 'waffle', ...UNCONSTRAINED },
         { id: 'area_stacked', ...VERTICAL_16_9 },
-        { id: 'horizontalBullet', searchText: 'gauge', ...UNCONSTRAINED },
+        {
+          id: 'horizontalBullet',
+          searchText: 'gauge',
+          expectedWidth: '600px',
+          expectedHeight: '300px',
+        },
         { id: 'bar_horizontal', ...HORIZONTAL_16_9 },
         // { id: 'heatmap', ...UNCONSTRAINED }, // heatmap blocks render unless it's given two dimensions. This stops the expression renderer from requesting new dimensions.
         // { id: 'lnsChoropleth', ...UNCONSTRAINED }, // choropleth currently erases all dimensions

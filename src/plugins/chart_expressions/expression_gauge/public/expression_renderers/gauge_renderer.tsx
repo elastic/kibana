@@ -74,9 +74,16 @@ export const gaugeRenderer: (
       name: 'dimensions',
       data: {
         maxDimensions: {
-          x: 100,
-          y: 100,
-          unit: 'percentage',
+          unit: 'pixels',
+          ...(config.args.shape === GaugeShapes.HORIZONTAL_BULLET
+            ? {
+                x: 600,
+                y: 300,
+              }
+            : {
+                y: 600,
+                x: 300,
+              }),
         },
       },
     };
