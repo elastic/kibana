@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { APP_ID } from '../../../../../common';
 import type { TimelineTabs } from '../../../../../common/types';
 import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -30,7 +31,9 @@ const TimelineActionMenuComponent = ({
   activeTab,
   isInspectButtonDisabled,
 }: TimelineActionMenuProps) => {
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const { cases } = useKibana().services;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+
   return (
     <EuiFlexGroup
       id={TIMELINE_TOUR_CONFIG_ANCHORS.ACTION_MENU}
