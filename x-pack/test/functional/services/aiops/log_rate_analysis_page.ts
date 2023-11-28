@@ -11,6 +11,8 @@ import type { LogRateAnalysisType } from '@kbn/aiops-utils';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+import type { LogRateAnalysisDataGenerator } from './log_rate_analysis_data_generator';
+
 export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
@@ -241,7 +243,12 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async assertAnalysisComplete(analisysType: LogRateAnalysisType) {
+    async assertAnalysisComplete(
+      analysisType: LogRateAnalysisType,
+      dataGenerator: LogRateAnalysisDataGenerator
+    ) {
+      const dataGeneratorParts = dataGenerator.split('_');
+      const includeGaps = dataGeneratorParts[5] === 'gaps';
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail('aiopsAnalysisComplete');
         const currentProgressTitle = await testSubjects.getVisibleText('aiopsAnalysisComplete');
@@ -251,7 +258,18 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
         const currentAnalysisTypeCalloutTitle = await testSubjects.getVisibleText(
           'aiopsAnalysisTypeCalloutTitle'
         );
-        expect(currentAnalysisTypeCalloutTitle).to.be(`Analysis type: Log rate ${analisysType}`);
+
+        if (includeGaps && analysisType === 'spike') {
+          expect(currentAnalysisTypeCalloutTitle).to.be(
+            'Analysis type: Top items for deviation time range'
+          );
+        } else if (includeGaps && analysisType === 'dip') {
+          expect(currentAnalysisTypeCalloutTitle).to.be(
+            'Analysis type: Top items for baseline time range'
+          );
+        } else {
+          expect(currentAnalysisTypeCalloutTitle).to.be(`Analysis type: Log rate ${analysisType}`);
+        }
       });
     },
 

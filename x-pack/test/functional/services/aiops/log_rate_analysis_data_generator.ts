@@ -14,10 +14,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
   FAREQUOTE_WITH_SPIKE: 'farequote_with_spike',
-  ARTIFICIAL_LOGS_WITH_SPIKE_NOTEXTFIELD: 'artificial_logs_with_spike_notextfield',
-  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD: 'artificial_logs_with_spike_textfield',
-  ARTIFICIAL_LOGS_WITH_DIP_NOTEXTFIELD: 'artificial_logs_with_dip_notextfield',
-  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
+  ARTIFICIAL_LOGS_WITH_SPIKE_NOTEXTFIELD_GAPS: 'artificial_logs_with_spike_notextfield_gaps',
+  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD_GAPS: 'artificial_logs_with_spike_textfield_gaps',
+  ARTIFICIAL_LOGS_WITH_DIP_NOTEXTFIELD_GAPS: 'artificial_logs_with_dip_notextfield_gaps',
+  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD_GAPS: 'artificial_logs_with_dip_textfield_gaps',
+  ARTIFICIAL_LOGS_WITH_SPIKE_NOTEXTFIELD_NOGAPS: 'artificial_logs_with_spike_notextfield_nogaps',
+  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD_NOGAPS: 'artificial_logs_with_spike_textfield_nogaps',
+  ARTIFICIAL_LOGS_WITH_DIP_NOTEXTFIELD_NOGAPS: 'artificial_logs_with_dip_notextfield_nogaps',
+  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD_NOGAPS: 'artificial_logs_with_dip_textfield_nogaps',
 } as const;
 export type LogRateAnalysisDataGenerator =
   typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
@@ -38,7 +42,7 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-function getMessage(timestamp: number, user: string, url: string, responseCode: string) {
+function getTextFieldMessage(timestamp: number, user: string, url: string, responseCode: string) {
   const date = new Date(timestamp);
   return `${user} [${date.toLocaleString('en-US')}] "GET /${url} HTTP/1.1" ${responseCode}`;
 }
@@ -46,11 +50,36 @@ function getMessage(timestamp: number, user: string, url: string, responseCode: 
 function getArtificialLogsWithDeviation(
   index: string,
   deviationType: string,
-  includeTextField = false
+  includeTextField = false,
+  includeGaps = false
 ) {
   const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
+
+  if (includeGaps) {
+    const earliestDoc: GeneratedDoc = {
+      user: 'Peter',
+      response_code: '200',
+      url: 'login.php',
+      version: 'v1.0.0',
+      '@timestamp': BASELINE_TS - DAY_MS,
+      should_ignore_this_field: 'should_ignore_this_field',
+    };
+    bulkBody.push(action);
+    bulkBody.push(earliestDoc);
+
+    const latestDoc: GeneratedDoc = {
+      user: 'Peter',
+      response_code: '200',
+      url: 'login.php',
+      version: 'v1.0.0',
+      '@timestamp': DEVIATION_TS + 2 * DAY_MS,
+      should_ignore_this_field: 'should_ignore_this_field',
+    };
+    bulkBody.push(action);
+    bulkBody.push(latestDoc);
+  }
 
   // Creates docs evenly spread across baseline and deviation time frame
   [BASELINE_TS, DEVIATION_TS].forEach((ts) => {
@@ -66,8 +95,32 @@ function getArtificialLogsWithDeviation(
             )
           ) {
             tsOffset = 0;
-            [...Array(100)].forEach(() => {
-              tsOffset += Math.round(DAY_MS / 100);
+
+            let docCount = 100;
+            let responseCodeFactor = 1;
+
+            if (includeGaps) {
+              if (responseCode === '404') {
+                responseCodeFactor = 2;
+              } else if (responseCode === '500') {
+                responseCodeFactor = 3;
+              }
+
+              if (url === 'user.php') {
+                responseCodeFactor *= 2;
+              } else if (url === 'home.php') {
+                responseCodeFactor *= 3;
+              }
+
+              if (user === 'Paul') {
+                docCount = 40 * responseCodeFactor;
+              } else if (user === 'Mary') {
+                docCount = 25 * responseCodeFactor;
+              }
+            }
+
+            [...Array(docCount)].forEach(() => {
+              tsOffset += Math.round(DAY_MS / docCount);
               const timestamp = ts + tsOffset;
               const doc: GeneratedDoc = {
                 user,
@@ -79,7 +132,7 @@ function getArtificialLogsWithDeviation(
               };
 
               if (includeTextField) {
-                doc.message = getMessage(timestamp, user, url, responseCode);
+                doc.message = getTextFieldMessage(timestamp, user, url, responseCode);
               }
 
               bulkBody.push(action);
@@ -116,7 +169,7 @@ function getArtificialLogsWithDeviation(
         };
 
         if (includeTextField) {
-          doc.message = getMessage(timestamp, 'Peter', url, responseCode);
+          doc.message = getTextFieldMessage(timestamp, 'Peter', url, responseCode);
         }
 
         bulkBody.push(action);
@@ -204,10 +257,14 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
           break;
 
-        case 'artificial_logs_with_spike_notextfield':
-        case 'artificial_logs_with_spike_textfield':
-        case 'artificial_logs_with_dip_notextfield':
-        case 'artificial_logs_with_dip_textfield':
+        case 'artificial_logs_with_spike_notextfield_nogaps':
+        case 'artificial_logs_with_spike_textfield_nogaps':
+        case 'artificial_logs_with_dip_notextfield_nogaps':
+        case 'artificial_logs_with_dip_textfield_nogaps':
+        case 'artificial_logs_with_spike_notextfield_gaps':
+        case 'artificial_logs_with_spike_textfield_gaps':
+        case 'artificial_logs_with_dip_notextfield_gaps':
+        case 'artificial_logs_with_dip_textfield_gaps':
           try {
             const indexExists = await es.indices.exists({
               index: dataGenerator,
@@ -240,10 +297,11 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           const dataGeneratorOptions = dataGenerator.split('_');
           const deviationType = dataGeneratorOptions[3] ?? LOG_RATE_ANALYSIS_TYPE.SPIKE;
           const textField = dataGeneratorOptions[4] === 'textfield' ?? false;
+          const gaps = dataGeneratorOptions[5] === 'gaps' ?? false;
 
           await es.bulk({
             refresh: 'wait_for',
-            body: getArtificialLogsWithDeviation(dataGenerator, deviationType, textField),
+            body: getArtificialLogsWithDeviation(dataGenerator, deviationType, textField, gaps),
           });
           break;
 
@@ -262,10 +320,14 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
           break;
 
-        case 'artificial_logs_with_spike_notextfield':
-        case 'artificial_logs_with_spike_textfield':
-        case 'artificial_logs_with_dip_notextfield':
-        case 'artificial_logs_with_dip_textfield':
+        case 'artificial_logs_with_spike_notextfield_nogaps':
+        case 'artificial_logs_with_spike_textfield_nogaps':
+        case 'artificial_logs_with_dip_notextfield_nogaps':
+        case 'artificial_logs_with_dip_textfield_nogaps':
+        case 'artificial_logs_with_spike_notextfield_gaps':
+        case 'artificial_logs_with_spike_textfield_gaps':
+        case 'artificial_logs_with_dip_notextfield_gaps':
+        case 'artificial_logs_with_dip_textfield_gaps':
           try {
             await es.indices.delete({
               index: dataGenerator,
