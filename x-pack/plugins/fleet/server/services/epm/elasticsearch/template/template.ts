@@ -33,6 +33,7 @@ import {
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 
@@ -102,7 +103,9 @@ export function getTemplate({
     isIndexModeTimeSeries,
   });
   if (template.template.settings.index.final_pipeline) {
-    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+    throw new PackageInvalidArchiveError(
+      `Error template for ${templateIndexPattern} contains a final_pipeline`
+    );
   }
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
@@ -427,8 +430,8 @@ function _generateMappings(
             matchingType = field.object_type_mapping_type ?? 'object';
             break;
           default:
-            throw new Error(
-              `no dynamic mapping generated for field ${path} of type ${field.object_type}`
+            throw new PackageInvalidArchiveError(
+              `No dynamic mapping generated for field ${path} of type ${field.object_type}`
             );
         }
 
@@ -908,7 +911,9 @@ const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClien
       alias: dataStreamName,
     });
   } catch (error) {
-    throw new Error(`cannot rollover data stream [${dataStreamName}] due to error: ${error}`);
+    throw new PackageESError(
+      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
+    );
   }
 };
 
@@ -1055,7 +1060,11 @@ const updateExistingDataStream = async ({
         { logger }
       );
     } catch (err) {
-      throw new Error(`could not update lifecycle settings for ${dataStreamName}: ${err.message}`);
+      // Check if this error can happen because of invalid settings;
+      // We are returning a 500 but in that case it should be a 400 instead
+      throw new PackageESError(
+        `Could not update lifecycle settings for ${dataStreamName}: ${err.message}`
+      );
     }
   }
 
@@ -1078,6 +1087,8 @@ const updateExistingDataStream = async ({
       { logger }
     );
   } catch (err) {
-    throw new Error(`could not update index template settings for ${dataStreamName}`);
+    // Same as above - Check if this error can happen because of invalid settings;
+    // We are returning a 500 but in that case it should be a 400 instead
+    throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
   }
 };

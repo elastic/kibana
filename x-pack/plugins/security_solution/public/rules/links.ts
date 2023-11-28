@@ -65,7 +65,7 @@ export const links: LinkItem = {
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
           skipUrlState: true,
-          hideTimeline: true,
+          hideTimeline: false,
         },
       ],
     },
