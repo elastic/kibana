@@ -54,9 +54,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.saveTimeline.description"
-          defaultMessage={
-            'Click {saveButton} to manually save existing timeline, {editButton} its name and description. You also have the option to {saveAsNew} timeline.'
-          }
+          defaultMessage="Click {saveButton} to manually save existing timeline, {editButton} its name and description. You also have the option to {saveAsNew} timeline."
           values={{
             saveButton: <EuiCode>{i18n.TIMELINE_TOUR_SAVE}</EuiCode>,
             editButton: <EuiCode>{i18n.TIMELINE_TOUR_EDIT}</EuiCode>,
