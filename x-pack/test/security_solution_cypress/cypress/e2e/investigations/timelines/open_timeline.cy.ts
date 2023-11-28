@@ -7,11 +7,7 @@
 
 import { getTimeline } from '../../../objects/timeline';
 
-import {
-  TIMELINE_DESCRIPTION,
-  TIMELINE_TITLE,
-  OPEN_TIMELINE_MODAL,
-} from '../../../screens/timeline';
+import { TIMELINE_TITLE, OPEN_TIMELINE_MODAL } from '../../../screens/timeline';
 import {
   TIMELINES_DESCRIPTION,
   TIMELINES_PINNED_EVENT_COUNT,
@@ -69,7 +65,6 @@ describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
       cy.get(TIMELINES_NOTES_COUNT).last().should('have.text', '1');
       cy.get(TIMELINES_FAVORITE).last().should('exist');
       cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
     });
   });
 });

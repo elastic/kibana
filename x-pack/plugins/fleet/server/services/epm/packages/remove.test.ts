@@ -18,6 +18,7 @@ jest.mock('../..', () => {
       getLogger: jest.fn().mockReturnValue({
         info: jest.fn(),
         error: jest.fn(),
+        warn: jest.fn(),
       }),
     },
     packagePolicyService: {
@@ -78,7 +79,7 @@ describe('removeInstallation', () => {
         force: false,
       })
     ).rejects.toThrowError(
-      `unable to remove package with existing package policy(s) in use by agent(s)`
+      `Unable to remove package with existing package policy(s) in use by agent(s)`
     );
   });
 

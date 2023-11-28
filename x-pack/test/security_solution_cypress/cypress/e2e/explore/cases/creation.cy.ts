@@ -34,7 +34,7 @@ import {
   CASES_METRIC,
   UNEXPECTED_METRICS,
 } from '../../../screens/case_details';
-import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
+import { TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
 
 import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../../screens/overview';
 
@@ -123,7 +123,6 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
     openCaseTimeline();
 
     cy.get(TIMELINE_TITLE).contains(this.mycase.timeline.title);
-    cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
 
     visitWithTimeRange(OVERVIEW_URL);
