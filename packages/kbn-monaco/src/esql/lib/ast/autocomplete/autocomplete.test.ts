@@ -180,12 +180,17 @@ describe('autocomplete', () => {
     return { ...parseListener.getAst() };
   };
 
-  type TestArgs = [string, string[], string?, Parameters<typeof createCustomCallbackMocks>?];
+  type TestArgs = [
+    string,
+    string[],
+    (string | number)?,
+    Parameters<typeof createCustomCallbackMocks>?
+  ];
 
   const testSuggestionsFn = (
     statement: string,
     expected: string[],
-    triggerCharacter: string = '',
+    triggerCharacter: string | number = '',
     customCallbacksArgs: Parameters<typeof createCustomCallbackMocks> = [
       undefined,
       undefined,
@@ -193,12 +198,21 @@ describe('autocomplete', () => {
     ],
     { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) => {
-    const context = createSuggestContext(statement, triggerCharacter);
-    const offset = statement.lastIndexOf(context.triggerCharacter) + 2;
+    const triggerCharacterString =
+      triggerCharacter == null || typeof triggerCharacter === 'string'
+        ? triggerCharacter
+        : statement[triggerCharacter + 1];
+    const context = createSuggestContext(statement, triggerCharacterString);
+    const offset =
+      typeof triggerCharacter === 'string'
+        ? statement.lastIndexOf(context.triggerCharacter) + 2
+        : triggerCharacter;
     const testFn = only ? test.only : skip ? test.skip : test;
 
     testFn(
-      `${statement} (triggerChar: "${context.triggerCharacter}")=> ["${expected.join('","')}"]`,
+      `${statement} (triggerChar: "${context.triggerCharacter}" @ ${offset})=> ["${expected.join(
+        '","'
+      )}"]`,
       async () => {
         const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
         const { model, position } = createModelAndPosition(statement, offset);
@@ -396,7 +410,7 @@ describe('autocomplete', () => {
     testSuggestions('from a | stats a=', [...allAggFunctions]);
     testSuggestions('from a | stats a=max(b) by ', [...fields.map(({ name }) => name)]);
     testSuggestions('from a | stats a=max(b) BY ', [...fields.map(({ name }) => name)]);
-    testSuggestions('from a | stats a=c by d', ['|', ',']);
+    testSuggestions('from a | stats a=c by d ', ['|', ',']);
     testSuggestions('from a | stats a=c by d, ', [...fields.map(({ name }) => name)]);
     testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
     testSuggestions(
@@ -418,6 +432,10 @@ describe('autocomplete', () => {
       'var0',
       'var1',
     ]);
+
+    // smoke testing with suggestions not at the end of the string
+    // but more the cursor back after the min(b) function
+    testSuggestions('from a | stats a = min(b) | sort b', ['by', '|', ','], 27);
   });
 
   describe('enrich', () => {
@@ -427,7 +445,7 @@ describe('autocomplete', () => {
       '| enrich other-policy on b ',
       '| enrich other-policy with c ',
     ]) {
-      testSuggestions(`from a ${prevCommand}| enrich`, ['policy']);
+      testSuggestions(`from a ${prevCommand}| enrich `, ['policy']);
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['on', 'with', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
@@ -469,7 +487,7 @@ describe('autocomplete', () => {
         'var0 =',
         ...getPolicyFields('policy'),
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy with stringField`, ['= $0', '|', ',']);
+      testSuggestions(`from a ${prevCommand}| enrich policy with stringField `, ['= $0', '|', ',']);
     }
   });
 
