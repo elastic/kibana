@@ -72,7 +72,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
-      cy.contains('Run a set of queries in a pack.').click();
+      cy.contains('Run a set of queries in a pack').click();
     });
     cy.getBySel('response-actions-error')
       .within(() => {
