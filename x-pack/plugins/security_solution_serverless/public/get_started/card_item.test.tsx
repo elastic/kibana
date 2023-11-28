@@ -18,7 +18,7 @@ describe('CardItemComponent', () => {
   const finishedSteps = {} as Record<CardId, Set<StepId>>;
   const onCardStepClicked = jest.fn();
   const onStepClicked = jest.fn();
-  const onStepButtonClicked = jest.fn();
+  const toggleTaskCompleteStatus = jest.fn();
   const expandedCardSteps = {
     [GetSetUpCardId.introduction]: {
       isExpanded: false,
@@ -37,7 +37,7 @@ describe('CardItemComponent', () => {
         euiTheme={mockEuiTheme}
         finishedSteps={finishedSteps}
         onCardClicked={onCardStepClicked}
-        onStepButtonClicked={onStepButtonClicked}
+        toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}
         sectionId={SectionId.getSetUp}
         shadow=""
@@ -66,7 +66,7 @@ describe('CardItemComponent', () => {
         euiTheme={mockEuiTheme}
         finishedSteps={finishedSteps}
         onCardClicked={onCardStepClicked}
-        onStepButtonClicked={onStepButtonClicked}
+        toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}
         sectionId={SectionId.getSetUp}
         shadow=""
@@ -97,7 +97,7 @@ describe('CardItemComponent', () => {
         timeInMins={0}
         onCardClicked={onCardStepClicked}
         onStepClicked={onStepClicked}
-        onStepButtonClicked={onStepButtonClicked}
+        toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         finishedSteps={mockFinishedSteps}
       />
     );
@@ -127,7 +127,7 @@ describe('CardItemComponent', () => {
         timeInMins={0}
         onCardClicked={onCardStepClicked}
         onStepClicked={onStepClicked}
-        onStepButtonClicked={onStepButtonClicked}
+        toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         finishedSteps={finishedSteps}
       />
     );

@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 
 import classnames from 'classnames';
 import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
-import type { CardId, OnStepClicked, OnStepButtonClicked, SectionId, StepId } from '../types';
+import type { CardId, OnStepClicked, ToggleTaskCompleteStatus, SectionId, StepId } from '../types';
 import {
   ALL_DONE_TEXT,
   COLLAPSE_STEP_BUTTON_LABEL,
@@ -39,7 +39,7 @@ const CardStepComponent: React.FC<{
   expandedSteps: Set<StepId>;
   finishedSteps: Set<StepId>;
   isExpandedCard: boolean;
-  onStepButtonClicked: OnStepButtonClicked;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
   onStepClicked: OnStepClicked;
   sectionId: SectionId;
   stepId: StepId;
@@ -49,7 +49,7 @@ const CardStepComponent: React.FC<{
   expandedSteps,
   finishedSteps = new Set(),
   isExpandedCard,
-  onStepButtonClicked,
+  toggleTaskCompleteStatus,
   onStepClicked,
   sectionId,
   stepId,
@@ -90,9 +90,9 @@ const CardStepComponent: React.FC<{
 
   const updateStepStatus = useCallback(
     (undo: boolean | undefined) => {
-      onStepButtonClicked({ stepId, cardId, sectionId, undo });
+      toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo });
     },
-    [cardId, onStepButtonClicked, sectionId, stepId]
+    [cardId, toggleTaskCompleteStatus, sectionId, stepId]
   );
 
   const isDone = finishedSteps.has(stepId);

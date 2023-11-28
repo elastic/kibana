@@ -17,7 +17,7 @@ describe('CardStepComponent', () => {
   };
 
   const onStepClicked = jest.fn();
-  const onStepButtonClicked = jest.fn();
+  const toggleTaskCompleteStatus = jest.fn();
   const expandedSteps = new Set([IntroductionSteps.getToKnowElasticSecurity]);
 
   const props = {
@@ -25,7 +25,7 @@ describe('CardStepComponent', () => {
     cardId: GetSetUpCardId.introduction,
     expandedSteps,
     finishedStepsByCard: new Set<StepId>(),
-    onStepButtonClicked,
+    toggleTaskCompleteStatus,
     onStepClicked,
     sectionId: SectionId.getSetUp,
     stepId: step.id,

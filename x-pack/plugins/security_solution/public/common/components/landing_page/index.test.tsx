@@ -12,6 +12,25 @@ const mockUseContractComponents = jest.fn(() => ({}));
 jest.mock('../../hooks/use_contract_component', () => ({
   useContractComponents: () => mockUseContractComponents(),
 }));
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_management_filters', () => ({
+  useRuleManagementFilters: jest.fn().mockReturnValue({ data: null }),
+}));
+jest.mock('../../../detection_engine/rule_management_ui/components/rules_table/helpers', () => ({
+  isRulesTableEmpty: jest.fn().mockReturnValue(true),
+}));
+jest.mock(
+  '../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context',
+  () => ({
+    useRulesTableContext: jest.fn().mockReturnValue({ state: { isLoading: false } }),
+    RulesTableContextProvider: jest.fn(({ children }) => <>{children}</>),
+  })
+);
+jest.mock('../../containers/sourcerer', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
+}));
+jest.mock('./land_page_context', () => ({
+  updateLandingPageContext: jest.fn(),
+}));
 
 describe('LandingPageComponent', () => {
   beforeEach(() => {

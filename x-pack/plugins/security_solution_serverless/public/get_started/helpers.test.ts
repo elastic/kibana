@@ -18,10 +18,12 @@ import {
   AddAndValidateYourDataCardsId,
   AddIntegrationsSteps,
   CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
   OverviewSteps,
   QuickStartSectionCardsId,
   SectionId,
   GetStartedWithAlertsCardsId,
+  ViewAlertsSteps,
   ViewDashboardSteps,
 } from './types';
 

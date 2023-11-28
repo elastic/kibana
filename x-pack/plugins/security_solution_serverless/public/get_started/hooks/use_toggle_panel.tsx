@@ -20,7 +20,7 @@ import {
 import type {
   Card,
   ExpandedCardSteps,
-  OnStepButtonClicked,
+  ToggleTaskCompleteStatus,
   OnStepClicked,
   Step,
   Switch,
@@ -157,7 +157,7 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     ]
   );
 
-  const onStepButtonClicked: OnStepButtonClicked = useCallback(
+  const toggleTaskCompleteStatus: ToggleTaskCompleteStatus = useCallback(
     ({ stepId, cardId, sectionId, undo }) => {
       dispatch({
         type: undo
@@ -182,5 +182,5 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     [toggleActiveProductsInStorage]
   );
 
-  return { state, onStepClicked, onStepButtonClicked, onProductSwitchChanged };
+  return { state, onStepClicked, toggleTaskCompleteStatus, onProductSwitchChanged };
 };

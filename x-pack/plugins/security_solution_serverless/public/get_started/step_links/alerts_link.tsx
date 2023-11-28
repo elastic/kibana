@@ -14,16 +14,16 @@ import { useStepContext } from '../context/step_context';
 import { GetStartedWithAlertsCardsId, SectionId, ViewAlertsSteps } from '../types';
 
 const AlertsButtonComponent = () => {
-  const { onStepButtonClicked } = useStepContext();
+  const { toggleTaskCompleteStatus } = useStepContext();
 
   const onClick = useCallback(() => {
-    onStepButtonClicked({
+    toggleTaskCompleteStatus({
       stepId: ViewAlertsSteps.viewAlerts,
       cardId: GetStartedWithAlertsCardsId.viewAlerts,
       sectionId: SectionId.getStartedWithAlerts,
       undo: false,
     });
-  }, [onStepButtonClicked]);
+  }, [toggleTaskCompleteStatus]);
 
   return (
     <LinkButton id={SecurityPageName.alerts} onClick={onClick} fill>

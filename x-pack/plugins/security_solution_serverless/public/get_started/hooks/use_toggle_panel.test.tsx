@@ -23,6 +23,10 @@ import {
 } from '../types';
 
 jest.mock('../storage');
+jest.mock('../../common/services');
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn().mockReturnValue({ hash: '' }),
+}));
 
 describe('useTogglePanel', () => {
   const productTypes = [
@@ -239,8 +243,8 @@ describe('useTogglePanel', () => {
 
     act(() => {
       onStepClicked({
-        stepId: CreateProjectSteps.createFirstProject,
-        cardId: QuickStartSectionCardsId.createFirstProject,
+        stepId: OverviewSteps.getToKnowElasticSecurity,
+        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: true,
       });
@@ -256,8 +260,8 @@ describe('useTogglePanel', () => {
 
     act(() => {
       onStepClicked({
-        stepId: CreateProjectSteps.createFirstProject,
-        cardId: QuickStartSectionCardsId.createFirstProject,
+        stepId: OverviewSteps.getToKnowElasticSecurity,
+        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: true,
       });
@@ -265,8 +269,8 @@ describe('useTogglePanel', () => {
 
     expect(getStartedStorage.addExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.addExpandedCardStepToStorage).toHaveBeenCalledWith(
-      QuickStartSectionCardsId.createFirstProject,
-      CreateProjectSteps.createFirstProject
+      QuickStartSectionCardsId.watchTheOverviewVideo,
+      OverviewSteps.getToKnowElasticSecurity
     );
   });
 
@@ -277,8 +281,8 @@ describe('useTogglePanel', () => {
 
     act(() => {
       onStepClicked({
-        stepId: CreateProjectSteps.createFirstProject,
-        cardId: QuickStartSectionCardsId.createFirstProject,
+        stepId: OverviewSteps.getToKnowElasticSecurity,
+        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         isExpanded: false,
       });
@@ -286,40 +290,40 @@ describe('useTogglePanel', () => {
 
     expect(getStartedStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledWith(
-      QuickStartSectionCardsId.createFirstProject,
-      CreateProjectSteps.createFirstProject
+      QuickStartSectionCardsId.watchTheOverviewVideo,
+      OverviewSteps.getToKnowElasticSecurity
     );
   });
 
-  test('should call addFinishedStepToStorage when onStepButtonClicked is executed', () => {
+  test('should call addFinishedStepToStorage when toggleTaskCompleteStatus is executed', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
-    const { onStepButtonClicked } = result.current;
+    const { toggleTaskCompleteStatus } = result.current;
 
     act(() => {
-      onStepButtonClicked({
-        stepId: CreateProjectSteps.createFirstProject,
-        cardId: QuickStartSectionCardsId.createFirstProject,
+      toggleTaskCompleteStatus({
+        stepId: OverviewSteps.getToKnowElasticSecurity,
+        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
       });
     });
 
     expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
-      QuickStartSectionCardsId.createFirstProject,
-      CreateProjectSteps.createFirstProject
+      QuickStartSectionCardsId.watchTheOverviewVideo,
+      OverviewSteps.getToKnowElasticSecurity
     );
   });
 
-  test('should call removeFinishedStepToStorage when onStepButtonClicked is executed with undo equals to true', () => {
+  test('should call removeFinishedStepToStorage when toggleTaskCompleteStatus is executed with undo equals to true', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
-    const { onStepButtonClicked } = result.current;
+    const { toggleTaskCompleteStatus } = result.current;
 
     act(() => {
-      onStepButtonClicked({
-        stepId: CreateProjectSteps.createFirstProject,
-        cardId: QuickStartSectionCardsId.createFirstProject,
+      toggleTaskCompleteStatus({
+        stepId: OverviewSteps.getToKnowElasticSecurity,
+        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
         sectionId: SectionId.quickStart,
         undo: true,
       });
@@ -327,8 +331,8 @@ describe('useTogglePanel', () => {
 
     expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledWith(
-      QuickStartSectionCardsId.createFirstProject,
-      CreateProjectSteps.createFirstProject
+      QuickStartSectionCardsId.watchTheOverviewVideo,
+      OverviewSteps.getToKnowElasticSecurity
     );
   });
 

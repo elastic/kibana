@@ -185,7 +185,7 @@ export type HandleStepClicked = ({
   isExpandedStep: boolean;
 }) => void;
 
-export type OnStepButtonClicked = ({
+export type ToggleTaskCompleteStatus = ({
   stepId,
   cardId,
   sectionId,

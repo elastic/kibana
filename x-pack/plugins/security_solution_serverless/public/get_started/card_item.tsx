@@ -13,7 +13,7 @@ import classnames from 'classnames';
 import type {
   CardId,
   ExpandedCardSteps,
-  OnStepButtonClicked,
+  ToggleTaskCompleteStatus,
   OnStepClicked,
   SectionId,
   StepId,
@@ -31,7 +31,7 @@ const CardItemComponent: React.FC<{
   euiTheme: EuiThemeComputed;
   expandedCardSteps: ExpandedCardSteps;
   finishedSteps: Set<StepId>;
-  onStepButtonClicked: OnStepButtonClicked;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
   onStepClicked: OnStepClicked;
   sectionId: SectionId;
 }> = ({
@@ -41,7 +41,7 @@ const CardItemComponent: React.FC<{
   euiTheme,
   expandedCardSteps,
   finishedSteps,
-  onStepButtonClicked,
+  toggleTaskCompleteStatus,
   onStepClicked,
   sectionId,
 }) => {
@@ -93,7 +93,7 @@ const CardItemComponent: React.FC<{
                 finishedSteps={finishedSteps}
                 isExpandedCard={isExpandedCard}
                 key={stepId}
-                onStepButtonClicked={onStepButtonClicked}
+                toggleTaskCompleteStatus={toggleTaskCompleteStatus}
                 onStepClicked={onStepClicked}
                 sectionId={sectionId}
                 stepId={stepId}

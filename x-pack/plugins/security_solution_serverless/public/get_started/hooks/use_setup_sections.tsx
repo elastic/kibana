@@ -13,7 +13,7 @@ import type {
   ActiveSections,
   CardId,
   ExpandedCardSteps,
-  OnStepButtonClicked,
+  ToggleTaskCompleteStatus,
   OnStepClicked,
   SectionId,
   StepId,
@@ -30,7 +30,7 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
       activeSections,
       expandedCardSteps,
       finishedSteps,
-      onStepButtonClicked,
+      toggleTaskCompleteStatus,
       onStepClicked,
       sectionId,
     }: {
@@ -38,7 +38,7 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
       activeSections: ActiveSections | null;
       expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
-      onStepButtonClicked: OnStepButtonClicked;
+      toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
       onStepClicked: OnStepClicked;
       sectionId: SectionId;
     }) => {
@@ -54,7 +54,7 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
                 expandedCardSteps={expandedCardSteps}
                 euiTheme={euiTheme}
                 finishedSteps={finishedSteps[cardItem.id]}
-                onStepButtonClicked={onStepButtonClicked}
+                toggleTaskCompleteStatus={toggleTaskCompleteStatus}
                 onStepClicked={onStepClicked}
                 sectionId={sectionId}
               />
@@ -71,14 +71,14 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
       activeSections,
       expandedCardSteps,
       finishedSteps,
-      onStepButtonClicked,
+      toggleTaskCompleteStatus,
       onStepClicked,
     }: {
       activeProducts: Set<ProductLine>;
       activeSections: ActiveSections | null;
       expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
-      onStepButtonClicked: OnStepButtonClicked;
+      toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
       onStepClicked: OnStepClicked;
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
@@ -87,7 +87,7 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
           activeSections,
           expandedCardSteps,
           finishedSteps,
-          onStepButtonClicked,
+          toggleTaskCompleteStatus,
           onStepClicked,
           sectionId: currentSection.id,
         });

@@ -26,7 +26,7 @@ const finishedSteps = {
 } as Record<CardId, Set<StepId>>;
 describe('useSetUpSections', () => {
   const onStepClicked = jest.fn();
-  const onStepButtonClicked = jest.fn();
+  const toggleTaskCompleteStatus = jest.fn();
 
   it('should return the sections', () => {
     const { result } = renderHook(() => useSetUpSections({ euiTheme: mockEuiTheme }));
@@ -46,7 +46,7 @@ describe('useSetUpSections', () => {
       activeSections,
       expandedCardSteps: {} as ExpandedCardSteps,
       onStepClicked,
-      onStepButtonClicked,
+      toggleTaskCompleteStatus,
       finishedSteps,
     });
 
@@ -63,7 +63,7 @@ describe('useSetUpSections', () => {
       activeProducts: new Set([ProductLine.security]),
       expandedCardSteps: {} as ExpandedCardSteps,
       onStepClicked,
-      onStepButtonClicked,
+      toggleTaskCompleteStatus,
       finishedSteps,
     });
 

@@ -4,9 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React from 'react';
-
-export const WelcomePanel = jest
-  .fn()
-  .mockImplementation(({ children }) => <div data-test-subj="welcome-panel">{children}</div>);
+export const useUserName = jest.fn().mockReturnValue('mocked_user_name');

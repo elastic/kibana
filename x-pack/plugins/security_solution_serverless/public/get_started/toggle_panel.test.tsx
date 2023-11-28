@@ -53,7 +53,7 @@ describe('TogglePanel', () => {
   };
 
   const onStepClicked = jest.fn();
-  const onStepButtonClicked = jest.fn();
+  const toggleTaskCompleteStatus = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -68,7 +68,7 @@ describe('TogglePanel', () => {
         activeSections={activeSections}
         expandedCardSteps={{} as ExpandedCardSteps}
         onStepClicked={onStepClicked}
-        onStepButtonClicked={onStepButtonClicked}
+        toggleTaskCompleteStatus={toggleTaskCompleteStatus}
       />
     );
 
@@ -86,7 +86,7 @@ describe('TogglePanel', () => {
         activeSections={activeSections}
         expandedCardSteps={{} as ExpandedCardSteps}
         onStepClicked={onStepClicked}
-        onStepButtonClicked={onStepButtonClicked}
+        toggleTaskCompleteStatus={toggleTaskCompleteStatus}
       />
     );
 

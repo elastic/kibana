@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { OnStepButtonClicked, CardId, StepId, ExpandedCardSteps } from '../types';
+import type { ToggleTaskCompleteStatus, CardId, StepId, ExpandedCardSteps } from '../types';
 
 export interface StepContextType {
   expandedCardSteps: ExpandedCardSteps;
   finishedSteps: Record<CardId, Set<StepId>>;
-  onStepButtonClicked: OnStepButtonClicked;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 
 const StepContext = React.createContext<StepContextType | null>(null);

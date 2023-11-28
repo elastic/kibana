@@ -216,35 +216,39 @@ describe('useStorage', () => {
 
   it('should reset card steps in storage', () => {
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
-      [QuickStartSectionCardsId.createFirstProject]: {
-        isExpanded: true,
-        expandedSteps: [CreateProjectSteps.createFirstProject],
+      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+        isExpanded: false,
+        expandedSteps: [OverviewSteps.getToKnowElasticSecurity],
       },
     });
     getStartedStorage.resetAllExpandedCardStepsToStorage();
-    expect(mockStorage.set).toHaveBeenCalledWith(EXPANDED_CARDS_STORAGE_KEY, {
-      [QuickStartSectionCardsId.createFirstProject]: {
-        isExpanded: true,
+    expect(mockStorage.get(EXPANDED_CARDS_STORAGE_KEY)).toEqual({
+      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+        isExpanded: false,
         expandedSteps: [],
       },
     });
   });
 
   it('should add a step to expanded card steps in storage', () => {
-    (mockStorage.get as jest.Mock).mockReturnValueOnce({
+    mockStorage.set(EXPANDED_CARDS_STORAGE_KEY, {
       [QuickStartSectionCardsId.createFirstProject]: {
-        isExpanded: true,
-        expandedSteps: [CreateProjectSteps.createFirstProject],
+        isExpanded: false,
+        expandedSteps: [],
+      },
+      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+        isExpanded: false,
+        expandedSteps: [OverviewSteps.getToKnowElasticSecurity],
       },
     });
     getStartedStorage.addExpandedCardStepToStorage(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
-    expect(mockStorage.set).toHaveBeenCalledWith(EXPANDED_CARDS_STORAGE_KEY, {
+    expect(mockStorage.get(EXPANDED_CARDS_STORAGE_KEY)).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: {
-        isExpanded: true,
-        expandedSteps: [CreateProjectSteps.createFirstProject],
+        isExpanded: false,
+        expandedSteps: [],
       },
       [QuickStartSectionCardsId.watchTheOverviewVideo]: {
         isExpanded: true,
@@ -254,19 +258,19 @@ describe('useStorage', () => {
   });
 
   it('should remove a step from expanded card steps in storage', () => {
-    (mockStorage.get as jest.Mock).mockReturnValueOnce({
-      [QuickStartSectionCardsId.createFirstProject]: {
+    mockStorage.set(EXPANDED_CARDS_STORAGE_KEY, {
+      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
         isExpanded: true,
-        expandedSteps: [CreateProjectSteps.createFirstProject],
+        expandedSteps: [OverviewSteps.getToKnowElasticSecurity],
       },
     });
     getStartedStorage.removeExpandedCardStepFromStorage(
-      QuickStartSectionCardsId.createFirstProject,
-      CreateProjectSteps.createFirstProject
+      QuickStartSectionCardsId.watchTheOverviewVideo,
+      OverviewSteps.getToKnowElasticSecurity
     );
-    expect(mockStorage.set).toHaveBeenCalledWith(EXPANDED_CARDS_STORAGE_KEY, {
-      [QuickStartSectionCardsId.createFirstProject]: {
-        isExpanded: true,
+    expect(mockStorage.get(EXPANDED_CARDS_STORAGE_KEY)).toEqual({
+      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+        isExpanded: false,
         expandedSteps: [],
       },
     });

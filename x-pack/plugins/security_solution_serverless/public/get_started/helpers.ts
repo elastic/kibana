@@ -10,6 +10,8 @@ import { getSections } from './sections';
 import type { ActiveCard, ActiveSections, Card, CardId, SectionId, Step, StepId } from './types';
 import { CreateProjectSteps, QuickStartSectionCardsId } from './types';
 
+export const CONTENT_WIDTH = 1150;
+
 export const defaultFinishedSteps: Partial<Record<CardId, StepId[]>> = {
   [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
 };

@@ -13,16 +13,16 @@ import { AddAndValidateYourDataCardsId, SectionId, ViewDashboardSteps } from '..
 import { useStepContext } from '../context/step_context';
 
 const DashboardButtonComponent = () => {
-  const { onStepButtonClicked } = useStepContext();
+  const { toggleTaskCompleteStatus } = useStepContext();
 
   const onClick = useCallback(() => {
-    onStepButtonClicked({
+    toggleTaskCompleteStatus({
       stepId: ViewDashboardSteps.analyzeData,
       cardId: AddAndValidateYourDataCardsId.viewDashboards,
       sectionId: SectionId.addAndValidateYourData,
       undo: false,
     });
-  }, [onStepButtonClicked]);
+  }, [toggleTaskCompleteStatus]);
   return (
     <LinkButton id={SecurityPageName.dashboards} onClick={onClick} fill>
       <FormattedMessage

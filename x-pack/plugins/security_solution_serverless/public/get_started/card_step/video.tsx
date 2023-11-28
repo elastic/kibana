@@ -13,7 +13,7 @@ import { SECTION_1_CARD_2_TITLE_TASK_1_BUTTON_TITLE } from '../translations';
 import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../types';
 
 const VideoComponent: React.FC = () => {
-  const { onStepButtonClicked, finishedSteps } = useStepContext();
+  const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
   const ref = React.useRef<HTMLIFrameElement>(null);
   const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
   const { euiTheme } = useEuiTheme();
@@ -24,14 +24,14 @@ const VideoComponent: React.FC = () => {
   );
 
   const onVideoClicked = useCallback(() => {
-    onStepButtonClicked({
+    toggleTaskCompleteStatus({
       stepId: OverviewSteps.getToKnowElasticSecurity,
       cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
       sectionId: SectionId.quickStart,
       undo: false,
     });
     setIsVideoPlaying(true);
-  }, [onStepButtonClicked]);
+  }, [toggleTaskCompleteStatus]);
 
   return (
     <div
