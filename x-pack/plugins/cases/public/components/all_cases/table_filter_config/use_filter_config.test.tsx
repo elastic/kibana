@@ -55,11 +55,12 @@ describe('useFilterConfig', () => {
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionChange: () => {},
+        isSelectorView: false,
       },
     });
 
     expect(deactivateCb).not.toHaveBeenCalled();
-    rerender({ systemFilterConfig: [], onFilterOptionChange: () => {} });
+    rerender({ systemFilterConfig: [], onFilterOptionChange: () => {}, isSelectorView: false });
     expect(deactivateCb).toHaveBeenCalled();
   });
 });

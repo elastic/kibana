@@ -30,14 +30,19 @@ const mergeSystemAndCustomFieldConfigs = ({
 };
 
 export const useFilterConfig = ({
-  systemFilterConfig,
+  isSelectorView,
   onFilterOptionChange,
+  systemFilterConfig,
 }: {
-  systemFilterConfig: FilterConfig[];
+  isSelectorView: boolean;
   onFilterOptionChange: FilterChangeHandler;
+  systemFilterConfig: FilterConfig[];
 }) => {
   const { appId } = useCasesContext();
-  const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({ onFilterOptionChange });
+  const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
+    onFilterOptionChange,
+    isSelectorView,
+  });
   const [filterConfigs, setFilterConfigs] = useState<Map<string, FilterConfig>>(
     () => new Map([...systemFilterConfig].map((filter) => [filter.key, filter]))
   );

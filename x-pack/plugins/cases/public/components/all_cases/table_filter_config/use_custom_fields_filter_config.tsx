@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import type { CustomFieldTypes } from '../../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
@@ -15,23 +15,25 @@ import { MultiSelectFilter } from '../multi_select_filter';
 export const CUSTOM_FIELD_KEY_PREFIX = 'cf_';
 
 interface CustomFieldFilterOptionFactoryProps {
-  fieldKey: string;
   buttonLabel: string;
-  type: CustomFieldTypes;
-  onFilterOptionChange: FilterChangeHandler;
   customFieldOptions: Array<{ key: string; label: string }>;
+  fieldKey: string;
+  isSelectorView: boolean;
+  onFilterOptionChange: FilterChangeHandler;
+  type: CustomFieldTypes;
 }
 const customFieldFilterOptionFactory = ({
-  fieldKey,
   buttonLabel,
-  type,
-  onFilterOptionChange,
   customFieldOptions,
+  fieldKey,
+  isSelectorView,
+  onFilterOptionChange,
+  type,
 }: CustomFieldFilterOptionFactoryProps) => {
   return {
     key: `${CUSTOM_FIELD_KEY_PREFIX}${fieldKey}`, // this prefix is set in case custom field has the same key as a system field
     isActive: false,
-    isAvailable: type === CustomFieldTypes.TOGGLE,
+    isAvailable: !isSelectorView,
     label: buttonLabel,
     deactivate: () => {
       onFilterOptionChange({
@@ -72,8 +74,10 @@ const customFieldFilterOptionFactory = ({
 };
 
 export const useCustomFieldsFilterConfig = ({
+  isSelectorView,
   onFilterOptionChange,
 }: {
+  isSelectorView: boolean;
   onFilterOptionChange: FilterChangeHandler;
 }) => {
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
@@ -86,22 +90,25 @@ export const useCustomFieldsFilterConfig = ({
     const customFieldsFilterConfig: FilterConfig[] = [];
     for (const { key: fieldKey, type, label: buttonLabel } of customFields ?? []) {
       if (customFieldsBuilder[type]) {
-        const { filterOptions: customFieldOptions = [] } = customFieldsBuilder[type]();
+        const { filterOptions: customFieldOptions } = customFieldsBuilder[type]();
 
-        customFieldsFilterConfig.push(
-          customFieldFilterOptionFactory({
-            fieldKey,
-            buttonLabel,
-            type,
-            onFilterOptionChange,
-            customFieldOptions,
-          })
-        );
+        if (customFieldOptions) {
+          customFieldsFilterConfig.push(
+            customFieldFilterOptionFactory({
+              buttonLabel,
+              customFieldOptions,
+              fieldKey,
+              isSelectorView,
+              onFilterOptionChange,
+              type,
+            })
+          );
+        }
       }
     }
 
     setFilterConfig(customFieldsFilterConfig);
-  }, [customFields, onFilterOptionChange]);
+  }, [customFields, isSelectorView, onFilterOptionChange]);
 
   return { customFieldsFilterConfig: filterConfig };
 };

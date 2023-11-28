@@ -113,7 +113,7 @@ const CasesTableFiltersComponent = ({
     selectableOptions,
     activeSelectableOptionKeys,
     onFilterConfigChange,
-  } = useFilterConfig({ systemFilterConfig, onFilterOptionChange });
+  } = useFilterConfig({ systemFilterConfig, onFilterOptionChange, isSelectorView });
 
   const handleOnSearch = useCallback(
     (newSearch) => {
@@ -163,11 +163,13 @@ const CasesTableFiltersComponent = ({
               {filter.render({ filterOptions, onChange: onFilterOptionChange })}
             </React.Fragment>
           ))}
-          <MoreFiltersSelectable
-            options={selectableOptions}
-            activeFilters={activeSelectableOptionKeys}
-            onChange={onFilterConfigChange}
-          />
+          {isSelectorView || (
+            <MoreFiltersSelectable
+              options={selectableOptions}
+              activeFilters={activeSelectableOptionKeys}
+              onChange={onFilterConfigChange}
+            />
+          )}
         </EuiFilterGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

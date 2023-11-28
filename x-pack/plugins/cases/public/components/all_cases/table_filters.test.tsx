@@ -464,6 +464,11 @@ describe('CasesTableFilters ', () => {
       jest.clearAllMocks();
     });
 
+    it('shouldnt render the more button when in selector view', async () => {
+      appMockRender.render(<CasesTableFilters {...props} isSelectorView />);
+      expect(screen.queryByRole('button', { name: 'More' })).not.toBeInTheDocument();
+    });
+
     it('should render all options in the popover, including custom fields', async () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 

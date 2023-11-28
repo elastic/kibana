@@ -112,10 +112,3 @@ export const TOGGLE_FIELD_OFF_LABEL = i18n.translate(
     defaultMessage: 'Off',
   }
 );
-
-export const TOGGLE_FIELD_UNSET_LABEL = i18n.translate(
-  'xpack.cases.customFields.tableFilters.toggle.unset',
-  {
-    defaultMessage: 'Unset',
-  }
-);
