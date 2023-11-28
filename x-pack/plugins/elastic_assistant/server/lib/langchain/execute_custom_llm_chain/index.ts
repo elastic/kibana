@@ -9,13 +9,10 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool, Tool } from 'langchain/tools';
-
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
-import { APMTracer } from '../tracers/apm_tracer';
 
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
@@ -95,10 +92,9 @@ export const callAgentExecutor = async ({
   });
   console.log('THIS SHOULD BE before stream call');
   const resp = await executor.stream({ input: latestMessage[0].content, chat_history: [] });
-  // for await (const chunk of resp) {
-  //   console.log('CHUNKCHUNKCHUNK', chunk);
-  // }
-  console.log('THIS SHOULD BE after stream call', { resp });
+
+  console.log('THIS SHOULD BE after stream call ', { resp });
+
   return resp;
 
   // // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx

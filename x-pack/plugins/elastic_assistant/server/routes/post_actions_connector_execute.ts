@@ -79,7 +79,7 @@ export const postActionsConnectorExecuteRoute = (
 
         return response.ok({
           body: langChainResponseBody,
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'application/octet-stream' },
         });
       } catch (err) {
         console.log('THIS SHOULD BE ERROR?????', err);
