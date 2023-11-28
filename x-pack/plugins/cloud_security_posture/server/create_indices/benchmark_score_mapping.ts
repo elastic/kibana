@@ -7,7 +7,6 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export const benchmarkScoreMapping: MappingTypeMapping = {
-  dynamic: false, // TODO: before commit we need to verify this is the correct move
   properties: {
     '@timestamp': {
       type: 'date',
