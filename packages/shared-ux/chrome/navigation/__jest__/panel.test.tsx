@@ -13,7 +13,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-
+import { PanelContentProvider } from '../src/ui';
 import {
   renderNavigation,
   errorHandler,
@@ -21,7 +21,6 @@ import {
   getMockFn,
   ProjectNavigationChangeListener,
 } from './utils';
-import { PanelContentProvider } from '../src/ui';
 
 describe('Panel', () => {
   test('should render group as panel opener', async () => {
@@ -187,7 +186,7 @@ describe('Panel', () => {
             const [path0 = []] = activeNodes;
             return (
               <div data-test-subj="customPanelContent">
-                <p data-test-subj="customPanelSelectedNode">{selectedNode.id}</p>
+                <p data-test-subj="customPanelSelectedNode">{selectedNode.path}</p>
                 <ul data-test-subj="customPanelActiveNodes">
                   {path0.map((node) => (
                     <li key={node.id}>{node.id}</li>
@@ -207,12 +206,12 @@ describe('Panel', () => {
           {
             id: 'activeGroup1',
             title: 'Group 1',
-            path: ['activeGroup1'],
+            path: 'activeGroup1',
           },
           {
             id: 'activeItem1',
             title: 'Item 1',
-            path: ['activeGroup1', 'activeItem1'],
+            path: 'activeGroup1.activeItem1',
           },
         ],
       ]);

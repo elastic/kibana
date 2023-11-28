@@ -13,7 +13,7 @@ import type {
 import { SolutionSideNavPanelContent } from '@kbn/security-solution-side-nav/panel';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../common/services';
-import type { ProjectNavigationLink, ProjectPageName } from '../links/types';
+import type { ProjectNavigationLink } from '../links/types';
 import { useFormattedSideNavItems } from '../side_navigation/use_side_nav_items';
 import { CATEGORIES, FOOTER_CATEGORIES } from '../categories';
 import { formatNavigationTree } from '../navigation_tree/navigation_tree';
@@ -21,8 +21,7 @@ import { formatNavigationTree } from '../navigation_tree/navigation_tree';
 const getPanelContentProvider = (
   projectNavLinks: ProjectNavigationLink[]
 ): React.FC<PanelComponentProps> =>
-  React.memo(function PanelContentProvider({ selectedNode: { path }, closePanel }) {
-    const linkId = path[path.length - 1] as ProjectPageName;
+  React.memo(function PanelContentProvider({ selectedNode: { id: linkId }, closePanel }) {
     const currentPanelItem = projectNavLinks.find((item) => item.id === linkId);
 
     const { title = '', links = [], categories } = currentPanelItem ?? {};
