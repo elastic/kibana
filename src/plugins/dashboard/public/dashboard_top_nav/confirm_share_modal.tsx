@@ -18,12 +18,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { SpacesApi, SpacesContextProps } from '@kbn/spaces-plugin/public';
-import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
+import React, { useMemo } from 'react';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
-
-export const ConfirmShareSaveModal = ({
+export const ConfirmShareModal = ({
   canSave,
   message,
   namespaces,
@@ -37,15 +36,19 @@ export const ConfirmShareSaveModal = ({
   canSave: boolean;
   message: string;
   namespaces: string[];
-  spacesApi?: SpacesApi;
+  spacesApi: SpacesApi;
   title: string;
   onCancel?: () => void;
   onClone: () => void;
   onClose: () => void;
   onSave: () => void;
 }) => {
-  const SpacesContextWrapper =
-    spacesApi?.ui.components.getSpacesContextProvider ?? getEmptyFunctionComponent;
+  const SpacesContextWrapper = spacesApi.ui.components.getSpacesContextProvider;
+
+  const LazySpaceList = useMemo(
+    () => spacesApi.ui.components.getSpaceList,
+    [spacesApi.ui.components.getSpaceList]
+  );
 
   return (
     <SpacesContextWrapper>
@@ -65,12 +68,12 @@ export const ConfirmShareSaveModal = ({
           </EuiFlexGroup>
         </EuiModalHeader>
         <EuiModalBody>
-          {spacesApi?.ui.components.getSpaceList({
-            namespaces,
-            behaviorContext: 'outside-space',
-            direction: 'vertical',
-            displayLimit: 4,
-          })}
+          <LazySpaceList
+            namespaces={namespaces}
+            behaviorContext="outside-space"
+            direction="vertical"
+            displayLimit={4}
+          />
         </EuiModalBody>
         <EuiModalFooter>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -82,7 +85,10 @@ export const ConfirmShareSaveModal = ({
                   onClose();
                 }}
               >
-                Cancel
+                <FormattedMessage
+                  id="xpack.spaces.confirmSaveModal.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -94,7 +100,10 @@ export const ConfirmShareSaveModal = ({
                   onClose();
                 }}
               >
-                Clone
+                <FormattedMessage
+                  id="xpack.spaces.confirmSaveModal.cloneButtonLabel"
+                  defaultMessage="Clone"
+                />
               </EuiButton>
             </EuiFlexItem>
             {canSave ? (
@@ -107,7 +116,10 @@ export const ConfirmShareSaveModal = ({
                     onClose();
                   }}
                 >
-                  Save
+                  <FormattedMessage
+                    id="xpack.spaces.confirmSaveModal.SaveButtonLabel"
+                    defaultMessage="Save"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             ) : null}

@@ -20,6 +20,7 @@ import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { MountPoint } from '@kbn/core/public';
+import { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,7 +40,7 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
-import { ConfirmShareSaveModal } from './confirm_share_save_modal';
+import { ConfirmShareModal } from './confirm_share_modal';
 
 const ALL_SPACES_ID = '*';
 const UNKNOWN_SPACE = '?';
@@ -92,7 +93,7 @@ export function InternalDashboardTopNav({
     overlays: { openModal },
     dashboardContentManagement: { getAttributesAndReferences },
   } = pluginServices.getServices();
-  const spacesService = spacesApi?.ui.useSpaces();
+  const { spacesManager } = spacesApi?.ui.useSpaces() ?? {};
 
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -289,24 +290,20 @@ export function InternalDashboardTopNav({
       onCancel?: () => void;
     }) => {
       const sharedWithAllSpaces = namespaces?.includes(ALL_SPACES_ID);
-
+      const hasHiddenSpace = namespaces?.includes(UNKNOWN_SPACE);
       const isShared = namespaces && (namespaces.length > 1 || sharedWithAllSpaces);
 
       // Skip confirm modal, and just save
-      if (!spacesService || !lastSavedId || !isShared) {
+      if (!spacesApi || !spacesManager || !lastSavedId || !isShared) {
         onSave();
         return;
       }
-
-      const { spacesManager } = spacesService;
 
       let message;
       const modalTitle = i18n.translate('dashboard.topNav.confirmSaveModalTitle', {
         defaultMessage: `Save '{title}'?`,
         values: { title },
       });
-
-      // Add check for all space and space access
 
       const { references } = await getAttributesAndReferences({
         currentState: dashboard.getExplicitInput(),
@@ -332,8 +329,6 @@ export function InternalDashboardTopNav({
 
         return namespaces.some((sharedSpace) => !shareableRef.spaces.includes(sharedSpace));
       });
-
-      const hasHiddenSpace = namespaces.includes(UNKNOWN_SPACE);
 
       if (!hasNewReference) {
         // no unshared references added
@@ -368,7 +363,7 @@ export function InternalDashboardTopNav({
 
       const session = openModal(
         toMountPoint(
-          <ConfirmShareSaveModal
+          <ConfirmShareModal
             onClone={onClone}
             onSave={onSave}
             onCancel={onCancel}
@@ -390,33 +385,33 @@ export function InternalDashboardTopNav({
       );
     },
     [
-      dashboard,
-      lastSavedId,
       namespaces,
       spacesApi,
-      spacesService,
-      theme$,
+      lastSavedId,
       title,
       getAttributesAndReferences,
+      dashboard,
+      spacesManager,
       openModal,
+      theme$,
     ]
   );
 
   const updateSpacesForReferences = useCallback(async () => {
-    if (!spacesService || !lastSavedId || !namespaces || namespaces.length < 2) return;
-
-    const { spacesManager } = spacesService;
+    if (!spacesManager || !lastSavedId || !namespaces || namespaces.length < 2) return;
 
     const shareableReferences = await spacesManager.getShareableReferences([
       { id: lastSavedId, type: 'dashboard' },
     ]);
-    const objects = shareableReferences.objects.map(({ id, type }) => ({ id, type }));
+    const objects = shareableReferences.objects.map(
+      ({ id, type }: SavedObjectReferenceWithContext) => ({ id, type })
+    );
 
     if (namespaces?.includes('?')) {
       // User doesn't have any access to one of the shared spaces
     }
     spacesManager.updateSavedObjectsSpaces(objects, namespaces, []);
-  }, [lastSavedId, namespaces, spacesService]);
+  }, [lastSavedId, namespaces, spacesManager]);
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,

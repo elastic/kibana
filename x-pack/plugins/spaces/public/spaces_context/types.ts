@@ -33,9 +33,9 @@ export interface InternalProps {
 /**
  * Properties for the SpacesContext.
  */
-export interface SpacesContextProps {
+export type SpacesContextProps = React.PropsWithChildren<{
   /**
    * If a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space.
    */
   feature?: string;
-}
+}>;
