@@ -6,21 +6,48 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { DiscoverTopNavServerless } from './discover_topnav_serverless';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
 
-describe('ServerlessTopNav', () => {
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: jest.fn(),
+}));
+
+function getProps() {
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.internalState.transitions.setDataView(dataViewMock);
+
+  return {
+    stateContainer,
+  };
+}
+
+const mockUseKibana = useKibana as jest.Mock;
+
+describe('DiscoverTopNavServerless', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: mockDiscoverService,
+    });
+  });
+
   it('should not render when serverless plugin is not defined', () => {
     const props = getProps();
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
+        <DiscoverTopNavServerless {...props} />
       </DiscoverMainProvider>
     );
-    expect(component.find(ServerlessTopNav)).toHaveLength(0);
-    const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
-    expect(searchBar.prop('badges')).toBeDefined();
-    expect(searchBar.prop('config')).toBeDefined();
-    expect(searchBar.prop('setMenuMountPoint')).toBeDefined();
+    expect(component.find(DiscoverTopNavServerless).isEmptyRender()).toBe(true);
   });
 
   it('should render when serverless plugin is defined and displayMode is "standalone"', () => {
@@ -33,14 +60,10 @@ describe('ServerlessTopNav', () => {
     const props = getProps();
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
+        <DiscoverTopNavServerless {...props} />
       </DiscoverMainProvider>
     );
-    expect(component.find(ServerlessTopNav)).toHaveLength(1);
-    const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
-    expect(searchBar.prop('badges')).toBeUndefined();
-    expect(searchBar.prop('config')).toBeUndefined();
-    expect(searchBar.prop('setMenuMountPoint')).toBeUndefined();
+    expect(component.find(DiscoverTopNavServerless).isEmptyRender()).toBe(false);
   });
 
   it('should not render when serverless plugin is defined and displayMode is not "standalone"', () => {
@@ -54,14 +77,10 @@ describe('ServerlessTopNav', () => {
     props.stateContainer.customizationContext.displayMode = 'embedded';
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
+        <DiscoverTopNavServerless {...props} />
       </DiscoverMainProvider>
     );
-    expect(component.find(ServerlessTopNav)).toHaveLength(0);
-    const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
-    expect(searchBar.prop('badges')).toBeUndefined();
-    expect(searchBar.prop('config')).toBeUndefined();
-    expect(searchBar.prop('setMenuMountPoint')).toBeUndefined();
+    expect(component.find(DiscoverTopNavServerless).isEmptyRender()).toBe(true);
   });
 
   describe('LogExplorerTabs', () => {
@@ -76,10 +95,10 @@ describe('ServerlessTopNav', () => {
       props.stateContainer.customizationContext.showLogExplorerTabs = true;
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
+          <DiscoverTopNavServerless {...props} />
         </DiscoverMainProvider>
       );
-      expect(component.find(ServerlessTopNav)).toHaveLength(1);
+      expect(component.find(DiscoverTopNavServerless)).toHaveLength(1);
       expect(component.find(LogExplorerTabs)).toHaveLength(1);
     });
 
@@ -93,10 +112,10 @@ describe('ServerlessTopNav', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
+          <DiscoverTopNavServerless {...props} />
         </DiscoverMainProvider>
       );
-      expect(component.find(ServerlessTopNav)).toHaveLength(1);
+      expect(component.find(DiscoverTopNavServerless)).toHaveLength(1);
       expect(component.find(LogExplorerTabs)).toHaveLength(0);
     });
   });
