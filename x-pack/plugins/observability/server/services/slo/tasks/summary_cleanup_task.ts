@@ -12,6 +12,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../assets/constants';
 import { StoredSLO } from '../../../domain/models';
 import { SO_SLO_TYPE } from '../../../saved_objects';
@@ -90,32 +91,49 @@ export class SloSummaryCleanupTask {
         type: SO_SLO_TYPE,
         perPage: 1000,
         fields: ['id', 'revision'],
+        namespaces: [ALL_SPACES_ID],
       });
       let searchAfterKey: SortResults | undefined;
       let soIdsToCheck: string[] = [];
       let sloSummaryIdsToDelete: string[] = [];
+
+      const processSloSummaries = async () => {
+        const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
+        searchAfterKey = searchAfter;
+
+        const { missingSummaryIds } = findMissingItems(
+          soIdsToCheck,
+          sloSummaryIds.concat(sloSummaryIdsToDelete)
+        );
+
+        sloSummaryIdsToDelete = missingSummaryIds;
+      };
 
       for await (const response of finder.find()) {
         const soItems = response.saved_objects.map(
           (so) => `${so.attributes.id}${SEPARATOR}${so.attributes.revision}`
         );
 
-        const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
-        searchAfterKey = searchAfter;
+        soIdsToCheck = soIdsToCheck.concat(soItems);
 
-        const { missingSummaryIds, missingSOIds } = findMissingItems(
-          soItems.concat(soIdsToCheck),
-          sloSummaryIds.concat(sloSummaryIdsToDelete)
-        );
+        await processSloSummaries();
 
-        soIdsToCheck = missingSOIds;
-        sloSummaryIdsToDelete = missingSummaryIds;
         if (searchAfterKey === undefined) {
           break;
         }
       }
 
       await finder.close();
+
+      // If there are no SLOs in the SO index, we can delete all the SLO Summaries
+      if (soIdsToCheck.length === 0) {
+        await processSloSummaries();
+      }
+
+      // Fetch the remaining SLO Summaries
+      while (searchAfterKey) {
+        await processSloSummaries();
+      }
 
       if (sloSummaryIdsToDelete.length > 0) {
         this.logger.info(
@@ -137,6 +155,7 @@ export class SloSummaryCleanupTask {
   };
 
   fetchSloSummariesIds = async (searchAfter?: SortResults) => {
+    this.logger.info(`[SLO] Fetching SLO Summaries ids after ${searchAfter}`);
     if (!this.esClient) {
       return {
         searchAfter: undefined,
@@ -165,7 +184,14 @@ export class SloSummaryCleanupTask {
       search_after: searchAfter,
     });
 
-    const newSearchAfter = result.hits.hits[result.hits.hits.length - 1].sort;
+    if ((result.hits?.hits ?? []).length === 0) {
+      return {
+        searchAfter: undefined,
+        sloSummaryIds: [] as string[],
+      };
+    }
+
+    const newSearchAfter = result.hits.hits[result.hits.hits.length - 1]?.sort;
     return {
       searchAfter: newSearchAfter,
       sloSummaryIds: result.hits.hits.map(

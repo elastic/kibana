@@ -191,6 +191,120 @@ describe('SloSummaryCleanupTask', () => {
       },
     });
   });
+
+  it('should run when summaries are way more then defs', async function () {
+    const task = new SloSummaryCleanupTask(taskManagerSetup, logger);
+    soClient.createPointInTimeFinder = mockSOClientFinder({
+      slos: times(100, (i) => ({
+        attributes: { id: `${i}`, revision: 'v2' },
+      })),
+    });
+    task.fetchSloSummariesIds = jest.fn().mockImplementation(async (searchKey) => {
+      if (!searchKey) {
+        return {
+          sloSummaryIds: [
+            `1${SEPARATOR}v2`,
+            `2${SEPARATOR}v2`,
+            `3${SEPARATOR}v2`,
+            `4${SEPARATOR}v2`,
+            `01${SEPARATOR}v1`,
+            `02${SEPARATOR}v1`,
+            `03${SEPARATOR}v1`,
+            `04${SEPARATOR}v1`,
+          ],
+          searchAfter: '1',
+        };
+      }
+      return {
+        sloSummaryIds: [
+          `5${SEPARATOR}v2`,
+          `6${SEPARATOR}v2`,
+          `7${SEPARATOR}v2`,
+          `8${SEPARATOR}v2`,
+          `05${SEPARATOR}v1`,
+          `06${SEPARATOR}v1`,
+          `07${SEPARATOR}v1`,
+          `08${SEPARATOR}v1`,
+        ],
+      };
+    });
+    await task.start(taskManagerStart, soClient, esClient);
+    await task.runTask();
+
+    expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+      index: '.slo-observability.summary-v2*',
+      query: {
+        bool: {
+          should: getDeleteQueryFilter([
+            `01${SEPARATOR}v1`,
+            `02${SEPARATOR}v1`,
+            `03${SEPARATOR}v1`,
+            `04${SEPARATOR}v1`,
+            `05${SEPARATOR}v1`,
+            `06${SEPARATOR}v1`,
+            `07${SEPARATOR}v1`,
+            `08${SEPARATOR}v1`,
+          ]),
+        },
+      },
+    });
+  });
+
+  it('should run when there are no Slo defs', async function () {
+    const task = new SloSummaryCleanupTask(taskManagerSetup, logger);
+    soClient.createPointInTimeFinder = mockSOClientFinder();
+    task.fetchSloSummariesIds = jest.fn().mockImplementation(async (searchKey) => {
+      if (!searchKey) {
+        return {
+          sloSummaryIds: [
+            `1${SEPARATOR}v2`,
+            `2${SEPARATOR}v2`,
+            `3${SEPARATOR}v2`,
+            `4${SEPARATOR}v2`,
+            `01${SEPARATOR}v1`,
+            `02${SEPARATOR}v1`,
+            `03${SEPARATOR}v1`,
+            `04${SEPARATOR}v1`,
+          ],
+          searchAfter: '1',
+        };
+      }
+      return {
+        sloSummaryIds: [
+          `5${SEPARATOR}v2`,
+          `6${SEPARATOR}v2`,
+          `7${SEPARATOR}v2`,
+          `8${SEPARATOR}v2`,
+          `05${SEPARATOR}v1`,
+          `06${SEPARATOR}v1`,
+          `07${SEPARATOR}v1`,
+          `08${SEPARATOR}v1`,
+        ],
+      };
+    });
+    await task.start(taskManagerStart, soClient, esClient);
+    await task.runTask();
+
+    expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+      index: '.slo-observability.summary-v2*',
+      query: {
+        bool: {
+          should: getDeleteQueryFilter([
+            `01${SEPARATOR}v1`,
+            `02${SEPARATOR}v1`,
+            `03${SEPARATOR}v1`,
+            `04${SEPARATOR}v1`,
+            `05${SEPARATOR}v1`,
+            `06${SEPARATOR}v1`,
+            `07${SEPARATOR}v1`,
+            `08${SEPARATOR}v1`,
+          ]),
+        },
+      },
+    });
+  });
 });
 
 export const mockSOClientFinder = ({ slos = null }: { slos?: any } = {}) => {
