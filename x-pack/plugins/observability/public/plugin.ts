@@ -64,8 +64,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import { firstValueFrom } from 'rxjs';
+
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
