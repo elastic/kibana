@@ -9,8 +9,9 @@ import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/sec
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
+
+import { mockManagedUserData, mockOktaUserFields } from './__mocks__';
 import { ManagedUser } from './managed_user';
-import { mockManagedUserData, mockOktaUser } from './__mocks__';
 
 describe('ManagedUser', () => {
   const mockProps = {
@@ -37,7 +38,7 @@ describe('ManagedUser', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('managedUser-data')).toHaveTextContent('Mar 7, 1989');
+    expect(getByTestId('managedUser-data')).toHaveTextContent('Nov 16, 2023');
   });
 
   it('renders enable integration callout when the integration is disabled', () => {
@@ -95,7 +96,7 @@ describe('ManagedUser', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('managedUser-entra-data')).toBeInTheDocument();
+    expect(getByTestId('managedUser-table')).toBeInTheDocument();
   });
 
   it('renders Okta managed user', () => {
@@ -106,9 +107,13 @@ describe('ManagedUser', () => {
             ...mockProps,
             managedUser: {
               ...mockManagedUserData,
-              details: {
+              data: {
                 [ManagedUserDatasetKey.ENTRA]: undefined,
-                [ManagedUserDatasetKey.OKTA]: mockOktaUser,
+                [ManagedUserDatasetKey.OKTA]: {
+                  fields: mockOktaUserFields,
+                  _index: '123',
+                  _id: '12234',
+                },
               },
             },
           }}
@@ -116,6 +121,6 @@ describe('ManagedUser', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('managedUser-okta-data')).toBeInTheDocument();
+    expect(getByTestId('managedUser-table')).toBeInTheDocument();
   });
 });

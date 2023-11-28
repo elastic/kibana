@@ -6,11 +6,11 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { EcsBase, EcsEvent, EcsHost, EcsUser, EcsAgent } from '@kbn/ecs';
+import type { SearchTypes } from '../../../../detection_engine/types';
 import type { Inspect, Maybe } from '../../../common';
 
 export interface ManagedUserDetailsStrategyResponse extends IEsSearchResponse {
-  users: ManagedUser;
+  users: ManagedUserHits;
   inspect?: Maybe<Inspect>;
 }
 
@@ -19,40 +19,12 @@ export enum ManagedUserDatasetKey {
   OKTA = 'entityanalytics_okta.user',
 }
 
-export type ManagedUser = Record<
-  ManagedUserDatasetKey,
-  EntraManagedUser | OktaManagedUser | undefined
->;
-
-export interface EntraManagedUser extends Pick<EcsBase, '@timestamp'> {
-  agent: EcsAgent;
-  host: EcsHost;
-  event: EcsEvent;
-  user: EcsUser & {
-    last_name?: string;
-    first_name?: string;
-    phone?: string;
-    job_title?: string;
-    work?: {
-      location_name?: string;
-    };
-  };
+export interface ManagedUserHit {
+  _index: string;
+  _id: string;
+  fields?: ManagedUserFields;
 }
 
-export interface OktaManagedUser extends Pick<EcsBase, '@timestamp'> {
-  agent: EcsAgent;
-  event: EcsEvent;
-  user: EcsUser & {
-    profile: {
-      last_name?: string;
-      first_name?: string;
-      mobile_phone?: string;
-      primaryPhone?: string;
-      job_title?: string;
-    };
-    geo?: {
-      city_name?: string;
-      country_iso_code?: string;
-    };
-  };
-}
+export type ManagedUserHits = Record<ManagedUserDatasetKey, ManagedUserHit | undefined>;
+
+export type ManagedUserFields = Record<string, SearchTypes[]>;

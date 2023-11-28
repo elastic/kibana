@@ -23,6 +23,8 @@ const flyoutContextValue = {
   panels: {},
 } as unknown as ExpandableFlyoutContextValue;
 
+const riskScoreData = { ...mockRiskScoreState, data: [] };
+
 storiesOf('Components/UserPanelContent', module)
   .addDecorator((storyFn) => (
     <StorybookProviders>
@@ -37,7 +39,7 @@ storiesOf('Components/UserPanelContent', module)
     <UserPanelContent
       managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
@@ -46,12 +48,12 @@ storiesOf('Components/UserPanelContent', module)
   .add('integration disabled', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: false,
         isIntegrationEnabled: false,
       }}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
@@ -60,12 +62,12 @@ storiesOf('Components/UserPanelContent', module)
   .add('no managed data', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: false,
         isIntegrationEnabled: true,
       }}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
@@ -99,7 +101,7 @@ storiesOf('Components/UserPanelContent', module)
         },
         anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
       }}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
@@ -108,7 +110,7 @@ storiesOf('Components/UserPanelContent', module)
   .add('loading', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: true,
         isIntegrationEnabled: true,
       }}
@@ -137,7 +139,7 @@ storiesOf('Components/UserPanelContent', module)
         },
         anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
       }}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}

@@ -6,9 +6,8 @@
  */
 
 import type {
-  EntraManagedUser,
-  ManagedUser,
-  OktaManagedUser,
+  ManagedUserHits,
+  ManagedUserFields,
 } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
@@ -82,56 +81,43 @@ export const mockObservedUser: ObservedUserData = {
   },
 };
 
-export const mockOktaUser: OktaManagedUser = {
-  '@timestamp': '2023-11-16T13:42:23.074Z',
-  agent: {},
-  event: {
-    dataset: ManagedUserDatasetKey.OKTA,
-  },
-  user: {
-    profile: {
-      last_name: 'User',
-      first_name: 'Test',
-      mobile_phone: '123456',
-      job_title: 'Unit tester',
-    },
-    geo: {
-      city_name: "A'dam",
-      country_iso_code: 'NL',
-    },
-    name: 'test.user@elastic.co',
-    id: '00ud9ohoh9ww644Px5d7',
-    email: 'test.user@elastic.co',
-  },
+export const mockOktaUserFields: ManagedUserFields = {
+  '@timestamp': ['2023-11-16T13:42:23.074Z'],
+  'event.dataset': [ManagedUserDatasetKey.OKTA],
+  'user.profile.last_name': ['Okta last name'],
+  'user.profile.first_name': ['Okta first name'],
+  'user.profile.mobile_phone': ['1234567'],
+  'user.profile.job_title': ['Okta Unit tester'],
+  'user.geo.city_name': ["A'dam"],
+  'user.geo.country_iso_code': ['NL'],
+  'user.id': ['00ud9ohoh9ww644Px5d7'],
+  'user.email': ['okta.test.user@elastic.co'],
+  'user.name': ['okta.test.user@elastic.co'],
 };
 
-export const mockEntraUser: EntraManagedUser = {
-  '@timestamp': '1989-03-07T20:00:00.000Z',
-  agent: {},
-  host: {},
-  event: {
-    dataset: ManagedUserDatasetKey.ENTRA,
-  },
-  user: {
-    id: '123456',
-    last_name: 'User',
-    first_name: 'Test',
-    full_name: 'test user',
-    phone: '123456',
-    job_title: 'Unit tester',
-    work: {
-      location_name: 'USA, CA',
-    },
-  },
+export const mockEntraUserFields: ManagedUserFields = {
+  '@timestamp': ['2023-11-16T13:42:23.074Z'],
+  'event.dataset': [ManagedUserDatasetKey.ENTRA],
+  'user.id': ['12345'],
+  'user.first_name': ['Entra first name'],
+  'user.last_name': ['Entra last name'],
+  'user.full_name': ['Entra full name'],
+  'user.phone': ['123456'],
+  'user.job_title': ['Entra Unit tester'],
+  'user.work.location_name': ['USA, CA'],
 };
 
-export const managedUserDetails: ManagedUser = {
-  [ManagedUserDatasetKey.ENTRA]: mockEntraUser,
+export const managedUserDetails: ManagedUserHits = {
+  [ManagedUserDatasetKey.ENTRA]: {
+    fields: mockEntraUserFields,
+    _index: 'test-index',
+    _id: '123-test',
+  },
   [ManagedUserDatasetKey.OKTA]: undefined,
 };
 
 export const mockManagedUserData: ManagedUserData = {
-  details: managedUserDetails,
+  data: managedUserDetails,
   isLoading: false,
   isIntegrationEnabled: true,
 };

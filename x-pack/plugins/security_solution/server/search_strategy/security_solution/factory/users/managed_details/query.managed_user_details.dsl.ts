@@ -10,12 +10,6 @@ import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/
 import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
 
-// input.type: "entity-analytics"
-// data_stream.dataset: "entityanalytics_entra_id.entity" | "entityanalytics_okta.user"
-// event.dataset: "entityanalytics_entra_id.entity" | "entityanalytics_okta.user"
-// event.kind: "asset"
-// tags: ["forwarded","entityanalytics_entra_id-entity", "entityanalytics_okta-user" ]
-
 export const buildManagedUserDetailsQuery = ({
   userName,
   defaultIndex,
@@ -44,8 +38,8 @@ export const buildManagedUserDetailsQuery = ({
           aggs: {
             latest_hit: {
               top_hits: {
-                // _source: false,
-                // fields: [],
+                fields: ['*', '_index', '_id'], // '_index' and '_id' are not returned by default
+                _source: false,
                 size: 1,
                 sort: [
                   {

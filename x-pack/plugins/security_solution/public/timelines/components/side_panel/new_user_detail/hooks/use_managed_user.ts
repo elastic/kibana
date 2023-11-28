@@ -27,7 +27,7 @@ export const useManagedUser = (userName: string) => {
   const spaceId = useSpaceId();
   const {
     loading: loadingManagedUser,
-    result: { users: managedUserDetails },
+    result: { users: managedUserData },
     search,
     refetch,
     inspect,
@@ -80,10 +80,10 @@ export const useManagedUser = (userName: string) => {
 
   return useMemo(
     () => ({
-      details: managedUserDetails,
+      data: managedUserData,
       isLoading: loadingManagedUser || loadingIntegrations,
       isIntegrationEnabled,
     }),
-    [isIntegrationEnabled, loadingIntegrations, loadingManagedUser, managedUserDetails]
+    [isIntegrationEnabled, loadingIntegrations, loadingManagedUser, managedUserData]
   );
 };

@@ -67,10 +67,13 @@ describe('UserDetailsContent', () => {
             ...mockProps,
             managedUser: {
               ...mockManagedUserData,
-              details: {
+              data: {
                 [ManagedUserDatasetKey.ENTRA]: {
-                  ...entraManagedUser!,
-                  '@timestamp': futureDay,
+                  ...entraManagedUser,
+                  fields: {
+                    ...entraManagedUser.fields,
+                    '@timestamp': [futureDay],
+                  },
                 },
                 [ManagedUserDatasetKey.OKTA]: undefined,
               },
@@ -123,7 +126,7 @@ describe('UserDetailsContent', () => {
             ...mockProps,
             managedUser: {
               ...mockManagedUserData,
-              details: {
+              data: {
                 [ManagedUserDatasetKey.ENTRA]: undefined,
                 [ManagedUserDatasetKey.OKTA]: undefined,
               },

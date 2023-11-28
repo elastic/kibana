@@ -9,6 +9,12 @@ Object {
         "aggs": Object {
           "latest_hit": Object {
             "top_hits": Object {
+              "_source": false,
+              "fields": Array [
+                "*",
+                "_index",
+                "_id",
+              ],
               "size": 1,
               "sort": Array [
                 Object {

@@ -46,31 +46,17 @@ export const OBSERVED_DATA_TITLE = i18n.translate(
   }
 );
 
-export const HIDE_ENTRA_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.hideEntraDataButton',
+export const ENTRA_DATA_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.EntraDataPanelTitle',
   {
-    defaultMessage: 'Hide Entra ID data',
+    defaultMessage: 'Entra ID data',
   }
 );
 
-export const SHOW_ENTRA_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.showEntraDataButton',
+export const OKTA_DATA_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.hideOktaDataPanelTitle',
   {
-    defaultMessage: 'Show Entra ID data',
-  }
-);
-
-export const HIDE_OKTA_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.hideOktaDataButton',
-  {
-    defaultMessage: 'Hide Okta data',
-  }
-);
-
-export const SHOW_OKTA_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.showOktaDataButton',
-  {
-    defaultMessage: 'Show Okta data',
+    defaultMessage: 'Okta data',
   }
 );
 
@@ -135,45 +121,6 @@ export const IP_ADDRESSES = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.ipAddressesLabel',
   {
     defaultMessage: 'IP addresses',
-  }
-);
-
-export const FULL_NAME = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.fullNameLabel',
-  {
-    defaultMessage: 'Full name',
-  }
-);
-
-export const FIRST_NAME = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.firstNameLabel',
-  {
-    defaultMessage: 'First name',
-  }
-);
-
-export const LAST_NAME = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.lastNameLabel',
-  {
-    defaultMessage: 'Last name',
-  }
-);
-
-export const PHONE = i18n.translate('xpack.securitySolution.timeline.userDetails.phoneLabel', {
-  defaultMessage: 'Phone',
-});
-
-export const JOB_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.jobTitleLabel',
-  {
-    defaultMessage: 'Job title',
-  }
-);
-
-export const WORK_LOCATION = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.work:ocationLabel',
-  {
-    defaultMessage: 'Work location',
   }
 );
 

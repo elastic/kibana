@@ -15,23 +15,23 @@ import { buildManagedUserDetailsQuery } from './query.managed_user_details.dsl';
 
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
-  EntraManagedUser,
-  ManagedUser,
+  ManagedUserHits,
+  ManagedUserHit,
   ManagedUserDetailsStrategyResponse,
-  OktaManagedUser,
+  ManagedUserFields,
 } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 
 interface ManagedUserBucket {
   key: ManagedUserDatasetKey;
-  latest_hit: SearchResponse<EntraManagedUser | OktaManagedUser>;
+  latest_hit: SearchResponse<ManagedUserFields | ManagedUserFields>;
 }
 
 export const managedUserDetails: SecuritySolutionFactory<UsersQueries.managedDetails> = {
   buildDsl: (options) => buildManagedUserDetailsQuery(options),
   parse: async (
     options,
-    response: IEsSearchResponse<EntraManagedUser>
+    response: IEsSearchResponse<ManagedUserFields>
   ): Promise<ManagedUserDetailsStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildManagedUserDetailsQuery(options))],
@@ -43,12 +43,12 @@ export const managedUserDetails: SecuritySolutionFactory<UsersQueries.managedDet
       response.rawResponse
     );
 
-    const managedUsers: ManagedUser = buckets.reduce(
-      (acc: ManagedUser, bucket: ManagedUserBucket) => {
-        acc[bucket.key] = bucket.latest_hit.hits.hits[0]._source;
+    const managedUsers: ManagedUserHits = buckets.reduce(
+      (acc: ManagedUserHits, bucket: ManagedUserBucket) => {
+        acc[bucket.key] = bucket.latest_hit.hits.hits[0] as unknown as ManagedUserHit;
         return acc;
       },
-      {} as ManagedUser
+      {} as ManagedUserHits
     );
 
     if (buckets.length === 0) {

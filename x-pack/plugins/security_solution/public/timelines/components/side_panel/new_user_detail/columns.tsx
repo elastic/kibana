@@ -10,7 +10,10 @@ import React, { useCallback } from 'react';
 import { head } from 'lodash/fp';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { EcsFlat } from '@kbn/ecs';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
 import type {
   ManagedUsersTableColumns,
@@ -32,21 +35,22 @@ import { getSourcererScopeId } from '../../../../helpers';
 const fieldColumn: EuiBasicTableColumn<ObservedUserTable | ManagedUserTable> = {
   name: i18n.FIELD_COLUMN_TITLE,
   field: 'label',
-  render: (label: string) => (
-    <span
-      css={css`
-        font-weight: ${euiLightVars.euiFontWeightMedium};
-        color: ${euiLightVars.euiTitleColor};
-      `}
-    >
-      {label}
-    </span>
+  render: (label: string, { field }) => (
+    <EuiToolTip content={EcsFlat[field as keyof typeof EcsFlat]?.short ?? field}>
+      <span
+        css={css`
+          font-weight: ${euiLightVars.euiFontWeightMedium};
+          color: ${euiLightVars.euiTitleColor};
+        `}
+      >
+        {label ?? field}
+      </span>
+    </EuiToolTip>
   ),
 };
 
 export const getManagedUserTableColumns = (
   contextID: string,
-  scopeId: string,
   isDraggable: boolean
 ): ManagedUsersTableColumns => [
   fieldColumn,
@@ -56,11 +60,11 @@ export const getManagedUserTableColumns = (
     render: (value: ManagedUserTable['value'], { field }) => {
       return field && value ? (
         <DefaultFieldRenderer
-          rowItems={[value]}
+          rowItems={value.map((v) => (typeof v === 'string' ? v : value.toString()))} // Array.isArray(value) ? value : [value]
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
           isDraggable={isDraggable}
-          sourcererScopeId={getSourcererScopeId(scopeId)}
+          sourcererScopeId={SourcererScopeName.default}
         />
       ) : (
         defaultToEmptyTag(value)

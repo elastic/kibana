@@ -29,8 +29,12 @@ interface UserPanelHeaderProps {
 }
 
 export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPanelHeaderProps) => {
-  const oktaTimestamp = managedUser.details?.[ManagedUserDatasetKey.OKTA]?.['@timestamp'];
-  const entraTimestamp = managedUser.details?.[ManagedUserDatasetKey.ENTRA]?.['@timestamp'];
+  const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
+    '@timestamp'
+  ][0] as string | undefined;
+  const entraTimestamp = managedUser.data?.[ManagedUserDatasetKey.ENTRA]?.fields?.[
+    '@timestamp'
+  ][0] as string | undefined;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
   const lastSeenDate = useMemo(

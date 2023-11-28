@@ -17,10 +17,8 @@ import {
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EntraManagedUser,
-  OktaManagedUser,
-} from '../../../../../common/search_strategy/security_solution/users/managed_details';
+import { UserAssetTableType } from '../../../../explore/users/store/model';
+import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import * as i18n from './translations';
 
@@ -37,16 +35,14 @@ import { useManagedUserItems } from './hooks/use_managed_user_items';
 export const ManagedUser = ({
   managedUser,
   contextID,
-  scopeId,
   isDraggable,
 }: {
   managedUser: ManagedUserData;
   contextID: string;
-  scopeId: string;
   isDraggable: boolean;
 }) => {
-  const entraManagedUser = managedUser.details?.[ManagedUserDatasetKey.ENTRA];
-  const oktaManagedUser = managedUser.details?.[ManagedUserDatasetKey.OKTA];
+  const entraManagedUser = managedUser.data?.[ManagedUserDatasetKey.ENTRA];
+  const oktaManagedUser = managedUser.data?.[ManagedUserDatasetKey.OKTA];
   const { getAppUrl } = useAppUrl();
   const installedIntegrationHref = useMemo(
     () => getAppUrl({ appId: 'integrations', path: INSTALL_EA_INTEGRATIONS_HREF }),
@@ -115,36 +111,38 @@ export const ManagedUser = ({
                 </EuiCallOut>
               ) : (
                 <>
-                  {entraManagedUser && (
+                  {entraManagedUser && entraManagedUser.fields && (
                     <ManagedUserAccordion
-                      id="managedUser-entra-data"
-                      openTitle={i18n.HIDE_ENTRA_DATA_BUTTON}
-                      closedTitle={i18n.SHOW_ENTRA_DATA_BUTTON}
-                      managedUser={entraManagedUser}
+                      title={i18n.ENTRA_DATA_PANEL_TITLE}
+                      managedUser={entraManagedUser.fields}
+                      indexName={entraManagedUser._index}
+                      eventId={entraManagedUser._id}
+                      tableType={UserAssetTableType.assetEntra}
                     >
-                      <ManagedUserDataset
+                      <ManagedUserTable
                         isDraggable={isDraggable}
                         contextID={contextID}
-                        scopeId={scopeId}
-                        managedUser={entraManagedUser}
+                        managedUser={entraManagedUser.fields}
+                        tableType={UserAssetTableType.assetEntra}
                       />
                     </ManagedUserAccordion>
                   )}
 
                   {entraManagedUser && oktaManagedUser && <EuiSpacer size="m" />}
 
-                  {oktaManagedUser && (
+                  {oktaManagedUser && oktaManagedUser.fields && (
                     <ManagedUserAccordion
-                      id="managedUser-okta-data"
-                      openTitle={i18n.HIDE_OKTA_DATA_BUTTON}
-                      closedTitle={i18n.SHOW_OKTA_DATA_BUTTON}
-                      managedUser={oktaManagedUser}
+                      title={i18n.OKTA_DATA_PANEL_TITLE}
+                      managedUser={oktaManagedUser.fields}
+                      indexName={oktaManagedUser._index}
+                      eventId={oktaManagedUser._id}
+                      tableType={UserAssetTableType.assetEntra}
                     >
-                      <ManagedUserDataset
+                      <ManagedUserTable
                         isDraggable={isDraggable}
                         contextID={contextID}
-                        scopeId={scopeId}
-                        managedUser={oktaManagedUser}
+                        managedUser={oktaManagedUser.fields}
+                        tableType={UserAssetTableType.assetEntra}
                       />
                     </ManagedUserAccordion>
                   )}
@@ -158,22 +156,22 @@ export const ManagedUser = ({
   );
 };
 
-export const ManagedUserDataset = ({
+export const ManagedUserTable = ({
   managedUser,
   contextID,
-  scopeId,
   isDraggable,
+  tableType,
 }: {
-  managedUser: EntraManagedUser | OktaManagedUser;
+  managedUser: ManagedUserFields;
   contextID: string;
-  scopeId: string;
   isDraggable: boolean;
+  tableType: UserAssetTableType;
 }) => {
   const managedUserTableColumns = useMemo(
-    () => getManagedUserTableColumns(contextID, scopeId, isDraggable),
-    [isDraggable, contextID, scopeId]
+    () => getManagedUserTableColumns(contextID, isDraggable),
+    [isDraggable, contextID]
   );
-  const managedItems = useManagedUserItems(managedUser);
+  const managedItems = useManagedUserItems(tableType, managedUser);
 
   return (
     <BasicTable

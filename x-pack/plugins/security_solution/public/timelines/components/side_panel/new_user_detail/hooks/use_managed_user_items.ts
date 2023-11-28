@@ -5,73 +5,27 @@
  * 2.0.
  */
 import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import type { UserAssetTableType } from '../../../../../explore/users/store/model';
+import type { State } from '../../../../../common/store/types';
+import { usersSelectors } from '../../../../../explore/users/store';
 import type { ManagedUserTable } from '../types';
-import type {
-  EntraManagedUser,
-  OktaManagedUser,
-} from '../../../../../../common/search_strategy/security_solution/users/managed_details';
-import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
-import * as i18n from '../translations';
-
-const isEntraManagedUser = (
-  managedUser: EntraManagedUser | OktaManagedUser
-): managedUser is EntraManagedUser => managedUser.event.dataset === ManagedUserDatasetKey.ENTRA;
+import type { ManagedUserFields } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 
 export const useManagedUserItems = (
-  managedUserDetails?: EntraManagedUser | OktaManagedUser
-): ManagedUserTable[] | null =>
-  useMemo(
-    () =>
-      !managedUserDetails
-        ? null
-        : [
-            {
-              label: i18n.USER_ID,
-              value: managedUserDetails.user.id,
-              field: 'user.id',
-            },
-            {
-              label: i18n.FIRST_NAME,
-              value: isEntraManagedUser(managedUserDetails)
-                ? managedUserDetails.user.first_name
-                : managedUserDetails.user.profile.first_name,
-            },
-            {
-              label: i18n.LAST_NAME,
-              value: isEntraManagedUser(managedUserDetails)
-                ? managedUserDetails.user.last_name
-                : managedUserDetails.user.profile.last_name,
-            },
-            {
-              label: i18n.PHONE,
-              value: isEntraManagedUser(managedUserDetails)
-                ? managedUserDetails.user.phone
-                : managedUserDetails.user.profile.primaryPhone ??
-                  managedUserDetails.user.profile.mobile_phone,
-            },
-            {
-              label: i18n.JOB_TITLE,
-              value: isEntraManagedUser(managedUserDetails)
-                ? managedUserDetails.user.job_title
-                : managedUserDetails.user.profile.job_title,
-            },
-            {
-              label: i18n.WORK_LOCATION,
-              value: getWorkLocation(managedUserDetails),
-            },
-          ],
-    [managedUserDetails]
+  tableType: UserAssetTableType,
+  managedUserDetails: ManagedUserFields
+): ManagedUserTable[] | null => {
+  const tableData = useSelector((state: State) =>
+    usersSelectors.selectUserAssetTableById(state, tableType)
   );
 
-const getWorkLocation = (managedUserDetails: EntraManagedUser | OktaManagedUser) => {
-  if (isEntraManagedUser(managedUserDetails)) {
-    return managedUserDetails.user.work?.location_name;
-  } else {
-    const { city_name: city, country_iso_code: countryCode } = managedUserDetails.user.geo ?? {};
-    if (!city || !countryCode) {
-      return undefined;
-    }
-
-    return `${city}, ${countryCode}`;
-  }
+  return useMemo(
+    () =>
+      tableData.fields.map((fieldName) => ({
+        value: managedUserDetails[fieldName],
+        field: fieldName,
+      })),
+    [managedUserDetails, tableData.fields]
+  );
 };
