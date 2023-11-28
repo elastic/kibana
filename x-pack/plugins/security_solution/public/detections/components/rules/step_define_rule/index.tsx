@@ -439,19 +439,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
       <EuiRadioGroup
         disabled={
-          !isAlertSuppressionLicenseValid ||
-          groupByFields == null ||
-          groupByFields.length === 0 ||
-          isThresholdRule
+          !isAlertSuppressionLicenseValid || isThresholdRule ? false : !groupByFields?.length
         }
         idSelected={groupByRadioSelection.value}
         options={[
           {
             id: GroupByOptions.PerRuleExecution,
             label: 'Per rule execution',
+            disabled: isThresholdRule,
           },
           {
             id: GroupByOptions.PerTimePeriod,
+            disabled: isThresholdRule && !enableThresholdSuppression,
             label: (
               <>
                 {`Per time period`}
@@ -482,9 +481,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const AlertSuppressionMissingFields = useCallback(
     ({ suppressionMissingFields }) => (
       <EuiRadioGroup
-        disabled={
-          !isAlertSuppressionLicenseValid || groupByFields == null || groupByFields.length === 0
-        }
+        disabled={!isAlertSuppressionLicenseValid || !groupByFields.length}
         idSelected={suppressionMissingFields.value}
         options={[
           {

@@ -779,7 +779,6 @@ export const enablesAndPopulatesThresholdSuppression = (
   timeUnit: 's' | 'm' | 'h'
 ) => {
   // enable suppression is unchecked so the rest of suppression components are disabled
-  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).should('be.disabled');
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.disabled').should('be.checked');
   cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION)
     .should('be.disabled')
@@ -792,9 +791,9 @@ export const enablesAndPopulatesThresholdSuppression = (
   cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
   cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
 
-  // interval/rule execution options still should be disabled
+  // rule execution radio option is disabled, per time interval becomes enabled when suppression enabled
   cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.disabled');
-  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.disabled').should('be.checked');
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
 };
 
 export const checkLoadQueryDynamically = () => {

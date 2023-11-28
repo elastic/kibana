@@ -79,7 +79,7 @@ describe('Detection threshold rules, edit', { tags: ['@ess', '@serverless'] }, (
       editFirstRule();
 
       cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL)
-        .should('be.disabled')
+        .should('be.enabled')
         .should('be.checked');
       cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION)
         .should('be.disabled')
