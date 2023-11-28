@@ -6,9 +6,11 @@
  */
 
 import type { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
-import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
+import type {
+  Actions,
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
 export interface EnsureAuthorizedDependencies {
   actions: Actions;

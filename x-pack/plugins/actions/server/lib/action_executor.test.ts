@@ -22,6 +22,7 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
+import { SecurityConnectorFeatureId } from '../../common';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -837,6 +838,44 @@ test('successfully authorize system actions', async () => {
     operation: 'execute',
     additionalPrivileges: ['test/create'],
   });
+});
+
+test('Execute of SentinelOne sub-actions require create privilege', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.sentinelone',
+    name: 'sentinelone',
+    minimumLicenseRequired: 'enterprise',
+    supportedFeatureIds: [SecurityConnectorFeatureId],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: '.sentinelone',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+      isMissingSecrets: false,
+    },
+    references: [],
+  };
+
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  await actionExecutor.execute({ ...executeParams, actionId: 'sentinel-one-connector-authz' });
+
+  expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({ operation: 'create' });
 });
 
 test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {

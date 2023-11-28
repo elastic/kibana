@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const testDiscoverCustomUrl: DiscoverUrlConfig = {
     label: 'Show data',
-    indexPattern: 'ft_egs_regression',
+    indexName: 'ft_egs_regression',
     queryEntityFieldNames: ['stabf'],
     timeRange: TIME_RANGE_TYPE.AUTO,
   };
@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'stab',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         advancedEditorContent: [
           '{',
           '  "description": "Regression job based on ft_egs_regression dataset with runtime fields",',
@@ -340,9 +340,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('sets the create data view switch');
           await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(
-            testData.createIndexPattern
-          );
+          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

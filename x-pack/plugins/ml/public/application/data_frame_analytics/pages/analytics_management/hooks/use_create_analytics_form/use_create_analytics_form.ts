@@ -59,7 +59,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const { refresh } = useRefreshAnalyticsList();
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
-  const { createIndexPattern, jobId } = form;
+  const { createDataView, jobId } = form;
   let { destinationIndex } = form;
 
   const addRequestMessage = (requestMessage: FormMessage) =>
@@ -73,8 +73,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const setAdvancedEditorRawString = (advancedEditorRawString: string) =>
     dispatch({ type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING, advancedEditorRawString });
 
-  const setIndexPatternTitles = (payload: { indexPatternsMap: SourceIndexMap }) =>
-    dispatch({ type: ACTION.SET_INDEX_PATTERN_TITLES, payload });
+  const setDataViewTitles = (payload: { dataViewsMap: SourceIndexMap }) =>
+    dispatch({ type: ACTION.SET_DATA_VIEW_TITLES, payload });
 
   const setIsJobCreated = (isJobCreated: boolean) =>
     dispatch({ type: ACTION.SET_IS_JOB_CREATED, isJobCreated });
@@ -110,7 +110,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
       setIsJobCreated(true);
-      if (createIndexPattern) {
+      if (createDataView) {
         createKibanaDataView(destinationIndex, dataViews, form.timeFieldName, addRequestMessage);
       }
       refresh();
@@ -132,17 +132,17 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const prepareFormValidation = async () => {
     try {
       // Set the existing data view names.
-      const indexPatternsMap: SourceIndexMap = {};
+      const dataViewsMap: SourceIndexMap = {};
       const savedObjects = (await dataViews.getCache()) || [];
       savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
           const id = obj?.id || '';
-          indexPatternsMap[title] = { label: title, value: id };
+          dataViewsMap[title] = { label: title, value: id };
         }
       });
-      setIndexPatternTitles({
-        indexPatternsMap,
+      setDataViewTitles({
+        dataViewsMap,
       });
     } catch (e) {
       addRequestMessage({

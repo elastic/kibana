@@ -18,7 +18,7 @@ import {
 } from '../../../../../tasks/alerts_detection_rules';
 import { deleteSelectedRules } from '../../../../../tasks/rules_bulk_actions';
 import { createRule, findAllRules } from '../../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
 
 describe('Rule deletion', { tags: ['@ess', '@serverless'] }, () => {

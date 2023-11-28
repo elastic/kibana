@@ -48,13 +48,13 @@ import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import type { RoleValidationResult } from './validate_role';
 import { RoleValidator } from './validate_role';
-import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,
   RawKibanaPrivileges,
   Role,
   RoleIndexPrivilege,
-} from '../../../../common/model';
+  SecurityLicense,
+} from '../../../../common';
 import {
   isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,

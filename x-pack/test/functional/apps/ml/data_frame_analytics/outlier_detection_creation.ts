@@ -17,7 +17,7 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  indexPattern: 'ft_ihp_outlier',
+  indexName: 'ft_ihp_outlier',
   queryEntityFieldNames: ['SaleType'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         modelMemory: '5mb',
-        createIndexPattern: true,
+        createDataView: true,
         advancedEditorContent: [
           '{',
           '  "description": "Outlier detection job based on ft_ihp_outlier dataset with runtime fields",',
@@ -325,9 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('sets the create data view switch');
           await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(
-            testData.createIndexPattern
-          );
+          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

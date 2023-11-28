@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RoleTemplateTypeSelect } from './role_template_type_select';
-import type { RoleTemplate } from '../../../../../common/model';
+import type { RoleTemplate } from '../../../../../common';
 import {
   isInlineRoleTemplate,
   isInvalidRoleTemplate,

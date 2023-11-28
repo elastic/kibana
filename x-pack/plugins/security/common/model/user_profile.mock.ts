@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserProfile, UserProfileWithSecurity } from './user_profile';
+import type { UserProfile, UserProfileWithSecurity } from '@kbn/security-plugin-types-common';
 
 function createUserProfileMock(userProfile: Partial<UserProfile> = {}) {
   return {
