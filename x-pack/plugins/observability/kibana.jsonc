@@ -35,12 +35,12 @@
       "unifiedSearch",
       "visualizations",
       "dashboard",
-      "expressions"
+      "expressions",
+      "licensing"
     ],
     "optionalPlugins": [
       "discover",
       "home",
-      "licensing",
       "usageCollection",
       "cloud",
       "spaces",
