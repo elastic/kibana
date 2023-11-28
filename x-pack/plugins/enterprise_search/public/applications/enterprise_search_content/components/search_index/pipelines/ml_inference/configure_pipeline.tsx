@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -30,7 +30,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
 import { PipelineSelectOption } from './pipeline_select_option';
-import { MODEL_REDACTED_VALUE, MODEL_SELECT_PLACEHOLDER } from './utils';
+import { MODEL_REDACTED_VALUE, MODEL_SELECT_PLACEHOLDER, normalizeModelName } from './utils';
 
 const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';
 const PIPELINE_SELECT_PLACEHOLDER_VALUE = 'pipeline_placeholder$$';
@@ -63,13 +63,6 @@ export const ConfigurePipeline: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   const { existingPipeline, modelID, pipelineName } = configuration;
-
-  useEffect(() => {
-    setInferencePipelineConfiguration({
-      ...configuration,
-      pipelineName: pipelineName || indexName,
-    });
-  }, []);
 
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
 
@@ -179,6 +172,7 @@ export const ConfigurePipeline: React.FC = () => {
                     inferenceConfig: undefined,
                     modelID: value,
                     fieldMappings: undefined,
+                    pipelineName: pipelineName || indexName + '-' + normalizeModelName(value),
                   })
                 }
                 options={modelOptions}
@@ -253,13 +247,10 @@ export const ConfigurePipeline: React.FC = () => {
         onTabClick={(tab) => {
           const isExistingPipeline = tab.id === ConfigurePipelineTabId.USE_EXISTING;
           if (isExistingPipeline !== configuration.existingPipeline) {
-            const pipelineConfig = EMPTY_PIPELINE_CONFIGURATION;
-            pipelineConfig.existingPipeline = isExistingPipeline;
-            if (!isExistingPipeline) {
-              pipelineConfig.pipelineName = indexName;
-            }
-
-            setInferencePipelineConfiguration(pipelineConfig);
+            setInferencePipelineConfiguration({
+              ...EMPTY_PIPELINE_CONFIGURATION,
+              existingPipeline: isExistingPipeline,
+            });
           }
         }}
       />
