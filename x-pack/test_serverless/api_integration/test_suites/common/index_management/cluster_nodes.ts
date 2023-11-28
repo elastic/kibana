@@ -8,16 +8,28 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { clusterNodesApi } from './lib/cluster_nodes.api';
 
 export default function ({ getService }: FtrProviderContext) {
-  const { getNodesPlugins } = clusterNodesApi(getService);
+  const indexManagementService = getService('indexManagement');
 
   describe('nodes', () => {
+    let getNodesPlugins: typeof indexManagementService['clusterNodes']['api']['getNodesPlugins'];
+
+    before(async () => {
+      ({
+        clusterNodes: {
+          api: {
+            getNodesPlugins,
+          },
+        },
+      } = indexManagementService);
+    });
+
     it('should fetch the nodes plugins', async () => {
       const { body } = await getNodesPlugins().expect(200);
 
       expect(Array.isArray(body)).to.be(true);
     });
+
   });
 }
