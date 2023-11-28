@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Asset } from '../../../../common/types_api';
 import { collectServices } from '../../collectors/services';
 import { parseEan } from '../../parse_ean';
@@ -23,10 +24,27 @@ export async function getServices(
 ): Promise<{ services: Asset[] }> {
   validateStringDateRange(options.from, options.to);
 
-  const filters = [];
+  const filters: QueryDslQueryContainer[] = [];
 
-  if (options.parent) {
-    const { kind, id } = parseEan(options.parent);
+  if (options.filters?.ean) {
+    const ean = Array.isArray(options.filters.ean) ? options.filters.ean[0] : options.filters.ean;
+    const { kind, id } = parseEan(ean);
+
+    if (kind !== 'service') {
+      return {
+        services: [],
+      };
+    }
+
+    filters.push({
+      term: {
+        'service.name': id,
+      },
+    });
+  }
+
+  if (options.filters?.parentEan) {
+    const { kind, id } = parseEan(options.filters?.parentEan);
 
     if (kind === 'host') {
       filters.push({
@@ -45,6 +63,31 @@ export async function getServices(
         },
       });
     }
+  }
+
+  if (options.filters?.id) {
+    const fn = options.filters.id.includes('*') ? 'wildcard' : 'term';
+    filters.push({
+      [fn]: {
+        'service.name': options.filters.id,
+      },
+    });
+  }
+
+  if (options.filters?.['cloud.provider']) {
+    filters.push({
+      term: {
+        'cloud.provider': options.filters['cloud.provider'],
+      },
+    });
+  }
+
+  if (options.filters?.['cloud.region']) {
+    filters.push({
+      term: {
+        'cloud.region': options.filters['cloud.region'],
+      },
+    });
   }
 
   const apmIndices = await options.getApmIndices(options.savedObjectsClient);
