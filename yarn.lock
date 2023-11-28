@@ -3146,6 +3146,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/calculate-width-from-char-count@link:packages/kbn-calculate-width-from-char-count":
+  version "0.0.0"
+  uid ""
+
 "@kbn/canvas-plugin@link:x-pack/plugins/canvas":
   version "0.0.0"
   uid ""
@@ -5491,6 +5495,18 @@
   uid ""
 
 "@kbn/security-api-integration-helpers@link:x-pack/test/security_api_integration/packages/helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-plugin-types-common@link:x-pack/packages/security/plugin_types_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-plugin-types-public@link:x-pack/packages/security/plugin_types_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-plugin-types-server@link:x-pack/packages/security/plugin_types_server":
   version "0.0.0"
   uid ""
 

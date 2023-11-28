@@ -70,13 +70,13 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
               <NewTimeline
                 timelineId={timelineId}
                 title={i18n.NEW_TIMELINE}
-                closeGearMenu={onClosePopover}
+                onClick={onClosePopover}
               />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <NewTemplateTimeline
-                closeGearMenu={onClosePopover}
+                onClick={onClosePopover}
                 timelineId={timelineId}
                 title={i18n.NEW_TEMPLATE_TIMELINE}
               />

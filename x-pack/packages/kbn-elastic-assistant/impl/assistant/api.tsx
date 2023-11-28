@@ -25,6 +25,10 @@ export interface FetchConnectorExecuteResponse {
   response: string | ReadableStreamDefaultReader<Uint8Array>;
   isError: boolean;
   isStream: boolean;
+  traceData?: {
+    transactionId: string;
+    traceId: string;
+  };
 }
 
 export const fetchConnectorExecuteAction = async ({
@@ -249,6 +253,7 @@ export interface PostEvaluationParams {
 }
 
 export interface PostEvaluationResponse {
+  evaluationId: string;
   success: boolean;
 }
 
@@ -270,11 +275,14 @@ export const postEvaluation = async ({
   try {
     const path = `/internal/elastic_assistant/evaluate`;
     const query = {
-      models: evalParams?.models.sort()?.join(','),
       agents: evalParams?.agents.sort()?.join(','),
+      datasetName: evalParams?.datasetName,
       evaluationType: evalParams?.evaluationType.sort()?.join(','),
       evalModel: evalParams?.evalModel.sort()?.join(','),
       outputIndex: evalParams?.outputIndex,
+      models: evalParams?.models.sort()?.join(','),
+      projectName: evalParams?.projectName,
+      runName: evalParams?.runName,
     };
 
     const response = await http.fetch(path, {

@@ -14,7 +14,16 @@ import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
+import { withAssistantSpan } from '../tracers/with_assistant_span';
+import { APMTracer } from '../tracers/apm_tracer';
 
+export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
+
+/**
+ * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientLlm,
+ * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
+ *
+ */
 export const callAgentExecutor = async ({
   actions,
   connectorId,
@@ -25,6 +34,7 @@ export const callAgentExecutor = async ({
   request,
   elserId,
   kbResource,
+  traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({
     actions,
@@ -65,12 +75,14 @@ export const callAgentExecutor = async ({
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
+  // TODO: Dependency inject these tools
   const tools: Tool[] = [
     new ChainTool({
-      name: 'esql-language-knowledge-base',
+      name: 'ESQLKnowledgeBaseTool',
       description:
         'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
       chain,
+      tags: ['esql', 'query-generation', 'knowledge-base'],
     }),
   ];
 
@@ -81,7 +93,6 @@ export const callAgentExecutor = async ({
     memory,
     verbose: true,
   });
-
   console.log('THIS SHOULD BE before stream call');
   const resp = await executor.stream({ input: latestMessage[0].content, chat_history: [] });
   // for await (const chunk of resp) {
@@ -89,4 +100,38 @@ export const callAgentExecutor = async ({
   // }
   console.log('THIS SHOULD BE after stream call', { resp });
   return resp;
+
+  // // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
+  // // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  // const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  //
+  // let traceData;
+  //
+  // // Wrap executor call with an APM span for instrumentation
+  // await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
+  //   if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
+  //     traceData = {
+  //       // Transactions ID since this span is the parent
+  //       transaction_id: span.transaction.ids['transaction.id'],
+  //       trace_id: span.ids['trace.id'],
+  //     };
+  //     span.addLabels({ evaluationId: traceOptions?.evaluationId });
+  //   }
+  //
+  //   return executor.call(
+  //     { input: latestMessage[0].content },
+  //     {
+  //       callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+  //       runName: DEFAULT_AGENT_EXECUTOR_ID,
+  //       tags: traceOptions?.tags ?? [],
+  //     }
+  //   );
+  // });
+  //
+  // return {
+  //   connector_id: connectorId,
+  //   data: llm.getActionResultData(), // the response from the actions framework
+  //   trace_data: traceData,
+  //   status: 'ok',
+  // };
 };
