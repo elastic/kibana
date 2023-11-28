@@ -13,6 +13,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseTestConfig.getAll(),
     testFiles: [
+      require.resolve('../../common/security/viewer_role_login.ts'),
       require.resolve('../../common/home_page'),
       require.resolve('../../common/management'),
       require.resolve('../../common/platform_security'),
