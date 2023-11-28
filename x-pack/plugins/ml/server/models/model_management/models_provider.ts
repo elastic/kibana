@@ -19,7 +19,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   ELASTIC_MODEL_DEFINITIONS,
-  type GetElserOptions,
+  type GetModelDownloadConfigOptions,
   type ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -52,6 +52,8 @@ interface ModelMapResult {
    */
   error: null | any;
 }
+
+export type GetCuratedModelConfigParams = Parameters<ModelsProvider['getCuratedModelConfig']>;
 
 export class ModelsProvider {
   private _transforms?: TransformGetTransformTransformSummary[];
@@ -501,7 +503,7 @@ export class ModelsProvider {
    */
   async getCuratedModelConfig(
     modelName: ElasticCurateModelName,
-    options?: GetElserOptions
+    options?: GetModelDownloadConfigOptions
   ): Promise<ModelDefinitionResponse> | never {
     const modelDownloadConfig = (await this.getModelDownloads()).filter(
       (model) => model.modelName === modelName
@@ -537,7 +539,9 @@ export class ModelsProvider {
    * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
    * a portable version of the model is returned.
    */
-  async getELSER(options?: GetElserOptions): Promise<ModelDefinitionResponse> | never {
+  async getELSER(
+    options?: GetModelDownloadConfigOptions
+  ): Promise<ModelDefinitionResponse> | never {
     return await this.getCuratedModelConfig('elser', options);
   }
 

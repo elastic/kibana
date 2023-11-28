@@ -19,7 +19,7 @@ export {
   type ModelDefinition,
   type ModelDefinitionResponse,
   type ElserVersion,
-  type GetElserOptions,
+  type GetModelDownloadConfigOptions,
   ELSER_ID_V1,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
