@@ -185,7 +185,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /**
    * Flag to indicate if the node is an "external" cloud link
    */
-  isCloudLink?: boolean;
+  isElasticInternalLink?: boolean;
 }
 
 /** @public */

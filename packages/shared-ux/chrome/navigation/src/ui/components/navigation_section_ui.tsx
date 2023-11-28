@@ -184,8 +184,8 @@ const nodeToEuiCollapsibleNavProps = (
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
-  const { id, path, title, href, icon, renderAs, isCloudLink, spaceBefore: _spaceBefore } = navNode;
-  const isExternal = Boolean(href) && !isCloudLink && isAbsoluteLink(href!);
+  const { id, path, href, renderAs } = navNode;
+  const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
 
   const isAccordion = hasChildren && !isItem;
   const isAccordionExpanded =
@@ -194,7 +194,7 @@ const nodeToEuiCollapsibleNavProps = (
 
   const dataTestSubj = getTestSubj(navNode, isSelected);
 
-  let spaceBefore = _spaceBefore;
+  let spaceBefore = navNode.spaceBefore;
   if (spaceBefore === undefined && treeDepth === 1 && hasChildren) {
     // For groups at level 1 that don't have a space specified we default to add a "m"
     // space. For all other groups, unless specified, there is no vertical space.
@@ -293,14 +293,14 @@ const nodeToEuiCollapsibleNavProps = (
     {
       id,
       path,
-      title,
       isSelected,
       linkProps,
       onClick,
       href,
+      icon: navNode.icon,
+      title: navNode.title,
       items: subItems,
       ['data-test-subj']: dataTestSubj,
-      icon,
       iconProps: { size: treeDepth === 0 ? 'm' : 's' },
     },
   ];

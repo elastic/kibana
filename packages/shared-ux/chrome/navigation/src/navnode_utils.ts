@@ -150,8 +150,8 @@ export const initNavNode = <
 
   const id = getNavigationNodeId(node, () => `node-${rootIndex}-${treeDepth}-${index}`) as Id;
   const title = getTitleForNode(node, { deepLink, cloudLinks });
-  const isCloudLink = cloudLink != null;
-  const href = isCloudLink ? cloudLinks[cloudLink]?.href : node.href;
+  const isElasticInternalLink = cloudLink != null;
+  const href = isElasticInternalLink ? cloudLinks[cloudLink]?.href : node.href;
   const path = parentNodePath ? `${parentNodePath}.${id}` : id;
 
   if (href && !isAbsoluteLink(href)) {
@@ -165,7 +165,7 @@ export const initNavNode = <
     path,
     title,
     deepLink,
-    isCloudLink,
+    isElasticInternalLink,
     sideNavStatus,
   };
 
