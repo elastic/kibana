@@ -95,6 +95,32 @@ steps:
             - exit_status: '*'
               limit: 1
 
+      - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
+        label: 'Serverless Rule Management - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 8
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
+        label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 6
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
       - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
         label: 'Defend Workflows Cypress Tests on Serverless'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
