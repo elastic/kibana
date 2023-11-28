@@ -59,11 +59,9 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
             <EuiToolTip
               position="bottom"
               content={
-                !isPlatinumPlus && upsellingMessage
-                  ? upsellingMessage
-                  : i18n.translate('xpack.securitySolution.filtersGroup.assignees.popoverTooltip', {
-                      defaultMessage: 'Filter by assignee',
-                    })
+                upsellingMessage ?? i18n.translate('xpack.securitySolution.filtersGroup.assignees.popoverTooltip', {
+                  defaultMessage: 'Filter by assignee',
+                })
               }
             >
               <EuiFilterButton
