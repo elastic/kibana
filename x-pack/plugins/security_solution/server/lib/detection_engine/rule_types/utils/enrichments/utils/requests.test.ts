@@ -45,7 +45,6 @@ describe('makeSingleFieldMatchQuery', () => {
               match: {
                 'enrichment.host.name': {
                   query: 'host name 1',
-                  minimum_should_match: 1,
                 },
               },
             },
@@ -53,7 +52,6 @@ describe('makeSingleFieldMatchQuery', () => {
               match: {
                 'enrichment.host.name': {
                   query: 'host name 2',
-                  minimum_should_match: 1,
                 },
               },
             },
