@@ -8,76 +8,110 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { casesPluginMock, openAddToExistingCaseModalMock } from '@kbn/cases-plugin/public/mocks';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 
 import { render } from '../../../utils/test_helper';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { alertWithTags, mockAlertUuid } from '../mock/alert';
+import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
 import { HeaderActions } from './header_actions';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
 
 jest.mock('../../../utils/kibana_react');
+jest.mock('../../../hooks/use_fetch_rule');
 
 const useKibanaMock = useKibana as jest.Mock;
+const useFetchRuleMock = useFetchRule as jest.Mock;
+const mockCases = casesPluginMock.createStartContract();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract(),
       triggersActionsUi: triggersActionsUiMock.createStart(),
-      cases: casesPluginMock.createStartContract(),
+      cases: mockCases,
     },
   });
 };
 
-const ruleId = '123';
-const ruleName = '456';
+const mockRuleId = '123';
+const mockRuleName = '456';
 
-jest.mock('../../../hooks/use_fetch_rule', () => {
-  return {
-    useFetchRule: () => ({
-      reloadRule: jest.fn(),
-      rule: {
-        id: ruleId,
-        name: ruleName,
-      },
-    }),
-  };
-});
+const mockUseFetchRuleWithData = () => {
+  useFetchRuleMock.mockReturnValue({
+    reloadRule: jest.fn(),
+    rule: {
+      id: mockRuleId,
+      name: mockRuleName,
+    },
+  });
+};
+const mockUseFetchRuleWithoutData = () => {
+  useFetchRuleMock.mockReturnValue({
+    reloadRule: jest.fn(),
+    rule: null,
+  });
+};
 
 describe('Header Actions', () => {
-  beforeEach(() => {
+  afterAll(() => {
     jest.clearAllMocks();
-    mockKibana();
   });
 
-  it('should display an actions button', () => {
-    const { queryByTestId } = render(<HeaderActions alert={alertWithTags} />);
-    expect(queryByTestId('alert-details-header-actions-menu-button')).toBeTruthy();
-  });
+  describe('Header Actions - Enabled', () => {
+    beforeEach(() => {
+      mockKibana();
+      mockUseFetchRuleWithData();
+    });
 
-  describe('when clicking the actions button', () => {
-    it('should offer an "add to case" button which opens the add to case modal', async () => {
-      const { getByTestId, findByRole } = render(<HeaderActions alert={alertWithTags} />);
+    it('should display an actions button', () => {
+      const { queryByTestId } = render(<HeaderActions alert={alertWithTags} />);
+      expect(queryByTestId('alert-details-header-actions-menu-button')).toBeTruthy();
+    });
 
-      fireEvent.click(await findByRole('button', { name: 'Actions' }));
+    describe('when clicking the actions button', () => {
+      it('should offer an "add to case" button which opens the add to case modal', async () => {
+        let attachments: any[] = [];
 
-      fireEvent.click(getByTestId('add-to-case-button'));
+        const useCasesAddToExistingCaseModalMock: any = jest.fn().mockImplementation(() => ({
+          open: ({ getAttachments }: { getAttachments: () => any[] }) => {
+            attachments = getAttachments();
+          },
+        })) as CasesUiStart['hooks']['useCasesAddToExistingCaseModal'];
 
-      expect(openAddToExistingCaseModalMock).toBeCalledWith({
-        attachments: [
+        mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
+
+        const { getByTestId, findByRole } = render(<HeaderActions alert={alertWithTags} />);
+
+        fireEvent.click(await findByRole('button', { name: 'Actions' }));
+
+        fireEvent.click(getByTestId('add-to-case-button'));
+
+        expect(attachments).toEqual([
           {
             alertId: mockAlertUuid,
             index: '.internal.alerts-observability.metrics.alerts-*',
             rule: {
-              id: ruleId,
-              name: ruleName,
+              id: mockRuleId,
+              name: mockRuleName,
             },
             type: 'alert',
           },
-        ],
+        ]);
       });
+    });
+  });
+  describe('Header Actions - Disabled', () => {
+    beforeEach(() => {
+      mockKibana();
+      mockUseFetchRuleWithoutData();
+    });
+    it("should disable the 'View rule details' when the rule is not available/delete", async () => {
+      const { queryByTestId, findByRole } = render(<HeaderActions alert={alertWithTags} />);
+      fireEvent.click(await findByRole('button', { name: 'Actions' }));
+      expect(queryByTestId('view-rule-details-button')).toHaveAttribute('disabled');
     });
   });
 });

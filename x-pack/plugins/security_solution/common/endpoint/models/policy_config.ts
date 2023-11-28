@@ -11,8 +11,24 @@ import { ProtectionModes } from '../types';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (): PolicyConfig => {
+export const policyFactory = (
+  license = '',
+  cloud = false,
+  licenseUid = '',
+  clusterUuid = '',
+  clusterName = '',
+  serverless = false
+): PolicyConfig => {
   return {
+    meta: {
+      license,
+      license_uuid: licenseUid,
+      cluster_uuid: clusterUuid,
+      cluster_name: clusterName,
+      cloud,
+      serverless,
+    },
+    global_manifest_version: 'latest',
     windows: {
       events: {
         credential_access: true,
@@ -38,6 +54,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       popup: {
@@ -82,6 +99,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
@@ -123,6 +141,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
@@ -154,6 +173,19 @@ export const policyFactory = (): PolicyConfig => {
 };
 
 /**
+ * Strips paid features from an existing or new `PolicyConfig` for license below enterprise
+ */
+
+export const policyFactoryWithoutPaidEnterpriseFeatures = (
+  policy: PolicyConfig = policyFactory()
+): PolicyConfig => {
+  return {
+    ...policy,
+    global_manifest_version: 'latest',
+  };
+};
+
+/**
  * Strips paid features from an existing or new `PolicyConfig` for gold and below license
  */
 export const policyFactoryWithoutPaidFeatures = (
@@ -169,6 +201,7 @@ export const policyFactoryWithoutPaidFeatures = (
 
   return {
     ...policy,
+    global_manifest_version: 'latest',
     windows: {
       ...policy.windows,
       advanced:
@@ -196,6 +229,7 @@ export const policyFactoryWithoutPaidFeatures = (
       },
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       attack_surface_reduction: {
@@ -227,6 +261,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.mac,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {
@@ -253,6 +288,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.linux,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {

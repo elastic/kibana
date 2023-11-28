@@ -11,15 +11,20 @@ import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { AuditServiceSetup } from '..';
+import type { SessionCookie } from './session_cookie';
+import {
+  SessionConcurrencyLimitError,
+  SessionExpiredError,
+  SessionMissingError,
+  SessionUnexpectedError,
+} from './session_errors';
+import type { SessionIndex, SessionIndexValue } from './session_index';
 import type { AuthenticationProvider } from '../../common';
 import { userSessionConcurrentLimitLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
-import type { SessionCookie } from './session_cookie';
-import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
-import type { SessionIndex, SessionIndexValue } from './session_index';
 
 /**
  * The shape of the value that represents user's session information.
@@ -214,7 +219,7 @@ export class Session {
         'Session is outside the concurrent session limit and will be invalidated.'
       );
       await this.invalidate(request, { match: 'current' });
-      return { error: new SessionUnexpectedError(), value: null };
+      return { error: new SessionConcurrencyLimitError(), value: null };
     }
 
     return {

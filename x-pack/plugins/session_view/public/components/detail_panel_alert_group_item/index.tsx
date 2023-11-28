@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiIcon, EuiText, EuiAccordion, EuiNotificationBadge } from '@elastic/eui';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessEvent } from '../../../common';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from '../detail_panel_alert_list_item/styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
@@ -51,7 +51,7 @@ export const DetailPanelAlertGroupItem = ({
           size="s"
         >
           <p css={styles.alertTitle}>
-            <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
+            <EuiIcon color="danger" type="warning" css={styles.alertIcon} />
             {dataOrDash(rule?.name)}
           </p>
         </EuiText>

@@ -24,7 +24,7 @@ import {
   getIsLayerTOCOpen,
   getFlyoutDisplay,
 } from '../../../selectors/ui_selectors';
-import { getLayerList } from '../../../selectors/map_selectors';
+import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';
 import { DRAW_MODE } from '../../../../common/constants';
 
@@ -34,6 +34,7 @@ function mapStateToProps(state: MapStoreState) {
     isLayerTOCOpen: getIsLayerTOCOpen(state),
     layerList: getLayerList(state),
     isFlyoutOpen: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
+    zoom: getMapZoom(state),
   };
 }
 

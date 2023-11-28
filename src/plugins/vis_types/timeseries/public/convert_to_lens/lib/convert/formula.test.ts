@@ -297,6 +297,34 @@ describe('convertMathToFormulaColumn', () => {
       expect(convertMathToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
     }
   });
+
+  it.each`
+    expression                               | expected
+    ${'params._interval'}                    | ${'time_range()'}
+    ${'params._interval + params._interval'} | ${'time_range() + time_range()'}
+    ${'params._all'}                         | ${null}
+    ${'params._all + params.interval'}       | ${null}
+    ${'params._timestamp'}                   | ${null}
+    ${'params._timestamp + params.interval'} | ${null}
+    ${'params._index'}                       | ${null}
+    ${'params._index + params.interval'}     | ${null}
+  `(`handle special params cases: $expression`, ({ expression, expected }) => {
+    expect(
+      convertMathToFormulaColumn({
+        series,
+        metrics: [{ ...mathMetric, script: expression }],
+        dataView,
+      })
+    ).toEqual(
+      expected
+        ? expect.objectContaining({
+            meta: { metricId: 'some-id-1' },
+            operationType: 'formula',
+            params: { formula: expected },
+          })
+        : expected
+    );
+  });
 });
 
 describe('convertOtherAggsToFormulaColumn', () => {

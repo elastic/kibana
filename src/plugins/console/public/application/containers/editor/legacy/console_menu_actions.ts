@@ -29,7 +29,8 @@ export function getDocumentation(
     if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
       return endpoint.documentation
         .replace('/master/', `/${docLinkVersion}/`)
-        .replace('/current/', `/${docLinkVersion}/`);
+        .replace('/current/', `/${docLinkVersion}/`)
+        .replace('/{branch}/', `/${docLinkVersion}/`);
     } else {
       return null;
     }

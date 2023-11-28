@@ -7,8 +7,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getSavedQuerySecurityUtils } from '../../saved_query_management/utils/saved_query_security';
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function (ctx: FtrProviderContext) {
+  const { getPageObjects, getService } = ctx;
+  const savedQuerySecurityUtils = getSavedQuerySecurityUtils(ctx);
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
   const dataGrid = getService('dataGrid');
@@ -27,17 +30,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'share',
     'spaceSelector',
     'header',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
-  const queryBar = getService('queryBar');
-  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const kibanaServer = getService('kibanaServer');
   const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
+
+  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('discover feature controls security', () => {
     before(async () => {
@@ -128,53 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows saving via the saved query management component popover with no saved query loaded', async () => {
-        await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
-        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-
-        await savedQueryManagementComponent.deleteSavedQuery('foo');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
-      });
-
-      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
-          'new description',
-          true,
-          false
-        );
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:404');
-
-        // Reset after changing
-        await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
-          'Ok responses for jpg files',
-          true,
-          false
-        );
-      });
-
-      it('allow saving currently loaded query as a copy', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'ok2',
-          'description',
-          true,
-          false
-        );
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
-        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-        await testSubjects.click('showQueryBarMenu');
-        await savedQueryManagementComponent.deleteSavedQuery('ok2');
-      });
+      savedQuerySecurityUtils.shouldAllowSavingQueries();
     });
 
     describe('global discover read-only privileges', () => {
@@ -234,8 +192,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
@@ -244,33 +202,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows loading a saved query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:200');
-      });
-
-      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
-        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
-      });
-
-      it('does not allow saving changes to saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
-      });
-
-      it('does not allow deleting a saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
-      });
-
-      it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      });
+      savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
     });
 
-    describe('global discover read-only privileges with url_create', () => {
+    describe('discover read-only privileges with url_create', () => {
       before(async () => {
         await security.role.create('global_discover_read_url_create_role', {
           elasticsearch: {
@@ -326,8 +261,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
       it('Permalinks shows create short-url button', async () => {
@@ -337,30 +272,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows loading a saved query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:200');
-      });
-
-      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
-        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
-      });
-
-      it('does not allow saving changes to saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
-      });
-
-      it('does not allow deleting a saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
-      });
-
-      it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      });
+      savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
     });
 
     describe('discover and visualize privileges', () => {
@@ -404,8 +316,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
       });
     });
 
@@ -429,6 +341,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           password: 'no_discover_privileges_user-password',
           roles: ['no_discover_privileges_role'],
           full_name: 'test user',
+        });
+
+        // Navigate home before attempting to login or we may get redirected to
+        // Discover with a forbidden error, which hides the chrome and causes
+        // PageObjects.security.login to fail when checking for the logout button
+        await PageObjects.common.navigateToUrl('home', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
 
         await PageObjects.security.login(

@@ -20,16 +20,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, SerializedStyles } from '@emotion/react';
-import { IconError, IconWarning } from '../custom_icons';
 import { UserMessage } from '../../../types';
 
 export const MessageList = ({
   messages,
-  useSmallIconsOnButton,
   customButtonStyles,
 }: {
   messages: UserMessage[];
-  useSmallIconsOnButton?: boolean;
   customButtonStyles?: SerializedStyles;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -71,6 +68,7 @@ export const MessageList = ({
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
+
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -87,15 +85,14 @@ export const MessageList = ({
           >
             {errorCount > 0 && (
               <>
-                <EuiIcon type={IconError} size={useSmallIconsOnButton ? 's' : undefined} />
+                <EuiIcon type="error" />
                 {errorCount}
               </>
             )}
             {warningCount > 0 && (
               <>
                 <EuiIcon
-                  type={IconWarning}
-                  size={useSmallIconsOnButton ? 's' : undefined}
+                  type="alert"
                   css={css`
                     margin-left: 4px;
                   `}
@@ -116,18 +113,26 @@ export const MessageList = ({
             className="lnsWorkspaceWarningList__item"
             data-test-subj={`lens-message-list-${message.severity}`}
           >
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                {message.severity === 'error' ? (
-                  <EuiIcon type={IconError} color="danger" />
-                ) : (
-                  <EuiIcon type={IconWarning} color="warning" />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
-                <EuiText size="s">{message.longMessage}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {typeof message.longMessage === 'function' ? (
+              message.longMessage(closePopover)
+            ) : (
+              <EuiFlexGroup
+                gutterSize="s"
+                responsive={false}
+                className="lnsWorkspaceWarningList__textItem"
+              >
+                <EuiFlexItem grow={false}>
+                  {message.severity === 'error' ? (
+                    <EuiIcon type="error" color="danger" />
+                  ) : (
+                    <EuiIcon type="alert" color="warning" />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
+                  <EuiText size="s">{message.longMessage}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </li>
         ))}
       </ul>

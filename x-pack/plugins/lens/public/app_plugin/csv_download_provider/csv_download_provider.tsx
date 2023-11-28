@@ -11,7 +11,7 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { FormatFactory } from '../../../common';
+import { FormatFactory } from '../../../common/types';
 import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
@@ -100,7 +100,7 @@ export const downloadCsvShareProvider = ({
   formatFactoryFn,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
-    if ('lens_visualization' !== objectType) {
+    if ('lens' !== objectType) {
       return [];
     }
 

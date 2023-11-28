@@ -19,7 +19,7 @@ import {
   EuiDataGrid,
   EuiPanel,
   EuiLink,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiProgress,
   EuiIconTip,
 } from '@elastic/eui';
@@ -28,7 +28,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import styled from 'styled-components';
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
@@ -47,14 +46,23 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
 
-const StyledEuiDataGrid = styled(EuiDataGrid)`
-  :not(.euiDataGrid--fullScreen) {
-    .euiDataGrid__virtualized {
-      height: 100% !important;
-      max-height: 500px;
-    }
-  }
-`;
+const euiDataGridCss = {
+  ':not(.euiDataGrid--fullScreen)': {
+    '.euiDataGrid__virtualized': {
+      height: '100% !important',
+      maxHeight: '500px',
+    },
+  },
+};
+
+const euiProgressCss = {
+  marginTop: '-2px',
+};
+
+const resultsTableContainerCss = {
+  width: '100%',
+  maxWidth: '1200px',
+};
 
 export interface ResultsTableComponentProps {
   actionId: string;
@@ -84,6 +92,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     data: { aggregations },
   } = useActionResults({
     actionId,
+    startDate,
     activePage: 0,
     agentIds,
     limit: 0,
@@ -132,6 +141,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const { data: allResultsData, isLoading } = useAllResults({
     actionId,
+    startDate,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     isLive,
@@ -252,7 +262,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       return;
     }
 
-    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...allResultsData?.columns];
+    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...(allResultsData?.columns || [])];
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {
@@ -391,6 +401,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     ]
   );
 
+  if (isLoading) {
+    return <EuiSkeletonText lines={5} />;
+  }
+
   if (!hasActionResultsPrivileges) {
     return (
       <EuiCallOut
@@ -401,7 +415,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage
@@ -418,32 +432,31 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     );
   }
 
-  if (isLoading) {
-    return <EuiLoadingContent lines={5} />;
-  }
-
   return (
     <>
-      {isLive && <EuiProgress color="primary" size="xs" />}
+      {isLive && <EuiProgress color="primary" size="xs" css={euiProgressCss} />}
 
       {!allResultsData?.edges.length ? (
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
-          <StyledEuiDataGrid
-            data-test-subj="osqueryResultsTable"
-            aria-label="Osquery results"
-            columns={columns}
-            columnVisibility={columnVisibility}
-            rowCount={allResultsData?.total ?? 0}
-            renderCellValue={renderCellValue}
-            leadingControlColumns={leadingControlColumns}
-            sorting={tableSorting}
-            pagination={tablePagination}
-            toolbarVisibility={toolbarVisibility}
-          />
+          <div css={resultsTableContainerCss}>
+            <EuiDataGrid
+              css={euiDataGridCss}
+              data-test-subj="osqueryResultsTable"
+              aria-label="Osquery results"
+              columns={columns}
+              columnVisibility={columnVisibility}
+              rowCount={allResultsData?.total ?? 0}
+              renderCellValue={renderCellValue}
+              leadingControlColumns={leadingControlColumns}
+              sorting={tableSorting}
+              pagination={tablePagination}
+              toolbarVisibility={toolbarVisibility}
+            />
+          </div>
         </DataContext.Provider>
       )}
     </>

@@ -5,97 +5,62 @@
  * 2.0.
  */
 
+import { customActionEditSavedQuerySelector, UPDATE_QUERY_BUTTON } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
-import { login } from '../../tasks/login';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { ROLES } from '../../test';
+import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Edit saved query', () => {
-  const SAVED_QUERY_ID = 'Saved-Query-Id';
+describe('ALL - Edit saved query', { tags: ['@ess', '@serverless'] }, () => {
+  let savedQueryName: string;
+  let savedQueryId: string;
 
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+    loadSavedQuery().then((data) => {
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
+    });
   });
+
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery/saved_queries');
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+    cleanupSavedQuery(savedQueryId);
   });
 
   it('by changing ecs mappings and platforms', () => {
-    cy.getBySel('pagination-button-next').click();
-    cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
-    }).click();
+    cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
     cy.get('[data-test-subj="ECSMappingEditorForm"]')
       .first()
       .within(() => {
-        cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+        cy.get(`[aria-label="Delete ECS mapping row"]`).click();
       });
 
-    cy.react('PlatformCheckBoxGroupField')
-      .first()
-      .within(() => {
-        cy.react('EuiCheckbox', {
-          props: {
-            id: 'linux',
-            checked: true,
-          },
-        }).should('exist');
-        cy.react('EuiCheckbox', {
-          props: {
-            id: 'darwin',
-            checked: true,
-          },
-        }).should('exist');
-
-        cy.react('EuiCheckbox', {
-          props: {
-            id: 'windows',
-            checked: false,
-          },
-        }).should('exist');
-      });
+    cy.getBySel('osquery-platform-checkbox-group').within(() => {
+      cy.get('input[id="linux"]').should('be.checked');
+      cy.get('input[id="darwin"]').should('be.checked');
+      cy.get('input[id="windows"]').should('not.be.checked');
+    });
 
     cy.get('#windows').check({ force: true });
 
-    cy.react('EuiButton').contains('Update query').click();
+    cy.getBySel(UPDATE_QUERY_BUTTON).click();
 
     cy.wait(5000);
 
-    cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
-    }).click();
+    cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
+
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');
 
-    cy.react('PlatformCheckBoxGroupField')
-      .first()
-      .within(() => {
-        cy.react('EuiCheckbox', {
-          props: {
-            id: 'linux',
-            checked: true,
-          },
-        }).should('exist');
-        cy.react('EuiCheckbox', {
-          props: {
-            id: 'darwin',
-            checked: true,
-          },
-        }).should('exist');
-
-        cy.react('EuiCheckbox', {
-          props: {
-            id: 'windows',
-            checked: true,
-          },
-        }).should('exist');
-      });
+    cy.getBySel('osquery-platform-checkbox-group').within(() => {
+      cy.get('input[id="linux"]').should('be.checked');
+      cy.get('input[id="darwin"]').should('be.checked');
+      cy.get('input[id="windows"]').should('be.checked');
+    });
   });
 });

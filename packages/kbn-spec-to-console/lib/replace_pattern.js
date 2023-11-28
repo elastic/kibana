@@ -6,20 +6,6 @@
  * Side Public License, v 1.
  */
 
-const map = require('./static/map_interpolation.json');
-
-module.exports = (pattern, { brackets, exact } = {}) => {
-  let newPattern = pattern;
-  Object.keys(map).forEach((key) => {
-    const replaceFrom = brackets ? `{${key}}` : key;
-    const replaceTo = brackets ? `{${map[key]}}` : map[key];
-    if (exact) {
-      const exactMatch = replaceFrom === newPattern;
-      newPattern = exactMatch ? replaceTo : newPattern;
-    } else {
-      newPattern = newPattern.replace(replaceFrom, replaceTo);
-    }
-  });
-
-  return newPattern.replace(/^\//, '');
+module.exports = (pattern) => {
+  return pattern.replace(/^\//, '');
 };

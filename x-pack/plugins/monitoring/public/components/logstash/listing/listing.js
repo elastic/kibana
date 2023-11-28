@@ -11,7 +11,6 @@ import {
   EuiPage,
   EuiLink,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiScreenReaderOnly,
@@ -201,7 +200,7 @@ export class Listing extends PureComponent {
           </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallOut}
-          <EuiPageContent>
+          <EuiPanel>
             <EuiMonitoringTable
               className="logstashNodesTable"
               rows={flattenedData}
@@ -229,7 +228,7 @@ export class Listing extends PureComponent {
                 defaultFields: ['name'],
               }}
             />
-          </EuiPageContent>
+          </EuiPanel>
         </EuiPageBody>
       </EuiPage>
     );

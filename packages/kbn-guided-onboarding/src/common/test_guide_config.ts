@@ -75,5 +75,14 @@ export const testGuideConfig: GuideConfig = {
         path: 'stepThree',
       },
     },
+    {
+      id: 'step4',
+      title: 'Step 4 (dynamic url)',
+      description: 'This step navigates to a dynamic URL with a param indexName passed in step 1.',
+      location: {
+        appID: 'guidedOnboardingExample',
+        path: 'stepFour/{indexName}',
+      },
+    },
   ],
 };

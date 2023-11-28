@@ -6,10 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-
 import type { Inspect, Maybe, PageInfoPaginated } from '../../../common';
-import type { RequestOptionsPaginated } from '../..';
-import type { SortableUsersFields } from '../common';
 import type { RiskSeverity } from '../../risk_score';
 
 export interface User {
@@ -24,8 +21,4 @@ export interface UsersStrategyResponse extends IEsSearchResponse {
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
-}
-
-export interface UsersRequestOptions extends RequestOptionsPaginated<SortableUsersFields> {
-  defaultIndex: string[];
 }

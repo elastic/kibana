@@ -10,11 +10,14 @@ import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import {
-  CommentType,
-  AttributesTypeUser,
-  AttributesTypeAlerts,
+  AttachmentType,
+  UserCommentAttachmentAttributes,
+  AlertAttachmentAttributes,
   CaseStatuses,
-} from '@kbn/cases-plugin/common/api';
+  ExternalReferenceSOAttachmentPayload,
+  AlertAttachmentPayload,
+  ExternalReferenceStorageType,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -22,6 +25,10 @@ import {
   postCommentUserReq,
   postCommentAlertReq,
   getPostCaseRequest,
+  getFilesAttachmentReq,
+  fileAttachmentMetadata,
+  fileMetadata,
+  postCommentAlertMultipleIdsReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -35,10 +42,12 @@ import {
   updateCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  getAllComments,
+  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../detection_engine_api_integration/utils';
 import {
@@ -86,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: postCommentUserReq,
         });
         const comment = removeServerGeneratedPropertiesFromSavedObject(
-          patchedCase.comments![0] as AttributesTypeUser
+          patchedCase.comments![0] as UserCommentAttachmentAttributes
         );
 
         expect(comment).to.eql({
@@ -112,13 +121,13 @@ export default ({ getService }: FtrProviderContext): void => {
           params: postCommentAlertReq,
         });
         const comment = removeServerGeneratedPropertiesFromSavedObject(
-          patchedCase.comments![0] as AttributesTypeAlerts
+          patchedCase.comments![0] as AlertAttachmentAttributes
         );
 
         expect(comment).to.eql({
           type: postCommentAlertReq.type,
-          alertId: postCommentAlertReq.alertId,
-          index: postCommentAlertReq.index,
+          alertId: [postCommentAlertReq.alertId],
+          index: [postCommentAlertReq.index],
           rule: postCommentAlertReq.rule,
           created_by: defaultUser,
           pushed_at: null,
@@ -158,9 +167,75 @@ export default ({ getService }: FtrProviderContext): void => {
           owner: 'securitySolutionFixture',
         });
       });
+
+      describe('files', () => {
+        it('should create a file attachment', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const caseWithAttachments = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq(),
+          });
+
+          const fileAttachment =
+            caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
+
+          expect(caseWithAttachments.totalComment).to.be(1);
+          expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+        });
+      });
     });
 
     describe('unhappy path', () => {
+      describe('files', () => {
+        it('400s when attempting to create a single file attachment with multiple file objects within it', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const files = [fileMetadata(), fileMetadata()];
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                files,
+              },
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attaching a file with metadata that is missing the file field', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                // intentionally structuring the data in a way that is invalid (using foo instead of files)
+                foo: fileAttachmentMetadata.files,
+              },
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attaching a file with an empty metadata', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {},
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
       it('400s when attempting to create a comment with a different owner than the case', async () => {
         const postedCase = await createCase(
           supertest,
@@ -195,7 +270,50 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           // @ts-expect-error
           params: {
-            type: CommentType.user,
+            type: AttachmentType.user,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when adding too long comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const longComment = Array(30001).fill('a').toString();
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: longComment,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when adding empty comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: '',
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when adding a comment with only empty characters', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: '    ',
           },
           expectedHttpCode: 400,
         });
@@ -209,7 +327,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              type: CommentType.user,
+              type: AttachmentType.user,
               [attribute]: attribute,
               comment: 'a comment',
               owner: 'securitySolutionFixture',
@@ -223,7 +341,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const allRequestAttributes = {
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           index: 'test-index',
           alertId: 'test-id',
           rule: {
@@ -253,7 +371,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               [attribute]: attribute,
               alertId: 'test-id',
               index: 'test-index',
@@ -352,6 +470,76 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
+
+      it('400s when attempting to add a persistable state to a case that already has 100', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const attachments = Array(100).fill({
+          type: AttachmentType.externalReference as const,
+          owner: 'securitySolutionFixture',
+          externalReferenceAttachmentTypeId: '.test',
+          externalReferenceId: 'so-id',
+          externalReferenceMetadata: {},
+          externalReferenceStorage: {
+            soType: 'external-ref',
+            type: ExternalReferenceStorageType.savedObject as const,
+          },
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: attachments,
+          expectedHttpCode: 200,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            persistableStateAttachmentTypeId: '.test',
+            persistableStateAttachmentState: {},
+            type: AttachmentType.persistableState as const,
+            owner: 'securitySolutionFixture',
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when attempting to add an external reference to a case that already has 100', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const attachments = Array(100).fill({
+          persistableStateAttachmentTypeId: '.test',
+          persistableStateAttachmentState: {},
+          type: AttachmentType.persistableState as const,
+          owner: 'securitySolutionFixture',
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: attachments,
+          expectedHttpCode: 200,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: AttachmentType.externalReference as const,
+            owner: 'securitySolutionFixture',
+            externalReferenceAttachmentTypeId: '.test',
+            externalReferenceId: 'so-id',
+            externalReferenceMetadata: {},
+            externalReferenceStorage: {
+              soType: 'external-ref',
+              type: ExternalReferenceStorageType.savedObject as const,
+            },
+          },
+          expectedHttpCode: 400,
+        });
+      });
     });
 
     describe('alerts', () => {
@@ -362,7 +550,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
@@ -391,7 +579,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'securitySolutionFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
             expectedHttpCode,
             auth,
@@ -685,7 +873,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   name: 'name',
                 },
                 owner: 'observabilityFixture',
-                type: CommentType.alert,
+                type: AttachmentType.alert,
               },
             });
           }
@@ -699,7 +887,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const caseIds = cases.map((theCase) => theCase.id);
 
-          expect(alert['kibana.alert.case_ids']).eql(caseIds);
+          expect(alert[ALERT_CASE_IDS]).eql(caseIds);
 
           return { alert, cases };
         };
@@ -727,7 +915,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'observabilityFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
           });
 
@@ -738,7 +926,7 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user: superUser, space: 'space1' },
           });
 
-          expect(alert['kibana.alert.case_ids']).eql([postedCase.id]);
+          expect(alert[ALERT_CASE_IDS]).eql([postedCase.id]);
         });
 
         it('should not add more than 10 cases to an alert', async () => {
@@ -760,7 +948,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'observabilityFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
             expectedHttpCode: 400,
           });
@@ -789,7 +977,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'observabilityFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
             auth: { user: obsOnlyReadAlerts, space: 'space1' },
             expectedHttpCode: 200,
@@ -819,7 +1007,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'observabilityFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
             auth: { user: obsSec, space: 'space1' },
             expectedHttpCode: 403,
@@ -829,11 +1017,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alert format', () => {
-      type AlertComment = CommentType.alert;
+      type AlertComment = AttachmentType.alert;
 
       for (const [alertId, index, type] of [
-        ['1', ['index1', 'index2'], CommentType.alert],
-        [['1', '2'], 'index', CommentType.alert],
+        ['1', ['index1', 'index2'], AttachmentType.alert],
+        [['1', '2'], 'index', AttachmentType.alert],
       ]) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -847,8 +1035,8 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       for (const [alertId, index, type] of [
-        ['1', ['index1'], CommentType.alert],
-        [['1', '2'], ['index', 'other-index'], CommentType.alert],
+        ['1', ['index1'], AttachmentType.alert],
+        [['1', '2'], ['index', 'other-index'], AttachmentType.alert],
       ]) {
         it(`does not throw an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -865,6 +1053,74 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('alert filtering', () => {
+      it('not create a new attachment if the alert is already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should not create a new attachment if the alerts are already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should create a new attachment without alerts attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            ...postCommentAlertMultipleIdsReq,
+            alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+            index: ['test-index-1', 'test-index-2', 'test-index-3'],
+          },
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(2);
+
+        const secondAttachment = attachments[1] as AlertAttachmentPayload;
+
+        expect(secondAttachment.alertId).to.eql(['test-id-3']);
+        expect(secondAttachment.index).to.eql(['test-index-3']);
+      });
     });
 
     describe('rbac', () => {

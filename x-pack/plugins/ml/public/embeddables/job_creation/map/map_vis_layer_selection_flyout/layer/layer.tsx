@@ -19,6 +19,7 @@ import {
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_map';
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';
+
 interface Props {
   layer: LayerResult;
   layerIndex: number;

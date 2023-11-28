@@ -193,6 +193,24 @@ describe('parseDataStreamElasticsearchEntry', () => {
       },
     });
   });
+  it('Should handle dynamic_dataset', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        dynamic_dataset: true,
+      })
+    ).toEqual({
+      dynamic_dataset: true,
+    });
+  });
+  it('Should handle dynamic_namespace', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        dynamic_namespace: true,
+      })
+    ).toEqual({
+      dynamic_namespace: true,
+    });
+  });
 });
 
 describe('parseTopLevelElasticsearchEntry', () => {
@@ -361,13 +379,17 @@ describe('parseAndVerifyArchive', () => {
     expect(() =>
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml', 'dummy/manifest.yml'], {})
     ).toThrowError(
-      new PackageInvalidArchiveError('Package contains more than one top-level directory.')
+      new PackageInvalidArchiveError(
+        'Package contains more than one top-level directory; top-level directory found: input_only-0.1.0; filePath: dummy/manifest.yml'
+      )
     );
   });
 
   it('should throw on missing manifest file', () => {
     expect(() => parseAndVerifyArchive(['input_only-0.1.0/test/manifest.yml'], {})).toThrowError(
-      new PackageInvalidArchiveError('Package must contain a top-level manifest.yml file.')
+      new PackageInvalidArchiveError(
+        'Package at top-level directory input_only-0.1.0 must contain a top-level manifest.yml file.'
+      )
     );
   });
 
@@ -378,7 +400,9 @@ describe('parseAndVerifyArchive', () => {
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml'], {
         'input_only-0.1.0/manifest.yml': buf,
       })
-    ).toThrowError('Could not parse top-level package manifest: YAMLException');
+    ).toThrowError(
+      'Could not parse top-level package manifest at top-level directory input_only-0.1.0: YAMLException'
+    );
   });
 
   it('should throw on missing required fields', () => {
@@ -398,7 +422,9 @@ version: 0.1.0
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml'], {
         'input_only-0.1.0/manifest.yml': buf,
       })
-    ).toThrowError('Invalid top-level package manifest: one or more fields missing of ');
+    ).toThrowError(
+      'Invalid top-level package manifest at top-level directory input_only-0.1.0 (package name: input_only): one or more fields missing of '
+    );
   });
 
   it('should throw on name or version mismatch', () => {
@@ -433,7 +459,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/README.md'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {},
+        assetsMap: {},
       })
     ).toThrowError("No manifest.yml file found for data stream 'stream1'");
   });
@@ -444,7 +470,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.alloc(1),
         },
       })
@@ -457,7 +483,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
             `
           title: Custom Logs`,
@@ -476,7 +502,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
             `
           title: Custom Logs
@@ -496,6 +522,126 @@ describe('parseAndVerifyDataStreams', () => {
         release: 'ga',
         title: 'Custom Logs',
         type: 'logs',
+      },
+    ]);
+  });
+
+  it('should parse dotted elasticsearch keys', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0
+          elasticsearch.dynamic_dataset: true`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        elasticsearch: {
+          dynamic_dataset: true,
+        },
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+      },
+    ]);
+  });
+
+  it('should parse routing rules', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0`,
+            'utf8'
+          ),
+          'input-only-0.1.0/data_stream/stream1/routing_rules.yml': Buffer.from(
+            `
+          - source_dataset: ds
+            rules:
+              - target_dataset: ds.test
+                if: true == true
+                namespace: "default"
+          `,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+        elasticsearch: {},
+        routing_rules: [
+          {
+            source_dataset: 'ds',
+            rules: [
+              {
+                target_dataset: 'ds.test',
+                if: 'true == true',
+                namespace: 'default',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should parse lifecycle', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0`,
+            'utf8'
+          ),
+          'input-only-0.1.0/data_stream/stream1/lifecycle.yml': Buffer.from(
+            `data_retention: "7d"`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+        elasticsearch: {},
+        lifecycle: { data_retention: '7d' },
       },
     ]);
   });

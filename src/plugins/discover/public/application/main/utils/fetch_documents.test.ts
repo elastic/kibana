@@ -13,9 +13,10 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
-import type { EsHitRecord } from '../../../types';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 
 const getDeps = () =>
   ({
@@ -25,6 +26,7 @@ const getDeps = () =>
     searchSessionId: '123',
     services: discoverServiceMock,
     savedSearch: savedSearchMock,
+    getAppState: () => ({ sampleSize: 100 }),
   } as unknown as FetchDeps);
 
 describe('test fetchDocuments', () => {
@@ -36,16 +38,64 @@ describe('test fetchDocuments', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual({
+    expect(await fetchDocuments(savedSearchMock.searchSource, getDeps())).toEqual({
+      interceptedWarnings: [],
       records: documents,
     });
   });
 
-  test('rejects on query failure', () => {
+  test('rejects on query failure', async () => {
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
 
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual(
-      new Error('Oh noes!')
+    try {
+      await fetchDocuments(savedSearchMock.searchSource, getDeps());
+    } catch (e) {
+      expect(e).toEqual(new Error('Oh noes!'));
+    }
+  });
+
+  test('passes a correct session id', async () => {
+    const deps = getDeps();
+    const hits = [
+      { _id: '1', foo: 'bar' },
+      { _id: '2', foo: 'baz' },
+    ] as unknown as EsHitRecord[];
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
+
+    // regular search source
+
+    const searchSourceRegular = createSearchSourceMock({ index: dataViewMock });
+    searchSourceRegular.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+
+    jest.spyOn(searchSourceRegular, 'fetch$');
+
+    expect(await fetchDocuments(searchSourceRegular, deps)).toEqual({
+      interceptedWarnings: [],
+      records: documents,
+    });
+
+    expect(searchSourceRegular.fetch$ as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionId: deps.searchSessionId })
+    );
+
+    // search source with `search_after` for "Load more" requests
+
+    const searchSourceForLoadMore = createSearchSourceMock({ index: dataViewMock });
+    searchSourceForLoadMore.setField('searchAfter', ['100']);
+
+    searchSourceForLoadMore.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+
+    jest.spyOn(searchSourceForLoadMore, 'fetch$');
+
+    expect(await fetchDocuments(searchSourceForLoadMore, deps)).toEqual({
+      interceptedWarnings: [],
+      records: documents,
+    });
+
+    expect(searchSourceForLoadMore.fetch$ as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionId: undefined })
     );
   });
 });

@@ -164,7 +164,7 @@ describe('useTimeRange', () => {
             color="warning"
             content="This interval creates buckets that are too large to show in the selected time range, so it has been scaled to 1 minute."
             title="Warning"
-            type="alert"
+            type="warning"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -230,10 +230,55 @@ describe('useTimeRange', () => {
             color="warning"
             content="This interval creates too many buckets to show in the selected time range, so it has been scaled to 1 minute."
             title="Warning"
-            type="alert"
+            type="warning"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
+  });
+
+  it('should render time range display and no interval for text based languages', () => {
+    const { result } = renderHook(() =>
+      useTimeRange({
+        uiSettings,
+        bucketInterval,
+        timeRange,
+        timeInterval,
+        isPlainRecord: true,
+        timeField: '@timestamp',
+      })
+    );
+    expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
+      <EuiText
+        css={
+          Object {
+            "map": undefined,
+            "name": "1vgo99t",
+            "next": undefined,
+            "styles": "
+          padding: 0 8px 0 8px;
+        ",
+            "toString": [Function],
+          }
+        }
+        size="xs"
+        textAlign="center"
+      >
+        2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z 
+      </EuiText>
+    `);
+  });
+
+  it('should not render a text for text based languages when not timeField is provided', () => {
+    const { result } = renderHook(() =>
+      useTimeRange({
+        uiSettings,
+        bucketInterval,
+        timeRange,
+        timeInterval,
+        isPlainRecord: true,
+      })
+    );
+    expect(result.current.timeRangeDisplay).toBeNull();
   });
 });

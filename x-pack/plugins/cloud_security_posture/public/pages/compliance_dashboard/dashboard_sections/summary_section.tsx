@@ -6,31 +6,28 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { statusColors } from '../../../common/constants';
-import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
+import { useCspIntegrationLink } from '../../../common/navigation/use_csp_integration_link';
+import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 import type {
   ComplianceDashboardData,
   Evaluation,
   PosturePolicyTemplate,
 } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
-import {
-  NavFilter,
-  useNavigateFindings,
-  useNavigateFindingsByResource,
-} from '../../../common/hooks/use_navigate_findings';
+import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   RULE_FAILED,
 } from '../../../../common/constants';
+import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
 
 export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,
@@ -54,7 +51,8 @@ export const SummarySection = ({
   complianceData: ComplianceDashboardData;
 }) => {
   const navToFindings = useNavigateFindings();
-  const navToFindingsByResource = useNavigateFindingsByResource();
+  const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+  const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   const handleEvalCounterClick = (evaluation: Evaluation) => {
     navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) });
@@ -86,7 +84,26 @@ export const SummarySection = ({
                 'xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription',
                 { defaultMessage: 'Accounts Evaluated' }
               ),
-        title: <CompactFormattedNumber number={complianceData.clusters.length} />,
+        title: <AccountsEvaluatedWidget clusters={complianceData.clusters} />,
+        button: (
+          <EuiButtonEmpty
+            iconType="listAdd"
+            target="_blank"
+            href={
+              dashboardType === KSPM_POLICY_TEMPLATE ? kspmIntegrationLink : cspmIntegrationLink
+            }
+          >
+            {dashboardType === KSPM_POLICY_TEMPLATE
+              ? i18n.translate(
+                  'xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedButtonTitle',
+                  { defaultMessage: 'Enroll more clusters' }
+                )
+              : i18n.translate(
+                  'xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedButtonTitle',
+                  { defaultMessage: 'Enroll more accounts' }
+                )}
+          </EuiButtonEmpty>
+        ),
       },
       {
         id: DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED,
@@ -95,33 +112,28 @@ export const SummarySection = ({
           { defaultMessage: 'Resources Evaluated' }
         ),
         title: <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated || 0} />,
-        onClick: () => {
-          navToFindingsByResource(getPolicyTemplateQuery(dashboardType));
-        },
-      },
-      {
-        id: DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS,
-        description: i18n.translate(
-          'xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription',
-          { defaultMessage: 'Failing Findings' }
+        button: (
+          <EuiButtonEmpty
+            iconType="search"
+            onClick={() => {
+              navToFindings(getPolicyTemplateQuery(dashboardType));
+            }}
+          >
+            {i18n.translate(
+              'xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedButtonTitle',
+              { defaultMessage: 'View all resources' }
+            )}
+          </EuiButtonEmpty>
         ),
-        title: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
-        titleColor: complianceData.stats.totalFailed > 0 ? statusColors.failed : 'text',
-        onClick: () => {
-          navToFindings({
-            'result.evaluation': RULE_FAILED,
-            ...getPolicyTemplateQuery(dashboardType),
-          });
-        },
       },
     ],
     [
-      complianceData.clusters.length,
+      complianceData.clusters,
       complianceData.stats.resourcesEvaluated,
-      complianceData.stats.totalFailed,
+      cspmIntegrationLink,
       dashboardType,
+      kspmIntegrationLink,
       navToFindings,
-      navToFindingsByResource,
     ]
   );
 
@@ -139,6 +151,7 @@ export const SummarySection = ({
         // height for compliance by cis section with max rows
         height: 310px;
       `}
+      data-test-subj={DASHBOARD_SUMMARY_CONTAINER}
     >
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
         <EuiFlexGroup direction="column">
@@ -151,7 +164,7 @@ export const SummarySection = ({
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
         <ChartPanel title={chartTitle}>
-          <CloudPostureScoreChart
+          <ComplianceScoreChart
             id="cloud_posture_score_chart"
             data={complianceData.stats}
             trend={complianceData.trend}

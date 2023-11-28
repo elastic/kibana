@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/lists-plugin",
-  "owner": "@elastic/security-solution-platform",
+  "owner": "@elastic/security-detection-engine",
   "plugin": {
     "id": "lists",
     "server": true,

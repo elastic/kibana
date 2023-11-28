@@ -16,19 +16,19 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/detection_engine/rule_schema';
-import type { SavedIdOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { SavedIdOrUndefined } from '../../../../../common/api/detection_engine';
 import type { PartialFilter } from '../../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from './get_query_filter';
 
-interface GetFilterArgs {
+export interface GetFilterArgs {
   type: Type;
   filters: unknown | undefined;
   language: LanguageOrUndefined;
@@ -37,6 +37,7 @@ interface GetFilterArgs {
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexPatternArray | undefined;
   exceptionFilter: Filter | undefined;
+  fields?: DataViewFieldBase[];
 }
 
 interface QueryAttributes {
@@ -57,6 +58,7 @@ export const getFilter = async ({
   type,
   query,
   exceptionFilter,
+  fields = [],
 }: GetFilterArgs): Promise<ESBoolQuery> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
@@ -66,6 +68,7 @@ export const getFilter = async ({
         filters: filters || [],
         index,
         exceptionFilter,
+        fields,
       });
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
@@ -85,6 +88,7 @@ export const getFilter = async ({
           filters: savedObject.attributes.filters,
           index,
           exceptionFilter,
+          fields,
         });
       } catch (err) {
         // saved object does not exist, so try and fall back if the user pushed
@@ -96,6 +100,7 @@ export const getFilter = async ({
             filters: filters || [],
             index,
             exceptionFilter,
+            fields,
           });
         } else {
           // user did not give any additional fall back mechanism for generating a rule
@@ -126,6 +131,9 @@ export const getFilter = async ({
     }
     case 'eql': {
       throw new BadRequestError('Unsupported Rule of type "eql" supplied to getFilter');
+    }
+    case 'esql': {
+      throw new BadRequestError('Unsupported Rule of type "esql" supplied to getFilter');
     }
     default: {
       return assertUnreachable(type);

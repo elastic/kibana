@@ -6,7 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { CSSProperties, ReactElement, useCallback, useEffect, useState } from 'react';
+import React, {
+  CSSProperties,
+  ReactElement,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+  useMemo,
+} from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -14,7 +22,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiTextProps,
+  EuiTitle,
   useEuiTheme,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
@@ -22,7 +33,11 @@ import { StepTabs } from '../../test_run_details/step_tabs';
 import { ResultDetails } from './result_details';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
-import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
+import {
+  ScreenshotImageSize,
+  THUMBNAIL_SCREENSHOT_SIZE,
+  THUMBNAIL_SCREENSHOT_SIZE_MOBILE,
+} from '../screenshot/screenshot_size';
 import { StepDetailsLinkIcon } from '../links/step_details_link';
 
 import { parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
@@ -45,6 +60,23 @@ export function isStepEnd(step: JourneyStep) {
   return step.synthetics?.type === 'step/end';
 }
 
+function toExpandedMapItem(step: JourneyStep, stepsList: JourneyStep[], testNowMode: boolean) {
+  if (testNowMode) {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <StepTabs step={step} loading={false} stepsList={stepsList} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  return <></>;
+}
+
+function mapStepIds(steps: JourneyStep[]) {
+  return steps.map(({ _id }) => _id).toString();
+}
+
 export const BrowserStepsList = ({
   steps,
   error,
@@ -56,44 +88,56 @@ export const BrowserStepsList = ({
   showExpand = true,
   testNowMode = false,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, ReactElement>
-  >({});
+  const failedStep = stepEnds.find((step) => step.synthetics.step?.status === 'failed');
+  /**
+   * This component is used in cases where the steps list is not pre-fetched at render time. In that case, we handle the auto-expand
+   * in the `useEffect` call below, which will update the expanded map after the data loads. At times, the component is also rendered
+   * with the complete list of steps pre-loaded. In that case, we must set the default state value to pre-expand for the error step.
+   */
+  const defaultExpanded = useMemo(
+    () =>
+      !!failedStep && showExpand
+        ? { [failedStep._id]: toExpandedMapItem(failedStep, steps, testNowMode) }
+        : {},
+    [failedStep, showExpand, steps, testNowMode]
+  );
+  const { euiTheme } = useEuiTheme();
+  const [expandedMap, setExpandedMap] = useState<Record<string, ReactElement>>(defaultExpanded);
+  const [stepIds, setStepIds] = useState<string>(mapStepIds(stepEnds));
+  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
+
+  useEffect(() => {
+    /**
+     * This effect will only take action when the set of steps changes.
+     */
+    const latestIds = mapStepIds(stepEnds);
+    if (latestIds !== stepIds) {
+      setStepIds(latestIds);
+      if (failedStep && showExpand && !expandedMap[failedStep._id]) {
+        setExpandedMap(
+          Object.assign(expandedMap, {
+            [failedStep._id]: toExpandedMapItem(failedStep, steps, testNowMode),
+          })
+        );
+      }
+    }
+  }, [expandedMap, failedStep, showExpand, stepEnds, stepIds, steps, testNowMode]);
 
   const toggleDetails = useCallback(
     (item: JourneyStep) => {
-      setItemIdToExpandedRowMap((prevState) => {
-        const itemIdToExpandedRowMapValues = { ...prevState };
-        if (itemIdToExpandedRowMapValues[item._id]) {
-          delete itemIdToExpandedRowMapValues[item._id];
+      setExpandedMap((prevState) => {
+        const expandedMapValues = { ...prevState };
+        if (expandedMapValues[item._id]) {
+          delete expandedMapValues[item._id];
         } else {
-          if (testNowMode) {
-            itemIdToExpandedRowMapValues[item._id] = (
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <StepTabs step={item} loading={false} stepsList={steps} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          } else {
-            itemIdToExpandedRowMapValues[item._id] = <></>;
-          }
+          expandedMapValues[item._id] = toExpandedMapItem(item, steps, testNowMode);
         }
-        return itemIdToExpandedRowMapValues;
+        return expandedMapValues;
       });
     },
     [steps, testNowMode]
   );
-
-  const failedStep = stepEnds?.find((step) => step.synthetics.step?.status === 'failed');
-
-  useEffect(() => {
-    if (failedStep && showExpand) {
-      toggleDetails(failedStep);
-    }
-  }, [failedStep, showExpand, toggleDetails]);
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     ...(showExpand
@@ -104,9 +148,10 @@ export const BrowserStepsList = ({
             isExpander: true,
             render: (item: JourneyStep) => (
               <EuiButtonIcon
+                data-test-subj="syntheticsColumnsButton"
                 onClick={() => toggleDetails(item)}
-                aria-label={itemIdToExpandedRowMap[item._id] ? 'Collapse' : 'Expand'}
-                iconType={itemIdToExpandedRowMap[item._id] ? 'arrowDown' : 'arrowRight'}
+                aria-label={expandedMap[item._id] ? 'Collapse' : 'Expand'}
+                iconType={expandedMap[item._id] ? 'arrowDown' : 'arrowRight'}
               />
             ),
           },
@@ -118,8 +163,13 @@ export const BrowserStepsList = ({
             field: 'synthetics.step.index',
             name: '#',
             render: (stepIndex: number, item: JourneyStep) => (
-              <StepNumber stepIndex={stepIndex} step={item} euiTheme={euiTheme} />
+              <StyleForStepStatus step={item} euiTheme={euiTheme}>
+                {stepIndex}
+              </StyleForStepStatus>
             ),
+            mobileOptions: {
+              show: false,
+            },
           },
         ]
       : []),
@@ -127,7 +177,7 @@ export const BrowserStepsList = ({
       align: 'left',
       field: 'timestamp',
       name: SCREENSHOT_LABEL,
-      render: (_timestamp: string, step) => (
+      render: (timestamp: string, step) => (
         <JourneyStepScreenshotContainer
           checkGroup={step.monitor.check_group}
           initialStepNumber={step.synthetics?.step?.index}
@@ -135,18 +185,25 @@ export const BrowserStepsList = ({
           allStepsLoaded={!loading}
           retryFetchOnRevisit={true}
           size={screenshotImageSize}
+          testNowMode={testNowMode}
+          timestamp={timestamp}
         />
       ),
       mobileOptions: {
-        render: (item: JourneyStep) => (
-          <EuiText>
-            <strong>
-              {item.synthetics?.step?.index!}. {item.synthetics?.step?.name}
-            </strong>
-          </EuiText>
+        render: (step: JourneyStep) => (
+          <MobileRowDetails
+            journeyStep={step}
+            stepsLoading={loading}
+            showStepNumber={showStepNumber}
+            showLastSuccessful={showLastSuccessful}
+            isExpanded={Boolean(expandedMap[step._id])}
+            isTestNowMode={testNowMode}
+            euiTheme={euiTheme}
+          />
         ),
-        header: SCREENSHOT_LABEL,
+        header: false,
         enlarge: true,
+        width: '100%',
       },
     },
     {
@@ -165,17 +222,24 @@ export const BrowserStepsList = ({
           </EuiText>
         );
       },
+      mobileOptions: {
+        show: false,
+      },
     },
     {
       field: 'synthetics.step.status',
       name: RESULT_LABEL,
       render: (pingStatus: string, item: JourneyStep) => (
         <ResultDetails
+          testNowMode={testNowMode}
           step={item}
           pingStatus={pingStatus}
-          isExpanded={Boolean(itemIdToExpandedRowMap[item._id]) && !testNowMode}
+          isExpanded={Boolean(expandedMap[item._id]) && !testNowMode}
         />
       ),
+      mobileOptions: {
+        show: false,
+      },
     },
     ...(showLastSuccessful
       ? [
@@ -183,11 +247,11 @@ export const BrowserStepsList = ({
             field: 'synthetics.step.status',
             name: LAST_SUCCESSFUL,
             render: (pingStatus: string, item: JourneyStep) => (
-              <ResultDetailsSuccessful
-                step={item}
-                isExpanded={Boolean(itemIdToExpandedRowMap[item._id])}
-              />
+              <ResultDetailsSuccessful step={item} isExpanded={Boolean(expandedMap[item._id])} />
             ),
+            mobileOptions: {
+              show: false,
+            },
           },
         ]
       : [
@@ -207,22 +271,24 @@ export const BrowserStepsList = ({
       align: 'right',
       field: 'timestamp',
       name: '',
-      mobileOptions: { show: false },
       render: (_val: string, item) => (
         <StepDetailsLinkIcon
           checkGroup={item.monitor.check_group}
           stepIndex={item.synthetics?.step?.index}
           configId={item.config_id!}
+          target={testNowMode ? '_blank' : undefined}
         />
       ),
+      mobileOptions: { show: false },
     },
   ];
 
   return (
     <>
       <EuiBasicTable
+        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
         cellProps={(row) => {
-          if (itemIdToExpandedRowMap[row._id]) {
+          if (expandedMap[row._id]) {
             return {
               style: { verticalAlign: 'top' },
             };
@@ -232,8 +298,8 @@ export const BrowserStepsList = ({
         loading={loading}
         columns={columns}
         error={error?.message}
-        isExpandable={true}
-        hasActions={true}
+        isExpandable={showExpand}
+        hasActions={false}
         items={stepEnds}
         noItemsMessage={
           loading
@@ -246,33 +312,129 @@ export const BrowserStepsList = ({
         }
         tableLayout={'auto'}
         itemId="_id"
-        itemIdToExpandedRowMap={testNowMode ? itemIdToExpandedRowMap : undefined}
+        itemIdToExpandedRowMap={testNowMode ? expandedMap : undefined}
       />
     </>
   );
 };
 
-const StepNumber = ({
-  stepIndex,
+const StyleForStepStatus = ({
   step,
+  textSize = 's',
   euiTheme,
-}: {
-  stepIndex: number;
+  children,
+}: PropsWithChildren<{
   step: JourneyStep;
+  textSize?: EuiTextProps['size'];
   euiTheme: EuiThemeComputed;
-}) => {
+}>) => {
   const status = parseBadgeStatus(step.synthetics?.step?.status ?? '');
 
   return (
     <EuiText
       css={{
         fontWeight: euiTheme.font.weight.bold,
+        whiteSpace: 'nowrap',
       }}
-      size="s"
+      size={textSize}
       color={euiTheme.colors[getTextColorForMonitorStatus(status)] as CSSProperties['color']}
     >
-      {stepIndex}
+      {children}
     </EuiText>
+  );
+};
+
+const MobileRowDetails = ({
+  journeyStep,
+  showStepNumber,
+  showLastSuccessful,
+  stepsLoading,
+  isExpanded,
+  isTestNowMode,
+  euiTheme,
+}: {
+  journeyStep: JourneyStep;
+  showStepNumber: boolean;
+  showLastSuccessful: boolean;
+  stepsLoading: boolean;
+  isExpanded: boolean;
+  isTestNowMode: boolean;
+  euiTheme: EuiThemeComputed;
+}) => {
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiTitle size="s">
+        <h4>
+          <StyleForStepStatus step={journeyStep} textSize="relative" euiTheme={euiTheme}>
+            {showStepNumber && journeyStep.synthetics?.step?.index
+              ? `${journeyStep.synthetics.step.index}. `
+              : null}{' '}
+            {journeyStep.synthetics?.step?.name}
+          </StyleForStepStatus>
+        </h4>
+      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceEvenly" responsive={false} wrap={true} gutterSize="xl">
+        <JourneyStepScreenshotContainer
+          checkGroup={journeyStep.monitor.check_group}
+          initialStepNumber={journeyStep.synthetics?.step?.index}
+          stepStatus={journeyStep.synthetics.payload?.status}
+          allStepsLoaded={!stepsLoading}
+          retryFetchOnRevisit={true}
+          size={THUMBNAIL_SCREENSHOT_SIZE_MOBILE}
+          timestamp={journeyStep?.['@timestamp']}
+        />
+        <div>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {[
+              {
+                title: RESULT_LABEL,
+                description: (
+                  <ResultDetails
+                    testNowMode={isTestNowMode}
+                    step={journeyStep}
+                    pingStatus={journeyStep?.synthetics?.step?.status ?? 'skipped'}
+                    isExpanded={isExpanded && !isTestNowMode}
+                  />
+                ),
+              },
+              ...[
+                showLastSuccessful
+                  ? {
+                      title: LAST_SUCCESSFUL,
+                      description: (
+                        <ResultDetailsSuccessful step={journeyStep} isExpanded={isExpanded} />
+                      ),
+                    }
+                  : {
+                      title: STEP_DURATION,
+                      description: <StepDurationText step={journeyStep} />,
+                    },
+              ],
+            ].map(({ title, description }) => (
+              <EuiFlexGroup
+                key={title}
+                css={{ maxWidth: 'fit-content' }}
+                direction="row"
+                alignItems="baseline"
+                gutterSize="xs"
+                responsive={false}
+                wrap={true}
+              >
+                <EuiText size="xs">{title}</EuiText>
+                {description}
+              </EuiFlexGroup>
+            ))}
+          </EuiFlexGroup>
+        </div>
+      </EuiFlexGroup>
+      <StepDetailsLinkIcon
+        css={{ marginLeft: 'auto' }}
+        checkGroup={journeyStep.monitor.check_group}
+        stepIndex={journeyStep.synthetics?.step?.index}
+        configId={journeyStep.config_id!}
+        asButton={true}
+      />
+    </EuiFlexGroup>
   );
 };
 

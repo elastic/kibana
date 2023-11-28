@@ -9,7 +9,14 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { CollapseFunctions } from './constants';
 import type { SupportedMetric } from './lib/convert/supported_metrics';
-import type { CollapseFunction, Layer, XYAnnotationsLayerConfig, XYLayerConfig } from './types';
+import type {
+  CollapseFunction,
+  Column,
+  ColumnWithMeta,
+  Layer,
+  XYAnnotationsLayerConfig,
+  XYLayerConfig,
+} from './types';
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
@@ -45,3 +52,18 @@ export const isFieldValid = (
 
 export const isCollapseFunction = (candidate: string | undefined): candidate is CollapseFunction =>
   Boolean(candidate && CollapseFunctions.includes(candidate as CollapseFunction));
+
+const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
+  if ((column as ColumnWithMeta).meta) {
+    return true;
+  }
+  return false;
+};
+
+export const excludeMetaFromColumn = (column: Column) => {
+  if (isColumnWithMeta(column)) {
+    const { meta, ...rest } = column;
+    return rest;
+  }
+  return column;
+};

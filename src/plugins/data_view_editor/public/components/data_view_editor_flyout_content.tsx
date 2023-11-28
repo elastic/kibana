@@ -105,6 +105,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             title: editData.getIndexPattern(),
             id: editData.id,
             name: editData.name,
+            allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName
               ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
@@ -124,6 +125,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
         name: formData.name,
+        allowHidden: formData.allowHidden,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -231,7 +233,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-      <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
+      <FlyoutPanels.Item
+        className="fieldEditor__mainFlyoutPanel"
+        data-test-subj="indexPatternEditorFlyout"
+        border="right"
+      >
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
         </EuiTitle>
@@ -289,6 +295,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             onAllowHiddenChange={() => {
               form.getFields().title.validate();
             }}
+            defaultVisible={editData?.getAllowHidden()}
           />
         </Form>
         <Footer
@@ -299,6 +306,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
               form.updateFieldValues({ name: formData.title });
               await form.getFields().name.validate();
             }
+            // Ensures timestamp field is validated against current set of options
+            form.validateFields(['timestampField']);
             form.setFieldValue('isAdHoc', adhoc || false);
             form.submit();
           }}

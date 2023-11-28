@@ -11,6 +11,7 @@ import * as i18n from './translations';
 import { useSearchStrategy } from '../use_search_strategy';
 import { FirstLastSeenQuery } from '../../../../common/search_strategy';
 import type { Direction } from '../../../../common/search_strategy';
+import type { ESQuery } from '../../../../common/typed_json';
 
 export interface FirstLastSeenArgs {
   errorMessage: string | null;
@@ -22,6 +23,7 @@ export interface UseFirstLastSeen {
   value: string;
   order: Direction.asc | Direction.desc;
   defaultIndex: string[];
+  filterQuery?: ESQuery | string;
 }
 
 export const useFirstLastSeen = ({
@@ -29,6 +31,7 @@ export const useFirstLastSeen = ({
   value,
   order,
   defaultIndex,
+  filterQuery,
 }: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
   const { loading, result, search, error } = useSearchStrategy<typeof FirstLastSeenQuery>({
     factoryQueryType: FirstLastSeenQuery,
@@ -42,12 +45,12 @@ export const useFirstLastSeen = ({
   useEffect(() => {
     search({
       defaultIndex,
-      factoryQueryType: FirstLastSeenQuery,
       field,
       value,
       order,
+      filterQuery,
     });
-  }, [defaultIndex, field, value, order, search]);
+  }, [defaultIndex, field, value, order, search, filterQuery]);
 
   const setFirstLastSeenResponse: FirstLastSeenArgs = useMemo(
     () => ({

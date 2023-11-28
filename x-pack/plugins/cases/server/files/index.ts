@@ -9,28 +9,30 @@ import type { FileJSON, FileKind } from '@kbn/files-plugin/common';
 import type { FilesSetup } from '@kbn/files-plugin/server';
 import {
   APP_ID,
-  constructFilesHttpOperationTag,
   MAX_FILE_SIZE,
+  MAX_IMAGE_FILE_SIZE,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
 import { HttpApiTagOperation } from '../../common/constants/types';
-import { ALLOWED_MIME_TYPES, IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
+import { IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
+import type { FilesConfig } from './types';
+import { constructFileKindIdByOwner, constructFilesHttpOperationTag } from '../../common/files';
 
-const buildFileKind = (owner: Owner): FileKind => {
+const buildFileKind = (config: FilesConfig, owner: Owner): FileKind => {
   return {
-    id: owner,
+    id: constructFileKindIdByOwner(owner),
     http: fileKindHttpTags(owner),
-    maxSizeBytes,
-    allowedMimeTypes: ALLOWED_MIME_TYPES,
+    maxSizeBytes: createMaxCallback(config),
+    allowedMimeTypes: config.allowedMimeTypes,
+    hashes: ['md5', 'sha1', 'sha256'],
   };
 };
 
 const fileKindHttpTags = (owner: Owner): FileKind['http'] => {
   return {
     create: buildTag(owner, HttpApiTagOperation.Create),
-    delete: buildTag(owner, HttpApiTagOperation.Delete),
     download: buildTag(owner, HttpApiTagOperation.Read),
     getById: buildTag(owner, HttpApiTagOperation.Read),
     list: buildTag(owner, HttpApiTagOperation.Read),
@@ -45,27 +47,44 @@ const buildTag = (owner: Owner, operation: HttpApiTagOperation) => {
   };
 };
 
-const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024; // 10 MiB
+export const createMaxCallback =
+  (config: FilesConfig) =>
+  (file: FileJSON): number => {
+    // if the user set a max size, always return that
+    if (config.maxSize != null) {
+      return config.maxSize;
+    }
 
-const maxSizeBytes = (file: FileJSON): number => {
-  if (file.mimeType != null && IMAGE_MIME_TYPES.has(file.mimeType)) {
-    return MAX_IMAGE_FILE_SIZE;
-  }
+    const allowedMimeTypesSet = new Set(config.allowedMimeTypes);
 
-  return MAX_FILE_SIZE;
-};
+    // if we have the mime type for the file and it exists within the allowed types and it is an image then return the
+    // image size
+    if (
+      file.mimeType != null &&
+      allowedMimeTypesSet.has(file.mimeType) &&
+      IMAGE_MIME_TYPES.has(file.mimeType)
+    ) {
+      return MAX_IMAGE_FILE_SIZE;
+    }
+
+    return MAX_FILE_SIZE;
+  };
 
 /**
  * The file kind definition for interacting with the file service for the backend
  */
-const CASES_FILE_KINDS: Record<Owner, FileKind> = {
-  [APP_ID]: buildFileKind(APP_ID),
-  [SECURITY_SOLUTION_OWNER]: buildFileKind(SECURITY_SOLUTION_OWNER),
-  [OBSERVABILITY_OWNER]: buildFileKind(OBSERVABILITY_OWNER),
+const createFileKinds = (config: FilesConfig): Record<Owner, FileKind> => {
+  return {
+    [APP_ID]: buildFileKind(config, APP_ID),
+    [OBSERVABILITY_OWNER]: buildFileKind(config, OBSERVABILITY_OWNER),
+    [SECURITY_SOLUTION_OWNER]: buildFileKind(config, SECURITY_SOLUTION_OWNER),
+  };
 };
 
-export const registerCaseFileKinds = (filesSetupPlugin: FilesSetup) => {
-  for (const fileKind of Object.values(CASES_FILE_KINDS)) {
+export const registerCaseFileKinds = (config: FilesConfig, filesSetupPlugin: FilesSetup) => {
+  const fileKinds = createFileKinds(config);
+
+  for (const fileKind of Object.values(fileKinds)) {
     filesSetupPlugin.registerFileKind(fileKind);
   }
 };

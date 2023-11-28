@@ -8,6 +8,7 @@
 import http from 'http';
 import https from 'https';
 import { Plugin, CoreSetup } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
@@ -105,6 +106,11 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Test: Not Enabled',
       minimumLicenseRequired: 'gold',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}, { defaultValue: {} }) },
+        secrets: { schema: schema.object({}, { defaultValue: {} }) },
+        params: { schema: schema.object({}, { defaultValue: {} }) },
+      },
       async executor() {
         return { status: 'ok', actionId: '' };
       },

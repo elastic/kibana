@@ -26,14 +26,12 @@ const TopNContainer = styled.div`
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
-  z-index: 999999;
   position: absolute;
   right: 4px;
   top: 4px;
 `;
 
 const ViewSelect = styled(EuiSuperSelect)`
-  z-index: 999999;
   width: 170px;
 `;
 
@@ -59,8 +57,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   showLegend?: boolean;
   scopeId?: string;
   toggleTopN: () => void;
-  onFilterAdded?: () => void;
-  value?: string[] | string | null;
+  onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
 }
 
 const TopNComponent: React.FC<Props> = ({
@@ -86,9 +83,8 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const { selectedPatterns, runtimeMappings } = useSourcererDataView(
-    getSourcererScopeName({ scopeId, view })
-  );
+  const sourcererScopeId = getSourcererScopeName({ scopeId, view });
+  const { selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScopeId);
 
   useEffect(() => {
     setView(defaultView);
@@ -116,13 +112,6 @@ const TopNComponent: React.FC<Props> = ({
 
   return (
     <TopNContainer data-test-subj="topN-container">
-      <CloseButton
-        aria-label={i18n.CLOSE}
-        data-test-subj="close"
-        iconType="cross"
-        onClick={toggleTopN}
-      />
-
       <TopNContent>
         {view === 'raw' || view === 'all' ? (
           <EventsByDataset
@@ -144,6 +133,7 @@ const TopNComponent: React.FC<Props> = ({
             showSpacer={false}
             toggleTopN={toggleTopN}
             scopeId={scopeId}
+            sourcererScopeId={sourcererScopeId}
             to={to}
             hideQueryToggle
           />
@@ -162,6 +152,13 @@ const TopNComponent: React.FC<Props> = ({
           />
         )}
       </TopNContent>
+
+      <CloseButton
+        aria-label={i18n.CLOSE}
+        data-test-subj="close"
+        iconType="cross"
+        onClick={toggleTopN}
+      />
     </TopNContainer>
   );
 };

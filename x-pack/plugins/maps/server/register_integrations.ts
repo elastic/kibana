@@ -21,7 +21,7 @@ export function registerIntegrations(
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.gdal.integrationDescription', {
       defaultMessage:
-        'Upload shapefiles and ingest from relational databases such as PostGIS or Oracle Spatial with GDAL.',
+        'Upload shapefiles and ingest from relational databases such as PostGIS or Oracle Spatial with GDAL. [file upload, geo, maps]',
     }),
     uiInternalPath:
       'https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal',
@@ -31,7 +31,7 @@ export function registerIntegrations(
         src: core.http.basePath.prepend(`/plugins/${APP_ID}/assets/gdal_logo.svg`),
       },
     ],
-    categories: ['upload_file', 'geo'],
+    categories: ['custom'],
     shipper: 'other',
     isBeta: false,
   });
@@ -41,7 +41,7 @@ export function registerIntegrations(
       defaultMessage: 'GeoJSON',
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.geojson.integrationDescription', {
-      defaultMessage: 'Upload GeoJSON files with Elastic Maps.',
+      defaultMessage: 'Upload GeoJSON files with Elastic Maps. [file upload, geo]',
     }),
     uiInternalPath: `${getFullPath('')}#?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`,
     icons: [
@@ -50,7 +50,7 @@ export function registerIntegrations(
         src: 'logoMaps',
       },
     ],
-    categories: ['upload_file', 'geo'],
+    categories: ['custom'],
     shipper: 'other',
     isBeta: false,
   });
@@ -62,7 +62,7 @@ export function registerIntegrations(
     description: i18n.translate(
       'xpack.maps.registerIntegrations.shapefile.integrationDescription',
       {
-        defaultMessage: 'Upload Shapefiles with Elastic Maps.',
+        defaultMessage: 'Upload Shapefiles with Elastic Maps. [file upload, geo]',
       }
     ),
     uiInternalPath: `${getFullPath('')}#?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`,
@@ -72,7 +72,7 @@ export function registerIntegrations(
         src: 'logoMaps',
       },
     ],
-    categories: ['upload_file', 'geo'],
+    categories: ['custom'],
     shipper: 'other',
     isBeta: false,
   });

@@ -8,10 +8,11 @@ import { ColumnarViewModel } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { compact, range, sum, uniqueId } from 'lodash';
+import { describeFrameType, FrameType } from '@kbn/profiling-utils';
+import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import { createColumnarViewModel } from '../../../common/columnar_view_model';
-import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
-import { describeFrameType, FrameType } from '../../../common/profiling';
+import { ComparisonMode } from '../../components/normalization_menu';
 import { getInterpolationValue } from './get_interpolation_value';
 
 const nullColumnarViewModel = {
@@ -30,7 +31,7 @@ export function getFlamegraphModel({
   colorSuccess,
   colorDanger,
   colorNeutral,
-  comparisonMode,
+  comparisonMode = ComparisonMode.Absolute,
   comparison,
   baseline,
 }: {
@@ -39,7 +40,7 @@ export function getFlamegraphModel({
   colorSuccess: string;
   colorDanger: string;
   colorNeutral: string;
-  comparisonMode: FlameGraphComparisonMode;
+  comparisonMode?: ComparisonMode;
   baseline?: number;
   comparison?: number;
 }): {
@@ -64,21 +65,7 @@ export function getFlamegraphModel({
 
   let legendItems: Array<{ label: string; color: string }>;
 
-  if (!comparisonFlamegraph) {
-    const usedFrameTypes = new Set([...primaryFlamegraph.FrameType]);
-    legendItems = compact(
-      Object.entries(FRAME_TYPE_COLOR_MAP).map(([frameTypeKey, colors]) => {
-        const frameType = Number(frameTypeKey) as FrameType;
-
-        return usedFrameTypes.has(frameType)
-          ? {
-              color: `#${colors[0].toString(16)}`,
-              label: describeFrameType(frameType),
-            }
-          : undefined;
-      })
-    );
-  } else {
+  if (comparisonFlamegraph) {
     const positiveChangeInterpolator = d3.interpolateRgb(colorNeutral, colorSuccess);
 
     const negativeChangeInterpolator = d3.interpolateRgb(colorNeutral, colorDanger);
@@ -135,23 +122,20 @@ export function getFlamegraphModel({
     const comparisonTotalSamples = sum(comparisonFlamegraph.CountExclusive);
 
     const weightComparisonSide =
-      comparisonMode === FlameGraphComparisonMode.Relative
-        ? 1
-        : (comparison ?? 1) / (baseline ?? 1);
+      comparisonMode === ComparisonMode.Relative ? 1 : (comparison ?? 1) / (baseline ?? 1);
 
     primaryFlamegraph.ID.forEach((nodeID, index) => {
       const samples = primaryFlamegraph.CountInclusive[index];
       const comparisonSamples = comparisonNodesById[nodeID]?.CountInclusive as number | undefined;
 
       const foreground =
-        comparisonMode === FlameGraphComparisonMode.Absolute ? samples : samples / totalSamples;
+        comparisonMode === ComparisonMode.Absolute ? samples : samples / totalSamples;
       const background =
-        comparisonMode === FlameGraphComparisonMode.Absolute
+        comparisonMode === ComparisonMode.Absolute
           ? comparisonSamples
           : (comparisonSamples ?? 0) / comparisonTotalSamples;
 
-      const denominator =
-        comparisonMode === FlameGraphComparisonMode.Absolute ? totalSamples : foreground;
+      const denominator = comparisonMode === ComparisonMode.Absolute ? totalSamples : foreground;
 
       const interpolationValue = getInterpolationValue(
         foreground,
@@ -164,6 +148,20 @@ export function getFlamegraphModel({
       const rgba = rgbToRGBA(Number(nodeColor.replace('#', '0x')));
       viewModel.color.set(rgba, 4 * index);
     });
+  } else {
+    const usedFrameTypes = new Set([...primaryFlamegraph.FrameType]);
+    legendItems = compact(
+      Object.entries(FRAME_TYPE_COLOR_MAP).map(([frameTypeKey, colors]) => {
+        const frameType = Number(frameTypeKey) as FrameType;
+
+        return usedFrameTypes.has(frameType)
+          ? {
+              color: `#${colors[0].toString(16)}`,
+              label: describeFrameType(frameType),
+            }
+          : undefined;
+      })
+    );
   }
 
   return {

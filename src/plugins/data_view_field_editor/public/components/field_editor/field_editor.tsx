@@ -168,7 +168,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   useEffect(() => {
     const existingCompositeField = !!Object.keys(subfields$.getValue() || {}).length;
 
-    const changes$ = getFieldPreviewChanges(fieldPreview$);
+    const changes$ = getFieldPreviewChanges(fieldPreview$, updatedName);
 
     const subChanges = changes$.subscribe((previewFields) => {
       const fields = subfields$.getValue();
@@ -199,7 +199,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     return () => {
       subChanges.unsubscribe();
     };
-  }, [form, fieldPreview$, subfields$]);
+  }, [form, fieldPreview$, subfields$, updatedName]);
 
   useEffect(() => {
     if (onChange) {
@@ -276,7 +276,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           <EuiCallOut
             color="warning"
             title={changeWarning}
-            iconType="alert"
+            iconType="warning"
             size="s"
             data-test-subj="changeWarning"
           />

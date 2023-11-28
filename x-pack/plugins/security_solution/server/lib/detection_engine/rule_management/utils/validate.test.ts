@@ -11,7 +11,7 @@ import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export const ruleOutput = (): RuleResponse => ({
   actions: [],
@@ -43,9 +43,10 @@ export const ruleOutput = (): RuleResponse => ({
   tags: [],
   to: 'now',
   type: 'query',
-  throttle: 'no_actions',
+  throttle: undefined,
   threat: getThreatMock(),
   version: 1,
+  revision: 0,
   filters: [
     {
       query: {
@@ -77,24 +78,24 @@ export const ruleOutput = (): RuleResponse => ({
   data_view_id: undefined,
   saved_id: undefined,
   alert_suppression: undefined,
+  investigation_fields: undefined,
 });
 
 describe('validate', () => {
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
-      const [validated, errors] = transformValidate(ruleAlert, null);
+      const validated = transformValidate(ruleAlert);
       expect(validated).toEqual(ruleOutput());
-      expect(errors).toEqual(null);
     });
 
     test('it should do an in-validation correctly of a partial alert', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const [validated, errors] = transformValidate(ruleAlert, null);
-      expect(validated).toEqual(null);
-      expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
+      expect(() => {
+        transformValidate(ruleAlert);
+      }).toThrowError('Invalid input');
     });
   });
 
@@ -112,7 +113,8 @@ describe('validate', () => {
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
       const expected: BulkError = {
         error: {
-          message: 'Invalid value "undefined" supplied to "name"',
+          message:
+            'name: Required, type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", name: Required, name: Required, and 22 more',
           status_code: 500,
         },
         rule_id: 'rule-1',

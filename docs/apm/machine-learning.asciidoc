@@ -26,7 +26,7 @@ image::apm/images/service-quick-health.png[Example view of anomaly scores on res
 [role="screenshot"]
 image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in the APM app]
 
-* Service maps will display a color-coded anomaly indicator based on the detected anomaly score.
+* Service Maps will display a color-coded anomaly indicator based on the detected anomaly score.
 +
 [role="screenshot"]
 image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]

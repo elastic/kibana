@@ -6,10 +6,13 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+
 import { SecurityPageName } from '../../../../common/constants';
 import type { Request } from './types';
 
 export const VISUALIZATION_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
+export const FILTER_IN_LEGEND_ACTION = `filterIn`;
+export const FILTER_OUT_LEGEND_ACTION = `filterOut`;
 
 const pageFilterFieldMap: Record<string, string> = {
   [SecurityPageName.hosts]: 'host',
@@ -41,31 +44,36 @@ export const getDetailsPageFilter = (pageName: string, detailName?: string): Fil
     : [];
 };
 
-export const hostNameExistsFilter: Filter[] = [
-  {
-    query: {
-      bool: {
-        should: [
-          {
-            exists: {
-              field: 'host.name',
+export const fieldNameExistsFilter = (pageName: string): Filter[] => {
+  const field = pageFilterFieldMap[pageName];
+
+  return field && pageName
+    ? [
+        {
+          query: {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: `${field}.name`,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
             },
           },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-    meta: {
-      alias: '',
-      disabled: false,
-      key: 'bool',
-      negate: false,
-      type: 'custom',
-      value:
-        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1}}]}}}',
-    },
-  },
-];
+          meta: {
+            alias: '',
+            disabled: false,
+            key: 'bool',
+            negate: false,
+            type: 'custom',
+            value: `{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "${field}.name"}}],"minimum_should_match": 1}}]}}}`,
+          },
+        },
+      ]
+    : [];
+};
 
 export const getNetworkDetailsPageFilter = (ipAddress?: string): Filter[] =>
   ipAddress

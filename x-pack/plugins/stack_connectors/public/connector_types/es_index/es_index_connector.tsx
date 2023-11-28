@@ -25,11 +25,15 @@ import {
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ToggleField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  ToggleField,
+  SelectField,
+  HiddenField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   firstFieldOption,
   getFields,
@@ -131,6 +135,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           />
         </h5>
       </EuiTitle>
+      <UseField path="config.refresh" component={HiddenField} />
       <EuiSpacer size="m" />
       <UseField path="config.index" config={getIndexConfig(docLinks)}>
         {(field) => {
@@ -213,33 +218,6 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           );
         }}
       </UseField>
-      <EuiSpacer size="m" />
-      <UseField
-        path="config.refresh"
-        component={ToggleField}
-        config={{
-          defaultValue: false,
-        }}
-        componentProps={{
-          euiFieldProps: {
-            label: (
-              <>
-                <FormattedMessage
-                  id="xpack.stackConnectors.components.index.refreshLabel"
-                  defaultMessage="Refresh index"
-                />{' '}
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={translations.REFRESH_FIELD_TOGGLE_TOOLTIP}
-                />
-              </>
-            ),
-            disabled: readOnly,
-            'data-test-subj': 'indexRefreshCheckbox',
-          },
-        }}
-      />
       <EuiSpacer size="m" />
       {showTimeFieldCheckbox ? (
         <UseField

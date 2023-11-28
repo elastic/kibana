@@ -8,20 +8,13 @@
 import {
   CoreSetup,
   CustomRequestHandlerContext,
-  Logger,
-  KibanaRequest,
   CoreStart,
+  RouteConfigOptions,
 } from '@kbn/core/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { APMConfig } from '..';
-import {
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from '../types';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
@@ -37,10 +30,11 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
       | 'access:ml:canCloseJob'
+      | 'access:ai_assistant'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
     disableTelemetry?: boolean;
-  };
+  } & RouteConfigOptions<any>;
 }
 
 export type TelemetryUsageCounter = ReturnType<
@@ -50,28 +44,4 @@ export type TelemetryUsageCounter = ReturnType<
 export interface APMCore {
   setup: CoreSetup;
   start: () => Promise<CoreStart>;
-}
-
-export interface APMRouteHandlerResources {
-  request: KibanaRequest;
-  context: ApmPluginRequestHandlerContext;
-  params: {
-    query: {
-      _inspect: boolean;
-      start?: number;
-      end?: number;
-    };
-  };
-  config: APMConfig;
-  logger: Logger;
-  core: APMCore;
-  plugins: {
-    [key in keyof APMPluginSetupDependencies]: {
-      setup: Required<APMPluginSetupDependencies>[key];
-      start: () => Promise<Required<APMPluginStartDependencies>[key]>;
-    };
-  };
-  ruleDataClient: IRuleDataClient;
-  telemetryUsageCounter?: TelemetryUsageCounter;
-  kibanaVersion: string;
 }

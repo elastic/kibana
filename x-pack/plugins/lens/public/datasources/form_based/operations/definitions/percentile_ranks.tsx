@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -22,7 +23,6 @@ import {
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { useDebouncedValue } from '../../../../shared_components';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
@@ -80,10 +80,16 @@ export const percentileRanksOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   canReduceTimeRange: true,
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type: fieldType,
+    timeSeriesMetric,
+  }) => {
     if (
       supportedFieldTypes.includes(fieldType) &&
       aggregatable &&
+      timeSeriesMetric !== 'counter' &&
       (!aggregationRestrictions || !aggregationRestrictions.percentile_ranks)
     ) {
       return {
@@ -103,7 +109,7 @@ export const percentileRanksOperation: OperationDefinition<
         (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
     );
   },
-  getDefaultLabel: (column, indexPattern, columns) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.params.value,
@@ -183,7 +189,7 @@ export const percentileRanksOperation: OperationDefinition<
       });
     const onChange = useCallback(
       (value) => {
-        if (!isValidNumber(value) || Number(value) === currentColumn.params.value) {
+        if (!isValidNumber(value, isInline) || Number(value) === currentColumn.params.value) {
           return;
         }
         paramEditorUpdater({
@@ -203,7 +209,7 @@ export const percentileRanksOperation: OperationDefinition<
           },
         } as PercentileRanksIndexPatternColumn);
       },
-      [paramEditorUpdater, currentColumn, indexPattern]
+      [isInline, currentColumn, paramEditorUpdater, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
@@ -214,7 +220,7 @@ export const percentileRanksOperation: OperationDefinition<
       },
       { allowFalsyValue: true }
     );
-    const inputValueIsValid = isValidNumber(inputValue);
+    const inputValueIsValid = isValidNumber(inputValue, isInline);
 
     const handleInputChange: EuiFieldNumberProps['onChange'] = useCallback(
       (e) => {
@@ -244,7 +250,7 @@ export const percentileRanksOperation: OperationDefinition<
           compressed
           value={inputValue ?? ''}
           onChange={handleInputChange}
-          step="any"
+          step={isInline ? 1 : 'any'}
           aria-label={percentileRanksLabel}
         />
       </FormRow>

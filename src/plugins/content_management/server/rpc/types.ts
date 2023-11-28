@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { ContentRegistry } from '../core';
+import type { Version } from '@kbn/object-versioning';
+import type { ContentRegistry, StorageContextGetTransformFn } from '../core';
+import type { MSearchService } from '../core/msearch';
 
 export interface Context {
   contentRegistry: ContentRegistry;
   requestHandlerContext: RequestHandlerContext;
+  getTransformsFactory: (
+    contentTypeId: string,
+    requestVersion: Version,
+    options?: { cacheEnabled?: boolean }
+  ) => StorageContextGetTransformFn;
+  mSearchService: MSearchService;
 }

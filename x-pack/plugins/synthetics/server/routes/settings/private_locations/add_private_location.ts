@@ -5,52 +5,93 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { getAllPrivateLocations } from './get_private_locations';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { SyntheticsRestApiRouteFactory } from '../../types';
+import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
-import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { toClientContract, toSavedObjectContract } from './helpers';
 import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),
-  id: schema.string(),
   agentPolicyId: schema.string(),
-  concurrentMonitors: schema.number(),
   tags: schema.maybe(schema.arrayOf(schema.string())),
   geo: schema.maybe(
     schema.object({
-      lat: schema.oneOf([schema.number(), schema.string()]),
-      lon: schema.oneOf([schema.number(), schema.string()]),
+      lat: schema.number(),
+      lon: schema.number(),
     })
   ),
 });
 
-export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => ({
+export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
+
+export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocation> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
-  validate: {
-    body: PrivateLocationSchema,
+  validate: {},
+  validation: {
+    request: {
+      body: PrivateLocationSchema,
+    },
   },
   writeAccess: true,
-  handler: async ({ request, server, savedObjectsClient }): Promise<any> => {
-    const location = request.body as PrivateLocation;
+  handler: async ({ response, request, savedObjectsClient, syntheticsMonitorClient }) => {
+    const location = request.body as PrivateLocationObject;
 
-    const { locations } = await getAllPrivateLocations(savedObjectsClient);
+    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
+      savedObjectsClient,
+      syntheticsMonitorClient
+    );
+
+    if (locations.find((loc) => loc.agentPolicyId === location.agentPolicyId)) {
+      return response.badRequest({
+        body: {
+          message: `Private location with agentPolicyId ${location.agentPolicyId} already exists`,
+        },
+      });
+    }
+
+    // return if name is already taken
+    if (locations.find((loc) => loc.label === location.label)) {
+      return response.badRequest({
+        body: {
+          message: `Private location with label ${location.label} already exists`,
+        },
+      });
+    }
+
     const existingLocations = locations.filter((loc) => loc.id !== location.agentPolicyId);
+    const formattedLocation = toSavedObjectContract({
+      ...location,
+      id: location.agentPolicyId,
+    });
 
-    const result = await savedObjectsClient.create(
+    const agentPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
+    if (!agentPolicy) {
+      return response.badRequest({
+        body: {
+          message: `Agent policy with id ${location.agentPolicyId} does not exist`,
+        },
+      });
+    }
+
+    const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
       privateLocationsSavedObjectName,
-      { locations: [...existingLocations, location] },
+      { locations: [...existingLocations, formattedLocation] },
       {
         id: privateLocationsSavedObjectId,
         overwrite: true,
       }
     );
 
-    return result.attributes;
+    const allLocations = toClientContract(result.attributes, agentPolicies);
+
+    return allLocations.find((loc) => loc.id === location.agentPolicyId)!;
   },
 });

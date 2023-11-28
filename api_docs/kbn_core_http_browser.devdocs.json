@@ -195,6 +195,22 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.HttpFetchOptions.rawResponse",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawResponse",
+            "description": [
+              "\nWhen true, the response from the `fetch` call will be returned as is, without being awaited or processed.\nDefaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.HttpFetchOptions.context",
             "type": "Object",
             "tags": [],
@@ -209,6 +225,22 @@
                 "text": "KibanaExecutionContext"
               },
               " | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.HttpFetchOptions.version",
+            "type": "string",
+            "tags": [
+              "experimental"
+            ],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -370,7 +402,7 @@
         "tags": [],
         "label": "HttpHeadersInit",
         "description": [
-          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error."
+          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error.\nIncludes the required Header that validates internal requests to internal APIs"
         ],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
@@ -833,7 +865,7 @@
                 "section": "def-common.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -841,7 +873,7 @@
                 "section": "def-common.KibanaExecutionContext",
                 "text": "KibanaExecutionContext"
               },
-              " | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+              " | undefined; readonly version?: string | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -1210,7 +1242,7 @@
                 "section": "def-common.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -1218,7 +1250,7 @@
                 "section": "def-common.KibanaExecutionContext",
                 "text": "KibanaExecutionContext"
               },
-              " | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+              " | undefined; readonly version?: string | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -1302,6 +1334,28 @@
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
                 "section": "def-common.IBasePath",
                 "text": "IBasePath"
+              }
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.HttpSetup.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
               }
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
@@ -1838,6 +1892,19 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.IBasePath.assetsHrefBase",
+            "type": "string",
+            "tags": [],
+            "label": "assetsHrefBase",
+            "description": [
+              "\nHref (hypertext reference) intended to be used as the base for constructing\nother hrefs to static assets."
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.IBasePath.publicBaseUrl",
             "type": "string",
             "tags": [],
@@ -2117,6 +2184,56 @@
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-browser",
+        "id": "def-common.IStaticAssets",
+        "type": "Interface",
+        "tags": [],
+        "label": "IStaticAssets",
+        "description": [
+          "\nAPIs for creating hrefs to static assets.\n"
+        ],
+        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.IStaticAssets.getPluginAssetHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginAssetHref",
+            "description": [
+              "\nGets the full href to the current plugin's asset,\ngiven its path relative to the plugin's `public/assets` folder.\n"
+            ],
+            "signature": [
+              "(assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-common.IStaticAssets.getPluginAssetHref.$1",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

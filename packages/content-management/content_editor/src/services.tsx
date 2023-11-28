@@ -26,6 +26,10 @@ export interface SavedObjectsReference {
   type: string;
 }
 
+export interface Theme {
+  readonly darkMode: boolean;
+}
+
 /**
  * Abstract external services for this component.
  */
@@ -58,6 +62,9 @@ export interface ContentEditorKibanaDependencies {
       toasts: {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
       };
+    };
+    theme: {
+      theme$: Observable<Theme>;
     };
   };
   /**
@@ -103,6 +110,7 @@ export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = 
 }) => {
   const { core, toMountPoint, savedObjectsTagging } = services;
   const { openFlyout: coreOpenFlyout } = core.overlays;
+  const { theme$ } = core.theme;
 
   const TagList = useMemo(() => {
     const Comp: Services['TagList'] = ({ references }) => {
@@ -118,9 +126,9 @@ export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = 
 
   const openFlyout = useCallback(
     (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
-      return coreOpenFlyout(toMountPoint(node), options);
+      return coreOpenFlyout(toMountPoint(node, { theme$ }), options);
     },
-    [toMountPoint, coreOpenFlyout]
+    [coreOpenFlyout, toMountPoint, theme$]
   );
 
   return (

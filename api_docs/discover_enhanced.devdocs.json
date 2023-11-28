@@ -639,15 +639,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
               },
-              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+              ") => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -663,15 +663,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
-                "text": "Trigger"
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
               },
-              ") => void; readonly unregisterAction: (actionId: string) => void; }"
+              "<any>) => void; }"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false,
@@ -760,15 +760,17 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
               },
-              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+              ") => void; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -784,17 +786,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
-                "text": "Trigger"
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
               },
-              ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
+              "<any>) => void; readonly getAction: (id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",

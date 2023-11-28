@@ -9,7 +9,7 @@ exports[`install footer should render 1`] = `
   >
     <button
       aria-label="Add Data Set Name"
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
       data-test-subj="addSampleDataSetdata-set-id"
       type="button"
     >

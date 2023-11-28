@@ -6,19 +6,23 @@
  * Side Public License, v 1.
  */
 
+import Url from 'url';
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ArtifactLicense } from '@kbn/es';
 import type { Config } from '../../functional_test_runner';
-import { createTestEsCluster } from '../../es';
+import { createTestEsCluster, esTestConfig } from '../../es';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom?: string;
+  esServerlessImage?: string;
   config: Config;
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
+  name?: string;
 }
 
 interface CcsConfig {
@@ -30,10 +34,11 @@ type EsConfig = ReturnType<typeof getEsConfig>;
 function getEsConfig({
   config,
   esFrom = config.get('esTestCluster.from'),
+  esServerlessImage,
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
-  const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
-  const esArgs: string[] = config.get('esTestCluster.serverArgs') ?? [];
+  const license: ArtifactLicense = config.get('esTestCluster.license');
+  const esArgs: string[] = config.get('esTestCluster.serverArgs');
   const esJavaOpts: string | undefined = config.get('esTestCluster.esJavaOpts');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
@@ -45,6 +50,10 @@ function getEsConfig({
     : config.get('servers.elasticsearch.password');
 
   const dataArchive: string | undefined = config.get('esTestCluster.dataArchive');
+  const serverless: boolean = config.get('serverless');
+  const files: string[] | undefined = config.get('esTestCluster.files');
+
+  const esServerlessOptions = getESServerlessOptions(esServerlessImage, config);
 
   return {
     ssl,
@@ -53,23 +62,26 @@ function getEsConfig({
     esJavaOpts,
     isSecurityEnabled,
     esFrom,
+    esServerlessOptions,
     port,
     password,
     dataArchive,
     ccsConfig,
+    serverless,
+    files,
   };
 }
 
 export async function runElasticsearch(
   options: RunElasticsearchOptions
 ): Promise<() => Promise<void>> {
-  const { log, logsDir } = options;
+  const { log, logsDir, name } = options;
   const config = getEsConfig(options);
 
   if (!config.ccsConfig) {
     const node = await startEsNode({
       log,
-      name: 'ftr',
+      name: name ?? 'ftr',
       logsDir,
       config,
     });
@@ -81,7 +93,7 @@ export async function runElasticsearch(
   const remotePort = await getPort();
   const remoteNode = await startEsNode({
     log,
-    name: 'ftr-remote',
+    name: name ?? 'ftr-remote',
     logsDir,
     config: {
       ...config,
@@ -92,7 +104,7 @@ export async function runElasticsearch(
 
   const localNode = await startEsNode({
     log,
-    name: 'ftr-local',
+    name: name ?? 'ftr-local',
     logsDir,
     config: {
       ...config,
@@ -123,6 +135,7 @@ async function startEsNode({
     clusterName: `cluster-${name}`,
     esArgs: config.esArgs,
     esFrom: config.esFrom,
+    esServerlessOptions: config.esServerlessOptions,
     esJavaOpts: config.esJavaOpts,
     license: config.license,
     password: config.password,
@@ -139,9 +152,56 @@ async function startEsNode({
     ],
     transportPort: config.transportPort,
     onEarlyExit,
+    serverless: config.serverless,
+    files: config.files,
   });
 
   await cluster.start();
 
   return cluster;
+}
+
+interface EsServerlessOptions {
+  host?: string;
+  resources: string[];
+  kibanaUrl: string;
+  tag?: string;
+  image?: string;
+}
+
+function getESServerlessOptions(
+  esServerlessImageFromArg: string | undefined,
+  config: Config
+): EsServerlessOptions {
+  const esServerlessImageUrlOrTag =
+    esServerlessImageFromArg ||
+    esTestConfig.getESServerlessImage() ||
+    (config.has('esTestCluster.esServerlessImage') &&
+      config.get('esTestCluster.esServerlessImage'));
+  const serverlessResources: string[] =
+    (config.has('esServerlessOptions.resources') && config.get('esServerlessOptions.resources')) ||
+    [];
+  const serverlessHost: string | undefined =
+    config.has('esServerlessOptions.host') && config.get('esServerlessOptions.host');
+
+  const commonOptions = {
+    host: serverlessHost,
+    resources: serverlessResources,
+    kibanaUrl: Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: config.get('servers.kibana.port'),
+    }),
+  };
+
+  if (esServerlessImageUrlOrTag) {
+    return {
+      ...commonOptions,
+      ...(esServerlessImageUrlOrTag.includes(':')
+        ? { image: esServerlessImageUrlOrTag }
+        : { tag: esServerlessImageUrlOrTag }),
+    };
+  }
+
+  return commonOptions;
 }

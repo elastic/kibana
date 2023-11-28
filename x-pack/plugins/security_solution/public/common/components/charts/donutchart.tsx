@@ -7,7 +7,7 @@
 
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { Datum, NodeColorAccessor, PartialTheme, ElementClickListener } from '@elastic/charts';
 import {
@@ -17,9 +17,12 @@ import {
   PartitionLayout,
   defaultPartitionValueFormatter,
 } from '@elastic/charts';
+import { isEmpty } from 'lodash';
 import type { FlattenSimpleInterpolation } from 'styled-components';
 import styled from 'styled-components';
-import { useTheme } from './common';
+
+import { i18n } from '@kbn/i18n';
+import { useThemes } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
 import { DonutChartEmpty } from './donutchart_empty';
@@ -48,7 +51,10 @@ export interface DonutChartProps {
   height?: number;
   label: React.ReactElement | string;
   legendItems?: LegendItem[] | null | undefined;
-  onElementClick?: ElementClickListener;
+  /**
+   * provides the section name of a clicked donut ring partition
+   */
+  onPartitionClick?: (level: string) => void;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
 }
@@ -105,6 +111,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
     [euiTheme.colors.disabled]
   );
   const className = isChartEmbeddablesEnabled ? undefined : 'eui-textTruncate';
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -152,11 +159,30 @@ export const DonutChart = ({
   height = 90,
   label,
   legendItems,
-  onElementClick,
+  onPartitionClick,
   title,
   totalCount,
 }: DonutChartProps) => {
-  const theme = useTheme();
+  const { baseTheme, theme } = useThemes();
+
+  const onElementClicked: ElementClickListener = useCallback(
+    (event) => {
+      if (onPartitionClick) {
+        const flattened = event.flat(2);
+        const level =
+          flattened.length > 0 &&
+          'groupByRollup' in flattened[0] &&
+          flattened[0]?.groupByRollup != null
+            ? `${flattened[0].groupByRollup}`
+            : '';
+
+        if (!isEmpty(level.trim())) {
+          onPartitionClick(level.toLowerCase());
+        }
+      }
+    },
+    [onPartitionClick]
+  );
 
   return (
     <DonutChartWrapper
@@ -170,7 +196,12 @@ export const DonutChart = ({
           <DonutChartEmpty size={height} />
         ) : (
           <Chart size={height}>
-            <Settings theme={donutTheme} baseTheme={theme} onElementClick={onElementClick} />
+            <Settings
+              theme={[donutTheme, theme]}
+              baseTheme={baseTheme}
+              onElementClick={onElementClicked}
+              locale={i18n.getLocale()}
+            />
             <Partition
               id="donut-chart"
               data={data}

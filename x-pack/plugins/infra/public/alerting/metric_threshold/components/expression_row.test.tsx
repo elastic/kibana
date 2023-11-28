@@ -12,8 +12,9 @@ import { Comparator } from '../../../../common/alerting/metrics';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 
-jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
-  useSourceViaHttp: () => ({
+jest.mock('../../../containers/metrics_source/source', () => ({
+  withSourceProvider: () => jest.fn,
+  useSourceContext: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),
@@ -80,7 +81,7 @@ describe('ExpressionRow', () => {
     const [valueMatch] =
       wrapper
         .html()
-        .match('<span class="euiExpression__value css-xlzuv8-euiExpression__value">50</span>') ??
+        .match('<span class="euiExpression__value css-1lfq7nz-euiExpression__value">50</span>') ??
       [];
     expect(valueMatch).toBeTruthy();
   });
@@ -98,7 +99,7 @@ describe('ExpressionRow', () => {
     const [valueMatch] =
       wrapper
         .html()
-        .match('<span class="euiExpression__value css-xlzuv8-euiExpression__value">0.5</span>') ??
+        .match('<span class="euiExpression__value css-1lfq7nz-euiExpression__value">0.5</span>') ??
       [];
     expect(valueMatch).toBeTruthy();
   });

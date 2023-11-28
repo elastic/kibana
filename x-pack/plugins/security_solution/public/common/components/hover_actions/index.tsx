@@ -7,7 +7,7 @@
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DraggableId } from 'react-beautiful-dnd';
+import type { DraggableId } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
@@ -217,13 +217,12 @@ export const HoverActions: React.FC<Props> = React.memo(
 
     const isCaseView = scopeId === TimelineId.casePage;
     const isTimelineView = scopeId === TimelineId.active;
-    const isAlertDetailsView = scopeId === TimelineId.detectionsAlertDetailsPage;
     // TODO Provide a list of disabled/enabled actions as props
     const isEntityAnalyticsPage = scopeId === SecurityPageName.entityAnalytics;
 
     const hideFilters = useMemo(
-      () => (isAlertDetailsView || isEntityAnalyticsPage) && !isTimelineView,
-      [isTimelineView, isAlertDetailsView, isEntityAnalyticsPage]
+      () => isEntityAnalyticsPage && !isTimelineView,
+      [isTimelineView, isEntityAnalyticsPage]
     );
 
     const hiddenActionsCount = useMemo(() => {
@@ -272,6 +271,7 @@ export const HoverActions: React.FC<Props> = React.memo(
         })}
       >
         <Container
+          data-test-subj="hover-actions-container"
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}

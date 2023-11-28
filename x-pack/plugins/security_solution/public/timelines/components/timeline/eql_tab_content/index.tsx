@@ -57,23 +57,23 @@ import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 
-const TimelineHeaderContainer = styled.div`
-  margin-top: 6px;
+const EqlTabHeaderContainer = styled.div`
+  margin-top: ${(props) => props.theme.eui.euiSizeS};
   width: 100%;
 `;
 
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
+EqlTabHeaderContainer.displayName = 'EqlTabHeaderContainer';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   align-items: stretch;
   box-shadow: none;
   display: flex;
   flex-direction: column;
+  margin-top: ${({ theme }) => theme.eui.euiSizeM}
   padding: 0;
 
   &.euiFlyoutHeader {
-    ${({ theme }) =>
-      `padding: 0 ${theme.eui.euiSizeS} ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};`}
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
   }
 `;
 
@@ -109,17 +109,9 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
   overflow: hidden;
 `;
-
-const DatePicker = styled(EuiFlexItem)`
-  .euiSuperDatePicker__flexWrapper {
-    max-width: none;
-    width: auto;
-  }
-`;
-
-DatePicker.displayName = 'DatePicker';
 
 const VerticalRule = styled.div`
   width: 2px;
@@ -200,22 +192,24 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   };
 
-  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
-    useTimelineEvents({
-      dataViewId,
-      endDate: end,
-      eqlOptions: restEqlOption,
-      fields: getTimelineQueryFields(),
-      filterQuery: eqlQuery ?? '',
-      id: timelineId,
-      indexNames: selectedPatterns,
-      language: 'eql',
-      limit: itemsPerPage,
-      runtimeMappings,
-      skip: !canQueryTimeline(),
-      startDate: start,
-      timerangeKind,
-    });
+  const [
+    isQueryLoading,
+    { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    dataViewId,
+    endDate: end,
+    eqlOptions: restEqlOption,
+    fields: getTimelineQueryFields(),
+    filterQuery: eqlQuery ?? '',
+    id: timelineId,
+    indexNames: selectedPatterns,
+    language: 'eql',
+    limit: itemsPerPage,
+    runtimeMappings,
+    skip: !canQueryTimeline(),
+    startDate: start,
+    timerangeKind,
+  });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.eql, id: timelineId });
@@ -266,9 +260,11 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             hasBorder={false}
           >
             <EuiFlexGroup
-              alignItems="center"
+              className="euiScrollBar"
+              alignItems="flexStart"
               gutterSize="s"
               data-test-subj="timeline-date-picker-container"
+              responsive={false}
             >
               {timelineFullScreen && setTimelineFullScreen != null && (
                 <ExitFullScreen
@@ -276,22 +272,22 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={10}>
-                <SuperDatePicker id={InputsModelId.timeline} timelineId={timelineId} />
-              </DatePicker>
               <EuiFlexItem grow={false}>
-                <TimelineDatePickerLock />
-              </EuiFlexItem>
-              <EuiFlexItem grow={1}>
                 {activeTab === TimelineTabs.eql && (
                   <Sourcerer scope={SourcererScopeName.timeline} />
                 )}
               </EuiFlexItem>
+              <EuiFlexItem>
+                <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TimelineDatePickerLock />
+              </EuiFlexItem>
             </EuiFlexGroup>
-            <TimelineHeaderContainer data-test-subj="timelineHeader">
-              <EqlQueryBarTimeline timelineId={timelineId} />
-            </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
+          <EqlTabHeaderContainer data-test-subj="timelineHeader">
+            <EqlQueryBarTimeline timelineId={timelineId} />
+          </EqlTabHeaderContainer>
 
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
@@ -325,7 +321,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 <Footer
                   activePage={pageInfo?.activePage ?? 0}
                   data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
+                  updatedAt={refreshedAt}
                   height={footerHeight}
                   id={timelineId}
                   isLive={isLive}

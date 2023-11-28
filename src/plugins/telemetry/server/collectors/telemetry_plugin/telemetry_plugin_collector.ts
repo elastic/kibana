@@ -10,13 +10,16 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { ISavedObjectsRepository } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../saved_objects';
-import { TelemetryConfigType } from '../../config';
+import type { TelemetryConfigType } from '../../config';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
 
 export interface TelemetryUsageStats {
   opt_in_status?: boolean | null;
   usage_fetcher?: 'browser' | 'server';
   last_reported?: number;
+  // Not using TelemetryConfigLabels because the @kbn/telemetry-tools goes crazy with the types in @kbn/config-schema
+  // For telemetry purposes, we are OK with it being unknown. It's already validated in '../../config/telemetry_labels.ts'
+  labels: Record<string, unknown>;
 }
 
 export interface TelemetryPluginUsageCollectorOptions {
@@ -31,7 +34,12 @@ export function createCollectorFetch({
   getSavedObjectsClient,
 }: TelemetryPluginUsageCollectorOptions) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
-    const { sendUsageFrom, allowChangingOptInStatus, optIn = null } = await firstValueFrom(config$);
+    const {
+      sendUsageFrom,
+      allowChangingOptInStatus,
+      optIn = null,
+      labels,
+    } = await firstValueFrom(config$);
     const configTelemetrySendUsageFrom = sendUsageFrom;
     const configTelemetryOptIn = optIn;
 
@@ -56,6 +64,7 @@ export function createCollectorFetch({
         telemetrySavedObject,
         configTelemetrySendUsageFrom,
       }),
+      labels,
     };
   };
 }
@@ -72,6 +81,12 @@ export function registerTelemetryPluginUsageCollector(
       opt_in_status: { type: 'boolean' },
       usage_fetcher: { type: 'keyword' },
       last_reported: { type: 'long' },
+      labels: {
+        type: 'pass_through',
+        _meta: {
+          description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+        },
+      },
     },
   });
 

@@ -13,7 +13,7 @@ import {
 } from '../kibana_react.mock';
 
 export const KibanaServices = {
-  get: jest.fn(),
+  get: jest.fn(() => ({})),
   getKibanaVersion: jest.fn(() => '8.0.0'),
   getConfig: jest.fn(() => null),
 };

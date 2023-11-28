@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { scheduleNotificationResponseActions } from './schedule_notification_response_actions';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import { getScheduleNotificationResponseActionsService } from './schedule_notification_response_actions';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 describe('ScheduleNotificationResponseActions', () => {
   const signalOne = { agent: { id: 'agent-id-1' }, _id: 'alert-id-1', user: { id: 'S-1-5-20' } };
@@ -52,34 +53,40 @@ describe('ScheduleNotificationResponseActions', () => {
     saved_query_id: undefined,
     ecs_mapping: { testField: { field: 'testField', value: 'testValue' } },
   };
+  const osqueryActionMock = {
+    create: jest.fn(),
+    stop: jest.fn(),
+  };
+  const endpointActionMock = jest.fn();
+
+  const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
+    osqueryCreateActionService: osqueryActionMock,
+    endpointAppContextService: endpointActionMock as never,
+  });
 
   const simpleQuery = 'select * from uptime';
   it('should handle osquery response actions with query', async () => {
-    const osqueryActionMock = jest.fn();
-
-    const responseActions = [
+    const responseActions: RuleResponseAction[] = [
       {
-        actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+        actionTypeId: ResponseActionTypesEnum['.osquery'],
         params: {
           ...defaultQueryParams,
           query: simpleQuery,
         },
       },
     ];
-    scheduleNotificationResponseActions({ signals, responseActions }, osqueryActionMock);
+    scheduleNotificationResponseActions({ signals, responseActions });
 
-    expect(osqueryActionMock).toHaveBeenCalledWith({
+    expect(osqueryActionMock.create).toHaveBeenCalledWith({
       ...defaultQueryResultParams,
       query: simpleQuery,
     });
     //
   });
   it('should handle osquery response actions with packs', async () => {
-    const osqueryActionMock = jest.fn();
-
-    const responseActions = [
+    const responseActions: RuleResponseAction[] = [
       {
-        actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+        actionTypeId: ResponseActionTypesEnum['.osquery'],
         params: {
           ...defaultPackParams,
           queries: [
@@ -93,9 +100,9 @@ describe('ScheduleNotificationResponseActions', () => {
         },
       },
     ];
-    scheduleNotificationResponseActions({ signals, responseActions }, osqueryActionMock);
+    scheduleNotificationResponseActions({ signals, responseActions });
 
-    expect(osqueryActionMock).toHaveBeenCalledWith({
+    expect(osqueryActionMock.create).toHaveBeenCalledWith({
       ...defaultPackResultParams,
       queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
     });

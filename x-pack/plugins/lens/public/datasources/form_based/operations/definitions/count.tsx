@@ -101,18 +101,24 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       sourceField: field.name,
     };
   },
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type,
+    timeSeriesMetric,
+  }) => {
     if (
       type === 'document' ||
       (aggregatable &&
+        timeSeriesMetric !== 'counter' &&
         (!aggregationRestrictions || aggregationRestrictions.value_count) &&
         supportedTypes.has(type))
     ) {
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
-  getDefaultLabel: (column, indexPattern) => {
-    const field = indexPattern.getFieldByName(column.sourceField);
+  getDefaultLabel: (column, columns, indexPattern) => {
+    const field = indexPattern?.getFieldByName(column.sourceField);
     return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {

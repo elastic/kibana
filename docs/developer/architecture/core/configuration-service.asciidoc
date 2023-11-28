@@ -17,7 +17,7 @@ const basePath = core.http.basePath.get(request);
 To have access to your plugin config, you _should_:
 
 * Declare plugin-specific `configPath` (will fallback to plugin `id`
-if not specified) in {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
+if not specified) in your plugin definition.
 * Export schema validation for the config from plugin's main file. Schema is
 mandatory. If a plugin reads from the config without schema declaration,
 `ConfigService` will throw an error.
@@ -35,7 +35,7 @@ export type MyPluginConfigType = TypeOf<typeof config.schema>;
 
 * Read config value exposed via `PluginInitializerContext`:
 
-*my_plugin/server/index.ts*
+*my_plugin/server/plugin.ts*
 [source,typescript]
 ----
 import type { PluginInitializerContext } from '@kbn/core/server';
@@ -145,5 +145,89 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     renameFromRoot('oldplugin.property', 'myplugin.property'),
     unusedFromRoot('oldplugin.deprecated'),
   ],
+};
+----
+[[validating-your-configuration-based-on-context-references]]
+=== Validating your configuration based on context references
+Some features require special configuration when running in different modes (dev/prod/dist, or even serverless). For purpose, core injects the following _references_ in the validation's context:
+
+[cols="^1,^1,3"]
+|===
+|Context Reference |Potential values |Description
+
+|`dev`
+|`true`\|`false`
+|Is Kibana running in Dev mode?
+
+|`prod`
+|`true`\|`false`
+|Is Kibana running in Production mode (running from binary)?
+
+|`dist`
+|`true`\|`false`
+|Is Kibana running from a distributable build (not running from source)?
+
+|`serverless`
+|`true`\|`false`
+|Is Kibana running in Serverless offering?
+
+|`version`
+|`8.9.0`
+|The current version of Kibana
+
+|`buildNum`
+|`12345`
+|The build number
+
+|`branch`
+|`main`
+|The current branch running
+
+|`buildSha`
+|`12345`
+|The build SHA (typically refers to the last commit's SHA)
+
+|`buildDate`
+|`2023-05-15T23:12:09+0000`
+|The ISO 8601 date of the build
+
+|===
+
+To use any of the references listed above in a config validation schema, they can be accessed via `schema.contextRef('{CONTEXT_REFERENCE}')`:
+
+[source,js]
+----
+export const config = {
+  schema: schema.object({
+    // Enabled by default in Dev mode
+    enabled: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+
+    // Setting only allowed in the Serverless offering
+    plansForWorldPeace: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.string({ defaultValue: 'Free hugs' }),
+      schema.never()
+    ),
+  }),
+};
+----
+
+For Serverless vs. Traditional configuration, you are encouraged to use the `offeringBasedSchema` helper:
+
+[source,js]
+----
+import { schema, offeringBasedSchema } from '@kbn/config-schema'
+
+export const config = {
+  schema: schema.object({
+    // Enabled by default in Dev mode
+    enabled: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+
+    // Setting only allowed in the Serverless offering
+    plansForWorldPeace: offeringBasedSchema({ 
+      serverless: schema.string({ defaultValue: 'Free hugs' }),
+    }),
+  }),
 };
 ----

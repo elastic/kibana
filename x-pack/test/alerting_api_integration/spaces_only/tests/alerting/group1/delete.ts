@@ -54,6 +54,8 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
         .send(getTestRuleData())
         .expect(200);
 
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
       await supertest
         .delete(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')

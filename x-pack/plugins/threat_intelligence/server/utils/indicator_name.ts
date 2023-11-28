@@ -94,12 +94,18 @@ const mappingToIndicatorNameOriginScript = ([types, paths]: Mapping) => {
 };
 
 /**
+ * Wrap painless with trycatch
+ */
+export const tryCatch = (script: string) =>
+  `try { ${script} } catch (Exception e) { return emit('') }`;
+
+/**
  * Generates the runtime field script computing display name for the given indicator
  */
 export const threatIndicatorNamesScript = (mappings: Mappings = mappingsArray) => {
   const combined = mappings.map(mappingToIndicatorNameScript).join('\n\n');
 
-  return `${combined}\n\nreturn emit('')`;
+  return tryCatch(`${combined}\n\nreturn emit('')`);
 };
 
 /**
@@ -108,5 +114,5 @@ export const threatIndicatorNamesScript = (mappings: Mappings = mappingsArray) =
 export const threatIndicatorNamesOriginScript = (mappings: Mappings = mappingsArray) => {
   const combined = mappings.map(mappingToIndicatorNameOriginScript).join('\n\n');
 
-  return `${combined}\n\nreturn emit('')`;
+  return tryCatch(`${combined}\n\nreturn emit('')`);
 };

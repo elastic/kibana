@@ -25,7 +25,8 @@ export const NewNote = React.memo<{
   note: string;
   updateNewNote: UpdateInternalNewNote;
   autoFocusDisabled?: boolean;
-}>(({ note, noteInputHeight, updateNewNote, autoFocusDisabled = false }) => {
+  setIsMarkdownInvalid: (value: boolean) => void;
+}>(({ note, noteInputHeight, updateNewNote, autoFocusDisabled = false, setIsMarkdownInvalid }) => {
   return (
     <NewNoteTabs data-test-subj="new-note-tabs">
       <MarkdownEditor
@@ -35,6 +36,7 @@ export const NewNote = React.memo<{
         dataTestSubj="add-a-note"
         height={noteInputHeight}
         autoFocusDisabled={autoFocusDisabled}
+        setIsMarkdownInvalid={setIsMarkdownInvalid}
       />
     </NewNoteTabs>
   );

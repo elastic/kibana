@@ -33,6 +33,7 @@ export function ManualTestRunMode({
     <Fragment key={manualTestRun.testRunId}>
       {isBrowserMonitor ? (
         <BrowserTestRunResult
+          name={manualTestRun.monitor.name}
           expectPings={expectPings}
           onDone={onDone}
           testRunId={manualTestRun.testRunId}
@@ -40,6 +41,7 @@ export function ManualTestRunMode({
         />
       ) : (
         <SimpleTestResults
+          name={manualTestRun.monitor.name}
           expectPings={expectPings}
           onDone={onDone}
           testRunId={manualTestRun.testRunId}

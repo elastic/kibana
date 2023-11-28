@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UserOverview } from '../../../../overview/components/user_overview';
-import { useUserDetails } from '../../../../explore/users/containers/users/details';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -21,6 +21,7 @@ import { getCriteriaFromUsersType } from '../../../../common/components/ml/crite
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { UsersType } from '../../../../explore/users/store/model';
+import { getSourcererScopeId } from '../../../../helpers';
 
 export const QUERY_ID = 'usersDetailsQuery';
 export interface ExpandableUserProps {
@@ -54,14 +55,15 @@ export const ExpandableUserDetailsPageLink = ({ userName }: ExpandableUserProps)
 
 export const ExpandableUserDetails = ({
   contextID,
+  scopeId,
   userName,
   isDraggable,
-}: ExpandableUserProps & { contextID: string; isDraggable?: boolean }) => {
+}: ExpandableUserProps & { contextID: string; scopeId: string; isDraggable?: boolean }) => {
   const { to, from, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();
 
-  const [loading, { userDetails }] = useUserDetails({
+  const [loading, { userDetails }] = useObservedUserDetails({
     endDate: to,
     startDate: from,
     userName,
@@ -97,6 +99,7 @@ export const ExpandableUserDetails = ({
           data={userDetails}
           loading={loading}
           contextID={contextID}
+          sourcererScopeId={getSourcererScopeId(scopeId)}
           isDraggable={isDraggable}
           id={QUERY_ID}
           anomaliesData={anomaliesData}

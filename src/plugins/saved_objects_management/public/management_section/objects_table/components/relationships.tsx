@@ -194,7 +194,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
       <>
         <EuiCallOut
           color="warning"
-          iconType="alert"
+          iconType="warning"
           title={i18n.translate(
             'savedObjectsManagement.objectsTable.relationships.invalidRelationShip',
             {

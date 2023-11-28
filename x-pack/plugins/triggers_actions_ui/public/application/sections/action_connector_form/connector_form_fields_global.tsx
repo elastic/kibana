@@ -9,10 +9,8 @@ import React, { memo } from 'react';
 
 import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
-
-import { HiddenField } from '../../components/hidden_field';
 
 interface ConnectorFormData {
   name: string;
@@ -43,9 +41,9 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
 const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = ({ canSave }) => {
   return (
     <>
-      <HiddenField path={'id'} />
-      <HiddenField path={'actionTypeId'} />
-      <HiddenField path={'isDeprecated'} />
+      <UseField path="id" component={HiddenField} />
+      <UseField path="actionTypeId" component={HiddenField} />
+      <UseField path="isDeprecated" component={HiddenField} />
       <UseField
         path="name"
         config={nameConfig}

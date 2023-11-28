@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import type { UseInspectButtonParams } from './hooks';
+import type { BrowserField } from '@kbn/timelines-plugin/common';
+
+import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
@@ -22,15 +24,45 @@ jest.mock('../../../../common/containers/sourcerer', () => ({
   getScopeFromPath: jest.fn(),
 }));
 
-test('getAggregatableFields', () => {
-  expect(getAggregatableFields(mockBrowserFields)).toMatchSnapshot();
-});
+describe('getAggregatableFields', () => {
+  test('getAggregatableFields when useLensCompatibleFields = false', () => {
+    expect(getAggregatableFields(mockBrowserFields.base?.fields as GetAggregatableFields))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "label": "@timestamp",
+          "value": "@timestamp",
+        },
+      ]
+    `);
+  });
 
-test('getAggregatableFields when useLensCompatibleFields = true', () => {
-  const useLensCompatibleFields = true;
-  expect(
-    getAggregatableFields({ base: mockBrowserFields.base }, useLensCompatibleFields)
-  ).toHaveLength(0);
+  test('getAggregatableFields when useLensCompatibleFields = true', () => {
+    const useLensCompatibleFields = true;
+    expect(
+      getAggregatableFields(
+        mockBrowserFields?.base?.fields as GetAggregatableFields,
+        useLensCompatibleFields
+      )
+    ).toHaveLength(0);
+  });
+
+  describe.each([
+    { field: 'destination.domain' },
+    { field: 'destination.bytes' },
+    { field: 'destination.ip' },
+  ])('$field', ({ field }) => {
+    test(`type ${mockBrowserFields?.destination?.fields?.[field].type} should be supported by Lens Embeddable`, () => {
+      const useLensCompatibleFields = true;
+
+      expect(
+        getAggregatableFields(
+          { [field]: mockBrowserFields?.destination?.fields?.[field] as Partial<BrowserField> },
+          useLensCompatibleFields
+        )
+      ).toHaveLength(1);
+    });
+  });
 });
 
 describe('hooks', () => {
@@ -92,11 +124,11 @@ describe('hooks', () => {
         <TestProviders>{children}</TestProviders>
       );
       const { result, unmount } = renderHook(() => useStackByFields(), { wrapper });
-      const aggregateableFields = result.current;
+      const aggregateableFields = result.current();
       unmount();
-      expect(aggregateableFields?.find((field) => field.label === 'agent.id')).toBeTruthy();
+      expect(aggregateableFields!.find((field) => field.label === 'agent.id')).toBeTruthy();
       expect(
-        aggregateableFields?.find((field) => field.label === 'nestedField.firstAttributes')
+        aggregateableFields!.find((field) => field.label === 'nestedField.firstAttributes')
       ).toBe(undefined);
     });
 
@@ -112,10 +144,10 @@ describe('hooks', () => {
       const { result, unmount } = renderHook(() => useStackByFields(useLensCompatibleFields), {
         wrapper,
       });
-      const aggregateableFields = result.current;
+      const aggregateableFields = result.current();
       unmount();
-      expect(aggregateableFields?.find((field) => field.label === '@timestamp')).toBeUndefined();
-      expect(aggregateableFields?.find((field) => field.label === '_id')).toBeUndefined();
+      expect(aggregateableFields!.find((field) => field.label === '@timestamp')).toBeUndefined();
+      expect(aggregateableFields!.find((field) => field.label === '_id')).toBeUndefined();
     });
 
     it('returns only Lens compatible fields (check if it is a nested field)', () => {
@@ -130,7 +162,7 @@ describe('hooks', () => {
       const { result, unmount } = renderHook(() => useStackByFields(useLensCompatibleFields), {
         wrapper,
       });
-      const aggregateableFields = result.current;
+      const aggregateableFields = result.current();
       unmount();
       expect(aggregateableFields).toHaveLength(0);
     });

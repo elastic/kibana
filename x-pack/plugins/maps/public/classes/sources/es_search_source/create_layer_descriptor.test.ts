@@ -44,6 +44,7 @@ test('Should create layer descriptor', () => {
     sortField: '',
     sortOrder: 'desc',
     tooltipProperties: [],
+    topHitsGroupByTimeseries: false,
     topHitsSize: 1,
     topHitsSplitField: '',
     type: 'ES_SEARCH',

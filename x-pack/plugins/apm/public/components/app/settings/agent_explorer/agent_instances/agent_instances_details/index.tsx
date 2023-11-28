@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { ValuesType } from 'utility-types';
+import { MetricOverviewLink } from '../../../../../shared/links/apm/metric_overview_link';
 import { AgentExplorerFieldName } from '../../../../../../../common/agent_explorer';
 import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
 import {
@@ -26,7 +27,6 @@ import { APIReturnType } from '../../../../../../services/rest/create_call_apm_a
 import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../../shared/item_badge';
-import { ServiceNodeMetricOverviewLink } from '../../../../../shared/links/apm/service_node_metric_overview_link';
 import { PopoverTooltip } from '../../../../../shared/popover_tooltip';
 import { TimestampTooltip } from '../../../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -79,6 +79,7 @@ export function getInstanceColumns(
                     values={{
                       seeDocs: (
                         <EuiLink
+                          data-test-subj="apmGetInstanceColumnsConfigurationOptionsLink"
                           href={`${agentDocsPageUrl}${
                             !isOpenTelemetryAgentName(agentName)
                               ? 'configuration.html#service-node-name'
@@ -107,12 +108,15 @@ export function getInstanceColumns(
             content={
               <>
                 {serviceNode ? (
-                  <ServiceNodeMetricOverviewLink
+                  <MetricOverviewLink
                     serviceName={serviceName}
-                    serviceNodeName={serviceNode}
+                    mergeQuery={(query) => ({
+                      ...query,
+                      kuery: `service.node.name:"${displayedName}"`,
+                    })}
                   >
-                    <span className="eui-textTruncate">{displayedName}</span>
-                  </ServiceNodeMetricOverviewLink>
+                    {displayedName}
+                  </MetricOverviewLink>
                 ) : (
                   <span className="eui-textTruncate">{displayedName}</span>
                 )}

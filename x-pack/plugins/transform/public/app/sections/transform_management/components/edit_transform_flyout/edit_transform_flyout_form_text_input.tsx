@@ -5,29 +5,35 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
+import {
+  useEditTransformFlyout,
+  type EditTransformHookTextInputSelectors,
+} from './use_edit_transform_flyout';
+import { capitalizeFirstLetter } from './capitalize_first_letter';
+
 interface EditTransformFlyoutFormTextInputProps {
-  dataTestSubj: string;
-  errorMessages: string[];
-  helpText?: string;
+  field: EditTransformHookTextInputSelectors;
   label: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  value: string;
+  helpText?: string;
+  placeHolder?: boolean;
 }
 
 export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInputProps> = ({
-  dataTestSubj,
-  errorMessages,
-  helpText,
+  field,
   label,
-  onChange,
-  placeholder,
-  value,
+  helpText,
+  placeHolder = false,
 }) => {
+  const { defaultValue, errorMessages, value } = useEditTransformFlyout(field);
+  const { formField } = useEditTransformFlyout('actions');
+  const upperCaseField = capitalizeFirstLetter(field);
+
   return (
     <EuiFormRow
       label={label}
@@ -36,11 +42,18 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
       error={errorMessages}
     >
       <EuiFieldText
-        data-test-subj={dataTestSubj}
-        placeholder={placeholder}
+        data-test-subj={`transformEditFlyout${upperCaseField}Input`}
+        placeholder={
+          placeHolder
+            ? i18n.translate('xpack.transform.transformList.editFlyoutFormPlaceholderText', {
+                defaultMessage: 'Default: {defaultValue}',
+                values: { defaultValue },
+              })
+            : undefined
+        }
         isInvalid={errorMessages.length > 0}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => formField({ field, value: e.target.value })}
         aria-label={label}
       />
     </EuiFormRow>

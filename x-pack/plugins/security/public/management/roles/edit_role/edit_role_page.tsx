@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   Capabilities,
   DocLinksStart,
@@ -31,22 +31,30 @@ import type {
   NotificationsStart,
   ScopedHistory,
 } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { Cluster } from '@kbn/remote-clusters-plugin/public';
+import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { SecurityLicense } from '../../../../common/licensing';
+import { DeleteRoleButton } from './delete_role_button';
+import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
+import { ReservedRoleBadge } from './reserved_role_badge';
+import type { RoleValidationResult } from './validate_role';
+import { RoleValidator } from './validate_role';
 import type {
   BuiltinESPrivileges,
   RawKibanaPrivileges,
   Role,
   RoleIndexPrivilege,
-} from '../../../../common/model';
+  SecurityLicense,
+} from '../../../../common';
 import {
   isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,
@@ -56,16 +64,12 @@ import {
   prepareRoleClone,
 } from '../../../../common/model';
 import { useCapabilities } from '../../../components/use_capabilities';
+import type { CheckRoleMappingFeaturesResponse } from '../../role_mappings/role_mappings_api_client';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
 import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
-import { DeleteRoleButton } from './delete_role_button';
-import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
-import { ReservedRoleBadge } from './reserved_role_badge';
-import type { RoleValidationResult } from './validate_role';
-import { RoleValidator } from './validate_role';
 
 interface Props {
   action: 'edit' | 'clone';
@@ -84,6 +88,16 @@ interface Props {
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
+}
+
+function useRemoteClusters(http: HttpStart) {
+  return useAsync(() => http.get<Cluster[]>(REMOTE_CLUSTERS_PATH));
+}
+
+function useFeatureCheck(http: HttpStart) {
+  return useAsync(() =>
+    http.get<CheckRoleMappingFeaturesResponse>('/internal/security/_check_role_mapping_features')
+  );
 }
 
 function useRunAsUsers(
@@ -180,7 +194,8 @@ function useRole(
           return;
         }
 
-        if (fetchedRole.elasticsearch.indices.length === 0) {
+        const isEditingExistingRole = !!roleName && action === 'edit';
+        if (!isEditingExistingRole && fetchedRole.elasticsearch.indices.length === 0) {
           const emptyOption: RoleIndexPrivilege = {
             names: [],
             privileges: [],
@@ -310,6 +325,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
+  const featureCheckState = useFeatureCheck(http);
+  const remoteClustersState = useRemoteClusters(http);
   const [role, setRole] = useRole(
     rolesAPIClient,
     fatalErrors,
@@ -328,7 +345,15 @@ export const EditRolePage: FunctionComponent<Props> = ({
     }
   }, [hasReadOnlyPrivileges, isEditingExistingRole]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!role || !runAsUsers || !indexPatternsTitles || !privileges || !spaces || !features) {
+  if (
+    !role ||
+    !runAsUsers ||
+    !indexPatternsTitles ||
+    !privileges ||
+    !spaces ||
+    !features ||
+    !featureCheckState.value
+  ) {
     return null;
   }
 
@@ -453,9 +478,11 @@ export const EditRolePage: FunctionComponent<Props> = ({
           runAsUsers={runAsUsers}
           validator={validator}
           indexPatterns={indexPatternsTitles}
+          remoteClusters={remoteClustersState.value}
           builtinESPrivileges={builtInESPrivileges}
           license={license}
           docLinks={docLinks}
+          canUseRemoteIndices={featureCheckState.value?.canUseRemoteIndices}
         />
       </div>
     );
@@ -648,7 +675,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             <EuiCallOut
               title={getExtendedRoleDeprecationNotice(role)}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             />
           </Fragment>
         )}

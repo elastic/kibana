@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './log_view';
+export * from './inventory_view';
+export * from './metrics_explorer_view';

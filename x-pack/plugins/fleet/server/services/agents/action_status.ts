@@ -9,18 +9,27 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../types';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+import type {
+  FleetServerAgentAction,
+  ActionStatus,
+  ActionErrorResult,
+  AgentActionType,
+  ActionStatusOptions,
+} from '../../types';
+import {
+  AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
+  AGENTS_INDEX,
+  AGENT_POLICY_INDEX,
+} from '../../../common';
 import { appContextService } from '..';
-
-const PRECISION_THRESHOLD = 40000;
 
 /**
  * Return current bulk actions
  */
 export async function getActionStatuses(
   esClient: ElasticsearchClient,
-  options: ListWithKuery
+  options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
   const actions = await _getActions(esClient, options);
   const cancelledActions = await getCancelledActions(esClient);
@@ -42,12 +51,6 @@ export async function getActionStatuses(
           terms: { field: 'action_id', size: actions.length || 10 },
           aggs: {
             max_timestamp: { max: { field: '@timestamp' } },
-            agent_count: {
-              cardinality: {
-                field: 'agent_id',
-                precision_threshold: PRECISION_THRESHOLD, // max value
-              },
-            },
           },
         },
       },
@@ -68,25 +71,17 @@ export async function getActionStatuses(
       (bucket: any) => bucket.key === action.actionId
     );
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
-    const cardinalityCount = (matchingBucket?.agent_count as any)?.value ?? 0;
     const docCount = matchingBucket?.doc_count ?? 0;
-    const nbAgentsAck =
-      action.type === 'UPDATE_TAGS'
-        ? Math.min(docCount, nbAgentsActioned)
-        : Math.min(
-            docCount,
-            // only using cardinality count when count lower than precision threshold
-            docCount > PRECISION_THRESHOLD ? docCount : cardinalityCount,
-            nbAgentsActioned
-          );
+    const nbAgentsAck = Math.min(docCount, nbAgentsActioned);
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 
     let errorCount = 0;
+    let latestErrors: ActionErrorResult[] = [];
     try {
       // query to find errors in action results, cannot do aggregation on text type
-      const res = await esClient.search({
+      const errorResults = await esClient.search({
         index: AGENT_ACTIONS_RESULTS_INDEX,
         track_total_hits: true,
         rest_total_hits_as_int: true,
@@ -104,8 +99,41 @@ export async function getActionStatuses(
           },
         },
         size: 0,
+        aggs: {
+          top_error_hits: {
+            top_hits: {
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: {
+                includes: ['@timestamp', 'agent_id', 'error'],
+              },
+              size: options.errorSize,
+            },
+          },
+        },
       });
-      errorCount = (res.hits.total as number) ?? 0;
+      errorCount = (errorResults.hits.total as number) ?? 0;
+      latestErrors = ((errorResults.aggregations?.top_error_hits as any)?.hits.hits ?? []).map(
+        (hit: any) => ({
+          agentId: hit._source.agent_id,
+          error: hit._source.error,
+          timestamp: hit._source['@timestamp'],
+        })
+      );
+      if (latestErrors.length > 0) {
+        const hostNames = await getHostNames(
+          esClient,
+          latestErrors.map((errorItem: ActionErrorResult) => errorItem.agentId)
+        );
+        latestErrors.forEach((errorItem: ActionErrorResult) => {
+          errorItem.hostname = hostNames[errorItem.agentId] ?? errorItem.agentId;
+        });
+      }
     } catch (err) {
       if (err.statusCode === 404) {
         // .fleet-actions-results does not yet exist
@@ -129,10 +157,37 @@ export async function getActionStatuses(
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime,
+      latestErrors,
     });
   }
 
-  return results;
+  const policyChangeActions = await getPolicyChangeActions(esClient);
+  return [...results, ...policyChangeActions].sort((a: ActionStatus, b: ActionStatus) =>
+    b.creationTime > a.creationTime ? 1 : -1
+  );
+}
+
+async function getHostNames(esClient: ElasticsearchClient, agentIds: string[]) {
+  const agentsRes = await esClient.search({
+    index: AGENTS_INDEX,
+    query: {
+      bool: {
+        filter: {
+          terms: {
+            'agent.id': agentIds,
+          },
+        },
+      },
+    },
+    size: agentIds.length,
+    _source: ['local_metadata.host.name'],
+  });
+  const hostNames = agentsRes.hits.hits.reduce((acc: { [key: string]: string }, curr) => {
+    acc[curr._id] = (curr._source as any).local_metadata.host.name;
+    return acc;
+  }, {});
+
+  return hostNames;
 }
 
 export async function getCancelledActions(
@@ -163,7 +218,7 @@ export async function getCancelledActions(
 
 async function _getActions(
   esClient: ElasticsearchClient,
-  options: ListWithKuery
+  options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
@@ -205,7 +260,7 @@ async function _getActions(
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
           startTime: source.start_time,
-          type: source.type,
+          type: source.type as AgentActionType,
           nbAgentsActioned: source.total ?? 0,
           status: isExpired
             ? 'EXPIRED'
@@ -234,3 +289,148 @@ export const hasRolloutPeriodPassed = (source: FleetServerAgentAction) =>
         .add(source.rollout_duration_seconds, 'seconds')
         .valueOf()
     : false;
+
+async function getPolicyChangeActions(esClient: ElasticsearchClient): Promise<ActionStatus[]> {
+  const latestAgentPoliciesRes = await esClient.search({
+    index: AGENT_POLICY_INDEX,
+    size: 10,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              revision_idx: {
+                gt: 1,
+              },
+            },
+          },
+        ],
+      },
+    },
+    sort: [
+      {
+        '@timestamp': {
+          order: 'desc',
+        },
+      },
+    ],
+    _source: ['revision_idx', '@timestamp', 'policy_id'],
+  });
+
+  interface AgentPolicyRevision {
+    policyId: string;
+    revision: number;
+    timestamp: string;
+    agentsAssignedToPolicy: number;
+    agentsOnAtLeastThisRevision: number;
+  }
+
+  const latestAgentPolicies: { [key: string]: AgentPolicyRevision } =
+    latestAgentPoliciesRes.hits.hits.reduce((acc, curr) => {
+      const hit = curr._source! as any;
+      acc[`${hit.policy_id}:${hit.revision_idx}`] = {
+        policyId: hit.policy_id,
+        revision: hit.revision_idx,
+        timestamp: hit['@timestamp'],
+        agentsAssignedToPolicy: 0,
+        agentsOnAtLeastThisRevision: 0,
+      };
+      return acc;
+    }, {} as { [key: string]: AgentPolicyRevision });
+
+  const agentsPerPolicyRevisionRes = await esClient.search({
+    index: AGENTS_INDEX,
+    size: 0,
+    // ignore unenrolled agents
+    query: {
+      bool: { must_not: [{ exists: { field: 'unenrolled_at' } }] },
+    },
+    aggs: {
+      policies: {
+        terms: {
+          field: 'policy_id',
+          size: 10,
+        },
+        aggs: {
+          agents_per_rev: {
+            terms: {
+              field: 'policy_revision_idx',
+              size: 10,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  interface AgentsPerPolicyRev {
+    total: number;
+    agentsPerRev: Array<{
+      revision: number;
+      agents: number;
+    }>;
+  }
+
+  const agentsPerPolicyRevisionMap: { [key: string]: AgentsPerPolicyRev } = (
+    agentsPerPolicyRevisionRes.aggregations!.policies as any
+  ).buckets.reduce(
+    (
+      acc: { [key: string]: AgentsPerPolicyRev },
+      policyBucket: { key: string; doc_count: number; agents_per_rev: any }
+    ) => {
+      const policyId = policyBucket.key;
+      const policyAgentCount = policyBucket.doc_count;
+      if (!acc[policyId])
+        acc[policyId] = {
+          total: 0,
+          agentsPerRev: [],
+        };
+      acc[policyId].total = policyAgentCount;
+      acc[policyId].agentsPerRev = policyBucket.agents_per_rev.buckets.map(
+        (agentsPerRev: { key: string; doc_count: number }) => {
+          return {
+            revision: agentsPerRev.key,
+            agents: agentsPerRev.doc_count,
+          };
+        }
+      );
+      return acc;
+    },
+    {}
+  );
+
+  Object.values(latestAgentPolicies).forEach((agentPolicyRev) => {
+    const agentsPerPolicyRev = agentsPerPolicyRevisionMap[agentPolicyRev.policyId];
+    if (agentsPerPolicyRev) {
+      agentPolicyRev.agentsAssignedToPolicy = agentsPerPolicyRev.total;
+      agentsPerPolicyRev.agentsPerRev.forEach((item) => {
+        if (agentPolicyRev.revision <= item.revision) {
+          agentPolicyRev.agentsOnAtLeastThisRevision += item.agents;
+        }
+      });
+    }
+  });
+
+  const agentPolicyUpdateActions: ActionStatus[] = Object.entries(latestAgentPolicies).map(
+    ([updateKey, updateObj]: [updateKey: string, updateObj: AgentPolicyRevision]) => {
+      return {
+        actionId: updateKey,
+        creationTime: updateObj.timestamp,
+        completionTime: updateObj.timestamp,
+        type: 'POLICY_CHANGE',
+        nbAgentsActioned: updateObj.agentsAssignedToPolicy,
+        nbAgentsAck: updateObj.agentsOnAtLeastThisRevision,
+        nbAgentsActionCreated: updateObj.agentsAssignedToPolicy,
+        nbAgentsFailed: 0,
+        status:
+          updateObj.agentsAssignedToPolicy === updateObj.agentsOnAtLeastThisRevision
+            ? 'COMPLETE'
+            : 'IN_PROGRESS',
+        policyId: updateObj.policyId,
+        revision: updateObj.revision,
+      };
+    }
+  );
+
+  return agentPolicyUpdateActions;
+}

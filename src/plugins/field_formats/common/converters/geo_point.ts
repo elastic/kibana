@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { FIELD_FORMAT_IDS, TextContextTypeConvert } from '../types';
-import { asPrettyString } from '../utils';
-
+import { asPrettyString, geoUtils } from '../utils';
+const { ddToMGRS, ddToDMS } = geoUtils;
 const TRANSFORM_OPTIONS = [
   {
     kind: 'none',
@@ -30,6 +30,24 @@ const TRANSFORM_OPTIONS = [
     kind: 'wkt',
     text: i18n.translate('fieldFormats.geoPoint.transformOptions.wkt', {
       defaultMessage: 'Well-Known Text',
+    }),
+  },
+  {
+    kind: 'dms',
+    text: i18n.translate('fieldFormats.geoPoint.transformOptions.dms', {
+      defaultMessage: 'Degrees Minutes Seconds',
+    }),
+  },
+  {
+    kind: 'mgrs',
+    text: i18n.translate('fieldFormats.geoPoint.transformOptions.mgrs', {
+      defaultMessage: 'Military Grid Reference System (MGRS)',
+    }),
+  },
+  {
+    kind: 'multi',
+    text: i18n.translate('fieldFormats.geoPoint.transformOptions.multi', {
+      defaultMessage: 'All formats',
     }),
   },
 ];
@@ -113,6 +131,15 @@ export class GeoPointFormat extends FieldFormat {
         return `${point.coordinates[1]},${point.coordinates[0]}`;
       case 'wkt':
         return `POINT (${point.coordinates[0]} ${point.coordinates[1]})`;
+      case 'dms':
+        return `${ddToDMS(point.coordinates[1], point.coordinates[0])}`;
+      case 'mgrs':
+        return `${ddToMGRS(point.coordinates[1], point.coordinates[0])}`;
+      case 'multi':
+        return `Lat Lon: ${point.coordinates[1]},${point.coordinates[0]}
+WKT: POINT (${point.coordinates[0]} ${point.coordinates[1]})
+MGRS: ${ddToMGRS(point.coordinates[1], point.coordinates[0])}
+DMS: ${ddToDMS(point.coordinates[1], point.coordinates[0])}`;
       default:
         return asPrettyString(val, options);
     }

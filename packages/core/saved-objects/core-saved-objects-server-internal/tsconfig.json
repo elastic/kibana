@@ -45,6 +45,8 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/utils",
     "@kbn/core-http-router-server-internal",
+    "@kbn/logging-mocks",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

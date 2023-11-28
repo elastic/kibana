@@ -17,30 +17,18 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
-  getRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getPerformBulkActionSchemaMock,
-} from '../../../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../../logic/crud/read_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
-import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
 jest.mock('../../../../../machine_learning/authz');
 jest.mock('../../../logic/crud/read_rules', () => ({ readRules: jest.fn() }));
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
@@ -55,7 +43,6 @@ describe('Perform bulk action route', () => {
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     performBulkActionRoute(server.router, ml, logger);
@@ -499,7 +486,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "action",Invalid value "undefined" supplied to "edit"'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
       );
     });
 
@@ -511,7 +498,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown" supplied to "action",Invalid value "undefined" supplied to "edit"'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
       );
     });
 
@@ -544,7 +531,9 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionSchemaMock(), ids: 'test fake' },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "test fake" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 7 more'
+      );
     });
 
     it('rejects payload if there is more than 100 ids in payload', async () => {
@@ -590,7 +579,9 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionSchemaMock(), ids: [] },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "[]" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'ids: Array must contain at least 1 element(s)'
+      );
     });
 
     it('rejects payloads if property "edit" actions is empty', async () => {
@@ -601,7 +592,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid value "[]" supplied to "edit"')
+        expect.stringContaining('edit: Array must contain at least 1 element(s)')
       );
     });
 
@@ -614,7 +605,9 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid value "invalid" supplied to "dry_run"')
+        expect.stringContaining(
+          "dry_run: Invalid enum value. Expected 'true' | 'false', received 'invalid', dry_run: Expected boolean, received string"
+        )
       );
     });
   });

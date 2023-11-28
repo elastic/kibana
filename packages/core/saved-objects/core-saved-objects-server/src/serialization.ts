@@ -73,16 +73,23 @@ export interface SavedObjectsRawDoc {
   _primary_term?: number;
 }
 
-/** @public */
+/**
+ * Saved object document as stored in `_source` of doc in ES index
+ * Similar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]
+ *
+ * @public
+ */
 export interface SavedObjectsRawDocSource {
   type: string;
   namespace?: string;
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
+  typeMigrationVersion?: string;
   updated_at?: string;
   created_at?: string;
   references?: SavedObjectReference[];
   originId?: string;
+  managed?: boolean;
 
   [typeMapping: string]: any;
 }
@@ -100,10 +107,12 @@ interface SavedObjectDoc<T = unknown> {
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
   coreMigrationVersion?: string;
+  typeMigrationVersion?: string;
   version?: string;
   updated_at?: string;
   created_at?: string;
   originId?: string;
+  managed?: boolean;
 }
 
 /**
@@ -141,4 +150,12 @@ export interface SavedObjectsRawDocParseOptions {
    * If not specified, the default treatment is `strict`.
    */
   namespaceTreatment?: 'strict' | 'lax';
+
+  /**
+   * Optional setting to allow compatible handling of the `migrationVersion` field.
+   * This is needed to return the `migrationVersion` field in the same format as it was before migrating to the `typeMigrationVersion` property.
+   *
+   * @default 'raw'
+   */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }

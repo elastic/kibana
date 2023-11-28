@@ -5,25 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { ESQuery } from '../../../../typed_json';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
-import type { RiskScoreEntity } from '../common';
-
-export interface RiskScoreRequestOptions extends IEsSearchRequest {
-  defaultIndex: string[];
-  riskScoreEntity: RiskScoreEntity;
-  timerange?: TimerangeInput;
-  includeAlertsCount?: boolean;
-  onlyLatest?: boolean;
-  pagination?: {
-    cursorStart: number;
-    querySize: number;
-  };
-  sort?: RiskScoreSortField;
-  filterQuery?: ESQuery | string | undefined;
-}
+import type { Inspect, Maybe, SortField } from '../../../common';
+import type { RiskInputs } from '../../../../risk_engine';
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
@@ -42,6 +27,7 @@ export interface RiskStats {
   calculated_score_norm: number;
   multipliers: string[];
   calculated_level: RiskSeverity;
+  inputs?: RiskInputs;
 }
 
 export interface HostRiskScore {
@@ -88,6 +74,8 @@ export interface RiskScoreItem {
   [RiskScoreFields.hostName]: Maybe<string>;
   [RiskScoreFields.userName]: Maybe<string>;
 
+  [RiskScoreFields.timestamp]: Maybe<string>;
+
   [RiskScoreFields.hostRisk]: Maybe<RiskSeverity>;
   [RiskScoreFields.userRisk]: Maybe<RiskSeverity>;
 
@@ -115,11 +103,3 @@ export const EMPTY_SEVERITY_COUNT = {
   [RiskSeverity.moderate]: 0,
   [RiskSeverity.unknown]: 0,
 };
-
-export const SEVERITY_UI_SORT_ORDER = [
-  RiskSeverity.unknown,
-  RiskSeverity.low,
-  RiskSeverity.moderate,
-  RiskSeverity.high,
-  RiskSeverity.critical,
-];

@@ -5,66 +5,95 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isEqual } from 'lodash';
-import { DiscoverStateContainer } from '../../services/discover_state';
-import { AppState, isEqualState } from '../../services/discover_app_state_container';
+import type { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
+import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
+import type { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
+import type { DiscoverStateContainer } from '../../services/discover_state';
+import {
+  DiscoverAppState,
+  DiscoverAppStateContainer,
+  isEqualState,
+} from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { FetchStatus } from '../../../types';
+import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
  * or programmatically. It's main purpose is to detect which changes should trigger a refetch of the data.
  * @param stateContainer
- * @param savedSearch
- * @param setState
  */
 export const buildStateSubscribe =
   ({
-    stateContainer,
-    savedSearch,
-    setState,
+    appState,
+    dataState,
+    internalState,
+    savedSearchState,
+    services,
+    setDataView,
   }: {
-    stateContainer: DiscoverStateContainer;
-    savedSearch: SavedSearch;
-    setState: (state: AppState) => void;
+    appState: DiscoverAppStateContainer;
+    dataState: DiscoverDataStateContainer;
+    internalState: DiscoverInternalStateContainer;
+    savedSearchState: DiscoverSavedSearchContainer;
+    services: DiscoverServices;
+    setDataView: DiscoverStateContainer['actions']['setDataView'];
   }) =>
-  async (nextState: AppState) => {
-    const prevState = stateContainer.appState.getPrevious();
-    if (isEqualState(prevState, nextState)) {
-      addLog('[appstate] subscribe update ignored due to no changes');
+  async (nextState: DiscoverAppState) => {
+    const prevState = appState.getPrevious();
+    const nextQuery = nextState.query;
+    const savedSearch = savedSearchState.getState();
+    const prevQuery = savedSearch.searchSource.getField('query');
+    const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
+    if (isEqualState(prevState, nextState) && !queryChanged) {
+      addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
-    const { hideChart, interval, breakdownField, sort, index } =
-      stateContainer.appState.getPrevious();
+    const { hideChart, interval, breakdownField, sampleSize, sort, index } = prevState;
+
+    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
+    if (isTextBasedQueryLang) {
+      const isTextBasedQueryLangPrev = isTextBasedQuery(prevQuery);
+      if (!isTextBasedQueryLangPrev) {
+        savedSearchState.update({ nextState });
+        dataState.reset(savedSearch);
+      }
+    }
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
-    const chartIntervalChanged = nextState.interval !== interval;
+    const chartIntervalChanged = nextState.interval !== interval && !isTextBasedQueryLang;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
-    const docTableSortChanged = !isEqual(nextState.sort, sort);
-    const dataViewChanged = !isEqual(nextState.index, index);
+    const sampleSizeChanged = nextState.sampleSize !== sampleSize;
+    const docTableSortChanged = !isEqual(nextState.sort, sort) && !isTextBasedQueryLang;
+    const dataViewChanged = !isEqual(nextState.index, index) && !isTextBasedQueryLang;
+    let savedSearchDataView;
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
-      const { dataView: nextDataView, fallback } =
-        await stateContainer.actions.loadAndResolveDataView(nextState.index, savedSearch);
+      const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
+        { id: nextState.index, savedSearch, isTextBasedQuery: isTextBasedQuery(nextState?.query) },
+        { internalStateContainer: internalState, services }
+      );
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        stateContainer.appState.update({ index: nextDataView.id }, true);
+        appState.update({ index: nextDataView.id }, true);
         return;
       }
       savedSearch.searchSource.setField('index', nextDataView);
-      stateContainer.dataState.reset();
-      stateContainer.actions.setDataView(nextDataView);
+      dataState.reset(savedSearch);
+      setDataView(nextDataView);
+      savedSearchDataView = nextDataView;
     }
 
-    if (
-      dataViewChanged &&
-      stateContainer.dataState.initialFetchStatus === FetchStatus.UNINITIALIZED
-    ) {
+    savedSearchState.update({ nextDataView: savedSearchDataView, nextState });
+
+    if (dataViewChanged && dataState.getInitialFetchStatus() === FetchStatus.UNINITIALIZED) {
       // stop execution if given data view has changed, and it's not configured to initially start a search in Discover
       return;
     }
@@ -73,11 +102,35 @@ export const buildStateSubscribe =
       chartDisplayChanged ||
       chartIntervalChanged ||
       breakdownFieldChanged ||
-      docTableSortChanged
+      sampleSizeChanged ||
+      docTableSortChanged ||
+      dataViewChanged ||
+      queryChanged
     ) {
-      addLog('[appstate] subscribe triggers data fetching');
-      stateContainer.dataState.refetch$.next(undefined);
-    }
+      const logData = {
+        chartDisplayChanged: logEntry(chartDisplayChanged, hideChart, nextState.hideChart),
+        chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
+        breakdownFieldChanged: logEntry(
+          breakdownFieldChanged,
+          breakdownField,
+          nextState.breakdownField
+        ),
+        docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
+        dataViewChanged: logEntry(dataViewChanged, index, nextState.index),
+        queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
+      };
 
-    setState(nextState);
+      addLog(
+        '[buildStateSubscribe] state changes triggers data fetching',
+        JSON.stringify(logData, null, 2)
+      );
+
+      dataState.fetch();
+    }
   };
+
+const logEntry = <T>(changed: boolean, prevState: T, nextState: T) => ({
+  changed,
+  prevState,
+  nextState,
+});

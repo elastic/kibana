@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
@@ -23,18 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
-
-const cardCss = css`
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-`;
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {
@@ -84,6 +71,23 @@ export const GuideCard = ({
   const isHighlighted = activeFilter === 'all' || activeFilter === card.solution;
   const isComplete = guideState && guideState.status === 'complete';
   const progress = getProgressLabel(guideState);
+
+  const cardCss = css`
+    position: relative;
+    height: 125px;
+    width: 380px;
+    .euiCard__top {
+      margin-block-end: 8px;
+    }
+    @media (max-width: ${euiTheme.breakpoint.s}px) {
+      max-width: 335px;
+    }
+    @media (min-width: 768px) and (max-width: 1210px) {
+      max-width: 230px;
+      height: 175px;
+    }
+  `;
+
   return (
     <EuiCard
       // data-test-subj used for FS tracking
@@ -93,16 +97,9 @@ export const GuideCard = ({
       css={cardCss}
       display={isHighlighted ? undefined : 'transparent'}
       hasBorder={!isHighlighted}
-      title={
-        <>
-          <EuiSpacer size="s" />
-          <h3 style={{ fontWeight: 600 }}>{card.title}</h3>
-        </>
-      }
+      title={<h3 style={{ fontWeight: 600 }}>{card.title}</h3>}
       titleSize="xs"
-      betaBadgeProps={{
-        label: card.solution,
-      }}
+      icon={<EuiIcon size="l" type={card.icon} />}
       description={
         <>
           {progress && (
@@ -111,7 +108,12 @@ export const GuideCard = ({
             </EuiTextColor>
           )}
           {isComplete && (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              justifyContent="center"
+            >
               <EuiFlexItem grow={false}>
                 <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
               </EuiFlexItem>
@@ -124,7 +126,6 @@ export const GuideCard = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {card.navigateTo && <EuiIcon type="document" />}
         </>
       }
     />

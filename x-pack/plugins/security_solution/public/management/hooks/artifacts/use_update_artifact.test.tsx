@@ -54,6 +54,7 @@ describe('Update artifact hook', () => {
       expect(onSuccessMock).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.put).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.put).toHaveBeenCalledWith('/api/exception_lists/items', {
+        version: '2023-10-31',
         body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exceptionItem)),
       });
     });

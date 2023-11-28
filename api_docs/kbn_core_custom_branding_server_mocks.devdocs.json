@@ -66,7 +66,7 @@
             "label": "createSetupContract",
             "description": [],
             "signature": [
-              "() => { register: jest.Mock<any, any>; getBrandingFor: jest.Mock<any, any>; }"
+              "() => { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }"
             ],
             "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
             "deprecated": false,

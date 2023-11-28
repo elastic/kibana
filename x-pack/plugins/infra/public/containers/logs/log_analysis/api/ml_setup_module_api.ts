@@ -38,14 +38,15 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
     useDedicatedIndex = false,
   } = requestArgs;
 
-  const response = await fetch(`/api/ml/modules/setup/${moduleId}`, {
+  const response = await fetch(`/internal/ml/modules/setup/${moduleId}`, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
         start,
         end,
         indexPatternName: indexPattern,
-        prefix: getJobIdPrefix(spaceId, sourceId),
+        prefix: getJobIdPrefix(spaceId, sourceId, 'hashed'),
         startDatafeed: true,
         jobOverrides,
         datafeedOverrides,

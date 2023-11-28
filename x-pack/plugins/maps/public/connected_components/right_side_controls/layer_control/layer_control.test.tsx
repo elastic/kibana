@@ -33,6 +33,7 @@ const defaultProps = {
   isLayerTOCOpen: true,
   layerList: [],
   isFlyoutOpen: false,
+  zoom: 0,
 };
 
 describe('LayerControl', () => {
@@ -60,47 +61,36 @@ describe('LayerControl', () => {
       expect(component).toMatchSnapshot();
     });
 
-    describe('spinner icon', () => {
-      const isLayerLoading = true;
-      let isVisible = true;
-      const mockLayerThatIsLoading = {
-        hasErrors: () => {
-          return false;
-        },
-        isLayerLoading: () => {
-          return isLayerLoading;
-        },
-        isVisible: () => {
-          return isVisible;
-        },
-      } as unknown as ILayer;
-      test('Should render expand button with loading icon when layer is loading', () => {
-        const component = shallow(
-          <LayerControl
-            {...defaultProps}
-            isLayerTOCOpen={false}
-            layerList={[mockLayerThatIsLoading]}
-          />
-        );
-        expect(component).toMatchSnapshot();
-      });
-      test('Should not render expand button with loading icon when layer is invisible', () => {
-        isVisible = false;
-        const component = shallow(
-          <LayerControl
-            {...defaultProps}
-            isLayerTOCOpen={false}
-            layerList={[mockLayerThatIsLoading]}
-          />
-        );
-        expect(component).toMatchSnapshot();
-      });
+    test('Should render expand button with loading icon when layer is loading', () => {
+      const component = shallow(
+        <LayerControl
+          {...defaultProps}
+          isLayerTOCOpen={false}
+          layerList={[
+            {
+              hasErrors: () => {
+                return false;
+              },
+              hasWarnings: () => {
+                return false;
+              },
+              isLayerLoading: () => {
+                return true;
+              },
+            } as unknown as ILayer,
+          ]}
+        />
+      );
+      expect(component).toMatchSnapshot();
     });
 
     test('Should render expand button with error icon when layer has error', () => {
       const mockLayerThatHasError = {
         hasErrors: () => {
           return true;
+        },
+        hasWarnings: () => {
+          return false;
         },
         isLayerLoading: () => {
           return false;

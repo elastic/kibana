@@ -342,7 +342,7 @@ Create your map and set the theme for the default layer to dark mode.
 . Click *Create map*.
 . In the *Layers* list, click *Road map*, and then click *Edit layer settings*.
 . Open the *Tile service* dropdown, and select *Road map - dark*.
-. Click *Save & close*.
+. Click *Keep changes*.
 
 [float]
 ==== Step 2. Add a tracks layer
@@ -355,12 +355,12 @@ Add a layer to show the bus routes for the last 15 minutes.
 . Define the tracks:
 .. Set *Entity* to *trimet.vehicleID*.
 .. Set *Sort* to *trimet.time*.
-. Click *Add layer*.
+. Click *Add and continue*.
 . In Layer settings:
 .. Set *Name* to *Buses*.
 .. Set *Opacity* to 80%.
 . Scroll to *Layer Style*, and set *Border color* to pink.
-. Click *Save & close*.
+. Click *Keep changes*.
 . In the *Layers* list, click *Buses*, and then click *Fit to data*.
 
 At this point, you have a map with lines that represent the routes of the buses as they move around the city.
@@ -380,7 +380,7 @@ Add a layer that uses attributes in the data to set the style and orientation of
 .. Set *Documents per entity* to 1.
 .. Set *Sort field* to *trimet.time*.
 .. Set *Sort order* to *descending*.
-. Click *Add layer*.
+. Click *Add and continue*.
 . Scroll to *Layer Style*.
 .. Set *Symbol type* to *icon*.
 .. Set *Icon* to *arrow-es*.
@@ -395,7 +395,7 @@ Add a layer that uses attributes in the data to set the style and orientation of
 +
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/top_hits_layer_style.png[]
-. Click *Save & close*.
+. Click *Keep changes*.
 . Open the <<set-time-filter, time filter>>, and set *Refresh every* to 10 seconds, and click *Start*.
 
 Your map should automatically refresh every 10 seconds to show the latest bus positions and tracks.
@@ -423,7 +423,7 @@ Add a layer for construction zones, which you will draw on the map. The construc
 . When you finish drawing the construction zones, click *Exit* under the layer name in the legend.
 . In *Layer settings*, set *Name* to *Construction zones*.
 . Scroll to *Layer Style*, and set *Fill color* to yellow.
-. Click *Save & close*.
+. Click *Keep changes*.
 . *Save* the map.
 .. Give the map a title.
 .. Under *Add to dashboard*, select *None*.
@@ -440,7 +440,9 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 [float]
 ==== Step 2. Configure an alert
 
-Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will log a message to the Kibana log.
+Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will log a message to the {kib} log. 
+
+NOTE: For this example, you will set the rule to check every 5 seconds. However, when running in production, consider setting a higher check interval (such as 1 minute) to avoid performance issues. Refer to <<alerting-production-considerations,Alerting production considerations>> for more information.
 
 . Open *{stack-manage-app}*, and then click *{rules-ui}*.
 . Click *Create rule*.

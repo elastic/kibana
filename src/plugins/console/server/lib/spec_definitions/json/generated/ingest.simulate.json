@@ -1,6 +1,10 @@
 {
   "ingest.simulate": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "verbose": "__flag__"
     },
     "methods": [
@@ -11,6 +15,10 @@
       "_ingest/pipeline/_simulate",
       "_ingest/pipeline/{id}/_simulate"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/simulate-pipeline-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/simulate-pipeline-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -6,10 +6,18 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import '@kbn/kibana-react-plugin/public/code_editor/code_editor.test.helpers';
+import '@kbn/code-editor/code_editor.test.helpers';
 import { TestProvider } from '../../test/test_provider';
-import { getCloudDefendNewPolicyMock, MOCK_YAML_INVALID_CONFIGURATION } from '../../test/mocks';
+import {
+  getCloudDefendNewPolicyMock,
+  MOCK_YAML_INVALID_CONFIGURATION,
+  MOCK_YAML_INVALID_ACTIONS,
+  MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
+  MOCK_YAML_INVALID_STRING_ARRAY_CONDITION,
+} from '../../test/mocks';
 import { ControlYamlView } from '.';
+import * as i18n from './translations';
+import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
 
 describe('<ControlYamlView />', () => {
   const onChange = jest.fn();
@@ -30,5 +38,40 @@ describe('<ControlYamlView />', () => {
     render(
       <WrappedComponent policy={getCloudDefendNewPolicyMock(MOCK_YAML_INVALID_CONFIGURATION)} />
     );
+  });
+
+  it('handles additionalErrors: max selectors+responses exceeded ', async () => {
+    const { getByText, getByTestId } = render(
+      <WrappedComponent
+        policy={getCloudDefendNewPolicyMock(MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES)}
+      />
+    );
+
+    expect(getByTestId('cloudDefendAdditionalErrors')).toBeTruthy();
+    expect(
+      getByText(
+        `You cannot exceed ${MAX_SELECTORS_AND_RESPONSES_PER_TYPE} selectors + responses for a given type e.g file, process`
+      )
+    ).toBeTruthy();
+  });
+
+  it('handles additionalErrors: block action error', async () => {
+    const { getByText, getByTestId } = render(
+      <WrappedComponent policy={getCloudDefendNewPolicyMock(MOCK_YAML_INVALID_ACTIONS)} />
+    );
+
+    expect(getByTestId('cloudDefendAdditionalErrors')).toBeTruthy();
+    expect(getByText(i18n.errorAlertActionRequired)).toBeTruthy();
+  });
+
+  it('handles additionalErrors: selector condition value byte length', async () => {
+    const { getByText, getByTestId } = render(
+      <WrappedComponent
+        policy={getCloudDefendNewPolicyMock(MOCK_YAML_INVALID_STRING_ARRAY_CONDITION)}
+      />
+    );
+
+    expect(getByTestId('cloudDefendAdditionalErrors')).toBeTruthy();
+    expect(getByText('"targetFilePath" values cannot exceed 255 bytes')).toBeTruthy();
   });
 });

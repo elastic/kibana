@@ -6,12 +6,13 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiText, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiText, EuiLink, EuiEmptyPrompt, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HelpCommands } from './help_commands';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { fetchServiceAPIKey } from '../../../state/monitor_management/api';
+import { fetchProjectAPIKey } from '../../../state/monitor_management/api';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { ApiKeyBtn } from './api_key_btn';
 import { useEnablement } from '../../../hooks';
@@ -26,21 +27,40 @@ export const ProjectAPIKeys = () => {
   } = useEnablement();
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
   const [loadAPIKey, setLoadAPIKey] = useState(false);
+  const [accessToElasticManagedLocations, setAccessToElasticManagedLocations] = useState(true);
 
   const kServices = useKibana<ClientPluginsStart>().services;
   const canSaveIntegrations: boolean =
     !!kServices?.fleet?.authz.integrations.writeIntegrationPolicies;
 
-  const { data, loading } = useFetcher(async () => {
+  const canUsePublicLocations =
+    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+
+  const { data, loading, error } = useFetcher(async () => {
     if (loadAPIKey) {
-      return fetchServiceAPIKey();
+      return fetchProjectAPIKey(accessToElasticManagedLocations && Boolean(canUsePublicLocations));
     }
     return null;
-  }, [loadAPIKey]);
+  }, [loadAPIKey, canUsePublicLocations]);
 
   useEffect(() => {
-    setApiKey(data?.apiKey.encoded);
+    if (data?.apiKey) {
+      setApiKey(data?.apiKey.encoded);
+    }
+    setLoadAPIKey(false);
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      const requestError = error as IHttpFetchError<ResponseErrorBody>;
+      kServices?.notifications?.toasts.addError(error, {
+        title: i18n.translate('xpack.synthetics.createApiKey.error', {
+          defaultMessage: 'Error',
+        }),
+        toastMessage: requestError?.body?.message,
+      });
+    }
+  }, [error, kServices?.notifications?.toasts]);
 
   const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
@@ -59,16 +79,37 @@ export const ProjectAPIKeys = () => {
               <EuiText>
                 {GET_API_KEY_LABEL_DESCRIPTION}{' '}
                 {!canSaveIntegrations ? `${API_KEY_DISCLAIMER} ` : ''}
-                <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
+                <EuiLink
+                  data-test-subj="syntheticsProjectAPIKeysLink"
+                  href={syntheticsTestRunDocsLink}
+                  external
+                  target="_blank"
+                >
                   {LEARN_MORE_LABEL}
                 </EuiLink>
               </EuiText>
+              <EuiSpacer />
+              <EuiSwitch
+                label={i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
+                  defaultMessage: 'Elastic managed locations enabled',
+                })}
+                checked={accessToElasticManagedLocations && Boolean(canUsePublicLocations)}
+                onChange={() => {
+                  setAccessToElasticManagedLocations(!accessToElasticManagedLocations);
+                }}
+                disabled={!canUsePublicLocations}
+              />
             </>
           ) : (
             <>
               <EuiText>
                 {GET_API_KEY_REDUCED_PERMISSIONS_LABEL}{' '}
-                <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
+                <EuiLink
+                  data-test-subj="syntheticsProjectAPIKeysLink"
+                  href={syntheticsTestRunDocsLink}
+                  external
+                  target="_blank"
+                >
                   {LEARN_MORE_LABEL}
                 </EuiLink>
               </EuiText>

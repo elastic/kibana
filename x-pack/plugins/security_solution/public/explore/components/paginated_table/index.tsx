@@ -17,7 +17,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
@@ -205,7 +205,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
         id: 'PaginationWarningMsg',
         title: headerTitle + i18n.TOAST_TITLE,
         color: 'warning',
-        iconType: 'alert',
+        iconType: 'warning',
         toastLifeTimeMs: 10000,
         text: i18n.TOAST_TEXT,
       };
@@ -297,7 +297,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
         </HeaderSection>
         {toggleStatus &&
           (loadingInitial ? (
-            <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
+            <EuiSkeletonText data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
           ) : (
             <>
               <BasicTable

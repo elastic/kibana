@@ -8,12 +8,14 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 
-import { setup } from '@kbn/core-test-helpers-http-setup-browser';
+import type { HttpSetup } from '@kbn/core/public';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { setup } from '@kbn/core-test-helpers-http-setup-browser';
 
-import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
 import { SessionExpired } from './session_expired';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
+import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
+import { LogoutReason } from '../../common/types';
 
 jest.mock('./session_expired');
 
@@ -29,7 +31,7 @@ const setupHttp = (basePath: string) => {
   const { http } = setup((injectedMetadata) => {
     injectedMetadata.getBasePath.mockReturnValue(basePath);
   });
-  return http;
+  return http as HttpSetup;
 };
 const tenant = '';
 const application = applicationServiceMock.createStartContract();
@@ -38,9 +40,15 @@ afterEach(() => {
   fetchMock.restore();
 });
 
-for (const reason of ['AUTHENTICATION_ERROR', 'SESSION_EXPIRED']) {
+for (const reason of [
+  LogoutReason.AUTHENTICATION_ERROR,
+  LogoutReason.SESSION_EXPIRED,
+  LogoutReason.CONCURRENCY_LIMIT,
+]) {
   const headers =
-    reason === 'SESSION_EXPIRED' ? { [SESSION_ERROR_REASON_HEADER]: reason } : undefined;
+    reason === LogoutReason.SESSION_EXPIRED || reason === LogoutReason.CONCURRENCY_LIMIT
+      ? { [SESSION_ERROR_REASON_HEADER]: reason }
+      : undefined;
 
   it(`logs out 401 responses (reason: ${reason})`, async () => {
     const http = setupHttp('/foo');

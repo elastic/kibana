@@ -40,6 +40,25 @@ export function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
   return fleetPluginStart.createArtifactsClient('apm');
 }
 
+export interface ListSourceMapArtifactsResponse {
+  artifacts: Array<{
+    body: ApmSourceMapArtifactBody;
+    id: string;
+    created: string;
+    compressionAlgorithm: 'none' | 'zlib';
+    encryptionAlgorithm: 'none';
+    decodedSha256: string;
+    decodedSize: number;
+    encodedSha256: string;
+    encodedSize: number;
+    identifier: string;
+    packageName: string;
+    relative_url: string;
+    type?: string | undefined;
+  }>;
+  total: number;
+}
+
 export async function listSourceMapArtifacts({
   fleetPluginStart,
   perPage = 20,
@@ -48,7 +67,7 @@ export async function listSourceMapArtifacts({
   fleetPluginStart: FleetPluginStart;
   perPage?: number;
   page?: number;
-}) {
+}): Promise<ListSourceMapArtifactsResponse> {
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
   const artifactsResponse = await apmArtifactClient.listArtifacts({
     kuery: 'type: sourcemap',

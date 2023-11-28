@@ -164,7 +164,6 @@ const rules = {
     terms: {
       __template: {
         field: '',
-        size: 10,
       },
       field: '{field}',
       size: 10,
@@ -173,7 +172,7 @@ const rules = {
         __template: {
           _key: 'asc',
         },
-        _term: { __one_of: ['asc', 'desc'] },
+        _key: { __one_of: ['asc', 'desc'] },
         _count: { __one_of: ['asc', 'desc'] },
         '*': { __one_of: ['asc', 'desc'] },
       },
@@ -268,11 +267,11 @@ const rules = {
     date_histogram: {
       __template: {
         field: 'date',
-        interval: 'month',
+        fixed_interval: '1d',
       },
       field: '{field}',
-      interval: {
-        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second'],
+      fixed_interval: {
+        __one_of: ['1d', '1h', '1m', '1s', '1ms'],
       },
       min_doc_count: 0,
       extended_bounds: {
@@ -294,7 +293,6 @@ const rules = {
       keyed: { __one_of: [true, false] },
       pre_zone: '-01:00',
       post_zone: '-01:00',
-      pre_zone_adjust_large_interval: { __one_of: [true, false] },
       factor: 1000,
       pre_offset: '1d',
       post_offset: '1d',
@@ -302,7 +300,22 @@ const rules = {
       time_zone: '00:00',
       missing: '',
       calendar_interval: {
-        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second'],
+        __one_of: [
+          'year',
+          'quarter',
+          'month',
+          'week',
+          'day',
+          'hour',
+          'minute',
+          '1y',
+          '1q',
+          '1M',
+          '1w',
+          '1d',
+          '1h',
+          '1m',
+        ],
       },
     },
     geo_distance: {

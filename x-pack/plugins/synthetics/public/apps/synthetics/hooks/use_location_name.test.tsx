@@ -8,6 +8,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useLocationName } from './use_location_name';
 import { WrappedHelper } from '../utils/testing';
+import { MonitorOverviewItem } from '../../../../common/runtime_types';
 
 describe('useLocationName', () => {
   beforeEach(() => {
@@ -47,18 +48,11 @@ describe('useLocationName', () => {
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_central',
-        }),
+          location: { id: 'us_central' },
+        } as MonitorOverviewItem),
       { wrapper: WrapperWithState }
     );
-    expect(result.current).toEqual({
-      geo: { lat: 41.25, lon: -95.86 },
-      id: 'us_central',
-      isServiceManaged: true,
-      label: 'US Central',
-      status: 'ga',
-      url: 'mockUrl',
-    });
+    expect(result.current).toEqual('US Central');
   });
 
   it('returns the location id if matching location cannot be found', () => {
@@ -94,10 +88,10 @@ describe('useLocationName', () => {
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_west',
-        }),
+          location: { id: 'us_west' },
+        } as MonitorOverviewItem),
       { wrapper: WrapperWithState }
     );
-    expect(result.current).toEqual(undefined);
+    expect(result.current).toEqual('us_west');
   });
 });

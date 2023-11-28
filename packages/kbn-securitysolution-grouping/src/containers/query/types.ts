@@ -6,15 +6,24 @@
  * Side Public License, v 1.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  InlineScript,
+  MappingRuntimeField,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-interface BoolAgg {
+type RunTimeMappings =
+  | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
+  | undefined;
+
+export interface BoolAgg {
   bool: BoolQuery;
 }
 
-interface RangeAgg {
+export interface RangeAgg {
   range: { '@timestamp': { gte: string; lte: string } };
 }
 
@@ -23,37 +32,41 @@ export type NamedAggregation = Record<string, estypes.AggregationsAggregationCon
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   from: string;
-  runtimeMappings?: MappingRuntimeFields;
+  groupByField: string;
+  rootAggregations?: NamedAggregation[];
+  runtimeMappings?: RunTimeMappings;
   additionalAggregationsRoot?: NamedAggregation[];
-  stackByMultipleFields0: string[];
-  stackByMultipleFields0Size?: number;
-  stackByMultipleFields0From?: number;
-  stackByMultipleFields0Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregationsFields0: NamedAggregation[];
-  stackByMultipleFields1: string[] | undefined;
-  stackByMultipleFields1Size?: number;
-  stackByMultipleFields1From?: number;
-  stackByMultipleFields1Sort?: Array<{ [category: string]: { order: estypes.SortOrder } }>;
-  additionalStatsAggregationsFields1: NamedAggregation[];
+  pageNumber?: number;
+  uniqueValue: string;
+  size?: number;
+  sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+  statsAggregations?: NamedAggregation[];
   to: string;
 }
 
 export interface MainAggregation extends NamedAggregation {
-  stackByMultipleFields0: {
-    terms?: estypes.AggregationsAggregationContainer['terms'];
-    multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
+  groupByFields: {
     aggs: NamedAggregation;
+    terms: estypes.AggregationsAggregationContainer['terms'];
   };
 }
 
+export interface GroupingRuntimeField extends MappingRuntimeField {
+  script: InlineScript & {
+    params: Record<string, any>;
+  };
+}
+
+type GroupingMappingRuntimeFields = Record<'groupByField', GroupingRuntimeField>;
+
 export interface GroupingQuery extends estypes.QueryDslQueryContainer {
-  size: number;
-  runtime_mappings: MappingRuntimeFields | undefined;
+  aggs: MainAggregation;
   query: {
     bool: {
       filter: Array<BoolAgg | RangeAgg>;
     };
   };
+  runtime_mappings: MappingRuntimeFields & GroupingMappingRuntimeFields;
+  size: number;
   _source: boolean;
-  aggs: MainAggregation;
 }

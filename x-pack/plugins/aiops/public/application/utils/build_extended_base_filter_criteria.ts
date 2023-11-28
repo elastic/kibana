@@ -11,11 +11,13 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Query } from '@kbn/es-query';
-import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
-import type { GroupTableItem } from '../../components/spike_analysis_table/types';
+import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
+
+import type { GroupTableItem } from '../../components/log_rate_analysis_results_table/types';
 
 /*
  * Contains utility functions for building and processing queries.
@@ -28,40 +30,80 @@ export function buildExtendedBaseFilterCriteria(
   earliestMs?: number,
   latestMs?: number,
   query?: Query['query'],
-  selectedChangePoint?: ChangePoint,
-  includeSelectedChangePoint = true,
+  selectedSignificantItem?: SignificantItem,
+  includeSelectedSignificantItem = true,
   selectedGroup?: GroupTableItem | null
 ): estypes.QueryDslQueryContainer[] {
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   const groupFilter = [];
   if (selectedGroup) {
-    const allItems: FieldValuePair[] = [...selectedGroup.group, ...selectedGroup.repeatedValues];
+    const allItems = selectedGroup.groupItemsSortedByUniqueness;
     for (const item of allItems) {
-      const { fieldName, fieldValue } = item;
-      groupFilter.push({ term: { [fieldName]: fieldValue } });
+      const { fieldName, fieldValue, key, type, docCount } = item;
+      if (type === SIGNIFICANT_ITEM_TYPE.KEYWORD) {
+        groupFilter.push({ term: { [fieldName]: fieldValue } });
+      } else {
+        groupFilter.push(
+          getCategoryQuery(fieldName, [
+            {
+              key,
+              count: docCount,
+              examples: [],
+            },
+          ])
+        );
+      }
     }
   }
 
-  if (includeSelectedChangePoint) {
-    if (selectedChangePoint) {
-      filterCriteria.push({
-        term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
-      });
+  if (includeSelectedSignificantItem) {
+    if (selectedSignificantItem) {
+      if (selectedSignificantItem.type === 'keyword') {
+        filterCriteria.push({
+          term: { [selectedSignificantItem.fieldName]: selectedSignificantItem.fieldValue },
+        });
+      } else {
+        filterCriteria.push(
+          getCategoryQuery(selectedSignificantItem.fieldName, [
+            {
+              key: `${selectedSignificantItem.key}`,
+              count: selectedSignificantItem.doc_count,
+              examples: [],
+            },
+          ])
+        );
+      }
     } else if (selectedGroup) {
       filterCriteria.push(...groupFilter);
     }
-  } else if (selectedChangePoint && !includeSelectedChangePoint) {
-    filterCriteria.push({
-      bool: {
-        must_not: [
-          {
-            term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
-          },
-        ],
-      },
-    });
-  } else if (selectedGroup && !includeSelectedChangePoint) {
+  } else if (selectedSignificantItem && !includeSelectedSignificantItem) {
+    if (selectedSignificantItem.type === 'keyword') {
+      filterCriteria.push({
+        bool: {
+          must_not: [
+            {
+              term: { [selectedSignificantItem.fieldName]: selectedSignificantItem.fieldValue },
+            },
+          ],
+        },
+      });
+    } else {
+      filterCriteria.push({
+        bool: {
+          must_not: [
+            getCategoryQuery(selectedSignificantItem.fieldName, [
+              {
+                key: `${selectedSignificantItem.key}`,
+                count: selectedSignificantItem.doc_count,
+                examples: [],
+              },
+            ]),
+          ],
+        },
+      });
+    }
+  } else if (selectedGroup && !includeSelectedSignificantItem) {
     filterCriteria.push({
       bool: {
         must_not: [

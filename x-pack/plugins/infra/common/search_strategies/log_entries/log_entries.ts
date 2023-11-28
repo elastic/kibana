@@ -6,14 +6,15 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as rt from 'io-ts';
 import {
   logEntryAfterCursorRT,
   logEntryBeforeCursorRT,
   logEntryCursorRT,
   logEntryRT,
-} from '../../log_entry';
-import { logViewColumnConfigurationRT, logViewReferenceRT } from '../../log_views';
+  logViewColumnConfigurationRT,
+  logViewReferenceRT,
+} from '@kbn/logs-shared-plugin/common';
+import * as rt from 'io-ts';
 import { jsonObjectRT } from '../../typed_json';
 import { searchStrategyErrorRT } from '../common/errors';
 

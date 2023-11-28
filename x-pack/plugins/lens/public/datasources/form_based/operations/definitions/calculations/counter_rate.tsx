@@ -56,6 +56,11 @@ export const counterRateOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
+  // return false for quick function as the built-in reference will use max
+  // in formula this check won't be used and the check is performed on the formula AST tree traversal independently
+  getUnsupportedSettings: () => ({
+    sampling: false,
+  }),
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
       return {
@@ -65,11 +70,11 @@ export const counterRateOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern, columns) => {
+  getDefaultLabel: (column, columns, indexPattern) => {
     const ref = columns[column.references[0]];
     return ofName(
       ref && 'sourceField' in ref
-        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        ? indexPattern?.getFieldByName(ref.sourceField)?.displayName
         : undefined,
       column.timeScale,
       column.timeShift

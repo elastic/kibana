@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { observTourStepStorageKey } from '@kbn/observability-plugin/public/components/shared/tour';
+import { observTourStepStorageKey } from '@kbn/observability-shared-plugin/public/components/tour/tour';
+import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -44,7 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         beforeEach(async () => {
           // Activate the Observability guide, step 3, in order to trigger the EuiTour
           await supertest
-            .put(`/api/guided_onboarding/state`)
+            .put(`${API_BASE_PATH}/state`)
             .set('kbn-xsrf', 'true')
             .send({
               status: 'in_progress',

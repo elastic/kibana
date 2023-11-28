@@ -6,6 +6,7 @@
  */
 
 import { Position } from '@elastic/charts';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getSuggestions } from './suggestions';
 import type { HeatmapVisualizationState } from './types';
@@ -298,8 +299,73 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: true,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.3,
+        },
+      ]);
+    });
+
+    test('when no metric dimension but groups', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'string-column-01',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'string',
+                  label: 'Bucket 1',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([
+        {
+          state: {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            shape: 'heatmap',
+            xAccessor: 'date-column',
+            yAccessor: 'string-column-01',
+            gridConfig: {
+              type: HEATMAP_GRID_FUNCTION,
+              isCellLabelVisible: false,
+              isYAxisLabelVisible: true,
+              isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
+            },
+            legend: {
+              isVisible: true,
+              position: Position.Right,
+              type: LEGEND_FUNCTION,
+            },
+          },
+          title: 'Heat map',
+          hide: true,
+          incomplete: true,
+          previewIcon: IconChartHeatmap,
+          score: 0,
         },
       ]);
     });
@@ -351,7 +417,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: true,
-          previewIcon: 'empty',
+          incomplete: true,
+          previewIcon: IconChartHeatmap,
           score: 0,
         },
       ]);
@@ -404,7 +471,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: true,
-          previewIcon: 'empty',
+          incomplete: true,
+          previewIcon: IconChartHeatmap,
           score: 0.3,
         },
       ]);
@@ -468,7 +536,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: true,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.3,
         },
       ]);
@@ -534,7 +603,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: false,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.6,
         },
       ]);
@@ -608,7 +678,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: false,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.3,
         },
       ]);
@@ -682,7 +753,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: false,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.9,
         },
       ]);

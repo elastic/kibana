@@ -28,7 +28,10 @@ import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar
 import type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from '../dataview_picker';
 import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
@@ -45,6 +48,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   indexPatterns?: DataView[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
+  dataViewPickerOverride?: React.ReactNode;
   screenTitle?: string;
   dataTestSubj?: string;
   // Togglers
@@ -54,7 +58,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
+  filtersForSuggestions?: Filter[];
   hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
+  prependFilterBar?: React.ReactNode;
   // Date picker
   isRefreshPaused?: boolean;
   refreshInterval?: number;
@@ -62,7 +68,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: QT | Query;
-  // Show when user has privileges to save
+  // Show when user has privileges to save. See `canShowSavedQuery(...)` lib.
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: QT | Query }) => void;
@@ -74,16 +80,23 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  // Execute whenever time range is updated.
+  onTimeRangeChange?: (payload: { dateRange: TimeRange }) => void;
   // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  // Autorefresh
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   indicateNoData?: boolean;
+  // Disables the default auto-refresh option inside the date picker
+  isAutoRefreshDisabled?: boolean;
 
   placeholder?: string;
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
+  disableQueryLanguageSwitcher?: boolean;
   // defines padding and border; use 'inPage' to avoid any padding or border;
   // use 'detached' if the searchBar appears at the very top of the view, without any wrapper
   displayStyle?: 'inPage' | 'detached';
@@ -91,17 +104,22 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
+  textBasedLanguageModeWarning?: string;
+  hideTextBasedRunQueryLabel?: boolean;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   showSubmitButton?: boolean;
   submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   isScreenshotMode?: boolean;
 
   /**
    * Disables all inputs and interactive elements,
    */
   isDisabled?: boolean;
+
+  submitOnBlur?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -127,6 +145,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     showDatePicker: true,
     showSubmitButton: true,
     showAutoRefreshOnly: false,
+    filtersForSuggestions: [],
   };
 
   private services = this.props.kibana.services;
@@ -185,6 +204,19 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     if (nextDateRange) {
       nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
       nextState.dateRangeTo = nextDateRange.dateRangeTo;
+
+      /**
+       * Some applications do not rely on the _g url parameter to update the time. The onTimeRangeChange
+       * callback can be used in these cases to notify the consumer for the time change.
+       */
+      if (nextDateRange.dateRangeFrom && nextDateRange.dateRangeTo) {
+        nextProps?.onTimeRangeChange?.({
+          dateRange: {
+            from: nextDateRange.dateRangeFrom,
+            to: nextDateRange.dateRangeTo,
+          },
+        });
+      }
     }
     return nextState;
   }
@@ -453,6 +485,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     const queryBarMenu = this.props.showQueryMenu ? (
       <QueryBarMenu
         nonKqlMode={this.props.nonKqlMode}
+        disableQueryLanguageSwitcher={this.props.disableQueryLanguageSwitcher}
         language={
           this.state.query && isOfQueryType(this.state?.query)
             ? this.state?.query?.language
@@ -480,6 +513,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+        filtersForSuggestions={this.props.filtersForSuggestions}
         manageFilterSetComponent={
           this.props.showFilterBar && this.state.query
             ? this.renderSavedQueryManagement(
@@ -489,6 +523,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
               )
             : undefined
         }
+        suggestionsAbstraction={this.props.suggestionsAbstraction}
       />
     ) : undefined;
 
@@ -500,8 +535,10 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           readOnly={this.props.isDisabled}
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       ) : (
         <FilterBar
@@ -510,9 +547,12 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           isDisabled={this.props.isDisabled}
           data-test-subj="unifiedFilterBar"
+          prepend={this.props.prependFilterBar}
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       );
     }
@@ -544,6 +584,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          dataViewPickerOverride={this.props.dataViewPickerOverride}
           showSubmitButton={this.props.showSubmitButton}
           submitButtonStyle={this.props.submitButtonStyle}
           dataTestSubj={this.props.dataTestSubj}
@@ -553,10 +594,13 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           iconType={this.props.iconType}
           nonKqlMode={this.props.nonKqlMode}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={this.props.filtersForSuggestions}
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
+          textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}
+          hideTextBasedRunQueryLabel={this.props.hideTextBasedRunQueryLabel}
           onTextBasedSavedAndExit={this.props.onTextBasedSavedAndExit}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
@@ -564,6 +608,8 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           isScreenshotMode={this.props.isScreenshotMode}
           onTextLangQuerySubmit={this.onTextLangQuerySubmit}
           onTextLangQueryChange={this.onTextLangQueryChange}
+          submitOnBlur={this.props.submitOnBlur}
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       </div>
     );

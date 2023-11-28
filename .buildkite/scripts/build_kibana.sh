@@ -14,6 +14,7 @@ is_pr_with_label "ci:build-docker-cross-compile" && BUILD_ARGS+=("--docker-cross
 is_pr_with_label "ci:build-os-packages" || BUILD_ARGS+=("--skip-os-packages")
 is_pr_with_label "ci:build-canvas-shareable-runtime" || BUILD_ARGS+=("--skip-canvas-shareable-runtime")
 is_pr_with_label "ci:build-docker-contexts" || BUILD_ARGS+=("--skip-docker-contexts")
+is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 
 echo "> node scripts/build" "${BUILD_ARGS[@]}"
 node scripts/build "${BUILD_ARGS[@]}"
@@ -24,12 +25,14 @@ if is_pr_with_label "ci:build-cloud-image"; then
   --skip-initialize \
   --skip-generic-folders \
   --skip-platform-folders \
+  --skip-cdn-assets \
   --skip-archives \
   --docker-images \
   --docker-tag-qualifier="$GIT_COMMIT" \
   --docker-push \
   --skip-docker-ubi \
   --skip-docker-ubuntu \
+  --skip-docker-serverless \
   --skip-docker-contexts
   docker logout docker.elastic.co
 

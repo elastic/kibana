@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEqual } from 'lodash';
+import { Query } from '@kbn/es-query';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -19,7 +21,7 @@ import {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import type { FormBasedLayer } from '../../types';
+import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
 import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
@@ -103,10 +105,10 @@ export const generateMissingFieldMessage = (
         missingFields: (
           <>
             {missingFields.map((field, index) => (
-              <>
+              <Fragment key={field}>
                 <strong>{field}</strong>
                 {index + 1 === missingFields.length ? '' : ', '}
-              </>
+              </Fragment>
             ))}
           </>
         ),
@@ -127,8 +129,8 @@ export function combineErrorMessages(
   return messages.length ? messages : undefined;
 }
 
-export function getSafeName(name: string, indexPattern: IndexPattern): string {
-  const field = indexPattern.getFieldByName(name);
+export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
+  const field = indexPattern?.getFieldByName(name);
   return field
     ? field.displayName
     : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
@@ -136,11 +138,17 @@ export function getSafeName(name: string, indexPattern: IndexPattern): string {
       });
 }
 
+function areDecimalsValid(inputValue: string | number, digits: number) {
+  const [, decimals = ''] = `${inputValue}`.split('.');
+  return decimals.length <= digits;
+}
+
 export function isValidNumber(
   inputValue: string | number | null | undefined,
   integer?: boolean,
   upperBound?: number,
-  lowerBound?: number
+  lowerBound?: number,
+  digits: number = 2
 ) {
   const inputValueAsNumber = Number(inputValue);
   return (
@@ -150,7 +158,8 @@ export function isValidNumber(
     Number.isFinite(inputValueAsNumber) &&
     (!integer || Number.isInteger(inputValueAsNumber)) &&
     (upperBound === undefined || inputValueAsNumber <= upperBound) &&
-    (lowerBound === undefined || inputValueAsNumber >= lowerBound)
+    (lowerBound === undefined || inputValueAsNumber >= lowerBound) &&
+    areDecimalsValid(inputValue, integer ? 0 : digits)
   );
 }
 
@@ -190,11 +199,31 @@ export function getFormatFromPreviousColumn(
     : undefined;
 }
 
+// Check the escape argument when used for transitioning comparisons
+export function getExistsFilter(field: string, escape: boolean = true) {
+  return {
+    query: escape ? `"${field}": *` : `${field}: *`,
+    language: 'kuery',
+  };
+}
+
+// Useful utility to compare for escape and unescaped exist filters
+export function comparePreviousColumnFilter(filter: Query | undefined, field: string) {
+  return isEqual(filter, getExistsFilter(field)) || isEqual(filter, getExistsFilter(field, false));
+}
+
 export function getFilter(
   previousColumn: GenericIndexPatternColumn | undefined,
   columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
 ) {
   let filter = previousColumn?.filter;
+  if (
+    previousColumn &&
+    isColumnOfType<LastValueIndexPatternColumn>('last_value', previousColumn) &&
+    comparePreviousColumnFilter(filter, previousColumn.sourceField)
+  ) {
+    return;
+  }
   if (columnParams) {
     if ('kql' in columnParams) {
       filter = { query: columnParams.kql ?? '', language: 'kuery' };
@@ -203,4 +232,8 @@ export function getFilter(
     }
   }
   return filter;
+}
+
+export function isMetricCounterField(field?: IndexPatternField) {
+  return field?.timeSeriesMetric === 'counter';
 }

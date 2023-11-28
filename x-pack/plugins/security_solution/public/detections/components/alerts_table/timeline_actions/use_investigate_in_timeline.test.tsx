@@ -13,6 +13,9 @@ import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 import * as actions from '../actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import type { AlertTableContextMenuItem } from '../types';
+import React from 'react';
+import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -54,6 +57,21 @@ const props = {
   onInvestigateInTimelineAlertClick: () => {},
 };
 
+const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
+  const panels = [{ id: 0, items }];
+  return render(
+    <EuiPopover
+      isOpen={true}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      closePopover={() => {}}
+      button={<></>}
+    >
+      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+    </EuiPopover>
+  );
+};
+
 describe('use investigate in timeline hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -71,8 +89,8 @@ describe('use investigate in timeline hook', () => {
       const { result } = renderHook(() => useInvestigateInTimeline(props), {
         wrapper: TestProviders,
       });
-      const component = result.current.investigateInTimelineActionItems[0];
-      const { getByTestId } = render(component);
+      const actionItem = result.current.investigateInTimelineActionItems[0];
+      const { getByTestId } = renderContextMenu([actionItem]);
       expect(mockSendAlertToTimeline).toHaveBeenCalledTimes(0);
       act(() => {
         fireEvent.click(getByTestId('investigate-in-timeline-action-item'));

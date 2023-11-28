@@ -7,7 +7,7 @@
  */
 
 import { ExpandPanelAction } from './expand_panel_action';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
+import { buildMockDashboard, getSampleDashboardPanel } from '../mocks';
 import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -30,17 +30,16 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
   .mockReturnValue(mockEmbeddableFactory);
 
 beforeEach(async () => {
-  const input = getSampleDashboardInput({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+  container = buildMockDashboard({
+    overrides: {
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: '123' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
-
-  container = new DashboardContainer(input);
-  await container.untilInitialized();
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

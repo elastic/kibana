@@ -27,11 +27,53 @@ export interface GuideCardConstants {
   // see this issue https://github.com/elastic/kibana/issues/146672
   telemetryId: string;
   order: number;
+  icon: string;
 }
 
 export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
+    icon: 'database',
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
+        defaultMessage="Search across databases {lineBreak} and business systems"
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
+    guideId: 'databaseSearch',
+    telemetryId: 'onboarding--search--database',
+    order: 1,
+  },
+  {
+    solution: 'search',
+    icon: 'vector',
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title', {
+      defaultMessage: 'Set up vector search',
+    }),
+    navigateTo: {
+      appId: 'enterpriseSearchVectorSearch',
+    },
+    telemetryId: 'onboarding--search--vector',
+    order: 4,
+  },
+  {
+    solution: 'search',
+    icon: 'magnifyWithPlus',
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
+      defaultMessage: 'Build an AI-powered search experience',
+    }),
+    navigateTo: {
+      appId: 'enterpriseSearchAISearch',
+    },
+    telemetryId: 'onboarding--search--ai',
+    order: 7,
+  },
+  {
+    solution: 'search',
+    icon: 'wrench',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
@@ -43,46 +85,33 @@ export const guideCards: GuideCardConstants[] = [
     ),
     guideId: 'appSearch',
     telemetryId: 'onboarding--search--application',
-    order: 1,
+    order: 10,
   },
   {
     solution: 'search',
+    icon: 'search',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title', {
       defaultMessage: 'Add search to my website',
     }),
     guideId: 'websiteSearch',
     telemetryId: 'onboarding--search--website',
-    order: 4,
-  },
-  {
-    solution: 'search',
-    title: (
-      <FormattedMessage
-        id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-        defaultMessage="Search across databases and {lineBreak} business systems"
-        values={{
-          lineBreak: <br />,
-        }}
-      />
-    ),
-    guideId: 'databaseSearch',
-    telemetryId: 'onboarding--search--database',
-    order: 7,
+    order: 13,
   },
   {
     solution: 'observability',
+    icon: 'logstashInput',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.logsObservability.title', {
       defaultMessage: 'Collect and analyze my logs',
     }),
     navigateTo: {
-      appId: 'integrations',
-      path: '/browse?q=log',
+      appId: 'observabilityOnboarding',
     },
     telemetryId: 'onboarding--observability--logs',
     order: 2,
   },
   {
     solution: 'observability',
+    icon: 'apmTrace',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.apmObservability.title"
@@ -93,14 +122,15 @@ export const guideCards: GuideCardConstants[] = [
       />
     ),
     navigateTo: {
-      appId: 'home',
-      path: '#/tutorial/apm',
+      appId: 'apm',
+      path: '/tutorial',
     },
     telemetryId: 'onboarding--observability--apm',
     order: 5,
   },
   {
     solution: 'observability',
+    icon: 'visBarVertical',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title', {
       defaultMessage: 'Monitor my host metrics',
     }),
@@ -113,6 +143,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
+    icon: 'cluster',
     title: i18n.translate(
       'guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title',
       {
@@ -124,7 +155,38 @@ export const guideCards: GuideCardConstants[] = [
     order: 11,
   },
   {
+    solution: 'observability',
+    icon: 'videoPlayer',
+    title: i18n.translate(
+      'guidedOnboardingPackage.gettingStarted.cards.syntheticsObservability.title',
+      {
+        defaultMessage: 'Create a Synthetic Monitor',
+      }
+    ),
+    navigateTo: {
+      appId: 'synthetics',
+      path: '/monitors/getting-started',
+    },
+    telemetryId: 'onboarding--observability--synthetics',
+    order: 14,
+  },
+  {
+    solution: 'observability',
+    icon: 'visBarHorizontal',
+    title: i18n.translate(
+      'guidedOnboardingPackage.gettingStarted.cards.universalProfilingObservability.title',
+      { defaultMessage: 'Optimize my workloads with Universal Profiling' }
+    ),
+    navigateTo: {
+      appId: 'profiling',
+      path: '/add-data-instructions',
+    },
+    telemetryId: 'onboarding--observability--profiling',
+    order: 15,
+  },
+  {
     solution: 'security',
+    icon: 'securitySignal',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title"
@@ -140,6 +202,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
+    icon: 'inputOutput',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.hostsSecurity.title"
@@ -158,10 +221,11 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
+    icon: 'lock',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
-        defaultMessage="Secure my cloud assets with {lineBreak} cloud security posture management (CSPM)"
+        defaultMessage="Secure my cloud assets with cloud {lineBreak} security posture management (CSPM)"
         values={{
           lineBreak: <br />,
         }}
@@ -169,7 +233,7 @@ export const guideCards: GuideCardConstants[] = [
     ),
     navigateTo: {
       appId: 'integrations',
-      path: '/detail/cloud_security_posture/overview',
+      path: '/detail/cloud_security_posture/overview?integration=cspm',
     },
     telemetryId: 'onboarding--security--cloud',
     order: 9,

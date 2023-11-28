@@ -72,7 +72,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
   setup(core: CoreSetup) {
     const router = core.http.createRouter();
-    const kibanaIndex = core.savedObjects.getKibanaIndex();
+    const kibanaIndex = core.savedObjects.getDefaultIndex();
     const server = core.http.getServerInfo();
     const uuid = this.initializerContext.env.instanceUuid;
     const kibanaVersion = this.initializerContext.env.packageInfo.version;

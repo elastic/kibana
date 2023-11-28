@@ -37,6 +37,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
+    "overrides": undefined,
     "params": Object {
       "listenOnChange": true,
     },
@@ -52,6 +53,7 @@ Object {
         },
         "type": "vis_dimension",
       },
+      "colorMapping": undefined,
       "dimensions": Object {
         "buckets": Array [
           Object {

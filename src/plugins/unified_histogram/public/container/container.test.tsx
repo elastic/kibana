@@ -10,76 +10,70 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { UnifiedHistogramFetchStatus } from '../types';
+import { UnifiedHistogramLayout } from '../layout';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { UnifiedHistogramApi, UnifiedHistogramContainer } from './container';
-import type { UnifiedHistogramState } from './services/state_service';
 
 describe('UnifiedHistogramContainer', () => {
-  const initialState: UnifiedHistogramState = {
-    breakdownField: 'bytes',
-    chartHidden: false,
-    dataView: dataViewWithTimefieldMock,
-    filters: [],
-    lensRequestAdapter: new RequestAdapter(),
-    query: { language: 'kuery', query: '' },
-    requestAdapter: new RequestAdapter(),
-    searchSessionId: '123',
-    timeInterval: 'auto',
-    timeRange: { from: 'now-15m', to: 'now' },
-    topPanelHeight: 100,
-    totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
-    totalHitsResult: undefined,
-  };
-
-  it('should set ref', () => {
+  it('should initialize', async () => {
     let api: UnifiedHistogramApi | undefined;
     const setApi = (ref: UnifiedHistogramApi) => {
       api = ref;
     };
-    mountWithIntl(<UnifiedHistogramContainer ref={setApi} resizeRef={{ current: null }} />);
+    const getCreationOptions = jest.fn(() => ({ initialState: { timeInterval: '42s' } }));
+    const component = mountWithIntl(
+      <UnifiedHistogramContainer
+        services={unifiedHistogramServicesMock}
+        ref={setApi}
+        getCreationOptions={getCreationOptions}
+        dataView={dataViewWithTimefieldMock}
+        filters={[]}
+        query={{ language: 'kuery', query: '' }}
+        requestAdapter={new RequestAdapter()}
+        searchSessionId={'123'}
+        timeRange={{ from: 'now-15m', to: 'now' }}
+        container={null}
+      />
+    );
+    expect(component.update().isEmptyRender()).toBe(true);
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    component.update();
+    expect(getCreationOptions).toHaveBeenCalled();
+    expect(component.find(UnifiedHistogramLayout).prop('chart')?.timeInterval).toBe('42s');
+    expect(component.update().isEmptyRender()).toBe(false);
     expect(api).toBeDefined();
   });
 
-  it('should return null if not initialized', async () => {
-    const component = mountWithIntl(<UnifiedHistogramContainer resizeRef={{ current: null }} />);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(component.update().isEmptyRender()).toBe(true);
-  });
-
-  it('should not return null if initialized', async () => {
-    const setApi = (api: UnifiedHistogramApi | null) => {
-      if (!api || api.initialized) {
-        return;
-      }
-      api?.initialize({
-        services: unifiedHistogramServicesMock,
-        initialState,
-      });
-    };
-    const component = mountWithIntl(
-      <UnifiedHistogramContainer ref={setApi} resizeRef={{ current: null }} />
-    );
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(component.update().isEmptyRender()).toBe(false);
-  });
-
-  it('should update initialized property when initialized', async () => {
+  it('should trigger input$ when refetch is called', async () => {
     let api: UnifiedHistogramApi | undefined;
     const setApi = (ref: UnifiedHistogramApi) => {
       api = ref;
     };
-    mountWithIntl(<UnifiedHistogramContainer ref={setApi} resizeRef={{ current: null }} />);
-    expect(api?.initialized).toBe(false);
+    const getCreationOptions = jest.fn(() => ({ disableAutoFetching: true }));
+    const component = mountWithIntl(
+      <UnifiedHistogramContainer
+        services={unifiedHistogramServicesMock}
+        ref={setApi}
+        getCreationOptions={getCreationOptions}
+        dataView={dataViewWithTimefieldMock}
+        filters={[]}
+        query={{ language: 'kuery', query: '' }}
+        requestAdapter={new RequestAdapter()}
+        searchSessionId={'123'}
+        timeRange={{ from: 'now-15m', to: 'now' }}
+        container={null}
+      />
+    );
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    component.update();
+    const input$ = component.find(UnifiedHistogramLayout).prop('input$');
+    const inputSpy = jest.fn();
+    input$?.subscribe(inputSpy);
     act(() => {
-      if (!api?.initialized) {
-        api?.initialize({
-          services: unifiedHistogramServicesMock,
-          initialState,
-        });
-      }
+      api?.refetch();
     });
-    expect(api?.initialized).toBe(true);
+    expect(inputSpy).toHaveBeenCalledTimes(1);
+    expect(inputSpy).toHaveBeenCalledWith({ type: 'refetch' });
   });
 });

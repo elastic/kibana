@@ -24,18 +24,19 @@ const createStartMock = () => {
     get: jest.fn(),
     aggregate: jest.fn(),
     remove: jest.fn(),
+    bulkRemove: jest.fn(),
     schedule: jest.fn(),
     runSoon: jest.fn(),
     ephemeralRunNow: jest.fn(),
     ensureScheduled: jest.fn(),
     removeIfExists: jest.fn(),
-    bulkRemoveIfExist: jest.fn(),
     supportsEphemeralTasks: jest.fn(),
     bulkUpdateSchedules: jest.fn(),
     bulkSchedule: jest.fn(),
     bulkDisable: jest.fn(),
     bulkEnable: jest.fn(),
     getRegisteredTypes: jest.fn(),
+    bulkUpdateState: jest.fn(),
   };
   return mock;
 };

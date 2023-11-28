@@ -11,7 +11,7 @@ import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter } from '../../hooks';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
-import { AggregateResult } from '../../../common/types/aggregate';
+import { AggregateResult } from '../../../common/types';
 import { useFetchPercentWidgetData } from './hooks';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:percentWidgetLoading';

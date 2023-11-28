@@ -75,6 +75,7 @@ describe('cloneRule', () => {
               "level": "info",
               "message": "alert ",
             },
+            "useAlertDataForTemplate": undefined,
             "uuid": "123456",
           },
         ],

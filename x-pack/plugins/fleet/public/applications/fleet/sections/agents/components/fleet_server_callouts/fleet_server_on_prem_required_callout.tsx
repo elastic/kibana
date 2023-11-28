@@ -15,7 +15,7 @@ export const FleetServerOnPremRequiredCallout = () => {
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut
-      iconType="alert"
+      iconType="warning"
       title={
         <FormattedMessage
           id="xpack.fleet.fleetServerOnPremRequiredCallout.calloutTitle"

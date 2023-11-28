@@ -20,3 +20,9 @@ export type AlertsStackByField =
   | 'process.name'
   | 'file.name'
   | 'hash.sha256';
+
+export interface AddFilterProps {
+  field: string;
+  value: string | number | null;
+  negate?: boolean;
+}

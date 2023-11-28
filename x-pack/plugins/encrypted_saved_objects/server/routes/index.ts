@@ -8,9 +8,9 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { defineKeyRotationRoutes } from './key_rotation';
 import type { ConfigType } from '../config';
 import type { EncryptionKeyRotationService } from '../crypto';
-import { defineKeyRotationRoutes } from './key_rotation';
 
 /**
  * Describes parameters used to define HTTP routes.

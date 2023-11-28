@@ -12,26 +12,29 @@
     ],
     "requiredPlugins": [
       "features",
-      "spaces",
       "security",
       "licensing",
       "data",
       "discover",
       "charts",
-      "infra",
+      "logsShared",
       "cloud",
       "esUiShared",
-      "guidedOnboarding"
+      "lens",
+      "embeddable",
+      "share"
     ],
     "optionalPlugins": [
-      "usageCollection",
-      "home",
       "customIntegrations",
-      "ml"
+      "globalSearch",
+      "home",
+      "ml",
+      "spaces",
+      "usageCollection",
+      "guidedOnboarding",
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "cloudChat"
+      "kibanaReact"
     ]
   }
 }

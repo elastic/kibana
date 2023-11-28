@@ -12,7 +12,7 @@ In order to achieve our goal of creating best user experience in Kibana, it is i
 To make things easier, we introduced performance journeys, that mimics end-user experience with Kibana.
 
 Journey runs a flow of user interactions with Kibana in a browser and collects APM metrics for both server and client-side.
-It is possible to instrument Kibana with [custom performance metrics](https://docs.elastic.dev/kibana-dev-docs/tutorials/performance/adding_custom_performance_metrics),
+It is possible to instrument Kibana with [custom performance metrics](https://docs.elastic.dev/kibana-dev-docs/tutorial/performance/adding_custom_performance_metrics),
 that will provide more detailed information about feature performance.
 
 Journeys core is [kbn-journeys](packages/kbn-journeys/README.mdx) package. It is a function test by design and is powered
@@ -61,7 +61,7 @@ Scripts steps include:
 
 You can skip warmup phase for debug purpose by using `--skip-warmup` flag
 
-Since the tests are run on a local machine, there is also realistic throttling applied to the network to 
+Since the tests are run on a local machine, there is also realistic throttling applied to the network to
 simulate real life internet connection. This means that all requests have a fixed latency and limited bandwidth.
 
 ### Benchmarking performance on CI

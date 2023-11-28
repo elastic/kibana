@@ -7,18 +7,14 @@
  */
 
 import Path from 'path';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import Fs from 'fs';
 
+import archiver from 'archiver';
 import del from 'del';
-import vfs from 'vinyl-fs';
-import zip from 'gulp-zip';
 
-import { BuildContext } from '../build_context';
+import { TaskContext } from '../task_context';
 
-const asyncPipeline = promisify(pipeline);
-
-export async function createArchive({ kibanaVersion, plugin, log }: BuildContext) {
+export async function createArchive({ kibanaVersion, plugin, log }: TaskContext) {
   const {
     manifest: { id },
     directory,
@@ -30,15 +26,14 @@ export async function createArchive({ kibanaVersion, plugin, log }: BuildContext
   const buildDir = Path.resolve(directory, 'build');
 
   // zip up the build files
-  await asyncPipeline(
-    vfs.src([`kibana/${id}/**/*`], {
-      cwd: buildDir,
-      base: buildDir,
-      dot: true,
-    }),
-    zip(zipName),
-    vfs.dest(buildDir)
-  );
+  const output = Fs.createWriteStream(Path.resolve(buildDir, zipName));
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  archive.pipe(output);
+
+  const directoryToAdd = Path.resolve(buildDir, 'kibana');
+  const directoryNameOnZip = Path.basename(directoryToAdd);
+
+  await archive.directory(directoryToAdd, directoryNameOnZip).finalize();
 
   // delete the files that were zipped
   await del(Path.resolve(buildDir, 'kibana'));

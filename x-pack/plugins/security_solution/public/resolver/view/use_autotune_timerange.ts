@@ -10,12 +10,12 @@ import { useSelector } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useFormattedDate } from './panels/use_formatted_date';
-import type { ResolverState } from '../types';
+import type { State } from '../../common/store/types';
 
-export function useAutotuneTimerange() {
+export function useAutotuneTimerange({ id }: { id: string }) {
   const { addSuccess } = useAppToasts();
-  const { from: detectedFrom, to: detectedTo } = useSelector((state: ResolverState) => {
-    const detectedBounds = selectors.detectedBounds(state);
+  const { from: detectedFrom, to: detectedTo } = useSelector((state: State) => {
+    const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
     return {
       from: detectedBounds?.from ? detectedBounds.from : undefined,
       to: detectedBounds?.to ? detectedBounds.to : undefined,

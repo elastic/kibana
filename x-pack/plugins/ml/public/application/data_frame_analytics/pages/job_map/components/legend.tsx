@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (
@@ -66,6 +66,21 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
               <FormattedMessage
                 id="xpack.ml.dataframe.analyticsMap.legend.indexLabel"
                 defaultMessage="index"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <span className="mlJobMapLegend__ingestPipeline" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.legend.ingestPipelineLabel"
+                defaultMessage="ingest pipeline"
               />
             </EuiText>
           </EuiFlexItem>

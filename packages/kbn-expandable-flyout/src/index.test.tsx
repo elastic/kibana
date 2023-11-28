@@ -10,18 +10,20 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { Panel } from './types';
 import { ExpandableFlyout } from '.';
-import { LEFT_SECTION, PREVIEW_SECTION, RIGHT_SECTION } from './components/test_ids';
+import {
+  LEFT_SECTION_TEST_ID,
+  PREVIEW_SECTION_TEST_ID,
+  RIGHT_SECTION_TEST_ID,
+} from './components/test_ids';
 import { ExpandableFlyoutContext } from './context';
 
 describe('ExpandableFlyout', () => {
   const registeredPanels: Panel[] = [
     {
       key: 'key',
-      width: 500,
       component: () => <div>{'component'}</div>,
     },
   ];
-  const onClose = () => window.alert('closed');
 
   it(`shouldn't render flyout if no panels`, () => {
     const context: ExpandableFlyoutContext = {
@@ -34,7 +36,7 @@ describe('ExpandableFlyout', () => {
 
     const result = render(
       <ExpandableFlyoutContext.Provider value={context}>
-        <ExpandableFlyout registeredPanels={registeredPanels} onClose={onClose} />
+        <ExpandableFlyout registeredPanels={registeredPanels} />
       </ExpandableFlyoutContext.Provider>
     );
 
@@ -54,11 +56,11 @@ describe('ExpandableFlyout', () => {
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
-        <ExpandableFlyout registeredPanels={registeredPanels} onClose={onClose} />
+        <ExpandableFlyout registeredPanels={registeredPanels} />
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(getByTestId(RIGHT_SECTION)).toBeInTheDocument();
+    expect(getByTestId(RIGHT_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render left section', () => {
@@ -74,11 +76,11 @@ describe('ExpandableFlyout', () => {
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
-        <ExpandableFlyout registeredPanels={registeredPanels} onClose={onClose} />
+        <ExpandableFlyout registeredPanels={registeredPanels} />
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(getByTestId(LEFT_SECTION)).toBeInTheDocument();
+    expect(getByTestId(LEFT_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render preview section', () => {
@@ -96,10 +98,10 @@ describe('ExpandableFlyout', () => {
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
-        <ExpandableFlyout registeredPanels={registeredPanels} onClose={onClose} />
+        <ExpandableFlyout registeredPanels={registeredPanels} />
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(getByTestId(PREVIEW_SECTION)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_SECTION_TEST_ID)).toBeInTheDocument();
   });
 });

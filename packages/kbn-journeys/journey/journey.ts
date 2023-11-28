@@ -12,29 +12,28 @@ import { Page } from 'playwright';
 import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
-import {
-  FtrProviderContext,
-  KibanaServer,
-  Es,
-  RetryService,
-} from '@kbn/ftr-common-functional-services';
+import { FtrProviderContext } from '../services/ftr_context_provider';
+import { Es, KibanaServer, Retry, Auth } from '../services';
 
-import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
 import { JourneyFtrHarness } from './journey_ftr_harness';
 import { makeFtrConfigProvider } from './journey_ftr_config';
 import { JourneyConfig, JourneyConfigOptions } from './journey_config';
+import { KibanaPage } from '../services/page/kibana_page';
+import { ProjectPage } from '../services/page/project_page';
 
 export interface BaseStepCtx {
+  kibanaPage: KibanaPage | ProjectPage;
   page: Page;
   log: ToolingLog;
   inputDelays: InputDelays;
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
   es: Es;
-  retry: RetryService;
+  retry: Retry;
+  auth: Auth;
 }
 
 export type AnyStep = Step<{}>;
@@ -137,7 +136,7 @@ export class Journey<CtxExt extends object> {
       getService('kibanaServer'),
       getService('es'),
       getService('retry'),
-      new Auth(getService('config'), getService('log'), getService('kibanaServer')),
+      getService('auth'),
       this.config
     ).initMochaSuite(this.#steps);
   }

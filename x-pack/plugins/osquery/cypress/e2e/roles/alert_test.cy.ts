@@ -5,94 +5,46 @@
  * 2.0.
  */
 
-import { ROLES } from '../../test';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
-import {
-  checkResults,
-  findAndClickButton,
-  findFormFieldByRowsLabelAndType,
-  submitQuery,
-} from '../../tasks/live_query';
-import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
-import { navigateTo } from '../../tasks/navigation';
+import { initializeDataViews } from '../../tasks/login';
+import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
+import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('Alert_Test', () => {
+describe('Alert Test', { tags: ['@ess'] }, () => {
+  let ruleName: string;
+  let ruleId: string;
+
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
-  });
-
-  after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack');
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
-  });
-
-  describe('alert_test role', () => {
-    it('should not be able to run live query', () => {
-      login(ROLES.alert_test);
-
-      const PACK_NAME = 'testpack';
-      const RULE_NAME = 'Test-rule';
-      navigateTo('/app/osquery');
-      cy.contains('Packs').click();
-      cy.getBySel('pagination-button-next').click();
-      cy.contains(PACK_NAME).click();
-      findAndClickButton('Edit');
-      cy.contains(`Edit ${PACK_NAME}`);
-      findFormFieldByRowsLabelAndType(
-        'Scheduled agent policies (optional)',
-        'fleet server {downArrow}{enter}'
-      );
-      findAndClickButton('Update pack');
-      closeModalIfVisible();
-      cy.contains(`Successfully updated "${PACK_NAME}" pack`);
-      closeToastIfVisible();
-
-      cy.visit('/app/security/rules');
-      cy.contains(RULE_NAME).click();
-      cy.wait(2000);
-      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-      cy.getBySel('ruleSwitch').click();
-      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
-      cy.getBySel('ruleSwitch').click();
-      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-      cy.visit('/app/security/alerts');
-      cy.getBySel('expand-event').first().click();
-      cy.getBySel('take-action-dropdown-btn').click();
-      cy.getBySel('osquery-action-item').click();
-
-      cy.contains('Run Osquery');
-      cy.contains('Permission denied');
+    initializeDataViews();
+    loadRule().then((data) => {
+      ruleName = data.name;
+      ruleId = data.id;
     });
   });
 
   describe('t1_analyst role', () => {
-    it('should be able to run rule investigation guide query', () => {
-      login(ROLES.t1_analyst);
+    beforeEach(() => {
+      cy.login(ServerlessRoleName.T1_ANALYST);
 
-      navigateTo('/app/osquery');
-
-      cy.visit('/app/security/alerts');
-      cy.getBySel('expand-event').first().click();
+      cy.visit('/app/security/rules');
+      clickRuleName(ruleName);
+      cy.getBySel('expand-event').first().click({ force: true });
 
       cy.wait(500);
+      cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
       cy.contains('Get processes').click();
+    });
+
+    after(() => {
+      cleanupRule(ruleId);
+    });
+
+    it('should be able to run rule investigation guide query', () => {
       submitQuery();
       checkResults();
     });
 
     it('should not be able to run custom query', () => {
-      login(ROLES.t1_analyst);
-
-      navigateTo('/app/osquery');
-
-      cy.visit('/app/security/alerts');
-      cy.getBySel('expand-event').first().click();
-
-      cy.wait(500);
-      cy.contains('Get processes').click();
-
       cy.intercept('POST', '/api/osquery/live_queries', (req) => {
         req.body.query = 'select * from processes limit 10';
       });

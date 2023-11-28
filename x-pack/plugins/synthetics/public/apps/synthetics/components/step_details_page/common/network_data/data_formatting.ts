@@ -6,8 +6,9 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import moment from 'moment';
 
+import { MarkerItems } from '../../step_waterfall_chart/waterfall/context/waterfall_context';
+import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import { NetworkEvent } from '../../../../../../../common/runtime_types';
 import { WaterfallData, WaterfallMetadata } from './types';
 import {
@@ -55,7 +56,7 @@ const getFriendlyTooltipValue = ({
     const formattedMimeType: MimeType = MimeTypesMap[mimeType];
     label += ` (${FriendlyMimetypeLabels[formattedMimeType] || mimeType})`;
   }
-  return `${label}: ${formatValueForDisplay(value)}ms`;
+  return `${label}: ${formatValueForDisplay(value, value > 1 ? 0 : 1)}ms`;
 };
 export const isHighlightedItem = (
   item: NetworkEvent,
@@ -127,8 +128,10 @@ export const getFilterMatcher = (filters: string[] | undefined): ItemMatcher => 
 export const getSeriesAndDomain = (
   items: NetworkEvent[],
   onlyHighlighted = false,
+  dateFormatter: DateFormatter,
   query?: string,
-  activeFilters?: string[]
+  activeFilters?: string[],
+  markerItems?: MarkerItems
 ) => {
   const getValueForOffset = (item: NetworkEvent) => {
     return item.requestSentTime;
@@ -157,7 +160,7 @@ export const getSeriesAndDomain = (
     const mimeTypeColour = getColourForMimeType(item.mimeType);
     const offsetValue = getValueForOffset(item);
     let currentOffset = offsetValue - zeroOffset;
-    metadata.push(formatMetadata({ item, index, requestStart: currentOffset }));
+    metadata.push(formatMetadata({ item, index, requestStart: currentOffset, dateFormatter }));
     const isHighlighted = isHighlightedItem(item, queryMatcher, filterMatcher);
     if (isHighlighted) {
       totalHighlightedRequests++;
@@ -245,6 +248,12 @@ export const getSeriesAndDomain = (
     filteredSeries = series.filter((item) => item.config.isHighlighted);
   }
 
+  if (markerItems && markerItems.length > 0) {
+    // set domain to include marker items, whichever has higher time value
+    const highestMarkerTime = Math.max(...markerItems.map((item) => item.offset));
+    domain.max = Math.max(domain.max, highestMarkerTime);
+  }
+
   return { series: filteredSeries, domain, metadata, totalHighlightedRequests };
 };
 
@@ -262,10 +271,12 @@ const formatMetadata = ({
   item,
   index,
   requestStart,
+  dateFormatter,
 }: {
   item: NetworkEvent;
   index: number;
   requestStart: number;
+  dateFormatter: DateFormatter;
 }) => {
   const {
     certificates,
@@ -293,13 +304,11 @@ const formatMetadata = ({
           },
           {
             name: FriendlyFlyoutLabels[Metadata.CertificateIssueDate],
-            value: certificates.validFrom
-              ? moment(certificates.validFrom).format('L LT')
-              : undefined,
+            value: certificates.validFrom ? dateFormatter(certificates.validFrom) : undefined,
           },
           {
             name: FriendlyFlyoutLabels[Metadata.CertificateExpiryDate],
-            value: certificates.validTo ? moment(certificates.validTo).format('L LT') : undefined,
+            value: certificates.validTo ? dateFormatter(certificates.validTo) : undefined,
           },
           {
             name: FriendlyFlyoutLabels[Metadata.CertificateSubject],

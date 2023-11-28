@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { has } from 'lodash';
-import type { AlertType, AlertsByTypeAgg, AlertsTypeData } from './types';
+import type { AlertType, AlertsByTypeAgg, AlertsTypeData, AlertsByRuleAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
 import { DETECTION, PREVENTION } from './translations';
@@ -19,10 +19,27 @@ export const ALERT_TYPE_LABEL = {
   Prevention: PREVENTION,
 };
 
+export const parseAlertsRuleData = (
+  response: AlertSearchResponse<{}, AlertsByRuleAgg>
+): AlertsTypeData[] => {
+  const rulesBuckets = response?.aggregations?.alertsByRule?.buckets ?? [];
+
+  return rulesBuckets.length === 0
+    ? []
+    : rulesBuckets.map((rule) => {
+        return {
+          rule: rule.key,
+          type: 'Detection' as AlertType,
+          value: rule.doc_count,
+          color: ALERT_TYPE_COLOR.Detection,
+        };
+      });
+};
+
 export const parseAlertsTypeData = (
   response: AlertSearchResponse<{}, AlertsByTypeAgg>
 ): AlertsTypeData[] => {
-  const rulesBuckets = response?.aggregations?.alertsByRule?.buckets ?? [];
+  const rulesBuckets = response?.aggregations?.alertsByType?.buckets ?? [];
   return rulesBuckets.length === 0
     ? []
     : rulesBuckets.flatMap((rule) => {
@@ -75,5 +92,11 @@ export const getIsAlertsTypeData = (data: SummaryChartsData[]): data is AlertsTy
 export const getIsAlertsByTypeAgg = (
   data: AlertSearchResponse<{}, SummaryChartsAgg>
 ): data is AlertSearchResponse<{}, AlertsByTypeAgg> => {
+  return has(data, 'aggregations.alertsByType');
+};
+
+export const getIsAlertsByRuleAgg = (
+  data: AlertSearchResponse<{}, SummaryChartsAgg>
+): data is AlertSearchResponse<{}, AlertsByRuleAgg> => {
   return has(data, 'aggregations.alertsByRule');
 };

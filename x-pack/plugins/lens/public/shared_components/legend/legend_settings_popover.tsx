@@ -15,13 +15,12 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { ToolbarPopover } from '../toolbar_popover';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
 import { LegendSizeSettings } from './size/legend_size_settings';
-import { useDebouncedValue } from '../debounced_value';
 
 export interface LegendSettingsPopoverProps {
   /**
@@ -119,7 +118,7 @@ export interface LegendSettingsPopoverProps {
   /**
    * Button group position
    */
-  groupPosition?: ToolbarButtonProps['groupPosition'];
+  groupPosition?: ToolbarPopoverProps['groupPosition'];
   /**
    * Legend size in pixels
    */
@@ -165,30 +164,32 @@ export const MaxLinesInput = ({
   );
 };
 
+const noop = () => {};
+
 export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
   legendOptions,
   mode,
   onDisplayChange,
   position,
   location,
-  onLocationChange = () => {},
+  onLocationChange = noop,
   verticalAlignment,
   horizontalAlignment,
   floatingColumns,
-  onAlignmentChange = () => {},
-  onFloatingColumnsChange = () => {},
+  onAlignmentChange = noop,
+  onFloatingColumnsChange = noop,
   onPositionChange,
   renderNestedLegendSwitch,
   nestedLegend,
-  onNestedLegendChange = () => {},
+  onNestedLegendChange = noop,
   valueInLegend,
-  onValueInLegendChange = () => {},
+  onValueInLegendChange = noop,
   renderValueInLegendSwitch,
   groupPosition = 'right',
   maxLines,
-  onMaxLinesChange = () => {},
+  onMaxLinesChange = noop,
   shouldTruncate,
-  onTruncateLegendChange = () => {},
+  onTruncateLegendChange = noop,
   legendSize,
   onLegendSizeChange,
   showAutoLegendSizeOption,
@@ -294,7 +295,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 })}
                 data-test-subj="lens-legend-nested-switch"
                 showLabel={false}
-                checked={!!nestedLegend}
+                checked={Boolean(nestedLegend)}
                 onChange={onNestedLegendChange}
               />
             </EuiFormRow>

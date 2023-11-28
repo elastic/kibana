@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, FC, useMemo } from 'react';
-import { useSourcererDataView } from '../modules/indicators';
+import { useSourcererDataView } from '../modules/indicators/hooks/use_sourcerer_data_view';
 
 export type FieldTypesContextValue = Record<string, string | undefined>;
 

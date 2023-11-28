@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { lazyLoadModules } from '../lazy_load_bundle';
 import { IndexNameFormProps } from '..';
 
@@ -38,6 +38,6 @@ export class IndexNameFormAsyncWrapper extends React.Component<IndexNameFormProp
 
   render() {
     const { IndexNameForm } = this.state;
-    return IndexNameForm ? <IndexNameForm {...this.props} /> : <EuiLoadingContent lines={3} />;
+    return IndexNameForm ? <IndexNameForm {...this.props} /> : <EuiSkeletonText lines={3} />;
   }
 }

@@ -11,10 +11,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  getRuleExecutionResultsUrl,
-  RuleExecutionStatus,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { getRuleExecutionResultsUrl } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -22,11 +19,12 @@ import {
   createSignalsIndex,
   deleteAllRules,
   deleteAllEventLogExecutionEvents,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getRuleForSignalTesting,
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
-  waitForRuleSuccessOrStatus,
+  waitForRulePartialFailure,
+  waitForRuleSuccess,
 } from '../../utils';
 import {
   failedGapExecution,
@@ -51,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     beforeEach(async () => {
@@ -65,6 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl('1'))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(404);
@@ -74,9 +73,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return execution events for a rule that has executed successfully', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*']);
+      const rule = {
+        ...getRuleForSignalTesting(['auditbeat-*']),
+        query: 'process.executable: "/usr/bin/sudo"',
+      };
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
 
       const start = dateMath.parse('now-24h')?.utc().toISOString();
@@ -84,6 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -102,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return execution events for a rule that has executed in a warning state', async () => {
       const rule = getRuleForSignalTesting(['no-name-index']);
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus['partial failure']);
+      await waitForRulePartialFailure({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
 
       const start = dateMath.parse('now-24h')?.utc().toISOString();
@@ -110,6 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -122,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].security_status).to.eql('partial failure');
       expect(
         response.body.events[0].security_message.startsWith(
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["no-name-index"] was found.'
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["no-name-index"] was found.'
         )
       ).to.eql(true);
     });
@@ -157,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -228,6 +233,8 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .set('elastic-api-version', '1')
         .query({ start, end, status_filters: 'failed,succeeded' });
 
       // Verify the most recent execution was one of the failedRanAfterDisabled executions, which have a duration of 3ms and are made up of 2 docs per execution,

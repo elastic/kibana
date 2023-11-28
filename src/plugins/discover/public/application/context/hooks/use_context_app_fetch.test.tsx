@@ -9,7 +9,7 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
+import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
 import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
@@ -19,12 +19,19 @@ import {
   mockSuccessorHits,
 } from '../__mocks__/use_context_app_fetch';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
+const mockInterceptedWarning = {
+  originalWarning: searchResponseIncompleteWarningLocalCluster,
+};
+
 const mockFilterManager = createFilterManagerMock();
+
+let mockOverrideInterceptedWarnings = false;
 
 jest.mock('../services/context', () => {
   const originalModule = jest.requireActual('../services/context');
@@ -35,7 +42,10 @@ jest.mock('../services/context', () => {
       if (!dataView || !dataView.id) {
         throw new Error();
       }
-      return type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits;
+      return {
+        rows: type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits,
+        interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
+      };
     },
   };
 });
@@ -45,7 +55,10 @@ jest.mock('../services/anchor', () => ({
     if (!dataView.id || !anchorId) {
       throw new Error();
     }
-    return mockAnchorHit;
+    return {
+      anchorRow: mockAnchorHit,
+      interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
+    };
   },
 }));
 
@@ -118,6 +131,9 @@ describe('test useContextAppFetch', () => {
     expect(result.current.fetchedState.anchor).toEqual({ ...mockAnchorHit, isAnchor: true });
     expect(result.current.fetchedState.predecessors).toEqual(mockPredecessorHits);
     expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
+    expect(result.current.fetchedState.predecessorsInterceptedWarnings).toBeUndefined();
+    expect(result.current.fetchedState.successorsInterceptedWarnings).toBeUndefined();
+    expect(result.current.fetchedState.anchorInterceptedWarnings).toBeUndefined();
   });
 
   it('should set anchorStatus to failed when tieBreakingField array is empty', async () => {
@@ -186,5 +202,33 @@ describe('test useContextAppFetch', () => {
     expect(result.current.fetchedState.successorsStatus.reason).toBe(FailureReason.UNKNOWN);
     expect(result.current.fetchedState.predecessors).toEqual([]);
     expect(result.current.fetchedState.successors).toEqual([]);
+  });
+
+  it('should handle warnings', async () => {
+    mockOverrideInterceptedWarnings = true;
+
+    const { result } = initDefaults(['_doc']);
+
+    expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.UNINITIALIZED);
+    expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
+    expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
+
+    await act(async () => {
+      await result.current.fetchAllRows();
+    });
+
+    expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.LOADED);
+    expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.LOADED);
+    expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.LOADED);
+    expect(result.current.fetchedState.anchor).toEqual({ ...mockAnchorHit, isAnchor: true });
+    expect(result.current.fetchedState.predecessors).toEqual(mockPredecessorHits);
+    expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
+    expect(result.current.fetchedState.predecessorsInterceptedWarnings).toEqual([
+      mockInterceptedWarning,
+    ]);
+    expect(result.current.fetchedState.successorsInterceptedWarnings).toEqual([
+      mockInterceptedWarning,
+    ]);
+    expect(result.current.fetchedState.anchorInterceptedWarnings).toEqual([mockInterceptedWarning]);
   });
 });

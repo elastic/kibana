@@ -7,11 +7,11 @@
 
 import { omitBy } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   NotificationsQueryParams,
   NotificationsSearchResponse,
 } from '../../../../common/types/notifications';
-import { basePath } from '.';
 import type { HttpService } from '../http_service';
 import type {
   NotificationsCountQueryParams,
@@ -19,22 +19,22 @@ import type {
 } from '../../../../common/types/notifications';
 
 export function notificationsProvider(httpService: HttpService) {
-  const apiBasePath = basePath();
-
   return {
     findMessages(params: NotificationsQueryParams) {
       return httpService.http<NotificationsSearchResponse>({
-        path: `${apiBasePath}/notifications`,
+        path: `${ML_INTERNAL_BASE_PATH}/notifications`,
         method: 'GET',
         query: omitBy(params, (v) => !isDefined(v)),
+        version: '1',
       });
     },
 
     countMessages$(params: NotificationsCountQueryParams) {
       return httpService.http$<NotificationsCountResponse>({
-        path: `${apiBasePath}/notifications/count`,
+        path: `${ML_INTERNAL_BASE_PATH}/notifications/count`,
         method: 'GET',
         query: omitBy(params, (v) => !isDefined(v)),
+        version: '1',
       });
     },
   };

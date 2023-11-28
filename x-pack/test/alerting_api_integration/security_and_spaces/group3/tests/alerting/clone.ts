@@ -10,7 +10,7 @@ import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
   getTestRuleData,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   getUrlPrefix,
   ObjectRemover,
   TaskManagerDoc,
@@ -121,11 +121,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'create',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -161,10 +157,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 throttle: '1m',
                 notify_when: 'onThrottleInterval',
                 updated_by: user.username,
+                api_key_created_by_user: false,
                 api_key_owner: user.username,
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
+                revision: 0,
                 last_run: {
                   alerts_count: {
                     active: 0,

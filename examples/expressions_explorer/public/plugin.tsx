@@ -49,7 +49,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
       title: 'Expressions Explorer',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const [, depsStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
         return renderApp(
           {
@@ -57,6 +57,8 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
             inspector: depsStart.inspector,
             actions: depsStart.uiActions,
             uiSettings: core.uiSettings,
+            settings: core.settings,
+            theme: coreStart.theme,
           },
           params
         );

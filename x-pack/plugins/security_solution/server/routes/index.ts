@@ -43,7 +43,7 @@ import {
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
 
-import { persistNoteRoute } from '../lib/timeline/routes/notes';
+import { persistNoteRoute, deleteNoteRoute } from '../lib/timeline/routes/notes';
 
 import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
@@ -71,6 +71,18 @@ import {
   readPrebuiltDevToolContentRoute,
 } from '../lib/risk_score/routes';
 import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
+import { registerDashboardsRoutes } from '../lib/dashboards/routes';
+import { registerTagsRoutes } from '../lib/tags/routes';
+import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
+import {
+  riskScorePreviewRoute,
+  riskEngineDisableRoute,
+  riskEngineInitRoute,
+  riskEngineEnableRoute,
+  riskEngineStatusRoute,
+  riskEnginePrivilegesRoute,
+} from '../lib/entity_analytics/risk_engine/routes';
+import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_engine/routes/risk_score_calculation_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -125,12 +137,14 @@ export const initRoutes = (
   installPrepackedTimelinesRoute(router, config, security);
 
   persistNoteRoute(router, config, security);
+  deleteNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router, logger, security, telemetrySender);
+  setAlertTagsRoute(router);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
@@ -157,9 +171,25 @@ export const initRoutes = (
   deletePrebuiltSavedObjectsRoute(router, security);
   getRiskScoreIndexStatusRoute(router);
   installRiskScoresRoute(router, logger, security);
+
+  // Dashboards
+  registerDashboardsRoutes(router, logger, security);
+  registerTagsRoutes(router, logger, security);
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  }
+
+  if (config.experimentalFeatures.riskScoringRoutesEnabled) {
+    riskScorePreviewRoute(router, logger);
+    riskScoreCalculationRoute(router, logger);
+    riskEngineStatusRoute(router);
+    riskEngineInitRoute(router, getStartServices);
+    riskEngineEnableRoute(router, getStartServices);
+    riskEngineDisableRoute(router, getStartServices);
+    if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
+      riskEnginePrivilegesRoute(router, getStartServices);
+    }
   }
 };

@@ -39,13 +39,8 @@ export const platformServiceFactory: CanvaPlatformServiceFactory = ({
     setFullscreen: coreStart.chrome.setIsVisible,
     redirectLegacyUrl: startPlugins.spaces?.ui.redirectLegacyUrl,
     getLegacyUrlConflict: startPlugins.spaces?.ui.components.getLegacyUrlConflict,
-
-    // TODO: these should go away.  We want thin accessors, not entire objects.
-    // Entire objects are hard to mock, and hide our dependency on the external service.
-    getSavedObjects: () => coreStart.savedObjects,
-    getSavedObjectsClient: () => coreStart.savedObjects.client,
     getUISettings: () => coreStart.uiSettings,
     getHttp: () => coreStart.http,
-    getSavedObjectsManagement: () => startPlugins.savedObjectsManagement,
+    getContentManagement: () => startPlugins.contentManagement,
   };
 };

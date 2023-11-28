@@ -8,6 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { Readable } from 'stream';
+import type { HapiReadableStream } from '../../../types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import type {
@@ -20,6 +22,7 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
+import type { actionCreateService } from '..';
 
 export const createActionRequestsEsSearchResultsMock = (
   agentIds?: string[],
@@ -211,7 +214,31 @@ export const generateFileMetadataDocumentMock = (
     transithash: {
       sha256: 'a0d6d6a2bb73340d4a0ed32b2a46272a19dd111427770c072918aed7a8565010',
     },
+    '@timestamp': new Date().toISOString(),
 
     ...overrides,
+  };
+};
+
+export const createHapiReadableStreamMock = (): HapiReadableStream => {
+  const readable = Readable.from(['test']) as HapiReadableStream;
+  readable.hapi = {
+    filename: 'foo.txt',
+    headers: {
+      'content-type': 'application/text',
+    },
+  };
+
+  return readable;
+};
+
+export const createActionCreateServiceMock = (): jest.Mocked<
+  ReturnType<typeof actionCreateService>
+> => {
+  const createdActionMock = new EndpointActionGenerator('seed').generateActionDetails();
+
+  return {
+    createAction: jest.fn().mockResolvedValue(createdActionMock),
+    createActionFromAlert: jest.fn().mockResolvedValue(createdActionMock),
   };
 };

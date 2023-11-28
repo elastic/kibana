@@ -7,9 +7,9 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useIndicators, UseIndicatorsParams, UseIndicatorsValue } from './use_indicators';
-import { TestProvidersComponent } from '../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
-import { mockTimeRange } from '../../../common/mocks/mock_indicators_filters_context';
+import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
 
 jest.mock('../services/fetch_indicators');
 

@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense, useMemo } from 'react';
-import type { Ecs } from '../../common/ecs';
+import type { Ecs } from '@kbn/cases-plugin/common';
 import ServicesWrapper from './services_wrapper';
 import type { ServicesWrapperProps } from './services_wrapper';
 import type { OsqueryActionProps } from './osquery_action';

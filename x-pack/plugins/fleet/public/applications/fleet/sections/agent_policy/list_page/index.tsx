@@ -34,7 +34,8 @@ import {
   useUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
-import { AgentPolicySummaryLine, SearchBar } from '../../../components';
+import { SearchBar } from '../../../components';
+import { AgentPolicySummaryLine } from '../../../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { CreateAgentPolicyFlyout } from './components';
@@ -260,6 +261,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
               setSearch(newSearch);
             }}
             fieldPrefix={AGENT_POLICY_SAVED_OBJECT_TYPE}
+            dataTestSubj="agentPolicyList.queryInput"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

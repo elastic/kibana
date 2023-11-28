@@ -7,19 +7,17 @@
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { pick } from 'lodash';
-import {
-  experimentalRuleFieldMap,
-  ExperimentalRuleFieldMap,
-} from './assets/field_maps/experimental_rule_field_map';
+import { legacyExperimentalFieldMap, ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
 
 import { runtimeTypeFromFieldMap } from './field_map';
 
-const experimentalFieldRuntimeType =
-  runtimeTypeFromFieldMap<ExperimentalRuleFieldMap>(experimentalRuleFieldMap);
+const experimentalFieldRuntimeType = runtimeTypeFromFieldMap<ExperimentalRuleFieldMap>(
+  legacyExperimentalFieldMap
+);
 
 export const parseExperimentalFields = (input: unknown, partial = false) => {
   const decodePartial = (alert: unknown) => {
-    const limitedFields = pick(experimentalRuleFieldMap, Object.keys(alert as object));
+    const limitedFields = pick(legacyExperimentalFieldMap, Object.keys(alert as object));
     const partialTechnicalFieldRuntimeType = runtimeTypeFromFieldMap<ExperimentalRuleFieldMap>(
       limitedFields as unknown as ExperimentalRuleFieldMap
     );

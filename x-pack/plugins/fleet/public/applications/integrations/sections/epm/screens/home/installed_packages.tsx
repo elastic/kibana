@@ -77,7 +77,7 @@ const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
         count,
       },
     })}
-    iconType="alert"
+    iconType="warning"
     color="warning"
   >
     <p>
@@ -97,7 +97,7 @@ const VerificationWarningCallout: React.FC = () => {
       title={i18n.translate('xpack.fleet.epmList.verificationWarningCalloutTitle', {
         defaultMessage: 'Integrations not verified',
       })}
-      iconType="alert"
+      iconType="warning"
       color="warning"
     >
       <p>
@@ -171,7 +171,7 @@ export const InstalledPackages: React.FC<{
     () =>
       installedPackages.filter(
         (item) =>
-          'savedObject' in item && semverLt(item.savedObject.attributes.version, item.version)
+          item?.installationInfo?.version && semverLt(item.installationInfo.version, item.version)
       ),
     [installedPackages]
   );

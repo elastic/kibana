@@ -54,10 +54,10 @@ export function dockerMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/docker_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/docker_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['containers', 'os_system'],
+    integrationBrowserCategories: ['containers', 'observability'],
   };
 }

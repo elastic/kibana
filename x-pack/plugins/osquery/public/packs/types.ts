@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject } from '@kbn/core/public';
-import type { Shard } from '../../common/schemas/common/utils';
+import type { Shard } from '../../common/utils/converters';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
 
-export type PackSavedObject = SavedObject<{
+export interface PackSavedObject {
+  saved_object_id: string;
   name: string;
   description: string | undefined;
   queries: Record<string, Omit<PackQueryFormData, 'id'>>;
@@ -18,9 +18,10 @@ export type PackSavedObject = SavedObject<{
   created_by: string | undefined;
   updated_at: string;
   updated_by: string | undefined;
-}>;
+  references: Array<{ name: string; id: string; type: string }>;
+}
 
-export type PackItem = PackSavedObject['attributes'] & {
+export type PackItem = PackSavedObject & {
   id: string;
   policy_ids: string[];
   read_only?: boolean;

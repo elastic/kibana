@@ -9,8 +9,8 @@ import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   ParsedTechnicalFields,
@@ -18,6 +18,7 @@ import {
 } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
@@ -153,12 +154,6 @@ export const getViewInInventoryAppUrl = ({
 export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
   addSpaceIdToPath(basePath.publicBaseUrl, spaceId, LINK_TO_METRICS_EXPLORER);
 
-export const getAlertDetailsUrl = (
-  basePath: IBasePath,
-  spaceId: string,
-  alertUuid: string | null
-) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
-
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;
 export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: CONTAINER_ID };
@@ -229,8 +224,10 @@ export const flattenAdditionalContext = (
   return additionalContext ? flattenObject(additionalContext) : {};
 };
 
-export const getContextForRecoveredAlerts = (
-  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
+export const getContextForRecoveredAlerts = <
+  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)
+>(
+  alertHitSource: Partial<T> | undefined | null
 ): AdditionalContext => {
   const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
 

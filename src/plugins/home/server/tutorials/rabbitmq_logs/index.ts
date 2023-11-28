@@ -39,7 +39,7 @@ export function rabbitmqLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-rabbitmq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/rabbitmq.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/rabbitmq.svg'),
     artifacts: {
       dashboards: [],
       application: {
@@ -56,6 +56,6 @@ export function rabbitmqLogsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['message_queue'],
+    integrationBrowserCategories: ['message_queue', 'observability'],
   };
 }

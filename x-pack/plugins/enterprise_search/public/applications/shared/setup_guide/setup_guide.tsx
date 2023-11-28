@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import {
   EuiPage,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
+  EuiPageSidebar,
   EuiPageBody,
   EuiSpacer,
   EuiFlexGroup,
@@ -35,8 +35,8 @@ import './setup_guide.scss';
 
 interface Props {
   children: React.ReactNode;
-  productName: string;
   productEuiIcon: 'logoAppSearch' | 'logoWorkplaceSearch' | 'logoEnterpriseSearch';
+  productName: string;
 }
 
 export const SetupGuideLayout: React.FC<Props> = ({ children, productName, productEuiIcon }) => {
@@ -46,7 +46,7 @@ export const SetupGuideLayout: React.FC<Props> = ({ children, productName, produ
 
   return (
     <EuiPage className="setupGuide" data-test-subj="setupGuide">
-      <EuiPageSideBar className="setupGuide__sidebar">
+      <EuiPageSidebar className="setupGuide__sidebar">
         <EuiText color="subdued" size="s">
           <strong>{SETUP_GUIDE_TITLE}</strong>
         </EuiText>
@@ -64,7 +64,7 @@ export const SetupGuideLayout: React.FC<Props> = ({ children, productName, produ
         </EuiFlexGroup>
 
         {children}
-      </EuiPageSideBar>
+      </EuiPageSidebar>
 
       <EuiPageBody className="setupGuide__body">
         {isCloudEnabled ? (

@@ -9,8 +9,8 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
-import { ALL_VALUES_SELECTED } from '@kbn/observability-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
+import { ALL_VALUES_SELECTED } from '@kbn/exploratory-view-plugin/public';
 import {
   isMobileAgentName,
   isRumAgentName,
@@ -82,10 +82,14 @@ export function AnalyzeDataButton() {
         position="top"
         content={i18n.translate('xpack.apm.analyzeDataButton.tooltip', {
           defaultMessage:
-            'Explore Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
+            'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
         })}
       >
-        <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">
+        <EuiButtonEmpty
+          data-test-subj="apmAnalyzeDataButtonExploreDataButton"
+          href={href}
+          iconType="visBarVerticalStacked"
+        >
           {i18n.translate('xpack.apm.analyzeDataButton.label', {
             defaultMessage: 'Explore data',
           })}

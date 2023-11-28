@@ -101,7 +101,7 @@ export function getServiceColumns({
                   )}
                 >
                   <EuiBadge
-                    iconType="alert"
+                    iconType="warning"
                     color="danger"
                     href={link('/services/{serviceName}/alerts', {
                       path: { serviceName },
@@ -327,6 +327,7 @@ export function ServiceList({
   } = useApmParams('/services');
 
   const { kuery } = query;
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
@@ -377,7 +378,7 @@ export function ServiceList({
                 'xpack.apm.servicesTable.tooltip.metricsExplanation',
                 {
                   defaultMessage:
-                    'Service metrics are aggregated on transaction type "request", "page-load", or the top available transaction type.',
+                    'Service metrics are aggregated on their transaction type, which can be request or page-load. If neither exists, metrics are aggregated on the top available transaction type.',
                 }
               )}
             >

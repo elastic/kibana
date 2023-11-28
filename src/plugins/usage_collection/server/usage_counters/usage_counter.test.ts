@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { UsageCounter, CounterMetric } from './usage_counter';
+import { UsageCounter } from './usage_counter';
+import type { UsageCounters } from '../../common/types';
 import * as Rx from 'rxjs';
 import * as rxOp from 'rxjs/operators';
 
 describe('UsageCounter', () => {
   const domainId = 'test-domain-id';
-  const counter$ = new Rx.Subject<CounterMetric>();
+  const counter$ = new Rx.Subject<UsageCounters.v1.CounterMetric>();
   const usageCounter = new UsageCounter({ domainId, counter$ });
 
   afterAll(() => {

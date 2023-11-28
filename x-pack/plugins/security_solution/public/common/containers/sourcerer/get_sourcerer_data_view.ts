@@ -5,25 +5,31 @@
  * 2.0.
  */
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
+import type { SourcererDataView, RunTimeMappings } from '../../store/sourcerer/model';
+import { getDataViewStateFromIndexFields } from '../source/use_data_view';
 
 export const getSourcererDataView = async (
   dataViewId: string,
-  dataViewsService: DataViewsContract
-) => {
-  const dataViewData = await dataViewsService.get(dataViewId);
-  const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
-  const patternList = defaultPatternsList.reduce((res: string[], pattern) => {
-    if (dataViewData.matchedIndices.find((q) => q.includes(pattern.replaceAll('*', '')))) {
-      res.push(pattern);
-    }
-    return res;
-  }, []);
+  dataViewsService: DataViewsServicePublic,
+  refreshFields = false
+): Promise<SourcererDataView> => {
+  const dataView = await dataViewsService.get(dataViewId, true, refreshFields);
+  const dataViewData = dataView.toSpec();
+  const defaultPatternsList = ensurePatternFormat(dataView.getIndexPattern().split(','));
+  const patternList = await dataViewsService.getExistingIndices(defaultPatternsList);
 
   return {
+    loading: false,
     id: dataViewData.id ?? '',
-    title: dataViewData.getIndexPattern(),
+    title: dataView.getIndexPattern(),
+    indexFields: dataView.fields,
+    fields: dataViewData.fields,
     patternList,
+    dataView: dataViewData,
+    browserFields: getDataViewStateFromIndexFields(dataViewData.id ?? '', dataViewData.fields)
+      .browserFields,
+    runtimeMappings: dataViewData.runtimeFieldMap as RunTimeMappings,
   };
 };

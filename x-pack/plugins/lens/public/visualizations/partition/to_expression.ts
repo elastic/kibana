@@ -7,7 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
@@ -26,17 +26,15 @@ import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
+import { PieLayerState, PieVisualizationState, EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,
+  LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieLayerState,
-  PieVisualizationState,
-  EmptySizeRatios,
-  LegendDisplay,
-} from '../../../common';
+} from '../../../common/constants';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import { isCollapsed } from './visualization';
+import { hasNonCollapsedSliceBy, isCollapsed } from './visualization';
 
 interface Attributes {
   isPreview: boolean;
@@ -112,7 +110,7 @@ const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (
     layer.numberDisplay !== NumberDisplay.HIDDEN ? (layer.numberDisplay as ValueFormats) : [];
   const percentDecimals = layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS;
   const colorOverrides =
-    layer.allowMultipleMetrics && !layer.primaryGroups.length
+    layer.allowMultipleMetrics && !hasNonCollapsedSliceBy(layer)
       ? Object.entries(columnToLabelMap).reduce<Record<string, string>>(
           (acc, [columnId, label]) => {
             const color = layer.colorsByDimension?.[columnId];
@@ -177,7 +175,6 @@ const generateCommonArguments = (
   const datasource = datasourceLayers[layer.layerId];
   const columnToLabelMap = getColumnToLabelMap(layer.metrics, datasource);
   const sortedMetricAccessors = getSortedAccessorsForGroup(datasource, layer, 'metrics');
-
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer, columnToLabelMap),
     buckets: operations
@@ -194,11 +191,15 @@ const generateCommonArguments = (
     legendPosition: layer.legendPosition || Position.Right,
     maxLegendLines: layer.legendMaxLines ?? 1,
     legendSize: layer.legendSize,
-    nestedLegend: !!layer.nestedLegend,
+    nestedLegend:
+      layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+        ? Boolean(layer.nestedLegend)
+        : false,
     truncateLegend:
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
     palette: generatePaletteAstArguments(paletteService, state.palette),
     addTooltip: true,
+    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   };
 };
 

@@ -5,29 +5,45 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getMetadataForDependency } from './get_metadata_for_dependency';
-import { getLatencyChartsForDependency } from './get_latency_charts_for_dependency';
-import { getTopDependencies } from './get_top_dependencies';
-import { getUpstreamServicesForDependency } from './get_upstream_services_for_dependency';
-import { getThroughputChartsForDependency } from './get_throughput_charts_for_dependency';
-import { getErrorRateChartsForDependency } from './get_error_rate_charts_for_dependency';
-import { ConnectionStatsItemWithImpact } from '../../../common/connections';
+import * as t from 'io-ts';
 import { offsetRt } from '../../../common/comparison_rt';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import {
+  DependencyLatencyDistributionResponse,
+  getDependencyLatencyDistribution,
+} from './get_dependency_latency_distribution';
+import { getErrorRateChartsForDependency } from './get_error_rate_charts_for_dependency';
+import {
+  getLatencyChartsForDependency,
+  LatencyChartsDependencyResponse,
+} from './get_latency_charts_for_dependency';
+import {
+  getMetadataForDependency,
+  MetadataForDependencyResponse,
+} from './get_metadata_for_dependency';
+import {
+  getThroughputChartsForDependency,
+  ThroughputChartsForDependencyResponse,
+} from './get_throughput_charts_for_dependency';
+import {
+  getTopDependencies,
+  TopDependenciesResponse,
+} from './get_top_dependencies';
 import {
   DependencyOperation,
   getTopDependencyOperations,
 } from './get_top_dependency_operations';
-import { getDependencyLatencyDistribution } from './get_dependency_latency_distribution';
-import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
 import {
   DependencySpan,
   getTopDependencySpans,
 } from './get_top_dependency_spans';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import {
+  getUpstreamServicesForDependency,
+  UpstreamServicesForDependencyResponse,
+} from './get_upstream_services_for_dependency';
 
 const topDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/top_dependencies',
@@ -47,84 +63,20 @@ const topDependenciesRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{
-    dependencies: Array<{
-      currentStats: {
-        latency: {
-          value: number | null;
-          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-        };
-        throughput: {
-          value: number | null;
-          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-        };
-        errorRate: {
-          value: number | null;
-          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-        };
-        totalTime: {
-          value: number | null;
-          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-        };
-      } & { impact: number };
-      previousStats:
-        | ({
-            latency: {
-              value: number | null;
-              timeseries: Array<
-                import('./../../../typings/timeseries').Coordinate
-              >;
-            };
-            throughput: {
-              value: number | null;
-              timeseries: Array<
-                import('./../../../typings/timeseries').Coordinate
-              >;
-            };
-            errorRate: {
-              value: number | null;
-              timeseries: Array<
-                import('./../../../typings/timeseries').Coordinate
-              >;
-            };
-            totalTime: {
-              value: number | null;
-              timeseries: Array<
-                import('./../../../typings/timeseries').Coordinate
-              >;
-            };
-          } & { impact: number })
-        | null;
-      location: import('./../../../common/connections').Node;
-    }>;
-  }> => {
+  handler: async (resources): Promise<TopDependenciesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { environment, offset, numBuckets, kuery, start, end } =
       resources.params.query;
 
-    const opts = { apmEventClient, start, end, numBuckets, environment, kuery };
-
-    const [currentDependencies, previousDependencies] = await Promise.all([
-      getTopDependencies(opts),
-      offset ? getTopDependencies({ ...opts, offset }) : Promise.resolve([]),
-    ]);
-
-    return {
-      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      dependencies: currentDependencies.map((dependency) => {
-        const { stats, ...rest } = dependency;
-        const prev = previousDependencies.find(
-          (item): boolean => item.location.id === dependency.location.id
-        );
-        return {
-          ...rest,
-          currentStats: stats,
-          previousStats: prev?.stats ?? null,
-        };
-      }),
-    };
+    return getTopDependencies({
+      apmEventClient,
+      start,
+      end,
+      numBuckets,
+      environment,
+      kuery,
+      offset,
+    });
   },
 });
 
@@ -147,57 +99,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{
-    services: Array<{
-      currentStats: {
-        latency: {
-          value: number | null;
-          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-        };
-        throughput: {
-          value: number | null;
-          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-        };
-        errorRate: {
-          value: number | null;
-          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-        };
-        totalTime: {
-          value: number | null;
-          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-        };
-      } & { impact: number };
-      previousStats:
-        | ({
-            latency: {
-              value: number | null;
-              timeseries: Array<
-                import('./../../../typings/timeseries').Coordinate
-              >;
-            };
-            throughput: {
-              value: number | null;
-              timeseries: Array<
-                import('./../../../typings/timeseries').Coordinate
-              >;
-            };
-            errorRate: {
-              value: number | null;
-              timeseries: Array<
-                import('./../../../typings/timeseries').Coordinate
-              >;
-            };
-            totalTime: {
-              value: number | null;
-              timeseries: Array<
-                import('./../../../typings/timeseries').Coordinate
-              >;
-            };
-          } & { impact: number })
-        | null;
-      location: import('./../../../common/connections').Node;
-    }>;
-  }> => {
+  ): Promise<UpstreamServicesForDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const {
       query: {
@@ -211,7 +113,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
       },
     } = resources.params;
 
-    const opts = {
+    return getUpstreamServicesForDependency({
       dependencyName,
       apmEventClient,
       start,
@@ -219,35 +121,8 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
       numBuckets,
       environment,
       kuery,
-    };
-
-    const [currentServices, previousServices] = await Promise.all([
-      getUpstreamServicesForDependency(opts),
-      offset
-        ? getUpstreamServicesForDependency({ ...opts, offset })
-        : Promise.resolve([]),
-    ]);
-
-    return {
-      services: currentServices.map(
-        (
-          service
-        ): Omit<ConnectionStatsItemWithImpact, 'stats'> & {
-          currentStats: ConnectionStatsItemWithImpact['stats'];
-          previousStats: ConnectionStatsItemWithImpact['stats'] | null;
-        } => {
-          const { stats, ...rest } = service;
-          const prev = previousServices.find(
-            (item): boolean => item.location.id === service.location.id
-          );
-          return {
-            ...rest,
-            currentStats: stats,
-            previousStats: prev?.stats ?? null,
-          };
-        }
-      ),
-    };
+      offset,
+    });
   },
 });
 
@@ -262,7 +137,7 @@ const dependencyMetadataRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    metadata: { spanType: string | undefined; spanSubtype: string | undefined };
+    metadata: MetadataForDependencyResponse;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -298,12 +173,7 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{
-    currentTimeseries: Array<{ x: number; y: number }>;
-    comparisonTimeseries: Array<{ x: number; y: number }> | null;
-  }> => {
+  handler: async (resources): Promise<LatencyChartsDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const {
@@ -317,33 +187,17 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    const [currentTimeseries, comparisonTimeseries] = await Promise.all([
-      getLatencyChartsForDependency({
-        dependencyName,
-        spanName,
-        searchServiceDestinationMetrics,
-        apmEventClient,
-        start,
-        end,
-        kuery,
-        environment,
-      }),
-      offset
-        ? getLatencyChartsForDependency({
-            dependencyName,
-            spanName,
-            searchServiceDestinationMetrics,
-            apmEventClient,
-            start,
-            end,
-            kuery,
-            environment,
-            offset,
-          })
-        : null,
-    ]);
-
-    return { currentTimeseries, comparisonTimeseries };
+    return getLatencyChartsForDependency({
+      apmEventClient,
+      dependencyName,
+      searchServiceDestinationMetrics,
+      spanName,
+      kuery,
+      environment,
+      offset,
+      start,
+      end,
+    });
   },
 });
 
@@ -367,10 +221,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{
-    currentTimeseries: Array<{ x: number; y: number | null }>;
-    comparisonTimeseries: Array<{ x: number; y: number | null }> | null;
-  }> => {
+  ): Promise<ThroughputChartsForDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const {
@@ -384,33 +235,17 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    const [currentTimeseries, comparisonTimeseries] = await Promise.all([
-      getThroughputChartsForDependency({
-        dependencyName,
-        spanName,
-        apmEventClient,
-        start,
-        end,
-        kuery,
-        environment,
-        searchServiceDestinationMetrics,
-      }),
-      offset
-        ? getThroughputChartsForDependency({
-            dependencyName,
-            spanName,
-            apmEventClient,
-            start,
-            end,
-            kuery,
-            environment,
-            offset,
-            searchServiceDestinationMetrics,
-          })
-        : null,
-    ]);
-
-    return { currentTimeseries, comparisonTimeseries };
+    return getThroughputChartsForDependency({
+      apmEventClient,
+      dependencyName,
+      searchServiceDestinationMetrics,
+      spanName,
+      kuery,
+      environment,
+      offset,
+      start,
+      end,
+    });
   },
 });
 
@@ -451,33 +286,17 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    const [currentTimeseries, comparisonTimeseries] = await Promise.all([
-      getErrorRateChartsForDependency({
-        dependencyName,
-        spanName,
-        apmEventClient,
-        start,
-        end,
-        kuery,
-        environment,
-        searchServiceDestinationMetrics,
-      }),
-      offset
-        ? getErrorRateChartsForDependency({
-            dependencyName,
-            spanName,
-            apmEventClient,
-            start,
-            end,
-            kuery,
-            environment,
-            offset,
-            searchServiceDestinationMetrics,
-          })
-        : null,
-    ]);
-
-    return { currentTimeseries, comparisonTimeseries };
+    return getErrorRateChartsForDependency({
+      apmEventClient,
+      dependencyName,
+      start,
+      end,
+      environment,
+      kuery,
+      searchServiceDestinationMetrics,
+      spanName,
+      offset,
+    });
   },
 });
 
@@ -549,10 +368,7 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{
-    allSpansDistribution: OverallLatencyDistributionResponse;
-    failedSpansDistribution: OverallLatencyDistributionResponse;
-  }> => {
+  ): Promise<DependencyLatencyDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const {

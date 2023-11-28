@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import type { PopoverAnchorPosition } from '@elastic/eui';
-import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import type { PopoverAnchorPosition, WithEuiThemeProps } from '@elastic/eui';
+import {
+  EuiHeaderSectionItemButton,
+  EuiLoadingSpinner,
+  EuiPopover,
+  withEuiTheme,
+} from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { SpacesDescription } from './components/spaces_description';
+import { SpacesMenu } from './components/spaces_menu';
 import type { Space } from '../../common';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
-import { SpacesDescription } from './components/spaces_description';
-import { SpacesMenu } from './components/spaces_menu';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
@@ -31,6 +36,7 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
+  theme: WithEuiThemeProps['theme'];
 }
 
 interface State {
@@ -42,7 +48,7 @@ interface State {
 
 const popoutContentId = 'headerSpacesMenuContent';
 
-export class NavControlPopover extends Component<Props, State> {
+class NavControlPopoverUI extends Component<Props, State> {
   private activeSpace$?: Subscription;
 
   constructor(props: Props) {
@@ -73,6 +79,7 @@ export class NavControlPopover extends Component<Props, State> {
 
   public render() {
     const button = this.getActiveSpaceButton();
+    const { theme } = this.props;
 
     let element: React.ReactNode;
     if (this.state.loading || this.state.spaces.length < 2) {
@@ -110,6 +117,7 @@ export class NavControlPopover extends Component<Props, State> {
         panelPaddingSize="none"
         repositionOnScroll
         ownFocus
+        zIndex={Number(theme.euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
       >
         {element}
       </EuiPopover>
@@ -199,3 +207,5 @@ export class NavControlPopover extends Component<Props, State> {
     });
   };
 }
+
+export const NavControlPopover = withEuiTheme(NavControlPopoverUI);

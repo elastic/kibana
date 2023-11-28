@@ -39,6 +39,7 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
     name: 'Policy',
     updated_at: '2020-01-01',
     updated_by: 'qwerty',
+    is_protected: false,
     ...data,
   });
 }
@@ -282,6 +283,20 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should return a policy with monitoring enabled but no logs/metrics if keep_monitoring_alive is true', async () => {
+    mockAgentPolicy({
+      keep_monitoring_alive: true,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy?.agent?.monitoring).toEqual({
+      enabled: true,
+      logs: false,
+      metrics: false,
+    });
+  });
+
   it('should get the permissions for monitoring', async () => {
     mockAgentPolicy({
       namespace: 'testnamespace',
@@ -437,30 +452,18 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should populate agent.protection and signed properties if encryption is available', async () => {
-    const mockContext = createAppContextStartContractMock();
-    mockContext.messageSigningService.sign = jest
-      .fn()
-      .mockImplementation((message: Record<string, unknown>) =>
-        Promise.resolve({
-          data: Buffer.from(JSON.stringify(message), 'utf8'),
-          signature: 'thisisasignature',
-        })
-      );
-    mockContext.messageSigningService.getPublicKey = jest
-      .fn()
-      .mockResolvedValue('thisisapublickey');
-    appContextService.start(mockContext);
+    appContextService.start(createAppContextStartContractMock());
 
     mockAgentPolicy({});
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
 
     expect(agentPolicy!.agent!.protection).toMatchObject({
-      enabled: true,
+      enabled: false,
       uninstall_token_hash: '',
       signing_key: 'thisisapublickey',
     });
     expect(agentPolicy!.signed).toMatchObject({
-      data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7InByb3RlY3Rpb24iOnsiZW5hYmxlZCI6dHJ1ZSwidW5pbnN0YWxsX3Rva2VuX2hhc2giOiIiLCJzaWduaW5nX2tleSI6InRoaXNpc2FwdWJsaWNrZXkifX19',
+      data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7ImZlYXR1cmVzIjp7fSwicHJvdGVjdGlvbiI6eyJlbmFibGVkIjpmYWxzZSwidW5pbnN0YWxsX3Rva2VuX2hhc2giOiIiLCJzaWduaW5nX2tleSI6InRoaXNpc2FwdWJsaWNrZXkifX0sImlucHV0cyI6W119',
       signature: 'thisisasignature',
     });
   });

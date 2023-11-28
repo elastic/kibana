@@ -11,10 +11,6 @@ import { SavedObjectsStart, SavedObjectSetup } from './plugin';
 const createStartContract = (): SavedObjectsStart => {
   return {
     SavedObjectClass: jest.fn(),
-    settings: {
-      getPerPage: () => 20,
-      getListingLimit: () => 100,
-    },
   };
 };
 

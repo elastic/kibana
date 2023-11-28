@@ -39,15 +39,19 @@ Choose the data you want to visualize.
 
 Edit and delete.
 
-. To change the aggregation *Quick function* and display options, click the field in the layer pane. 
+. Click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] on the panel, then **Edit visualization**. 
 
-. To delete a field, close the configuration options, then click *X* next to the field.
+. To change the aggregation *Quick function* and, click the field in the flyout. 
 
-. To duplicate a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the layer pane, then select *Duplicate layer*.
+. To delete a field, click image:dashboard/images/trash_can.png[Actions menu icon to delete a field, width=5%] next to the field.
 
-. To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the layer pane, then select *Clear layer*.
+. To duplicate a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the flyout, then select *Duplicate layer*.
 
-TIP: You can manually apply the changes you make, which is helpful when creating large and complex visualizations. To manually apply your changes, click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
+. To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the flyout, then select *Clear layer*.
+
+. Click **Apply and close**. 
+
+TIP: Use the **Edit visualization** flyout to make edits without having to leave the dashboard, or click **Edit in Lens** to make edits using the Lens application.
 
 [float]
 [[change-the-fields]]
@@ -175,18 +179,34 @@ Compare your real-time data to the results that are offset by a time increment. 
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
-[[multi-metric-partition-chart]]
-==== Build a partition chart from multiple metrics
+[[create-partition-charts-with-multiple-metrics]]
+==== Create partition charts with multiple metrics
 
-By default, partition charts (e.g. pie) are built from one or more "slice-by" dimensions to define the partitions and a single metric dimension to define their size. However, you can also build a partition chart from multiple metric dimensions.
+To create partition charts, such as pie charts, configure one or more *Slice by* dimensions to define the partitions, and a *Metric* dimension to define the size. 
+To create partition charts with multiple metrics, use the layer settings. Multiple metrics are unsupported for mosaic visualizations.
 
-. Open the layer context menu at the top right of the layer panel.
+. In the layer pane, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
 
-. Click *Layer settings*.
+. Select *Multiple metrics*.
 
-. Click the switch labeled *Multiple metrics*.
+. Click *X*.
 
-Note: this option is not available for mosaic charts.
+[float]
+[[improve-visualization-loading-time]]
+==== Improve visualization loading time
+
+preview::[]
+
+Data sampling allows you to improve the visualization loading time. To decrease the loading time, use a lower sampling percentage, which also decreases the accuracy. 
+Use low sampling percentages on large datasets.
+
+. In the **Edit visualization** flyout, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
+
+. To select the *Sampling* percentage, use the slider.
+
+. Click *Apply and close*.
+
+. Click **Save**.
 
 [float]
 [[add-annotations]]
@@ -205,15 +225,20 @@ Annotations support two placement types:
 
 * *Custom query* &mdash; Displays annotations based on custom {es} queries. For detailed information about queries, check <<semi-structured-search>>. 
 
-Create the annotation layer. 
+Any annotation layer can be saved as an annotation group to the *Visualize Library* in order to reuse it in other visualizations. Any changes made to the annotation group will be reflected in all visualizations to which it is added.
 
-. In the layer pane, click *Add layer > Annotations*.
+Create a new annotation layer. 
+
+. In the layer pane, click *Add layer > Annotations > New annotation*.
 
 . Select the {data-source} for the annotation.
 
 . From the fields list, drag a field to the *Add an annotation* field.
 
 . To use global filters in the annotation, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the annotations layer], then select *Keep global filters* from the dropdown.
++
+When you add the visualization to dashboards, image:dashboard/images/lens_visualizationModifierPopup_8.8.0.png[Visualization modifier popup] appears, 
+which allows you to view settings changes to the visualization.
 
 Create static annotations.
 
@@ -242,6 +267,20 @@ Specify the annotation appearance.
 . If you created a custom query annotation, click *Add field* to add a field to the annotation tooltip.
 
 . To close, click *X*.
+
+Save the annotation group to the library. 
+
+. In the layer pane, on your annotation layer, click image:images/lens_saveAnnotationLayerButton_8.9.0.png[Save button on annotations layer].
+
+. Enter the *Title*, *Description*, and add any applicable <<managing-tags,*Tags*>>.
+
+. Click *Save group*.
+
+Add a library annotation group to a visualization.
+
+. In the layer pane, click *Add layer > Annotations > Load from library*.
+
+. Select the annotation group you want to use.
 
 [float]
 [[add-reference-lines]]

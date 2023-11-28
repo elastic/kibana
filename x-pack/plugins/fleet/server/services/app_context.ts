@@ -46,6 +46,7 @@ import type { TelemetryEventsSender } from '../telemetry/sender';
 import type { MessageSigningServiceInterface } from '..';
 
 import type { BulkActionsResolver } from './agents';
+import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -61,6 +62,7 @@ class AppContextService {
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
   private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
   private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'] = '';
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -69,6 +71,7 @@ class AppContextService {
   private savedObjectsTagging: SavedObjectTaggingStart | undefined;
   private bulkActionsResolver: BulkActionsResolver | undefined;
   private messageSigningService: MessageSigningServiceInterface | undefined;
+  private uninstallTokenService: UninstallTokenServiceInterface | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -84,11 +87,13 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
+    this.kibanaInstanceId = appContext.kibanaInstanceId;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
     this.savedObjectsTagging = appContext.savedObjectsTagging;
     this.bulkActionsResolver = appContext.bulkActionsResolver;
     this.messageSigningService = appContext.messageSigningService;
+    this.uninstallTokenService = appContext.uninstallTokenService;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -118,6 +123,10 @@ class AppContextService {
 
   public getSecurity() {
     return this.securityStart!;
+  }
+
+  public getSecuritySetup() {
+    return this.securitySetup!;
   }
 
   public getSecurityLicense() {
@@ -202,6 +211,10 @@ class AppContextService {
     return this.kibanaBranch;
   }
 
+  public getKibanaInstanceId() {
+    return this.kibanaInstanceId;
+  }
+
   public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
     if (!this.externalCallbacks.has(type)) {
       this.externalCallbacks.set(type, new Set());
@@ -249,6 +262,10 @@ class AppContextService {
 
   public getMessageSigningService() {
     return this.messageSigningService;
+  }
+
+  public getUninstallTokenService() {
+    return this.uninstallTokenService;
   }
 }
 

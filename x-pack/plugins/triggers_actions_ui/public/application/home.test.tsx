@@ -7,7 +7,8 @@
 
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { RouteComponentProps, Router } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 import { mountWithIntl } from '@kbn/test-jest-helpers';

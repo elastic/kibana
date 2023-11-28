@@ -6,31 +6,25 @@
  */
 
 import * as t from 'io-ts';
+import { SavedObject } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { saveApmIndices } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getApmIndices, getApmIndexSettings } from './get_apm_indices';
-import { saveApmIndices } from './save_apm_indices';
-import { APMConfig } from '../../..';
+import {
+  getApmIndexSettings,
+  ApmIndexSettingsResponse,
+} from './get_apm_indices';
 
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-index-settings',
   options: { tags: ['access:apm'] },
-  handler: async ({
-    config,
-    context,
-  }): Promise<{
-    apmIndexSettings: Array<{
-      configurationName:
-        | 'transaction'
-        | 'span'
-        | 'error'
-        | 'metric'
-        | 'onboarding';
-      defaultValue: string;
-      savedValue: string | undefined;
-    }>;
+  handler: async (
+    resources
+  ): Promise<{
+    apmIndexSettings: ApmIndexSettingsResponse;
   }> => {
-    const apmIndexSettings = await getApmIndexSettings({ config, context });
+    const apmIndexSettings = await getApmIndexSettings(resources);
     return { apmIndexSettings };
   },
 });
@@ -39,22 +33,13 @@ const apmIndexSettingsRoute = createApmServerRoute({
 const apmIndicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-indices',
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<
-    import('./../../../../../observability/common/typings').ApmIndicesConfig
-  > => {
-    const { context, config } = resources;
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    return await getApmIndices({
-      savedObjectsClient,
-      config,
-    });
+  handler: async (resources): Promise<APMIndices> => {
+    return await resources.getApmIndices();
   },
 });
 
 type SaveApmIndicesBodySchema = {
-  [Property in keyof APMConfig['indices']]: t.StringC;
+  [Property in keyof APMIndices]: t.StringC;
 };
 
 // save ui indices
@@ -72,11 +57,7 @@ const saveApmIndicesRoute = createApmServerRoute({
       metric: t.string,
     } as SaveApmIndicesBodySchema),
   }),
-  handler: async (
-    resources
-  ): Promise<
-    import('./../../../../../../../src/core/types').SavedObject<{}>
-  > => {
+  handler: async (resources): Promise<SavedObject<{}>> => {
     const { params, context } = resources;
     const { body } = params;
     const savedObjectsClient = (await context.core).savedObjects.client;

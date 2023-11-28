@@ -6,12 +6,13 @@
  */
 
 import type { ChartSizeArray } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { Axis, Chart, HistogramBarSeries, Position, Settings, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import type { UpdateDateRange, ChartData } from '../../../../common/components/charts/common';
-import { useTheme } from '../../../../common/components/charts/common';
+import { useThemes } from '../../../../common/components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { hasValueToDisplay } from '../../../../common/utils/validators';
 import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
@@ -47,8 +48,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     to,
     updateDateRange,
   }) => {
-    const theme = useTheme();
-
+    const { baseTheme, theme } = useThemes();
     const chartSize: ChartSizeArray = useMemo(() => ['100%', chartHeight], [chartHeight]);
     const xAxisId = 'alertsHistogramAxisX';
     const yAxisId = 'alertsHistogramAxisY';
@@ -81,6 +81,8 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
                 showLegend={showLegend && legendItems.length === 0}
                 showLegendExtra={showLegend}
                 theme={theme}
+                baseTheme={baseTheme}
+                locale={i18n.getLocale()}
               />
 
               <Axis id={xAxisId} position={Position.Bottom} tickFormat={tickFormat} />

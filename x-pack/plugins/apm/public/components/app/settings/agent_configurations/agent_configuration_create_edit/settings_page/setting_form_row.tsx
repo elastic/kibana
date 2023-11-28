@@ -41,6 +41,7 @@ function FormRow({
     case 'text': {
       return (
         <EuiFieldText
+          data-test-subj="apmFormRowFieldText"
           placeholder={setting.placeholder}
           value={value || ''}
           onChange={(e) => onChange(setting.key, e.target.value)}
@@ -51,6 +52,7 @@ function FormRow({
     case 'integer': {
       return (
         <EuiFieldNumber
+          data-test-subj="apmFormRowFieldNumber"
           placeholder={setting.placeholder}
           value={(value as any) || ''}
           min={setting.min}
@@ -93,6 +95,7 @@ function FormRow({
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiFieldNumber
+              data-test-subj="apmFormRowFieldNumber"
               placeholder={setting.placeholder}
               value={amount}
               onChange={(e) =>

@@ -8,35 +8,16 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
+import { compileConfigStack } from './compile_config_stack';
+import { getConfigFromFiles } from '@kbn/config';
 
-/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
-/** @type {ServerlessProjectMode[]} */
-const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
-
-/**
- * @param {Record<string, unknown>} opts
- * @returns {ServerlessProjectMode | null}
- */
-function getServerlessProjectMode(opts) {
-  if (!opts.serverless) {
-    return null;
-  }
-
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
-    return opts.serverless;
-  }
-
-  throw new Error(
-    `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`
-  );
-}
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 function canRequire(path) {
   try {
@@ -51,9 +32,6 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_PATH = '@kbn/cli-dev-mode';
-const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
-
 const getBootstrapScript = (isDev) => {
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
     // need dynamic require to exclude it from production build
@@ -66,56 +44,61 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
-const pathCollector = function () {
+const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
+  const esHosts = [].concat(
+    get('elasticsearch.hosts', []),
+    opts.elasticsearch ? opts.elasticsearch.split(',') : []
+  );
+
+  /*
+   * We only handle the service token if serverless ES is running locally.
+   * Example would be if the user is running SES in the cloud and KBN serverless
+   * locally, they would be expected to handle auth on their own and this token
+   * is likely invalid anyways.
+   */
+  const isESlocalhost = esHosts.length
+    ? esHosts.some((hostUrl) => {
+        const parsedUrl = url.parse(hostUrl);
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
+      })
+    : true; // default is localhost:9200
+
+  if (!opts.dev || !opts.serverless || !isESlocalhost) {
+    return;
+  }
+
+  const DEV_UTILS_PATH = '@kbn/dev-utils';
+
+  if (!canRequire(DEV_UTILS_PATH)) {
+    return;
+  }
+
+  // need dynamic require to exclude it from production build
+  // eslint-disable-next-line import/no-dynamic-require
+  const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
+  set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+};
+
+function pathCollector() {
   const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
-};
+}
 
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-/**
- * @param {string} name
- * @param {string[]} configs
- * @param {'push' | 'unshift'} method
- */
-function maybeAddConfig(name, configs, method) {
-  const path = resolve(getConfigDirectory(), name);
-  try {
-    if (statSync(path).isFile()) {
-      configs[method](path);
-    }
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return;
-    }
-
-    throw err;
-  }
-}
-
-/**
- * @returns {string[]}
- */
-function getEnvConfigs() {
-  const val = process.env.KBN_CONFIG_PATHS;
-  if (typeof val === 'string') {
-    return val
-      .split(',')
-      .filter((v) => !!v)
-      .map((p) => resolve(p.trim()));
-  }
-  return [];
-}
-
-function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
+export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
-  const merge = _.partial(_.merge, rawConfig);
+
   if (opts.oss) {
     delete rawConfig.xpack;
   }
@@ -124,6 +107,42 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
+    if (opts.serverless) {
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+
+      // Load mock identity provider plugin and configure realm if supported (ES only supports SAML when run with SSL)
+      if (opts.ssl && canRequire('@kbn/mock-idp-plugin/common')) {
+        // Ensure the plugin is loaded in dynamically to exclude from production build
+        const {
+          MOCK_IDP_PLUGIN_PATH,
+          MOCK_IDP_REALM_NAME,
+        } = require('@kbn/mock-idp-plugin/common');
+
+        if (has('server.basePath')) {
+          console.log(
+            `Custom base path is not supported when running in Serverless, it will be removed.`
+          );
+          _.unset(rawConfig, 'server.basePath');
+        }
+
+        set('plugins.paths', _.compact([].concat(get('plugins.paths'), MOCK_IDP_PLUGIN_PATH)));
+        set(`xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+          order: Number.MAX_SAFE_INTEGER,
+          realm: MOCK_IDP_REALM_NAME,
+          icon: 'user',
+          description: 'Continue as Test User',
+          hint: 'Allows testing serverless user roles',
+        });
+        // Add basic realm since defaults won't be applied when a provider has been configured
+        if (!has('xpack.security.authc.providers.basic')) {
+          set('xpack.security.authc.providers.basic.basic', {
+            order: 0,
+            enabled: true,
+          });
+        }
+      }
+    }
+
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
@@ -154,7 +173,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-
       const elasticsearchHosts = (
         (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
           'https://localhost:9200',
@@ -191,8 +209,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
-  merge(extraCliOptions);
-  merge(readKeystore());
+  _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
+  _.merge(rawConfig, readKeystore());
 
   return rawConfig;
 }
@@ -234,7 +252,11 @@ export default function (program) {
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
-      .option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
+      .option(
+        '--serverless [oblt|security|es]',
+        'Start Kibana in a specific serverless project mode. ' +
+          'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
+      );
   }
 
   if (DEV_MODE_SUPPORTED) {
@@ -258,23 +280,19 @@ export default function (program) {
 
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
-    const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
-    const serverlessMode = getServerlessProjectMode(opts);
+    const configs = compileConfigStack({
+      configOverrides: opts.config,
+      devConfig: opts.devConfig,
+      dev: opts.dev,
+      serverless: opts.serverless || unknownOptions.serverless,
+    });
 
-    // we "unshift" .serverless. config so that it only overrides defaults
-    if (serverlessMode) {
-      maybeAddConfig(`serverless.yml`, configs, 'push');
-      maybeAddConfig(`serverless.${serverlessMode}.yml`, configs, 'unshift');
-    }
-
-    // .dev. configs are "pushed" so that they override all other config files
-    if (opts.dev && opts.devConfig !== false) {
-      maybeAddConfig('kibana.dev.yml', configs, 'push');
-      if (serverlessMode) {
-        maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeAddConfig(`serverless.${serverlessMode}.dev.yml`, configs, 'push');
-      }
-    }
+    const configsEvaluted = getConfigFromFiles(configs);
+    const isServerlessMode = !!(
+      configsEvaluted.serverless ||
+      opts.serverless ||
+      unknownOptions.serverless
+    );
 
     const cliArgs = {
       dev: !!opts.dev,
@@ -288,13 +306,15 @@ export default function (program) {
       // We can tell users they only have to run with `yarn start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
-      basePath: opts.runExamples ? false : !!opts.basePath,
+      // We also want to run without base path when running in serverless mode so that Elasticsearch can
+      // connect to Kibana's mock identity provider.
+      basePath: opts.runExamples || isServerlessMode ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
-      serverless: !!opts.serverless,
+      serverless: isServerlessMode,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
@@ -312,4 +332,16 @@ export default function (program) {
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });
+}
+
+function mergeAndReplaceArrays(objValue, srcValue) {
+  if (typeof srcValue === 'undefined') {
+    return objValue;
+  } else if (Array.isArray(srcValue)) {
+    // do not merge arrays, use new value instead
+    return srcValue;
+  } else {
+    // default to default merging
+    return undefined;
+  }
 }

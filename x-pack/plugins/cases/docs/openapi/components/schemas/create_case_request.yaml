@@ -3,12 +3,12 @@ description: >-
   The create case API request body varies depending on the type of connector.
 type: object
 required:
-      - connector
-      - description
-      - owner
-      - settings
-      - tags
-      - title
+  - connector
+  - description
+  - owner
+  - settings
+  - tags
+  - title
 properties:
   assignees:
     $ref: 'assignees.yaml'
@@ -24,6 +24,7 @@ properties:
   description:
     description: The description for the case.
     type: string
+    maxLength: 30000
   owner:
     $ref: 'owners.yaml'
   settings:
@@ -33,8 +34,31 @@ properties:
   tags:
     description: The words and phrases that help categorize cases. It can be an empty array.
     type: array
+    maxItems: 200
     items:
       type: string
+      maxLength: 256
+  category:
+    description: A word or phrase that categorizes the case.
+    type: string
+    maxLength: 50
   title:
     description: A title for the case.
     type: string
+    maxLength: 160
+  customFields:
+    type: array
+    description: >
+      Custom field values for a case.
+      Any optional custom fields that are not specified in the request are set to null.
+    x-technical-preview: true
+    minItems: 0
+    maxItems: 10
+    items:
+      type: object
+      required:
+        - key
+        - type
+        - value
+      properties:
+        $ref: 'case_customfields.yaml'

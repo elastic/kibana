@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { getESCapabilities } from '../../../lib/helpers/get_es_capabilities';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
@@ -21,7 +22,7 @@ import { updateToV3 } from './update_to_v3';
 import { environmentStringRt } from '../../../../common/environment_rt';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { getApmIndices } from '../apm_indices/get_apm_indices';
+import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/anomaly-detection/jobs',
@@ -31,9 +32,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    jobs: Array<
-      import('./../../../../common/anomaly_detection/apm_ml_job').ApmMlJob
-    >;
+    jobs: ApmMlJob[];
     hasLegacyJobs: boolean;
   }> => {
     const mlClient = await getMlClient(resources);
@@ -69,18 +68,16 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<{ jobCreated: true }> => {
-    const { params, context, logger, config } = resources;
+    const { params, context, logger, getApmIndices } = resources;
     const { environments } = params.body;
     const licensingContext = await context.licensing;
-    const coreContext = await context.core;
     const esClient = (await context.core).elasticsearch.client;
+
+    const esCapabilities = await getESCapabilities(resources);
 
     const [mlClient, indices] = await Promise.all([
       getMlClient(resources),
-      getApmIndices({
-        savedObjectsClient: coreContext.savedObjects.client,
-        config,
-      }),
+      getApmIndices(),
     ]);
 
     if (!isActivePlatinumLicense(licensingContext.license)) {
@@ -93,6 +90,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
       indices,
       environments,
       logger,
+      esCapabilities,
     });
 
     notifyFeatureUsage({
@@ -143,9 +141,9 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
     ],
   },
   handler: async (resources): Promise<{ update: boolean }> => {
-    const { config, context } = resources;
-    const coreContext = await context.core;
-    const [mlClient, esClient, indices] = await Promise.all([
+    const { getApmIndices } = resources;
+    const [indices, mlClient, esClient] = await Promise.all([
+      getApmIndices(),
       getMlClient(resources),
       resources.core
         .start()
@@ -153,16 +151,20 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
           (start): ElasticsearchClient =>
             start.elasticsearch.client.asInternalUser
         ),
-      getApmIndices({
-        config,
-        savedObjectsClient: coreContext.savedObjects.client,
-      }),
     ]);
+
+    const esCapabilities = await getESCapabilities(resources);
 
     const { logger } = resources;
 
     return {
-      update: await updateToV3({ mlClient, logger, indices, esClient }),
+      update: await updateToV3({
+        mlClient,
+        logger,
+        indices,
+        esClient,
+        esCapabilities,
+      }),
     };
   },
 });

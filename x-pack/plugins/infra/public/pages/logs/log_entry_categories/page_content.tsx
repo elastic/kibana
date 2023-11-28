@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { isJobStatusWithResults } from '../../../../common/log_analysis';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { isJobStatusWithResults, logEntryCategoriesJobType } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
@@ -22,10 +23,10 @@ import {
 import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../shared/page_template';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
+import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
 const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
   defaultMessage: 'Categories',
@@ -51,6 +52,8 @@ export const LogEntryCategoriesPageContent = () => {
       fetchJobStatus();
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
+
+  const { idFormats } = useLogMlJobIdFormatsShimContext();
 
   if (!hasLogAnalysisCapabilites) {
     return (
@@ -81,12 +84,13 @@ export const LogEntryCategoriesPageContent = () => {
         <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />
       </CategoriesPageTemplate>
     );
-  } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
+  } else if (isJobStatusWithResults(jobStatus[logEntryCategoriesJobType])) {
     return (
       <>
         <LogEntryCategoriesResultsContent
           onOpenSetup={showCategoriesModuleSetup}
           pageTitle={logCategoriesTitle}
+          idFormat={idFormats![logEntryCategoriesJobType]}
         />
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
       </>

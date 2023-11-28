@@ -6,13 +6,13 @@
  */
 
 import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
-import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { extractErrorMessage } from '../../../../../../common/util/errors';
+import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 
 interface Props {
   layer: LayerResult;
@@ -23,7 +23,7 @@ export const IncompatibleLayer: FC<Props> = ({ layer }) => {
     <EuiFlexGroup gutterSize="s" color="subdued" data-test-subj="mlLensLayerIncompatible">
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          <EuiIcon type="crossInACircleFilled" color="subdued" />
+          <EuiIcon type="error" color="subdued" />
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>

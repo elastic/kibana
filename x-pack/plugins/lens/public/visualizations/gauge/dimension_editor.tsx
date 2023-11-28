@@ -25,8 +25,9 @@ import {
 } from '@kbn/coloring';
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
+import { TooltipWrapper } from '@kbn/visualization-ui-components';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import { applyPaletteParams, PalettePanelContainer, TooltipWrapper } from '../../shared_components';
+import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import type { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';
@@ -39,7 +40,7 @@ export function GaugeDimensionEditor(
     paletteService: PaletteRegistry;
   }
 ) {
-  const { state, setState, frame, accessor } = props;
+  const { state, setState, frame, accessor, isInlineEditing } = props;
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   if (state?.metricAccessor !== accessor) return null;
@@ -158,6 +159,10 @@ export function GaugeDimensionEditor(
                   siblingRef={props.panelRef}
                   isOpen={isPaletteOpen}
                   handleClose={togglePalette}
+                  title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
+                    defaultMessage: 'Color',
+                  })}
+                  isInlineEditing={isInlineEditing}
                 >
                   <CustomizablePalette
                     palettes={props.paletteService}

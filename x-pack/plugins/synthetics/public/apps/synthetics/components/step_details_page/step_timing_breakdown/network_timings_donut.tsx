@@ -24,7 +24,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { formatMillisecond } from '../common/network_data/data_formatting';
 
 import { useNetworkTimings } from '../hooks/use_network_timings';
@@ -68,7 +68,11 @@ export const NetworkTimingsDonut = () => {
 
       <EuiSpacer size="m" />
       <Chart size={{ height: 240 }}>
-        <Settings theme={[themeOverrides, LIGHT_THEME ?? {}]} showLegend={false} />
+        <Settings
+          theme={[themeOverrides, LIGHT_THEME ?? {}]}
+          showLegend={false}
+          locale={i18n.getLocale()}
+        />
         <Partition
           id="spec_1"
           data={networkTimings.timingsWithLabels}
@@ -80,7 +84,7 @@ export const NetworkTimingsDonut = () => {
               groupByRollup: (d: Datum) => d.label,
               nodeLabel: (d: Datum) => d,
               shape: {
-                fillColor: (d: Datum, index: number) => {
+                fillColor: (dataName, index) => {
                   return (theme.eui as unknown as Record<string, string>)[
                     `euiColorVis${index + 1}`
                   ];

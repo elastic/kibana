@@ -5,10 +5,14 @@
  * 2.0.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
+import type {
+  DataFrameAnalyticsConfig,
+  FeatureImportanceBaseline,
+  TotalFeatureImportance,
+} from '@kbn/ml-data-frame-analytics-utils';
+import { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { XOR } from './common';
-import type { DeploymentState, TrainedModelType } from '../constants/trained_models';
 import type { MlSavedObjectType } from './saved_objects';
 
 export interface IngestStats {
@@ -51,7 +55,7 @@ export interface TrainedModelStat {
       }
     >;
   };
-  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  deployment_stats?: TrainedModelDeploymentStatsResponse;
   model_size_stats?: TrainedModelModelSizeStats;
 }
 
@@ -94,6 +98,7 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
    * Associated pipelines. Extends response from the ES endpoint.
    */
   pipelines?: Record<string, PipelineDefinition> | null;
+  origin_job_exists?: boolean;
 
   metadata?: {
     analytics_config: DataFrameAnalyticsConfig;
@@ -107,6 +112,7 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
+  indices?: Array<Record<IndexName, IndicesIndexState | null>>;
 };
 
 export interface PipelineDefinition {
@@ -128,6 +134,7 @@ export interface InferenceConfigResponse {
 
 export interface TrainedModelDeploymentStatsResponse {
   model_id: string;
+  deployment_id: string;
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
@@ -163,6 +170,8 @@ export interface TrainedModelDeploymentStatsResponse {
 }
 
 export interface AllocatedModel {
+  key: string;
+  deployment_id: string;
   inference_threads: number;
   allocation_status: {
     target_allocation_count: number;
@@ -196,6 +205,7 @@ export interface AllocatedModel {
     throughput_last_minute: number;
     number_of_allocations: number;
     threads_per_allocation: number;
+    error_count?: number;
   };
 }
 

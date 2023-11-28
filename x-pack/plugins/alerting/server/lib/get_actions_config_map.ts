@@ -10,15 +10,17 @@ import { ActionsConfig, ActionTypeConfig } from '../config';
 
 export interface ActionsConfigMap {
   default: ActionTypeConfig;
+
   [key: string]: ActionTypeConfig;
 }
 
 export const getActionsConfigMap = (actionsConfig: ActionsConfig): ActionsConfigMap => {
   const configsByConnectorType = actionsConfig.connectorTypeOverrides?.reduce(
     (config, configByConnectorType) => {
-      return { ...config, [configByConnectorType.id]: omit(configByConnectorType, 'id') };
+      config[configByConnectorType.id] = omit(configByConnectorType, 'id') as ActionTypeConfig;
+      return config;
     },
-    {}
+    {} as Record<string, ActionTypeConfig>
   );
   return {
     default: omit(actionsConfig, 'connectorTypeOverrides'),

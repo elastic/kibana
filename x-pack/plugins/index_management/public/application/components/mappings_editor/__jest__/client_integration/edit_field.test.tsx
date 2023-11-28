@@ -121,4 +121,30 @@ describe('Mappings editor: edit field', () => {
 
     expect(data).toEqual(updatedMappings);
   });
+
+  test('should have Update button enabled only when changes are made', async () => {
+    const defaultMappings = {
+      properties: {
+        myField: {
+          type: 'text',
+        },
+      },
+    };
+
+    await act(async () => {
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    });
+    testBed.component.update();
+
+    await testBed.actions.expandAllFieldsAndReturnMetadata();
+
+    const {
+      actions: { startEditField, isUpdateButtonDisabled, updateFieldName },
+    } = testBed;
+    // Open the flyout to edit the field
+    await startEditField('myField');
+    expect(isUpdateButtonDisabled()).toBe(true);
+    await updateFieldName('updatedField');
+    expect(isUpdateButtonDisabled()).toBe(false);
+  });
 });

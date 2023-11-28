@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiFlexGrid,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
@@ -26,21 +25,22 @@ import React from 'react';
 import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
-import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import type {
+  RequiredFieldArray,
+  Threshold,
+  AlertSuppressionMissingFieldsStrategy,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import type {
-  RequiredFieldArray,
-  Threshold,
-} from '../../../../../common/detection_engine/rule_schema';
-import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
 
 import * as i18n from './translations';
-import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
+import type { BuildQueryBarDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import type {
   AboutStepRiskScore,
@@ -50,8 +50,9 @@ import type {
 import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
+import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import type { LicenseService } from '../../../../../common/license';
-
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -100,7 +101,7 @@ export const buildQueryBarDescription = ({
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {filterManager.getFilters().map((filter, index) => (
-              <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
+              <EuiFlexItem grow={false} key={`${field}-filter-${index}`} css={{ width: '100%' }}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
                     <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
@@ -162,12 +163,20 @@ export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): List
   return items;
 };
 
-export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
+interface BuildThreatDescriptionProps {
+  label: string;
+  threat: Threats;
+}
+
+export const buildThreatDescription = ({
+  threat,
+  label,
+}: BuildThreatDescriptionProps): ListItems[] => {
   if (threat.length > 0) {
     return [
       {
         title: label,
-        description: <ThreatEuiFlexGroup label={label} threat={threat} />,
+        description: <ThreatEuiFlexGroup threat={threat} />,
       },
     ];
   }
@@ -200,6 +209,38 @@ export const buildUnorderedListArrayDescription = (
     ];
   }
   return [];
+};
+
+export const buildHighlightedFieldsOverrideDescription = (
+  label: string,
+  values: string[]
+): ListItems[] => {
+  if (isEmpty(values)) {
+    return [];
+  }
+  const description = (
+    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+      {values.map((val: string) =>
+        isEmpty(val) ? null : (
+          <EuiFlexItem grow={false} key={`${label}-${val}`}>
+            <EuiBadgeWrap
+              data-test-subj="customHighlightedFieldsStringArrayDescriptionBadgeItem"
+              color="hollow"
+            >
+              {val}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        )
+      )}
+    </EuiFlexGroup>
+  );
+
+  return [
+    {
+      title: label,
+      description,
+    },
+  ];
 };
 
 export const buildStringArrayDescription = (
@@ -237,6 +278,13 @@ const OverrideColumn = styled(EuiFlexItem)`
   text-overflow: ellipsis;
 `;
 
+const OverrideValueColumn = styled(EuiFlexItem)`
+  width: 30px;
+  max-width: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
 export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems[] => [
   {
     title: i18nSeverity.DEFAULT_SEVERITY,
@@ -249,7 +297,7 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
           return {
             title: index === 0 ? i18nSeverity.SEVERITY_MAPPING : '',
             description: (
-              <EuiFlexGroup alignItems="center">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <OverrideColumn>
                   <EuiToolTip
                     content={severityItem.field}
@@ -258,14 +306,14 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
                     <>{`${severityItem.field}:`}</>
                   </EuiToolTip>
                 </OverrideColumn>
-                <OverrideColumn>
+                <OverrideValueColumn>
                   <EuiToolTip
                     content={severityItem.value}
                     data-test-subj={`severityOverrideValue${index}`}
                   >
                     {defaultToEmptyTag(severityItem.value)}
                   </EuiToolTip>
-                </OverrideColumn>
+                </OverrideValueColumn>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={'sortRight'} />
                 </EuiFlexItem>
@@ -294,7 +342,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
           return {
             title: index === 0 ? i18nRiskScore.RISK_SCORE_MAPPING : '',
             description: (
-              <EuiFlexGroup alignItems="center">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <OverrideColumn>
                   <EuiToolTip
                     content={riskScoreItem.field}
@@ -410,6 +458,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         {
           title: label,
           description: i18n.NEW_TERMS_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    case 'esql': {
+      return [
+        {
+          title: label,
+          description: <TechnicalPreviewBadge label={i18n.ESQL_TYPE_DESCRIPTION} />,
         },
       ];
     }
@@ -535,21 +591,7 @@ export const buildAlertSuppressionDescription = (
     </EuiFlexGroup>
   );
 
-  const title = (
-    <>
-      {label}
-      <EuiBetaBadge
-        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
-        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
-        size="s"
-      />
-      {!license.isAtLeast(minimumLicenseForSuppression) && (
-        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
-        </EuiToolTip>
-      )}
-    </>
-  );
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
   return [
     {
       title,
@@ -569,21 +611,30 @@ export const buildAlertSuppressionWindowDescription = (
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
-  const title = (
-    <>
-      {label}
-      <EuiBetaBadge
-        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
-        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
-        size="s"
-      />
-      {!license.isAtLeast(minimumLicenseForSuppression) && (
-        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
-        </EuiToolTip>
-      )}
-    </>
-  );
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildAlertSuppressionMissingFieldsDescription = (
+  label: string,
+  value: AlertSuppressionMissingFieldsStrategy,
+  license: LicenseService
+): ListItems[] => {
+  if (isEmpty(value)) {
+    return [];
+  }
+
+  const description =
+    value === AlertSuppressionMissingFieldsStrategyEnum.suppress
+      ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
+      : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
+
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
   return [
     {
       title,

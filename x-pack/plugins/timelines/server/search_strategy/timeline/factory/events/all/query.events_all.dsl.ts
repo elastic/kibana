@@ -7,13 +7,12 @@
 
 import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
-
 import {
-  TimerangeFilter,
-  TimerangeInput,
-  TimelineEventsAllRequestOptions,
-  TimelineRequestSortField,
-} from '../../../../../../common/search_strategy';
+  SortItem,
+  TimelineEventsAllOptions,
+} from '../../../../../../common/api/search_strategy/timeline/events_all';
+
+import { TimerangeFilter, TimerangeInput } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getPreferredEsType } from './helpers';
 
@@ -22,11 +21,12 @@ export const buildTimelineEventsAllQuery = ({
   defaultIndex,
   fields,
   filterQuery,
-  pagination: { activePage, querySize },
+  pagination = { activePage: 0, querySize: 0 },
   runtimeMappings,
   sort,
   timerange,
-}: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
+}: Omit<TimelineEventsAllOptions, 'fieldRequested'>) => {
+  const { activePage, querySize } = pagination;
   const filterClause = [...createQueryFilterClauses(filterQuery)];
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
@@ -51,7 +51,7 @@ export const buildTimelineEventsAllQuery = ({
   const filters = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
   const filter = authFilter != null ? [...filters, authFilter] : filters;
 
-  const getSortField = (sortFields: TimelineRequestSortField[]) =>
+  const getSortField = (sortFields: SortItem[]) =>
     sortFields.map((item) => {
       const field: string = item.field === 'timestamp' ? '@timestamp' : item.field;
       return {

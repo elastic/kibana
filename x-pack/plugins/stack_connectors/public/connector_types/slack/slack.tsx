@@ -12,16 +12,34 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SlackActionParams, SlackSecrets } from '../types';
+import { PostMessageParams } from '../../../common/slack_api/types';
+
+export const subtype = [
+  {
+    id: '.slack',
+    name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {
+      defaultMessage: 'Webhook',
+    }),
+  },
+  {
+    id: '.slack_api',
+    name: i18n.translate('xpack.stackConnectors.components.slack.webApi', {
+      defaultMessage: 'Web API',
+    }),
+  },
+];
 
 export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
     id: '.slack',
+    subtype,
+    modalWidth: 675,
     iconClass: 'logoSlack',
     selectMessage: i18n.translate('xpack.stackConnectors.components.slack.selectMessageText', {
-      defaultMessage: 'Send a message to a Slack channel or user.',
+      defaultMessage: 'Send messages to Slack channels.',
     }),
     actionTypeTitle: i18n.translate('xpack.stackConnectors.components.slack.connectorTypeTitle', {
-      defaultMessage: 'Send to Slack',
+      defaultMessage: 'Slack',
     }),
     validateParams: async (
       actionParams: SlackActionParams
@@ -38,5 +56,17 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
     },
     actionConnectorFields: lazy(() => import('./slack_connectors')),
     actionParamsFields: lazy(() => import('./slack_params')),
+    convertParamsBetweenGroups: (
+      params: PostMessageParams | SlackActionParams
+    ): PostMessageParams | SlackActionParams | {} => {
+      if ('message' in params) {
+        return params;
+      } else if ('subAction' in params) {
+        return {
+          message: (params as PostMessageParams).subActionParams.text,
+        };
+      }
+      return {};
+    },
   };
 }

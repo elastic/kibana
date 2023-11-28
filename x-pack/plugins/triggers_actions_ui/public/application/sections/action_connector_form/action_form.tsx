@@ -19,7 +19,13 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { ActionGroup, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  ActionGroup,
+  RuleActionAlertsFilterProperty,
+  RuleActionFrequency,
+  RuleActionParam,
+} from '@kbn/alerting-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -29,6 +35,7 @@ import {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ActionTypeForm } from './action_type_form';
@@ -53,11 +60,20 @@ export interface ActionAccordionFormProps {
   defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
+  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionAlertsFilterProperty: (
+    key: string,
+    value: RuleActionAlertsFilterProperty,
+    index: number
+  ) => void;
   featureId: string;
+  producerId: string;
+  ruleTypeId?: string;
   messageVariables?: ActionVariables;
+  summaryMessageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -66,8 +82,12 @@ export interface ActionAccordionFormProps {
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
   defaultSummaryMessage?: string;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultRuleFrequency?: RuleActionFrequency;
+  hasFieldsForAAD?: boolean;
+  disableErrorMessages?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -80,11 +100,14 @@ export const ActionForm = ({
   defaultActionGroupId,
   setActionIdByIndex,
   setActionGroupIdByIndex,
+  setActionUseAlertDataForTemplate,
   setActions,
   setActionParamsProperty,
   setActionFrequencyProperty,
+  setActionAlertsFilterProperty,
   featureId,
   messageVariables,
+  summaryMessageVariables,
   actionGroups,
   defaultActionMessage,
   setHasActionsDisabled,
@@ -95,8 +118,14 @@ export const ActionForm = ({
   hideActionHeader,
   hideNotifyWhen,
   defaultSummaryMessage,
-  hasSummary,
+  hasAlertsMappings,
   minimumThrottleInterval,
+  notifyWhenSelectOptions,
+  defaultRuleFrequency = DEFAULT_FREQUENCY,
+  ruleTypeId,
+  producerId,
+  hasFieldsForAAD,
+  disableErrorMessages,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -210,7 +239,8 @@ export const ActionForm = ({
       return;
     }
     setIsAddActionPanelOpen(false);
-    const actionTypeConnectors = connectors.filter(
+    const allowGroupConnector = (actionTypeModel?.subtype ?? []).map((atm) => atm.id);
+    let actionTypeConnectors = connectors.filter(
       (field) => field.actionTypeId === actionTypeModel.id
     );
 
@@ -220,10 +250,27 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        frequency: DEFAULT_FREQUENCY,
+        frequency: defaultRuleFrequency,
+        uuid: uuidv4(),
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+    } else {
+      actionTypeConnectors = connectors.filter((field) =>
+        allowGroupConnector.includes(field.actionTypeId)
+      );
+      if (actionTypeConnectors.length > 0) {
+        actions.push({
+          id: '',
+          actionTypeId: actionTypeConnectors[0].actionTypeId,
+          group: defaultActionGroupId,
+          params: {},
+          frequency: DEFAULT_FREQUENCY,
+          uuid: uuidv4(),
+        });
+        setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+      }
     }
+
     if (actionTypeConnectors.length === 0) {
       // if no connectors exists or all connectors is already assigned an action under current alert
       // set actionType as id to be able to create new connector within the alert form
@@ -232,7 +279,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        frequency: DEFAULT_FREQUENCY,
+        frequency: defaultRuleFrequency,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
@@ -245,7 +292,7 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter((item) => actionTypesIndex[item.id])
+      .filter((item) => actionTypesIndex[item.id] && !item.hideInUi)
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
@@ -360,6 +407,27 @@ export const ActionForm = ({
                 }}
                 onSelectConnector={(connectorId: string) => {
                   setActionIdByIndex(connectorId, index);
+                  const newConnector = connectors.find((connector) => connector.id === connectorId);
+                  if (newConnector && newConnector.actionTypeId) {
+                    const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
+                    if (actionTypeRegistered.convertParamsBetweenGroups) {
+                      const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                        if (i === index) {
+                          return {
+                            ..._item,
+                            actionTypeId: newConnector.actionTypeId,
+                            id: connectorId,
+                            params:
+                              actionTypeRegistered.convertParamsBetweenGroups != null
+                                ? actionTypeRegistered.convertParamsBetweenGroups(_item.params)
+                                : {},
+                          };
+                        }
+                        return _item;
+                      });
+                      setActions(updatedActions);
+                    }
+                  }
                 }}
               />
             );
@@ -370,13 +438,16 @@ export const ActionForm = ({
               actionItem={actionItem}
               actionConnector={actionConnector}
               index={index}
-              key={`action-form-action-at-${index}`}
+              key={`action-form-action-at-${actionItem.uuid}`}
+              setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
+              setActionAlertsFilterProperty={setActionAlertsFilterProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
               messageVariables={messageVariables}
+              summaryMessageVariables={summaryMessageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
               recoveryActionGroup={recoveryActionGroup}
@@ -388,6 +459,31 @@ export const ActionForm = ({
               }}
               onConnectorSelected={(id: string) => {
                 setActionIdByIndex(id, index);
+                const newConnector = connectors.find((connector) => connector.id === id);
+                if (
+                  newConnector &&
+                  actionConnector &&
+                  newConnector.actionTypeId !== actionConnector.actionTypeId
+                ) {
+                  const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
+                  if (actionTypeRegistered.convertParamsBetweenGroups) {
+                    const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                      if (i === index) {
+                        return {
+                          ..._item,
+                          actionTypeId: newConnector.actionTypeId,
+                          id,
+                          params:
+                            actionTypeRegistered.convertParamsBetweenGroups != null
+                              ? actionTypeRegistered.convertParamsBetweenGroups(_item.params)
+                              : {},
+                        };
+                      }
+                      return _item;
+                    });
+                    setActions(updatedActions);
+                  }
+                }
               }}
               actionTypeRegistry={actionTypeRegistry}
               onDeleteAction={() => {
@@ -400,8 +496,15 @@ export const ActionForm = ({
               }}
               hideNotifyWhen={hideNotifyWhen}
               defaultSummaryMessage={defaultSummaryMessage}
-              hasSummary={hasSummary}
+              hasAlertsMappings={hasAlertsMappings}
               minimumThrottleInterval={minimumThrottleInterval}
+              notifyWhenSelectOptions={notifyWhenSelectOptions}
+              defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
+              featureId={featureId}
+              producerId={producerId}
+              ruleTypeId={ruleTypeId}
+              hasFieldsForAAD={hasFieldsForAAD}
+              disableErrorMessages={disableErrorMessages}
             />
           );
         })}
@@ -475,6 +578,10 @@ export const ActionForm = ({
           actionType={actionTypesIndex[activeActionItem.actionTypeId]}
           onClose={closeAddConnectorModal}
           postSaveEventHandler={(savedAction: ActionConnector) => {
+            // TODO: fix in https://github.com/elastic/kibana/issues/155993
+            // actionTypes with subtypes need to be updated in case they switched to a
+            // subtype that is not the default one
+            actions[0].actionTypeId = savedAction.actionTypeId;
             connectors.push(savedAction);
             const indicesToUpdate = activeActionItem.indices || [];
             indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));

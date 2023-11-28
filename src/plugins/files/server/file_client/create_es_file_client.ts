@@ -31,6 +31,14 @@ export interface CreateEsFileClientArgs {
    */
   elasticsearchClient: ElasticsearchClient;
   /**
+   * Treat the indices provided as Aliases/Datastreams.
+   * When set to `true`:
+   * - additional ES calls will be made to get the real backing indexes
+   * - will not check if indexes exists and attempt to create them if not
+   * - an additional `@timestamp` property will be written to all documents (at root of document)
+   */
+  indexIsAlias?: boolean;
+  /**
    * The maximum file size to be written.
    */
   maxSizeBytes?: number;
@@ -49,15 +57,31 @@ export interface CreateEsFileClientArgs {
  * @param arg - See {@link CreateEsFileClientArgs}
  */
 export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
-  const { blobStorageIndex, elasticsearchClient, logger, metadataIndex, maxSizeBytes } = arg;
+  const {
+    blobStorageIndex,
+    elasticsearchClient,
+    logger,
+    metadataIndex,
+    maxSizeBytes,
+    indexIsAlias,
+  } = arg;
   return new FileClientImpl(
     {
       id: NO_FILE_KIND,
       http: {},
       maxSizeBytes,
+      hashes: ['md5', 'sha1', 'sha256', 'sha512'],
     },
-    new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger),
-    new ElasticsearchBlobStorageClient(elasticsearchClient, blobStorageIndex, undefined, logger),
+    new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger, indexIsAlias),
+    new ElasticsearchBlobStorageClient(
+      elasticsearchClient,
+      blobStorageIndex,
+      undefined,
+      logger,
+      undefined,
+      undefined,
+      indexIsAlias
+    ),
     undefined,
     undefined,
     logger

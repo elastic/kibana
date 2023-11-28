@@ -14,6 +14,13 @@ export const BASIC_AUTH_LABEL = i18n.translate(
   }
 );
 
+export const BASIC_AUTH_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.xmatters.error.requiredConnectorSettingsText',
+  {
+    defaultMessage: 'Authentication method is required.',
+  }
+);
+
 export const BASIC_AUTH_BUTTON_GROUP_LEGEND = i18n.translate(
   'xpack.stackConnectors.components.xmatters.basicAuthButtonGroupLegend',
   {
@@ -36,6 +43,13 @@ export const PASSWORD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.xmatters.passwordTextFieldLabel',
   {
     defaultMessage: 'Password',
+  }
+);
+
+export const PASSWORD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.xmatters.error.requiredPasswordText',
+  {
+    defaultMessage: 'Password is required.',
   }
 );
 

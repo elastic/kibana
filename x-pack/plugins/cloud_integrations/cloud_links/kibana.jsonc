@@ -9,7 +9,14 @@
     "browser": true,
     "optionalPlugins": [
       "cloud",
-      "security"
+      "security",
+      "guidedOnboarding"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "requiredPlugins": [
+      "share"
     ]
   }
 }

@@ -12,23 +12,31 @@ import type { BucketItem } from '../../../../../common/search_strategy/security_
 import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
 import * as i18n from './translations';
 
+export const formatPercentage = (percent: number): string => {
+  return percent > 0 && percent < 0.01 ? '<1%' : `${(Math.round(percent * 1000) / 10).toString()}%`;
+};
+
 export const parseAlertsGroupingData = (
   response: AlertSearchResponse<{}, AlertsByGroupingAgg>
 ): AlertsProgressBarData[] => {
   const buckets = response?.aggregations?.alertsByGrouping?.buckets ?? [];
-  if (buckets.length === 0) {
+  const emptyFieldCount = response?.aggregations?.missingFields?.doc_count ?? 0;
+  if (buckets.length === 0 && emptyFieldCount === 0) {
     return [];
   }
 
   const other = response?.aggregations?.alertsByGrouping?.sum_other_doc_count ?? 0;
   const total =
-    buckets.reduce((acc: number, group: BucketItem) => acc + group.doc_count, 0) + other;
+    buckets.reduce((acc: number, group: BucketItem) => acc + group.doc_count, 0) +
+    other +
+    emptyFieldCount;
 
   const topAlerts = buckets.map((group) => {
     return {
       key: group.key,
       value: group.doc_count,
-      percentage: Math.round((group.doc_count / total) * 1000) / 10,
+      percentage: group.doc_count / total,
+      percentageLabel: formatPercentage(group.doc_count / total),
       label: group.key,
     };
   });
@@ -37,12 +45,37 @@ export const parseAlertsGroupingData = (
     topAlerts.push({
       key: 'Other',
       value: other,
-      percentage: Math.round((other / total) * 1000) / 10,
+      percentage: other / total,
+      percentageLabel: formatPercentage(other / total),
       label: i18n.OTHER,
     });
   }
 
+  if (emptyFieldCount > 0) {
+    topAlerts.push({
+      key: '-',
+      value: emptyFieldCount,
+      percentage: emptyFieldCount / total,
+      percentageLabel: formatPercentage(emptyFieldCount / total),
+      label: '-',
+    });
+  }
+
   return topAlerts;
+};
+
+export const getAggregateData = (topAlerts: AlertsProgressBarData[]): [number, string] => {
+  const { total, nonEmpty } = topAlerts.reduce(
+    (ret, cur) => {
+      ret.total += cur.value;
+      if (cur.key !== '-') {
+        ret.nonEmpty += cur.value;
+      }
+      return ret;
+    },
+    { total: 0, nonEmpty: 0 }
+  );
+  return [nonEmpty, formatPercentage(total === 0 ? 0 : nonEmpty / total)];
 };
 
 export const getIsAlertsProgressBarData = (

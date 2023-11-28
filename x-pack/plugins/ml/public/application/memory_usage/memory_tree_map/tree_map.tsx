@@ -11,7 +11,6 @@ import {
   Settings,
   Partition,
   PartitionLayout,
-  ShapeTreeNode,
   LIGHT_THEME,
   DARK_THEME,
 } from '@elastic/charts';
@@ -20,15 +19,17 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import { MemoryUsageInfo } from '../../../../common/types/trained_models';
 import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
-import { useFieldFormatter, useUiSettings } from '../../contexts/kibana';
+import { useFieldFormatter, useMlKibana } from '../../contexts/kibana';
 
 import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {
   node?: string;
@@ -58,15 +59,12 @@ const TYPE_LABELS_INVERTED = Object.entries(TYPE_LABELS).reduce<Record<MlSavedOb
   {} as Record<MlSavedObjectType, string>
 );
 
-const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
-  ([label, type]) => ({
-    label,
-    color: getMemoryItemColor(type),
-  })
-);
-
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
-  const isDarkTheme = useUiSettings().get('theme:darkMode');
+  const {
+    services: { theme: themeService },
+  } = useMlKibana();
+  const isDarkTheme = useIsDarkTheme(themeService);
+
   const { theme, baseTheme } = useMemo(
     () =>
       isDarkTheme
@@ -74,6 +72,8 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
         : { theme: EUI_CHARTS_THEME_LIGHT, baseTheme: LIGHT_THEME },
     [isDarkTheme]
   );
+
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const { displayErrorToast } = useToastNotificationService();
@@ -84,10 +84,40 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   const [allData, setAllData] = useState<MemoryUsageInfo[]>([]);
   const [data, setData] = useState<MemoryUsageInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState(TYPE_OPTIONS);
+  const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[] | null>(null);
+  const typeOptions = useMemo(() => {
+    return Object.entries(TYPE_LABELS)
+      .filter(([, t]) => {
+        if (
+          (t === 'anomaly-detector' && isADEnabled === false) ||
+          (t === 'data-frame-analytics' && isDFAEnabled === false) ||
+          (t === 'trained-model' && isNLPEnabled === false && isDFAEnabled === false)
+        ) {
+          return false;
+        }
+
+        return true;
+      })
+      .map(([label, t]) => ({
+        label,
+        color: getMemoryItemColor(t),
+      }));
+  }, [isADEnabled, isDFAEnabled, isNLPEnabled]);
+
+  useEffect(
+    function initSelectedOptions() {
+      if (selectedOptions === null) {
+        setSelectedOptions(typeOptions);
+      }
+    },
+    [selectedOptions, typeOptions]
+  );
 
   const filterData = useCallback(
     (dataIn: MemoryUsageInfo[]) => {
+      if (selectedOptions === null) {
+        return dataIn;
+      }
       const types = selectedOptions.map((o) => TYPE_LABELS[o.label]);
       return dataIn.filter((d) => types.includes(d.type));
     },
@@ -133,8 +163,8 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
       <LoadingWrapper height={chartHeight} hasData={data.length > 0} loading={loading}>
         <EuiComboBox
           fullWidth
-          options={TYPE_OPTIONS}
-          selectedOptions={selectedOptions}
+          options={typeOptions}
+          selectedOptions={selectedOptions ?? []}
           onChange={setSelectedOptions}
           isClearable={false}
         />
@@ -143,7 +173,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
         {data.length ? (
           <Chart>
-            <Settings baseTheme={baseTheme} theme={theme.theme} />
+            <Settings baseTheme={baseTheme} theme={theme.theme} locale={i18n.getLocale()} />
             <Partition<MemoryUsageInfo>
               id="memoryUsageTreeMap"
               data={data}
@@ -158,7 +188,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                     valueFormatter: (size: number) => bytesFormatter(size),
                   },
                   shape: {
-                    fillColor: (d: ShapeTreeNode) => getMemoryItemColor(d.dataName as JobType),
+                    fillColor: (dataName) => getMemoryItemColor(dataName as JobType),
                   },
                 },
                 {
@@ -170,7 +200,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                     },
                   },
                   shape: {
-                    fillColor: (d: ShapeTreeNode) => {
+                    fillColor: (dataName, index, d) => {
                       // color the shape the same as its parent.
                       const parentId = d.parent.path[d.parent.path.length - 1].value as JobType;
                       return getMemoryItemColor(parentId);
@@ -183,7 +213,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
         ) : (
           <EuiEmptyPrompt
             titleSize="xs"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="mlEmptyMemoryUsageTreeMap"
             title={
               <h2>

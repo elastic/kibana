@@ -15,7 +15,6 @@ import { shallow } from 'enzyme';
 import { DEFAULT_PIPELINE_NAME } from '../../../../../../../common/constants';
 
 import { CustomPipelineItem } from './custom_pipeline_item';
-import { CustomizeIngestPipelineItem } from './customize_pipeline_item';
 import { DefaultPipelineItem } from './default_pipeline_item';
 import { IngestPipelinesCard } from './ingest_pipelines_card';
 
@@ -34,7 +33,7 @@ const DEFAULT_VALUES = {
     extract_binary_content: true,
     name: DEFAULT_PIPELINE_NAME,
     reduce_whitespace: true,
-    run_ml_inference: false,
+    run_ml_inference: true,
   },
   showModal: false,
 };
@@ -45,9 +44,8 @@ describe('IngestPipelinesCard', () => {
     setMockValues({ ...DEFAULT_VALUES });
   });
   it('renders with default ingest pipeline', () => {
-    const wrapper = shallow(<IngestPipelinesCard />);
+    const wrapper = shallow(<IngestPipelinesCard extractionDisabled={false} />);
     expect(wrapper.find(DefaultPipelineItem)).toHaveLength(1);
-    expect(wrapper.find(CustomizeIngestPipelineItem)).toHaveLength(1);
     expect(wrapper.find(CustomPipelineItem)).toHaveLength(0);
   });
 });

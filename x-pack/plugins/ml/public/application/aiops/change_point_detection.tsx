@@ -13,19 +13,20 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 
-import { useMlContext } from '../contexts/ml';
+import { useDataSource } from '../contexts/ml/data_source_context';
+import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '../components/field_stats_flyout';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
+import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
+  const { showNodeInfo } = useEnabledFeatures();
 
-  const context = useMlContext();
-  const dataView = context.currentDataView;
-  const savedSearch = context.selectedSavedSearch;
+  const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
   return (
     <>
@@ -46,20 +47,31 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
-          appDependencies={pick(services, [
-            'application',
-            'data',
-            'charts',
-            'fieldFormats',
-            'http',
-            'notifications',
-            'share',
-            'storage',
-            'uiSettings',
-            'unifiedSearch',
-            'theme',
-            'lens',
-          ])}
+          showFrozenDataTierChoice={showNodeInfo}
+          appDependencies={{
+            ...pick(services, [
+              'application',
+              'cases',
+              'charts',
+              'data',
+              'embeddable',
+              'executionContext',
+              'fieldFormats',
+              'http',
+              'i18n',
+              'lens',
+              'notifications',
+              'presentationUtil',
+              'share',
+              'storage',
+              'theme',
+              'uiActions',
+              'uiSettings',
+              'unifiedSearch',
+              'usageCollection',
+            ]),
+            fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
+          }}
         />
       ) : null}
       <HelpMenu

@@ -52,8 +52,9 @@ node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/plugins/fleet
-yarn cypress:run-as-ci
+yarn cypress:run
 ```
+
 #### FTR + Interactive
 
 This is the preferred mode for developing new tests.
@@ -67,24 +68,14 @@ node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/plugins/fleet
-yarn cypress:open-as-ci
-```
-
-Alternatively, kibana test server can be started separately, to pick up changes in UI (e.g. change in data-test-subj selector)
-
-```
-# launch kibana test server
-node scripts/functional_tests_server --config x-pack/test/fleet_cypress/config.ts
-
-# launch cypress runner
-node scripts/functional_test_runner --config x-pack/test/fleet_cypress/visual_config.ts
+yarn cypress:open
 ```
 
 Note that you can select the browser you want to use on the top right side of the interactive runner.
 
 ## Folder Structure
 
-### integration/
+### e2e/
 
 Cypress convention. Contains the specs that are going to be executed.
 
@@ -108,7 +99,7 @@ Each file inside the screens folder represents a screen in our application.
 
 _Tasks_ are functions that may be reused across tests.
 
-Each file inside the tasks folder represents a screen of our application. 
+Each file inside the tasks folder represents a screen of our application.
 
 ## Test data
 
@@ -141,7 +132,7 @@ Note that the command will create the folder if it does not exist.
 
 ## Development Best Practices
 
-### Clean up the state 
+### Clean up the state
 
 Remember to clean up the state of the test after its execution, typically with the `cleanKibana` function. Be mindful of failure scenarios, as well: if your test fails, will it leave the environment in a recoverable state?
 
@@ -164,7 +155,7 @@ Remember that minimizing the number of times the web page is loaded, we minimize
 
 The `checkA11y({ skipFailures: false });` call uses [axe-core](https://github.com/dequelabs/axe-core) to perform a full page check for accessibility violations.
 
-See [axe-core](https://github.com/dequelabs/axe-core)'s documentation for details on what is checked for. 
+See [axe-core](https://github.com/dequelabs/axe-core)'s documentation for details on what is checked for.
 
 ## Linting
 

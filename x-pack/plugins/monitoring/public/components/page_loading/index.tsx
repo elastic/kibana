@@ -6,43 +6,20 @@
  */
 
 import React from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageTemplate, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import './page_loading.scss';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 function PageLoadingUI() {
   return (
     <EuiPage style={{ height: 'calc(100vh - 50px)' }}>
       <EuiPageBody>
-        <EuiPageContent
-          verticalPosition="center"
-          horizontalPosition="center"
-          className="monNoData__content"
-        >
-          <EuiFlexGroup justifyContent="spaceAround">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="xl" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <FormattedMessage
-                    id="xpack.monitoring.pageLoadingTitle"
-                    defaultMessage="Loading…"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageContent>
+        <EuiPageTemplate.EmptyPrompt
+          icon={<EuiLoadingSpinner size="xl" />}
+          body={
+            <FormattedMessage id="xpack.monitoring.pageLoadingTitle" defaultMessage="Loading…" />
+          }
+        />
       </EuiPageBody>
     </EuiPage>
   );

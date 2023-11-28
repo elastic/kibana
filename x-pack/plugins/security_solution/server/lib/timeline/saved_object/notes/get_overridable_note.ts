@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NoteResult, SavedNote } from '../../../../../common/types/timeline/note';
+import type { Note } from '../../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../../framework';
 import { getNote } from './saved_object';
 
@@ -16,10 +16,10 @@ import { getNote } from './saved_object';
 
 export const getOverridableNote = async (
   frameworkRequest: FrameworkRequest,
-  note: NoteResult,
+  note: Note,
   timelineSavedObjectId: string,
   overrideOwner: boolean
-): Promise<SavedNote> => {
+): Promise<Note> => {
   let savedNote = note;
   try {
     savedNote = await getNote(frameworkRequest, note.noteId);
@@ -30,6 +30,8 @@ export const getOverridableNote = async (
         eventId: note.eventId,
         note: note.note,
         timelineId: timelineSavedObjectId,
+        version: note.version,
+        noteId: note.noteId,
       }
     : {
         eventId: savedNote.eventId,
@@ -39,5 +41,7 @@ export const getOverridableNote = async (
         updated: savedNote.updated,
         updatedBy: savedNote.updatedBy,
         timelineId: timelineSavedObjectId,
+        version: note.version,
+        noteId: note.noteId,
       };
 };

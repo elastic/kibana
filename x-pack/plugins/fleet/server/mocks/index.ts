@@ -28,9 +28,17 @@ import { createFleetAuthzMock } from '../../common/mocks';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
+import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
+import type { MessageSigningServiceInterface } from '../services/security';
 
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
+
+// export all mocks from fleet files client
+export * from '../services/files/mocks';
+
+// export all mocks from fleet actions client
+export * from '../services/actions/mocks';
 
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
@@ -63,7 +71,10 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {} as ExperimentalFeatures,
+    experimentalFeatures: {
+      agentTamperProtectionEnabled: true,
+      diagnosticFileUploadEnabled: true,
+    } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -73,9 +84,11 @@ export const createAppContextStartContractMock = (
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
+    kibanaInstanceId: '1',
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
     messageSigningService: createMessageSigningServiceMock(),
+    uninstallTokenService: createUninstallTokenServiceMock(),
   };
 };
 
@@ -115,6 +128,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
+    inspect: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
     getByIDs: jest.fn(),
@@ -161,11 +175,33 @@ export const createMockAgentClient = () => agentServiceMock.createClient();
  */
 export const createMockPackageService = () => packageServiceMock.create();
 
-export function createMessageSigningServiceMock() {
+export function createMessageSigningServiceMock(): MessageSigningServiceInterface {
   return {
     isEncryptionAvailable: true,
     generateKeyPair: jest.fn(),
-    sign: jest.fn(),
-    getPublicKey: jest.fn(),
+    sign: jest.fn().mockImplementation((message: Record<string, unknown>) =>
+      Promise.resolve({
+        data: Buffer.from(JSON.stringify(message), 'utf8'),
+        signature: 'thisisasignature',
+      })
+    ),
+    getPublicKey: jest.fn().mockResolvedValue('thisisapublickey'),
+    rotateKeyPair: jest.fn(),
+  };
+}
+
+export function createUninstallTokenServiceMock(): UninstallTokenServiceInterface {
+  return {
+    getToken: jest.fn(),
+    getTokenMetadata: jest.fn(),
+    getHashedTokenForPolicyId: jest.fn(),
+    getHashedTokensForPolicyIds: jest.fn(),
+    getAllHashedTokens: jest.fn(),
+    generateTokenForPolicyId: jest.fn(),
+    generateTokensForPolicyIds: jest.fn(),
+    generateTokensForAllPolicies: jest.fn(),
+    encryptTokens: jest.fn(),
+    checkTokenValidityForAllPolicies: jest.fn(),
+    checkTokenValidityForPolicy: jest.fn(),
   };
 }

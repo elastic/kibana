@@ -2,16 +2,17 @@
 
 exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
 <EuiPage
+  data-test-subj="fatalErrorScreen"
   style={
     Object {
+      "alignItems": "center",
       "minHeight": "100vh",
     }
   }
 >
   <EuiPageBody>
-    <EuiPageContent_Deprecated
-      horizontalPosition="center"
-      verticalPosition="center"
+    <EuiPageSection
+      alignment="center"
     >
       <EuiEmptyPrompt
         actions={
@@ -21,7 +22,6 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
               data-test-subj="clearSession"
               fill={true}
               onClick={[Function]}
-              size="m"
             >
               <FormattedMessage
                 defaultMessage="Clear your session"
@@ -51,7 +51,7 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
           </p>
         }
         iconColor="danger"
-        iconType="alert"
+        iconType="warning"
         title={
           <h2>
             <FormattedMessage
@@ -64,7 +64,7 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
       />
       <EuiCallOut
         color="danger"
-        iconType="alert"
+        iconType="warning"
         key="0"
         title="foo"
       >
@@ -80,7 +80,7 @@ Error: foo
       </EuiCallOut>
       <EuiCallOut
         color="danger"
-        iconType="alert"
+        iconType="warning"
         key="1"
         title="bar"
       >
@@ -94,7 +94,7 @@ Error: bar
   stack...bar.js:1:1
         </EuiCodeBlock>
       </EuiCallOut>
-    </EuiPageContent_Deprecated>
+    </EuiPageSection>
   </EuiPageBody>
 </EuiPage>
 `;

@@ -14,13 +14,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiCallOut,
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
   EuiIcon,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -68,13 +69,14 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { RefreshToken } from './types';
 
 export type RuleDetailsProps = {
   rule: Rule;
   ruleType: RuleType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
 } & Pick<
   BulkOperationsComponentOpts,
   'bulkDisableRules' | 'bulkEnableRules' | 'bulkDeleteRules' | 'snoozeRule' | 'unsnoozeRule'
@@ -366,6 +368,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
                       <b>{rule.apiKeyOwner}</b>
+                      {rule.apiKeyCreatedByUser ? (
+                        <>
+                          &nbsp;
+                          <EuiIconTip
+                            position="right"
+                            content={i18n.translate(
+                              'xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey',
+                              {
+                                defaultMessage: 'This rule is associated with an API key.',
+                              }
+                            )}
+                          />
+                        </>
+                      ) : null}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -410,15 +426,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           <ViewInApp rule={rule} />,
         ]}
       />
-      <EuiSpacer size="l" />
-      <EuiPageContentBody>
+      <EuiPageSection>
         {rule.enabled &&
         rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
                 <p>
-                  <EuiIcon color="danger" type="alert" />
+                  <EuiIcon color="danger" type="warning" />
                   &nbsp;
                   <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
                   {rule.executionStatus.error?.message}
@@ -445,10 +460,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 color="warning"
                 data-test-subj="ruleWarningBanner"
                 size="s"
-                iconType="alert"
+                iconType="warning"
               >
                 <p>
-                  <EuiIcon color="warning" type="alert" />
+                  <EuiIcon color="warning" type="warning" />
                   &nbsp;
                   {getRuleStatusWarningReasonText()}
                   &nbsp;
@@ -468,7 +483,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 size="s"
               >
                 <p>
-                  <EuiIcon color="warning" type="alert" />
+                  <EuiIcon color="warning" type="warning" />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"
@@ -503,7 +518,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

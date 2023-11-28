@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { significantTerms } from '../__mocks__/artificial_logs/significant_terms';
+import { finalSignificantItemGroups } from '../__mocks__/artificial_logs/final_significant_item_groups';
+
 import {
-  addChangePointsAction,
+  addSignificantItemsAction,
+  addSignificantItemsGroupAction,
   resetAllAction,
+  resetGroupsAction,
   updateLoadingStateAction,
-} from './explain_log_rate_spikes';
+} from './log_rate_analysis/actions';
 import { initialState, streamReducer } from './stream_reducer';
 
 describe('streamReducer', () => {
@@ -23,34 +28,59 @@ describe('streamReducer', () => {
       ccsWarning: true,
       loaded: 50,
       loadingState: 'Loaded 50%',
-      changePoints: [],
-      changePointsGroups: [],
+      significantItems: [],
+      significantItemsGroups: [],
       errors: [],
     });
   });
 
-  it('adds change point, then resets state again', () => {
+  it('adds significant item, then resets all state again', () => {
     const state1 = streamReducer(
       initialState,
-      addChangePointsAction([
-        {
-          fieldName: 'the-field-name',
-          fieldValue: 'the-field-value',
-          doc_count: 10,
-          bg_count: 100,
-          total_doc_count: 1000,
-          total_bg_count: 10000,
-          score: 0.1,
-          pValue: 0.01,
-          normalizedScore: 0.123,
-        },
-      ])
+      addSignificantItemsAction(
+        [
+          {
+            key: 'the-field-name:the-field-value',
+            type: 'keyword',
+            fieldName: 'the-field-name',
+            fieldValue: 'the-field-value',
+            doc_count: 10,
+            bg_count: 100,
+            total_doc_count: 1000,
+            total_bg_count: 10000,
+            score: 0.1,
+            pValue: 0.01,
+            normalizedScore: 0.123,
+          },
+        ],
+        '2'
+      )
     );
 
-    expect(state1.changePoints).toHaveLength(1);
+    expect(state1.significantItems).toHaveLength(1);
 
     const state2 = streamReducer(state1, resetAllAction());
 
-    expect(state2.changePoints).toHaveLength(0);
+    expect(state2.significantItems).toHaveLength(0);
+  });
+
+  it('adds significant items and groups, then resets groups only', () => {
+    const state1 = streamReducer(initialState, addSignificantItemsAction(significantTerms, '2'));
+
+    expect(state1.significantItems).toHaveLength(4);
+    expect(state1.significantItemsGroups).toHaveLength(0);
+
+    const state2 = streamReducer(
+      state1,
+      addSignificantItemsGroupAction(finalSignificantItemGroups, '2')
+    );
+
+    expect(state2.significantItems).toHaveLength(4);
+    expect(state2.significantItemsGroups).toHaveLength(4);
+
+    const state3 = streamReducer(state2, resetGroupsAction());
+
+    expect(state3.significantItems).toHaveLength(4);
+    expect(state3.significantItemsGroups).toHaveLength(0);
   });
 });

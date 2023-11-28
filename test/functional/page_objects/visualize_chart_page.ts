@@ -248,6 +248,12 @@ export class VisualizeChartPageObject extends FtrService {
     return items.map(({ name }) => name);
   }
 
+  public async getReferenceLine(selector: string) {
+    const items = (await this.getEsChartDebugState(selector))?.annotations;
+    const referenceLine = items?.filter(({ type }) => type === 'line');
+    return referenceLine;
+  }
+
   public async getLegendEntries() {
     const isVisTypePieChart = await this.isNewLibraryChart(partitionVisChartSelector);
     const isVisTypeHeatmapChart = await this.isNewLibraryChart(heatmapChartSelector);

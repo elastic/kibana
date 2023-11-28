@@ -6,8 +6,8 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import styled from 'styled-components';
 import {
@@ -26,6 +26,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
+
+import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 
 import {
   getPackageReleaseLabel,
@@ -54,7 +56,7 @@ import {
   useIsGuidedOnboardingActive,
 } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type { DetailViewPanelName, PackageInfo } from '../../../../types';
+import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import {
   Error,
@@ -65,6 +67,7 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
+import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
@@ -80,8 +83,18 @@ import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
 import { DocumentationPage } from './documentation';
+import { Configs } from './configs';
 
 import './index.scss';
+
+export type DetailViewPanelName =
+  | 'overview'
+  | 'policies'
+  | 'assets'
+  | 'settings'
+  | 'custom'
+  | 'api-reference'
+  | 'configs';
 
 export interface DetailParams {
   pkgkey: string;
@@ -120,6 +133,7 @@ export function Detail() {
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+  const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
 
   const canInstallPackages = useAuthz().integrations.installPackages;
   const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
@@ -152,9 +166,8 @@ export function Detail() {
     if (packageInfo === null || !packageInfo.name) {
       return undefined;
     }
-    return getPackageInstallStatus(packageInfo.name).status;
+    return getPackageInstallStatus(packageInfo?.name)?.status;
   }, [packageInfo, getPackageInstallStatus]);
-
   const isInstalled = useMemo(
     () =>
       packageInstallStatus === InstallStatus.installed ||
@@ -164,20 +177,20 @@ export function Detail() {
 
   const updateAvailable =
     packageInfo &&
-    'savedObject' in packageInfo &&
-    packageInfo.savedObject &&
-    semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
+    semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
   >();
 
-  const { data: settings } = useGetSettingsQuery();
+  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery();
 
   useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
     setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.item.prerelease_integrations_enabled]);
+  }, [settings?.item.prerelease_integrations_enabled, prerelease]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
@@ -185,10 +198,19 @@ export function Detail() {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
+    isFetchedAfterMount: packageInfoIsFetchedAfterMount,
     refetch: refetchPackageInfo,
-  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, {
-    prerelease: prereleaseIntegrationsEnabled,
-  });
+  } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    {
+      prerelease: prereleaseIntegrationsEnabled,
+    },
+    {
+      enabled: !isSettingsInitialLoading, // Load only after settings are loaded
+      refetchOnMount: 'always',
+    }
+  );
 
   const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
   const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
@@ -232,28 +254,32 @@ export function Detail() {
     }
   }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
-  const isLoading = packageInfoLoading || isPermissionCheckLoading || firstTimeUserLoading;
+  const isLoading =
+    packageInfoLoading ||
+    isPermissionCheckLoading ||
+    firstTimeUserLoading ||
+    !packageInfoIsFetchedAfterMount;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.item) {
+    if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
       const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
 
       let installedVersion;
       const { name } = packageInfoData.item;
-      if ('savedObject' in packageInfoResponse) {
-        installedVersion = packageInfoResponse.savedObject.attributes.version;
+      if ('installationInfo' in packageInfoResponse) {
+        installedVersion = packageInfoResponse.installationInfo?.version;
       }
       const status: InstallStatus = packageInfoResponse?.status as any;
       if (name) {
         setPackageInstallStatus({ name, status, version: installedVersion || null });
       }
     }
-  }, [packageInfoData, setPackageInstallStatus, setPackageInfo]);
+  }, [packageInfoData, packageInfoIsFetchedAfterMount, setPackageInstallStatus, setPackageInfo]);
 
   const integrationInfo = useMemo(
     () =>
@@ -274,9 +300,14 @@ export function Detail() {
       ? getHref('integrations_installed')
       : getHref('integrations_all');
 
+  const numOfDeferredInstallations = useMemo(
+    () => getDeferredInstallationsCnt(packageInfo),
+    [packageInfo]
+  );
+
   const headerLeftContent = useMemo(
     () => (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="headerLeft">
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
@@ -570,10 +601,16 @@ export function Detail() {
       tabs.push({
         id: 'assets',
         name: (
-          <FormattedMessage
-            id="xpack.fleet.epm.packageDetailsNav.packageAssetsLinkText"
-            defaultMessage="Assets"
-          />
+          <div style={{ display: 'flex', textAlign: 'center' }}>
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetailsNav.packageAssetsLinkText"
+              defaultMessage="Assets"
+            />
+            &nbsp;
+            {numOfDeferredInstallations > 0 ? (
+              <DeferredAssetsWarning numOfDeferredInstallations={numOfDeferredInstallations} />
+            ) : null}
+          </div>
         ),
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
@@ -596,6 +633,24 @@ export function Detail() {
         isSelected: panel === 'settings',
         'data-test-subj': `tab-settings`,
         href: getHref('integration_details_settings', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
+
+    if (canReadPackageSettings) {
+      tabs.push({
+        id: 'configs',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.configsText"
+            defaultMessage="Configs"
+          />
+        ),
+        isSelected: panel === 'configs',
+        'data-test-subj': `tab-configs`,
+        href: getHref('integration_details_configs', {
           pkgkey: packageInfoKey,
           ...(integration ? { integration } : {}),
         }),
@@ -645,6 +700,7 @@ export function Detail() {
     getHref,
     integration,
     canReadIntegrationPolicies,
+    numOfDeferredInstallations,
     isInstalled,
     CustomAssets,
     canReadPackageSettings,
@@ -708,7 +764,7 @@ export function Detail() {
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
-        <Switch>
+        <Routes>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
             <OverviewPage
               packageInfo={packageInfo}
@@ -722,6 +778,9 @@ export function Detail() {
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} />
           </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
+            <Configs packageInfo={packageInfo} />
+          </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
             <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
           </Route>
@@ -732,7 +791,7 @@ export function Detail() {
             <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
-        </Switch>
+        </Routes>
       )}
     </WithHeaderLayout>
   );

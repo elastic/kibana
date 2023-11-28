@@ -7,7 +7,7 @@
 import CspRouter from './csp_router';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import type { CspPage, CspPageNavigationItem } from '../common/navigation/types';
 import { CspSecuritySolutionContext } from '../types';
 import { createMemoryHistory, MemoryHistory } from 'history';
@@ -17,6 +17,9 @@ import { QueryClientProviderProps } from '@tanstack/react-query';
 jest.mock('../pages', () => ({
   Findings: () => <div data-test-subj="Findings">Findings</div>,
   ComplianceDashboard: () => <div data-test-subj="ComplianceDashboard">ComplianceDashboard</div>,
+  VulnerabilityDashboard: () => (
+    <div data-test-subj="VulnerabilityDashboard">VulnerabilityDashboard</div>
+  ),
   Rules: () => <div data-test-subj="Rules">Rules</div>,
   Benchmarks: () => <div data-test-subj="Benchmarks">Benchmarks</div>,
 }));
@@ -57,6 +60,7 @@ describe('CspRouter', () => {
 
       expect(result.queryByTestId('Findings')).toBeInTheDocument();
       expect(result.queryByTestId('ComplianceDashboard')).not.toBeInTheDocument();
+      expect(result.queryByTestId('VulnerabilityDashboard')).not.toBeInTheDocument();
       expect(result.queryByTestId('Benchmarks')).not.toBeInTheDocument();
       expect(result.queryByTestId('Rules')).not.toBeInTheDocument();
     });
@@ -66,6 +70,18 @@ describe('CspRouter', () => {
       const result = renderCspRouter();
 
       expect(result.queryByTestId('ComplianceDashboard')).toBeInTheDocument();
+      expect(result.queryByTestId('VulnerabilityDashboard')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Findings')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Benchmarks')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Rules')).not.toBeInTheDocument();
+    });
+
+    it('should render the Vulnerability Dashboard', () => {
+      history.push('/cloud_security_posture/vulnerability_dashboard');
+      const result = renderCspRouter();
+
+      expect(result.queryByTestId('VulnerabilityDashboard')).toBeInTheDocument();
+      expect(result.queryByTestId('ComplianceDashboard')).not.toBeInTheDocument();
       expect(result.queryByTestId('Findings')).not.toBeInTheDocument();
       expect(result.queryByTestId('Benchmarks')).not.toBeInTheDocument();
       expect(result.queryByTestId('Rules')).not.toBeInTheDocument();
@@ -78,6 +94,7 @@ describe('CspRouter', () => {
       expect(result.queryByTestId('Benchmarks')).toBeInTheDocument();
       expect(result.queryByTestId('Findings')).not.toBeInTheDocument();
       expect(result.queryByTestId('ComplianceDashboard')).not.toBeInTheDocument();
+      expect(result.queryByTestId('VulnerabilityDashboard')).not.toBeInTheDocument();
       expect(result.queryByTestId('Rules')).not.toBeInTheDocument();
     });
 
@@ -88,6 +105,7 @@ describe('CspRouter', () => {
       expect(result.queryByTestId('Rules')).toBeInTheDocument();
       expect(result.queryByTestId('Findings')).not.toBeInTheDocument();
       expect(result.queryByTestId('ComplianceDashboard')).not.toBeInTheDocument();
+      expect(result.queryByTestId('VulnerabilityDashboard')).not.toBeInTheDocument();
       expect(result.queryByTestId('Benchmarks')).not.toBeInTheDocument();
     });
   });

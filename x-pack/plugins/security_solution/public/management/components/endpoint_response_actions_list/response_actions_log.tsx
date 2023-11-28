@@ -13,10 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   ResponseActionsApiCommandNames,
   ResponseActionStatus,
+  ResponseActionType,
 } from '../../../../common/endpoint/service/response_actions/constants';
 
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
 import { UX_MESSAGES } from './translations';
@@ -50,9 +51,10 @@ export const ResponseActionsLog = memo<
       commands: commandsFromUrl,
       hosts: agentIdsFromUrl,
       statuses: statusesFromUrl,
-      startDate: startDateFromUrl,
-      endDate: endDateFromUrl,
       users: usersFromUrl,
+      types: typesFromUrl,
+      withOutputs: withOutputsFromUrl,
+      setUrlWithOutputs,
     } = useActionHistoryUrlParams();
 
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -67,6 +69,8 @@ export const ResponseActionsLog = memo<
       commands: [],
       statuses: [],
       userIds: [],
+      withOutputs: [],
+      types: [],
     });
 
     // update query state from URL params
@@ -82,9 +86,20 @@ export const ResponseActionsLog = memo<
             ? (statusesFromUrl as ResponseActionStatus[])
             : prevState.statuses,
           userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
+          withOutputs: withOutputsFromUrl?.length ? withOutputsFromUrl : prevState.withOutputs,
+          types: typesFromUrl?.length ? (typesFromUrl as ResponseActionType[]) : prevState.types,
         }));
       }
-    }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams, usersFromUrl]);
+    }, [
+      commandsFromUrl,
+      agentIdsFromUrl,
+      isFlyout,
+      statusesFromUrl,
+      setQueryParams,
+      usersFromUrl,
+      withOutputsFromUrl,
+      typesFromUrl,
+    ]);
 
     // date range picker state and handlers
     const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker(isFlyout);
@@ -99,8 +114,8 @@ export const ResponseActionsLog = memo<
     } = useGetEndpointActionList(
       {
         ...queryParams,
-        startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
-        endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
+        startDate: dateRangePickerState.startDate,
+        endDate: dateRangePickerState.endDate,
       },
       { retry: false }
     );
@@ -159,6 +174,16 @@ export const ResponseActionsLog = memo<
       [setQueryParams]
     );
 
+    const onChangeTypeFilter = useCallback(
+      (selectedTypes: string[]) => {
+        setQueryParams((prevState) => ({
+          ...prevState,
+          types: selectedTypes as ResponseActionType[],
+        }));
+      },
+      [setQueryParams]
+    );
+
     // handle on change hosts filter
     const onChangeHostsFilter = useCallback(
       (selectedAgentIds: string[]) => {
@@ -201,6 +226,18 @@ export const ResponseActionsLog = memo<
       [isFlyout, reFetchEndpointActionList, setQueryParams, setPaginationOnUrlParams]
     );
 
+    // handle on details open
+    const onShowActionDetails = useCallback(
+      (actionIds: string[]) => {
+        setQueryParams((prevState) => ({ ...prevState, withOutputs: actionIds }));
+        if (!isFlyout) {
+          // set and show `withOutputs` URL param on history page
+          setUrlWithOutputs(actionIds.join());
+        }
+      },
+      [isFlyout, setUrlWithOutputs, setQueryParams]
+    );
+
     if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
       return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
     } else if (isFetching && isFirstAttempt) {
@@ -217,6 +254,7 @@ export const ResponseActionsLog = memo<
           onChangeCommandsFilter={onChangeCommandsFilter}
           onChangeStatusesFilter={onChangeStatusesFilter}
           onChangeUsersFilter={onChangeUsersFilter}
+          onChangeTypeFilter={onChangeTypeFilter}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
@@ -257,6 +295,7 @@ export const ResponseActionsLog = memo<
             isFlyout={isFlyout}
             loading={isFetching}
             onChange={handleTableOnChange}
+            onShowActionDetails={onShowActionDetails}
             queryParams={queryParams}
             showHostNames={showHostNames}
             totalItemCount={totalItemCount}

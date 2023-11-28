@@ -23,6 +23,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     'config',
     'journey',
     'esFrom',
+    'esServerlessImage',
     'kibana-install-dir',
     'grep',
     'include-tag',
@@ -36,7 +37,8 @@ export const FLAG_OPTIONS: FlagOptions = {
   help: `
     --config             Define a FTR config that should be executed. Can be specified multiple times
     --journey            Define a Journey that should be executed. Can be specified multiple times
-    --esFrom             Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or "snapshot"
+    --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
+    --esServerlessImage  When 'esFrom' is "serverless", this argument will be interpreted either as a tag within the ES Serverless repo, OR a full docker image path.
     --include-tag        Tags that suites must include to be run, can be included multiple times
     --exclude-tag        Tags that suites must NOT include to be run, can be included multiple times
     --include            Files that must included to be run, can be included multiple times
@@ -49,6 +51,13 @@ export const FLAG_OPTIONS: FlagOptions = {
     --updateBaselines    Replace baseline screenshots with whatever is generated from the test
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
     --updateAll, -u      Replace both baseline screenshots and snapshots
+  `,
+  examples: `
+Run the latest verified, kibana-compatible ES Serverless image:
+  node scripts/functional_tests --config ./config.ts --esFrom serverless --esServerlessImage docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+
+Run with a specific ES Serverless tag from the docker.elastic.co/elasticsearch-ci/elasticsearch-serverless repo:
+  node scripts/functional_tests --config ./config.ts --esFrom serverless --esServerlessImage git-fec36430fba2
   `,
 };
 
@@ -74,16 +83,17 @@ export function parseFlags(flags: FlagsReader) {
     logsDir: flags.boolean('logToFile')
       ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
       : undefined,
-    esFrom: flags.enum('esFrom', ['snapshot', 'source']) ?? 'snapshot',
+    esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']),
+    esServerlessImage: flags.string('esServerlessImage'),
     installDir: flags.path('kibana-install-dir'),
     grep: flags.string('grep'),
     suiteTags: {
-      include: flags.arrayOfStrings('include-tag'),
-      exclude: flags.arrayOfStrings('exclude-tag'),
+      include: flags.arrayOfStrings('include-tag') ?? [],
+      exclude: flags.arrayOfStrings('exclude-tag') ?? [],
     },
     suiteFilters: {
-      include: flags.arrayOfPaths('include'),
-      exclude: flags.arrayOfPaths('exclude'),
+      include: flags.arrayOfPaths('include') ?? [],
+      exclude: flags.arrayOfPaths('exclude') ?? [],
     },
   };
 }

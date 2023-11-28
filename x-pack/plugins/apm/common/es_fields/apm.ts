@@ -101,6 +101,7 @@ export const PARENT_ID = 'parent.id';
 
 export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
+export const ERROR_GROUP_NAME = 'error.grouping_name';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
@@ -109,6 +110,7 @@ export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used i
 export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_TYPE = 'error.exception.type';
 export const ERROR_PAGE_URL = 'error.page.url';
+export const ERROR_TYPE = 'error.type';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
@@ -135,6 +137,10 @@ export const METRICSET_NAME = 'metricset.name';
 export const METRICSET_INTERVAL = 'metricset.interval';
 
 export const LABEL_NAME = 'labels.name';
+export const LABEL_GC = 'labels.gc';
+export const LABEL_TYPE = 'labels.type';
+export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
+export const LABEL_LIFECYCLE_STATE = 'labels.lifecycle_state';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
@@ -158,6 +164,27 @@ export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
 export const FAAS_DURATION = 'faas.duration';
 export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
 export const FAAS_BILLED_DURATION = 'faas.billed_duration';
+
+// OpenTelemetry Metrics
+export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
+export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION =
+  'system.memory.utilization';
+
+export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT =
+  'process.runtime.jvm.cpu.utilization';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE =
+  'process.runtime.jvm.memory.usage';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED =
+  'process.runtime.jvm.memory.committed';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT =
+  'process.runtime.jvm.memory.limit';
+export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT =
+  'process.runtime.jvm.threads.count';
+export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT =
+  'process.runtime.jvm.system.cpu.utilization';
+export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
+export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
+export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 
 // Metadata
 export const TIER = '_tier';

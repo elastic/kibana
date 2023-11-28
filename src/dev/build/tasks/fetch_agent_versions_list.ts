@@ -7,9 +7,16 @@
  */
 
 import fetch from 'node-fetch';
+import pRetry from 'p-retry';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { write, Task } from '../lib';
+
+// Endpoint maintained by the web-team and hosted on the elastic website
+const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
+
+const isPr = () =>
+  !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
 
 const getAvailableVersions = async (log: ToolingLog) => {
   const options = {
@@ -17,14 +24,17 @@ const getAvailableVersions = async (log: ToolingLog) => {
       'Content-Type': 'application/json',
     },
   };
-  // Endpoint maintained by the web-team and hosted on the elastic website
-  // See https://github.com/elastic/website-development/issues/9331
-  const url = 'https://www.elastic.co/api/product_versions';
-  try {
-    log.info('Fetching Elastic Agent versions list');
-    const results = await fetch(url, options);
+  log.info('Fetching Elastic Agent versions list');
 
-    const jsonBody = await results.json();
+  try {
+    const results = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), { retries: 3 });
+    const rawBody = await results.text();
+
+    if (results.status >= 400) {
+      throw new Error(`Status code ${results.status} received from versions API: ${rawBody}`);
+    }
+
+    const jsonBody = JSON.parse(rawBody);
 
     const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
       .filter((item: any) => item?.title?.includes('Elastic Agent'))
@@ -33,8 +43,18 @@ const getAvailableVersions = async (log: ToolingLog) => {
     log.info(`Retrieved available versions`);
     return versions;
   } catch (error) {
-    log.warning(`Failed to fetch versions list`);
-    log.warning(error);
+    const errorMessage = 'Failed to fetch Elastic Agent versions list';
+
+    if (isPr()) {
+      // For PR jobs, just log the error as a warning and continue
+      log.warning(errorMessage);
+      log.warning(error);
+    } else {
+      // For non-PR jobs like nightly builds, log the error to stderror and throw
+      // to ensure the build fails
+      log.error(errorMessage);
+      throw new Error(error);
+    }
   }
   return [];
 };
@@ -44,6 +64,11 @@ export const FetchAgentVersionsList: Task = {
   description: 'Build list of available Elastic Agent versions for Fleet UI',
 
   async run(config, log, build) {
+    // Agent version list task is skipped for PR's, so as not to overwhelm the versions API
+    if (isPr()) {
+      return;
+    }
+
     const versionsList = await getAvailableVersions(log);
     const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
 

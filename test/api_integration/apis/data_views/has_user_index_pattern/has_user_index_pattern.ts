@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  INITIAL_REST_VERSION,
+  INITIAL_REST_VERSION_INTERNAL,
+} from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { configArray } from '../constants';
@@ -32,7 +37,11 @@ export default function ({ getService }: FtrProviderContext) {
         const servicePath = `${config.basePath}/has_user_${config.serviceKey}`;
 
         it('should return false if no index patterns', async () => {
-          const response = await supertest.get(servicePath);
+          // Make sure all saved objects including data views are cleared
+          await esArchiver.emptyKibanaIndex();
+          const response = await supertest
+            .get(servicePath)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL);
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(false);
         });
@@ -41,14 +50,19 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.load(
             'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
           );
-          await supertest.post(config.path).send({
-            override: true,
-            [config.serviceKey]: {
-              title: 'basic_index',
-            },
-          });
+          await supertest
+            .post(config.path)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .send({
+              override: true,
+              [config.serviceKey]: {
+                title: 'basic_index',
+              },
+            });
 
-          const response = await supertest.get(servicePath);
+          const response = await supertest
+            .get(servicePath)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL);
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(true);
 
@@ -58,15 +72,20 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should return true if has user index pattern without data', async () => {
-          await supertest.post(config.path).send({
-            override: true,
-            [config.serviceKey]: {
-              title: 'basic_index',
-              allowNoIndex: true,
-            },
-          });
+          await supertest
+            .post(config.path)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .send({
+              override: true,
+              [config.serviceKey]: {
+                title: 'basic_index',
+                allowNoIndex: true,
+              },
+            });
 
-          const response = await supertest.get(servicePath);
+          const response = await supertest
+            .get(servicePath)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL);
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(true);
         });

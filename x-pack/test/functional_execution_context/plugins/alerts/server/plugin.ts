@@ -73,6 +73,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           name: 'Default',
         },
       ],
+      category: 'kibana',
       producer: 'fecAlertsTestPlugin',
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
@@ -81,6 +82,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         const [coreStart] = await core.getStartServices();
         await coreStart.elasticsearch.client.asInternalUser.ping();
         return { state: {} };
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     });
 

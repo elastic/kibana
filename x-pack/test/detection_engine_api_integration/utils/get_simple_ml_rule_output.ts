@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MachineLearningRule } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { MachineLearningRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getMockSharedResponseSchema } from './get_simple_rule_output';
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 

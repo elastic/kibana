@@ -9,10 +9,18 @@
 import { get } from 'lodash';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
+import {
+  OptionsListRequestBody,
+  OptionsListSuggestions,
+  OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE,
+} from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
-import { getIpBuckets, getSortType } from './options_list_suggestion_query_helpers';
+import {
+  getEscapedWildcardQuery,
+  getIpBuckets,
+  getSortType,
+} from './options_list_suggestion_query_helpers';
 
 /**
  * Suggestion aggregations
@@ -34,6 +42,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
    */
   textOrKeywordOrNested: {
     buildAggregation: ({
+      searchTechnique,
       searchString,
       fieldName,
       fieldSpec,
@@ -56,13 +65,17 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
           },
         },
       };
-      if (searchString) {
+      // disabling for date fields because applying a search string will return an error
+      if (fieldSpec?.type !== 'date' && searchString && searchString.length > 0) {
         textOrKeywordQuery = {
           filteredSuggestions: {
             filter: {
-              prefix: {
+              [(searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE) as string]: {
                 [fieldName]: {
-                  value: searchString,
+                  value:
+                    searchTechnique === 'wildcard'
+                      ? `*${getEscapedWildcardQuery(searchString)}*`
+                      : searchString,
                   case_insensitive: true,
                 },
               },
@@ -93,9 +106,10 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
         },
-        {}
+        []
       );
       return {
         suggestions,
@@ -120,14 +134,12 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
     parse: (rawEsResult) => {
       const suggestions = get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
-          return {
-            ...acc,
-            [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
-          };
+          acc.push({ value: suggestion.key_as_string, docCount: suggestion.doc_count });
+          return acc;
         },
-        {}
+        []
       );
-      return { suggestions, totalCardinality: Object.keys(suggestions).length }; // cardinality is only ever 0, 1, or 2 so safe to use length here
+      return { suggestions, totalCardinality: suggestions.length }; // cardinality is only ever 0, 1, or 2 so safe to use length here
     },
   },
 
@@ -147,7 +159,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         ],
       };
 
-      if (searchString) {
+      if (searchString && searchString.length > 0) {
         ipRangeQuery = getIpRangeQuery(searchString);
         if (!ipRangeQuery.validSearch) {
           // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
@@ -185,7 +197,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
-        return { suggestions: {}, totalCardinality: 0 };
+        return { suggestions: [], totalCardinality: 0 };
       }
       const buckets: EsBucket[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
@@ -200,11 +212,12 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
               (bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count
             );
 
-      const suggestions: OptionsListSuggestions = sortedSuggestions
+      const suggestions = sortedSuggestions
         .slice(0, request.size)
         .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        }, {});
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
+        }, []);
       const totalCardinality =
         (get(rawEsResult, `aggregations.suggestions.buckets.ipv4.unique_terms.value`) ?? 0) +
         (get(rawEsResult, `aggregations.suggestions.buckets.ipv6.unique_terms.value`) ?? 0);

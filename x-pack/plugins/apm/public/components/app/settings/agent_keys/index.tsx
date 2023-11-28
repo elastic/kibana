@@ -68,13 +68,6 @@ export function AgentKeys() {
 
   return (
     <Fragment>
-      <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.agentKeys.descriptionText', {
-          defaultMessage:
-            'View and delete APM agent keys. An APM agent key sends requests on behalf of a user.',
-        })}
-      </EuiText>
-      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
@@ -88,6 +81,7 @@ export function AgentKeys() {
         {areApiKeysEnabled && canManage && !isEmpty(agentKeys) && (
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="apmAgentKeysCreateApmAgentKeyButton"
               onClick={() => setIsFlyoutVisible(true)}
               fill={true}
               iconType="plusInCircle"
@@ -102,6 +96,14 @@ export function AgentKeys() {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.agentKeys.descriptionText', {
+          defaultMessage:
+            'View and delete APM agent keys. An APM agent key sends requests on behalf of a user.',
+        })}
+      </EuiText>
       <EuiSpacer size="m" />
       {createdAgentKey && (
         <AgentKeyCallOut
@@ -193,7 +195,7 @@ function AgentKeysContent({
     if (requestFailed) {
       return (
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2>
               {i18n.translate(
@@ -238,6 +240,7 @@ function AgentKeysContent({
         }
         actions={
           <EuiButton
+            data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"
             onClick={onCreateAgentClick}
             fill={true}
             iconType="plusInCircle"

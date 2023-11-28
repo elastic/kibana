@@ -11,6 +11,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   FILE_STORAGE_DATA_INDEX_PATTERN,
   FILE_STORAGE_METADATA_INDEX_PATTERN,
+  FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN,
+  FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN,
 } from '../../../common/constants/file_storage';
 
 import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common/services';
@@ -67,7 +69,7 @@ describe('files service', () => {
 
       expect(esClientMock.search).toBeCalledWith(
         {
-          index: FILE_STORAGE_METADATA_INDEX_PATTERN,
+          index: [FILE_STORAGE_METADATA_INDEX_PATTERN, FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN],
           body: {
             size: ES_SEARCH_LIMIT,
             query: {
@@ -130,7 +132,8 @@ describe('files service', () => {
 
       expect(esClientMock.search).toBeCalledWith(
         {
-          index: FILE_STORAGE_DATA_INDEX_PATTERN,
+          ignore_unavailable: true,
+          index: [FILE_STORAGE_DATA_INDEX_PATTERN, FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN],
           body: {
             size: ES_SEARCH_LIMIT,
             query: {

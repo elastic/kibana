@@ -27,7 +27,8 @@ import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
-import { serviceGroupQuery } from '../../../lib/service_group_query';
+import { maybe } from '../../../../common/utils/maybe';
+import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
 interface AggregationParams {
   environment: string;
@@ -43,6 +44,20 @@ interface AggregationParams {
     | ApmDocumentType.TransactionMetric
     | ApmDocumentType.TransactionEvent;
   rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
+}
+
+export interface ServiceTransactionStatsResponse {
+  serviceStats: Array<{
+    serviceName: string;
+    transactionType?: string;
+    environments: string[];
+    agentName?: AgentName;
+    latency?: number | null;
+    transactionErrorRate?: number;
+    throughput?: number;
+  }>;
+  serviceOverflowCount: number;
 }
 
 export async function getServiceTransactionStats({
@@ -56,13 +71,17 @@ export async function getServiceTransactionStats({
   randomSampler,
   documentType,
   rollupInterval,
-}: AggregationParams) {
+  useDurationSummary,
+}: AggregationParams): Promise<ServiceTransactionStatsResponse> {
   const outcomes = getOutcomeAggregation(documentType);
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(documentType),
+        field: getDurationFieldForTransactions(
+          documentType,
+          useDurationSummary
+        ),
       },
     },
     ...outcomes,
@@ -88,7 +107,7 @@ export async function getServiceTransactionStats({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
-              ...serviceGroupQuery(serviceGroup),
+              ...serviceGroupWithOverflowQuery(serviceGroup),
             ],
           },
         },
@@ -140,29 +159,33 @@ export async function getServiceTransactionStats({
   return {
     serviceStats:
       response.aggregations?.sample.services.buckets.map((bucket) => {
-        const topTransactionTypeBucket =
+        const topTransactionTypeBucket = maybe(
           bucket.transactionType.buckets.find(({ key }) =>
             isDefaultTransactionType(key as string)
-          ) ?? bucket.transactionType.buckets[0];
+          ) ?? bucket.transactionType.buckets[0]
+        );
 
         return {
           serviceName: bucket.key as string,
-          transactionType: topTransactionTypeBucket.key as string,
-          environments: topTransactionTypeBucket.environments.buckets.map(
-            (environmentBucket) => environmentBucket.key as string
-          ),
-          agentName: topTransactionTypeBucket.sample.top[0].metrics[
+          transactionType: topTransactionTypeBucket?.key as string | undefined,
+          environments:
+            topTransactionTypeBucket?.environments.buckets.map(
+              (environmentBucket) => environmentBucket.key as string
+            ) ?? [],
+          agentName: topTransactionTypeBucket?.sample.top[0].metrics[
             AGENT_NAME
-          ] as AgentName,
-          latency: topTransactionTypeBucket.avg_duration.value,
-          transactionErrorRate: calculateFailedTransactionRate(
-            topTransactionTypeBucket
-          ),
-          throughput: calculateThroughputWithRange({
-            start,
-            end,
-            value: topTransactionTypeBucket.doc_count,
-          }),
+          ] as AgentName | undefined,
+          latency: topTransactionTypeBucket?.avg_duration.value,
+          transactionErrorRate: topTransactionTypeBucket
+            ? calculateFailedTransactionRate(topTransactionTypeBucket)
+            : undefined,
+          throughput: topTransactionTypeBucket
+            ? calculateThroughputWithRange({
+                start,
+                end,
+                value: topTransactionTypeBucket?.doc_count,
+              })
+            : undefined,
         };
       }) ?? [],
     serviceOverflowCount:

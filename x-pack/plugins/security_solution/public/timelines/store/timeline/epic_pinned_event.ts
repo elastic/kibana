@@ -9,12 +9,12 @@ import { get, omit } from 'lodash/fp';
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
 import type { Observable } from 'rxjs';
-import { from, empty } from 'rxjs';
+import { from, EMPTY } from 'rxjs';
 import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/operators';
 
 import { addError } from '../../../common/store/app/actions';
 import type { inputsModel } from '../../../common/store/inputs';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type { PinnedEventResponse } from '../../../../common/api/timeline';
 import {
   pinEvent,
   endTimelineSaving,
@@ -28,7 +28,7 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 import type { ActionTimeline, TimelineById } from './types';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
 
-export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
+export const timelinePinnedEventActionsType = new Set([pinEvent.type, unPinEvent.type]);
 
 export const epicPersistPinnedEvent = (
   action: ActionTimeline,
@@ -51,7 +51,7 @@ export const epicPersistPinnedEvent = (
     withLatestFrom(timeline$, allTimelineQuery$),
     mergeMap(([result, recentTimeline, allTimelineQuery]) => {
       const savedTimeline = recentTimeline[action.payload.id];
-      const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
+      const response: PinnedEventResponse = get('data.persistPinnedEventOnTimeline', result);
       const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       if (allTimelineQuery.refetch != null) {
@@ -97,7 +97,7 @@ export const epicPersistPinnedEvent = (
         endTimelineSaving({
           id: action.payload.id,
         }),
-      ];
+      ].filter(Boolean);
     }),
     startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
@@ -129,9 +129,9 @@ export const createTimelinePinnedEventEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) =>
     action$.pipe(
-      filter((action) => timelinePinnedEventActionsType.includes(action.type)),
+      filter((action) => timelinePinnedEventActionsType.has(action.type)),
       mergeMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
-        return empty();
+        return EMPTY;
       })
     );

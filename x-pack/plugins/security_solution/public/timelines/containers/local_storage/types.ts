@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TableIdLiteral } from '../../../../common/types';
-import type { DataTableModel } from '../../../common/store/data_table/model';
+import type { TableIdLiteral, DataTableModel } from '@kbn/securitysolution-data-table';
 
 export interface DataTablesStorage {
   getAllDataTables: () => Record<TableIdLiteral, DataTableModel>;

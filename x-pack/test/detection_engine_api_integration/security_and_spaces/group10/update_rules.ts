@@ -6,14 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_DEFAULT_FREQUENCY,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
+} from '@kbn/security-solution-plugin/common/constants';
+import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
@@ -27,12 +34,25 @@ import {
   getSimpleRule,
   createLegacyRuleAction,
   getThresholdRuleForSignalTesting,
+  getLegacyActionSO,
+  getSimpleRuleWithoutRuleId,
+  getRuleSOById,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../utils';
+import {
+  getActionsWithFrequencies,
+  getActionsWithoutFrequencies,
+  getSomeActionsWithFrequencies,
+} from '../../utils/get_rule_actions';
+import { removeUUIDFromActions } from '../../utils/remove_uuid_from_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('update_rules', () => {
     describe('update rules', () => {
@@ -41,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -57,12 +77,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -79,13 +100,14 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
         const outputRule = getSimpleMlRuleOutput();
         // @ts-expect-error type narrowing is lost due to Omit<>
         outputRule.machine_learning_job_id = ['legacy_job_id'];
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -102,12 +124,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
         const outputRule = getSimpleMlRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -126,12 +149,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -175,16 +199,15 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         // Expect an empty array
         outputRule.actions = [];
-        // Expect "no_actions"
-        outputRule.throttle = 'no_actions';
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -207,12 +230,19 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await createLegacyRuleAction(supertest, createRuleBody.id, connector.body.id);
 
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+          createRuleBody.id
+        );
+
         const action1 = {
           group: 'default',
           id: connector.body.id,
           action_type_id: connector.body.connector_type_id,
           params: {
-            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
         };
         // update a simple rule's name
@@ -220,12 +250,12 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.rule_id = createRuleBody.rule_id;
         updatedRule.name = 'some other name';
         updatedRule.actions = [action1];
-        updatedRule.throttle = '1d';
         delete updatedRule.id;
 
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
@@ -233,22 +263,25 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         outputRule.actions = [
           {
             action_type_id: '.slack',
             group: 'default',
             id: connector.body.id,
             params: {
-              message:
-                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: bodyToCompare.actions![0].uuid,
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
           },
         ];
-        outputRule.throttle = '1d';
 
         expect(bodyToCompare).to.eql(outputRule);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {
@@ -263,17 +296,18 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should change the version of a rule when it updates enabled and another property', async () => {
+      it('should change the revision of a rule when it updates enabled and another property', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's enabled to false and another property
@@ -284,13 +318,14 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(updatedRule)
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
         outputRule.severity = 'low';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -307,6 +342,7 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(ruleUpdate)
           .expect(200);
 
@@ -317,12 +353,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(ruleUpdate2)
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 3;
+        outputRule.revision = 2;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -336,6 +373,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(simpleRule)
           .expect(404);
 
@@ -353,6 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(simpleRule)
           .expect(404);
 
@@ -390,6 +429,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(ruleUpdate)
           .expect(200);
 
@@ -422,6 +462,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(ruleUpdate)
           .expect(500);
 
@@ -448,6 +489,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             ...getSimpleRule('rule-2'),
             exceptions_list: [
@@ -489,6 +531,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             ...updatedRule,
             exceptions_list: [
@@ -517,12 +560,14 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid value "undefined" supplied to "threshold"',
+            message:
+              '[request body]: type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", saved_id: Required, and 14 more',
             statusCode: 400,
           });
         });
@@ -541,6 +586,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
@@ -564,12 +610,13 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid value "0" supplied to "threshold,value"',
+            message: '[request body]: threshold.value: Number must be greater than or equal to 1',
             statusCode: 400,
           });
         });
@@ -593,6 +640,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
@@ -612,6 +660,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: outputRule } = await supertest
             .put(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(savedQueryRule)
             .expect(200);
 
@@ -627,6 +676,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: outputRule } = await supertest
             .put(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(savedQueryRule)
             .expect(200);
 
@@ -642,11 +692,323 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: outputRule } = await supertest
             .put(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(queryRule)
             .expect(200);
 
           expect(outputRule.type).to.be('query');
           expect(outputRule.saved_id).to.be(undefined);
+        });
+      });
+
+      describe('per-action frequencies', () => {
+        const updateSingleRule = async (
+          ruleId: string,
+          throttle: RuleActionThrottle | undefined,
+          actions: RuleActionArray
+        ) => {
+          // update a simple rule's `throttle` and `actions`
+          const ruleToUpdate = getSimpleRuleUpdate();
+          ruleToUpdate.throttle = throttle;
+          ruleToUpdate.actions = actions;
+          ruleToUpdate.id = ruleId;
+          delete ruleToUpdate.rule_id;
+
+          const { body: updatedRule } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send(ruleToUpdate)
+            .expect(200);
+
+          updatedRule.actions = removeUUIDFromActions(updatedRule.actions);
+          return removeServerGeneratedPropertiesIncludingRuleId(updatedRule);
+        };
+
+        describe('actions without frequencies', () => {
+          [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
+            (throttle) => {
+              it(`it sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
+                const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
+
+                // create simple rule
+                const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+                // update a simple rule's `throttle` and `actions`
+                const updatedRule = await updateSingleRule(
+                  createdRule.id,
+                  throttle,
+                  actionsWithoutFrequencies
+                );
+
+                const expectedRule = getSimpleRuleOutputWithoutRuleId();
+                expectedRule.revision = 1;
+                expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
+                  ...action,
+                  frequency: NOTIFICATION_DEFAULT_FREQUENCY,
+                }));
+
+                expect(updatedRule).to.eql(expectedRule);
+              });
+            }
+          );
+
+          // Action throttle cannot be shorter than the schedule interval which is by default is 5m
+          ['300s', '5m', '3h', '4d'].forEach((throttle) => {
+            it(`it correctly transforms 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
+              const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
+
+              // create simple rule
+              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+              // update a simple rule's `throttle` and `actions`
+              const updatedRule = await updateSingleRule(
+                createdRule.id,
+                throttle,
+                actionsWithoutFrequencies
+              );
+
+              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              expectedRule.revision = 1;
+              expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
+                ...action,
+                frequency: { summary: true, throttle, notifyWhen: 'onThrottleInterval' },
+              }));
+
+              expect(updatedRule).to.eql(expectedRule);
+            });
+          });
+        });
+
+        describe('actions with frequencies', () => {
+          [
+            undefined,
+            NOTIFICATION_THROTTLE_NO_ACTIONS,
+            NOTIFICATION_THROTTLE_RULE,
+            '321s',
+            '6m',
+            '10h',
+            '2d',
+          ].forEach((throttle) => {
+            it(`it does not change actions frequency attributes when 'throttle' is '${throttle}'`, async () => {
+              const actionsWithFrequencies = await getActionsWithFrequencies(supertest);
+
+              // create simple rule
+              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+              // update a simple rule's `throttle` and `actions`
+              const updatedRule = await updateSingleRule(
+                createdRule.id,
+                throttle,
+                actionsWithFrequencies
+              );
+
+              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              expectedRule.revision = 1;
+              expectedRule.actions = actionsWithFrequencies;
+
+              expect(updatedRule).to.eql(expectedRule);
+            });
+          });
+        });
+
+        describe('some actions with frequencies', () => {
+          [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
+            (throttle) => {
+              it(`it overrides each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
+                const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
+
+                // create simple rule
+                const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+                // update a simple rule's `throttle` and `actions`
+                const updatedRule = await updateSingleRule(
+                  createdRule.id,
+                  throttle,
+                  someActionsWithFrequencies
+                );
+
+                const expectedRule = getSimpleRuleOutputWithoutRuleId();
+                expectedRule.revision = 1;
+                expectedRule.actions = someActionsWithFrequencies.map((action) => ({
+                  ...action,
+                  frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
+                }));
+
+                expect(updatedRule).to.eql(expectedRule);
+              });
+            }
+          );
+
+          // Action throttle cannot be shorter than the schedule interval which is by default is 5m
+          ['430s', '7m', '1h', '8d'].forEach((throttle) => {
+            it(`it correctly transforms 'throttle = ${throttle}' and overrides frequency attribute of each action`, async () => {
+              const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
+
+              // create simple rule
+              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+
+              // update a simple rule's `throttle` and `actions`
+              const updatedRule = await updateSingleRule(
+                createdRule.id,
+                throttle,
+                someActionsWithFrequencies
+              );
+
+              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              expectedRule.revision = 1;
+              expectedRule.actions = someActionsWithFrequencies.map((action) => ({
+                ...action,
+                frequency: action.frequency ?? {
+                  summary: true,
+                  throttle,
+                  notifyWhen: 'onThrottleInterval',
+                },
+              }));
+
+              expect(updatedRule).to.eql(expectedRule);
+            });
+          });
+        });
+      });
+
+      describe('investigation_fields', () => {
+        it('should overwrite investigation_fields value on update - non additive', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            investigation_fields: { field_names: ['blob', 'boop'] },
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            investigation_fields: { field_names: ['foo', 'bar'] },
+          };
+
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send(ruleUpdate)
+            .expect(200);
+
+          expect(body.investigation_fields.field_names).to.eql(['foo', 'bar']);
+        });
+
+        it('should unset investigation_fields', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            investigation_fields: { field_names: ['blob', 'boop'] },
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            investigation_fields: undefined,
+          };
+
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(ruleUpdate)
+            .expect(200);
+
+          expect(body.investigation_fields).to.eql(undefined);
+        });
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('errors if sending legacy investigation fields type', async () => {
+        const updatedRule = {
+          ...getSimpleRuleUpdate(ruleWithLegacyInvestigationField.params.ruleId),
+          investigation_fields: ['foo'],
+        };
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(updatedRule)
+          .expect(400);
+
+        expect(body.message).to.eql(
+          '[request body]: investigation_fields: Expected object, received array, type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, and 22 more'
+        );
+      });
+
+      it('unsets legacy investigation fields when field not specified for update', async () => {
+        // rule_id of a rule with legacy investigation fields set
+        const updatedRule = getSimpleRuleUpdate(ruleWithLegacyInvestigationField.params.ruleId);
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(updatedRule)
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare.investigation_fields).to.eql(undefined);
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, body.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
+      });
+
+      it('updates a rule with legacy investigation fields when field specified for update in intended format', async () => {
+        // rule_id of a rule with legacy investigation fields set
+        const updatedRule = {
+          ...getSimpleRuleUpdate(ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId),
+          investigation_fields: {
+            field_names: ['foo'],
+          },
+        };
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(updatedRule)
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare.investigation_fields).to.eql({
+          field_names: ['foo'],
+        });
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, body.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({
+          field_names: ['foo'],
         });
       });
     });

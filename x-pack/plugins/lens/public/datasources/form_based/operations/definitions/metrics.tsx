@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { OperationDefinition, ParamEditorProps } from '.';
+import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -48,6 +48,10 @@ const typeToFn: Record<string, string> = {
 
 const supportedTypes = ['number', 'histogram'];
 
+function isTimeSeriesCompatible(type: string, timeSeriesMetric?: string) {
+  return timeSeriesMetric !== 'counter' || ['min', 'max'].includes(type);
+}
+
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
@@ -60,6 +64,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   aggConfigParams,
   documentationDescription,
   quickFunctionDocumentation,
+  unsupportedSettings,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -72,6 +77,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   aggConfigParams?: Record<string, string | number | boolean>;
   documentationDescription?: string;
   quickFunctionDocumentation?: string;
+  unsupportedSettings?: LayerSettingsFeatures;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -94,10 +100,17 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     description,
     input: 'field',
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
-    getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+    getUnsupportedSettings: () => unsupportedSettings,
+    getPossibleOperationForField: ({
+      aggregationRestrictions,
+      aggregatable,
+      type: fieldType,
+      timeSeriesMetric,
+    }) => {
       if (
         (supportedTypes.includes(fieldType) || (supportsDate && fieldType === 'date')) &&
         aggregatable &&
+        isTimeSeriesCompatible(type, timeSeriesMetric) &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
         return {
@@ -116,7 +129,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    getDefaultLabel: (column, indexPattern, columns) =>
+    getDefaultLabel: (column, columns, indexPattern) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
@@ -270,6 +283,7 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
     }
   ),
   supportsDate: true,
+  unsupportedSettings: { sampling: false },
 });
 
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
@@ -293,6 +307,7 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
     }
   ),
   supportsDate: true,
+  unsupportedSettings: { sampling: false },
 });
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({

@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clearTextArea();
     });
 
-    describe('collapsible JSON blocks', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/151056
+    describe.skip('collapsible JSON blocks', () => {
       it('should collapse and expand JSON blocks', async () => {
         const blockNumber = 1;
         await PageObjects.console.enterRequest(

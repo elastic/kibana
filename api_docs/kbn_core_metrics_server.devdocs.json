@@ -788,6 +788,22 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-common.OpsProcessMetrics.event_loop_utilization",
+            "type": "Object",
+            "tags": [],
+            "label": "event_loop_utilization",
+            "description": [
+              "node event loop utilization since last collection"
+            ],
+            "signature": [
+              "EventLoopUtilization"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
             "id": "def-common.OpsProcessMetrics.uptime_in_millis",
             "type": "number",
             "tags": [],
@@ -876,7 +892,7 @@
           "\nProtocol(s) used by the Elasticsearch Client"
         ],
         "signature": [
-          "\"none\" | \"mixed\" | \"http\" | \"https\""
+          "\"none\" | \"http\" | \"mixed\" | \"https\""
         ],
         "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
         "deprecated": false,

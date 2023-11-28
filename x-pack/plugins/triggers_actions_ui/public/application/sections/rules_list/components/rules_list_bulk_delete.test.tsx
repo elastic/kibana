@@ -92,6 +92,8 @@ jest.mock('../../../lib/capabilities', () => ({
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
+jest.mock('@kbn/alerts-ui-shared', () => ({ MaintenanceWindowCallout: jest.fn(() => <></>) }));
+
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -127,7 +129,8 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-describe('Rules list Bulk Delete', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/152521
+describe.skip('Rules list Bulk Delete', () => {
   beforeEach(async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({

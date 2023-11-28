@@ -6,13 +6,30 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
+
 import { schema } from '@kbn/config-schema';
+import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
-import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
+import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { get } from './get';
+
+const storageContextGetTransforms = jest.fn();
+const spy = () => storageContextGetTransforms;
+
+jest.mock('@kbn/object-versioning', () => {
+  const original = jest.requireActual('@kbn/object-versioning');
+  return {
+    ...original,
+    getContentManagmentServicesTransforms: (...args: any[]) => {
+      spy()(...args);
+      return original.getContentManagmentServicesTransforms(...args);
+    },
+  };
+});
 
 const { fn, schemas } = get;
 
@@ -31,24 +48,29 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> get()', () => {
   describe('Input/Output validation', () => {
-    /**
-     * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
-     * We will test _specific_ validation schema inside the procedure in separate tests.
-     */
+    const validInput = { contentTypeId: 'foo', id: '123', version: 1 };
+
     test('should validate that a contentTypeId and an id is passed', () => {
       [
-        { input: { contentTypeId: 'foo', id: '123' } },
+        { input: validInput },
         {
-          input: { id: '777' }, // contentTypeId missing
+          input: omit(validInput, 'contentTypeId'),
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', id: '123', unknown: 'foo' },
+          input: { ...validInput, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
         {
-          input: { contentTypeId: 'foo', id: '' }, // id must have min 1 char
+          input: { ...validInput, id: '' }, // id must have min 1 char
           expectedError: '[id]: value has length [0] but it must have a minimum length of [1].',
+        },
+        {
+          input: omit(validInput, 'version'),
+          expectedError: '[version]: expected value of type [number] but got [undefined]',
+        },
+        {
+          input: { ...validInput, version: '1' }, // string number is OK
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
@@ -70,6 +92,7 @@ describe('RPC -> get()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
+          version: 1,
           options: { any: 'object' },
         },
         inputSchema
@@ -81,6 +104,7 @@ describe('RPC -> get()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
+          version: 1,
           options: 123, // Not an object
         },
         inputSchema
@@ -94,37 +118,48 @@ describe('RPC -> get()', () => {
     test('should validate that the response is an object', () => {
       let error = validate(
         {
-          any: 'object',
+          contentTypeId: 'foo',
+          result: {
+            item: {
+              any: 'object',
+            },
+            meta: {
+              foo: 'bar',
+            },
+          },
         },
         outputSchema
       );
 
       expect(error).toBe(null);
 
-      error = validate(123, outputSchema);
+      error = validate({ contentTypeId: '123', result: 123 }, outputSchema);
 
-      expect(error?.message).toBe('expected a plain object value, but found [number] instead.');
+      expect(error?.message).toBe(
+        '[result]: expected a plain object value, but found [number] instead.'
+      );
     });
   });
 
   describe('procedure', () => {
-    const createSchemas = (): RpcSchemas => {
-      return {} as any;
-    };
-
-    const setup = ({ contentSchemas = createSchemas() } = {}) => {
+    const setup = () => {
       const contentRegistry = new ContentRegistry(new EventBus());
       const storage = createMockedStorage();
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
+        version: {
+          latest: 2,
         },
       });
 
       const requestHandlerContext = 'mockedRequestHandlerContext';
-      const ctx: any = { contentRegistry, requestHandlerContext };
+      const ctx: any = {
+        contentRegistry,
+        requestHandlerContext,
+        getTransformsFactory: (contentTypeId: string, version: Version) =>
+          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
+      };
 
       return { ctx, storage };
     };
@@ -132,21 +167,53 @@ describe('RPC -> get()', () => {
     test('should return the storage get() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'GetResult';
+      const expected = {
+        item: 'GetResult',
+      };
       storage.get.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234' });
+      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
-        item: expected,
+        result: expected,
       });
 
       expect(storage.get).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 1,
+            latest: 2, // from the registry
+          },
+          utils: {
+            getTransforms: expect.any(Function),
+          },
+        },
         '1234',
         undefined
       );
+    });
+
+    test('should implicitly set the requestVersion in storageContext -> utils -> getTransforms()', async () => {
+      const { ctx, storage } = setup();
+
+      const requestVersion = 1;
+      await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: requestVersion });
+
+      const [storageContext] = storage.get.mock.calls[0];
+      storageContext.utils.getTransforms({ 1: {} });
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith(
+        { 1: {} },
+        requestVersion,
+        expect.any(Object)
+      );
+
+      // We can still pass custom version
+      storageContext.utils.getTransforms({ 1: {} }, 1234);
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith({ 1: {} }, 1234, expect.any(Object));
     });
 
     describe('validation', () => {
@@ -157,42 +224,62 @@ describe('RPC -> get()', () => {
         );
       });
 
-      test('should enforce a schema for options if options are passed', () => {
+      test('should throw if the request version is higher than the registered version', () => {
         const { ctx } = setup();
         expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', options: { foo: 'bar' } })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [get.in.options].'));
+          fn(ctx, {
+            contentTypeId: FOO_CONTENT_ID,
+            id: '1234',
+            version: 7,
+          })
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
       });
+    });
 
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
+    describe('object versioning', () => {
+      test('should expose a  utility to transform and validate services objects', () => {
+        const { ctx, storage } = setup();
+        fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
+        const [[storageContext]] = storage.get.mock.calls;
+
+        // getTransforms() utils should be available from context
+        const { getTransforms } = storageContext.utils ?? {};
+        expect(getTransforms).not.toBeUndefined();
+
+        const definitions: ContentManagementServiceDefinitionVersioned = {
+          1: {
             get: {
               in: {
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
+                options: {
+                  schema: schema.object({
+                    version1: schema.string(),
+                  }),
+                  up: (pre: object) => ({ ...pre, version2: 'added' }),
+                },
               },
             },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', options: { foo: 'bar' } })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
+          },
+          2: {},
+        };
 
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            get: {
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
+        const transforms = getTransforms(definitions);
+
+        // Some smoke tests for the getTransforms() utils. Complete test suite is inside
+        // the package @kbn/object-versioning
+        expect(transforms.get.in.options.up({ version1: 'foo' }).value).toEqual({
+          version1: 'foo',
+          version2: 'added',
         });
 
-        const invalidResult = { wrongField: 'bad' };
-        storage.get.mockResolvedValueOnce(invalidResult);
+        const optionsUpTransform = transforms.get.in.options.up({ version1: 123 });
 
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234' })).rejects.toEqual(
-          new Error('[wrongField]: definition for this key is missing')
+        expect(optionsUpTransform.value).toBe(null);
+        expect(optionsUpTransform.error?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
+        );
+
+        expect(transforms.get.in.options.validate({ version1: 123 })?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
         );
       });
     });

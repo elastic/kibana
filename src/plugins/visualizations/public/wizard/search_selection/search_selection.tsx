@@ -10,24 +10,23 @@ import React from 'react';
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IUiSettingsClient, HttpStart } from '@kbn/core/public';
-
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 import { showSavedObject } from './show_saved_object';
 
 interface SearchSelectionProps {
+  contentClient: ContentClient;
+  uiSettings: IUiSettingsClient;
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: BaseVisType;
-  uiSettings: IUiSettingsClient;
-  http: HttpStart;
   goBack: () => void;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
   private fixedPageSize: number = 8;
-
   public render() {
     return (
       <React.Fragment>
@@ -47,7 +46,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
         </EuiModalHeader>
         <EuiModalBody>
           <DialogNavigation goBack={this.props.goBack} />
-          <SavedObjectFinderUi
+          <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
             showFilter
@@ -80,12 +79,13 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={this.fixedPageSize}
-            uiSettings={this.props.uiSettings}
-            http={this.props.http}
+            services={{
+              contentClient: this.props.contentClient,
+              uiSettings: this.props.uiSettings,
+            }}
           />
         </EuiModalBody>
       </React.Fragment>

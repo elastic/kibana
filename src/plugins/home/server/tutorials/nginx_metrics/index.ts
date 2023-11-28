@@ -59,10 +59,10 @@ which must be enabled in your Nginx installation. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/nginx_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/nginx_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['web', 'observability'],
   };
 }

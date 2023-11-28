@@ -20,9 +20,11 @@ import {
   UNITS,
   frequencyToFieldsMap,
   frequencyToBaselineFieldsMap,
+  EVERY_MINUTE_OPTIONS,
 } from './constants';
 import { CronDaily } from './cron_daily';
 import { CronHourly } from './cron_hourly';
+import { CronMinutely } from './cron_minutely';
 import { CronMonthly } from './cron_monthly';
 import { CronWeekly } from './cron_weekly';
 import { CronYearly } from './cron_yearly';
@@ -41,10 +43,12 @@ const excludeBlockListedFrequencies = (
 };
 
 interface Props {
-  frequencyBlockList?: string[];
+  autoFocus?: boolean;
+  cronExpression: string;
+  disabled?: boolean;
   fieldToPreferredValueMap: FieldToValueMap;
   frequency: Frequency;
-  cronExpression: string;
+  frequencyBlockList?: string[];
   onChange: ({
     cronExpression,
     fieldToPreferredValueMap,
@@ -54,8 +58,6 @@ interface Props {
     fieldToPreferredValueMap: FieldToValueMap;
     frequency: Frequency;
   }) => void;
-  autoFocus?: boolean;
-  disabled?: boolean;
 }
 
 type State = FieldToValueMap;
@@ -143,7 +145,14 @@ export class CronEditor extends Component<Props, State> {
 
     switch (frequency) {
       case 'MINUTE':
-        return;
+        return (
+          <CronMinutely
+            disabled={disabled}
+            minute={minute}
+            minuteOptions={EVERY_MINUTE_OPTIONS}
+            onChange={this.onChangeFields}
+          />
+        );
 
       case 'HOUR':
         return (

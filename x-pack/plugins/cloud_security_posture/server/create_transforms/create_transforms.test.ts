@@ -82,7 +82,7 @@ describe('startTransformIfNotStarted', () => {
     jest.resetAllMocks();
   });
 
-  ['failed', 'stopping', 'started', 'aborting', 'indexing'].forEach((state) =>
+  ['stopping', 'started', 'aborting', 'indexing'].forEach((state) =>
     it(`expect not to start if state is ${state}`, async () => {
       mockEsClient.transform.getTransformStats.mockResolvedValue({
         transforms: [getTransformWithState(state)],
@@ -113,6 +113,22 @@ describe('startTransformIfNotStarted', () => {
   it('expect to start if state is stopped', async () => {
     mockEsClient.transform.getTransformStats.mockResolvedValue({
       transforms: [getTransformWithState('stopped')],
+      count: 1,
+    });
+    await startTransformIfNotStarted(mockEsClient, latestFindingsTransform.transform_id, logger);
+    expect(mockEsClient.transform.getTransformStats).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.transform.getTransformStats).toHaveBeenCalledWith({
+      transform_id: latestFindingsTransform.transform_id,
+    });
+    expect(mockEsClient.transform.startTransform).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.transform.startTransform).toHaveBeenCalledWith({
+      transform_id: latestFindingsTransform.transform_id,
+    });
+  });
+
+  it('expect to attempt restart if state is failed', async () => {
+    mockEsClient.transform.getTransformStats.mockResolvedValue({
+      transforms: [getTransformWithState('failed')],
       count: 1,
     });
     await startTransformIfNotStarted(mockEsClient, latestFindingsTransform.transform_id, logger);

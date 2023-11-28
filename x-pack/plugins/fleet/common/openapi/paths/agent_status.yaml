@@ -58,3 +58,4 @@ get:
       name: kuery
       in: query
       required: false
+      deprecated: true

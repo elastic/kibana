@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, DataStream, FormMonitorType, SyntheticsMonitor } from '../types';
-import { DEFAULT_FIELDS } from '../constants';
+import { ConfigKey, MonitorTypeEnum, FormMonitorType, SyntheticsMonitor } from '../types';
+import { DEFAULT_FIELDS, PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants';
 import { formatDefaultFormValues } from './defaults';
 
 describe('defaults', () => {
@@ -44,17 +44,6 @@ describe('defaults', () => {
     'service.name': '',
     'source.inline.script': testScript,
     'source.project.content': '',
-    'source.zip_url.folder': '',
-    'source.zip_url.password': '',
-    'source.zip_url.proxy_url': '',
-    'source.zip_url.ssl.certificate': undefined,
-    'source.zip_url.ssl.certificate_authorities': undefined,
-    'source.zip_url.ssl.key': undefined,
-    'source.zip_url.ssl.key_passphrase': undefined,
-    'source.zip_url.ssl.supported_protocols': undefined,
-    'source.zip_url.ssl.verification_mode': undefined,
-    'source.zip_url.url': '',
-    'source.zip_url.username': '',
     'ssl.certificate': '',
     'ssl.certificate_authorities': '',
     'ssl.key': '',
@@ -63,17 +52,22 @@ describe('defaults', () => {
     'ssl.verification_mode': 'full',
     synthetics_args: [],
     tags: [],
-    'throttling.config': '5d/3u/20l',
-    'throttling.download_speed': '5',
-    'throttling.is_enabled': true,
-    'throttling.latency': '20',
-    'throttling.upload_speed': '3',
+    throttling: {
+      value: {
+        download: '5',
+        latency: '20',
+        upload: '3',
+      },
+      id: 'default',
+      label: 'Default',
+    },
     timeout: '16',
     type: 'browser',
     'url.port': null,
     urls: '',
     id: '',
     config_id: '',
+    max_attempts: 2,
   } as SyntheticsMonitor;
 
   it('correctly formats monitor type to form type', () => {
@@ -117,17 +111,6 @@ describe('defaults', () => {
       },
       'source.inline.script': 'testScript',
       'source.project.content': '',
-      'source.zip_url.folder': '',
-      'source.zip_url.password': '',
-      'source.zip_url.proxy_url': '',
-      'source.zip_url.ssl.certificate': undefined,
-      'source.zip_url.ssl.certificate_authorities': undefined,
-      'source.zip_url.ssl.key': undefined,
-      'source.zip_url.ssl.key_passphrase': undefined,
-      'source.zip_url.ssl.supported_protocols': undefined,
-      'source.zip_url.ssl.verification_mode': undefined,
-      'source.zip_url.url': '',
-      'source.zip_url.username': '',
       'ssl.certificate': '',
       'ssl.certificate_authorities': '',
       'ssl.key': '',
@@ -136,11 +119,7 @@ describe('defaults', () => {
       'ssl.verification_mode': 'full',
       synthetics_args: [],
       tags: [],
-      'throttling.config': '5d/3u/20l',
-      'throttling.download_speed': '5',
-      'throttling.is_enabled': true,
-      'throttling.latency': '20',
-      'throttling.upload_speed': '3',
+      throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
       timeout: '16',
       type: 'browser',
       'url.port': null,
@@ -149,13 +128,13 @@ describe('defaults', () => {
   });
 
   it.each([
-    [DataStream.HTTP, true],
-    [DataStream.HTTP, false],
-    [DataStream.TCP, true],
-    [DataStream.TCP, false],
+    [MonitorTypeEnum.HTTP, true],
+    [MonitorTypeEnum.HTTP, false],
+    [MonitorTypeEnum.TCP, true],
+    [MonitorTypeEnum.TCP, false],
   ])('correctly formats isTLSEnabled', (formType, isTLSEnabled) => {
     const monitor = {
-      ...DEFAULT_FIELDS[formType as DataStream],
+      ...DEFAULT_FIELDS[formType as MonitorTypeEnum],
       [ConfigKey.FORM_MONITOR_TYPE]: formType as unknown as FormMonitorType,
       [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: 'mockCA',
       [ConfigKey.METADATA]: {
@@ -170,10 +149,10 @@ describe('defaults', () => {
   });
 
   it.each([
-    [DataStream.HTTP, FormMonitorType.HTTP],
-    [DataStream.TCP, FormMonitorType.TCP],
-    [DataStream.ICMP, FormMonitorType.ICMP],
-    [DataStream.BROWSER, FormMonitorType.MULTISTEP],
+    [MonitorTypeEnum.HTTP, FormMonitorType.HTTP],
+    [MonitorTypeEnum.TCP, FormMonitorType.TCP],
+    [MonitorTypeEnum.ICMP, FormMonitorType.ICMP],
+    [MonitorTypeEnum.BROWSER, FormMonitorType.MULTISTEP],
   ])(
     'correctly formats legacy uptime monitors to include ConfigKey.FORM_MONITOR_TYPE',
     (dataStream, formType) => {

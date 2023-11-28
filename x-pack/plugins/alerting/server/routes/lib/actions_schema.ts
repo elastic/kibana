@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { FilterStateStore } from '@kbn/es-query';
+import { validateTimezone } from './validate_timezone';
 import { validateDurationSchema } from '../../lib';
+import { validateHours } from './validate_hours';
 
 export const actionsSchema = schema.arrayOf(
   schema.object({
@@ -25,6 +28,55 @@ export const actionsSchema = schema.arrayOf(
       })
     ),
     uuid: schema.maybe(schema.string()),
+    alerts_filter: schema.maybe(
+      schema.object({
+        query: schema.maybe(
+          schema.object({
+            kql: schema.string(),
+            filters: schema.arrayOf(
+              schema.object({
+                query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+                meta: schema.recordOf(schema.string(), schema.any()),
+                $state: schema.maybe(
+                  schema.object({
+                    store: schema.oneOf([
+                      schema.literal(FilterStateStore.APP_STATE),
+                      schema.literal(FilterStateStore.GLOBAL_STATE),
+                    ]),
+                  })
+                ),
+              })
+            ),
+            dsl: schema.maybe(schema.string()),
+          })
+        ),
+        timeframe: schema.maybe(
+          schema.object({
+            days: schema.arrayOf(
+              schema.oneOf([
+                schema.literal(1),
+                schema.literal(2),
+                schema.literal(3),
+                schema.literal(4),
+                schema.literal(5),
+                schema.literal(6),
+                schema.literal(7),
+              ])
+            ),
+            hours: schema.object({
+              start: schema.string({
+                validate: validateHours,
+              }),
+              end: schema.string({
+                validate: validateHours,
+              }),
+            }),
+            timezone: schema.string({ validate: validateTimezone }),
+          })
+        ),
+      })
+    ),
+    use_alert_data_for_template: schema.maybe(schema.boolean()),
   }),
   { defaultValue: [] }
 );

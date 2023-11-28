@@ -9,9 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { useSloFormattedSummary } from '../hooks/use_slo_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { asPercentWithTwoDecimals } from '../../../../common/utils/formatters';
 import { SloSparkline } from './slo_sparkline';
 
 export interface Props {
@@ -21,26 +20,30 @@ export interface Props {
 }
 
 export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoading }: Props) {
+  const { sliValue, sloTarget, errorBudgetRemaining } = useSloFormattedSummary(slo);
   const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
   const titleColor = isSloFailed ? 'danger' : '';
   const errorBudgetBurnDownData = formatHistoricalData(historicalSummary, 'error_budget_remaining');
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   return (
-    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xl">
-      <EuiFlexItem grow={false} style={{ width: 200 }}>
-        <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 120 }}>
+    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
+      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
+        <EuiFlexGroup
+          direction="row"
+          responsive={false}
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="flexEnd"
+        >
+          <EuiFlexItem grow={false}>
             <EuiStat
               description={i18n.translate('xpack.observability.slo.slo.stats.objective', {
                 defaultMessage: '{objective} target',
-                values: { objective: asPercentWithTwoDecimals(slo.objective.target, 1) },
+                values: { objective: sloTarget },
               })}
-              title={
-                slo.summary.status === 'NO_DATA'
-                  ? NOT_AVAILABLE_LABEL
-                  : asPercentWithTwoDecimals(slo.summary.sliValue, 1)
-              }
+              title={sliValue}
+              textAlign="right"
               titleColor={titleColor}
               titleSize="m"
               reverse
@@ -52,32 +55,39 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
               id="sli_history"
               state={isSloFailed ? 'error' : 'success'}
               data={historicalSliData}
-              loading={historicalSummaryLoading}
+              isLoading={historicalSummaryLoading}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 260 }}>
-        <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 180 }}>
+      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
+        <EuiFlexGroup
+          direction="row"
+          responsive={false}
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="flexEnd"
+        >
+          <EuiFlexItem grow={false}>
             <EuiStat
               description={i18n.translate('xpack.observability.slo.slo.stats.budgetRemaining', {
                 defaultMessage: 'Budget remaining',
               })}
-              title={asPercentWithTwoDecimals(slo.summary.errorBudget.remaining, 1)}
+              textAlign="right"
+              title={errorBudgetRemaining}
               titleColor={titleColor}
               titleSize="m"
               reverse
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <SloSparkline
               chart="area"
               id="error_budget_burn_down"
               state={isSloFailed ? 'error' : 'success'}
               data={errorBudgetBurnDownData}
-              loading={historicalSummaryLoading}
+              isLoading={historicalSummaryLoading}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

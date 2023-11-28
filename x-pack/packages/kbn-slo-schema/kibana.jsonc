@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/slo-schema",
+  "owner": "@elastic/obs-ux-management-team"
+}

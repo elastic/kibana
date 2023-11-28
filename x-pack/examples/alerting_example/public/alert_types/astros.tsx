@@ -139,7 +139,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
   return (
     <Fragment>
       {errorsCallout.length ? (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
           {errorsCallout}
         </EuiCallOut>
       ) : (

@@ -6,8 +6,10 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiHealth } from '@elastic/eui';
 import { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
+import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { getSeriesAndDomain, getSidebarItems } from '../../common/network_data/data_formatting';
 import { SidebarItem, LegendItem } from '../../common/network_data/types';
 import { RenderItem, WaterfallDataEntry } from '../../common/network_data/types';
@@ -40,18 +42,33 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
 }) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [onlyHighlighted, setOnlyHighlighted] = useState(false);
+  const [onlyHighlighted, setOnlyHighlighted] = useLocalStorage<boolean>(
+    'xpack.synthetics.waterfallChart.showOnlyHighlighted',
+    false
+  );
+  const [showCustomMarks, setShowCustomMarks] = useLocalStorage<boolean>(
+    'xpack.synthetics.waterfallChart.showCustomMarks',
+    false
+  );
 
   const [networkData] = useState<NetworkEvent[]>(data);
 
   const hasFilters = activeFilters.length > 0;
 
+  const dateFormatter = useDateFormat();
   const { series, domain, metadata, totalHighlightedRequests } = useMemo(() => {
-    return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters);
-  }, [networkData, query, activeFilters, onlyHighlighted]);
+    return getSeriesAndDomain(
+      networkData,
+      onlyHighlighted,
+      dateFormatter,
+      query,
+      activeFilters,
+      markerItems
+    );
+  }, [networkData, dateFormatter, query, activeFilters, onlyHighlighted, markerItems]);
 
   const sidebarItems = useMemo(() => {
-    return getSidebarItems(networkData, onlyHighlighted, query, activeFilters);
+    return getSidebarItems(networkData, onlyHighlighted ?? false, query, activeFilters);
   }, [networkData, query, activeFilters, onlyHighlighted]);
 
   const {
@@ -100,12 +117,14 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
       onElementClick={useCallback(onBarClick, [onBarClick])}
       onProjectionClick={useCallback(onProjectionClick, [onProjectionClick])}
       onSidebarClick={onSidebarClick}
-      showOnlyHighlightedNetworkRequests={onlyHighlighted}
+      showOnlyHighlightedNetworkRequests={onlyHighlighted ?? false}
+      showCustomMarks={showCustomMarks ?? false}
       sidebarItems={sidebarItems}
       metadata={metadata}
       activeFilters={activeFilters}
       setActiveFilters={setActiveFilters}
       setOnlyHighlighted={setOnlyHighlighted}
+      setShowCustomMarks={setShowCustomMarks}
       query={query}
       setQuery={setQuery}
       renderTooltipItem={useCallback((tooltipProps) => {

@@ -13,7 +13,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { isEqual } from 'lodash';
 
 import { AboutPanel, LoadingPanel } from '../about_panel';
-import { BottomBar } from '../bottom_bar';
 import { ResultsView } from '../results_view';
 import {
   FileCouldNotBeRead,
@@ -29,8 +28,6 @@ import {
   createUrlOverrides,
   processResults,
 } from '../../../common/components/utils';
-
-import { Chat } from '@kbn/cloud-chat-plugin/public';
 
 import { MODE } from './constants';
 
@@ -54,7 +51,6 @@ export class FileDataVisualizerView extends Component {
       mode: MODE.READ,
       isEditFlyoutVisible: false,
       isExplanationFlyoutVisible: false,
-      bottomBarVisible: false,
       hasPermissionToImport: false,
       fileCouldNotBeReadPermissionError: false,
     };
@@ -85,7 +81,6 @@ export class FileDataVisualizerView extends Component {
     this.setState(
       {
         loading: files.length > 0,
-        bottomBarVisible: files.length > 0,
         loaded: false,
         fileName: '',
         fileContents: '',
@@ -213,30 +208,18 @@ export class FileDataVisualizerView extends Component {
 
   closeEditFlyout = () => {
     this.setState({ isEditFlyoutVisible: false });
-    this.showBottomBar();
   };
 
   showEditFlyout = () => {
     this.setState({ isEditFlyoutVisible: true });
-    this.hideBottomBar();
   };
 
   closeExplanationFlyout = () => {
     this.setState({ isExplanationFlyoutVisible: false });
-    this.showBottomBar();
   };
 
   showExplanationFlyout = () => {
     this.setState({ isExplanationFlyoutVisible: true });
-    this.hideBottomBar();
-  };
-
-  showBottomBar = () => {
-    this.setState({ bottomBarVisible: true });
-  };
-
-  hideBottomBar = () => {
-    this.setState({ bottomBarVisible: false });
   };
 
   setOverrides = (overrides) => {
@@ -282,7 +265,6 @@ export class FileDataVisualizerView extends Component {
       mode,
       isEditFlyoutVisible,
       isExplanationFlyoutVisible,
-      bottomBarVisible,
       hasPermissionToImport,
       fileCouldNotBeReadPermissionError,
     } = this.state;
@@ -333,6 +315,9 @@ export class FileDataVisualizerView extends Component {
                 showEditFlyout={this.showEditFlyout}
                 showExplanationFlyout={this.showExplanationFlyout}
                 disableButtons={isEditFlyoutVisible || isExplanationFlyoutVisible}
+                onChangeMode={this.changeMode}
+                onCancel={this.onCancel}
+                disableImport={hasPermissionToImport === false}
               />
             )}
             <EditFlyout
@@ -347,18 +332,6 @@ export class FileDataVisualizerView extends Component {
             {isExplanationFlyoutVisible && (
               <ExplanationFlyout results={results} closeFlyout={this.closeExplanationFlyout} />
             )}
-
-            {bottomBarVisible && loaded && (
-              <>
-                <BottomBar
-                  mode={MODE.READ}
-                  onChangeMode={this.changeMode}
-                  onCancel={this.onCancel}
-                  disableImport={hasPermissionToImport === false}
-                />
-                <BottomPadding />
-              </>
-            )}
           </>
         )}
         {mode === MODE.IMPORT && (
@@ -369,38 +342,16 @@ export class FileDataVisualizerView extends Component {
               fileContents={fileContents}
               data={data}
               dataViewsContract={this.props.dataViewsContract}
-              showBottomBar={this.showBottomBar}
-              hideBottomBar={this.hideBottomBar}
               fileUpload={this.props.fileUpload}
               getAdditionalLinks={this.props.getAdditionalLinks}
               capabilities={this.props.capabilities}
+              mode={mode}
+              onChangeMode={this.changeMode}
+              onCancel={this.onCancel}
             />
-
-            {bottomBarVisible && (
-              <>
-                <BottomBar
-                  mode={MODE.IMPORT}
-                  onChangeMode={this.changeMode}
-                  onCancel={this.onCancel}
-                />
-                <BottomPadding />
-              </>
-            )}
           </>
         )}
-        <Chat />
       </div>
     );
   }
-}
-
-function BottomPadding() {
-  // padding for the BottomBar
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiSpacer size="l" />
-      <EuiSpacer size="l" />
-    </>
-  );
 }

@@ -5,105 +5,91 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosRequestConfig } from 'axios';
 import execa from 'execa';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/test';
+import {
+  fetchFleetServerUrl,
+  waitForHostToEnroll,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
+
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
-
-export interface AgentManagerParams {
-  user: string;
-  password: string;
-  kibanaUrl: string;
-  esHost: string;
-  esPort: string;
-}
+import { generateRandomString } from './utils';
 
 export class AgentManager extends Manager {
-  private params: AgentManagerParams;
   private log: ToolingLog;
+  private policyEnrollmentKey: string;
+  private fleetServerPort: string;
   private agentContainerId?: string;
-  private requestOptions: AxiosRequestConfig;
-  constructor(params: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
+  private kbnClient: KbnClient;
+
+  constructor(
+    policyEnrollmentKey: string,
+    fleetServerPort: string,
+    log: ToolingLog,
+    kbnClient: KbnClient
+  ) {
     super();
     this.log = log;
-    this.params = params;
-    this.requestOptions = requestOptions;
+    this.fleetServerPort = fleetServerPort;
+    this.policyEnrollmentKey = policyEnrollmentKey;
+    this.kbnClient = kbnClient;
   }
 
   public async setup() {
     this.log.info('Running agent preconfig');
 
-    await axios.post(
-      `${this.params.kibanaUrl}/api/fleet/agent_policies?sys_monitoring=true`,
-      {
-        name: 'Osquery policy',
-        description: '',
-        namespace: 'default',
-        monitoring_enabled: ['logs', 'metrics'],
-        inactivity_timeout: 1209600,
-      },
-      this.requestOptions
-    );
-
-    this.log.info('Getting agent enrollment key');
-    const { data: apiKeys } = await axios.get(
-      this.params.kibanaUrl + '/api/fleet/enrollment_api_keys',
-      this.requestOptions
-    );
-    const policy = apiKeys.items[0];
-
-    this.log.info('Running the agent');
-
     const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);
+    const containerName = generateRandomString(12);
+    const fleetServerUrl =
+      (await fetchFleetServerUrl(this.kbnClient)) ??
+      `https://host.docker.internal:${this.fleetServerPort}`;
 
     const dockerArgs = [
       'run',
+      '--net',
+      'elastic',
       '--detach',
       '--add-host',
       'host.docker.internal:host-gateway',
+      '--name',
+      containerName,
+      '--hostname',
+      containerName,
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=https://host.docker.internal:8220`,
+      `FLEET_URL=${fleetServerUrl}`,
       '--env',
-      `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
+      `FLEET_ENROLLMENT_TOKEN=${this.policyEnrollmentKey}`,
       '--env',
       'FLEET_INSECURE=true',
       '--rm',
       artifact,
     ];
 
-    this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
+    const startedContainer = await execa('docker', dockerArgs);
 
-    // Wait til we see the agent is online
-    let done = false;
-    let retries = 0;
-    while (!done) {
-      await new Promise((r) => setTimeout(r, 5000));
-      const { data: agents } = await axios.get(
-        `${this.params.kibanaUrl}/api/fleet/agents`,
-        this.requestOptions
-      );
-      done = agents.items[0]?.status === 'online';
-      if (++retries > 12) {
-        this.log.error('Giving up on enrolling the agent after a minute');
-        throw new Error('Agent timed out while coming online');
-      }
-    }
+    this.log.info(`agent docker container started:\n${JSON.stringify(startedContainer, null, 2)}`);
 
-    return { policyId: policy.policy_id as string };
+    this.agentContainerId = startedContainer.stdout;
+    await waitForHostToEnroll(this.kbnClient, this.log, containerName, 240000);
   }
 
-  protected _cleanup() {
+  public cleanup() {
+    super.cleanup();
     this.log.info('Cleaning up the agent process');
     if (this.agentContainerId) {
-      this.log.info('Closing agent process');
+      this.log.info('Closing fleet process');
 
-      execa.sync('docker', ['kill', this.agentContainerId]);
-      this.log.info('Agent process closed');
+      try {
+        execa.sync('docker', ['kill', this.agentContainerId]);
+      } catch (err) {
+        this.log.error('Error closing fleet agent process');
+      }
+      this.log.info('Fleet agent process closed');
     }
-    return;
   }
 }

@@ -25,15 +25,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
+import { JobDetails, Detectors, Datafeed } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
-import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
+import { validateModelMemoryLimit, validateGroupNames } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { ml } from '../../../../services/ml_api_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
+import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../components/custom_urls';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
@@ -390,7 +391,7 @@ export class EditJobFlyoutUI extends Component {
             defaultMessage: 'Custom URLs',
           }),
           content: (
-            <CustomUrls
+            <CustomUrlsWrapper
               job={job}
               jobCustomUrls={jobCustomUrls}
               setCustomUrls={this.setCustomUrls}

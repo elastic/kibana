@@ -25,13 +25,13 @@ import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { RoleMapping } from '../../../../../common/model';
+import { JSONRuleEditor } from './json_rule_editor';
+import { VisualRuleEditor } from './visual_rule_editor';
+import type { RoleMapping } from '../../../../../common';
 import type { Rule } from '../../model';
 import { generateRulesFromRaw } from '../../model';
 import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
 import { validateRoleMappingRules } from '../services/role_mapping_validation';
-import { JSONRuleEditor } from './json_rule_editor';
-import { VisualRuleEditor } from './visual_rule_editor';
 
 interface Props {
   rawRules: RoleMapping['rules'];

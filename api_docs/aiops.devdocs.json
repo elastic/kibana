@@ -10,11 +10,17 @@
         "tags": [],
         "label": "ChangePointDetection",
         "description": [
-          "\nLazy-wrapped LogCategorizationAppStateProps React component"
+          "\nLazy-wrapped ChangePointDetectionAppStateProps React component"
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
-          "LogCategorizationAppStateProps",
+          {
+            "pluginId": "aiops",
+            "scope": "public",
+            "docId": "kibAiopsPluginApi",
+            "section": "def-public.ChangePointDetectionAppStateProps",
+            "text": "ChangePointDetectionAppStateProps"
+          },
           ">) => JSX.Element"
         ],
         "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
@@ -32,48 +38,13 @@
             ],
             "signature": [
               "React.PropsWithChildren<",
-              "LogCategorizationAppStateProps",
-              ">"
-            ],
-            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "aiops",
-        "id": "def-public.ExplainLogRateSpikes",
-        "type": "Function",
-        "tags": [],
-        "label": "ExplainLogRateSpikes",
-        "description": [
-          "\nLazy-wrapped ExplainLogRateSpikesAppState React component"
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          "ExplainLogRateSpikesAppStateProps",
-          ">) => JSX.Element"
-        ],
-        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "aiops",
-            "id": "def-public.ExplainLogRateSpikes.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [
-              "- properties specifying the data on which to run the analysis."
-            ],
-            "signature": [
-              "React.PropsWithChildren<",
-              "ExplainLogRateSpikesAppStateProps",
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.ChangePointDetectionAppStateProps",
+                "text": "ChangePointDetectionAppStateProps"
+              },
               ">"
             ],
             "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
@@ -96,7 +67,13 @@
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
-          "LogCategorizationAppStateProps",
+          {
+            "pluginId": "aiops",
+            "scope": "public",
+            "docId": "kibAiopsPluginApi",
+            "section": "def-public.LogCategorizationAppStateProps",
+            "text": "LogCategorizationAppStateProps"
+          },
           ">) => JSX.Element"
         ],
         "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
@@ -114,7 +91,119 @@
             ],
             "signature": [
               "React.PropsWithChildren<",
-              "LogCategorizationAppStateProps",
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.LogCategorizationAppStateProps",
+                "text": "LogCategorizationAppStateProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogRateAnalysis",
+        "type": "Function",
+        "tags": [],
+        "label": "LogRateAnalysis",
+        "description": [
+          "\nLazy-wrapped LogRateAnalysisAppState React component"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          {
+            "pluginId": "aiops",
+            "scope": "public",
+            "docId": "kibAiopsPluginApi",
+            "section": "def-public.LogRateAnalysisAppStateProps",
+            "text": "LogRateAnalysisAppStateProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysis.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.LogRateAnalysisAppStateProps",
+                "text": "LogRateAnalysisAppStateProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogRateAnalysisContent",
+        "type": "Function",
+        "tags": [],
+        "label": "LogRateAnalysisContent",
+        "description": [
+          "\nLazy-wrapped LogRateAnalysisContentWrapperReact component"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          {
+            "pluginId": "aiops",
+            "scope": "public",
+            "docId": "kibAiopsPluginApi",
+            "section": "def-public.LogRateAnalysisContentWrapperProps",
+            "text": "LogRateAnalysisContentWrapperProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.LogRateAnalysisContentWrapperProps",
+                "text": "LogRateAnalysisContentWrapperProps"
+              },
               ">"
             ],
             "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
@@ -127,7 +216,1198 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.AiopsAppDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "AiopsAppDependencies",
+        "description": [
+          "\nAIOps App Dependencies to be provided via React context."
+        ],
+        "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [
+              "\nUsed to check capabilities for links to other plugins.\n`application.currentAppId$` is used to close the log pattern analysis flyout\nwhen user navigates out of the current plugin."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationStart",
+                "text": "ApplicationStart"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nUsed for data fetching."
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "\nProvides execution context for data fetching."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.charts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "charts",
+            "description": [
+              "\nRequired as a dependency for the fields stats service."
+            ],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "public",
+                "docId": "kibChartsPluginApi",
+                "section": "def-public.ChartsPluginSetup",
+                "text": "ChartsPluginSetup"
+              },
+              " & { activeCursor: ",
+              "ActiveCursor",
+              "; }"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.fieldFormats",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [
+              "\nRequired as a dependency for the fields stats service and\nused for date formatting in change point detection."
+            ],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatsRegistry",
+                "text": "FieldFormatsRegistry"
+              },
+              ", \"init\" | \"register\"> & { deserialize: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FormatFactory",
+                "text": "FormatFactory"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "\nUsed for data fetching."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [
+              "\nUsed for toast notifications."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsSetup",
+                "text": "NotificationsSetup"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [
+              "\nUsed to store user settings in local storage."
+            ],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IStorageWrapper",
+                "text": "IStorageWrapper"
+              },
+              "<any, void>"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [
+              "\nTheme service."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.ThemeServiceStart",
+                "text": "ThemeServiceStart"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [
+              "\nUI settings."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [
+              "\nUnified search."
+            ],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [
+              "\nUsage collection."
+            ],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [
+              "\nUsed to create deep links to other plugins."
+            ],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.lens",
+            "type": "Object",
+            "tags": [],
+            "label": "lens",
+            "description": [
+              "\nUsed to create lens embeddables."
+            ],
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensPublicStart",
+                "text": "LensPublicStart"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [
+              "\nUI actions."
+            ],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsStart",
+                "text": "UiActionsStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [
+              "\nInternationalisation service"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-common.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.fieldStats",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldStats",
+            "description": [
+              "\nDeps for unified fields stats."
+            ],
+            "signature": [
+              "{ useFieldStatsTrigger: () => { renderOption: ((option: ",
+              "EuiComboBoxOptionOption",
+              "<string>, searchValue: string, OPTION_CONTENT_CLASSNAME: string) => React.ReactNode) | undefined; closeFlyout: () => void; }; FieldStatsFlyoutProvider: React.FC<{ dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "; fieldStatsServices: ",
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "common",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-common.FieldStatsServices",
+                "text": "FieldStatsServices"
+              },
+              "; timeRangeMs?: ",
+              {
+                "pluginId": "@kbn/ml-date-picker",
+                "scope": "common",
+                "docId": "kibKbnMlDatePickerPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined; dslQuery?: object | undefined; }>; } | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.presentationUtil",
+            "type": "Object",
+            "tags": [],
+            "label": "presentationUtil",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.PresentationUtilPluginStart",
+                "text": "PresentationUtilPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cases",
+                "scope": "public",
+                "docId": "kibCasesPluginApi",
+                "section": "def-public.CasesUiStart",
+                "text": "CasesUiStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.isServerless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isServerless",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.embeddingOrigin",
+            "type": "string",
+            "tags": [],
+            "label": "embeddingOrigin",
+            "description": [
+              "Identifier to indicate the plugin utilizing the component"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.ChangePointDetectionAppStateProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointDetectionAppStateProps",
+        "description": [
+          "\nProps for the ChangePointDetectionAppState component."
+        ],
+        "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ChangePointDetectionAppStateProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "The data view to analyze."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ChangePointDetectionAppStateProps.savedSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearch",
+            "description": [
+              "The saved search to analyze."
+            ],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              " | null"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ChangePointDetectionAppStateProps.appDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "appDependencies",
+            "description": [
+              "App dependencies"
+            ],
+            "signature": [
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.AiopsAppDependencies",
+                "text": "AiopsAppDependencies"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ChangePointDetectionAppStateProps.showFrozenDataTierChoice",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showFrozenDataTierChoice",
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogCategorizationAppStateProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogCategorizationAppStateProps",
+        "description": [
+          "\nProps for the LogCategorizationAppState component."
+        ],
+        "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogCategorizationAppStateProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "The data view to analyze."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogCategorizationAppStateProps.savedSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearch",
+            "description": [
+              "The saved search to analyze."
+            ],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              " | null"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogCategorizationAppStateProps.appDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "appDependencies",
+            "description": [
+              "App dependencies"
+            ],
+            "signature": [
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.AiopsAppDependencies",
+                "text": "AiopsAppDependencies"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogCategorizationAppStateProps.showFrozenDataTierChoice",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showFrozenDataTierChoice",
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogRateAnalysisAppStateProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogRateAnalysisAppStateProps",
+        "description": [
+          "\nProps for the LogRateAnalysisAppState component."
+        ],
+        "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisAppStateProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "The data view to analyze."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisAppStateProps.savedSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearch",
+            "description": [
+              "The saved search to analyze."
+            ],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              " | null"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisAppStateProps.appDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "appDependencies",
+            "description": [
+              "App dependencies"
+            ],
+            "signature": [
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.AiopsAppDependencies",
+                "text": "AiopsAppDependencies"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisAppStateProps.stickyHistogram",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stickyHistogram",
+            "description": [
+              "Option to make main histogram sticky"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisAppStateProps.showFrozenDataTierChoice",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showFrozenDataTierChoice",
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogRateAnalysisContentWrapperProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogRateAnalysisContentWrapperProps",
+        "description": [
+          "\nProps for the LogRateAnalysisContentWrapper component."
+        ],
+        "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "The data view to analyze."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.stickyHistogram",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stickyHistogram",
+            "description": [
+              "Option to make main histogram sticky"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.appDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "appDependencies",
+            "description": [
+              "App dependencies"
+            ],
+            "signature": [
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.AiopsAppDependencies",
+                "text": "AiopsAppDependencies"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.setGlobalState",
+            "type": "Any",
+            "tags": [],
+            "label": "setGlobalState",
+            "description": [
+              "On global timefilter update"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.initialAnalysisStart",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initialAnalysisStart",
+            "description": [
+              "Timestamp for start of initial analysis"
+            ],
+            "signature": [
+              "number | ",
+              {
+                "pluginId": "@kbn/aiops-utils",
+                "scope": "common",
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [
+              "Optional time range"
+            ],
+            "signature": [
+              "{ min: moment.Moment; max: moment.Moment; } | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.esSearchQuery",
+            "type": "Object",
+            "tags": [],
+            "label": "esSearchQuery",
+            "description": [
+              "Elasticsearch query to pass to analysis endpoint"
+            ],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.barColorOverride",
+            "type": "string",
+            "tags": [],
+            "label": "barColorOverride",
+            "description": [
+              "Optional color override for the default bar color for charts"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.barHighlightColorOverride",
+            "type": "string",
+            "tags": [],
+            "label": "barHighlightColorOverride",
+            "description": [
+              "Optional color override for the highlighted bar color for charts"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.onAnalysisCompleted",
+            "type": "Function",
+            "tags": [],
+            "label": "onAnalysisCompleted",
+            "description": [
+              "\nOptional callback that exposes data of the completed analysis"
+            ],
+            "signature": [
+              "((d: ",
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.LogRateAnalysisResultsData",
+                "text": "LogRateAnalysisResultsData"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "aiops",
+                "id": "def-public.LogRateAnalysisContentWrapperProps.onAnalysisCompleted.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "d",
+                "description": [
+                  "Log rate analysis results data"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "aiops",
+                    "scope": "public",
+                    "docId": "kibAiopsPluginApi",
+                    "section": "def-public.LogRateAnalysisResultsData",
+                    "text": "LogRateAnalysisResultsData"
+                  }
+                ],
+                "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.showFrozenDataTierChoice",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showFrozenDataTierChoice",
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.embeddingOrigin",
+            "type": "string",
+            "tags": [],
+            "label": "embeddingOrigin",
+            "description": [
+              "Identifier to indicate the plugin utilizing the component"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogRateAnalysisResultsData",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogRateAnalysisResultsData",
+        "description": [
+          "\nInterface for log rate analysis results data."
+        ],
+        "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisResultsData.analysisType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "analysisType",
+            "description": [
+              "The type of analysis, whether it's a spike or dip"
+            ],
+            "signature": [
+              "\"spike\" | \"dip\""
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisResultsData.significantItems",
+            "type": "Array",
+            "tags": [],
+            "label": "significantItems",
+            "description": [
+              "Statistically significant field/value items."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.SignificantItem",
+                "text": "SignificantItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisResultsData.significantItemsGroups",
+            "type": "Array",
+            "tags": [],
+            "label": "significantItemsGroups",
+            "description": [
+              "Statistically significant groups of field/value items."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.SignificantItemGroup",
+                "text": "SignificantItemGroup"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []
@@ -180,28 +1460,13 @@
     "misc": [
       {
         "parentPluginId": "aiops",
-        "id": "def-common.AIOPS_ENABLED",
-        "type": "boolean",
-        "tags": [],
-        "label": "AIOPS_ENABLED",
-        "description": [
-          "\nThis is an internal hard coded feature flag so we can easily turn on/off the\n\"Explain log rate spikes UI\" during development until the first release."
-        ],
-        "signature": [
-          "true"
-        ],
-        "path": "x-pack/plugins/aiops/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "aiops",
         "id": "def-common.CHANGE_POINT_DETECTION_ENABLED",
         "type": "boolean",
         "tags": [],
         "label": "CHANGE_POINT_DETECTION_ENABLED",
-        "description": [],
+        "description": [
+          "\nThis is an internal hard coded feature flag so we can easily turn on/off the\n\"Change Point Detection UI\" during development until the first release."
+        ],
         "signature": [
           "true"
         ],

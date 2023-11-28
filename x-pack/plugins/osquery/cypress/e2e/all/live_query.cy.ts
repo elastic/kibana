@@ -5,45 +5,24 @@
  * 2.0.
  */
 
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
-  addToCase,
-  checkActionItemsInResults,
   checkResults,
+  fillInQueryTimeout,
   inputQuery,
   selectAllAgents,
   submitQuery,
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
-  viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import {
-  LIVE_QUERY_EDITOR,
-  RESULTS_TABLE,
-  RESULTS_TABLE_BUTTON,
-  RESULTS_TABLE_CELL_WRRAPER,
-} from '../../screens/live_query';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ROLES } from '../../test';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query', () => {
-  before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
-  });
-
+describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
-  });
-
-  after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
   });
 
   it('should validate the form', () => {
@@ -52,129 +31,38 @@ describe('ALL - Live Query', () => {
     cy.contains('Agents is a required field');
     cy.contains('Query is a required field');
     selectAllAgents();
-    inputQuery('select * from uptime; ');
+    inputQuery('select * from uptime;');
     submitQuery();
     cy.contains('Agents is a required field').should('not.exist');
     cy.contains('Query is a required field').should('not.exist');
     checkResults();
     getAdvancedButton().click();
+    fillInQueryTimeout('91');
+    submitQuery();
+    cy.contains('Timeout value must be lower than 900 seconds.');
+    fillInQueryTimeout('89');
+    submitQuery();
+    cy.contains('Timeout value must be lower than 900 seconds.').should('not.exist');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
     cy.contains('ECS field is required.');
     typeInECSFieldInput('message{downArrow}{enter}');
+
+    cy.intercept('POST', '/api/osquery/live_queries').as('postQuery');
     submitQuery();
     cy.contains('ECS field is required.').should('not.exist');
-
+    cy.wait('@postQuery').then((interception) => {
+      expect(interception.request.body).to.have.property('query', 'select * from uptime;');
+      expect(interception.request.body).to.have.property('timeout', 890);
+      expect(interception.response?.statusCode).to.eq(200);
+      expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 890);
+    });
     checkResults();
-    cy.react('Cell', { props: { columnIndex: 0 } })
-      .should('exist')
-      .first()
-      .click();
+    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist');
+    cy.get(
+      '[data-gridcell-column-index="0"][data-gridcell-row-index="0"] [data-datagrid-interactable="true"]'
+    ).click();
     cy.url().should('include', 'app/fleet/agents/');
-  });
-
-  it('should run query and enable ecs mapping', () => {
-    const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
-    cy.contains('New live query').click();
-    selectAllAgents();
-    inputQuery('select * from uptime; ');
-    cy.wait(500);
-    // checking submit by clicking cmd+enter
-    inputQuery(cmd);
-    checkResults();
-    checkActionItemsInResults({
-      lens: true,
-      discover: true,
-      cases: true,
-      timeline: false,
-    });
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.days.number', index: 1 },
-    }).should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.hours.number', index: 2 },
-    }).should('exist');
-
-    getAdvancedButton().click();
-    typeInECSFieldInput('message{downArrow}{enter}');
-    typeInOsqueryFieldInput('days{downArrow}{enter}');
-    submitQuery();
-
-    checkResults();
-    cy.getBySel(RESULTS_TABLE).within(() => {
-      cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
-    });
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'message', index: 1 },
-    }).should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.days.number', index: 2 },
-    })
-      .react('EuiIconTip', { props: { type: 'indexMapping' } })
-      .should('exist');
-  });
-
-  it('should run customized saved query', () => {
-    cy.contains('New live query').click();
-    selectAllAgents();
-    cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
-    // cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1); // TODO do we need it?
-    inputQuery('{selectall}{backspace}select * from users;');
-    cy.wait(1000);
-    submitQuery();
-    checkResults();
-    navigateTo('/app/osquery');
-    cy.react('EuiButtonIcon', { props: { iconType: 'play' } })
-      .eq(0)
-      .should('be.visible')
-      .click();
-
-    cy.react('ReactAce', { props: { value: 'select * from users;' } }).should('exist');
-  });
-
-  it('should open query details by clicking the details icon', () => {
-    cy.react('EuiButtonIcon', { props: { iconType: 'visTable' } })
-      .first()
-      .click();
-    cy.contains('Live query details');
-    cy.contains('select * from users;');
-  });
-
-  it('should run live pack', () => {
-    cy.contains('New live query').click();
-    cy.contains('Run a set of queries in a pack.').click();
-    cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.getBySel('select-live-pack').click().type('Example{downArrow}{enter}');
-    cy.contains('This table contains 3 rows.');
-    cy.contains('system_memory_linux_elastic');
-    cy.contains('system_info_elastic');
-    cy.contains('failingQuery');
-    selectAllAgents();
-    submitQuery();
-    cy.getBySel('live-query-loading').should('exist');
-    cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
-    cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
-    checkResults();
-    checkActionItemsInResults({
-      lens: true,
-      discover: true,
-      cases: true,
-      timeline: false,
-    });
-    cy.contains('Status').click();
-    cy.getBySel('tableHeaderCell_status_0').should('exist');
-    cy.getBySel('tableHeaderCell_fields.agent_id[0]_1').should('exist');
-    cy.getBySel('tableHeaderCell__source.action_response.osquery.count_2').should('exist');
-    cy.getBySel('tableHeaderCell_fields.error[0]_3').should('exist');
-
-    cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
-    cy.getBySel('toggleIcon-failingQuery').click();
-    cy.contains('Status').click();
-    cy.contains('query failed, code: 1, message: no such table: opera_extensions');
-    cy.getBySel('toggleIcon-failingQuery').click();
-    cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
-    addToCase();
-    viewRecentCaseAndCheckResults();
   });
 
   it('should run multiline query', () => {
@@ -196,25 +84,22 @@ describe('ALL - Live Query', () => {
       "where pos.remote_port !='0' {shift+enter}" +
       'limit 1000;';
     cy.contains('New live query').click();
-    cy.react('ReactAce').invoke('height').and('be.gt', 99).and('be.lt', 110);
-    cy.get(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').and('be.gt', 99).and('be.lt', 110);
+    cy.getBySel(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
 
     inputQuery(multilineQuery);
-    cy.wait(2000);
-    cy.react('ReactAce').invoke('height').should('be.gt', 220).and('be.lt', 300);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     selectAllAgents();
     submitQuery();
-    checkResults();
+    cy.getBySel('osqueryResultsPanel');
 
     // check if it get's bigger when we add more lines
-    cy.react('ReactAce').invoke('height').should('be.gt', 220).and('be.lt', 300);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     inputQuery(multilineQuery);
-    cy.wait(2000);
-    cy.react('ReactAce').invoke('height').should('be.gt', 350).and('be.lt', 500);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 600);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
-    cy.wait(2000);
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
-    cy.react('ReactAce').invoke('height').should('be.gt', 350).and('be.lt', 500);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 400);
   });
 });

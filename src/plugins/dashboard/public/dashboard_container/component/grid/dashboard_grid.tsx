@@ -6,220 +6,137 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import sizeMe from 'react-sizeme';
-import classNames from 'classnames';
 import 'react-resizable/css/styles.css';
 import 'react-grid-layout/css/styles.css';
-import React, { useCallback, useMemo, useRef } from 'react';
-import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 
-import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
+import { pick } from 'lodash';
+import classNames from 'classnames';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
+
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { useDashboardContainerContext } from '../../dashboard_container_context';
-import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
-import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
+import { useDashboardGridSettings } from './use_dashboard_grid_settings';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
+import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
+import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
-let lastValidGridSize = 0;
+export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
+  const dashboard = useDashboardContainer();
+  const panels = dashboard.select((state) => state.explicitInput.panels);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
+  const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
+  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
+  const animatePanelTransforms = dashboard.select(
+    (state) => state.componentState.animatePanelTransforms
+  );
 
-/**
- * This is a fix for a bug that stopped the browser window from automatically scrolling down when panels were made
- * taller than the current grid.
- * see https://github.com/elastic/kibana/issues/14710.
- */
-function ensureWindowScrollsToBottom(event: { clientY: number; pageY: number }) {
-  // The buffer is to handle the case where the browser is maximized and it's impossible for the mouse to move below
-  // the screen, out of the window.  see https://github.com/elastic/kibana/issues/14737
-  const WINDOW_BUFFER = 10;
-  if (event.clientY > window.innerHeight - WINDOW_BUFFER) {
-    window.scrollTo(0, event.pageY + WINDOW_BUFFER - window.innerHeight);
-  }
-}
+  /**
+   *  Track panel maximized state delayed by one tick and use it to prevent
+   * panel sliding animations on maximize and minimize.
+   */
+  const [delayedIsPanelExpanded, setDelayedIsPanelMaximized] = useState(false);
+  useEffect(() => {
+    if (expandedPanelId) {
+      setDelayedIsPanelMaximized(true);
+    } else {
+      setTimeout(() => setDelayedIsPanelMaximized(false), 0);
+    }
+  }, [expandedPanelId]);
 
-function ResponsiveGrid({
-  size,
-  isViewMode,
-  layout,
-  onLayoutChange,
-  children,
-  maximizedPanelId,
-  useMargins,
-}: {
-  size: { width: number };
-  isViewMode: boolean;
-  layout: Layout[];
-  onLayoutChange: ReactGridLayoutProps['onLayoutChange'];
-  children: JSX.Element[];
-  maximizedPanelId?: string;
-  useMargins: boolean;
-}) {
-  // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
-  // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
-  // grid to re-render so it'll show a grid with a width of 0.
-  lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
-  const classes = classNames({
-    'dshLayout--viewing': isViewMode,
-    'dshLayout--editing': !isViewMode,
-    'dshLayout-isMaximizedPanel': maximizedPanelId !== undefined,
-    'dshLayout-withoutMargins': !useMargins,
+  const { onPanelStatusChange } = useDashboardPerformanceTracker({
+    panelCount: Object.keys(panels).length,
   });
 
-  const MARGINS = useMargins ? 8 : 0;
-  // We can't take advantage of isDraggable or isResizable due to performance concerns:
-  // https://github.com/STRML/react-grid-layout/issues/240
-  return (
-    <ReactGridLayout
-      width={lastValidGridSize}
-      className={classes}
-      isDraggable={true}
-      isResizable={true}
-      // There is a bug with d3 + firefox + elements using transforms.
-      // See https://github.com/elastic/kibana/issues/16870 for more context.
-      useCSSTransforms={false}
-      margin={[MARGINS, MARGINS]}
-      cols={DASHBOARD_GRID_COLUMN_COUNT}
-      rowHeight={DASHBOARD_GRID_HEIGHT}
-      // Pass the named classes of what should get the dragging handle
-      draggableHandle={'.embPanel--dragHandle'}
-      layout={layout}
-      onLayoutChange={onLayoutChange}
-      onResize={({}, {}, {}, {}, event) => ensureWindowScrollsToBottom(event)}
-    >
-      {children}
-    </ReactGridLayout>
-  );
-}
+  const panelsInOrder: string[] = useMemo(() => {
+    return Object.keys(panels).sort((embeddableIdA, embeddableIdB) => {
+      const panelA = panels[embeddableIdA];
+      const panelB = panels[embeddableIdB];
 
-// Using sizeMe sets up the grid to be re-rendered automatically not only when the window size changes, but also
-// when the container size changes, so it works for Full Screen mode switches.
-const config = { monitorWidth: true };
-const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
-
-interface PanelLayout extends Layout {
-  i: string;
-}
-
-type DashboardRenderPerformanceTracker = DashboardRenderPerformanceStats & {
-  panelIds: Record<string, Record<string, number>>;
-  status: DashboardLoadedEventStatus;
-  doneCount: number;
-};
-
-const getDefaultPerformanceTracker: () => DashboardRenderPerformanceTracker = () => ({
-  panelsRenderStartTime: performance.now(),
-  panelsRenderDoneTime: 0,
-  lastTimeToData: 0,
-
-  panelIds: {},
-  doneCount: 0,
-  status: 'done',
-});
-
-export const DashboardGrid = () => {
-  const {
-    actions: { setPanels },
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
-
-  const panels = select((state) => state.explicitInput.panels);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const useMargins = select((state) => state.explicitInput.useMargins);
-  const expandedPanelId = select((state) => state.componentState.expandedPanelId);
-
-  const layout = useMemo(() => Object.values(panels).map((panel) => panel.gridData), [panels]);
-  const panelsInOrder = useMemo(
-    () => Object.keys(panels).map((key: string) => panels[key]),
-    [panels]
-  );
-
-  // reset performance tracker on each render.
-  const performanceRefs = useRef<DashboardRenderPerformanceTracker>(getDefaultPerformanceTracker());
-  performanceRefs.current = getDefaultPerformanceTracker();
-
-  const onPanelStatusChange = useCallback(
-    (info: EmbeddablePhaseEvent) => {
-      if (performanceRefs.current.panelIds[info.id] === undefined || info.status === 'loading') {
-        performanceRefs.current.panelIds[info.id] = {};
-      } else if (info.status === 'error') {
-        performanceRefs.current.status = 'error';
-      } else if (info.status === 'loaded') {
-        performanceRefs.current.lastTimeToData = performance.now();
-      }
-
-      performanceRefs.current.panelIds[info.id][info.status] = performance.now();
-
-      if (info.status === 'error' || info.status === 'rendered') {
-        performanceRefs.current.doneCount++;
-        if (performanceRefs.current.doneCount === panelsInOrder.length) {
-          performanceRefs.current.panelsRenderDoneTime = performance.now();
-          dashboardContainer.reportPerformanceMetrics(performanceRefs.current);
-        }
-      }
-    },
-    [dashboardContainer, panelsInOrder.length]
-  );
-
-  const onLayoutChange = useCallback(
-    (newLayout: PanelLayout[]) => {
-      const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
-        (updatedPanelsAcc, panelLayout) => {
-          updatedPanelsAcc[panelLayout.i] = {
-            ...panels[panelLayout.i],
-            gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-          };
-          return updatedPanelsAcc;
-        },
-        {} as { [key: string]: DashboardPanelState }
-      );
-      // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
-      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
-        dispatch(setPanels(updatedPanels));
-      }
-    },
-    [dispatch, panels, setPanels]
-  );
-
-  const dashboardPanels = useMemo(() => {
-    panelsInOrder.sort((panelA, panelB) => {
+      // need to manually sort the panels by position because we want the panels to be collapsed from the left to the
+      // right when switching to the single column layout, but RGL sorts by ID which can cause unexpected behaviour between
+      // by-reference and by-value panels + we want the HTML order to align with this in the multi-panel view
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
       } else {
         return panelA.gridData.y - panelB.gridData.y;
       }
     });
+  }, [panels]);
 
-    return panelsInOrder.map(({ explicitInput, type }, index) => (
-      <DashboardGridItem
-        key={explicitInput.id}
-        id={explicitInput.id}
-        index={index + 1}
-        type={type}
-        expandedPanelId={expandedPanelId}
-        onPanelStatusChange={onPanelStatusChange}
-      />
-    ));
-  }, [expandedPanelId, panelsInOrder, onPanelStatusChange]);
+  const panelComponents = useMemo(() => {
+    return panelsInOrder.map((embeddableId, index) => {
+      const type = panels[embeddableId].type;
+      return (
+        <DashboardGridItem
+          data-grid={panels[embeddableId].gridData}
+          key={embeddableId}
+          id={embeddableId}
+          index={index + 1}
+          type={type}
+          expandedPanelId={expandedPanelId}
+          focusedPanelId={focusedPanelId}
+          onPanelStatusChange={onPanelStatusChange}
+        />
+      );
+    });
+  }, [expandedPanelId, onPanelStatusChange, panels, panelsInOrder, focusedPanelId]);
+
+  const onLayoutChange = useCallback(
+    (newLayout: Array<Layout & { i: string }>) => {
+      if (viewMode !== ViewMode.EDIT) return;
+
+      const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
+        (updatedPanelsAcc, panelLayout) => {
+          updatedPanelsAcc[panelLayout.i] = {
+            ...panels[panelLayout.i],
+            gridData: pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+          };
+          return updatedPanelsAcc;
+        },
+        {} as { [key: string]: DashboardPanelState }
+      );
+      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+        dashboard.dispatch.setPanels(updatedPanels);
+      }
+    },
+    [dashboard, panels, viewMode]
+  );
+
+  const classes = classNames({
+    'dshLayout-withoutMargins': !useMargins,
+    'dshLayout--viewing': viewMode === ViewMode.VIEW,
+    'dshLayout--editing': viewMode !== ViewMode.VIEW,
+    'dshLayout--noAnimation': !animatePanelTransforms || delayedIsPanelExpanded,
+    'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
+  });
+
+  const { layouts, breakpoints, columns } = useDashboardGridSettings(panelsInOrder);
 
   // in print mode, dashboard layout is not controlled by React Grid Layout
   if (viewMode === ViewMode.PRINT) {
-    return <>{dashboardPanels}</>;
+    return <>{panelComponents}</>;
   }
 
   return (
-    <ResponsiveSizedGrid
-      layout={layout}
-      useMargins={useMargins}
+    <ResponsiveReactGridLayout
+      cols={columns}
+      layouts={layouts}
+      className={classes}
+      width={viewportWidth}
+      breakpoints={breakpoints}
       onLayoutChange={onLayoutChange}
-      maximizedPanelId={expandedPanelId}
-      isViewMode={viewMode === ViewMode.VIEW}
+      isResizable={!expandedPanelId && !focusedPanelId}
+      isDraggable={!expandedPanelId && !focusedPanelId}
+      rowHeight={DASHBOARD_GRID_HEIGHT}
+      margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
+      draggableHandle={'.embPanel--dragHandle'}
     >
-      {dashboardPanels}
-    </ResponsiveSizedGrid>
+      {panelComponents}
+    </ResponsiveReactGridLayout>
   );
 };

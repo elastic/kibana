@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
-import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import type { DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
 import { TimelineContext } from '../../../timelines/components/timeline';
 import { HoverActions } from '.';
 
@@ -102,7 +102,16 @@ export const useHoverActions = ({
         <ProviderContentWrapper
           data-test-subj={`draggable-link-content-${dataProvider.queryMatch.field}`}
         >
-          {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+          {render(dataProvider, null, {
+            isDragging: false,
+            isDropAnimating: false,
+            isClone: false,
+            dropAnimation: null,
+            draggingOver: null,
+            combineWith: null,
+            combineTargetFor: null,
+            mode: null,
+          })}
         </ProviderContentWrapper>
       ) : null;
 

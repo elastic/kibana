@@ -12,5 +12,7 @@ import { PluginFunctionalProviderContext } from '../../plugin_functional/service
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('content management examples', function () {
     loadTestFile(require.resolve('./todo_app'));
+    loadTestFile(require.resolve('./msearch'));
+    loadTestFile(require.resolve('./finder'));
   });
 }

@@ -6,33 +6,31 @@
  */
 
 import type { Observable } from 'rxjs';
-import LRU from 'lru-cache';
-import {
-  QUERY_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-} from '@kbn/securitysolution-rules';
-
+import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
+import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
-import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
+import { i18n } from '@kbn/i18n';
+import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
+import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
+import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
+import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
+import {
+  siemGuideId,
+  getSiemGuideConfig,
+  defaultGuideTranslations,
+} from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
+  createEsqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createNewTermsAlertType,
@@ -48,12 +46,7 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
-import {
-  APP_ID,
-  SERVER_APP_ID,
-  LEGACY_NOTIFICATIONS_ID,
-  DEFAULT_ALERTS_INDEX,
-} from '../common/constants';
+import { APP_ID, DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -70,42 +63,54 @@ import type { ITelemetryReceiver } from './lib/telemetry/receiver';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
-import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
-import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
-import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
-import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
+import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
+import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import type {
-  CreateRuleOptions,
   CreateQueryRuleAdditionalOptions,
+  CreateRuleOptions,
 } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import {
-  legacyRulesNotificationAlertType,
   legacyIsNotificationAlertExecutor,
+  legacyRulesNotificationAlertType,
 } from './lib/detection_engine/rule_actions_legacy';
-import { createSecurityRuleTypeWrapper } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
+import {
+  createSecurityRuleTypeWrapper,
+  securityRuleTypeFieldMap,
+} from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
 
 import type {
   ISecuritySolutionPlugin,
-  SecuritySolutionPluginSetupDependencies,
-  SecuritySolutionPluginStartDependencies,
+  PluginInitializerContext,
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginCoreStartDependencies,
   SecuritySolutionPluginSetup,
+  SecuritySolutionPluginSetupDependencies,
   SecuritySolutionPluginStart,
-  PluginInitializerContext,
+  SecuritySolutionPluginStartDependencies,
 } from './plugin_contract';
-import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
+import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
+import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
-import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
+  ENDPOINT_SEARCH_STRATEGY,
+} from '../common/endpoint/constants';
+
+import { AppFeaturesService } from './lib/app_features_service/app_features_service';
+import { registerRiskScoringTask } from './lib/entity_analytics/risk_engine/tasks/risk_scoring_task';
+import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
+import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
+import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -114,7 +119,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
   private readonly appClientFactory: AppClientFactory;
+  private readonly appFeaturesService: AppFeaturesService;
 
+  private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
@@ -125,22 +132,32 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private manifestTask: ManifestTask | undefined;
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
-  private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
-  private kibanaIndex?: string;
+  private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
+    const serverConfig = createConfig(context);
+
     this.pluginContext = context;
-    this.config = createConfig(context);
+    this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
+    this.appFeaturesService = new AppFeaturesService(this.logger, this.config.experimentalFeatures);
 
-    // Cache up to three artifacts with a max retention of 5 mins each
-    this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
+    this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
     this.logger.debug('plugin initialized');
+    this.endpointContext = {
+      logFactory: this.pluginContext.logger,
+      service: this.endpointAppContextService,
+      config: (): Promise<ConfigType> => Promise.resolve(this.config),
+      get serverConfig() {
+        return serverConfig;
+      },
+      experimentalFeatures: this.config.experimentalFeatures,
+    };
   }
 
   public setup(
@@ -149,20 +166,26 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    const { appClientFactory, pluginContext, config, logger } = this;
+    const { appClientFactory, appFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
-    this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
     initSavedObjects(core.savedObjects);
-    initUiSettings(core.uiSettings, experimentalFeatures);
+    initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
+    appFeaturesService.init(plugins.features);
 
-    const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
-    ruleExecutionLogService.registerEventLogProvider();
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
-      licensing: plugins.licensing,
-      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
-    };
+    this.ruleMonitoringService.setup(core, plugins);
+
+    if (experimentalFeatures.riskScoringPersistence) {
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+        telemetry: core.analytics,
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -170,7 +193,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       plugins,
       endpointAppContextService: this.endpointAppContextService,
-      ruleExecutionLogService,
+      ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
     });
@@ -181,15 +204,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       (context, request) => requestContextFactory.create(context, request)
     );
 
-    const endpointContext: EndpointAppContext = {
-      logFactory: pluginContext.logger,
-      service: this.endpointAppContextService,
-      config: (): Promise<ConfigType> => Promise.resolve(config),
-      experimentalFeatures,
-    };
-
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
+      cloud: plugins.cloud,
     });
 
     initUsageCollectors({
@@ -199,6 +216,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
       logger,
+      riskEngineIndexPatterns: {
+        all: allRiskScoreIndexPattern,
+        latest: latestRiskScoreIndexPattern,
+      },
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
@@ -214,16 +235,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
+      licensing: plugins.licensing,
     };
-
-    const aliasesFieldMap: FieldMap = {};
-    Object.entries(aadFieldConversion).forEach(([key, value]) => {
-      aliasesFieldMap[key] = {
-        type: 'alias',
-        required: false,
-        path: value,
-      };
-    });
 
     const ruleDataServiceOptions = {
       feature: SERVER_APP_ID,
@@ -233,10 +246,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(
-            { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
-            false
-          ),
+          mappings: mappingFromFieldMap(securityRuleTypeFieldMap, false),
         },
       ],
       secondaryAlias: config.signalsIndex,
@@ -256,14 +266,27 @@ export class Plugin implements ISecuritySolutionPlugin {
       lists: plugins.lists,
       logger: this.logger,
       config: this.config,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
       ruleDataClient,
-      ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
+      ruleExecutionLoggerFactory:
+        this.ruleMonitoringService.createRuleExecutionLogClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+      experimentalFeatures: config.experimentalFeatures,
+    };
+
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
+        endpointAppContextService: this.endpointAppContextService,
+        osqueryCreateActionService: plugins.osquery.createActionService,
+      }),
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
+    if (config.settings.ESQLEnabled && !experimentalFeatures.esqlRulesDisabled) {
+      plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType(ruleOptions)));
+    }
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({
@@ -309,31 +332,20 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    registerEndpointRoutes(router, endpointContext);
+    registerEndpointRoutes(router, this.endpointContext);
     registerEndpointSuggestionsRoutes(
       router,
       plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
-      endpointContext
+      this.endpointContext
     );
     registerLimitedConcurrencyRoutes(core);
-    registerPolicyRoutes(router, endpointContext);
-    registerActionRoutes(router, endpointContext);
-
-    const ruleTypes = [
-      LEGACY_NOTIFICATIONS_ID,
-      EQL_RULE_TYPE_ID,
-      INDICATOR_RULE_TYPE_ID,
-      ML_RULE_TYPE_ID,
-      QUERY_RULE_TYPE_ID,
-      SAVED_QUERY_RULE_TYPE_ID,
-      THRESHOLD_RULE_TYPE_ID,
-      NEW_TERMS_RULE_TYPE_ID,
-    ];
-
-    plugins.features.registerKibanaFeature(
-      getKibanaPrivilegesFeaturePrivileges(ruleTypes, experimentalFeatures)
+    registerPolicyRoutes(router, this.endpointContext);
+    registerProtectionUpdatesNoteRoutes(router, this.endpointContext);
+    registerActionRoutes(
+      router,
+      this.endpointContext,
+      plugins.encryptedSavedObjects?.canEncrypt === true
     );
-    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
@@ -350,7 +362,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (exceptionListsSetupEnabled()) {
       this.lists = plugins.lists;
       this.manifestTask = new ManifestTask({
-        endpointAppContext: endpointContext,
+        endpointAppContext: this.endpointContext,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         taskManager: plugins.taskManager!,
       });
@@ -373,9 +385,16 @@ export class Plugin implements ISecuritySolutionPlugin {
         endpointFieldsStrategy
       );
 
+      const endpointPackagePoliciesStatsStrategy =
+        endpointPackagePoliciesStatsSearchStrategyProvider(this.endpointAppContextService);
+      plugins.data.search.registerSearchStrategy(
+        ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
+        endpointPackagePoliciesStatsStrategy
+      );
+
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
-        endpointContext,
+        this.endpointContext,
         depsStart.spaces?.spacesService?.getSpaceId,
         ruleDataClient
       );
@@ -384,6 +403,38 @@ export class Plugin implements ISecuritySolutionPlugin {
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
       );
+      const endpointSearchStrategy = endpointSearchStrategyProvider(
+        depsStart.data,
+        this.endpointContext
+      );
+
+      plugins.data.search.registerSearchStrategy(ENDPOINT_SEARCH_STRATEGY, endpointSearchStrategy);
+
+      /**
+       * Register a config for the security guide
+       */
+      if (depsStart.cloudExperiments && i18n.getLocale() === 'en') {
+        try {
+          depsStart.cloudExperiments
+            .getVariation('security-solutions.guided-onboarding-content', defaultGuideTranslations)
+            .then((variation) => {
+              plugins.guidedOnboarding?.registerGuideConfig(
+                siemGuideId,
+                getSiemGuideConfig(variation)
+              );
+            });
+        } catch {
+          plugins.guidedOnboarding?.registerGuideConfig(
+            siemGuideId,
+            getSiemGuideConfig(defaultGuideTranslations)
+          );
+        }
+      } else {
+        plugins.guidedOnboarding?.registerGuideConfig(
+          siemGuideId,
+          getSiemGuideConfig(defaultGuideTranslations)
+        );
+      }
     });
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
@@ -396,7 +447,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
-      endpointAppContext: endpointContext,
+      endpointAppContext: this.endpointContext,
       core,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskManager: plugins.taskManager!,
@@ -404,19 +455,20 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     featureUsageService.setup(plugins.licensing);
 
-    /**
-     * Register a config for the security guide
-     */
-    plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
-
-    return {};
+    return {
+      setAppFeaturesConfigurator:
+        appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
+      experimentalFeatures: { ...config.experimentalFeatures },
+    };
   }
 
   public start(
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger } = this;
+    const { config, logger, appFeaturesService } = this;
+
+    this.ruleMonitoringService.start(core, plugins);
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
@@ -430,10 +482,27 @@ export class Plugin implements ISecuritySolutionPlugin {
       // from where authz can be derived)
       false
     );
-    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+    const {
+      authz,
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
+      createFilesClient,
+      createFleetActionsClient,
+    } =
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
     let manifestManager: ManifestManager | undefined;
+    const endpointFleetServicesFactory = new EndpointFleetServicesFactory(
+      {
+        agentService,
+        packageService,
+        packagePolicyService,
+        agentPolicyService,
+      },
+      core.savedObjects
+    );
 
     this.licensing$ = plugins.licensing.license$;
 
@@ -450,23 +519,29 @@ export class Plugin implements ISecuritySolutionPlugin {
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger,
-        cache: this.artifactsCache,
         experimentalFeatures: config.experimentalFeatures,
+        packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
+        esClient: core.elasticsearch.client.asInternalUser,
+        appFeaturesService,
       });
 
-      // Migrate artifacts to fleet and then start the minifest task after that is done
+      // Migrate artifacts to fleet and then start the manifest task after that is done
       plugins.fleet.fleetSetupCompleted().then(() => {
-        migrateArtifactsToFleet(savedObjectsClient, artifactClient, logger).finally(() => {
+        if (this.manifestTask) {
           logger.info('Dependent plugin setup complete - Starting ManifestTask');
+          this.manifestTask.start({
+            taskManager,
+          });
+        } else {
+          logger.error(new Error('User artifacts task not available.'));
+        }
 
-          if (this.manifestTask) {
-            this.manifestTask.start({
-              taskManager,
-            });
-          } else {
-            logger.error(new Error('User artifacts task not available.'));
-          }
-        });
+        turnOffPolicyProtectionsIfNotSupported(
+          core.elasticsearch.client.asInternalUser,
+          endpointFleetServicesFactory.asInternalUser(),
+          appFeaturesService,
+          logger
+        );
       });
 
       // License related start
@@ -483,24 +558,17 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
+      createFleetFilesClient: createFilesClient,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         agentPolicyService,
         packagePolicyService,
         logger
       ),
-      endpointFleetServicesFactory: new EndpointFleetServicesFactory(
-        {
-          agentService,
-          packageService,
-          packagePolicyService,
-          agentPolicyService,
-        },
-        core.savedObjects
-      ),
+      endpointFleetServicesFactory,
       security: plugins.security,
       alerting: plugins.alerting,
-      config: this.config,
+      config,
       cases: plugins.cases,
       logger,
       manifestManager,
@@ -511,12 +579,19 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
+      actionCreateService: actionCreateService(
+        core.elasticsearch.client.asInternalUser,
+        this.endpointContext
+      ),
+      createFleetActionsClient,
+      esClient: core.elasticsearch.client.asInternalUser,
+      appFeaturesService,
+      savedObjectsClient,
     });
 
     this.telemetryReceiver.start(
       core,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.kibanaIndex!,
+      (type: string) => core.savedObjects.getIndexForType(type),
       DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
       exceptionListClient,
@@ -531,13 +606,23 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    plugins.fleet?.fleetSetupCompleted().then(() => {
-      if (plugins.taskManager) {
-        this.checkMetadataTransformsTask?.start({
-          taskManager: plugins.taskManager,
-        });
+    const endpointPkgInstallationPromise = this.endpointContext.service
+      .getInternalFleetServices()
+      .packages.getInstallation(FLEET_ENDPOINT_PACKAGE);
+    Promise.all([endpointPkgInstallationPromise, plugins.fleet?.fleetSetupCompleted()]).then(
+      ([endpointPkgInstallation]) => {
+        if (plugins.taskManager) {
+          if (
+            endpointPkgInstallation?.version &&
+            isEndpointPackageV2(endpointPkgInstallation.version)
+          ) {
+            return;
+          }
+
+          this.checkMetadataTransformsTask?.start({ taskManager: plugins.taskManager });
+        }
       }
-    });
+    );
 
     return {};
   }

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -15,8 +16,48 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
-  describe('fleet_output_crud', async function () {
+  let pkgVersion: string;
+
+  const getSecretById = (id: string) => {
+    return es.get({
+      index: '.fleet-secrets',
+      id,
+    });
+  };
+
+  const deleteAllSecrets = async () => {
+    try {
+      await es.deleteByQuery({
+        index: '.fleet-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+    } catch (err) {
+      // index doesn't exist
+    }
+  };
+
+  const enableSecrets = async () => {
+    try {
+      await kibanaServer.savedObjects.update({
+        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        id: 'fleet-default-settings',
+        attributes: {
+          secret_storage_requirements_met: true,
+        },
+        overwrite: false,
+      });
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  describe('fleet_outputs_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -25,8 +66,70 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     let defaultOutputId: string;
+    let ESOutputId: string;
+    let fleetServerPolicyId: string;
+    let fleetServerPolicyWithCustomOutputId: string;
 
     before(async function () {
+      await enableSecrets();
+      // we must first force install the fleet_server package to override package verification error on policy create
+      // https://github.com/elastic/kibana/issues/137450
+      const getPkRes = await supertest
+        .get(`/api/fleet/epm/packages/fleet_server`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      pkgVersion = getPkRes.body.item.version;
+
+      await deleteAllSecrets();
+
+      await supertest
+        .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      let { body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Fleet Server policy 1',
+          namespace: 'default',
+          has_fleet_server: true,
+        })
+        .expect(200);
+      const fleetServerPolicy = apiResponse.item;
+      fleetServerPolicyId = fleetServerPolicy.id;
+
+      ({ body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Agent policy 1',
+          namespace: 'default',
+        })
+        .expect(200));
+
+      const agentPolicy = apiResponse.item;
+
+      if (!fleetServerPolicy) {
+        throw new Error('No Fleet server policy');
+      }
+
+      if (!agentPolicy) {
+        throw new Error('No agent policy');
+      }
+
+      await supertest
+        .post(`/api/fleet/fleet_server_hosts`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: 'test-default-123',
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://test.fr:8080'],
+        })
+        .expect(200);
+
       const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
       const defaultOutput = getOutputsRes.items.find((item: any) => item.is_default);
@@ -35,6 +138,30 @@ export default function (providerContext: FtrProviderContext) {
       }
 
       defaultOutputId = defaultOutput.id;
+
+      const { body: postResponse1 } = await supertest
+        .post(`/api/fleet/outputs`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'ESoutput',
+          type: 'elasticsearch',
+          hosts: ['https://test.fr'],
+        })
+        .expect(200);
+      ESOutputId = postResponse1.item.id;
+
+      ({ body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Preconfigured Fleet Server policy',
+          namespace: 'default',
+          has_fleet_server: true,
+          data_output_id: `${ESOutputId}`,
+        })
+        .expect(200));
+      const fleetServerPolicyWithCustomOutput = apiResponse.item;
+      fleetServerPolicyWithCustomOutputId = fleetServerPolicyWithCustomOutput.id;
     });
 
     after(async () => {
@@ -43,10 +170,12 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('GET /outputs', () => {
-      it('should list the default output', async () => {
+      it('should list all the outputs', async () => {
         const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
-        expect(getOutputsRes.items.length).to.eql(1);
+        expect(getOutputsRes.items.length).to.eql(2);
+        const findDefault = getOutputsRes.items.find((item: any) => item.is_default === true);
+        expect(findDefault.id).to.eql(defaultOutputId);
       });
     });
 
@@ -82,9 +211,199 @@ export default function (providerContext: FtrProviderContext) {
           .send({ hosts: ['https://test.fr'] })
           .expect(404);
       });
-      it('should allow to update an output with the shipper values', async function () {
+
+      it('should not allow to update a default ES output to logstash', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(400);
+        expect(body.message).to.eql(
+          'Logstash output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new ElasticSearch output.'
+        );
+      });
+
+      it('should not allow to update a default ES output to Kafka', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            is_default: true,
+            is_default_monitoring: true,
+            topics: [{ topic: 'topic1' }],
+          })
+          .expect(400);
+        expect(body.message).to.eql(
+          'Kafka output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new ElasticSearch output.'
+        );
+      });
+
+      it('should allow to update a default ES output if keeping it ES', async function () {
         await supertest
           .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated Default ES Output',
+            type: 'elasticsearch',
+            hosts: ['http://test.fr:443'],
+          })
+          .expect(200);
+      });
+
+      it('should allow to update a non-default ES output to logstash', async function () {
+        const { body: postResponse2 } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'A Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { id: logstashOutput1Id } = postResponse2.item;
+        await supertest
+          .put(`/api/fleet/outputs/${logstashOutput1Id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'A Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
+      it('should allow to update a non-default ES output to kafka', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Elasticsearch output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr:443'],
+          })
+          .expect(200);
+
+        const { id: elasticsearchOutputId } = postResponse.item;
+        await supertest
+          .put(`/api/fleet/outputs/${elasticsearchOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'A Kafka Output',
+            type: 'kafka',
+          })
+          .expect(200);
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
+      it('should allow to update a default logstash output to logstash and fleet server policies should be updated', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Logstash Output 1',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+        const { id: logstashOutput2Id } = postResponse.item;
+
+        await supertest
+          .put(`/api/fleet/outputs/${logstashOutput2Id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443', 'test.com:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        await supertest.get(`/api/fleet/outputs`).expect(200);
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
+      it('should allow to update a logstash output with the shipper values', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+        const { id: newOutputId } = postResponse.item;
+
+        await supertest
+          .put(`/api/fleet/outputs/${newOutputId}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'My Logstash Output',
@@ -107,7 +426,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { items: outputs },
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
-        const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
+        const newOutput = outputs.filter((o: any) => o.id === newOutputId);
 
         expect(newOutput[0].shipper).to.eql({
           compression_level: null,
@@ -145,10 +464,88 @@ export default function (providerContext: FtrProviderContext) {
         const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
         expect(newOutput[0].shipper).to.equal(null);
       });
+
+      it('should allow secrets to be updated + delete unused secret', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const outputId = res.body.item.id;
+        const secretId = res.body.item.secrets.ssl.key.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('KEY');
+
+        const updateRes = await supertest
+          .put(`/api/fleet/outputs/${outputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'NEW_KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const updatedSecretId = updateRes.body.item.secrets.ssl.key.id;
+
+        expect(updatedSecretId).not.to.equal(secretId);
+
+        const updatedSecret = await getSecretById(updatedSecretId);
+
+        // @ts-ignore _source unknown type
+        expect(updatedSecret._source.value).to.equal('NEW_KEY');
+
+        try {
+          await getSecretById(secretId);
+          expect().fail('Secret should have been deleted');
+        } catch (e) {
+          // not found
+        }
+      });
     });
 
     describe('POST /outputs', () => {
-      it('should allow to create an output ', async function () {
+      it('should allow to create an ES output ', async function () {
         const { body: postResponse } = await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -165,7 +562,29 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should allow to create a logstash output ', async function () {
+      it('should allow to create a new default ES output ', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default ES output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default: true,
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'Default ES output',
+          type: 'elasticsearch',
+          hosts: ['https://test.fr:443'],
+          is_default: true,
+          is_default_monitoring: false,
+        });
+      });
+
+      it('should allow to create a new logstash output', async function () {
         const { body: postResponse } = await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -196,6 +615,48 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should allow to create a new logstash default output and fleet server policies should not change', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            is_default: true,
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'Default Logstash Output',
+          type: 'logstash',
+          hosts: ['test.fr:443'],
+          is_default: true,
+          is_default_monitoring: false,
+          ssl: {
+            certificate: 'CERTIFICATE',
+            key: 'KEY',
+            certificate_authorities: ['CA1', 'CA2'],
+          },
+        });
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
       it('should not allow to create a logstash output with http hosts ', async function () {
         const { body: postResponse } = await supertest
           .post(`/api/fleet/outputs`)
@@ -217,7 +678,98 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should toggle default output when creating a new default output ', async function () {
+      it('should allow to create a new kafka output', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topics: [{ topic: 'topic1' }],
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'My Kafka Output',
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          auth_type: 'user_pass',
+          username: 'user',
+          password: 'pass',
+          topics: [{ topic: 'topic1' }],
+          broker_timeout: 10,
+          required_acks: 1,
+          client_id: 'Elastic',
+          compression: 'gzip',
+          compression_level: 4,
+          sasl: {
+            mechanism: 'PLAIN',
+          },
+          timeout: 30,
+          partition: 'hash',
+          version: '1.0.0',
+        });
+      });
+
+      it('should allow to create a new kafka default output and fleet server policies should not change', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topics: [{ topic: 'topic1' }],
+            is_default: true,
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'Default Kafka Output',
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          auth_type: 'user_pass',
+          username: 'user',
+          password: 'pass',
+          topics: [{ topic: 'topic1' }],
+          is_default: true,
+          is_default_monitoring: false,
+          broker_timeout: 10,
+          required_acks: 1,
+          client_id: 'Elastic',
+          compression: 'gzip',
+          compression_level: 4,
+          sasl: {
+            mechanism: 'PLAIN',
+          },
+          timeout: 30,
+          partition: 'hash',
+          version: '1.0.0',
+        });
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
+      it('should toggle the default output when creating a new one', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -405,77 +957,363 @@ export default function (providerContext: FtrProviderContext) {
         const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
         expect(defaultOutputs[0].shipper).to.equal(null);
       });
+
+      it('should allow to create a kafka output with the shipper values', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.name === 'Kafka Output');
+        expect(newOutput[0].shipper).to.eql({
+          compression_level: null,
+          disk_queue_compression_enabled: null,
+          disk_queue_enabled: true,
+          disk_queue_encryption_enabled: true,
+          disk_queue_max_size: null,
+          disk_queue_path: 'path/to/disk/queue',
+          loadbalance: null,
+          max_batch_bytes: null,
+          mem_queue_events: null,
+          queue_flush_timeout: null,
+        });
+      });
+
+      it('should not allow ssl.key and secrets.ssl.key to be set for logstash output ', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            secrets: { ssl: { key: 'KEY' } },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+      });
+
+      it('should not allow password and secrets.password to be set for kafka output ', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            secrets: { password: 'pass' },
+          })
+          .expect(400);
+      });
+
+      it('should not allow ssl.key and secrets.ssl.key to be set for kafka output ', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+      });
+
+      it('should create ssl.key secret correctly', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const secretId = res.body.item.secrets.ssl.key.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('KEY');
+      });
+
+      it('should create ssl.password secret correctly', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Password Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            secrets: { password: 'pass' },
+          });
+
+        const secretId = res.body.item.secrets.password.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('pass');
+      });
+
+      it('should create service_token secret correctly', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Remote Elasticsearch With Service Token Secret',
+            type: 'remote_elasticsearch',
+            hosts: ['https://remote-es:9200'],
+            secrets: { service_token: 'token' },
+          });
+
+        const secretId = res.body.item.secrets.service_token.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('token');
+      });
     });
 
     describe('DELETE /outputs/{outputId}', () => {
-      let outputId: string;
-      let defaultOutputIdToDelete: string;
-      let defaultMonitoringOutputId: string;
+      describe('Elasticsearch output', () => {
+        let outputId: string;
+        let defaultOutputIdToDelete: string;
+        let defaultMonitoringOutputId: string;
 
-      before(async () => {
-        const { body: postResponse } = await supertest
-          .post(`/api/fleet/outputs`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Output to delete test',
-            type: 'elasticsearch',
-            hosts: ['https://test.fr'],
-          })
-          .expect(200);
-        outputId = postResponse.item.id;
+        before(async () => {
+          const { body: postResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Output to delete test',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr'],
+            })
+            .expect(200);
+          outputId = postResponse.item.id;
 
-        const { body: defaultOutputPostResponse } = await supertest
-          .post(`/api/fleet/outputs`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Default Output to delete test',
-            type: 'elasticsearch',
-            hosts: ['https://test.fr'],
-            is_default: true,
-          })
-          .expect(200);
-        defaultOutputIdToDelete = defaultOutputPostResponse.item.id;
-        const { body: defaultMonitoringOutputPostResponse } = await supertest
-          .post(`/api/fleet/outputs`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Default Output to delete test',
-            type: 'elasticsearch',
-            hosts: ['https://test.fr'],
-            is_default_monitoring: true,
-          })
-          .expect(200);
-        defaultMonitoringOutputId = defaultMonitoringOutputPostResponse.item.id;
+          const { body: defaultOutputPostResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Default Output to delete test',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr'],
+              is_default: true,
+            })
+            .expect(200);
+          defaultOutputIdToDelete = defaultOutputPostResponse.item.id;
+          const { body: defaultMonitoringOutputPostResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Default Output to delete test',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr'],
+              is_default_monitoring: true,
+            })
+            .expect(200);
+          defaultMonitoringOutputId = defaultMonitoringOutputPostResponse.item.id;
+        });
+
+        it('should return a 400 when deleting a default output ', async function () {
+          await supertest
+            .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+        });
+
+        it('should return a 400 when deleting a default output ', async function () {
+          await supertest
+            .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+        });
+
+        it('should return a 404 when deleting a non existing output ', async function () {
+          await supertest
+            .delete(`/api/fleet/outputs/idonotexists`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(404);
+        });
+
+        it('should allow to delete an output ', async function () {
+          const { body: deleteResponse } = await supertest
+            .delete(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          expect(deleteResponse.id).to.eql(outputId);
+        });
+
+        it('should delete secrets when deleting an output', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Kafka Output With Secret',
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'ssl',
+              topics: [{ topic: 'topic1' }],
+              config_yaml: 'shipper: {}',
+              shipper: {
+                disk_queue_enabled: true,
+                disk_queue_path: 'path/to/disk/queue',
+                disk_queue_encryption_enabled: true,
+              },
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: {
+                ssl: {
+                  key: 'KEY',
+                },
+              },
+            })
+            .expect(200);
+
+          const outputWithSecretsId = res.body.item.id;
+          const secretId = res.body.item.secrets.ssl.key.id;
+
+          await supertest
+            .delete(`/api/fleet/outputs/${outputWithSecretsId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          try {
+            await getSecretById(secretId);
+            expect().fail('Secret should have been deleted');
+          } catch (e) {
+            // not found
+          }
+        });
       });
 
-      it('should return a 400 when deleting a default output ', async function () {
-        await supertest
-          .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(400);
-      });
+      describe('Kafka output', () => {
+        let outputId: string;
+        let defaultOutputIdToDelete: string;
 
-      it('should return a 400 when deleting a default output ', async function () {
-        await supertest
-          .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(400);
-      });
+        const kafkaOutputPayload = {
+          name: 'Output to delete test',
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          auth_type: 'user_pass',
+          username: 'user',
+          password: 'pass',
+          is_default: true,
+          topics: [{ topic: 'topic1' }],
+        };
 
-      it('should return a 404 when deleting a non existing output ', async function () {
-        await supertest
-          .delete(`/api/fleet/outputs/idonotexists`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(404);
-      });
+        before(async () => {
+          const { body: postResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send(kafkaOutputPayload)
+            .expect(200);
+          outputId = postResponse.item.id;
 
-      it('should allow to delete an output ', async function () {
-        const { body: deleteResponse } = await supertest
-          .delete(`/api/fleet/outputs/${outputId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+          const { body: defaultOutputPostResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ ...kafkaOutputPayload, name: 'Default Output to delete test' })
+            .expect(200);
+          defaultOutputIdToDelete = defaultOutputPostResponse.item.id;
+        });
 
-        expect(deleteResponse.id).to.eql(outputId);
+        it('should return a 400 when deleting a default output ', async function () {
+          await supertest
+            .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+        });
+
+        it('should allow to delete an output ', async function () {
+          const { body: deleteResponse } = await supertest
+            .delete(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          expect(deleteResponse.id).to.eql(outputId);
+        });
       });
     });
   });

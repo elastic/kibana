@@ -8,6 +8,7 @@ import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/
 import expect from '@kbn/expect';
 import { EXECUTE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ROLE } from '../../services/roles_users';
 
@@ -15,7 +16,11 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('Endpoint `execute` response action', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/171667
+  // FLAKY: https://github.com/elastic/kibana/issues/171666
+  describe.skip('Endpoint `execute` response action', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
 
@@ -24,8 +29,8 @@ export default function ({ getService }: FtrProviderContext) {
       agentId = indexedData.hosts[0].agent.id;
     });
 
-    after(() => {
-      endpointTestResources.unloadEndpointData(indexedData);
+    after(async () => {
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     it('should not allow `execute` action without required privilege', async () => {
@@ -33,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.t1_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la' } })
         .expect(403, {
           statusCode: 403,
@@ -45,8 +51,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('should error on invalid endpoint id', async () => {
       await supertestWithoutAuth
         .post(EXECUTE_ROUTE)
-        .auth(ROLE.response_actions_role, 'changeme')
+        .auth(ROLE.endpoint_operations_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [' '], parameters: { command: 'ls -la' } })
         .expect(400, {
           statusCode: 400,
@@ -58,8 +65,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('should error on missing endpoint id', async () => {
       await supertestWithoutAuth
         .post(EXECUTE_ROUTE)
-        .auth(ROLE.response_actions_role, 'changeme')
+        .auth(ROLE.endpoint_operations_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ parameters: { command: 'ls -la' } })
         .expect(400, {
           statusCode: 400,
@@ -72,8 +80,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('should error on invalid `command` parameter', async () => {
       await supertestWithoutAuth
         .post(EXECUTE_ROUTE)
-        .auth(ROLE.response_actions_role, 'changeme')
+        .auth(ROLE.endpoint_operations_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: ' ' } })
         .expect(400, {
           statusCode: 400,
@@ -85,8 +94,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('should error on missing `command` parameter', async () => {
       await supertestWithoutAuth
         .post(EXECUTE_ROUTE)
-        .auth(ROLE.response_actions_role, 'changeme')
+        .auth(ROLE.endpoint_operations_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId] })
         .expect(400, {
           statusCode: 400,
@@ -99,8 +109,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('should error on invalid `timeout` parameter', async () => {
       await supertestWithoutAuth
         .post(EXECUTE_ROUTE)
-        .auth(ROLE.response_actions_role, 'changeme')
+        .auth(ROLE.endpoint_operations_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la', timeout: 'too' } })
         .expect(400, {
           statusCode: 400,
@@ -115,8 +126,9 @@ export default function ({ getService }: FtrProviderContext) {
         body: { data },
       } = await supertestWithoutAuth
         .post(EXECUTE_ROUTE)
-        .auth(ROLE.response_actions_role, 'changeme')
+        .auth(ROLE.endpoint_operations_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la' } })
         .expect(200);
 
@@ -130,8 +142,9 @@ export default function ({ getService }: FtrProviderContext) {
         body: { data },
       } = await supertestWithoutAuth
         .post(EXECUTE_ROUTE)
-        .auth(ROLE.response_actions_role, 'changeme')
+        .auth(ROLE.endpoint_operations_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la', timeout: 2000 } })
         .expect(200);
 

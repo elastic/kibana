@@ -12,12 +12,14 @@ import { noop } from 'lodash';
 import { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   RuleRegistrySearchRequest,
+  RuleRegistrySearchRequestPagination,
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
 import type {
+  MappingRuntimeFields,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
@@ -25,7 +27,6 @@ import type {
 import type { Alert, Alerts, GetInspectQuery, InspectQuery } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
-import * as i18n from './translations';
 
 export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
@@ -35,11 +36,13 @@ export interface FetchAlertsArgs {
     pageIndex: number;
     pageSize: number;
   };
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  runtimeMappings?: MappingRuntimeFields;
   sort: SortCombinations[];
   skip: boolean;
 }
 
-type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'skip'>;
+type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'skip' | 'onPageChange'>;
 
 type Refetch = () => void;
 
@@ -65,7 +68,7 @@ export interface FetchAlertResp {
 type AlertResponseState = Omit<FetchAlertResp, 'getInspectQuery' | 'refetch'>;
 interface AlertStateReducer {
   loading: boolean;
-  request: Omit<FetchAlertsArgs, 'skip'>;
+  request: Omit<FetchAlertsArgs, 'skip' | 'onPageChange'>;
   response: AlertResponseState;
 }
 
@@ -79,7 +82,7 @@ type AlertActions =
       ecsAlertsData: unknown[];
     }
   | { type: 'resetPagination' }
-  | { type: 'request'; request: Omit<FetchAlertsArgs, 'skip'> };
+  | { type: 'request'; request: Omit<FetchAlertsArgs, 'skip' | 'onPageChange'> };
 
 const initialAlertState: AlertStateReducer = {
   loading: false,
@@ -144,6 +147,8 @@ export type UseFetchAlerts = ({
   fields,
   query,
   pagination,
+  onPageChange,
+  runtimeMappings,
   skip,
   sort,
 }: FetchAlertsArgs) => [boolean, FetchAlertResp];
@@ -152,6 +157,8 @@ const useFetchAlerts = ({
   fields,
   query,
   pagination,
+  onPageChange,
+  runtimeMappings,
   skip,
   sort,
 }: FetchAlertsArgs): [boolean, FetchAlertResp] => {
@@ -199,7 +206,7 @@ const useFetchAlerts = ({
             )
             .subscribe({
               next: (response: RuleRegistrySearchResponse) => {
-                if (isCompleteResponse(response)) {
+                if (!isRunningResponse(response)) {
                   const { rawResponse } = response;
                   inspectQuery.current = {
                     request: response?.inspect?.dsl ?? [],
@@ -252,10 +259,6 @@ const useFetchAlerts = ({
                     totalAlerts,
                   });
                   searchSubscription$.current.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  dispatch({ type: 'loading', loading: false });
-                  data.search.showError(new Error(i18n.ERROR_FETCH_ALERTS));
-                  searchSubscription$.current.unsubscribe();
                 }
               },
               error: (msg) => {
@@ -275,6 +278,9 @@ const useFetchAlerts = ({
     [skip, data, featureIds, query, fields]
   );
 
+  // FUTURE ENGINEER
+  // This useEffect is only to fetch the alert when these props below changed
+  // fields, pagination, sort, runtimeMappings
   useEffect(() => {
     if (featureIds.length === 0) {
       return;
@@ -283,7 +289,8 @@ const useFetchAlerts = ({
       featureIds,
       fields,
       pagination,
-      query,
+      query: prevAlertRequest.current?.query ?? {},
+      runtimeMappings,
       sort,
     };
     if (
@@ -295,7 +302,37 @@ const useFetchAlerts = ({
         request: newAlertRequest,
       });
     }
-  }, [featureIds, fields, pagination, query, sort]);
+  }, [featureIds, fields, pagination, sort, runtimeMappings]);
+
+  // FUTURE ENGINEER
+  // This useEffect is only to fetch the alert when query props changed
+  // because we want to reset the pageIndex of pagination to 0
+  useEffect(() => {
+    if (featureIds.length === 0 || !prevAlertRequest.current) {
+      return;
+    }
+    const resetPagination = {
+      pageIndex: 0,
+      pageSize: prevAlertRequest.current?.pagination?.pageSize ?? 50,
+    };
+    const newAlertRequest = {
+      ...prevAlertRequest.current,
+      featureIds,
+      pagination: resetPagination,
+      query,
+    };
+
+    if (
+      (newAlertRequest?.fields ?? []).length > 0 &&
+      !deepEqual(newAlertRequest.query, prevAlertRequest.current.query)
+    ) {
+      dispatch({
+        type: 'request',
+        request: newAlertRequest,
+      });
+      onPageChange(resetPagination);
+    }
+  }, [featureIds, onPageChange, query]);
 
   useEffect(() => {
     if (alertRequest.featureIds.length > 0 && !deepEqual(alertRequest, prevAlertRequest.current)) {

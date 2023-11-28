@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
+import { initializeDataViews } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -15,53 +14,69 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { ROLES } from '../../test';
+import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
+const testSpaces = [
+  { name: 'default', tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { name: 'custom-spaces', tags: ['@ess'] },
+];
 describe('ALL - Custom space', () => {
-  const CUSTOM_SPACE = 'custom-space';
-  const PACK_NAME = 'testpack';
-  before(() => {
-    login(ROLES.admin);
-    cy.request({
-      method: 'POST',
-      url: '/api/spaces/space',
-      body: {
-        id: CUSTOM_SPACE,
-        name: CUSTOM_SPACE,
-      },
-      failOnStatusCode: false,
-      headers: { 'kbn-xsrf': 'create-space' },
-    });
-  });
+  testSpaces.forEach((testSpace) => {
+    describe(`[${testSpace.name}]`, { tags: testSpace.tags }, () => {
+      let packName: string;
+      let packId: string;
+      let spaceId: string;
 
-  after(() => {
-    login(ROLES.admin);
-    cy.request({
-      method: 'DELETE',
-      url: '/api/spaces/space/custom-space',
-      headers: { 'kbn-xsrf': 'delete-space' },
-    });
-  });
-
-  ['default', 'custom-space'].forEach((space) => {
-    describe(`[${space}]`, () => {
       before(() => {
-        runKbnArchiverScript(ArchiverMethod.LOAD, 'pack', space);
+        initializeDataViews();
+        cy.wrap(
+          new Promise<string>((resolve) => {
+            if (testSpace.name !== 'default') {
+              loadSpace().then((space) => {
+                spaceId = space.id;
+                resolve(spaceId);
+              });
+            } else {
+              spaceId = 'default';
+              resolve(spaceId);
+            }
+          })
+        ).then((space) => {
+          loadPack(
+            {
+              queries: {
+                test: {
+                  interval: 10,
+                  query: 'select * from uptime;',
+                  ecs_mapping: {},
+                },
+              },
+            },
+            space as string
+          ).then((data) => {
+            packId = data.saved_object_id;
+            packName = data.name;
+          });
+        });
       });
 
       beforeEach(() => {
-        login(ROLES.soc_manager);
-        navigateTo(`/s/${space}/app/osquery`);
+        cy.login(ServerlessRoleName.SOC_MANAGER);
+        navigateTo(`/s/${spaceId}/app/osquery`);
       });
 
       after(() => {
-        runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack', space);
+        cleanupPack(packId, spaceId);
+        if (testSpace.name !== 'default') {
+          cleanupSpace(spaceId);
+        }
       });
 
-      it('Discover should be opened in new tab in results table', () => {
+      it('Discover should be opened in new tab in results table', { tags: testSpace.tags }, () => {
         cy.contains('New live query').click();
         selectAllAgents();
-        inputQuery('select * from uptime; ');
+        inputQuery('select * from uptime;');
         submitQuery();
         checkResults();
         checkActionItemsInResults({
@@ -76,18 +91,16 @@ describe('ALL - Custom space', () => {
           .then(($href) => {
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);
-            cy.getBySel('breadcrumbs').contains('Discover').should('exist');
             cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-              cy.contains('action_data.queryselect * from uptime');
+              cy.contains('action_data{ "query": "select * from uptime;"');
             });
           });
       });
-      it(`runs packs normally on ${space}`, () => {
+
+      it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
-        cy.react('CustomItemAction', {
-          props: { item: { attributes: { name: PACK_NAME } } },
-        }).click();
+        cy.getBySel(`play-${packName}-button`).click();
         selectAllAgents();
         cy.contains('Submit').click();
         checkResults();

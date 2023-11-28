@@ -12,7 +12,13 @@ import { type LogMeta } from '@kbn/logging';
 
 // If you are updating these, consider whether they should also be updated in the
 // http service `getResponseLog`
-const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie', 'x-elastic-app-auth'];
+const FORBIDDEN_HEADERS = [
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'x-elastic-app-auth',
+  'es-client-authentication',
+];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.

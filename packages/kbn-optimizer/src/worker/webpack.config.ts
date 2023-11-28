@@ -15,7 +15,6 @@ import webpack from 'webpack';
 import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import CompressionPlugin from 'compression-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
@@ -91,7 +90,7 @@ export function getWebpackConfig(
       // already bundled with all its necessary dependencies
       noParse: [
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
       ],
 
       rules: [
@@ -269,15 +268,6 @@ export function getWebpackConfig(
       new webpack.DefinePlugin({
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
-        },
-      }),
-      new CompressionPlugin({
-        algorithm: 'brotliCompress',
-        filename: '[path].br',
-        test: /\.(js|css)$/,
-        cache: false,
-        compressionOptions: {
-          level: 11,
         },
       }),
     ],

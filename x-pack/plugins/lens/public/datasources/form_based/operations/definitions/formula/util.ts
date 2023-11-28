@@ -14,6 +14,7 @@ import type {
   TinymathVariable,
 } from '@kbn/tinymath';
 import type { Query } from '@kbn/es-query';
+import { nonNullable } from '../../../../../utils';
 import type {
   OperationDefinition,
   GenericIndexPatternColumn,
@@ -735,10 +736,6 @@ Example: Average revenue per customer but in some cases customer id is not provi
     }),
   },
 };
-
-export function nonNullable<T>(v: T): v is NonNullable<T> {
-  return v != null;
-}
 
 export function isMathNode(node: TinymathAST | string) {
   return isObject(node) && node.type === 'function' && tinymathFunctions[node.name];

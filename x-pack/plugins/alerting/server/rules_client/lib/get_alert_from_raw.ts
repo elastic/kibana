@@ -34,8 +34,12 @@ export interface GetAlertFromRawParams {
   includeLegacyId?: boolean;
   excludeFromPublicApi?: boolean;
   includeSnoozeData?: boolean;
+  omitGeneratedValues?: boolean;
 }
 
+/**
+ * @deprecated in favor of transformRuleAttributesToRuleDomain
+ */
 export function getAlertFromRaw<Params extends RuleTypeParams>(
   context: RulesClientContext,
   id: string,
@@ -44,7 +48,8 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
   references: SavedObjectReference[] | undefined,
   includeLegacyId: boolean = false,
   excludeFromPublicApi: boolean = false,
-  includeSnoozeData: boolean = false
+  includeSnoozeData: boolean = false,
+  omitGeneratedValues: boolean = true
 ): Rule | RuleWithLegacyId {
   const ruleType = context.ruleTypeRegistry.get(ruleTypeId);
   // In order to support the partial update API of Saved Objects we have to support
@@ -58,7 +63,8 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
     references,
     includeLegacyId,
     excludeFromPublicApi,
-    includeSnoozeData
+    includeSnoozeData,
+    omitGeneratedValues
   );
   // include to result because it is for internal rules client usage
   if (includeLegacyId) {
@@ -92,7 +98,8 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   references: SavedObjectReference[] | undefined,
   includeLegacyId: boolean = false,
   excludeFromPublicApi: boolean = false,
-  includeSnoozeData: boolean = false
+  includeSnoozeData: boolean = false,
+  omitGeneratedValues: boolean = true
 ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
   const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
     ...s,
@@ -152,11 +159,16 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       : {}),
   };
 
+  if (omitGeneratedValues) {
+    if (rule.actions) {
+      rule.actions = rule.actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
+    }
+  }
+
   // Need the `rule` object to build a URL
   if (!excludeFromPublicApi) {
     const viewInAppRelativeUrl =
-      ruleType.getViewInAppRelativeUrl &&
-      ruleType.getViewInAppRelativeUrl({ rule: rule as Rule<Params> });
+      ruleType.getViewInAppRelativeUrl && ruleType.getViewInAppRelativeUrl({ rule });
     if (viewInAppRelativeUrl) {
       rule.viewInAppRelativeUrl = viewInAppRelativeUrl;
     }

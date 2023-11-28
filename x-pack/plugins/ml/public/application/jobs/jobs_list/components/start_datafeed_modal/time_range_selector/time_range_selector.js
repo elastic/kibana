@@ -14,7 +14,7 @@ import { EuiDatePicker, EuiFieldText, EuiSpacer, EuiFlexGroup, EuiFlexItem } fro
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { ManagedJobsWarningCallout } from '../../confirm_modals/managed_jobs_warning_callout';
 
 export class TimeRangeSelector extends Component {
@@ -27,6 +27,7 @@ export class TimeRangeSelector extends Component {
     };
     this.latestTimestamp = this.props.startTime;
     this.now = this.props.now;
+    this.twoWeeksAgo = moment(this.now).subtract(2, 'weeks').startOf('day');
   }
 
   setStartTab = (tab) => {
@@ -37,6 +38,9 @@ export class TimeRangeSelector extends Component {
         break;
       case 1:
         this.setStartTime(this.now);
+        break;
+      case 2:
+        this.setStartTime(this.twoWeeksAgo);
         break;
       default:
         break;

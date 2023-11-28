@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useContext, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
@@ -33,6 +34,8 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
+import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -50,7 +53,6 @@ import {
   AddUserMessages,
   isMessageRemovable,
 } from '../../../types';
-import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
@@ -98,6 +100,7 @@ export interface WorkspacePanelProps {
 interface WorkspaceState {
   expandError: boolean;
   expressionToRender: string | null | undefined;
+  errors: UserMessage[];
 }
 
 const dropProps = {
@@ -124,11 +127,11 @@ const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
 
-  const dragDropContext = useContext(DragContext);
+  const [{ dragging }] = useDragDropContext();
 
   const suggestionForDraggedField = useMemo(
-    () => dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging),
-    [dragDropContext.dragging, getSuggestionForField]
+    () => dragging && getSuggestionForField(dragging),
+    [dragging, getSuggestionForField]
   );
 
   return (
@@ -165,9 +168,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const [localState, setLocalState] = useState<WorkspaceState>({
     expandError: false,
     expressionToRender: undefined,
+    errors: [],
   });
 
-  const initialRenderComplete = useRef<boolean>();
+  const initialVisualizationRenderComplete = useRef<boolean>(false);
+
+  // NOTE: This does not reflect the actual visualization render
+  const initialWorkspaceRenderComplete = useRef<boolean>();
 
   const renderDeps = useRef<{
     datasourceMap: DatasourceMap;
@@ -189,8 +196,25 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     dataViews,
   };
 
+  // NOTE: initialRenderTime is only set once when the component mounts
+  const visualizationRenderStartTime = useRef<number>(NaN);
+  const dataReceivedTime = useRef<number>(NaN);
+
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
+      if (!initialVisualizationRenderComplete.current) {
+        initialVisualizationRenderComplete.current = true;
+        // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
+        const currentTime = performance.now();
+        reportPerformanceMetricEvent(core.analytics, {
+          eventName: 'lensVisualizationRenderTime',
+          duration: currentTime - visualizationRenderStartTime.current,
+          key1: 'time_to_data',
+          value1: dataReceivedTime.current - visualizationRenderStartTime.current,
+          key2: 'time_to_render',
+          value2: currentTime - dataReceivedTime.current,
+        });
+      }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
           if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
@@ -221,7 +245,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
       trackUiCounterEvents(events);
     }
-  }, []);
+  }, [core.analytics]);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
   const removeExpressionBuildErrorsRef = useRef<() => void>();
@@ -229,6 +253,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const onData$ = useCallback(
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
+        dataReceivedTime.current = performance.now();
+
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
@@ -273,20 +299,23 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [addUserMessages, dispatchLens, plugins.data.search]
   );
 
-  const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
+  const shouldApplyExpression =
+    autoApplyEnabled || !initialWorkspaceRenderComplete.current || triggerApply;
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = getUserMessages(['visualization', 'visualizationInEditor'], {
-    severity: 'error',
-  });
+  const workspaceErrors = useCallback(() => {
+    return getUserMessages(['visualization', 'visualizationInEditor'], {
+      severity: 'error',
+    });
+  }, [getUserMessages]);
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
     // shouldn't build expression if there is any type of error other than an expression build error
     // (in which case we try again every time because the config might have changed)
-    if (workspaceErrors.every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
+    if (workspaceErrors().every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -296,6 +325,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
           dateRange: framePublicAPI.dateRange,
+          nowInstant: plugins.data.nowProvider.get(),
           searchSessionId,
         });
 
@@ -342,13 +372,16 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     dataViews.indexPatterns,
     framePublicAPI.dateRange,
+    plugins.data.nowProvider,
     searchSessionId,
     addUserMessages,
   ]);
 
+  const isSaveable = Boolean(unappliedExpression);
+
   useEffect(() => {
-    dispatchLens(setSaveable(Boolean(unappliedExpression)));
-  }, [unappliedExpression, dispatchLens]);
+    dispatchLens(setSaveable(isSaveable));
+  }, [isSaveable, dispatchLens]);
 
   useEffect(() => {
     if (!autoApplyEnabled) {
@@ -361,9 +394,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       setLocalState((s) => ({
         ...s,
         expressionToRender: unappliedExpression,
+        errors: workspaceErrors(),
       }));
     }
-  }, [unappliedExpression, shouldApplyExpression]);
+  }, [unappliedExpression, shouldApplyExpression, workspaceErrors]);
 
   const expressionExists = Boolean(localState.expressionToRender);
 
@@ -379,9 +413,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     // null signals an empty workspace which should count as an initial render
     if (
       (expressionExists || localState.expressionToRender === null) &&
-      !initialRenderComplete.current
+      !initialWorkspaceRenderComplete.current
     ) {
-      initialRenderComplete.current = true;
+      initialWorkspaceRenderComplete.current = true;
     }
   }, [expressionExists, localState.expressionToRender]);
 
@@ -395,7 +429,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event),
           },
         });
       }
@@ -403,7 +437,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event),
           },
         });
       }
@@ -447,7 +481,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
 
   const renderDragDropPrompt = () => {
     return (
@@ -549,31 +583,32 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     return (
       <VisualizationWrapper
         expression={localState.expressionToRender}
-        framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState }}
-        errors={workspaceErrors}
+        errors={localState.errors}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
-        activeDatasourceId={activeDatasourceId}
         onRender$={onRender$}
         onData$={onData$}
+        onComponentRendered={() => {
+          visualizationRenderStartTime.current = performance.now();
+        }}
       />
     );
   };
 
-  const dragDropContext = useContext(DragContext);
+  const [{ dragging }] = useDragDropContext();
   const renderWorkspace = () => {
     const customWorkspaceRenderer =
       activeDatasourceId &&
       datasourceMap[activeDatasourceId]?.getCustomWorkspaceRenderer &&
-      dragDropContext.dragging
+      dragging
         ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
             datasourceStates[activeDatasourceId].state,
-            dragDropContext.dragging,
+            dragging,
             dataViews.indexPatterns
           )
         : undefined;
@@ -624,9 +659,28 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 });
 
+function useReportingState(errors: UserMessage[]): {
+  isRenderComplete: boolean;
+  hasDynamicError: boolean;
+  setIsRenderComplete: (state: boolean) => void;
+  setDynamicError: (state: boolean) => void;
+  nodeRef: React.RefObject<HTMLDivElement>;
+} {
+  const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
+  const [hasDynamicError, setDynamicError] = useState(false);
+  const nodeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isRenderComplete && nodeRef.current) {
+      nodeRef.current.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+    }
+  }, [isRenderComplete, errors]);
+
+  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
+}
+
 export const VisualizationWrapper = ({
   expression,
-  framePublicAPI,
   lensInspector,
   onEvent,
   hasCompatibleActions,
@@ -635,12 +689,11 @@ export const VisualizationWrapper = ({
   errors,
   ExpressionRendererComponent,
   core,
-  activeDatasourceId,
   onRender$,
   onData$,
+  onComponentRendered,
 }: {
   expression: string | null | undefined;
-  framePublicAPI: FramePublicAPI;
   lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
   hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
@@ -649,11 +702,25 @@ export const VisualizationWrapper = ({
   errors: UserMessage[];
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
-  activeDatasourceId: string | null;
   onRender$: () => void;
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onComponentRendered: () => void;
 }) => {
+  useEffect(() => {
+    onComponentRendered();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const context = useLensSelector(selectExecutionContext);
+  // Used for reporting
+  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
+    useReportingState(errors);
+
+  const onRenderHandler = useCallback(() => {
+    setIsRenderComplete(true);
+    onRender$();
+  }, [setIsRenderComplete, onRender$]);
+
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
       query: context.query,
@@ -662,13 +729,13 @@ export const VisualizationWrapper = ({
         to: context.dateRange.toDate,
       },
       filters: context.filters,
-      disableShardWarnings: true,
+      disableWarningToasts: true,
     }),
     [context]
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
-  if (errors?.length) {
+  if (errors.length) {
     const showExtraErrorsAction =
       !localState.expandError && errors.length > 1 ? (
         <EuiButtonEmpty
@@ -690,7 +757,14 @@ export const VisualizationWrapper = ({
     const [firstMessage, ...rest] = errors;
 
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup
+        data-shared-items-container
+        data-render-complete={true}
+        data-shared-item=""
+        data-render-error={i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
+          defaultMessage: `A configuration error occurred`,
+        })}
+      >
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={showExtraErrorsAction}
@@ -711,7 +785,7 @@ export const VisualizationWrapper = ({
               </>
             }
             iconColor="danger"
-            iconType="alert"
+            iconType="warning"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -719,7 +793,20 @@ export const VisualizationWrapper = ({
   }
 
   return (
-    <div className="lnsExpressionRenderer">
+    <div
+      className="lnsExpressionRenderer"
+      data-shared-items-container
+      data-render-complete={isRenderComplete}
+      data-shared-item=""
+      data-render-error={
+        hasDynamicError
+          ? i18n.translate('xpack.lens.editorFrame.dataFailure', {
+              defaultMessage: `An error occurred when loading data.`,
+            })
+          : undefined
+      }
+      ref={nodeRef}
+    >
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
         padding="m"
@@ -729,17 +816,21 @@ export const VisualizationWrapper = ({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
-        onRender$={onRender$}
+        onRender$={onRenderHandler}
         inspectorAdapters={lensInspector.adapters}
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const errorsFromRequest = getOriginalRequestErrorMessages(error);
+          const errorsFromRequest = getOriginalRequestErrorMessages(error || null, core.docLinks);
           const visibleErrorMessages = errorsFromRequest.length
-            ? errorsFromRequest
+            ? errorsFromRequest.map((e) => e.longMessage || e.shortMessage)
             : errorMessage
             ? [errorMessage]
             : [];
+
+          if (!hasDynamicError) {
+            setDynamicError(true);
+          }
 
           return (
             <EuiFlexGroup>
@@ -771,16 +862,20 @@ export const VisualizationWrapper = ({
                       </p>
 
                       {localState.expandError
-                        ? visibleErrorMessages.map((visibleErrorMessage) => (
-                            <p className="eui-textBreakWord" key={visibleErrorMessage}>
-                              {visibleErrorMessage}
-                            </p>
-                          ))
+                        ? visibleErrorMessages.map((visibleErrorMessage) =>
+                            typeof visibleErrorMessage === 'string' ? (
+                              <p className="eui-textBreakWord" key={visibleErrorMessage}>
+                                {visibleErrorMessage}
+                              </p>
+                            ) : (
+                              visibleErrorMessage
+                            )
+                          )
                         : null}
                     </>
                   }
                   iconColor="danger"
-                  iconType="alert"
+                  iconType="warning"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

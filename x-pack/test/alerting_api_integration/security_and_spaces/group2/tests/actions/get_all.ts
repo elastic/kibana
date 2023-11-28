@@ -70,6 +70,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: createdAction.id,
                   is_preconfigured: false,
+                  is_system_action: false,
                   is_deprecated: false,
                   name: 'My action',
                   connector_type_id: 'test.index-record',
@@ -80,8 +81,18 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: '.email',
+                  id: 'notification-email',
+                  is_deprecated: false,
+                  is_system_action: false,
+                  is_preconfigured: true,
+                  name: 'Notification Email Connector',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.index',
                   name: 'preconfigured_es_index_action',
@@ -91,6 +102,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   connector_type_id: '.servicenow',
                   id: 'my-deprecated-servicenow',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: true,
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
@@ -99,6 +111,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   connector_type_id: '.servicenow',
                   id: 'my-deprecated-servicenow-default',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: true,
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
@@ -106,6 +119,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'my-slack1',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
@@ -114,6 +128,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: 'system-abc-action-type',
                   name: 'SystemABC',
@@ -122,6 +137,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured.test.index-record',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
@@ -130,6 +146,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'my-test-email',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.email',
                   name: 'TestEmail#xyz',
@@ -213,6 +230,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: createdAction.id,
                   is_preconfigured: false,
+                  is_system_action: false,
                   is_deprecated: false,
                   name: 'My action',
                   connector_type_id: 'test.index-record',
@@ -223,8 +241,18 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 1,
                 },
                 {
+                  connector_type_id: '.email',
+                  id: 'notification-email',
+                  is_deprecated: false,
+                  is_preconfigured: true,
+                  is_system_action: false,
+                  name: 'Notification Email Connector',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.index',
                   name: 'preconfigured_es_index_action',
@@ -235,6 +263,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   id: 'my-deprecated-servicenow',
                   is_deprecated: true,
                   is_preconfigured: true,
+                  is_system_action: false,
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
                 },
@@ -242,6 +271,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   connector_type_id: '.servicenow',
                   id: 'my-deprecated-servicenow-default',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: true,
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
@@ -249,6 +279,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'my-slack1',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
@@ -257,6 +288,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: 'system-abc-action-type',
                   name: 'SystemABC',
@@ -265,6 +297,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured.test.index-record',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
@@ -273,6 +306,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'my-test-email',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.email',
                   name: 'TestEmail#xyz',
@@ -330,8 +364,18 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               );
               expect(nonCustomSslConnectors).to.eql([
                 {
+                  connector_type_id: '.email',
+                  id: 'notification-email',
+                  is_deprecated: false,
+                  is_preconfigured: true,
+                  is_system_action: false,
+                  name: 'Notification Email Connector',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.index',
                   name: 'preconfigured_es_index_action',
@@ -341,6 +385,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   connector_type_id: '.servicenow',
                   id: 'my-deprecated-servicenow',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: true,
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
@@ -349,6 +394,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   connector_type_id: '.servicenow',
                   id: 'my-deprecated-servicenow-default',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: true,
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
@@ -356,6 +402,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'my-slack1',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
@@ -364,6 +411,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: 'system-abc-action-type',
                   name: 'SystemABC',
@@ -372,6 +420,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured.test.index-record',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
@@ -380,6 +429,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'my-test-email',
                   is_preconfigured: true,
+                  is_system_action: false,
                   is_deprecated: false,
                   connector_type_id: '.email',
                   name: 'TestEmail#xyz',

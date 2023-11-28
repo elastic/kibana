@@ -16,6 +16,7 @@
     "@kbn/core-base-common",
     "@kbn/core-lifecycle-browser",
     "@kbn/logging",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

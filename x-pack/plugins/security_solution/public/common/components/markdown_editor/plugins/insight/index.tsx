@@ -14,7 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiSpacer,
-  EuiBetaBadge,
+  EuiCallOut,
   EuiCodeBlock,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -32,8 +32,7 @@ import {
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -55,6 +54,9 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/consta
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
+import { useLicense } from '../../../../hooks/use_license';
+import { isProviderValid } from './helpers';
+import * as i18n from './translations';
 
 interface InsightComponentProps {
   label?: string;
@@ -64,11 +66,12 @@ interface InsightComponentProps {
   relativeTo?: string;
 }
 
+export const insightPrefix = '!{investigate';
+
 export const parser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
-  const insightPrefix = '!{insight';
 
   const tokenizeInsight: RemarkTokenizer = function (eat, value, silent) {
     if (value.startsWith(insightPrefix) === false) {
@@ -114,16 +117,10 @@ export const parser: Plugin = function () {
         });
       } catch (err) {
         const now = eat.now();
-        this.file.fail(
-          i18n.translate('xpack.securitySolution.markdownEditor.plugins.insightConfigError', {
-            values: { err },
-            defaultMessage: 'Unable to parse insight JSON configuration: {err}',
-          }),
-          {
-            line: now.line,
-            column: now.column + insightPrefix.length,
-          }
-        );
+        this.file.fail(i18n.INVALID_FILTER_ERROR(err), {
+          line: now.line,
+          column: now.column + insightPrefix.length,
+        });
       }
     }
     return false;
@@ -137,8 +134,7 @@ export const parser: Plugin = function () {
 
 const resultFormat = '0,0.[000]a';
 
-// receives the configuration from the parser and renders
-const InsightComponent = ({
+const LicensedInsightComponent = ({
   label,
   description,
   providers,
@@ -153,9 +149,7 @@ const InsightComponent = ({
     }
   } catch (err) {
     addError(err, {
-      title: i18n.translate('xpack.securitySolution.markdownEditor.plugins.insightProviderError', {
-        defaultMessage: 'Unable to parse insight provider configuration',
-      }),
+      title: i18n.PARSE_ERROR,
     });
   }
   const { data: alertData, timestamp } = useContext(BasicAlertDataContext);
@@ -215,9 +209,8 @@ const InsightComponent = ({
       };
     }
   }, [oldestTimestamp, relativeTimerange]);
-
   if (isQueryLoading) {
-    return <EuiLoadingSpinner size="l" />;
+    return <EuiLoadingSpinner />;
   } else {
     return (
       <>
@@ -239,6 +232,43 @@ const InsightComponent = ({
   }
 };
 
+// receives the configuration from the parser and renders
+const InsightComponent = ({
+  label,
+  description,
+  providers,
+  relativeFrom,
+  relativeTo,
+}: InsightComponentProps) => {
+  const isPlatinum = useLicense().isPlatinumPlus();
+
+  if (isPlatinum === false) {
+    return (
+      <>
+        <EuiButton
+          isDisabled={true}
+          iconSide={'left'}
+          iconType={'timeline'}
+          data-test-subj="insight-investigate-in-timeline-button"
+        >
+          {`${label}`}
+        </EuiButton>
+        <div>{description}</div>
+      </>
+    );
+  } else {
+    return (
+      <LicensedInsightComponent
+        label={label}
+        description={description}
+        providers={providers}
+        relativeFrom={relativeFrom}
+        relativeTo={relativeTo}
+      />
+    );
+  }
+};
+
 export { InsightComponent as renderer };
 
 const InsightEditorComponent = ({
@@ -253,7 +283,16 @@ const InsightEditorComponent = ({
       ui: { FiltersBuilderLazy },
     },
     uiSettings,
+    fieldFormats,
   } = useKibana().services;
+  const dataView = useMemo(() => {
+    if (sourcererDataView != null) {
+      return new DataView({ spec: sourcererDataView, fieldFormats });
+    } else {
+      return null;
+    }
+  }, [sourcererDataView, fieldFormats]);
+
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
     const settings: Array<{ from: string; to: string; display: string }> = uiSettings.get(
@@ -270,12 +309,6 @@ const InsightEditorComponent = ({
       }),
     ];
   }, [uiSettings]);
-  const kibanaDataProvider = useMemo(() => {
-    return {
-      ...sourcererDataView,
-      fields: sourcererDataView?.indexFields,
-    } as DataView;
-  }, [sourcererDataView]);
   const formMethods = useForm<{
     label: string;
     description: string;
@@ -322,7 +355,7 @@ const InsightEditorComponent = ({
 
   const onSubmit = useCallback(() => {
     onSave(
-      `!{insight${JSON.stringify(
+      `${insightPrefix}${JSON.stringify(
         pickBy(
           {
             label: labelController.field.value,
@@ -356,9 +389,16 @@ const InsightEditorComponent = ({
     [relativeTimerangeController.field]
   );
   const disableSubmit = useMemo(() => {
-    const labelOrEmpty = labelController.field.value ? labelController.field.value : '';
-    return labelOrEmpty.trim() === '' || providers.length === 0;
-  }, [labelController.field.value, providers]);
+    const labelOrEmpty = labelController.field.value ?? '';
+    const flattenedProviders = providers.flat();
+    return (
+      labelOrEmpty.trim() === '' ||
+      flattenedProviders.length === 0 ||
+      flattenedProviders.some(
+        (provider) => !isProviderValid(provider, dataView?.getFieldByName(provider.field))
+      )
+    );
+  }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
     const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
     return [
@@ -375,6 +415,8 @@ const InsightEditorComponent = ({
       },
     ];
   }, [indexPattern]);
+  const isPlatinum = useLicense().isAtLeast('platinum');
+
   return (
     <>
       <EuiModalHeader
@@ -397,25 +439,28 @@ const InsightEditorComponent = ({
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                color={'hollow'}
-                label={i18n.translate('xpack.securitySolution.markdown.insight.technicalPreview', {
-                  defaultMessage: 'Technical Preview',
-                })}
-                size="s"
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-
+      {isPlatinum === false && (
+        <EuiCallOut
+          title="To add suggested queries to an investigation guide, please upgrade to platinum"
+          iconType="timeline"
+        />
+      )}
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
+            <EuiFormRow label={i18n.FORM_DESCRIPTION} fullWidth>
+              <></>
+            </EuiFormRow>
             <EuiFormRow
-              label="Label"
-              helpText="Label for the filter button rendered in the guide"
+              label={i18n.LABEL}
+              helpText={i18n.LABEL_TEXT}
+              isInvalid={
+                labelController.field.value !== undefined &&
+                labelController.field.value.trim().length === 0
+              }
               fullWidth
             >
               <EuiFieldText
@@ -427,28 +472,28 @@ const InsightEditorComponent = ({
                 onChange={labelController.field.onChange}
               />
             </EuiFormRow>
-            <EuiFormRow
-              label="Description"
-              helpText="Description of the relevance of the query"
-              fullWidth
-            >
+            <EuiFormRow label={i18n.DESCRIPTION} helpText={i18n.DESCRIPTION_TEXT} fullWidth>
               <EuiFieldText
                 {...{ ...formMethods.register('description'), ref: null }}
                 name="description"
                 onChange={descriptionController.field.onChange}
               />
             </EuiFormRow>
-            <EuiFormRow fullWidth>
-              <FiltersBuilderLazy
-                filters={filtersStub}
-                onChange={onChange}
-                dataView={kibanaDataProvider}
-                maxDepth={2}
-              />
+            <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
+              {dataView ? (
+                <FiltersBuilderLazy
+                  filters={filtersStub}
+                  onChange={onChange}
+                  dataView={dataView}
+                  maxDepth={1}
+                />
+              ) : (
+                <></>
+              )}
             </EuiFormRow>
             <EuiFormRow
-              label="Relative time range"
-              helpText="Select a time range relative to the time of the alert (optional)"
+              label={i18n.RELATIVE_TIMERANGE}
+              helpText={i18n.RELATIVE_TIMERANGE_TEXT}
               fullWidth
             >
               <EuiSelect
@@ -462,11 +507,7 @@ const InsightEditorComponent = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
-          {i18n.translate('xpack.securitySolution.markdown.insight.modalCancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL_FORM_BUTTON}</EuiButtonEmpty>
         <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill disabled={disableSubmit}>
           {isEditMode ? (
             <FormattedMessage
@@ -486,33 +527,40 @@ const InsightEditorComponent = ({
 };
 
 const InsightEditor = React.memo(InsightEditorComponent);
-const exampleInsight = `!{insight{
+const exampleInsight = `${insightPrefix}{
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [
-    [     
+    [
       {"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase", "excluded": "false"}
     ],
-    [  
+    [
       {"field": "event.action", "value": "", "queryType": "exists", "excluded": "false"},
       {"field": "process.pid", "value": "{{process.pid}}", "queryType": "phrase", "excluded":"false"}
     ]
   ]
 }}`;
 
-export const plugin = {
-  name: 'insights',
-  button: {
-    label: 'Insights',
-    iconType: 'aggregate',
-  },
-  helpText: (
-    <div>
-      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {exampleInsight}
-      </EuiCodeBlock>
-      <EuiSpacer size="s" />
-    </div>
-  ),
-  editor: InsightEditor,
+export const plugin = ({
+  insightsUpsellingMessage,
+}: {
+  insightsUpsellingMessage: string | null;
+}) => {
+  return {
+    name: 'insights',
+    button: {
+      label: insightsUpsellingMessage ?? i18n.INVESTIGATE,
+      iconType: 'timelineWithArrow',
+      isDisabled: !!insightsUpsellingMessage,
+    },
+    helpText: (
+      <div>
+        <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
+          {exampleInsight}
+        </EuiCodeBlock>
+        <EuiSpacer size="s" />
+      </div>
+    ),
+    editor: InsightEditor,
+  };
 };

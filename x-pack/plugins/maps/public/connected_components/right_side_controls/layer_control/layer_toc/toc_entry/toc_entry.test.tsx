@@ -14,6 +14,13 @@ jest.mock('../../../../../kibana_services', () => {
     getMapsCapabilities() {
       return { save: true };
     },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
   };
 });
 
@@ -42,6 +49,9 @@ const mockLayer = {
   },
   hasErrors: () => {
     return false;
+  },
+  getErrors: () => {
+    return [];
   },
   hasLegendDetails: () => {
     return true;

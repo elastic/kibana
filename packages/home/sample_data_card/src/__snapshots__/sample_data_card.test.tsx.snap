@@ -64,15 +64,15 @@ exports[`SampleDataCard installed renders with app links 1`] = `
         >
           <button
             aria-label="Remove Sample Data Set"
-            class="euiButtonEmpty euiButtonEmpty--flushLeft css-1v3a3p6-empty-danger"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-danger-flush-left"
             data-test-subj="removeSampleDataSetsample-data-set"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text"
               >
                 Remove
               </span>
@@ -92,7 +92,7 @@ exports[`SampleDataCard installed renders with app links 1`] = `
             >
               <button
                 aria-label="View Sample Data Set"
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
                 type="button"
               >
                 <span
@@ -182,15 +182,15 @@ exports[`SampleDataCard installed renders without app links 1`] = `
         >
           <button
             aria-label="Remove Sample Data Set"
-            class="euiButtonEmpty euiButtonEmpty--flushLeft css-1v3a3p6-empty-danger"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-danger-flush-left"
             data-test-subj="removeSampleDataSetsample-data-set"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text"
               >
                 Remove
               </span>
@@ -202,7 +202,7 @@ exports[`SampleDataCard installed renders without app links 1`] = `
         >
           <button
             aria-label="View Sample Data Set"
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
             data-test-subj="launchSampleDataSetsample-data-set"
             type="button"
           >
@@ -276,7 +276,7 @@ exports[`SampleDataCard not installed renders 1`] = `
         >
           <button
             aria-label="Add Sample Data Set"
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
             data-test-subj="addSampleDataSetsample-data-set"
             type="button"
           >

@@ -43,7 +43,7 @@ export const LastEventTime = memo<LastEventTimeProps>(
           aria-label="last_event_time_error"
           id={`last_event_time_error-${indexKey}`}
         >
-          <EuiIcon aria-describedby={`last_event_time_error-${indexKey}`} type="alert" />
+          <EuiIcon aria-describedby={`last_event_time_error-${indexKey}`} type="warning" />
         </EuiToolTip>
       );
     }

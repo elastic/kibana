@@ -39,7 +39,7 @@ const getBadge = (item: VisualizationListItem) => {
         })}
         tooltipContent={i18n.translate('visualizations.listing.experimentalTooltip', {
           defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
         })}
       />
     );
@@ -82,7 +82,7 @@ export const getCustomColumn = () => {
           {getBadge(record)}
         </span>
       ) : (
-        <EuiBadge iconType="alert" color="warning">
+        <EuiBadge iconType="warning" color="warning">
           {record.error}
         </EuiBadge>
       ),

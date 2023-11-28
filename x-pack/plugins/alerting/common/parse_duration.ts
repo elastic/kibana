@@ -10,6 +10,8 @@ const MINUTES_REGEX = /^[1-9][0-9]*m$/;
 const HOURS_REGEX = /^[1-9][0-9]*h$/;
 const DAYS_REGEX = /^[1-9][0-9]*d$/;
 
+const MS_PER_MINUTE = 60 * 1000;
+
 // parse an interval string '{digit*}{s|m|h|d}' into milliseconds
 export function parseDuration(duration: string): number {
   const parsed = parseInt(duration, 10);
@@ -41,6 +43,19 @@ export function formatDuration(duration: string, fullUnit?: boolean): string {
   throw new Error(
     `Invalid duration "${duration}". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"`
   );
+}
+
+export function convertDurationToFrequency(
+  duration: string,
+  denomination: number = MS_PER_MINUTE
+): number {
+  const durationInMs = parseDuration(duration);
+  if (denomination === 0) {
+    throw new Error(`Invalid denomination value: value cannot be 0`);
+  }
+
+  const intervalInDenominationUnits = durationInMs / denomination;
+  return 1 / intervalInDenominationUnits;
 }
 
 export function getDurationNumberInItsUnit(duration: string): number {

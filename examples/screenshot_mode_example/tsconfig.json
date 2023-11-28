@@ -22,5 +22,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/analytics",
     "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
   ]
 }

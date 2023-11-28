@@ -20,6 +20,8 @@ import {
   observabilityOnlyReadAlerts,
   securitySolutionOnlyReadAlerts,
   securitySolutionOnlyReadNoIndexAlerts,
+  securitySolutionOnlyReadDelete,
+  noCasesConnectors as noCasesConnectorRole,
 } from './roles';
 import { User } from './types';
 
@@ -45,6 +47,12 @@ export const secOnlyDelete: User = {
   username: 'sec_only_delete',
   password: 'sec_only_delete',
   roles: [securitySolutionOnlyDelete.name],
+};
+
+export const secOnlyReadDelete: User = {
+  username: 'sec_only_read_delete',
+  password: 'sec_only_read_delete',
+  roles: [securitySolutionOnlyReadDelete.name],
 };
 
 export const secOnlyNoDelete: User = {
@@ -119,6 +127,12 @@ export const noCasesPrivilegesSpace1: User = {
   roles: [noCasesPrivilegesSpace1Role.name],
 };
 
+export const noCasesConnectors: User = {
+  username: 'no_cases_connectors',
+  password: 'no_cases_connectors',
+  roles: [noCasesConnectorRole.name],
+};
+
 /**
  * These users will have access to all spaces.
  */
@@ -136,6 +150,7 @@ export const users = [
   secOnlyReadAlerts,
   secSolutionOnlyReadNoIndexAlerts,
   secOnlyDelete,
+  secOnlyReadDelete,
   secOnlyNoDelete,
   obsOnly,
   obsOnlyRead,
@@ -146,4 +161,5 @@ export const users = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
   testDisabled,
+  noCasesConnectors,
 ];

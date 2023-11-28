@@ -26,6 +26,7 @@ const simpleSavedObjectMockDefaults: Partial<SimpleSavedObject<T>> = {
   updatedAt: '',
   createdAt: '',
   namespaces: undefined,
+  managed: false,
 };
 
 const createSimpleSavedObjectMock = (
@@ -39,6 +40,8 @@ const createSimpleSavedObjectMock = (
     type: savedObject.type,
     migrationVersion: savedObject.migrationVersion,
     coreMigrationVersion: savedObject.coreMigrationVersion,
+    typeMigrationVersion: savedObject.typeMigrationVersion,
+    managed: savedObject.managed,
     error: savedObject.error,
     references: savedObject.references,
     updatedAt: savedObject.updated_at,

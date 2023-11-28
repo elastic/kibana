@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { MetricVis, MetricVisComponentProps } from './metric_vis';
 import {
   LayoutDirection,
@@ -21,7 +21,7 @@ import {
 } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
-import numeral from '@elastic/numeral';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { HtmlAttributes } from 'csstype';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import { DimensionsVisParam } from '../../common';
@@ -29,19 +29,17 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import faker from 'faker';
 
-const mockDeserialize = jest.fn((params) => {
-  const converter =
-    params.id === 'terms'
-      ? (val: string) => (val === '__other__' ? 'Other' : val)
-      : params.id === 'string'
-      ? (val: string) => (val === '' ? '(empty)' : val)
-      : () => 'formatted duration';
-  return { getConverterFor: jest.fn(() => converter) };
+const mockDeserialize = jest.fn(({ id }: { id: string }) => {
+  const convertFn = (v: unknown) => `${id}-${v}`;
+  return { getConverterFor: () => convertFn };
 });
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
 
-const mockLookupCurrentLocale = jest.fn(() => 'en');
+const CURRENCY_DEFAULT_FORMAT = '$0.0';
+
+const mockFormatSettingLookup = jest.fn(() => CURRENCY_DEFAULT_FORMAT);
+const mockIsOverridden = jest.fn();
 
 jest.mock('../services', () => ({
   getFormatService: () => {
@@ -53,13 +51,13 @@ jest.mock('../services', () => ({
     get: jest.fn(() => ({ getColorForValue: mockGetColorForValue })),
   }),
   getThemeService: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getThemeService } = require('../__mocks__/theme_service');
+    const { getThemeService } = jest.requireActual('../__mocks__/theme_service');
     return getThemeService();
   },
   getUiSettingsService: () => {
     return {
-      get: mockLookupCurrentLocale,
+      get: mockFormatSettingLookup,
+      isOverridden: mockIsOverridden,
     };
   },
 }));
@@ -68,15 +66,6 @@ jest.mock('@kbn/field-formats-plugin/common', () => ({
   FORMATS_UI_SETTINGS: {
     FORMAT_NUMBER_DEFAULT_LOCALE: 'format_number_default_locale',
   },
-}));
-
-jest.mock('@elastic/numeral', () => ({
-  language: jest.fn(() => 'en'),
-  languageData: jest.fn(() => ({
-    currency: {
-      symbol: '$',
-    },
-  })),
 }));
 
 type Props = MetricVisComponentProps;
@@ -218,6 +207,7 @@ const defaultProps = {
   fireEvent: () => {},
   filterable: true,
   renderMode: 'view',
+  uiSettings: {} as unknown as IUiSettingsClient,
 } as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'renderMode'>;
 
 describe('MetricVisComponent', function () {
@@ -230,6 +220,7 @@ describe('MetricVisComponent', function () {
       metric: {
         progressDirection: 'vertical',
         maxCols: 5,
+        icon: 'empty',
       },
       dimensions: {
         metric: basePriceColumnId,
@@ -250,6 +241,7 @@ describe('MetricVisComponent', function () {
         Object {
           "color": "#f5f7fa",
           "extra": <span />,
+          "icon": [Function],
           "subtitle": undefined,
           "title": "Median products.base_price",
           "value": 28.984375,
@@ -288,7 +280,7 @@ describe('MetricVisComponent', function () {
       expect(configNoPrefix!.extra).toEqual(
         <span>
           {table.columns.find((col) => col.id === minPriceColumnId)!.name}
-          {' ' + 13.63}
+          {` number-13.6328125`}
         </span>
       );
 
@@ -301,7 +293,7 @@ describe('MetricVisComponent', function () {
       expect(configWithPrefix!.extra).toEqual(
         <span>
           {'secondary prefix'}
-          {' ' + 13.63}
+          {` number-13.6328125`}
         </span>
       );
 
@@ -310,8 +302,9 @@ describe('MetricVisComponent', function () {
           "color": "#f5f7fa",
           "extra": <span>
             secondary prefix
-             13.63
+             number-13.6328125
           </span>,
+          "icon": [Function],
           "subtitle": "subtitle",
           "title": "Median products.base_price",
           "value": 28.984375,
@@ -358,6 +351,7 @@ describe('MetricVisComponent', function () {
           "color": "#f5f7fa",
           "domainMax": 28.984375,
           "extra": <span />,
+          "icon": [Function],
           "progressBarDirection": "vertical",
           "subtitle": undefined,
           "title": "Median products.base_price",
@@ -433,40 +427,45 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
-            "title": "Friday",
+            "title": "terms-Friday",
             "value": 28.984375,
             "valueFormatter": [Function],
           },
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
-            "title": "Wednesday",
+            "title": "terms-Wednesday",
             "value": 28.984375,
             "valueFormatter": [Function],
           },
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
-            "title": "Saturday",
+            "title": "terms-Saturday",
             "value": 25.984375,
             "valueFormatter": [Function],
           },
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
-            "title": "Sunday",
+            "title": "terms-Sunday",
             "value": 25.784375,
             "valueFormatter": [Function],
           },
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
-            "title": "Thursday",
+            "title": "terms-Thursday",
             "value": 25.348011363636363,
             "valueFormatter": [Function],
           },
@@ -497,23 +496,23 @@ describe('MetricVisComponent', function () {
         Array [
           <span>
             howdy
-             13.63
+             number-13.6328125
           </span>,
           <span>
             howdy
-             13.64
+             number-13.639539930555555
           </span>,
           <span>
             howdy
-             13.34
+             number-13.34375
           </span>,
           <span>
             howdy
-             13.49
+             number-13.4921875
           </span>,
           <span>
             howdy
-             13.34
+             number-13.34375
           </span>,
         ]
       `);
@@ -593,40 +592,45 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
-              "title": "Friday",
+              "title": "terms-Friday",
               "value": 28.984375,
               "valueFormatter": [Function],
             },
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
-              "title": "Wednesday",
+              "title": "terms-Wednesday",
               "value": 28.984375,
               "valueFormatter": [Function],
             },
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
-              "title": "Saturday",
+              "title": "terms-Saturday",
               "value": 25.984375,
               "valueFormatter": [Function],
             },
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
-              "title": "Sunday",
+              "title": "terms-Sunday",
               "value": 25.784375,
               "valueFormatter": [Function],
             },
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
-              "title": "Thursday",
+              "title": "terms-Thursday",
               "value": 25.348011363636363,
               "valueFormatter": [Function],
             },
@@ -635,8 +639,9 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
-              "title": "Other",
+              "title": "terms-__other__",
               "value": 24.984375,
               "valueFormatter": [Function],
             },
@@ -676,9 +681,10 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 28.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
-              "title": "Friday",
+              "title": "terms-Friday",
               "value": 28.984375,
               "valueFormatter": [Function],
             },
@@ -686,9 +692,10 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 28.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
-              "title": "Wednesday",
+              "title": "terms-Wednesday",
               "value": 28.984375,
               "valueFormatter": [Function],
             },
@@ -696,9 +703,10 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
-              "title": "Saturday",
+              "title": "terms-Saturday",
               "value": 25.984375,
               "valueFormatter": [Function],
             },
@@ -706,9 +714,10 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.784375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
-              "title": "Sunday",
+              "title": "terms-Sunday",
               "value": 25.784375,
               "valueFormatter": [Function],
             },
@@ -716,9 +725,10 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.348011363636363,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
-              "title": "Thursday",
+              "title": "terms-Thursday",
               "value": 25.348011363636363,
               "valueFormatter": [Function],
             },
@@ -728,9 +738,10 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 24.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
-              "title": "Other",
+              "title": "terms-__other__",
               "value": 24.984375,
               "valueFormatter": [Function],
             },
@@ -739,6 +750,7 @@ describe('MetricVisComponent', function () {
       `);
     });
     it('should configure trendlines if provided', () => {
+      // Raw values here, not formatted
       const trends: Record<string, MetricWTrend['trend']> = {
         Friday: [
           { x: faker.random.number(), y: faker.random.number() },
@@ -770,7 +782,7 @@ describe('MetricVisComponent', function () {
           { x: faker.random.number(), y: faker.random.number() },
           { x: faker.random.number(), y: faker.random.number() },
         ],
-        Other: [
+        __other__: [
           { x: faker.random.number(), y: faker.random.number() },
           { x: faker.random.number(), y: faker.random.number() },
           { x: faker.random.number(), y: faker.random.number() },
@@ -802,7 +814,8 @@ describe('MetricVisComponent', function () {
         .props().data![0] as MetricWTrend[];
 
       data?.forEach((tileConfig) => {
-        expect(tileConfig.trend).toEqual(trends[tileConfig.title!]);
+        // title has been formatted, so clean it up before using as index
+        expect(tileConfig.trend).toEqual(trends[tileConfig.title!.replace('terms-', '')]);
         expect(tileConfig.trendShape).toEqual('area');
       });
     });
@@ -1101,15 +1114,27 @@ describe('MetricVisComponent', function () {
     });
 
     it('should do nothing if primary metric is not filterable', () => {
-      const event: MetricElementEvent = {
-        type: 'metricElementEvent',
-        rowIndex: 1,
-        columnIndex: 0,
+      const props = {
+        ...defaultProps,
+        filterable: false,
       };
+      const metricComponent = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+          }}
+          data={table}
+          {...props}
+        />
+      );
 
-      fireFilter(event, false, true);
-
-      expect(fireEventSpy).not.toHaveBeenCalled();
+      expect(metricComponent.find(Settings).props().onElementClick).toBeUndefined();
     });
   });
 
@@ -1290,10 +1315,13 @@ describe('MetricVisComponent', function () {
   });
 
   describe('metric value formatting', () => {
+    function nonNullable<T>(v: T): v is NonNullable<T> {
+      return v != null;
+    }
     const getFormattedMetrics = (
       value: number | string,
-      secondaryValue: number | string,
-      fieldFormatter: SerializedFieldFormat<SerializableRecord>
+      secondaryValue: number | string | undefined,
+      fieldFormatter: SerializedFieldFormat<SerializableRecord> | undefined
     ) => {
       const config: Props['config'] = {
         metric: {
@@ -1302,7 +1330,7 @@ describe('MetricVisComponent', function () {
         },
         dimensions: {
           metric: '1',
-          secondaryMetric: '2',
+          secondaryMetric: secondaryValue ? '2' : undefined,
         },
       };
 
@@ -1317,12 +1345,14 @@ describe('MetricVisComponent', function () {
                 name: '',
                 meta: { type: 'number', params: fieldFormatter },
               },
-              {
-                id: '2',
-                name: '',
-                meta: { type: 'number', params: fieldFormatter },
-              },
-            ],
+              secondaryValue
+                ? {
+                    id: '2',
+                    name: '',
+                    meta: { type: 'number', params: fieldFormatter },
+                  }
+                : undefined,
+            ].filter(nonNullable) as DatatableColumn[],
             rows: [{ '1': value, '2': secondaryValue }],
           }}
           {...defaultProps}
@@ -1338,103 +1368,135 @@ describe('MetricVisComponent', function () {
       return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
     };
 
-    it('correctly formats plain numbers', () => {
-      const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, { id: 'number' });
-      expect(primary).toBe('394.24');
-      expect(secondary).toBe('983.12K');
-    });
+    it.each`
+      id            | pattern | finalPattern
+      ${'number'}   | ${'0'}  | ${'0'}
+      ${'currency'} | ${'$0'} | ${'$0'}
+      ${'percent'}  | ${'0%'} | ${'0%'}
+    `(
+      'applies $id custom field format pattern when passed over',
+      ({ id, pattern, finalPattern }) => {
+        getFormattedMetrics(394.2393, 983123.984, { id, params: { pattern } });
+        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: finalPattern } });
+      }
+    );
 
-    it('correctly formats strings', () => {
-      const { primary, secondary } = getFormattedMetrics('', '', { id: 'string' });
-      expect(primary).toBe('(empty)');
-      expect(secondary).toBe('(empty)');
-    });
+    it.each`
+      id
+      ${'number'}
+      ${'percent'}
+    `(
+      'does not apply the metric compact format if user customized default settings pattern for $id',
+      ({ id }) => {
+        mockIsOverridden.mockReturnValueOnce(true);
+        getFormattedMetrics(394.2393, 983123.984, { id });
+        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledWith({ id });
+      }
+    );
 
-    it('correctly formats currency', () => {
-      const { primary, secondary } = getFormattedMetrics(1000.839, 11.2, { id: 'currency' });
-      expect(primary).toBe('$1.00K');
-      expect(secondary).toBe('$11.20');
-
-      mockLookupCurrentLocale.mockReturnValueOnce('be-nl');
-      // @ts-expect-error
-      (numeral.languageData as jest.Mock).mockReturnValueOnce({
-        currency: {
-          symbol: '€',
-        },
-      });
-
-      const { primary: primaryEuro } = getFormattedMetrics(1000.839, 0, {
-        id: 'currency',
-      });
-      expect(primaryEuro).toBe('1,00 тыс. €');
-      // check that we restored the numeral.js state
-      expect(numeral.language).toHaveBeenLastCalledWith('en');
-    });
-
-    it('correctly formats percentages', () => {
-      const { primary, secondary } = getFormattedMetrics(0.23939, 11.2, { id: 'percent' });
-      expect(primary).toBe('23.94%');
-      expect(secondary).toBe('1.12K%');
-    });
-
-    it('correctly formats bytes', () => {
-      const base = 1024;
-
-      const { primary: bytesValue } = getFormattedMetrics(base - 1, 0, { id: 'bytes' });
-      expect(bytesValue).toBe('1,023 byte');
-
-      const { primary: kiloBytesValue } = getFormattedMetrics(Math.pow(base, 1), 0, {
-        id: 'bytes',
-      });
-      expect(kiloBytesValue).toBe('1 kB');
-
-      const { primary: megaBytesValue } = getFormattedMetrics(Math.pow(base, 2), 0, {
-        id: 'bytes',
-      });
-      expect(megaBytesValue).toBe('1 MB');
-
-      const { primary: moreThanPetaValue } = getFormattedMetrics(Math.pow(base, 6), 0, {
-        id: 'bytes',
-      });
-      expect(moreThanPetaValue).toBe('1,024 PB');
-    });
-
-    it('correctly formats durations', () => {
-      const { primary, secondary } = getFormattedMetrics(1, 1, {
-        id: 'duration',
-        params: {
-          // the following params should be preserved
-          inputFormat: 'minutes',
-          // the following params should be overridden
-          outputFormat: 'precise',
-          outputPrecision: 2,
-          useShortSuffix: false,
-        },
-      });
-
-      expect(primary).toBe('formatted duration');
-      expect(secondary).toBe('formatted duration');
+    it('applies a custom duration configuration to the formatter', () => {
+      getFormattedMetrics(394.2393, 983123.984, { id: 'duration' });
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
-        params: {
-          inputFormat: 'minutes',
-          outputFormat: 'humanizePrecise',
-          outputPrecision: 1,
-          useShortSuffix: true,
-        },
+        params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: true },
       });
     });
 
-    it('ignores suffix formatting', () => {
-      const { primary, secondary } = getFormattedMetrics(0.23939, 11.2, {
-        id: 'suffix',
-        params: {
-          id: 'percent',
-        },
+    it('does not override duration custom configuration when set', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'duration',
+        params: { useShortSuffix: false },
       });
-      expect(primary).toBe('23.94%');
-      expect(secondary).toBe('1.12K%');
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'duration',
+        params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: false },
+      });
+    });
+
+    it('does not override duration configuration at visualization level when set', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'duration',
+        params: { formatOverride: true, outputFormat: 'asSeconds' },
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'duration',
+        params: { formatOverride: true, outputFormat: 'asSeconds' },
+      });
+    });
+
+    it('does not tweak bytes format when passed', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'bytes',
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'bytes',
+      });
+    });
+
+    it('does not tweak bit format when passed', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'bytes',
+        params: { pattern: '0.0bitd' },
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'bytes',
+        params: { pattern: '0.0bitd' },
+      });
+    });
+
+    it('does not tweak legacy bits format when passed', () => {
+      const legacyBitFormat = {
+        id: 'number',
+        params: { pattern: `0,0bitd` },
+      };
+      getFormattedMetrics(394.2393, 983123.984, legacyBitFormat);
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith(legacyBitFormat);
+    });
+
+    it('calls the formatter only once when no secondary value is passed', () => {
+      getFormattedMetrics(394.2393, undefined, { id: 'number' });
+      expect(mockDeserialize).toHaveBeenCalledTimes(1);
+    });
+
+    it('still call the numeric formatter when no format is passed', () => {
+      const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, undefined);
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({ id: 'number' });
+      expect(primary).toBe('number-394.2393');
+      expect(secondary).toBe('number-983123.984');
+    });
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
     });
   });
 });

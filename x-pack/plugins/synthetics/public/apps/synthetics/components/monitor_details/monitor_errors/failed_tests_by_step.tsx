@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiProgress, EuiSpacer, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { EuiProgress, EuiSpacer, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
@@ -22,7 +22,7 @@ export const FailedTestsByStep = ({ time }: { time: { to: string; from: string }
   }
 
   if (loading && !failedSteps) {
-    return <EuiLoadingContent lines={3} />;
+    return <EuiSkeletonText lines={3} />;
   }
 
   return (

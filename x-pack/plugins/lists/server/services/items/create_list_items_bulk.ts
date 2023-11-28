@@ -60,6 +60,7 @@ export const createListItemsBulk = async ({
       });
       if (elasticQuery != null) {
         const elasticBody: IndexEsListItemSchema = {
+          '@timestamp': createdAt,
           created_at: createdAt,
           created_by: user,
           deserializer,

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { type FrozenTierPreference } from '@kbn/ml-date-picker';
-
-import { EntityFieldType } from './anomalies';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { FrozenTierPreference } from '@kbn/ml-date-picker';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields' as const;
 export const ML_APPLY_TIME_RANGE_CONFIG = 'ml.jobSelectorFlyout.applyTimeRange';
@@ -15,6 +14,8 @@ export const ML_GETTING_STARTED_CALLOUT_DISMISSED = 'ml.gettingStarted.isDismiss
 export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 export const ML_ANOMALY_EXPLORER_PANELS = 'ml.anomalyExplorerPanels';
 export const ML_NOTIFICATIONS_LAST_CHECKED_AT = 'ml.notificationsLastCheckedAt';
+export const ML_OVERVIEW_PANELS = 'ml.overviewPanels';
+export const ML_ELSER_CALLOUT_DISMISSED = 'ml.elserUpdateCalloutDismissed';
 
 export type PartitionFieldConfig =
   | {
@@ -38,7 +39,7 @@ export type PartitionFieldConfig =
   | undefined;
 
 export type PartitionFieldsConfig =
-  | Partial<Record<EntityFieldType, PartitionFieldConfig>>
+  | Partial<Record<MlEntityFieldType, PartitionFieldConfig>>
   | undefined;
 
 export type ApplyTimeRangeConfig = boolean | undefined;
@@ -53,6 +54,12 @@ export interface AnomalyExplorerPanelsState {
   mainPage: { size: number };
 }
 
+export interface OverviewPanelsState {
+  nodes: boolean;
+  adJobs: boolean;
+  dfaJobs: boolean;
+}
+
 export interface MlStorageRecord {
   [key: string]: unknown;
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
@@ -61,6 +68,8 @@ export interface MlStorageRecord {
   [ML_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
   [ML_ANOMALY_EXPLORER_PANELS]: AnomalyExplorerPanelsState | undefined;
   [ML_NOTIFICATIONS_LAST_CHECKED_AT]: number | undefined;
+  [ML_OVERVIEW_PANELS]: OverviewPanelsState;
+  [ML_ELSER_CALLOUT_DISMISSED]: boolean | undefined;
 }
 
 export type MlStorage = Partial<MlStorageRecord> | null;
@@ -79,6 +88,10 @@ export type TMlStorageMapped<T extends MlStorageKey> = T extends typeof ML_ENTIT
   ? AnomalyExplorerPanelsState | undefined
   : T extends typeof ML_NOTIFICATIONS_LAST_CHECKED_AT
   ? number | undefined
+  : T extends typeof ML_OVERVIEW_PANELS
+  ? OverviewPanelsState | undefined
+  : T extends typeof ML_ELSER_CALLOUT_DISMISSED
+  ? boolean | undefined
   : null;
 
 export const ML_STORAGE_KEYS = [
@@ -88,4 +101,6 @@ export const ML_STORAGE_KEYS = [
   ML_FROZEN_TIER_PREFERENCE,
   ML_ANOMALY_EXPLORER_PANELS,
   ML_NOTIFICATIONS_LAST_CHECKED_AT,
+  ML_OVERVIEW_PANELS,
+  ML_ELSER_CALLOUT_DISMISSED,
 ] as const;

@@ -6,6 +6,12 @@
 
 experimental[] Create sets of {kib} saved objects from a file created by the export API.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 ==== Compatibility across versions
 Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
 
@@ -40,13 +46,19 @@ Saved objects can only be imported into the same version, a newer minor on the s
   (Optional, boolean) Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict
   errors are avoided.
 +
-NOTE: This cannot be used with the `overwrite` option.
+NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.
 
 `overwrite`::
   (Optional, boolean) Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by
   overwriting the destination object.
 +
-NOTE: This cannot be used with the `createNewCopies` option.
+NOTE: This option cannot be used with the `createNewCopies` option.
+
+`compatibilityMode`::
+  (Optional, boolean) Applies various adjustments to the saved objects that are being imported to maintain compatibility between different {kib}
+  versions. Use this option only if you encounter issues with imported saved objects.
++
+NOTE: This option cannot be used with the `createNewCopies` option.
 
 [[saved-objects-api-import-request-body]]
 ==== Request body
@@ -95,7 +107,7 @@ to resolve errors, refer to the <<saved-objects-api-import-example,examples>>.
 [[saved-objects-api-import-example-1]]
 ===== Successful import with `createNewCopies` enabled
 
-Import {a-data-source} and dashboard:
+Import a {data-source} and dashboard:
 
 [source,sh]
 --------------------------------------------------
@@ -147,7 +159,7 @@ The result indicates a successful import, and both objects are created. Since th
 [[saved-objects-api-import-example-2]]
 ===== Successful import with `createNewCopies` disabled
 
-Import {a-data-source} and dashboard:
+Import a {data-source} and dashboard:
 
 [source,sh]
 --------------------------------------------------
@@ -196,7 +208,7 @@ The result indicates a successful import, and both objects are created.
 [[saved-objects-api-import-example-3]]
 ===== Failed import with conflict errors
 
-Import {a-data-source}, visualization, *Canvas* workpad, and dashboard that include saved objects:
+Import a {data-source}, visualization, *Canvas* workpad, and dashboard that include saved objects:
 
 [source,sh]
 --------------------------------------------------

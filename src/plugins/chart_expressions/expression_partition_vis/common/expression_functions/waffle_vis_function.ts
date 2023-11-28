@@ -9,7 +9,11 @@
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
+import {
+  LegendDisplay,
+  type PartitionChartProps,
+  type PartitionVisParams,
+} from '../types/expression_renderers';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -110,6 +114,10 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       help: strings.getAriaLabelHelp(),
       required: false,
     },
+    colorMapping: {
+      types: ['string'],
+      help: strings.getColorMappingHelp(),
+    },
   },
   fn(context, args, handlers) {
     if (args.splitColumn && args.splitRow) {
@@ -143,6 +151,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
+      colorMapping: args.colorMapping,
     };
 
     if (handlers?.inspectorAdapters?.tables) {
@@ -173,6 +182,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
         params: {
           listenOnChange: true,
         },
+        overrides: handlers.variables?.overrides as PartitionChartProps['overrides'],
       },
     };
   },

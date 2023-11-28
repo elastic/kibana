@@ -11,12 +11,15 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="alert"
+      data-euiicon-type="warning"
     />
     There is a problem with this saved object
   </p>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div>
       The data view associated with this object no longer exists.
@@ -60,12 +63,15 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="alert"
+      data-euiicon-type="warning"
     />
     There is a problem with this saved object
   </p>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div>
       A field associated with this object no longer exists in the data view.
@@ -109,12 +115,15 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="alert"
+      data-euiicon-type="warning"
     />
     There is a problem with this saved object
   </p>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div>
       The saved search associated with this object no longer exists.
@@ -158,12 +167,15 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="alert"
+      data-euiicon-type="warning"
     />
     There is a problem with this saved object
   </p>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div />
     <div>

@@ -29,13 +29,13 @@ import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { getInitialAnomaliesLayers } from '../../../maps/util';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
@@ -43,7 +43,7 @@ import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { Chart, Settings } from '@elastic/charts';
+import { BarSeries, Chart, Settings } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 
@@ -238,7 +238,9 @@ function ExplorerChartContainer({
       {/* so that we can use chart's ref which controls the activeCursor api */}
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
-          <Settings noResults={<div />} />
+          <Settings noResults={<div />} width={0} height={0} locale={i18n.getLocale()} />
+          {/* Just need an empty chart to access cursor service */}
+          <BarSeries id={'count'} xAccessor="x" yAccessors={['y']} data={[]} />
         </Chart>
       </div>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -262,7 +264,7 @@ function ExplorerChartContainer({
                 content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
                 position="top"
                 size="s"
-                type="alert"
+                type="warning"
                 color="warning"
               />
             )}

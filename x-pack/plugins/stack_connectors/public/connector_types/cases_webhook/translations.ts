@@ -119,6 +119,13 @@ export const USERNAME_REQUIRED = i18n.translate(
   }
 );
 
+export const PASSWORD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.error.requiredAuthPasswordText',
+  {
+    defaultMessage: 'Password is required.',
+  }
+);
+
 export const SUMMARY_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredWebhookSummaryText',
   {
@@ -451,6 +458,27 @@ export const CASE_TAGS_DESC = i18n.translate(
   }
 );
 
+export const CASE_ID_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseIdDesc',
+  {
+    defaultMessage: 'Kibana case id',
+  }
+);
+
+export const CASE_SEVERITY_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseSeverityDesc',
+  {
+    defaultMessage: 'Kibana case severity',
+  }
+);
+
+export const CASE_STATUS_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseStatusDesc',
+  {
+    defaultMessage: 'Kibana case status',
+  }
+);
+
 export const CASE_COMMENT_DESC = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.caseCommentDesc',
   {
@@ -475,3 +503,47 @@ export const EXTERNAL_TITLE_DESC = i18n.translate(
 export const DOC_LINK = i18n.translate('xpack.stackConnectors.components.casesWebhook.docLink', {
   defaultMessage: 'Configuring Webhook - Case Management connector.',
 });
+
+export const SEVERITY_CRITICAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.criticalLabel',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+export const SEVERITY_HIGH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.highLabel',
+  {
+    defaultMessage: 'High',
+  }
+);
+export const SEVERITY_MEDIUM_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.mediumLabel',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+export const SEVERITY_LOW_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.lowLabel',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+export const STATUS_OPEN = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.status.open',
+  {
+    defaultMessage: 'Open',
+  }
+);
+export const STATUS_CLOSED = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.status.closed',
+  {
+    defaultMessage: 'Closed',
+  }
+);
+export const STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.status.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);

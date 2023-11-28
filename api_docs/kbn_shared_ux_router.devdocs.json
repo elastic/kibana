@@ -21,16 +21,14 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-router",
-        "id": "def-common.Route",
+        "id": "def-common.BrowserRouter",
         "type": "Function",
         "tags": [],
-        "label": "Route",
-        "description": [
-          "\nThis is a wrapper around the react-router-dom Route component that inserts\nMatchPropagator in every application route. It helps track all route changes\nand send them to the execution context, later used to enrich APM\n'route-change' transactions."
-        ],
+        "label": "BrowserRouter",
+        "description": [],
         "signature": [
-          "({ children, component: Component, render, ...rest }: ",
-          "RouteProps",
+          "({ children, ...props }: ",
+          "BrowserRouterProps",
           ") => JSX.Element"
         ],
         "path": "packages/shared-ux/router/impl/router.tsx",
@@ -39,18 +37,220 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-router",
-            "id": "def-common.Route.$1",
+            "id": "def-common.BrowserRouter.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ children, component: Component, render, ...rest }",
+            "label": "{ children, ...props }",
             "description": [],
             "signature": [
-              "RouteProps"
+              "BrowserRouterProps"
             ],
             "path": "packages/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-router",
+        "id": "def-common.HashRouter",
+        "type": "Function",
+        "tags": [],
+        "label": "HashRouter",
+        "description": [],
+        "signature": [
+          "({ children, ...props }: ",
+          "HashRouterProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/router/impl/router.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-router",
+            "id": "def-common.HashRouter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, ...props }",
+            "description": [],
+            "signature": [
+              "HashRouterProps"
+            ],
+            "path": "packages/shared-ux/router/impl/router.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-router",
+        "id": "def-common.MemoryRouter",
+        "type": "Function",
+        "tags": [],
+        "label": "MemoryRouter",
+        "description": [],
+        "signature": [
+          "({ children, ...props }: ",
+          "MemoryRouterProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/router/impl/router.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-router",
+            "id": "def-common.MemoryRouter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, ...props }",
+            "description": [],
+            "signature": [
+              "MemoryRouterProps"
+            ],
+            "path": "packages/shared-ux/router/impl/router.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-router",
+        "id": "def-common.Route",
+        "type": "Function",
+        "tags": [],
+        "label": "Route",
+        "description": [
+          "\nThis is a wrapper around the react-router-dom Route component that inserts\nMatchPropagator in every application route. It helps track all route changes\nand send them to the execution context, later used to enrich APM\n'route-change' transactions."
+        ],
+        "signature": [
+          "<T extends {}>({ children, component: Component, render, ...rest }: ",
+          "RouteProps",
+          "<string, { [K: string]: string; } & T>) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/router/impl/route.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-router",
+            "id": "def-common.Route.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  component: Component,\n  render,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "RouteProps",
+              "<string, { [K: string]: string; } & T>"
+            ],
+            "path": "packages/shared-ux/router/impl/route.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-router",
+        "id": "def-common.Router",
+        "type": "Function",
+        "tags": [],
+        "label": "Router",
+        "description": [],
+        "signature": [
+          "({ children, ...props }: ",
+          "RouterProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/router/impl/router.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-router",
+            "id": "def-common.Router.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, ...props }",
+            "description": [],
+            "signature": [
+              "RouterProps"
+            ],
+            "path": "packages/shared-ux/router/impl/router.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-router",
+        "id": "def-common.Routes",
+        "type": "Function",
+        "tags": [],
+        "label": "Routes",
+        "description": [],
+        "signature": [
+          "({ legacySwitch, children, }: { legacySwitch?: boolean | undefined; children: React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/router/impl/routes.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-router",
+            "id": "def-common.Routes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  legacySwitch = true,\n  children,\n}",
+            "description": [],
+            "path": "packages/shared-ux/router/impl/routes.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-router",
+                "id": "def-common.Routes.$1.legacySwitch",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "legacySwitch",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/shared-ux/router/impl/routes.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-router",
+                "id": "def-common.Routes.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                ],
+                "path": "packages/shared-ux/router/impl/routes.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],

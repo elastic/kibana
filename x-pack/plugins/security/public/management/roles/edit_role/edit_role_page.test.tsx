@@ -14,20 +14,21 @@ import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import { licenseMock } from '../../../../common/licensing/index.mock';
-import type { Role } from '../../../../common/model';
-import { userAPIClientMock } from '../../users/index.mock';
-import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
-import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
 import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
+import type { Role } from '../../../../common';
+import { licenseMock } from '../../../../common/licensing/index.mock';
+import { userAPIClientMock } from '../../users/index.mock';
+import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
+import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
 
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();
@@ -140,11 +141,13 @@ function getProps({
   role,
   canManageSpaces = true,
   spacesEnabled = true,
+  canUseRemoteIndices = true,
 }: {
   action: 'edit' | 'clone';
   role?: Role;
   canManageSpaces?: boolean;
   spacesEnabled?: boolean;
+  canUseRemoteIndices?: boolean;
 }) {
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRole.mockResolvedValue(role);
@@ -171,11 +174,17 @@ function getProps({
   const { fatalErrors } = coreMock.createSetup();
   const { http, docLinks, notifications } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
-    if (!spacesEnabled) {
-      throw { response: { status: 404 } }; // eslint-disable-line no-throw-literal
-    }
     if (path === '/api/spaces/space') {
+      if (!spacesEnabled) {
+        throw { response: { status: 404 } }; // eslint-disable-line no-throw-literal
+      }
       return buildSpaces();
+    }
+    if (path === '/internal/security/_check_role_mapping_features') {
+      return { canUseRemoteIndices };
+    }
+    if (path === REMOTE_CLUSTERS_PATH) {
+      return [];
     }
   });
 
@@ -265,6 +274,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
     });
 
@@ -291,6 +302,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
@@ -308,6 +321,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
         false
       );
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
@@ -480,6 +495,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
     });
 
@@ -507,6 +524,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
@@ -524,6 +543,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
         false
       );
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
@@ -610,6 +631,19 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
     });
+  });
+
+  it('hides remote index privileges section when not supported', async () => {
+    const wrapper = mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <EditRolePage {...getProps({ action: 'edit', canUseRemoteIndices: false })} />
+      </KibanaContextProvider>
+    );
+
+    await waitForRender(wrapper);
+
+    expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+    expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
   });
 
   it('registers fatal error if features endpoint fails unexpectedly', async () => {

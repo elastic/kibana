@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import type { Filter } from '@kbn/es-query';
@@ -26,9 +26,10 @@ import { inputsActions } from '../../../common/store/inputs';
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { LandingPageComponent } from '../../../common/components/landing_page';
+
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
+jest.mock('../../../common/components/landing_page');
 jest.mock('../../../common/containers/sourcerer');
 
 // Test will fail because we will to need to mock some core services to make the test work
@@ -40,6 +41,7 @@ jest.mock('../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 jest.mock('../../../common/components/visualization_actions/actions');
+jest.mock('../../../common/components/visualization_actions/lens_embeddable');
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -133,7 +135,7 @@ describe('Network page - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
+    expect(wrapper.find(`[data-test-subj="siem-landing-page"]`).exists()).toBe(true);
   });
 
   test('it DOES NOT render getting started page when an index is available', async () => {

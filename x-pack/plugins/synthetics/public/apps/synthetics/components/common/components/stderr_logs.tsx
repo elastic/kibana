@@ -23,14 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable } from '@elastic/eui';
 import moment from 'moment';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { Ping } from '../../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 export const StdErrorLogs = ({
-  monitorId,
   checkGroup,
   timestamp,
   title,
@@ -38,7 +37,6 @@ export const StdErrorLogs = ({
   hideTitle = false,
   pageSize = 5,
 }: {
-  monitorId?: string;
   checkGroup?: string;
   timestamp?: string;
   title?: string;
@@ -54,6 +52,11 @@ export const StdErrorLogs = ({
       render: (date: string) => formatDate(date, 'dateTime'),
     },
     {
+      field: 'synthetics.type',
+      name: TYPE_LABEL,
+      sortable: true,
+    },
+    {
       field: 'synthetics.payload.message',
       name: 'Message',
       render: (message: string) => (
@@ -66,12 +69,12 @@ export const StdErrorLogs = ({
     },
   ] as Array<EuiBasicTableColumn<Ping>>;
 
-  const { items, loading } = useStdErrorLogs({ monitorId, checkGroup });
+  const { items, loading } = useStdErrorLogs({ checkGroup });
 
-  const { discover, observability } = useKibana<ClientPluginsStart>().services;
+  const { discover, exploratoryView } = useKibana<ClientPluginsStart>().services;
 
   const { data: discoverLink } = useFetcher(async () => {
-    const dataView = await observability.getAppDataView('synthetics', SYNTHETICS_INDEX_PATTERN);
+    const dataView = await exploratoryView.getAppDataView('synthetics', SYNTHETICS_INDEX_PATTERN);
     return discover.locator?.getUrl({
       query: { language: 'kuery', query: `monitor.check_group: ${checkGroup}` },
       indexPatternId: dataView?.id,
@@ -102,8 +105,9 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink>
+              <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
                 <EuiButtonEmpty
+                  data-test-subj="syntheticsStdErrorLogsButton"
                   href={discoverLink}
                   iconType="discoverApp"
                   isDisabled={!discoverLink}
@@ -114,7 +118,7 @@ export const StdErrorLogs = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           {summaryMessage && (
-            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
+            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
               <p>{summaryMessage}</p>
             </EuiCallOut>
           )}
@@ -135,6 +139,7 @@ export const StdErrorLogs = ({
         }}
         pagination={{
           pageSize,
+          pageSizeOptions: [2, 5, 10, 20, 50],
         }}
       />
     </>
@@ -143,6 +148,10 @@ export const StdErrorLogs = ({
 
 export const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.monitorList.timestamp', {
   defaultMessage: 'Timestamp',
+});
+
+export const TYPE_LABEL = i18n.translate('xpack.synthetics.monitorList.type', {
+  defaultMessage: 'Type',
 });
 
 export const ERROR_SUMMARY_LABEL = i18n.translate('xpack.synthetics.monitorList.errorSummary', {

@@ -42,7 +42,8 @@ const createSetupContract = (): ManagementSetup => ({
 });
 
 const createStartContract = (): ManagementStart => ({
-  sections: {},
+  setIsSidebarEnabled: jest.fn(),
+  setupCardsNavigation: jest.fn(),
 });
 
 export const managementPluginMock = {

@@ -82,3 +82,7 @@ export const uniqueIdFromArtifact = <
 }: T): string => {
   return `${packageName}:${identifier}-${decodedSha256}`;
 };
+
+export const uniqueIdFromId = (id: string, packageName: string): string => {
+  return `${packageName}:${id}`;
+};

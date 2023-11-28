@@ -16,6 +16,7 @@ import {
   VECTOR_STYLES,
   WIZARD_ID,
 } from '../../../../common/constants';
+import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
@@ -34,14 +35,7 @@ export const geoLineLayerWizardConfig: LayerWizard = {
     return !getIsGoldPlus();
   },
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (
-      sourceConfig: {
-        indexPatternId: string;
-        geoField: string;
-        splitField: string;
-        sortField: string;
-      } | null
-    ) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESGeoLineSourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;

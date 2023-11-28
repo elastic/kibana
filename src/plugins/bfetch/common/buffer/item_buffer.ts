@@ -19,7 +19,7 @@ export interface ItemBufferParams<Item> {
    * argument which is a list of all buffered items. If `.flush()` is called
    * when buffer is empty, `.onflush` is called with empty array.
    */
-  onFlush: (items: Item[]) => void;
+  onFlush: (items: Item[]) => void | Promise<void>;
 }
 
 /**
@@ -60,11 +60,19 @@ export class ItemBuffer<Item> {
   }
 
   /**
-   * Call `.onflush` method and clear buffer.
+   * Call `.onFlush` method and clear buffer.
    */
   public flush() {
+    this.flushAsync().catch(() => {});
+  }
+
+  /**
+   * Same as `.flush()` but asynchronous, and returns a promise, which
+   * rejects if `.onFlush` throws.
+   */
+  public async flushAsync(): Promise<void> {
     let list;
     [list, this.list] = [this.list, []];
-    this.params.onFlush(list);
+    await this.params.onFlush(list);
   }
 }

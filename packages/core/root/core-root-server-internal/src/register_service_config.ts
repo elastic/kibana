@@ -16,6 +16,7 @@ import { pidConfig } from '@kbn/core-environment-server-internal';
 import { executionContextConfig } from '@kbn/core-execution-context-server-internal';
 import { config as httpConfig, cspConfig, externalUrlConfig } from '@kbn/core-http-server-internal';
 import { config as elasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
+import { config as coreAppConfig } from '@kbn/core-apps-server-internal';
 import { opsConfig } from '@kbn/core-metrics-server-internal';
 import {
   savedObjectsConfig,
@@ -28,6 +29,7 @@ import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
 
 import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
+import { serverlessConfig } from './root/serverless_config';
 
 const rootConfigPath = '';
 
@@ -36,6 +38,7 @@ export function registerServiceConfig(configService: ConfigService) {
     cspConfig,
     deprecationConfig,
     elasticsearchConfig,
+    coreAppConfig,
     elasticApmConfig,
     executionContextConfig,
     externalUrlConfig,
@@ -49,6 +52,7 @@ export function registerServiceConfig(configService: ConfigService) {
     pluginsConfig,
     savedObjectsConfig,
     savedObjectsMigrationConfig,
+    serverlessConfig,
     statusConfig,
     uiSettingsConfig,
   ];

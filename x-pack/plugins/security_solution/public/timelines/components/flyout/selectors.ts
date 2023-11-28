@@ -7,7 +7,8 @@
 
 import { createSelector } from 'reselect';
 
-import { TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../common/api/timeline';
 import { timelineSelectors } from '../../store/timeline';
 
 export const getTimelineShowStatusByIdSelector = () =>
@@ -16,4 +17,5 @@ export const getTimelineShowStatusByIdSelector = () =>
     status: timeline?.status ?? TimelineStatus.draft,
     show: timeline?.show ?? false,
     updated: timeline?.updated ?? undefined,
+    changed: timeline?.changed ?? false,
   }));

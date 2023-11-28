@@ -10,11 +10,12 @@ import { EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
+import { i18n } from '@kbn/i18n';
 import { TopValues } from '../../../top_values';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
-import { roundToDecimalPlace } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
@@ -73,7 +74,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
             tickFormat={(d: any) => getFormattedValue(d, count)}
           />
 
-          <Settings showLegend={false} theme={theme} />
+          <Settings showLegend={false} theme={theme} locale={i18n.getLocale()} />
           <BarSeries
             id={config.fieldName || fieldFormat}
             data={[

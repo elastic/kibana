@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -25,14 +26,9 @@ const mockDependencies = {
   notifications: {},
 } as DatePickerDependencies;
 
-// Create a mock for the setFullTimeRange function in the service.
-// The mock is hoisted to the top, so need to prefix the mock function
-// with 'mock' so it can be used lazily.
-const mockSetFullTimeRange = jest.fn((indexPattern: DataView, query: Query) => true);
-jest.mock('../services/full_time_range_selector_service', () => ({
-  setFullTimeRange: (indexPattern: DataView, query: Query) =>
-    mockSetFullTimeRange(indexPattern, query),
-}));
+jest.mock('../services/full_time_range_selector_service');
+
+import { setFullTimeRange } from '../services/full_time_range_selector_service';
 
 jest.mock('@kbn/ml-local-storage', () => {
   return {
@@ -41,6 +37,10 @@ jest.mock('@kbn/ml-local-storage', () => {
 });
 
 describe('FullTimeRangeSelector', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const dataView = {
     id: '0844fc70-5ab5-11e9-935e-836737467b0f',
     fields: [],
@@ -53,19 +53,19 @@ describe('FullTimeRangeSelector', () => {
     query: 'region:us-east-1',
   };
 
-  const requiredProps = {
+  const props = {
     dataView,
     query,
+    disabled: false,
+    frozenDataPreference: FROZEN_TIER_PREFERENCE.EXCLUDE,
+    setFrozenDataPreference: jest.fn(),
+    timefilter: {} as TimefilterContract,
+    callback: jest.fn(),
   };
 
-  test('calls setFullTimeRange on clicking button', () => {
-    const props = {
-      ...requiredProps,
-      disabled: false,
-      frozenDataPreference: FROZEN_TIER_PREFERENCE.EXCLUDE,
-      setFrozenDataPreference: jest.fn(),
-      timefilter: {} as TimefilterContract,
-    };
+  it('calls setFullTimeRange on clicking button', async () => {
+    // prepare
+    (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => undefined);
 
     const { getByText } = render(
       <IntlProvider locale="en">
@@ -75,8 +75,54 @@ describe('FullTimeRangeSelector', () => {
       </IntlProvider>
     );
 
-    fireEvent.click(getByText(/use full data/i));
+    // act
+    await act(async () => {
+      fireEvent.click(getByText(/use full data/i));
+    });
 
-    expect(mockSetFullTimeRange).toHaveBeenCalled();
+    // assert
+    expect(setFullTimeRange).toHaveBeenCalled();
+
+    // The callback should not have been called since `setFullTimeRange` returned undefined
+    expect(props.callback).toHaveBeenCalledTimes(0);
+  });
+
+  it('calls setFullTimeRange and callback on clicking button', async () => {
+    // prepare
+    (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => ({
+      success: true,
+      start: { epoch: 1234, string: moment(1234).toISOString() },
+      end: { epoch: 2345, string: moment(2345).toISOString() },
+    }));
+
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <DatePickerContextProvider {...mockDependencies}>
+          <FullTimeRangeSelector {...props} />
+        </DatePickerContextProvider>
+      </IntlProvider>
+    );
+
+    // act
+    await act(async () => {
+      fireEvent.click(getByText(/use full data/i));
+    });
+
+    // assert
+    expect(setFullTimeRange).toHaveBeenCalled();
+
+    // The callback should have been called since `setFullTimeRange` returned a time range
+    expect(props.callback).toHaveBeenCalledTimes(1);
+    expect(props.callback).toHaveBeenCalledWith({
+      end: {
+        epoch: 2345,
+        string: '1970-01-01T00:00:02.345Z',
+      },
+      start: {
+        epoch: 1234,
+        string: '1970-01-01T00:00:01.234Z',
+      },
+      success: true,
+    });
   });
 });

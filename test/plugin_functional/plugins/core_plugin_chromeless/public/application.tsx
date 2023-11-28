@@ -13,10 +13,7 @@ import { Route } from '@kbn/shared-ux-router';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -33,16 +30,14 @@ const Home = () => (
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Chromeless home page section title</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>Where did all the chrome go?</EuiPageContentBody>
-    </EuiPageContent>
+    <EuiPageSection>
+      <EuiPageHeader>
+        <EuiTitle>
+          <h2>Chromeless home page section title</h2>
+        </EuiTitle>
+      </EuiPageHeader>
+      <EuiPageSection>Where did all the chrome go?</EuiPageSection>
+    </EuiPageSection>
   </EuiPageBody>
 );
 

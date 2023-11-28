@@ -12,7 +12,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import {
   RuleUpdateProps,
   RuleResponse,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * Helper to cut down on the noise in some of the tests. This checks for
@@ -28,6 +28,7 @@ export const updateRule = async (
   const response = await supertest
     .put(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send(updatedRule);
   if (response.status !== 200) {
     log.error(

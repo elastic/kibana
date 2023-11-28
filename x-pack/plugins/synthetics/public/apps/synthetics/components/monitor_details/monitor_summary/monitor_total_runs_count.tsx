@@ -7,11 +7,10 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
-import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 interface MonitorTotalRunsCountProps {
   from: string;
@@ -19,14 +18,13 @@ interface MonitorTotalRunsCountProps {
 }
 
 export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
-  const { ExploratoryViewEmbeddable } = observability;
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
-  const monitorId = useMonitorQueryId();
-  const selectedLocation = useSelectedLocation();
-
-  if (!monitorId || !selectedLocation) {
+  if (!queryIdFilter) {
     return null;
   }
 
@@ -38,10 +36,8 @@ export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
       attributes={[
         {
           time: props,
-          reportDefinitions: {
-            'monitor.id': [monitorId],
-            'observer.geo.name': [selectedLocation.label],
-          },
+          reportDefinitions: queryIdFilter,
+          filters: locationFilter,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_total_runs',
           name: TOTAL_RUNS_LABEL,

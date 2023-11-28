@@ -12,7 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elas
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type {
   Cluster,
   ComplianceDashboardData,
@@ -32,14 +31,15 @@ import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section'
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
-} from '../../findings/test_subjects';
+} from '../test_subjects';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 
 const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 
 export const getClusterIdQuery = (cluster: Cluster): NavFilter => {
   if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
     // TODO: remove assertion after typing CspFinding as discriminating union
-    return { 'cloud.account.name': cluster.meta.cloud!.account.name };
+    return { 'cloud.account.id': cluster.meta.cloud!.account.id };
   }
   return { cluster_id: cluster.meta.assetIdentifierId };
 };
@@ -175,7 +175,7 @@ export const BenchmarksSection = ({
             `}
             data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
-            <CloudPostureScoreChart
+            <ComplianceScoreChart
               compact
               id={`${cluster.meta.assetIdentifierId}_score_chart`}
               data={cluster.stats}
@@ -186,19 +186,31 @@ export const BenchmarksSection = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
-            <RisksTable
-              compact
-              data={cluster.groupedFindingsEvaluation}
-              maxItems={3}
-              onCellClick={(resourceTypeName) =>
-                navToFailedFindingsByClusterAndSection(cluster, resourceTypeName)
-              }
-              viewAllButtonTitle={i18n.translate(
-                'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
-                { defaultMessage: 'View all failed findings for this cluster' }
-              )}
-              onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
-            />
+            <div
+              style={{
+                paddingRight: euiTheme.size.base,
+              }}
+            >
+              <RisksTable
+                compact
+                data={cluster.groupedFindingsEvaluation}
+                maxItems={3}
+                onCellClick={(resourceTypeName) =>
+                  navToFailedFindingsByClusterAndSection(cluster, resourceTypeName)
+                }
+                viewAllButtonTitle={i18n.translate(
+                  'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
+                  {
+                    defaultMessage: 'View all failed findings for this {postureAsset}',
+                    values: {
+                      postureAsset:
+                        dashboardType === CSPM_POLICY_TEMPLATE ? 'cloud account' : 'cluster',
+                    },
+                  }
+                )}
+                onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
+              />
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}

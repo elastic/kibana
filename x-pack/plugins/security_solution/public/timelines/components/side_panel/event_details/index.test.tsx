@@ -11,17 +11,17 @@ import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import {
-  KibanaServices,
-  useKibana,
-  useGetUserCasesPermissions,
-} from '../../../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
 import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { allCasesPermissions } from '../../../../cases_test_utils';
-import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  DEFAULT_PREVIEW_INDEX,
+  ASSISTANT_FEATURE_ID,
+} from '../../../../../common/constants';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -36,6 +36,15 @@ const ecsData: Ecs = {
     },
   },
 };
+
+const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: () => mockUseLocation(),
+  };
+});
 
 jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
   return {
@@ -129,12 +138,22 @@ describe('event details panel component', () => {
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        application: {
+          capabilities: {
+            [ASSISTANT_FEATURE_ID]: {
+              'ai-assistant': true,
+            },
+          },
+        },
         uiSettings: {
           get: jest.fn().mockReturnValue([]),
         },
         cases: {
           ui: {
             getCasesContext: () => mockCasesContext,
+          },
+          cases: {
+            helpers: { canUseCases: jest.fn().mockReturnValue(allCasesPermissions()) },
           },
         },
         timelines: {
@@ -143,15 +162,17 @@ describe('event details panel component', () => {
           }),
         },
         osquery: {
-          OsqueryResults: jest.fn().mockReturnValue(null),
+          OsqueryResult: jest.fn().mockReturnValue(null),
+          fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
         },
       },
     });
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   test('it renders the take action dropdown in the timeline version', () => {
     const wrapper = render(
       <TestProviders>

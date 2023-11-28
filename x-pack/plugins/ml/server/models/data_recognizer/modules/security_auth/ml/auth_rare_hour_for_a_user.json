@@ -1,23 +1,17 @@
 {
-  "description": "Security: Authentication - looks for a user logging in at a time of day that is unusual for the user. This can be due to credentialed access via a compromised account when the user and the threat actor are in different time zones. In addition, unauthorized user activity often takes place during non-business hours.",
-  "groups": [
-    "security",
-    "authentication"
-  ],
+  "description": "Security: Authentication - Looks for a user logging in at a time of day that is unusual for the user. This can be due to credentialed access via a compromised account when the user and the threat actor are in different time zones. In addition, unauthorized user activity often takes place during non-business hours.",
+  "groups": ["security", "authentication"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare hour for a user",
+        "detector_description": "Detects rare hour for a user.",
         "function": "time_of_day",
         "by_field_name": "user.name",
         "detector_index": 0
       }
     ],
-    "influencers": [
-      "source.ip",
-      "user.name"
-    ]
+    "influencers": ["source.ip", "user.name", "host.name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -28,6 +22,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-auth",
-    "security_app_display_name": "Unusual Hour for a User to Logon"
+    "security_app_display_name": "Unusual Hour for a User to Logon",
+    "managed": true,
+    "job_revision": 4
   }
 }

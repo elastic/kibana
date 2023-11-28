@@ -10,7 +10,12 @@ import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 type AppName = keyof typeof PREFIX_MAP;
-const PREFIX_MAP = { visualize: 'vis', dashboard: 'dashboard', map: 'map' };
+const PREFIX_MAP = {
+  visualize: 'vis',
+  dashboard: 'dashboard',
+  map: 'map',
+  eventAnnotation: 'eventAnnotation',
+};
 
 export class ListingTableService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -18,7 +23,6 @@ export class ListingTableService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly header = this.ctx.getPageObject('header');
 
   private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
     name: 'Tag Popover',
@@ -39,12 +43,18 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Set search input value on landing page
+   */
+  public async setSearchFilterValue(value: string) {
+    const searchFilter = await this.getSearchFilter();
+    searchFilter.type(value);
+  }
+
+  /**
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
-    const searchFilter = await this.getSearchFilter();
-    await searchFilter.clearValue();
-    await searchFilter.click();
+    this.testSubjects.click('clearSearchButton');
   }
 
   private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
@@ -78,7 +88,6 @@ export class ListingTableService extends FtrService {
       } else {
         throw new Error('Waiting');
       }
-      await this.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -149,12 +158,42 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Open the inspect flyout
+   */
+  public async inspectVisualization(index: number = 0) {
+    const inspectButtons = await this.testSubjects.findAll('inspect-action');
+    await inspectButtons[index].click();
+  }
+
+  /**
+   * Edit Visualization title and description in the flyout
+   */
+  public async editVisualizationDetails(
+    { title, description }: { title?: string; description?: string } = {},
+    shouldSave: boolean = true
+  ) {
+    if (title) {
+      await this.testSubjects.setValue('nameInput', title);
+    }
+    if (description) {
+      await this.testSubjects.setValue('descriptionInput', description);
+    }
+    if (shouldSave) {
+      await this.retry.try(async () => {
+        await this.testSubjects.click('saveButton');
+        await this.testSubjects.missingOrFail('flyoutTitle');
+      });
+    }
+  }
+
+  /**
    * Returns items count on landing page
    */
-  public async expectItemsCount(appName: AppName, count: number) {
+  public async expectItemsCount(appName: AppName, count: number, findTimeout?: number) {
     await this.retry.try(async () => {
       const elements = await this.find.allByCssSelector(
-        `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink"]`
+        `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink"]`,
+        findTimeout ?? 10000
       );
       expect(elements.length).to.equal(count);
     });
@@ -204,6 +243,10 @@ export class ListingTableService extends FtrService {
     await this.testSubjects.click('deleteSelectedItems');
   }
 
+  public async selectFirstItemInList() {
+    await this.find.clickByCssSelector('.euiTableCellContent .euiCheckbox__input');
+  }
+
   public async clickItemCheckbox(id: string) {
     await this.testSubjects.click(`checkboxSelectRow-${id}`);
   }
@@ -213,9 +256,13 @@ export class ListingTableService extends FtrService {
    * @param name item name
    * @param id row id
    */
-  public async deleteItem(name: string, id: string) {
+  public async deleteItem(name: string, id?: string) {
     await this.searchForItemWithName(name);
-    await this.clickItemCheckbox(id);
+    if (id) {
+      await this.clickItemCheckbox(id);
+    } else {
+      await this.selectFirstItemInList();
+    }
     await this.clickDeleteSelected();
     await this.common.clickConfirmOnModal();
   }
@@ -248,9 +295,17 @@ export class ListingTableService extends FtrService {
     await this.testSubjects.click('newItemButton');
   }
 
+  public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
+    await this.testSubjects.existOrFail('newItemButton');
+  }
+
   public async onListingPage(appName: AppName) {
     return await this.testSubjects.exists(`${appName}LandingPage`, {
       timeout: 5000,
     });
+  }
+
+  public async selectTab(which: number) {
+    await this.find.clickByCssSelector(`.euiTab:nth-child(${which})`);
   }
 }

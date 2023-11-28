@@ -102,29 +102,11 @@ exports[`SavedObjectsTable should render normally 1`] = `
     size="l"
   />
   <RedirectAppLinks
-    application={
+    coreStart={
       Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-          "savedObjectsManagement": Object {
-            "delete": false,
-            "edit": false,
-            "read": true,
-          },
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
+        "application": Object {
+          "applications$": BehaviorSubject {
+            "_value": Map {},
             "closed": false,
             "currentObservers": null,
             "hasError": false,
@@ -132,10 +114,40 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "observers": Array [],
             "thrownError": null,
           },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "savedObjectsManagement": Object {
+              "delete": false,
+              "edit": false,
+              "read": true,
+            },
+          },
+          "currentAppId$": Observable {
+            "source": Subject {
+              "closed": false,
+              "currentObservers": null,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "currentLocation$": Observable {
+            "source": Subject {
+              "closed": false,
+              "currentObservers": null,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
         },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
   >
@@ -176,6 +188,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       }
       basePath={
         BasePath {
+          "assetsHrefBase": "",
           "basePath": "",
           "get": [Function],
           "prepend": [Function],

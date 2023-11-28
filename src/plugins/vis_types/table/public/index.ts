@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
+import { TablePublicConfig } from '../config';
 import { TableVisPlugin as Plugin } from './plugin';
 
-export function plugin() {
-  return new Plugin();
+export function plugin(initializerContext: PluginInitializerContext<TablePublicConfig>) {
+  return new Plugin(initializerContext);
 }

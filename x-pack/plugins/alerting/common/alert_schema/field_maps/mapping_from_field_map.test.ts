@@ -7,184 +7,199 @@
 import { alertFieldMap, legacyAlertFieldMap, type FieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from './mapping_from_field_map';
 
-describe('mappingFromFieldMap', () => {
-  const fieldMap: FieldMap = {
-    date_field: {
-      type: 'date',
-      array: false,
-      required: true,
-    },
-    keyword_field: {
-      type: 'keyword',
-      array: false,
-      required: false,
-      ignore_above: 1024,
-    },
-    long_field: {
-      type: 'long',
-      array: false,
-      required: false,
-    },
-    multifield_field: {
-      type: 'keyword',
-      array: false,
-      required: false,
-      ignore_above: 1024,
-      multi_fields: [
-        {
-          flat_name: 'multifield_field.text',
-          name: 'text',
-          type: 'match_only_text',
-        },
-      ],
-    },
-    geopoint_field: {
-      type: 'geo_point',
-      array: false,
-      required: false,
-    },
-    ip_field: {
-      type: 'ip',
-      array: false,
-      required: false,
-    },
+export const testFieldMap: FieldMap = {
+  date_field: {
+    type: 'date',
+    array: false,
+    required: true,
+  },
+  keyword_field: {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
+  },
+  long_field: {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  multifield_field: {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
+    multi_fields: [
+      {
+        flat_name: 'multifield_field.text',
+        name: 'text',
+        type: 'match_only_text',
+      },
+    ],
+  },
+  geopoint_field: {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  ip_field: {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  array_field: {
+    type: 'keyword',
+    array: true,
+    required: false,
+    ignore_above: 1024,
+  },
+  nested_array_field: {
+    type: 'nested',
+    array: false,
+    required: false,
+  },
+  'nested_array_field.field1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
+  },
+  'nested_array_field.field2': {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
+  },
+  scaled_float_field: {
+    type: 'scaled_float',
+    array: false,
+    required: false,
+    scaling_factor: 1000,
+  },
+  constant_keyword_field: {
+    type: 'constant_keyword',
+    array: false,
+    required: false,
+  },
+  'parent_field.child1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
+  },
+  'parent_field.child2': {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
+  },
+  unmapped_object: {
+    type: 'object',
+    required: false,
+    enabled: false,
+  },
+  formatted_field: {
+    type: 'date_range',
+    required: false,
+    format: 'epoch_millis||strict_date_optional_time',
+  },
+};
+export const expectedTestMapping = {
+  properties: {
     array_field: {
-      type: 'keyword',
-      array: true,
-      required: false,
       ignore_above: 1024,
-    },
-    nested_array_field: {
-      type: 'nested',
-      array: false,
-      required: false,
-    },
-    'nested_array_field.field1': {
       type: 'keyword',
-      array: false,
-      required: false,
-      ignore_above: 1024,
-    },
-    'nested_array_field.field2': {
-      type: 'keyword',
-      array: false,
-      required: false,
-      ignore_above: 1024,
-    },
-    scaled_float_field: {
-      type: 'scaled_float',
-      array: false,
-      required: false,
-      scaling_factor: 1000,
     },
     constant_keyword_field: {
       type: 'constant_keyword',
-      array: false,
-      required: false,
     },
-    'parent_field.child1': {
-      type: 'keyword',
-      array: false,
-      required: false,
-      ignore_above: 1024,
+    date_field: {
+      type: 'date',
     },
-    'parent_field.child2': {
-      type: 'keyword',
-      array: false,
-      required: false,
+    multifield_field: {
+      fields: {
+        text: {
+          type: 'match_only_text',
+        },
+      },
       ignore_above: 1024,
+      type: 'keyword',
+    },
+    geopoint_field: {
+      type: 'geo_point',
+    },
+    ip_field: {
+      type: 'ip',
+    },
+    keyword_field: {
+      ignore_above: 1024,
+      type: 'keyword',
+    },
+    long_field: {
+      type: 'long',
+    },
+    nested_array_field: {
+      properties: {
+        field1: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+        field2: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+      },
+      type: 'nested',
+    },
+    parent_field: {
+      properties: {
+        child1: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+        child2: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+      },
+    },
+    scaled_float_field: {
+      scaling_factor: 1000,
+      type: 'scaled_float',
     },
     unmapped_object: {
-      type: 'object',
-      required: false,
       enabled: false,
+      type: 'object',
     },
     formatted_field: {
       type: 'date_range',
-      required: false,
       format: 'epoch_millis||strict_date_optional_time',
     },
-  };
-  const expectedMapping = {
-    properties: {
-      array_field: {
-        ignore_above: 1024,
-        type: 'keyword',
-      },
-      constant_keyword_field: {
-        type: 'constant_keyword',
-      },
-      date_field: {
-        type: 'date',
-      },
-      multifield_field: {
-        fields: {
-          text: {
-            type: 'match_only_text',
-          },
-        },
-        ignore_above: 1024,
-        type: 'keyword',
-      },
-      geopoint_field: {
-        type: 'geo_point',
-      },
-      ip_field: {
-        type: 'ip',
-      },
-      keyword_field: {
-        ignore_above: 1024,
-        type: 'keyword',
-      },
-      long_field: {
-        type: 'long',
-      },
-      nested_array_field: {
-        properties: {
-          field1: {
-            ignore_above: 1024,
-            type: 'keyword',
-          },
-          field2: {
-            ignore_above: 1024,
-            type: 'keyword',
-          },
-        },
-        type: 'nested',
-      },
-      parent_field: {
-        properties: {
-          child1: {
-            ignore_above: 1024,
-            type: 'keyword',
-          },
-          child2: {
-            ignore_above: 1024,
-            type: 'keyword',
-          },
-        },
-      },
-      scaled_float_field: {
-        scaling_factor: 1000,
-        type: 'scaled_float',
-      },
-      unmapped_object: {
-        enabled: false,
-        type: 'object',
-      },
-      formatted_field: {
-        type: 'date_range',
-        format: 'epoch_millis||strict_date_optional_time',
-      },
-    },
-  };
+  },
+};
+
+describe('mappingFromFieldMap', () => {
   it('correctly creates mapping from field map', () => {
-    expect(mappingFromFieldMap(fieldMap)).toEqual({ dynamic: 'strict', ...expectedMapping });
+    expect(mappingFromFieldMap(testFieldMap)).toEqual({
+      dynamic: 'strict',
+      ...expectedTestMapping,
+    });
     expect(mappingFromFieldMap(alertFieldMap)).toEqual({
       dynamic: 'strict',
       properties: {
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
+        },
+        event: {
+          properties: {
+            action: {
+              type: 'keyword',
+            },
+            kind: {
+              type: 'keyword',
+            },
+          },
         },
         kibana: {
           properties: {
@@ -211,6 +226,9 @@ describe('mappingFromFieldMap', () => {
                 },
                 flapping_history: {
                   type: 'boolean',
+                },
+                maintenance_window_ids: {
+                  type: 'keyword',
                 },
                 instance: {
                   properties: {
@@ -250,6 +268,9 @@ describe('mappingFromFieldMap', () => {
                     producer: {
                       type: 'keyword',
                     },
+                    revision: {
+                      type: 'long',
+                    },
                     rule_type_id: {
                       type: 'keyword',
                     },
@@ -271,10 +292,18 @@ describe('mappingFromFieldMap', () => {
                   type: 'date_range',
                   format: 'epoch_millis||strict_date_optional_time',
                 },
+                url: {
+                  ignore_above: 2048,
+                  index: false,
+                  type: 'keyword',
+                },
                 uuid: {
                   type: 'keyword',
                 },
                 workflow_status: {
+                  type: 'keyword',
+                },
+                workflow_tags: {
                   type: 'keyword',
                 },
               },
@@ -286,6 +315,9 @@ describe('mappingFromFieldMap', () => {
               type: 'version',
             },
           },
+        },
+        tags: {
+          type: 'keyword',
         },
       },
     });
@@ -337,13 +369,14 @@ describe('mappingFromFieldMap', () => {
           },
         },
         ecs: { properties: { version: { type: 'keyword' } } },
-        event: { properties: { action: { type: 'keyword' }, kind: { type: 'keyword' } } },
-        tags: { type: 'keyword' },
       },
     });
   });
 
   it('uses dynamic setting if specified', () => {
-    expect(mappingFromFieldMap(fieldMap, true)).toEqual({ dynamic: true, ...expectedMapping });
+    expect(mappingFromFieldMap(testFieldMap, true)).toEqual({
+      dynamic: true,
+      ...expectedTestMapping,
+    });
   });
 });

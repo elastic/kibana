@@ -4,15 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { shallow } from 'enzyme';
 import React from 'react';
-
+import { render } from '@testing-library/react';
 import { LandingPageComponent } from '.';
 
-describe('LandingPageComponent component', () => {
-  it('renders page properly', () => {
-    const EmptyComponent = shallow(<LandingPageComponent />);
-    expect(EmptyComponent).toMatchSnapshot();
+const mockUseContractComponents = jest.fn(() => ({}));
+jest.mock('../../hooks/use_contract_component', () => ({
+  useContractComponents: () => mockUseContractComponents(),
+}));
+
+describe('LandingPageComponent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders the get started component', () => {
+    const GetStarted = () => <div data-test-subj="get-started-mock" />;
+    mockUseContractComponents.mockReturnValue({ GetStarted });
+    const { queryByTestId } = render(<LandingPageComponent />);
+
+    expect(queryByTestId('get-started-mock')).toBeInTheDocument();
   });
 });

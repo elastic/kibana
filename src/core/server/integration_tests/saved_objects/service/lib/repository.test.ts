@@ -46,8 +46,10 @@ describe('SavedObjectsRepository', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    if (root) {
+      await esServer.stop();
+      await root.shutdown();
+    }
   });
 
   describe('#incrementCounter', () => {

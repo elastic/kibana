@@ -17,15 +17,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogEntry } from '../../../../common/log_entry';
+import { LogEntry } from '@kbn/logs-shared-plugin/common';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
-import { LogStream } from '../../../components/log_stream';
 
 const MODAL_MARGIN = 25;
 
 export const PageViewLogInContext: React.FC = () => {
-  const [{ contextEntry, startTimestamp, endTimestamp, sourceId }, { setContextEntry }] =
+  const [{ contextEntry, startTimestamp, endTimestamp, logViewReference }, { setContextEntry }] =
     useViewLogInProviderContext();
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
   const { width: vw, height: vh } = useViewportDimensions();
@@ -56,7 +56,7 @@ export const PageViewLogInContext: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <LogStream
-              logView={{ type: 'log-view-reference', logViewId: sourceId }}
+              logView={logViewReference}
               startTimestamp={startTimestamp}
               endTimestamp={endTimestamp}
               query={contextQuery}

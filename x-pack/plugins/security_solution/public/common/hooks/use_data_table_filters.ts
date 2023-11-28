@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import type { TableId } from '@kbn/securitysolution-data-table';
+import {
+  tableDefaults,
+  dataTableSelectors,
+  dataTableActions,
+} from '@kbn/securitysolution-data-table';
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import type { TableId } from '../../../common/types';
-import { dataTableSelectors } from '../store/data_table';
-import {
-  updateShowBuildingBlockAlertsFilter,
-  updateShowThreatIndicatorAlertsFilter,
-} from '../store/data_table/actions';
-import { tableDefaults } from '../store/data_table/defaults';
 import { useShallowEqualSelector } from './use_selector';
+
+const { updateShowBuildingBlockAlertsFilter, updateShowThreatIndicatorAlertsFilter } =
+  dataTableActions;
 
 export type UseDataTableFilters = (tableId: TableId) => {
   showBuildingBlockAlerts: boolean;

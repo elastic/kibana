@@ -52,10 +52,7 @@ export function composeValidators(
 ): (value: any) => { [key: string]: any } | null {
   return (value) => {
     const validationResult = validators.reduce((acc, validator) => {
-      return {
-        ...acc,
-        ...(validator(value) || {}),
-      };
+      return Object.assign(acc, validator(value) || {});
     }, {});
     return Object.keys(validationResult).length > 0 ? validationResult : null;
   };
@@ -96,6 +93,16 @@ export function timeIntervalInputValidator() {
       };
     }
 
+    return null;
+  };
+}
+
+export function dictionaryValidator(dict: string[], shouldInclude: boolean = false) {
+  const dictSet = new Set(dict);
+  return (value: string) => {
+    if (dictSet.has(value) !== shouldInclude) {
+      return { matchDict: value };
+    }
     return null;
   };
 }

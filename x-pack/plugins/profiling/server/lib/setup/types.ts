@@ -5,22 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { Logger } from '@kbn/logging';
-import { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import { ProfilingCloudSetupOptions as BaseProfilingCloudSetupOptions } from '@kbn/profiling-data-access-plugin/common';
+import { ProfilingConfig } from '../..';
 
-export interface ProfilingSetupStep {
-  name: string;
-  init: () => Promise<void>;
-  hasCompleted: () => Promise<boolean>;
-}
-
-export interface ProfilingSetupStepFactoryOptions {
-  client: ProfilingESClient;
-  soClient: SavedObjectsClientContract;
-  packagePolicyClient: PackagePolicyClient;
-  logger: Logger;
-  spaceId: string;
-  isCloudEnabled: boolean;
+export interface ProfilingCloudSetupOptions extends BaseProfilingCloudSetupOptions {
+  config: ProfilingConfig;
 }

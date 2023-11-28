@@ -29,11 +29,14 @@ describe('useLast50DurationChart', () => {
     jest.spyOn(hooks, 'useLastXChecks').mockReturnValue({ hits: getMockHits(), loading: false });
 
     const { result } = renderHook(
-      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
+      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc', schedule: '1' }),
       { wrapper: WrappedHelper }
     );
     expect(result.current).toEqual({
-      averageDuration: 4.5,
+      medianDuration: 5,
+      maxDuration: 9,
+      minDuration: 0,
+      avgDuration: 4.5,
       data: [
         {
           x: 0,
@@ -88,7 +91,7 @@ describe('useLast50DurationChart', () => {
       .spyOn(hooks, 'useLastXChecks')
       .mockReturnValue({ hits: hitsWithAnUndefinedDuration, loading: false });
     const { result } = renderHook(
-      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
+      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc', schedule: '10' }),
       { wrapper: WrappedHelper }
     );
 
@@ -132,7 +135,10 @@ describe('useLast50DurationChart', () => {
     ];
 
     expect(result.current).toEqual({
-      averageDuration: data.reduce((acc, datum) => (acc += datum.y), 0) / 9,
+      medianDuration: [...data].sort((a, b) => a.y - b.y)[Math.floor(data.length / 2)].y,
+      maxDuration: 9,
+      minDuration: 0,
+      avgDuration: 4.4,
       data,
       loading: false,
     });
@@ -147,7 +153,7 @@ describe('useLast50DurationChart', () => {
     const spy = jest
       .spyOn(hooks, 'useLastXChecks')
       .mockReturnValue({ hits: hitsWithAnUndefinedDuration, loading: false });
-    renderHook(() => useLast50DurationChart({ monitorId, locationId }), {
+    renderHook(() => useLast50DurationChart({ monitorId, locationId, schedule: '120' }), {
       wrapper: WrappedHelper,
     });
 
@@ -157,6 +163,7 @@ describe('useLast50DurationChart', () => {
       locationId,
       fields: ['monitor.duration.us'],
       size: 50,
+      schedule: '120',
     });
   });
 
@@ -165,12 +172,15 @@ describe('useLast50DurationChart', () => {
 
     jest.spyOn(hooks, 'useLastXChecks').mockReturnValue({ hits: getMockHits(), loading });
     const { result } = renderHook(
-      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
+      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc', schedule: '3' }),
       { wrapper: WrappedHelper }
     );
-    renderHook(() => useLast50DurationChart({ monitorId: 'test-id', locationId: 'loc' }), {
-      wrapper: WrappedHelper,
-    });
+    renderHook(
+      () => useLast50DurationChart({ monitorId: 'test-id', locationId: 'loc', schedule: '5' }),
+      {
+        wrapper: WrappedHelper,
+      }
+    );
     expect(result.current.loading).toEqual(loading);
   });
 });

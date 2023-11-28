@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { meanBy, sumBy } from 'lodash';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -29,6 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       end: new Date(end).toISOString(),
       environment: 'ENVIRONMENT_ALL',
     };
+
     const [
       serviceInventoryAPIResponse,
       serviceThroughputAPIResponse,
@@ -46,10 +47,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ? {
                   documentType: ApmDocumentType.TransactionMetric,
                   rollupInterval: RollupInterval.OneMinute,
+                  useDurationSummary: true,
                 }
               : {
                   documentType: ApmDocumentType.TransactionEvent,
                   rollupInterval: RollupInterval.None,
+                  useDurationSummary: false,
                 }),
           },
         },
@@ -62,6 +65,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ...commonQuery,
             kuery: `processor.event : "${processorEvent}"`,
             transactionType: 'request',
+            bucketSizeInSeconds: 60,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),
@@ -74,6 +87,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             transactionType: 'request',
             latencyAggregationType: 'avg' as LatencyAggregationType,
+            useDurationSummary: false,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),

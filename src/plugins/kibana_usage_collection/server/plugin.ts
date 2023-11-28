@@ -123,7 +123,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     pluginStop$: Subject<void>,
     registerType: SavedObjectsRegisterType
   ) {
-    const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
@@ -138,7 +137,12 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerUsageCountersUsageCollector(usageCollection);
 
     registerOpsStatsCollector(usageCollection, metric$);
-    registerKibanaUsageCollector(usageCollection, kibanaIndex);
+
+    const getIndicesForTypes = (types: string[]) =>
+      coreSetup
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.getIndicesForTypes(types));
+    registerKibanaUsageCollector(usageCollection, getIndicesForTypes);
 
     const coreStartPromise = coreSetup.getStartServices().then(([coreStart]) => coreStart);
     const getAllSavedObjectTypes = async () => {
@@ -148,7 +152,19 @@ export class KibanaUsageCollectionPlugin implements Plugin {
         .getAllTypes()
         .map(({ name }) => name);
     };
-    registerSavedObjectsCountUsageCollector(usageCollection, kibanaIndex, getAllSavedObjectTypes);
+
+    const getSoClientWithHiddenIndices = async () => {
+      const coreStart = await coreStartPromise;
+
+      const allSoTypes = await getAllSavedObjectTypes();
+      return coreStart.savedObjects.createInternalRepository(allSoTypes);
+    };
+
+    registerSavedObjectsCountUsageCollector(
+      usageCollection,
+      getAllSavedObjectTypes,
+      getSoClientWithHiddenIndices
+    );
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

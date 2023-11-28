@@ -225,7 +225,22 @@
         "signature": [
           "(event: ",
           "DiagnosticResult",
-          "<unknown, unknown>) => { url: string; body: string; statusCode: number | null; method: string; }"
+          "<unknown, unknown>, apisToRedactInLogs: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchApiToRedactInLogs",
+            "text": "ElasticsearchApiToRedactInLogs"
+          },
+          "[] | undefined) => ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-client-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
+            "section": "def-common.RequestDebugMeta",
+            "text": "RequestDebugMeta"
+          }
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
         "deprecated": false,
@@ -246,6 +261,28 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+            "id": "def-common.getRequestDebugMeta.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "apisToRedactInLogs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchApiToRedactInLogs",
+                "text": "ElasticsearchApiToRedactInLogs"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -255,38 +292,112 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-        "id": "def-common.AgentStore",
+        "id": "def-common.AgentStatsProvider",
         "type": "Interface",
         "tags": [],
-        "label": "AgentStore",
-        "description": [],
+        "label": "AgentStatsProvider",
+        "description": [
+          "\nExposes the APIs to fetch stats of the existing agents."
+        ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.AgentStore.getAgents",
+            "id": "def-common.AgentStatsProvider.getAgentsStats",
             "type": "Function",
             "tags": [],
-            "label": "getAgents",
-            "description": [],
+            "label": "getAgentsStats",
+            "description": [
+              "\nReturns the {@link ElasticsearchClientsMetrics}, to understand the load on the Elasticsearch HTTP agents."
+            ],
             "signature": [
-              "() => Set<",
+              "() => ",
               {
-                "pluginId": "@kbn/core-elasticsearch-client-server-internal",
+                "pluginId": "@kbn/core-metrics-server",
                 "scope": "common",
-                "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-                "section": "def-common.NetworkAgent",
-                "text": "NetworkAgent"
-              },
-              ">"
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-common.ElasticsearchClientsMetrics",
+                "text": "ElasticsearchClientsMetrics"
+              }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+        "id": "def-common.RequestDebugMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestDebugMeta",
+        "description": [
+          "\nThe logger-relevant request meta of an ES request"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+            "id": "def-common.RequestDebugMeta.method",
+            "type": "string",
+            "tags": [],
+            "label": "method",
+            "description": [
+              "\nThe requested method"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+            "id": "def-common.RequestDebugMeta.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "\nThe requested endpoint + querystring"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+            "id": "def-common.RequestDebugMeta.body",
+            "type": "string",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "\nThe request body (it may be redacted)"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+            "id": "def-common.RequestDebugMeta.statusCode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "statusCode",
+            "description": [
+              "\nThe status code of the response"
+            ],
+            "signature": [
+              "number | null"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -11,6 +11,11 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import {
+  PublicFrameworkAlertsService,
+  DataStreamAdapter,
+  InstallShutdownError,
+} from '@kbn/alerting-plugin/server';
 import { INDEX_PREFIX } from '../config';
 import { type IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
@@ -91,8 +96,9 @@ interface ConstructorOptions {
   isWriteEnabled: boolean;
   isWriterCacheEnabled: boolean;
   disabledRegistrationContexts: string[];
-  areFrameworkAlertsEnabled: boolean;
+  frameworkAlerts: PublicFrameworkAlertsService;
   pluginStop$: Observable<void>;
+  dataStreamAdapter: DataStreamAdapter;
 }
 
 export class RuleDataService implements IRuleDataService {
@@ -113,8 +119,9 @@ export class RuleDataService implements IRuleDataService {
       logger: options.logger,
       disabledRegistrationContexts: options.disabledRegistrationContexts,
       isWriteEnabled: options.isWriteEnabled,
-      areFrameworkAlertsEnabled: options.areFrameworkAlertsEnabled,
+      frameworkAlerts: options.frameworkAlerts,
       pluginStop$: options.pluginStop$,
+      dataStreamAdapter: options.dataStreamAdapter,
     });
 
     this.installCommonResources = Promise.resolve(right('ok'));
@@ -155,7 +162,12 @@ export class RuleDataService implements IRuleDataService {
       .installCommonResources()
       .then(() => right('ok' as const))
       .catch((e) => {
-        this.options.logger.error(e);
+        if (e instanceof InstallShutdownError) {
+          this.options.logger.debug(e.message);
+        } else {
+          this.options.logger.error(e);
+        }
+
         return left(e); // propagates it to the index initialization phase
       });
 
@@ -200,7 +212,11 @@ export class RuleDataService implements IRuleDataService {
         const clusterClient = await this.options.getClusterClient();
         return right(clusterClient);
       } catch (e) {
-        this.options.logger.error(e);
+        if (e instanceof InstallShutdownError) {
+          this.options.logger.debug(e.message);
+        } else {
+          this.options.logger.error(e);
+        }
         return left(e);
       }
     };
@@ -221,6 +237,7 @@ export class RuleDataService implements IRuleDataService {
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
       logger: this.options.logger,
+      isUsingDataStreams: this.options.dataStreamAdapter.isUsingDataStreams(),
     });
   }
 

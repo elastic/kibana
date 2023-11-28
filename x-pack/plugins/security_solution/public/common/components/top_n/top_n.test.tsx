@@ -18,6 +18,8 @@ import type { Props as TopNProps } from './top_n';
 import { TopN } from './top_n';
 import { InputsModelId } from '../../store/inputs/constants';
 
+jest.mock('../visualization_actions/visualization_embeddable');
+
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -42,7 +44,6 @@ jest.mock('uuid', () => {
 });
 
 const field = 'host.name';
-const value = 'nice';
 const combinedQueries = {
   bool: {
     must: [],
@@ -114,7 +115,6 @@ describe('TopN', () => {
     setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',
     toggleTopN,
-    value,
   };
   describe('common functionality', () => {
     let wrapper: ReactWrapper;

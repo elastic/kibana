@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { TransformListRow } from '../../../../common';
 import { StopActionName, StopActionNameProps } from './stop_action_name';
@@ -15,6 +16,8 @@ import transformListRow from '../../../../common/__mocks__/transform_list_row.js
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
+
+const queryClient = new QueryClient();
 
 describe('Transform: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {
@@ -25,8 +28,11 @@ describe('Transform: Transform List Actions <StopAction />', () => {
       items: [item],
     };
 
-    const wrapper = shallow(<StopActionName {...props} />);
-
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(
+      <QueryClientProvider client={queryClient}>
+        <StopActionName {...props} />
+      </QueryClientProvider>
+    );
+    expect(container.textContent).toBe('Stop');
   });
 });

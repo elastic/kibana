@@ -11,12 +11,16 @@ import {
   ControllerRenderProps,
   ControllerFieldState,
   FormState,
+  UseControllerProps,
+  FieldValues,
 } from 'react-hook-form';
 import {
   ConfigKey,
   ServiceLocation,
   FormMonitorType,
   MonitorFields,
+  ResponseCheckJSON,
+  RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
 import { AlertConfigKey } from './constants';
 
@@ -36,15 +40,18 @@ export interface FormLocation {
   id: string;
   isServiceManaged: boolean;
   label: string;
+  isInvalid?: boolean;
 }
+
 export type FormConfig = MonitorFields & {
   isTLSEnabled: boolean;
   ['schedule.number']: string;
   ['source.inline']: string;
   [AlertConfigKey.STATUS_ENABLED]: boolean;
+  [AlertConfigKey.TLS_ENABLED]: boolean;
   [ConfigKey.LOCATIONS]: FormLocation[];
 
-  /* Dot notiation keys must have a type configuration both for their flattened and nested
+  /* Dot notation keys must have a type configuration both for their flattened and nested
    * variation in order for types to register for react hook form. For example, `AlertConfigKey.STATUS_ENABLED`
    * must be defined both as `alert.config.enabled: boolean` and `alert: { config: { enabled: boolean } }` */
   alert: {
@@ -55,18 +62,28 @@ export type FormConfig = MonitorFields & {
   ssl: {
     supported_protocols: MonitorFields[ConfigKey.TLS_VERSION];
   };
+  check: {
+    request: {
+      body: RequestBodyCheck;
+    };
+    response: {
+      json: ResponseCheckJSON[];
+    };
+  };
 };
 
 export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   fieldKey: keyof FormConfig;
   component: React.ComponentType<any>;
-  label?: string;
+  label?: string | React.ReactNode;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
+  hidden?: (depenencies: unknown[]) => boolean;
   props?: (params: {
     field?: ControllerRenderProps<FormConfig, TFieldKey>;
     formState: FormState<FormConfig>;
     setValue: UseFormReturn<FormConfig>['setValue'];
+    trigger: UseFormReturn<FormConfig>['trigger'];
     reset: UseFormReturn<FormConfig>['reset'];
     locations: Array<ServiceLocation & { key: string }>;
     dependencies: unknown[];
@@ -76,7 +93,6 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
-  shouldUseSetValue?: boolean;
   customHook?: (value: unknown) => {
     // custom hooks are only supported for controlled components and only supported for determining error validation
     func: Function;
@@ -88,10 +104,9 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
     event: React.ChangeEvent<HTMLInputElement>,
     formOnChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   ) => void;
-  showWhen?: [keyof FormConfig, any]; // show field when another field equals an arbitrary value
-  validation?: (dependencies: unknown[]) => Parameters<UseFormReturn['register']>[1];
+  validation?: (dependencies: unknown[]) => UseControllerProps<FieldValues, TFieldKey>['rules'];
   error?: React.ReactNode;
-  dependencies?: Array<keyof FormConfig>; // fields that another field may depend for or validation. Values are passed to the validation function
+  dependencies?: Array<keyof FormConfig>; // fields that another field may depend on or for validation. Values are passed to the validation function
 }
 
 export interface FieldMap {
@@ -116,6 +131,7 @@ export interface FieldMap {
   [ConfigKey.SCREENSHOTS]: FieldMeta<ConfigKey.SCREENSHOTS>;
   [ConfigKey.ENABLED]: FieldMeta<ConfigKey.ENABLED>;
   [AlertConfigKey.STATUS_ENABLED]: FieldMeta<AlertConfigKey.STATUS_ENABLED>;
+  [AlertConfigKey.TLS_ENABLED]: FieldMeta<AlertConfigKey.TLS_ENABLED>;
   [ConfigKey.NAMESPACE]: FieldMeta<ConfigKey.NAMESPACE>;
   [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
   [ConfigKey.MAX_REDIRECTS]: FieldMeta<ConfigKey.MAX_REDIRECTS>;
@@ -123,16 +139,19 @@ export interface FieldMap {
   [ConfigKey.USERNAME]: FieldMeta<ConfigKey.USERNAME>;
   [ConfigKey.PASSWORD]: FieldMeta<ConfigKey.PASSWORD>;
   [ConfigKey.PROXY_URL]: FieldMeta<ConfigKey.PROXY_URL>;
+  [ConfigKey.PROXY_HEADERS]: FieldMeta<ConfigKey.PROXY_HEADERS>;
   ['proxy_url__tcp']: FieldMeta<ConfigKey.PROXY_URL>;
   [ConfigKey.REQUEST_METHOD_CHECK]: FieldMeta<ConfigKey.REQUEST_METHOD_CHECK>;
   [ConfigKey.REQUEST_HEADERS_CHECK]: FieldMeta<ConfigKey.REQUEST_HEADERS_CHECK>;
   [ConfigKey.REQUEST_BODY_CHECK]: FieldMeta<ConfigKey.REQUEST_BODY_CHECK>;
   [ConfigKey.RESPONSE_HEADERS_INDEX]: FieldMeta<ConfigKey.RESPONSE_HEADERS_INDEX>;
   [ConfigKey.RESPONSE_BODY_INDEX]: FieldMeta<ConfigKey.RESPONSE_BODY_INDEX>;
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: FieldMeta<ConfigKey.RESPONSE_BODY_MAX_BYTES>;
   [ConfigKey.RESPONSE_STATUS_CHECK]: FieldMeta<ConfigKey.RESPONSE_STATUS_CHECK>;
   [ConfigKey.RESPONSE_HEADERS_CHECK]: FieldMeta<ConfigKey.RESPONSE_HEADERS_CHECK>;
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: FieldMeta<ConfigKey.RESPONSE_BODY_CHECK_POSITIVE>;
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: FieldMeta<ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE>;
+  [ConfigKey.RESPONSE_JSON_CHECK]: FieldMeta<ConfigKey.RESPONSE_JSON_CHECK>;
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: FieldMeta<ConfigKey.RESPONSE_RECEIVE_CHECK>;
   [ConfigKey.REQUEST_SEND_CHECK]: FieldMeta<ConfigKey.REQUEST_SEND_CHECK>;
   ['source.inline']: FieldMeta<ConfigKey.SOURCE_INLINE>;
@@ -142,4 +161,7 @@ export interface FieldMap {
   [ConfigKey.PLAYWRIGHT_OPTIONS]: FieldMeta<ConfigKey.PLAYWRIGHT_OPTIONS>;
   [ConfigKey.SYNTHETICS_ARGS]: FieldMeta<ConfigKey.SYNTHETICS_ARGS>;
   [ConfigKey.IGNORE_HTTPS_ERRORS]: FieldMeta<ConfigKey.IGNORE_HTTPS_ERRORS>;
+  [ConfigKey.MODE]: FieldMeta<ConfigKey.MODE>;
+  [ConfigKey.IPV4]: FieldMeta<ConfigKey.IPV4>;
+  [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;
 }

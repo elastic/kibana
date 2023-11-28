@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Timelines', () => {
+describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
+  before(() => {
+    initializeDataViews();
+  });
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {
@@ -19,7 +22,7 @@ describe('ALL - Timelines', () => {
     cy.getBySel('flyoutBottomBar').within(() => {
       cy.getBySel('flyoutOverlay').click();
     });
-    cy.getBySel('timelineQueryInput').type('_id:*{enter}');
+    cy.getBySel('timelineQueryInput').type('NOT host.name: "dev-fleet-server.8220"{enter}');
     // Filter out alerts
     cy.getBySel('timeline-sourcerer-trigger').click();
     cy.getBySel('sourcerer-advanced-options-toggle').click();

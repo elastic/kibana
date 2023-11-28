@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { createLogViewsServiceStartMock } from './services/log_views/log_views_service.mock';
+import { createLocatorMock } from '../common/locators/locators.mock';
+import { createInventoryViewsServiceStartMock } from './services/inventory_views/inventory_views_service.mock';
+import { createMetricsExplorerViewsServiceStartMock } from './services/metrics_explorer_views/metrics_explorer_views_service.mock';
 import { createTelemetryServiceMock } from './services/telemetry/telemetry_service.mock';
 import { InfraClientStartExports } from './types';
 
 export const createInfraPluginStartMock = () => ({
-  logViews: createLogViewsServiceStartMock(),
+  inventoryViews: createInventoryViewsServiceStartMock(),
+  metricsExplorerViews: createMetricsExplorerViewsServiceStartMock(),
   telemetry: createTelemetryServiceMock(),
-  ContainerMetricsTable: () => <div />,
-  HostMetricsTable: () => <div />,
-  PodMetricsTable: () => <div />,
+  locators: createLocatorMock(),
 });
 
 export const _ensureTypeCompatibility = (): InfraClientStartExports => createInfraPluginStartMock();

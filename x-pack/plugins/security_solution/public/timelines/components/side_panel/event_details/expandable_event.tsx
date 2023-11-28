@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import { NewChatById } from '@kbn/elastic-assistant';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiTextColor,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiCopy,
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { getAlertDetailsUrl } from '../../../../common/components/link_to';
-import {
-  SecuritySolutionLinkAnchor,
-  useGetSecuritySolutionLinkProps,
-} from '../../../../common/components/links';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
+import {
+  ALERT_SUMMARY_CONVERSATION_ID,
+  EVENT_SUMMARY_CONVERSATION_ID,
+} from '../../../../common/components/event_details/translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { SecurityPageName } from '../../../../../common/constants';
+import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -52,10 +54,12 @@ interface Props {
 
 interface ExpandableEventTitleProps {
   eventId: string;
+  eventIndex: string;
   isAlert: boolean;
   loading: boolean;
+  promptContextId?: string;
   ruleName?: string;
-  timestamp?: string;
+  timestamp: string;
   handleOnEventClosed?: HandleOnEventClosed;
 }
 
@@ -76,12 +80,23 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ eventId, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
-    const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
-    const { onClick } = useGetSecuritySolutionLinkProps()({
-      deepLinkId: SecurityPageName.alerts,
-      path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
+  ({
+    eventId,
+    eventIndex,
+    isAlert,
+    loading,
+    handleOnEventClosed,
+    promptContextId,
+    ruleName,
+    timestamp,
+  }) => {
+    const { hasAssistantPrivilege } = useAssistantAvailability();
+    const alertDetailsLink = useGetAlertDetailsFlyoutLink({
+      _id: eventId,
+      _index: eventIndex,
+      timestamp,
     });
+
     return (
       <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
         <EuiFlexItem grow={false}>
@@ -96,27 +111,51 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                   <PreferenceFormattedDate value={new Date(timestamp)} />
                 </>
               )}
-              {isAlert && eventId && isAlertDetailsPageEnabled && (
-                <>
-                  <EuiSpacer size="l" />
-                  <SecuritySolutionLinkAnchor
-                    data-test-subj="open-alert-details-page"
-                    deepLinkId={SecurityPageName.alerts}
-                    onClick={onClick}
-                  >
-                    {i18n.OPEN_ALERT_DETAILS_PAGE}
-                  </SecuritySolutionLinkAnchor>
-                  <EuiSpacer size="m" />
-                </>
-              )}
             </>
           )}
         </EuiFlexItem>
-        {handleOnEventClosed && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" alignItems="flexEnd">
+            {handleOnEventClosed && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.CLOSE}
+                  onClick={handleOnEventClosed}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
+                {hasAssistantPrivilege && promptContextId != null && (
+                  <EuiFlexItem grow={false}>
+                    <NewChatById
+                      conversationId={
+                        isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
+                      }
+                      promptContextId={promptContextId}
+                    />
+                  </EuiFlexItem>
+                )}
+                {isAlert && alertDetailsLink && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCopy textToCopy={alertDetailsLink}>
+                      {(copy) => (
+                        <EuiButtonEmpty
+                          onClick={copy}
+                          iconType="share"
+                          data-test-subj="copy-alert-flyout-link"
+                        >
+                          {i18n.SHARE_ALERT}
+                        </EuiButtonEmpty>
+                      )}
+                    </EuiCopy>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </StyledEuiFlexGroup>
     );
   }
@@ -144,7 +183,7 @@ export const ExpandableEvent = React.memo<Props>(
     }
 
     if (loading) {
-      return <EuiLoadingContent lines={10} />;
+      return <EuiSkeletonText lines={10} />;
     }
 
     return (
@@ -156,7 +195,6 @@ export const ExpandableEvent = React.memo<Props>(
             detailsEcsData={detailsEcsData}
             id={event.eventId}
             isAlert={isAlert}
-            indexName={event.indexName}
             isDraggable={isDraggable}
             rawEventData={rawEventData}
             scopeId={scopeId}

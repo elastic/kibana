@@ -14,7 +14,11 @@ import type { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
+export type OptionsListSearchTechnique = 'prefix' | 'wildcard';
+export const OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
+
 export interface OptionsListEmbeddableInput extends DataControlInput {
+  searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
   selectedOptions?: string[];
   existsSelected?: boolean;
@@ -23,14 +27,12 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   hideActionBar?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  placeholder?: string;
   hideSort?: boolean;
   exclude?: boolean;
-  placeholder?: string;
 }
 
-export interface OptionsListSuggestions {
-  [key: string]: { doc_count: number };
-}
+export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -63,6 +65,7 @@ export type OptionsListRequest = Omit<
   OptionsListRequestBody,
   'filters' | 'fieldName' | 'fieldSpec' | 'textFieldName'
 > & {
+  searchTechnique?: OptionsListSearchTechnique;
   allowExpensiveQueries: boolean;
   timeRange?: TimeRange;
   runPastTimeout?: boolean;
@@ -77,10 +80,11 @@ export type OptionsListRequest = Omit<
  */
 export interface OptionsListRequestBody {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  searchTechnique?: OptionsListSearchTechnique;
   allowExpensiveQueries: boolean;
   sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
-  selectedOptions?: string[];
+  selectedOptions?: Array<string | number>;
   runPastTimeout?: boolean;
   searchString?: string;
   fieldSpec?: FieldSpec;

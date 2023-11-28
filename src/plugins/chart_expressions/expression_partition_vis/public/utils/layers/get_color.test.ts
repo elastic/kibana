@@ -8,9 +8,7 @@
 
 import type { PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { byDataColorPaletteMap } from './get_color';
-import { ShapeTreeNode } from '@elastic/charts';
+import { byDataColorPaletteMap, SimplifiedArrayNode } from './get_color';
 import type { SeriesLayer } from '@kbn/coloring';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -19,31 +17,31 @@ import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
 import { generateFormatters } from '../formatters';
 import { ChartTypes } from '../../../common/types';
+import { getDistinctSeries } from '..';
 
 describe('#byDataColorPaletteMap', () => {
-  let datatable: Datatable;
   let paletteDefinition: PaletteDefinition;
   let palette: PaletteOutput;
-  const columnId = 'foo';
+  const visData = createMockVisData();
+  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const formatters = generateFormatters(visData, defaultFormatter);
 
   beforeEach(() => {
-    datatable = {
-      rows: [
-        {
-          [columnId]: '1',
-        },
-        {
-          [columnId]: '2',
-        },
-      ],
-    } as unknown as Datatable;
     paletteDefinition = chartPluginMock.createPaletteRegistry().get('default');
     palette = { type: 'palette' } as PaletteOutput;
   });
 
   it('should create byDataColorPaletteMap', () => {
-    expect(byDataColorPaletteMap(datatable.rows, columnId, paletteDefinition, palette))
-      .toMatchInlineSnapshot(`
+    expect(
+      byDataColorPaletteMap(
+        visData.rows,
+        visData.columns[0],
+        paletteDefinition,
+        palette,
+        formatters,
+        fieldFormatsMock
+      )
+    ).toMatchInlineSnapshot(`
       Object {
         "getColor": [Function],
       }
@@ -52,21 +50,25 @@ describe('#byDataColorPaletteMap', () => {
 
   it('should get color', () => {
     const colorPaletteMap = byDataColorPaletteMap(
-      datatable.rows,
-      columnId,
+      visData.rows,
+      visData.columns[0],
       paletteDefinition,
-      palette
+      palette,
+      formatters,
+      fieldFormatsMock
     );
 
-    expect(colorPaletteMap.getColor('1')).toBe('black');
+    expect(colorPaletteMap.getColor('Logstash Airways')).toBe('black');
   });
 
   it('should return undefined in case if values not in datatable', () => {
     const colorPaletteMap = byDataColorPaletteMap(
-      datatable.rows,
-      columnId,
+      visData.rows,
+      visData.columns[0],
       paletteDefinition,
-      palette
+      palette,
+      formatters,
+      fieldFormatsMock
     );
 
     expect(colorPaletteMap.getColor('wrong')).toBeUndefined();
@@ -74,24 +76,26 @@ describe('#byDataColorPaletteMap', () => {
 
   it('should increase rankAtDepth for each new value', () => {
     const colorPaletteMap = byDataColorPaletteMap(
-      datatable.rows,
-      columnId,
+      visData.rows,
+      visData.columns[0],
       paletteDefinition,
-      palette
+      palette,
+      formatters,
+      fieldFormatsMock
     );
-    colorPaletteMap.getColor('1');
-    colorPaletteMap.getColor('2');
+    colorPaletteMap.getColor('Logstash Airways');
+    colorPaletteMap.getColor('JetBeats');
 
     expect(paletteDefinition.getCategoricalColor).toHaveBeenNthCalledWith(
       1,
-      [{ name: '1', rankAtDepth: 0, totalSeriesAtDepth: 2 }],
+      [{ name: 'Logstash Airways', rankAtDepth: 0, totalSeriesAtDepth: 4 }],
       { behindText: false },
       undefined
     );
 
     expect(paletteDefinition.getCategoricalColor).toHaveBeenNthCalledWith(
       2,
-      [{ name: '2', rankAtDepth: 1, totalSeriesAtDepth: 2 }],
+      [{ name: 'JetBeats', rankAtDepth: 1, totalSeriesAtDepth: 4 }],
       { behindText: false },
       undefined
     );
@@ -110,6 +114,8 @@ describe('getColor', () => {
   }
   const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
   const formatters = generateFormatters(visData, defaultFormatter);
+  const distinctSeries = getDistinctSeries(visData.rows, buckets);
+  const dataLength = { columnsLength: buckets.length, rowsLength: visData.rows.length };
 
   dataMock.fieldFormats = {
     deserialize: jest.fn(() => ({
@@ -145,24 +151,29 @@ describe('getColor', () => {
     };
   };
   it('should return the correct color based on the parent sortIndex', () => {
-    const d = {
-      dataName: 'ES-Air',
+    const d: SimplifiedArrayNode = {
       depth: 1,
       sortIndex: 0,
       parent: {
-        children: [['ES-Air'], ['Kibana Airlines']],
+        children: [
+          ['ES-Air', undefined],
+          ['Kibana Airlines', undefined],
+        ],
         depth: 0,
         sortIndex: 0,
       },
-    } as unknown as ShapeTreeNode;
+      children: [],
+    };
+
     const color = getColor(
       ChartTypes.PIE,
+      'ES-Air',
       d,
       0,
       false,
       {},
-      buckets,
-      visData.rows,
+      distinctSeries,
+      dataLength,
       visParams,
       getPaletteRegistry(),
       { getColor: () => undefined },
@@ -176,24 +187,28 @@ describe('getColor', () => {
   });
 
   it('slices with the same label should have the same color for small multiples', () => {
-    const d = {
-      dataName: 'ES-Air',
+    const d: SimplifiedArrayNode = {
       depth: 1,
       sortIndex: 0,
       parent: {
-        children: [['ES-Air'], ['Kibana Airlines']],
+        children: [
+          ['ES-Air', undefined],
+          ['Kibana Airlines', undefined],
+        ],
         depth: 0,
         sortIndex: 0,
       },
-    } as unknown as ShapeTreeNode;
+      children: [],
+    };
     const color = getColor(
       ChartTypes.PIE,
+      'ES-Air',
       d,
       0,
       true,
       {},
-      buckets,
-      visData.rows,
+      distinctSeries,
+      dataLength,
       visParams,
       getPaletteRegistry(),
       { getColor: () => undefined },
@@ -206,24 +221,28 @@ describe('getColor', () => {
     expect(color).toEqual('color3');
   });
   it('returns the overwriteColor if exists', () => {
-    const d = {
-      dataName: 'ES-Air',
+    const d: SimplifiedArrayNode = {
       depth: 1,
       sortIndex: 0,
       parent: {
-        children: [['ES-Air'], ['Kibana Airlines']],
+        children: [
+          ['ES-Air', undefined],
+          ['Kibana Airlines', undefined],
+        ],
         depth: 0,
         sortIndex: 0,
       },
-    } as unknown as ShapeTreeNode;
+      children: [],
+    };
     const color = getColor(
       ChartTypes.PIE,
+      'ES-Air',
       d,
       0,
       true,
       { 'ES-Air': '#000028' },
-      buckets,
-      visData.rows,
+      distinctSeries,
+      dataLength,
       visParams,
       getPaletteRegistry(),
       { getColor: () => undefined },
@@ -237,11 +256,7 @@ describe('getColor', () => {
   });
 
   it('returns the overwriteColor for older visualizations with formatted values', () => {
-    const d = {
-      dataName: {
-        gte: 1000,
-        lt: 2000,
-      },
+    const d: SimplifiedArrayNode = {
       depth: 1,
       sortIndex: 0,
       parent: {
@@ -250,19 +265,22 @@ describe('getColor', () => {
             {
               gte: 1000,
               lt: 2000,
-            },
+            }.toString(),
+            undefined,
           ],
           [
             {
               gte: 2000,
               lt: 3000,
-            },
+            }.toString(),
+            undefined,
           ],
         ],
         depth: 0,
         sortIndex: 0,
       },
-    } as unknown as ShapeTreeNode;
+      children: [],
+    };
     const visParamsNew = {
       ...visParams,
       distinctColors: true,
@@ -278,12 +296,17 @@ describe('getColor', () => {
     };
     const color = getColor(
       ChartTypes.PIE,
+      // There is the unhandled situation that the categoricalName passed is not a plain string but a RangeKey
+      // In this case, the internal code, thankfully, requires the stringified version of it and/or the formatted one
+      // handling also this badly configured type
+      // FIXME when getColor could handle both strings and RangeKey
+      { gte: 1000, lt: 2000 } as unknown as string,
       d,
       0,
       true,
       { '≥ 1000 and < 2000': '#3F6833' },
-      buckets,
-      visData.rows,
+      distinctSeries,
+      dataLength,
       visParamsNew,
       getPaletteRegistry(),
       { getColor: () => undefined },
@@ -297,30 +320,34 @@ describe('getColor', () => {
   });
 
   it('should only pass the second layer for mosaic', () => {
-    const d = {
-      dataName: 'Second level 1',
+    const d: SimplifiedArrayNode = {
       depth: 2,
       sortIndex: 0,
       parent: {
-        children: [['Second level 1'], ['Second level 2']],
+        children: [
+          ['Second level 1', undefined],
+          ['Second level 2', undefined],
+        ],
         depth: 1,
         sortIndex: 0,
         parent: {
-          children: [['First level']],
+          children: [['First level', undefined]],
           depth: 0,
           sortIndex: 0,
         },
       },
-    } as unknown as ShapeTreeNode;
+      children: [],
+    };
     const registry = getPaletteRegistry();
     getColor(
       ChartTypes.MOSAIC,
+      'Second level 1',
       d,
       1,
       true,
       {},
-      buckets,
-      visData.rows,
+      distinctSeries,
+      dataLength,
       visParams,
       registry,
       undefined,
@@ -338,30 +365,34 @@ describe('getColor', () => {
   });
 
   it('should only pass the first layer for treemap', () => {
-    const d = {
-      dataName: 'Second level 1',
+    const d: SimplifiedArrayNode = {
       depth: 2,
       sortIndex: 0,
       parent: {
-        children: [['Second level 1'], ['Second level 2']],
+        children: [
+          ['Second level 1', undefined],
+          ['Second level 2', undefined],
+        ],
         depth: 1,
         sortIndex: 0,
         parent: {
-          children: [['First level']],
+          children: [['First level', undefined]],
           depth: 0,
           sortIndex: 0,
         },
       },
-    } as unknown as ShapeTreeNode;
+      children: [],
+    };
     const registry = getPaletteRegistry();
     getColor(
       ChartTypes.TREEMAP,
+      'Second level 1',
       d,
       1,
       true,
       {},
-      buckets,
-      visData.rows,
+      distinctSeries,
+      dataLength,
       visParams,
       registry,
       undefined,

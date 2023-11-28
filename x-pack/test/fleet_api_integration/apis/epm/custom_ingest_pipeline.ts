@@ -14,14 +14,14 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const CUSTOM_PIPELINE = 'logs-log.log@custom';
 
-let pkgVersion: string;
-
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
+  // TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
+  const LOG_INTEGRATION_VERSION = '1.1.2';
   describe('custom ingest pipeline for fleet managed datastreams', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
@@ -29,27 +29,16 @@ export default function (providerContext: FtrProviderContext) {
     });
     setupFleetAndAgents(providerContext);
 
-    // Use the custom log package to test the custom ingest pipeline
     before(async () => {
-      const { body: getPackagesRes } = await supertest.get(
-        `/api/fleet/epm/packages?prerelease=true`
-      );
-      const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
-      if (!logPackage) {
-        throw new Error('No log package');
-      }
-
-      pkgVersion = logPackage.version;
-
       await supertest
-        .post(`/api/fleet/epm/packages/log/${pkgVersion}`)
+        .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
     after(async () => {
       await supertest
-        .delete(`/api/fleet/epm/packages/log/${pkgVersion}`)
+        .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -89,25 +78,72 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Without custom pipeline', () => {
-      before(() =>
-        es.ingest.putPipeline({
-          id: CUSTOM_PIPELINE,
+    describe('With custom pipeline', () => {
+      before(async () => {
+        await es.ingest.putPipeline({
+          id: 'global@custom',
           processors: [
             {
-              set: {
+              append: {
                 field: 'test',
-                value: 'itworks',
+                value: ['global'],
               },
             },
           ],
-        })
-      );
+        });
+
+        await es.ingest.putPipeline({
+          id: 'logs@custom',
+          processors: [
+            {
+              append: {
+                field: 'test',
+                value: ['logs'],
+              },
+            },
+          ],
+        });
+
+        await es.ingest.putPipeline({
+          id: `logs-log@custom`,
+          processors: [
+            {
+              append: {
+                field: 'test',
+                value: ['logs-log'],
+              },
+            },
+          ],
+        });
+
+        await es.ingest.putPipeline({
+          id: CUSTOM_PIPELINE,
+          processors: [
+            {
+              append: {
+                field: 'test',
+                value: ['logs-log.log'],
+              },
+            },
+          ],
+        });
+      });
 
       after(() =>
-        es.ingest.deletePipeline({
-          id: CUSTOM_PIPELINE,
-        })
+        Promise.all([
+          es.ingest.deletePipeline({
+            id: 'global@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: 'logs@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: 'logs-log@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: CUSTOM_PIPELINE,
+          }),
+        ])
       );
       it('Should write doc correctly', async () => {
         const res = await es.index({
@@ -122,7 +158,7 @@ export default function (providerContext: FtrProviderContext) {
           id: res._id,
           index: res._index,
         });
-        expect(doc._source?.test).to.eql('itworks');
+        expect(doc._source?.test).be.eql(['global', 'logs', 'logs-log', 'logs-log.log']);
       });
     });
   });

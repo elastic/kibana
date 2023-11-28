@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { mountHook } from '@kbn/test-jest-helpers';
-
-import { MlContext } from '../../../../../contexts/ml';
-import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
-
 import { useCreateAnalyticsForm } from './use_create_analytics_form';
+import { kibanaContextMock } from '../../../../../contexts/kibana/__mocks__/kibana_context';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const getMountedHook = () =>
   mountHook(
     () => useCreateAnalyticsForm(),
     ({ children }) => (
-      <MlContext.Provider value={kibanaContextValueMock}>{children}</MlContext.Provider>
+      <KibanaContextProvider services={kibanaContextMock.services}>
+        {children}
+      </KibanaContextProvider>
     )
   );
 

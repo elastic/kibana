@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
+import { DisabledCallout } from './management/disabled_callout';
 import { useOverviewStatus } from './hooks/use_overview_status';
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
@@ -33,9 +33,8 @@ const MonitorManagementPage: React.FC = () => {
 
   const {
     error: enablementError,
-    enablement: { isEnabled, canEnable },
+    enablement: { isEnabled },
     loading: enablementLoading,
-    enableSynthetics,
   } = useEnablement();
 
   useOverviewStatus({ scopeStatusByLocation: false });
@@ -59,32 +58,7 @@ const MonitorManagementPage: React.FC = () => {
         errorTitle={labels.ERROR_HEADING_LABEL}
         errorBody={labels.ERROR_HEADING_BODY}
       >
-        {!isEnabled && syntheticsMonitors.length > 0 ? (
-          <>
-            <EuiCallOut title={labels.CALLOUT_MANAGEMENT_DISABLED} color="warning" iconType="help">
-              <p>{labels.CALLOUT_MANAGEMENT_DESCRIPTION}</p>
-              {canEnable ? (
-                <EuiButton
-                  fill
-                  color="primary"
-                  onClick={() => {
-                    enableSynthetics();
-                  }}
-                >
-                  {labels.SYNTHETICS_ENABLE_LABEL}
-                </EuiButton>
-              ) : (
-                <p>
-                  {labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-                  <EuiLink href="#" target="_blank">
-                    {labels.LEARN_MORE_LABEL}
-                  </EuiLink>
-                </p>
-              )}
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-          </>
-        ) : null}
+        <DisabledCallout total={absoluteTotal} />
         <MonitorListContainer isEnabled={isEnabled} monitorListProps={monitorListProps} />
       </Loader>
       {showEmptyState && <EnablementEmptyState />}

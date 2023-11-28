@@ -4,6 +4,7 @@ exports[`Initializing the store should initialize all datasources with state fro
 Object {
   "lens": Object {
     "activeDatasourceId": "testDatasource",
+    "annotationGroups": Object {},
     "dataViews": Object {
       "indexPatternRefs": Array [],
       "indexPatterns": Object {},

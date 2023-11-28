@@ -38,7 +38,7 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-vsphere.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/vsphere.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/vsphere.svg'),
     isBeta: true,
     artifacts: {
       application: {
@@ -56,6 +56,6 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['observability', 'virtualization'],
   };
 }

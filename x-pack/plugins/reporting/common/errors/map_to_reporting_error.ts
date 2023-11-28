@@ -16,7 +16,7 @@ import {
   ReportingError,
   UnknownError,
   VisualReportingSoftDisabledError,
-} from '.';
+} from '@kbn/reporting-common';
 
 /**
  * Map an error object from the Screenshotting plugin into an error type of the Reporting domain.

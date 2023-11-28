@@ -61,6 +61,14 @@ describe('isIncompatibleMappingExceptionError', () => {
       })
     ).toEqual(true);
   });
+  it('returns true for `document_parsing_exception` errors', () => {
+    expect(
+      isIncompatibleMappingException({
+        type: 'document_parsing_exception',
+        reason: 'idk',
+      })
+    ).toEqual(true);
+  });
   it('returns false undefined', () => {
     expect(isIncompatibleMappingException(undefined)).toEqual(false);
   });
@@ -93,6 +101,15 @@ describe('isClusterShardLimitExceeded', () => {
     expect(
       isClusterShardLimitExceeded({
         type: 'validation_exception',
+        reason:
+          'Validation Failed: 1: this action would add [2] shards, but this cluster currently has [3]/[1] maximum normal shards open;',
+      })
+    ).toEqual(true);
+  });
+  it('returns true with illegal_argument_exception and reason is maximum normal shards open', () => {
+    expect(
+      isClusterShardLimitExceeded({
+        type: 'illegal_argument_exception',
         reason:
           'Validation Failed: 1: this action would add [2] shards, but this cluster currently has [3]/[1] maximum normal shards open;',
       })

@@ -25,6 +25,17 @@ export const dashboardReadonlyBadge = {
     }),
 };
 
+export const dashboardManagedBadge = {
+  getText: () =>
+    i18n.translate('dashboard.badge.managed.text', {
+      defaultMessage: 'Managed',
+    }),
+  getTooltip: () =>
+    i18n.translate('dashboard.badge.managed.tooltip', {
+      defaultMessage: 'This dashboard is system managed. Clone this dashboard to make changes.',
+    }),
+};
+
 /**
  * @param title {string} the current title of the dashboard
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
@@ -45,6 +56,20 @@ export const unsavedChangesBadgeStrings = {
   getUnsavedChangedBadgeText: () =>
     i18n.translate('dashboard.unsavedChangesBadge', {
       defaultMessage: 'Unsaved changes',
+    }),
+  getUnsavedChangedBadgeToolTipContent: () =>
+    i18n.translate('dashboard.unsavedChangesBadgeToolTipContent', {
+      defaultMessage:
+        ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
+    }),
+  getHasRunMigrationsText: () =>
+    i18n.translate('dashboard.hasRunMigrationsBadge', {
+      defaultMessage: 'Save recommended',
+    }),
+  getHasRunMigrationsToolTipContent: () =>
+    i18n.translate('dashboard.hasRunMigrationsBadgeToolTipContent', {
+      defaultMessage:
+        'One or more panels on this dashboard have been updated to a new version. Save the dashboard so it loads faster next time.',
     }),
 };
 
@@ -86,145 +111,10 @@ export const getPanelAddedSuccessString = (savedObjectName: string) =>
     },
   });
 
-export const getDashboardURL404String = () =>
-  i18n.translate('dashboard.loadingError.dashboardNotFound', {
-    defaultMessage: 'The requested dashboard could not be found.',
-  });
-
 export const getPanelTooOldErrorString = () =>
   i18n.translate('dashboard.loadURLError.PanelTooOld', {
     defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
   });
-
-/*
-  Dashboard Listing Page
-*/
-export const discardConfirmStrings = {
-  getDiscardTitle: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesTitle', {
-      defaultMessage: 'Discard changes to dashboard?',
-    }),
-  getDiscardSubtitle: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
-      defaultMessage: `Once you discard your changes, there's no getting them back.`,
-    }),
-  getDiscardConfirmButtonText: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Discard changes',
-    }),
-  getDiscardCancelButtonText: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
-    }),
-};
-
-export const createConfirmStrings = {
-  getCreateTitle: () =>
-    i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {
-      defaultMessage: 'New dashboard already in progress',
-    }),
-  getCreateSubtitle: () =>
-    i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
-      defaultMessage: 'Continue editing or start over with a blank dashboard.',
-    }),
-  getStartOverButtonText: () =>
-    i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Start over',
-    }),
-  getContinueButtonText: () =>
-    i18n.translate('dashboard.createConfirmModal.continueButtonLabel', {
-      defaultMessage: 'Continue editing',
-    }),
-  getCancelButtonText: () =>
-    i18n.translate('dashboard.createConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
-    }),
-};
-
-export const dashboardListingErrorStrings = {
-  getErrorDeletingDashboardToast: () =>
-    i18n.translate('dashboard.deleteError.toastDescription', {
-      defaultMessage: 'Error encountered while deleting dashboard',
-    }),
-};
-
-export const dashboardListingTableStrings = {
-  getEntityName: () =>
-    i18n.translate('dashboard.listing.table.entityName', {
-      defaultMessage: 'dashboard',
-    }),
-  getEntityNamePlural: () =>
-    i18n.translate('dashboard.listing.table.entityNamePlural', {
-      defaultMessage: 'dashboards',
-    }),
-  getTableListTitle: () => getDashboardPageTitle(),
-};
-
-export const noItemsStrings = {
-  getReadonlyTitle: () =>
-    i18n.translate('dashboard.listing.readonlyNoItemsTitle', {
-      defaultMessage: 'No dashboards to view',
-    }),
-  getReadonlyBody: () =>
-    i18n.translate('dashboard.listing.readonlyNoItemsBody', {
-      defaultMessage: `There are no available dashboards. To change your permissions to view the dashboards in this space, contact your administrator.`,
-    }),
-  getReadEditTitle: () =>
-    i18n.translate('dashboard.listing.createNewDashboard.title', {
-      defaultMessage: 'Create your first dashboard',
-    }),
-  getReadEditInProgressTitle: () =>
-    i18n.translate('dashboard.listing.createNewDashboard.inProgressTitle', {
-      defaultMessage: 'Dashboard in progress',
-    }),
-  getReadEditDashboardDescription: () =>
-    i18n.translate('dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription', {
-      defaultMessage:
-        'Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.',
-    }),
-  getSampleDataLinkText: () =>
-    i18n.translate('dashboard.listing.createNewDashboard.sampleDataInstallLinkText', {
-      defaultMessage: `Add some sample data`,
-    }),
-  getCreateNewDashboardText: () =>
-    i18n.translate('dashboard.listing.createNewDashboard.createButtonLabel', {
-      defaultMessage: `Create a dashboard`,
-    }),
-};
-
-export const dashboardUnsavedListingStrings = {
-  getUnsavedChangesTitle: (plural = false) =>
-    i18n.translate('dashboard.listing.unsaved.unsavedChangesTitle', {
-      defaultMessage: 'You have unsaved changes in the following {dash}:',
-      values: {
-        dash: plural
-          ? dashboardListingTableStrings.getEntityNamePlural()
-          : dashboardListingTableStrings.getEntityName(),
-      },
-    }),
-  getLoadingTitle: () =>
-    i18n.translate('dashboard.listing.unsaved.loading', {
-      defaultMessage: 'Loading',
-    }),
-  getEditAriaLabel: (title: string) =>
-    i18n.translate('dashboard.listing.unsaved.editAria', {
-      defaultMessage: 'Continue editing {title}',
-      values: { title },
-    }),
-  getEditTitle: () =>
-    i18n.translate('dashboard.listing.unsaved.editTitle', {
-      defaultMessage: 'Continue editing',
-    }),
-  getDiscardAriaLabel: (title: string) =>
-    i18n.translate('dashboard.listing.unsaved.discardAria', {
-      defaultMessage: 'Discard changes to {title}',
-      values: { title },
-    }),
-  getDiscardTitle: () =>
-    i18n.translate('dashboard.listing.unsaved.discardTitle', {
-      defaultMessage: 'Discard changes',
-    }),
-};
 
 /*
   Share Modal
@@ -262,7 +152,7 @@ export const shareModalStrings = {
 */
 export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-    defaultMessage: 'Dashboard',
+    defaultMessage: 'Dashboards',
   });
 
 export const topNavStrings = {
@@ -307,6 +197,14 @@ export const topNavStrings = {
       defaultMessage: 'Save as a new dashboard',
     }),
   },
+  resetChanges: {
+    label: i18n.translate('dashboard.topNave.resetChangesButtonAriaLabel', {
+      defaultMessage: 'Reset',
+    }),
+    description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
+      defaultMessage: 'Reset changes to dashboard',
+    }),
+  },
   switchToViewMode: {
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
       defaultMessage: 'Switch to view mode',
@@ -323,12 +221,12 @@ export const topNavStrings = {
       defaultMessage: 'Share Dashboard',
     }),
   },
-  options: {
-    label: i18n.translate('dashboard.topNave.optionsButtonAriaLabel', {
-      defaultMessage: 'options',
+  settings: {
+    label: i18n.translate('dashboard.topNave.settingsButtonAriaLabel', {
+      defaultMessage: 'settings',
     }),
-    description: i18n.translate('dashboard.topNave.optionsConfigDescription', {
-      defaultMessage: 'Options',
+    description: i18n.translate('dashboard.topNave.settingsConfigDescription', {
+      defaultMessage: 'Open dashboard settings',
     }),
   },
   clone: {
@@ -349,6 +247,11 @@ export const getControlButtonTitle = () =>
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
     defaultMessage: 'Add control',
+  });
+
+export const getEditControlGroupButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.editControlGroupButtonTitle', {
+    defaultMessage: 'Settings',
   });
 
 export const getOnlyOneTimeSliderControlMsg = () =>

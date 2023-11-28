@@ -31,7 +31,9 @@
     "@kbn/logging",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/share-plugin",
+    "@kbn/alerting-state-types",
     "@kbn/alerts-as-data-utils",
+    "@kbn/core-http-router-server-mocks",
   ],
   "exclude": [
     "target/**/*",

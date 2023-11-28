@@ -77,7 +77,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </div>
   </div>
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
@@ -94,16 +94,17 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
-    class="euiAccordion"
+    class="euiAccordion emotion-euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
-      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
     >
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
         type="button"
       >
@@ -130,60 +131,64 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </div>
     <div
       aria-labelledby="generated-id"
-      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
       id="advanced-options"
+      inert=""
       role="region"
+      style="block-size: 0;"
       tabindex="-1"
     >
-      <div>
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s"
         >
+          <p>
+            <span>
+              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
+            </span>
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+          data-test-subj="shareReportingUnsavedState"
+        >
+          <p
+            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
+          >
+            <span
+              aria-hidden="true"
+              class="emotion-euiCallOut__icon"
+              color="inherit"
+              data-euiicon-type="warning"
+            />
+            Unsaved work
+          </p>
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiText emotion-euiText-s"
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
-            <p>
-              <span>
-                Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-              </span>
-            </p>
-          </div>
-          <div
-            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-          />
-          <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
-          >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
-            >
-              <span
-                aria-hidden="true"
-                class="emotion-euiCallOut__icon"
-                color="inherit"
-                data-euiicon-type="alert"
-              />
-              Unsaved work
-            </p>
             <div
-              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+              class="euiText emotion-euiText-s"
             >
-              <div
-                class="euiText emotion-euiText-s"
-              >
-                <p>
-                  <span>
-                    Save your work before copying this URL.
-                  </span>
-                </p>
-              </div>
-              <div
-                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-              />
+              <p>
+                <span>
+                  Save your work before copying this URL.
+                </span>
+              </p>
             </div>
+            <div
+              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+            />
           </div>
         </div>
       </div>
@@ -269,7 +274,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </div>
   </div>
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
@@ -286,16 +291,17 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
-    class="euiAccordion"
+    class="euiAccordion emotion-euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
-      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
     >
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
         type="button"
       >
@@ -322,60 +328,64 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </div>
     <div
       aria-labelledby="generated-id"
-      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
       id="advanced-options"
+      inert=""
       role="region"
+      style="block-size: 0;"
       tabindex="-1"
     >
-      <div>
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s"
         >
+          <p>
+            <span>
+              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
+            </span>
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+          data-test-subj="shareReportingUnsavedState"
+        >
+          <p
+            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
+          >
+            <span
+              aria-hidden="true"
+              class="emotion-euiCallOut__icon"
+              color="inherit"
+              data-euiicon-type="warning"
+            />
+            Unsaved work
+          </p>
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiText emotion-euiText-s"
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
-            <p>
-              <span>
-                Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-              </span>
-            </p>
-          </div>
-          <div
-            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-          />
-          <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
-          >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
-            >
-              <span
-                aria-hidden="true"
-                class="emotion-euiCallOut__icon"
-                color="inherit"
-                data-euiicon-type="alert"
-              />
-              Unsaved work
-            </p>
             <div
-              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+              class="euiText emotion-euiText-s"
             >
-              <div
-                class="euiText emotion-euiText-s"
-              >
-                <p>
-                  <span>
-                    Save your work before copying this URL.
-                  </span>
-                </p>
-              </div>
-              <div
-                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-              />
+              <p>
+                <span>
+                  Save your work before copying this URL.
+                </span>
+              </p>
             </div>
+            <div
+              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+            />
           </div>
         </div>
       </div>
@@ -402,7 +412,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
@@ -419,16 +429,17 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
-    class="euiAccordion"
+    class="euiAccordion emotion-euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
-      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
     >
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
         type="button"
       >
@@ -455,60 +466,64 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     </div>
     <div
       aria-labelledby="generated-id"
-      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
       id="advanced-options"
+      inert=""
       role="region"
+      style="block-size: 0;"
       tabindex="-1"
     >
-      <div>
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s"
         >
+          <p>
+            <span>
+              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
+            </span>
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+          data-test-subj="shareReportingUnsavedState"
+        >
+          <p
+            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
+          >
+            <span
+              aria-hidden="true"
+              class="emotion-euiCallOut__icon"
+              color="inherit"
+              data-euiicon-type="warning"
+            />
+            Unsaved work
+          </p>
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiText emotion-euiText-s"
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
-            <p>
-              <span>
-                Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-              </span>
-            </p>
-          </div>
-          <div
-            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-          />
-          <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
-          >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
-            >
-              <span
-                aria-hidden="true"
-                class="emotion-euiCallOut__icon"
-                color="inherit"
-                data-euiicon-type="alert"
-              />
-              Unsaved work
-            </p>
             <div
-              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+              class="euiText emotion-euiText-s"
             >
-              <div
-                class="euiText emotion-euiText-s"
-              >
-                <p>
-                  <span>
-                    Save your work before copying this URL.
-                  </span>
-                </p>
-              </div>
-              <div
-                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-              />
+              <p>
+                <span>
+                  Save your work before copying this URL.
+                </span>
+              </p>
             </div>
+            <div
+              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+            />
           </div>
         </div>
       </div>

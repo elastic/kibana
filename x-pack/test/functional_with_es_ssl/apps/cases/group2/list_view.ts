@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -22,6 +21,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   describe('cases list', () => {
     before(async () => {
@@ -292,6 +292,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const case1 = await cases.api.createCase({
           title: caseTitle,
           tags: ['one'],
+          category: 'foobar',
           description: 'lots of information about an incident',
         });
         const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
@@ -425,6 +426,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const row = await cases.casesTable.getCaseByIndex(0);
         const tags = await row.findByTestSubject('case-table-column-tags-one');
         expect(await tags.getVisibleText()).to.be('one');
+      });
+
+      it('filters cases by category', async () => {
+        await cases.casesTable.filterByCategory('foobar');
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        const row = await cases.casesTable.getCaseByIndex(0);
+        const category = await row.findByTestSubject('case-table-column-category-foobar');
+        expect(await category.getVisibleText()).to.be('foobar');
       });
 
       it('filters cases by status', async () => {
@@ -562,6 +572,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAllToastsWithChecks();
+      });
+
       describe('Status', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
@@ -590,9 +604,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/148468
-      // FLAKY: https://github.com/elastic/kibana/issues/148469
-      describe.skip('Severity', () => {
+      describe('Severity', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
           await header.waitUntilLoadingHasFinished();
@@ -642,6 +654,82 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.casesTable.waitForTableToFinishLoading();
           await cases.casesTable.validateCasesTableHasNthRows(0);
         });
+      });
+    });
+
+    describe('Column Selection', () => {
+      afterEach(async () => {
+        await toasts.dismissAllToastsWithChecks();
+      });
+
+      before(async () => {
+        await cases.api.createNthRandomCases(1);
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+        await browser.clearLocalStorage();
+      });
+
+      it('column selection popover button exists', async () => {
+        await testSubjects.existOrFail('column-selection-popover-button');
+      });
+
+      it('selecting a column works correctly', async () => {
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(false);
+
+        await cases.casesTable.toggleColumnInPopover('closedAt');
+
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(true);
+      });
+
+      it('deselecting columns works correctly', async () => {
+        expect(await cases.casesTable.hasColumn('Name')).to.be(true);
+
+        await cases.casesTable.toggleColumnInPopover('title');
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+      });
+
+      it('"Hide All" columns works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        await testSubjects.click('column-selection-popover-hide-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Assignees')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Tags')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Category')).to.be(false);
+      });
+
+      it('"Show All" columns works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        await testSubjects.click('column-selection-popover-show-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Assignees')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Tags')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Category')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(true);
+      });
+
+      it('search and toggle column works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        const input = await testSubjects.find('column-selection-popover-search');
+        await input.type('name');
+
+        await testSubjects.existOrFail('column-selection-switch-title');
+        await testSubjects.missingOrFail('column-selection-switch-closedAt');
+        await testSubjects.missingOrFail('column-selection-switch-category');
       });
     });
   });

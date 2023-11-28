@@ -20,7 +20,7 @@ import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-
 
 import { ExportCSVAction } from './export_csv_action';
 import { pluginServices } from '../services/plugin_services';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
+import { buildMockDashboard, getSampleDashboardPanel } from '../mocks';
 import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 describe('Export CSV action', () => {
@@ -45,16 +45,16 @@ describe('Export CSV action', () => {
       create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
     };
 
-    const input = getSampleDashboardInput({
-      panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-          explicitInput: { firstName: 'Kibanana', id: '123' },
-          type: CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-        }),
+    container = buildMockDashboard({
+      overrides: {
+        panels: {
+          '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+            explicitInput: { firstName: 'Kibanana', id: '123' },
+            type: CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
+          }),
+        },
       },
     });
-    container = new DashboardContainer(input);
-    await container.untilInitialized();
 
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,

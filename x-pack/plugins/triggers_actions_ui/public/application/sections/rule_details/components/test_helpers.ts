@@ -54,6 +54,7 @@ export function mockRule(overloads: Partial<Rule> = {}): Rule {
     notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
+    revision: 0,
     executionStatus: {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
@@ -94,6 +95,7 @@ export function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSumma
     throttle: '',
     enabled: true,
     errorMessages: [],
+    revision: 0,
     statusStartDate: '2022-03-21T07:40:46-07:00',
     statusEndDate: '2022-03-25T07:40:46-07:00',
     alerts: {
@@ -102,6 +104,7 @@ export function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSumma
         muted: false,
         actionGroupId: 'testActionGroup',
         flapping: false,
+        tracked: true,
       },
     },
     executionDuration: {

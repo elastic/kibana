@@ -11,7 +11,13 @@ import semverGt from 'semver/functions/gt';
 
 import type { Agent } from '../types';
 
-export function isAgentUpgradeable(agent: Agent, kibanaVersion: string, versionToUpgrade?: string) {
+export const AGENT_UPGRADE_COOLDOWN_IN_MIN = 10;
+
+export function isAgentUpgradeable(
+  agent: Agent,
+  latestAgentVersion: string,
+  versionToUpgrade?: string
+) {
   let agentVersion: string;
   if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
     agentVersion = agent.local_metadata.elastic.agent.version;
@@ -24,30 +30,29 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string, versionT
   if (!agent.local_metadata.elastic.agent.upgradeable) {
     return false;
   }
-  // check that the agent is not already in the process of updating
-  if (agent.upgrade_started_at && !agent.upgraded_at) {
+  if (isAgentUpgrading(agent)) {
+    return false;
+  }
+  if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
     return false;
   }
   if (versionToUpgrade !== undefined) {
-    return (
-      isNotDowngrade(agentVersion, versionToUpgrade) &&
-      isAgentVersionLessThanKibana(agentVersion, kibanaVersion)
-    );
+    return isNotDowngrade(agentVersion, versionToUpgrade);
   }
-  return isAgentVersionLessThanKibana(agentVersion, kibanaVersion);
+  return isAgentVersionLessThanLatest(agentVersion, latestAgentVersion);
 }
 
-export const isAgentVersionLessThanKibana = (agentVersion: string, kibanaVersion: string) => {
+const isAgentVersionLessThanLatest = (agentVersion: string, latestAgentVersion: string) => {
   // make sure versions are only the number before comparison
   const agentVersionNumber = semverCoerce(agentVersion);
   if (!agentVersionNumber) throw new Error('agent version is not valid');
-  const kibanaVersionNumber = semverCoerce(kibanaVersion);
-  if (!kibanaVersionNumber) throw new Error('kibana version is not valid');
+  const latestAgentVersionNumber = semverCoerce(latestAgentVersion);
+  if (!latestAgentVersionNumber) throw new Error('latest version is not valid');
 
-  return semverLt(agentVersionNumber, kibanaVersionNumber);
+  return semverLt(agentVersionNumber, latestAgentVersionNumber);
 };
 
-export const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
+const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
   const agentVersionNumber = semverCoerce(agentVersion);
   if (!agentVersionNumber) throw new Error('agent version is not valid');
   const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
@@ -55,3 +60,28 @@ export const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) =
 
   return semverGt(versionToUpgradeNumber, agentVersionNumber);
 };
+
+export function getRecentUpgradeInfoForAgent(agent: Agent): {
+  hasBeenUpgradedRecently: boolean;
+  timeToWaitMs: number;
+} {
+  if (!agent.upgraded_at) {
+    return {
+      hasBeenUpgradedRecently: false,
+      timeToWaitMs: 0,
+    };
+  }
+
+  const elaspedSinceUpgradeInMillis = Date.now() - Date.parse(agent.upgraded_at);
+  const timeToWaitMs = AGENT_UPGRADE_COOLDOWN_IN_MIN * 6e4 - elaspedSinceUpgradeInMillis;
+  const hasBeenUpgradedRecently = elaspedSinceUpgradeInMillis / 6e4 < AGENT_UPGRADE_COOLDOWN_IN_MIN;
+
+  return { hasBeenUpgradedRecently, timeToWaitMs };
+}
+
+export function isAgentUpgrading(agent: Agent) {
+  if (agent.upgrade_details) {
+    return agent.upgrade_details.state !== 'UPG_FAILED';
+  }
+  return agent.upgrade_started_at && !agent.upgraded_at;
+}

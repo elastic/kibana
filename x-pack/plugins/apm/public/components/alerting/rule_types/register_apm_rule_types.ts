@@ -7,13 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
   getAlertUrlErrorCount,
   getAlertUrlTransaction,
 } from '../../../../common/utils/formatters';
-import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
 import {
   anomalyMessage,
   errorCountMessage,
@@ -53,14 +52,9 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: lazy(
-      () =>
-        import(
-          '../ui_components/alert_details_app_section/alert_details_app_section'
-        )
-    ),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
+    priority: 80,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -72,7 +66,7 @@ export function registerApmRuleTypes(
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ fields, formatters: { asDuration } }) => {
+    format: ({ fields }) => {
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlTransaction(
@@ -94,13 +88,11 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     alertDetailsAppSection: lazy(
-      () =>
-        import(
-          '../ui_components/alert_details_app_section/alert_details_app_section'
-        )
+      () => import('../ui_components/alert_details_app_section')
     ),
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
+    priority: 60,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -112,7 +104,7 @@ export function registerApmRuleTypes(
           'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ fields, formatters: { asPercent } }) => ({
+    format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
         // TODO:fix SERVICE_NAME when we move it to initializeIndex
@@ -131,14 +123,9 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: lazy(
-      () =>
-        import(
-          '../ui_components/alert_details_app_section/alert_details_app_section'
-        )
-    ),
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
+    priority: 70,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -166,13 +153,8 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: lazy(
-      () =>
-        import(
-          '../ui_components/alert_details_app_section/alert_details_app_section'
-        )
-    ),
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
+    priority: 90,
   });
 }

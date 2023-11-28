@@ -8,7 +8,7 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { LabsFlyout } from './labs_flyout';
 
 export function Labs() {
@@ -27,7 +27,11 @@ export function Labs() {
 
   return (
     <>
-      <EuiButtonEmpty color="text" onClick={toggleFlyoutVisibility}>
+      <EuiButtonEmpty
+        data-test-subj="apmLabsLabsButton"
+        color="text"
+        onClick={toggleFlyoutVisibility}
+      >
         {i18n.translate('xpack.apm.labs', { defaultMessage: 'Labs' })}
       </EuiButtonEmpty>
       {isOpen && <LabsFlyout onClose={toggleFlyoutVisibility} />}

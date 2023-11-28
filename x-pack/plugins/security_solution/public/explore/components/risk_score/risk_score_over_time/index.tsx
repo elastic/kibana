@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { TooltipValue } from '@elastic/charts';
+import type { TooltipHeaderFormatter } from '@elastic/charts';
 import {
   Chart,
   LineSeries,
@@ -16,16 +16,18 @@ import {
   Position,
   AnnotationDomainType,
   LineAnnotation,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { chartDefaultSettings, useTheme } from '../../../../common/components/charts/common';
+import { i18n } from '@kbn/i18n';
+import { chartDefaultSettings, useThemes } from '../../../../common/components/charts/common';
 import { useTimeZone } from '../../../../common/lib/kibana';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import * as i18n from './translations';
+import * as translations from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import type {
   HostRiskScore,
@@ -52,7 +54,7 @@ export interface RiskScoreOverTimeProps {
 
 const RISKY_THRESHOLD = 70;
 const DEFAULT_CHART_HEIGHT = 250;
-
+const CHART_HEIGHT = 180;
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
@@ -80,13 +82,12 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   const timeZone = useTimeZone();
 
   const dataTimeFormatter = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
-  const headerFormatter = useCallback(
-    (tooltip: TooltipValue) => <PreferenceFormattedDate value={tooltip.value} />,
+  const headerFormatter = useCallback<TooltipHeaderFormatter>(
+    ({ value }) => <PreferenceFormattedDate value={value} />,
     []
   );
 
-  const theme = useTheme();
-
+  const { baseTheme, theme } = useThemes();
   const graphData = useMemo(
     () =>
       riskScore
@@ -135,7 +136,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                   getLensAttributes={getRiskScoreOverTimeAreaAttributes}
                   stackByField={riskEntity}
                   id={`${queryId}-embeddable`}
-                  height="180px"
+                  height={CHART_HEIGHT}
                   extraOptions={{ spaceId }}
                 />
               ) : (
@@ -144,19 +145,19 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                     <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
                   ) : (
                     <Chart>
+                      <Tooltip headerFormatter={headerFormatter} />
                       <Settings
                         {...chartDefaultSettings}
+                        baseTheme={baseTheme}
                         theme={theme}
-                        tooltip={{
-                          headerFormatter,
-                        }}
+                        locale={i18n.getLocale()}
                       />
                       <Axis
                         id="bottom"
                         position={Position.Bottom}
                         tickFormat={dataTimeFormatter}
-                        showGridLines
                         gridLine={{
+                          visible: true,
                           strokeWidth: 1,
                           opacity: 1,
                           dash: [3, 5],
@@ -181,7 +182,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                       />
                       <LineSeries
                         id="RiskOverTime"
-                        name={i18n.RISK_SCORE}
+                        name={translations.RISK_SCORE}
                         xScaleType={ScaleType.Time}
                         yScaleType={ScaleType.Linear}
                         xAccessor="x"
@@ -197,7 +198,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                           {
                             dataValue: RISKY_THRESHOLD,
                             details: `${RISKY_THRESHOLD}`,
-                            header: i18n.RISK_THRESHOLD,
+                            header: translations.RISK_THRESHOLD,
                           },
                         ]}
                         markerPosition="left"
@@ -210,7 +211,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                         }}
                         marker={
                           <StyledEuiText color={euiThemeVars.euiColorDarkestShade}>
-                            {i18n.RISKY}
+                            {translations.RISKY}
                           </StyledEuiText>
                         }
                       />

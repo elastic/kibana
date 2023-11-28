@@ -13,19 +13,26 @@ import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: `${API_ROUTE_WORKPAD}/{id}`,
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    catchErrorHandler(async (context, request, response) => {
-      const soClient = (await context.core).savedObjects.client;
-      await soClient.delete(CANVAS_TYPE, request.params.id);
-      return response.ok({ body: okResponse });
+      access: 'internal',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+          },
+        },
+      },
+      catchErrorHandler(async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        await soClient.delete(CANVAS_TYPE, request.params.id);
+        return response.ok({ body: okResponse });
+      })
+    );
 }

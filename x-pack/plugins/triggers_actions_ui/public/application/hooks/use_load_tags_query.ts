@@ -5,26 +5,49 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { loadRuleTags } from '../lib/rule_api/aggregate';
 import { useKibana } from '../../common/lib/kibana';
+import { LoadRuleTagsProps } from '../lib/rule_api';
+import { GetRuleTagsResponse } from '../lib/rule_api/aggregate_helpers';
 
 interface UseLoadTagsQueryProps {
   enabled: boolean;
   refresh?: Date;
+  search?: string;
+  perPage?: number;
+  page?: number;
 }
 
+const EMPTY_TAGS: string[] = [];
+
+// React query will refetch all prev pages when the cache keys change:
+// https://github.com/TanStack/query/discussions/3576
 export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
-  const { enabled, refresh } = props;
+  const { enabled, refresh, search, perPage, page = 1 } = props;
 
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
-  const queryFn = () => {
-    return loadRuleTags({ http });
+  const queryFn = ({ pageParam }: { pageParam?: LoadRuleTagsProps }) => {
+    if (pageParam) {
+      return loadRuleTags({
+        http,
+        perPage: pageParam.perPage,
+        page: pageParam.page,
+        search,
+      });
+    }
+    return loadRuleTags({
+      http,
+      perPage,
+      page,
+      search,
+    });
   };
 
   const onErrorFn = () => {
@@ -35,21 +58,48 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
     );
   };
 
-  const { refetch, data } = useQuery({
-    queryKey: [
-      'loadRuleTags',
-      {
-        refresh: refresh?.toDateString(),
-      },
-    ],
-    queryFn,
-    onError: onErrorFn,
-    enabled,
-    refetchOnWindowFocus: false,
-  });
+  const getNextPageParam = (lastPage: GetRuleTagsResponse) => {
+    const totalPages = Math.max(1, Math.ceil(lastPage.total / lastPage.perPage));
+    if (totalPages === lastPage.page) {
+      return;
+    }
+    return {
+      ...lastPage,
+      page: lastPage.page + 1,
+    };
+  };
+
+  const { refetch, data, fetchNextPage, isLoading, isFetching, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: [
+        'loadRuleTags',
+        search,
+        perPage,
+        page,
+        {
+          refresh: refresh?.toISOString(),
+        },
+      ],
+      queryFn,
+      onError: onErrorFn,
+      enabled,
+      getNextPageParam,
+      refetchOnWindowFocus: false,
+    });
+
+  const tags = useMemo(() => {
+    return (
+      data?.pages.reduce<string[]>((result, current) => {
+        return result.concat(current.data);
+      }, []) || EMPTY_TAGS
+    );
+  }, [data]);
 
   return {
-    tags: data?.ruleTags ?? [],
-    loadTags: refetch,
+    tags,
+    hasNextPage,
+    refetch,
+    isLoading: isLoading || isFetching || isFetchingNextPage,
+    fetchNextPage,
   };
 }

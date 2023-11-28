@@ -8,7 +8,12 @@
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getUnauthorizedErrorMessage,
+} from '../../../../common/lib';
 
 const defaultSuccessfulResponse = { total: 1, rules: [], errors: [], taskIdsFailedToBeEnabled: [] };
 
@@ -61,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -83,6 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
                     consumer: 'alertsFixture',
                     throttle: '1m',
                     alertTypeId: 'test.noop',
+                    apiKeyCreatedByUser: false,
                     apiKeyOwner: response.body.rules[0].apiKeyOwner,
                     createdBy: 'elastic',
                     updatedBy: response.body.rules[0].updatedBy,
@@ -95,6 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
                     snoozeSchedule: [],
                     updatedAt: response.body.rules[0].updatedAt,
                     createdAt: response.body.rules[0].createdAt,
+                    revision: 0,
                     scheduledTaskId: response.body.rules[0].scheduledTaskId,
                     executionStatus: {
                       lastDuration: 0,
@@ -145,8 +152,11 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message:
-                  'Unauthorized to bulkEnable a "test.restricted-noop" rule for "alertsRestrictedFixture"',
+                message: getUnauthorizedErrorMessage(
+                  'bulkEnable',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -211,7 +221,6 @@ export default ({ getService }: FtrProviderContext) => {
               expect(response.statusCode).to.eql(400);
               break;
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -251,7 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule by "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -301,7 +310,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -351,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -391,7 +400,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkEnable a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);

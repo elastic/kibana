@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import { EuiButton, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import React, { type FC, Fragment } from 'react';
+
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
+  createNewDataView: () => void;
+  canEditDataView: boolean;
 }
 
 const fixedPageSize: number = 8;
 
-export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) => {
-  const { uiSettings, http } = useAppDependencies();
+export const SearchSelection: FC<SearchSelectionProps> = ({
+  onSearchSelected,
+  createNewDataView,
+  canEditDataView,
+}) => {
+  const { contentManagement, uiSettings } = useAppDependencies();
 
   return (
     <>
@@ -37,7 +44,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <SavedObjectFinderUi
+        <SavedObjectFinder
           key="searchSavedObjectFinder"
           onChoose={onSearchSelected}
           showFilter
@@ -67,13 +74,27 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
                   defaultMessage: 'Data view',
                 }
               ),
-              defaultSearchField: 'name',
             },
           ]}
           fixedPageSize={fixedPageSize}
-          uiSettings={uiSettings}
-          http={http}
-        />
+          services={{ contentClient: contentManagement.client, uiSettings }}
+        >
+          {canEditDataView ? (
+            <EuiButton
+              onClick={createNewDataView}
+              iconType="plusInCircle"
+              data-test-subj="newDataViewButton"
+              disabled={!canEditDataView}
+            >
+              <FormattedMessage
+                id="xpack.transform.newTransform.searchSelection.createADataView"
+                defaultMessage="Create a data view"
+              />
+            </EuiButton>
+          ) : (
+            <Fragment />
+          )}
+        </SavedObjectFinder>
       </EuiModalBody>
     </>
   );

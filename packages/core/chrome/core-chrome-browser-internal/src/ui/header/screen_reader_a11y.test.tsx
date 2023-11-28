@@ -9,8 +9,8 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ScreenReaderRouteAnnouncements } from './screen_reader_a11y';
-import { mount } from 'enzyme';
+import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
+import { mount, render } from 'enzyme';
 
 describe('ScreenReaderRouteAnnouncements', () => {
   it('renders', () => {
@@ -24,7 +24,7 @@ describe('ScreenReaderRouteAnnouncements', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('does not set the focusOnRegionOnTextChange for canvas or discover', () => {
+  it('does not set the focusOnRegionOnTextChange for canvas', () => {
     const noFocusComponentCanvas = mount(
       <ScreenReaderRouteAnnouncements
         appId$={new BehaviorSubject('canvas')}
@@ -32,22 +32,9 @@ describe('ScreenReaderRouteAnnouncements', () => {
         breadcrumbs$={new BehaviorSubject([])}
       />
     );
-    const noFocusComponentDiscover = mount(
-      <ScreenReaderRouteAnnouncements
-        appId$={new BehaviorSubject('discover')}
-        customBranding$={new BehaviorSubject({})}
-        breadcrumbs$={new BehaviorSubject([])}
-      />
-    );
 
     expect(
       noFocusComponentCanvas
-        .debug()
-        .includes('<EuiScreenReaderLive focusRegionOnTextChange={false}>')
-    ).toBeTruthy();
-
-    expect(
-      noFocusComponentDiscover
         .debug()
         .includes('<EuiScreenReaderLive focusRegionOnTextChange={false}>')
     ).toBeTruthy();
@@ -65,5 +52,12 @@ describe('ScreenReaderRouteAnnouncements', () => {
     expect(
       noFocusComponent.debug().includes('<EuiScreenReaderLive focusRegionOnTextChange={true}>')
     ).toBeTruthy();
+  });
+});
+
+describe('SkipToMainContent', () => {
+  it('renders', () => {
+    const component = render(<SkipToMainContent />);
+    expect(component).toMatchSnapshot();
   });
 });

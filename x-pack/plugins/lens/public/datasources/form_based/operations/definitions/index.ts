@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-  HttpSetup,
-  CoreStart,
-} from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type {
   ExpressionAstExpressionBuilder,
@@ -46,11 +41,17 @@ import {
   timeScaleOperation,
 } from './calculations';
 import { countOperation } from './count';
-import { mathOperation, formulaOperation } from './formula';
+import {
+  mathOperation,
+  formulaOperation,
+  timeRangeOperation,
+  nowOperation,
+  intervalOperation,
+} from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
 import type {
-  FrameDatasourceAPI,
+  FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
@@ -64,7 +65,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
 import { DataViewDragDropOperation, FormBasedLayer } from '../../types';
-import { DateRange, LayerType } from '../../../../../common';
+import { DateRange, LayerType } from '../../../../../common/types';
 import { rangeOperation } from './ranges';
 import { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
@@ -105,7 +106,13 @@ export type {
 export type { CountIndexPatternColumn } from './count';
 export type { LastValueIndexPatternColumn } from './last_value';
 export type { RangeIndexPatternColumn } from './ranges';
-export type { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
+export type {
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  TimeRangeIndexPatternColumn,
+  NowIndexPatternColumn,
+  IntervalIndexPatternColumn,
+} from './formula';
 export type { StaticValueIndexPatternColumn } from './static_value';
 
 // List of all operation definitions registered to this data source.
@@ -139,6 +146,9 @@ const internalOperationDefinitions = [
   overallAverageOperation,
   staticValueOperation,
   timeScaleOperation,
+  timeRangeOperation,
+  nowOperation,
+  intervalOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -182,14 +192,12 @@ export interface ParamEditorProps<
   paramEditorUpdater: (setter: U) => void;
   ReferenceEditor?: (props: ReferenceEditorProps) => JSX.Element | null;
   toggleFullscreen: () => void;
-  setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
   columnId: string;
   layerId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
@@ -229,6 +237,8 @@ export interface HelpProps<C> {
 
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
+export type LayerSettingsFeatures = Record<'sampling', boolean>;
+
 export interface AdvancedOption {
   dataTestSubj: string;
   inlineElement: React.ReactElement | null;
@@ -257,8 +267,8 @@ interface BaseOperationDefinitionProps<
    */
   getDefaultLabel: (
     column: C,
-    indexPattern: IndexPattern,
-    columns: Record<string, GenericIndexPatternColumn>
+    columns: Record<string, GenericIndexPatternColumn>,
+    indexPattern?: IndexPattern
   ) => string;
   /**
    * This function is called if another column in the same layer changed or got added/removed.
@@ -312,7 +322,8 @@ interface BaseOperationDefinitionProps<
     columnId: string,
     indexPattern: IndexPattern,
     dateRange?: DateRange,
-    operationDefinitionMap?: Record<string, GenericOperationDefinition>
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>,
+    targetBars?: number
   ) => FieldBasedOperationErrorMessage[] | undefined;
 
   /*
@@ -342,7 +353,7 @@ interface BaseOperationDefinitionProps<
   documentation?: {
     signature: string;
     description: string;
-    section: 'elasticsearch' | 'calculation';
+    section: 'elasticsearch' | 'calculation' | 'constants';
   };
   quickFunctionDocumentation?: string;
   /**
@@ -434,6 +445,10 @@ interface BaseOperationDefinitionProps<
    * Boolean flag whether the data section extra element passed in from the visualization is handled by the param editor of the operation or whether the datasource general logic should be used.
    */
   handleDataSectionExtra?: boolean;
+  /**
+   * When present returns a dictionary of unsupported layer settings
+   */
+  getUnsupportedSettings?: () => LayerSettingsFeatures;
 }
 
 interface BaseBuildColumnArgs {
@@ -462,7 +477,7 @@ export type FieldBasedOperationErrorMessage =
         newState: (
           data: DataPublicPluginStart,
           core: CoreStart,
-          frame: FrameDatasourceAPI,
+          frame: FramePublicAPI,
           layerId: string
         ) => Promise<FormBasedLayer>;
       };
@@ -489,7 +504,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
    * Returns the meta data of the operation if applied. Undefined
    * if the field is not applicable.
    */
-  getPossibleOperation: () => OperationMetadata;
+  getPossibleOperation: (index?: IndexPattern) => OperationMetadata | undefined;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
@@ -665,7 +680,8 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
   toExpression: (
     layer: FormBasedLayer,
     columnId: string,
-    indexPattern: IndexPattern
+    indexPattern: IndexPattern,
+    context?: { dateRange?: DateRange; now?: Date; targetBars?: number }
   ) => ExpressionAstFunction[];
   /**
    * Managed references control the IDs of their inner columns, so we need to be able to copy from the
@@ -677,6 +693,18 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     target: DataViewDragDropOperation,
     operationDefinitionMap: Record<string, GenericOperationDefinition>
   ) => Record<string, FormBasedLayer>;
+
+  /**
+   * Special managed columns can be used in a formula
+   */
+  usedInMath?: boolean;
+
+  /**
+   * The specification of the arguments used by the operations used for both validation,
+   * and use from external managed operations
+   */
+  operationParams?: OperationParam[];
+  selectionStyle?: 'hidden';
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {

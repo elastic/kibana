@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import type { GetRuleExecutionEventsResponse } from '../../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleExecutionEventsResponse } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type { FetchRuleExecutionEventsArgs } from '../../api';
 import { api } from '../../api';
 

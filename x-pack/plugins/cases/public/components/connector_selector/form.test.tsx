@@ -50,25 +50,4 @@ describe('ConnectorSelector', () => {
 
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
   });
-
-  it('it should not render when is not in edit mode', async () => {
-    const wrapper = mount(
-      <Form form={formHookMock as unknown as FormHook}>
-        <UseField
-          path="connectorId"
-          component={ConnectorSelector}
-          componentProps={{
-            connectors: connectorsMock,
-            dataTestSubj: 'caseConnectors',
-            disabled: false,
-            idAria: 'caseConnectors',
-            isLoading: false,
-            isEdit: false,
-          }}
-        />
-      </Form>
-    );
-
-    expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeFalsy();
-  });
 });

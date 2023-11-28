@@ -13,6 +13,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_NAMESPACE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_PRODUCER,
@@ -26,7 +27,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { ANCHOR_DATE } from '../../../../../common/detection_engine/rule_schema/mocks';
+import { ANCHOR_DATE } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import type { RulesFieldMap } from '../../../../../common/field_maps';
 import {
@@ -125,6 +126,7 @@ export const sampleThresholdAlert = {
       interval: '5m',
       exceptions_list: getListArrayMock(),
     }) as TypeOfFieldMap<RulesFieldMap>),
+    [ALERT_URL]: 'http://example.com/docID',
     'kibana.alert.depth': 1,
   },
 };

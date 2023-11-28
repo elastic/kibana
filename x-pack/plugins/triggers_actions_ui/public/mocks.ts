@@ -9,8 +9,8 @@ import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
-import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
+import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionTypeModel,
@@ -18,7 +18,6 @@ import {
   RuleEditProps,
   RuleTypeModel,
   AlertsTableProps,
-  AlertsTableConfigurationRegistry,
   FieldBrowserProps,
   RuleTagBadgeOptions,
   RuleTagBadgeProps,
@@ -31,6 +30,7 @@ import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
+import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
@@ -47,11 +47,12 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
-  const alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
+  const alertsTableConfigurationRegistry = new AlertTableConfigRegistry();
   const connectorServices = { validateEmailAddresses: jest.fn() };
   return {
     actionTypeRegistry,
@@ -70,16 +71,16 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getAddAlertFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
-      return getAddAlertFlyoutLazy({
+    getAddRuleFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+      return getAddRuleFlyoutLazy({
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
         connectorServices,
       });
     },
-    getEditAlertFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
-      return getEditAlertFlyoutLazy({
+    getEditRuleFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+      return getEditRuleFlyoutLazy({
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
@@ -112,6 +113,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
       return getRuleEventLogListLazy<T>(props);
+    },
+    getGlobalRuleEventLogList: (props) => {
+      return getGlobalRuleEventLogListLazy(props);
     },
     getRulesListNotifyBadge: (props) => {
       return getRulesListNotifyBadgeLazy(props);

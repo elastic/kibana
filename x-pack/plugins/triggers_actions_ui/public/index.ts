@@ -42,6 +42,8 @@ export type {
   RuleDefinitionProps,
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
+  NotifyWhenSelectOptions,
+  RuleCreationValidConsumer,
 } from './types';
 
 export type {
@@ -69,15 +71,14 @@ export {
 
 export type { ConnectorFormSchema } from './application/sections/action_connector_form';
 
+export { getCategory } from './application/sections/field_browser/helpers';
+
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 
 export {
-  ButtonGroupField,
-  HiddenField,
   JsonEditorWithMessageVariables,
   JsonFieldWrapper,
   MustacheTextFieldWrapper,
-  PasswordField,
   SimpleConnectorForm,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
@@ -89,6 +90,7 @@ export {
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
+  executeAction,
 } from './application/lib';
 
 export type { ActionGroupWithCondition } from './application/sections';
@@ -100,7 +102,7 @@ export function plugin(context: PluginInitializerContext) {
 }
 
 export { useKibana } from './common';
-export type { AggregationType, Comparator } from './common';
+export type { AggregationType, Comparator, ValidNormalizedTypes } from './common';
 
 export {
   WhenExpression,
@@ -115,6 +117,7 @@ export {
   getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   GroupByExpression,
   COMPARATORS,
   connectorDeprecatedMessage,
@@ -145,3 +148,9 @@ export const getNotifyWhenOptions = async () => {
   const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');
   return NOTIFY_WHEN_OPTIONS;
 };
+
+export { transformRule } from './application/lib/rule_api/common_transformations';
+
+export { validateActionFilterQuery } from './application/lib/value_validators';
+
+export { useBulkUntrackAlerts } from './application/sections/alerts_table/hooks/use_bulk_untrack_alerts';

@@ -13,7 +13,7 @@ import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 
 export const wrapSequencesFactory =
   ({
@@ -21,6 +21,7 @@ export const wrapSequencesFactory =
     completeRule,
     ignoreFields,
     mergeStrategy,
+    publicBaseUrl,
     spaceId,
     indicesToQuery,
     alertTimestampOverride,
@@ -32,6 +33,7 @@ export const wrapSequencesFactory =
     spaceId: string | null | undefined;
     indicesToQuery: string[];
     alertTimestampOverride: Date | undefined;
+    publicBaseUrl: string | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
@@ -45,7 +47,8 @@ export const wrapSequencesFactory =
           spaceId,
           buildReasonMessage,
           indicesToQuery,
-          alertTimestampOverride
+          alertTimestampOverride,
+          publicBaseUrl
         ),
       ],
       []

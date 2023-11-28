@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import type {
@@ -20,6 +20,14 @@ import type {
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
+import {
+  isPolicySetToEventCollectionOnly,
+  ensureOnlyEventCollectionIsAllowed,
+} from '../../common/endpoint/models/policy_config_helpers';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -36,11 +44,32 @@ import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage'
 import type { AnyPolicyCreateConfig } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
+import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
+import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
 ): boolean => {
   return packagePolicy.package?.name === 'endpoint';
+};
+
+const shouldUpdateMetaValues = (
+  endpointPackagePolicy: PolicyConfig,
+  currentLicenseType: string,
+  currentCloudInfo: boolean,
+  currentClusterName: string,
+  currentClusterUUID: string,
+  currentLicenseUUID: string,
+  currentIsServerlessEnabled: boolean
+) => {
+  return (
+    endpointPackagePolicy.meta.license !== currentLicenseType ||
+    endpointPackagePolicy.meta.cloud !== currentCloudInfo ||
+    endpointPackagePolicy.meta.cluster_name !== currentClusterName ||
+    endpointPackagePolicy.meta.cluster_uuid !== currentClusterUUID ||
+    endpointPackagePolicy.meta.license_uuid !== currentLicenseUUID ||
+    endpointPackagePolicy.meta.serverless !== currentIsServerlessEnabled
+  );
 };
 
 /**
@@ -52,7 +81,9 @@ export const getPackagePolicyCreateCallback = (
   securitySolutionRequestContextFactory: IRequestContextFactory,
   alerts: AlertsStartContract,
   licenseService: LicenseService,
-  exceptionsClient: ExceptionListClient | undefined
+  exceptionsClient: ExceptionListClient | undefined,
+  cloud: CloudSetup,
+  appFeatures: AppFeaturesService
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -72,6 +103,9 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
+    if (newPackagePolicy?.inputs) {
+      validateEndpointPackagePolicy(newPackagePolicy.inputs);
+    }
     // Optional endpoint integration configuration
     let endpointIntegrationConfig;
 
@@ -113,8 +147,16 @@ export const getPackagePolicyCreateCallback = (
       createPolicyArtifactManifest(logger, manifestManager),
     ]);
 
+    const esClientInfo: InfoResponse = await esClient.info();
+
     // Add the default endpoint security policy
-    const defaultPolicyValue = createDefaultPolicy(licenseService, endpointIntegrationConfig);
+    const defaultPolicyValue = createDefaultPolicy(
+      licenseService,
+      endpointIntegrationConfig,
+      cloud,
+      esClientInfo,
+      appFeatures
+    );
 
     return {
       // We cast the type here so that any changes to the Endpoint
@@ -146,25 +188,77 @@ export const getPackagePolicyUpdateCallback = (
   logger: Logger,
   licenseService: LicenseService,
   featureUsageService: FeatureUsageService,
-  endpointMetadataService: EndpointMetadataService
+  endpointMetadataService: EndpointMetadataService,
+  cloud: CloudSetup,
+  esClient: ElasticsearchClient,
+  appFeatures: AppFeaturesService
 ): PutPackagePolicyUpdateCallback => {
   return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
 
+    const endpointIntegrationData = newPackagePolicy as NewPolicyData;
+
     // Validate that Endpoint Security policy is valid against current license
     validatePolicyAgainstLicense(
       // The cast below is needed in order to ensure proper typing for
       // the policy configuration specific for endpoint
-      newPackagePolicy.inputs[0].config?.policy?.value as PolicyConfig,
+      endpointIntegrationData.inputs[0].config?.policy?.value as PolicyConfig,
       licenseService,
       logger
     );
 
-    notifyProtectionFeatureUsage(newPackagePolicy, featureUsageService, endpointMetadataService);
+    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
-    return newPackagePolicy;
+    notifyProtectionFeatureUsage(
+      endpointIntegrationData,
+      featureUsageService,
+      endpointMetadataService
+    );
+
+    const newEndpointPackagePolicy = endpointIntegrationData.inputs[0].config?.policy
+      ?.value as PolicyConfig;
+
+    const esClientInfo: InfoResponse = await esClient.info();
+
+    if (
+      endpointIntegrationData.inputs[0].config?.policy?.value &&
+      shouldUpdateMetaValues(
+        newEndpointPackagePolicy,
+        licenseService.getLicenseType(),
+        cloud?.isCloudEnabled,
+        esClientInfo.cluster_name,
+        esClientInfo.cluster_uuid,
+        licenseService.getLicenseUID(),
+        cloud?.isServerlessEnabled
+      )
+    ) {
+      newEndpointPackagePolicy.meta.license = licenseService.getLicenseType();
+      newEndpointPackagePolicy.meta.cloud = cloud?.isCloudEnabled;
+      newEndpointPackagePolicy.meta.cluster_name = esClientInfo.cluster_name;
+      newEndpointPackagePolicy.meta.cluster_uuid = esClientInfo.cluster_uuid;
+      newEndpointPackagePolicy.meta.license_uuid = licenseService.getLicenseUID();
+      newEndpointPackagePolicy.meta.serverless = cloud?.isServerlessEnabled;
+
+      endpointIntegrationData.inputs[0].config.policy.value = newEndpointPackagePolicy;
+    }
+
+    // If no Policy Protection allowed (ex. serverless)
+    const eventsOnlyPolicy = isPolicySetToEventCollectionOnly(newEndpointPackagePolicy);
+    if (
+      !appFeatures.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections) &&
+      !eventsOnlyPolicy.isOnlyCollectingEvents
+    ) {
+      logger.warn(
+        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] adjusted due to [endpointPolicyProtections] appFeature not being enabled. Trigger [${eventsOnlyPolicy.message}]`
+      );
+
+      endpointIntegrationData.inputs[0].config.policy.value =
+        ensureOnlyEventCollectionIsAllowed(newEndpointPackagePolicy);
+    }
+
+    return endpointIntegrationData;
   };
 };
 
@@ -193,7 +287,8 @@ export const getPackagePolicyPostCreateCallback = (
 };
 
 export const getPackagePolicyDeleteCallback = (
-  exceptionsClient: ExceptionListClient | undefined
+  exceptionsClient: ExceptionListClient | undefined,
+  savedObjectsClient: SavedObjectsClientContract | undefined
 ): PostPackagePolicyPostDeleteCallback => {
   return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
@@ -203,8 +298,12 @@ export const getPackagePolicyDeleteCallback = (
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
         policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy));
+        if (savedObjectsClient) {
+          policiesToRemove.push(removeProtectionUpdatesNote(savedObjectsClient, policy));
+        }
       }
     }
+
     await Promise.all(policiesToRemove);
   };
 };

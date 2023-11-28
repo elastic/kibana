@@ -18,7 +18,7 @@ export const FormKeyUpdateWarning: React.FC = () => (
         defaultMessage: 'Proceed with caution!',
       })}
       color="warning"
-      iconType="alert"
+      iconType="warning"
     >
       <p>
         {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.updateWarning', {

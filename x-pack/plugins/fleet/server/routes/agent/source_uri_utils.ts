@@ -24,5 +24,5 @@ export const getSourceUriForAgentPolicy = async (
   if (!downloadSource) {
     throw new Error(`Download source host not found ${downloadSourceId}`);
   }
-  return downloadSource.host;
+  return { host: downloadSource.host, proxy_id: downloadSource.proxy_id };
 };

@@ -33,14 +33,15 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "meta": Object {
-          "flappingHistory": Array [],
-        },
-        "state": Object {},
-      }
-    `);
+    expect(result).toMatchObject({
+      meta: {
+        uuid: expect.any(String),
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      id: '1',
+    });
     // @ts-expect-error
     expect(result.getId()).toEqual('1');
   });
@@ -48,7 +49,10 @@ describe('createAlertFactory()', () => {
   test('reuses existing alerts', () => {
     const alert = new Alert('1', {
       state: { foo: true },
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+      meta: {
+        lastScheduledActions: { group: 'default', date: new Date().toISOString() },
+        uuid: 'uuid-previous',
+      },
     });
     const alertFactory = createAlertFactory({
       alerts: {
@@ -59,20 +63,19 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "meta": Object {
-          "flappingHistory": Array [],
-          "lastScheduledActions": Object {
-            "date": "1970-01-01T00:00:00.000Z",
-            "group": "default",
-          },
+    expect(result).toMatchObject({
+      meta: {
+        uuid: 'uuid-previous',
+        flappingHistory: [],
+        lastScheduledActions: {
+          date: expect.any(String),
+          group: 'default',
         },
-        "state": Object {
-          "foo": true,
-        },
-      }
-    `);
+      },
+      state: { foo: true },
+      context: {},
+      id: '1',
+    });
   });
 
   test('mutates given alerts', () => {
@@ -84,16 +87,56 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     alertFactory.create('1');
-    expect(alerts).toMatchInlineSnapshot(`
-      Object {
-        "1": Object {
-          "meta": Object {
-            "flappingHistory": Array [],
-          },
-          "state": Object {},
+    expect(alerts).toMatchObject({
+      1: {
+        meta: {
+          uuid: expect.any(String),
+          flappingHistory: [],
         },
-      }
-    `);
+        state: {},
+        context: {},
+        id: '1',
+      },
+    });
+  });
+
+  test('gets alert if it exists, returns null if it does not', () => {
+    const alert = new Alert('1', {
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: { group: 'default', date: new Date().toISOString() },
+        uuid: 'uuid-previous',
+      },
+    });
+    const alertFactory = createAlertFactory({
+      alerts: {
+        '1': alert,
+      },
+      logger,
+      maxAlerts: 1000,
+      autoRecoverAlerts: true,
+    });
+    expect(alertFactory.get('1')).toMatchObject({
+      meta: {
+        uuid: expect.any(String),
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      id: '1',
+    });
+    expect(alertFactory.get('2')).toBe(null);
+    alertFactory.create('2');
+    expect(alertFactory.get('2')).not.toBe(null);
+    expect(alertFactory.get('2')).toMatchObject({
+      meta: {
+        uuid: expect.any(String),
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      id: '2',
+    });
   });
 
   test('throws error and sets flag when more alerts are created than allowed', () => {
@@ -124,9 +167,10 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -166,9 +210,10 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -193,9 +238,10 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -219,9 +265,10 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -244,9 +291,10 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -323,6 +371,8 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -350,6 +400,7 @@ describe('getPublicAlertFactory', () => {
     });
 
     expect(alertFactory.create).toBeDefined();
+    expect(alertFactory.get).toBeDefined();
     expect(alertFactory.alertLimit.getValue).toBeDefined();
     expect(alertFactory.alertLimit.setLimitReached).toBeDefined();
     expect(alertFactory.alertLimit.checkLimitUsage).toBeDefined();
@@ -363,6 +414,8 @@ describe('getPublicAlertFactory', () => {
     expect(publicAlertFactory.alertLimit.getValue).toBeDefined();
     expect(publicAlertFactory.alertLimit.setLimitReached).toBeDefined();
 
+    // @ts-expect-error
+    expect(publicAlertFactory.get).not.toBeDefined();
     // @ts-expect-error
     expect(publicAlertFactory.alertLimit.checkLimitUsage).not.toBeDefined();
     // @ts-expect-error

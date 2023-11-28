@@ -7,27 +7,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@tanstack/react-query';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiImage,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../common/constants';
 import { SubscriptionNotAllowed } from './subscription_not_allowed';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { CspLoadingState } from './csp_loading_state';
-import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
-
-import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
-import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -103,72 +91,7 @@ export const CspNoDataPage = ({
   );
 };
 
-const packageNotInstalledRenderer = ({
-  kspmIntegrationLink,
-  cspmIntegrationLink,
-}: {
-  kspmIntegrationLink?: string;
-  cspmIntegrationLink?: string;
-}) => {
-  return (
-    <FullSizeCenteredPage>
-      <EuiEmptyPrompt
-        data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-        icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-              defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
-            />
-          </h2>
-        }
-        layout="horizontal"
-        color="plain"
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-              defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
-              values={{
-                learnMore: (
-                  <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
-                    <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
-                      defaultMessage="Learn more about Cloud Security Posture"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        }
-        actions={
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={cspmIntegrationLink}>
-                <FormattedMessage
-                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
-                  defaultMessage="Add CSPM Integration"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={kspmIntegrationLink}>
-                <FormattedMessage
-                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
-                  defaultMessage="Add KSPM Integration"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
-    </FullSizeCenteredPage>
-  );
-};
-
-const defaultLoadingRenderer = () => (
+export const defaultLoadingRenderer = () => (
   <CspLoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
     <FormattedMessage
       id="xpack.csp.cloudPosturePage.loadingDescription"
@@ -181,7 +104,7 @@ const defaultErrorRenderer = (error: unknown) => (
   <FullSizeCenteredPage>
     <EuiEmptyPrompt
       color="danger"
-      iconType="alert"
+      iconType="warning"
       data-test-subj={ERROR_STATE_TEST_SUBJECT}
       title={
         <h2>
@@ -210,7 +133,7 @@ const defaultErrorRenderer = (error: unknown) => (
   </FullSizeCenteredPage>
 );
 
-const defaultNoDataRenderer = () => (
+export const defaultNoDataRenderer = () => (
   <FullSizeCenteredPage>
     <NoDataPage
       data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
@@ -228,9 +151,9 @@ const defaultNoDataRenderer = () => (
   </FullSizeCenteredPage>
 );
 
-const subscriptionNotAllowedRenderer = () => (
+const subscriptionNotAllowedRenderer = (licenseManagementLocator?: string) => (
   <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
-    <SubscriptionNotAllowed />
+    <SubscriptionNotAllowed licenseManagementLocator={licenseManagementLocator} />
   </FullSizeCenteredPage>
 );
 
@@ -250,33 +173,19 @@ export const CloudPosturePage = <TData, TError>({
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
-  const getSetupStatus = useCspSetupStatusApi();
-  const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
-  const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+  const getLicenseManagementLocator = useLicenseManagementLocatorApi();
 
   const render = () => {
     if (subscriptionStatus.isError) {
       return defaultErrorRenderer(subscriptionStatus.error);
     }
 
-    if (subscriptionStatus.isLoading) {
+    if (subscriptionStatus.isLoading || getLicenseManagementLocator.isLoading) {
       return defaultLoadingRenderer();
     }
 
     if (!subscriptionStatus.data) {
-      return subscriptionNotAllowedRenderer();
-    }
-
-    if (getSetupStatus.isError) {
-      return defaultErrorRenderer(getSetupStatus.error);
-    }
-
-    if (getSetupStatus.isLoading) {
-      return defaultLoadingRenderer();
-    }
-
-    if (getSetupStatus.data.status === 'not-installed') {
-      return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
+      return subscriptionNotAllowedRenderer(getLicenseManagementLocator.data);
     }
 
     if (!query) {

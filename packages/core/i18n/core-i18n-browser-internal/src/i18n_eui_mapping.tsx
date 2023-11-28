@@ -17,9 +17,12 @@ interface EuiValues {
 
 export const getEuiContextMapping = (): EuiTokensObject => {
   return {
-    'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
-      defaultMessage: 'Loading',
-    }),
+    'euiAccordionChildrenLoading.message': i18n.translate(
+      'core.euiAccordionChildrenLoading.message',
+      {
+        defaultMessage: 'Loading',
+      }
+    ),
     'euiAutoRefresh.autoRefreshLabel': i18n.translate('core.euiAutoRefresh.autoRefreshLabel', {
       defaultMessage: 'Auto refresh',
     }),
@@ -103,6 +106,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Page level controls',
       description: 'Screen reader announcement about heading controls',
     }),
+    'euiBreadcrumb.popoverAriaLabel': i18n.translate('core.euiBreadcrumb.popoverAriaLabel', {
+      defaultMessage: 'Clicking this button will toggle a popover dialog.',
+    }),
     'euiBreadcrumb.collapsedBadge.ariaLabel': i18n.translate(
       'core.euiBreadcrumb.collapsedBadge.ariaLabel',
       {
@@ -112,6 +118,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiBreadcrumbs.nav.ariaLabel': i18n.translate('core.euiBreadcrumbs.nav.ariaLabel', {
       defaultMessage: 'Breadcrumbs',
       description: 'Label on the breadcrumbs nav element',
+    }),
+    'euiCallOut.dismissAriaLabel': i18n.translate('core.euiCallOut.dismissAriaLabel', {
+      defaultMessage: 'Dismiss this callout',
     }),
     'euiCardSelect.select': i18n.translate('core.euiCardSelect.select', {
       defaultMessage: 'Select',
@@ -158,6 +167,25 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'ARIA label and tooltip content describing a button that expands an actions menu',
       }
     ),
+    'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
+      defaultMessage: 'Site menu',
+    }),
+    'euiCollapsibleNavButton.ariaLabelExpand': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelExpand',
+      { defaultMessage: 'Expand navigation' }
+    ),
+    'euiCollapsibleNavButton.ariaLabelCollapse': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelCollapse',
+      { defaultMessage: 'Collapse navigation' }
+    ),
+    'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelClose',
+      { defaultMessage: 'Close navigation' }
+    ),
+    'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelOpen',
+      { defaultMessage: 'Open navigation' }
+    ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',
@@ -182,44 +210,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.popoverLabel': i18n.translate('core.euiColorPicker.popoverLabel', {
       defaultMessage: 'Color selection dialog',
     }),
-    'euiColorStopThumb.removeLabel': i18n.translate('core.euiColorStopThumb.removeLabel', {
-      defaultMessage: 'Remove this stop',
-      description: 'Label accompanying a button whose action will remove the color stop',
-    }),
-    'euiColorStopThumb.screenReaderAnnouncement': i18n.translate(
-      'core.euiColorStopThumb.screenReaderAnnouncement',
-      {
-        defaultMessage:
-          'A popup with a color stop edit form opened. Tab forward to cycle through form controls or press escape to close this popup.',
-        description:
-          'Message when the color picker popover has opened for an individual color stop thumb.',
-      }
-    ),
-    'euiColorStopThumb.buttonAriaLabel': i18n.translate('core.euiColorStopThumb.buttonAriaLabel', {
-      defaultMessage: 'Press the Enter key to modify this stop. Press Escape to focus the group',
-      description: 'Screen reader text to describe picker interaction',
-    }),
-    'euiColorStopThumb.buttonTitle': i18n.translate('core.euiColorStopThumb.buttonTitle', {
-      defaultMessage: 'Click to edit, drag to reposition',
-      description: 'Screen reader text to describe button interaction',
-    }),
-    'euiColorStopThumb.stopLabel': i18n.translate('core.euiColorStopThumb.stopLabel', {
-      defaultMessage: 'Stop value',
-    }),
-    'euiColorStopThumb.stopErrorMessage': i18n.translate(
-      'core.euiColorStopThumb.stopErrorMessage',
-      {
-        defaultMessage: 'Value is out of range',
-      }
-    ),
-    'euiColorStops.screenReaderAnnouncement': ({ label, readOnly, disabled }: EuiValues) =>
-      i18n.translate('core.euiColorStops.screenReaderAnnouncement', {
-        defaultMessage:
-          '{label}: {readOnly} {disabled} Color stop picker. Each stop consists of a number and corresponding color value. Use the Down and Up arrow keys to select individual stops. Press the Enter key to create a new stop.',
-        values: { label, readOnly, disabled },
-        description:
-          'Screen reader text to describe the composite behavior of the color stops component.',
-      }),
     'euiColorPickerSwatch.ariaLabel': ({ color }: EuiValues) =>
       i18n.translate('core.euiColorPickerSwatch.ariaLabel', {
         defaultMessage: 'Select {color} as the color',
@@ -373,12 +363,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ searchValue }}
       />
     ),
-    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) =>
-      i18n.translate('core.euiComboBoxOptionsList.delimiterMessage', {
-        defaultMessage: 'Add each item separated by {delimiter}',
-        values: { delimiter },
-        description: 'Screen reader text describing adding delimited options',
-      }),
+    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiComboBoxOptionsList.delimiterMessage"
+        defaultMessage="Add each item separated by {delimiter}"
+        values={{ delimiter }}
+      />
+    ),
     'euiComboBoxPill.removeSelection': ({ children }: EuiValues) =>
       i18n.translate('core.euiComboBoxPill.removeSelection', {
         defaultMessage: 'Remove {children} from selection in this group',
@@ -404,6 +395,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
         values: { landmarkHeading },
       }),
+    'euiGlobalToastList.clearAllToastsButtonAriaLabel': i18n.translate(
+      'core.euiGlobalToastList.clearAllToastsButtonAriaLabel',
+      {
+        defaultMessage: 'Clear all toast notifications',
+      }
+    ),
+    'euiGlobalToastList.clearAllToastsButtonDisplayText': i18n.translate(
+      'core.euiGlobalToastList.clearAllToastsButtonDisplayText',
+      {
+        defaultMessage: 'Clear all',
+      }
+    ),
     'euiKeyboardShortcuts.title': i18n.translate('core.euiKeyboardShortcuts.title', {
       defaultMessage: 'Keyboard shortcuts',
     }),
@@ -777,6 +780,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label on a button that removes any entry in a form field',
       }
     ),
+    'euiFormControlLayoutDelimited.delimiterLabel': i18n.translate(
+      'core.euiFormControlLayoutDelimited.delimiterLabel',
+      {
+        defaultMessage: 'to',
+      }
+    ),
     'euiFullscreenSelector.fullscreenButton': i18n.translate(
       'core.euiFullscreenSelector.fullscreenButton',
       {
@@ -805,6 +814,22 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiImageButton.closeFullScreen': i18n.translate('core.euiImageButton.closeFullScreen', {
       defaultMessage: 'Press Escape or click to close image fullscreen mode',
     }),
+    'euiInlineEditForm.activateEditModeDescription': i18n.translate(
+      'core.euiInlineEditForm.activateEditModeDescription',
+      { defaultMessage: 'Click to edit this text inline.' }
+    ),
+    'euiInlineEditForm.inputKeyboardInstructions': i18n.translate(
+      'core.euiInlineEditForm.inputKeyboardInstructions',
+      { defaultMessage: 'Press Enter to save your edited text. Press Escape to cancel your edit.' }
+    ),
+    'euiInlineEditForm.cancelButtonAriaLabel': i18n.translate(
+      'core.euiInlineEditForm.cancelButtonAriaLabel',
+      { defaultMessage: 'Cancel edit' }
+    ),
+    'euiInlineEditForm.saveButtonAriaLabel': i18n.translate(
+      'core.euiInlineEditForm.saveButtonAriaLabel',
+      { defaultMessage: 'Save edit' }
+    ),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
       defaultMessage: 'External link',
     }),
@@ -1432,13 +1457,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',
       {
-        defaultMessage: 'Press left or right to adjust panels size',
+        defaultMessage: 'Press the left or right arrow keys to adjust panels size',
       }
     ),
     'euiResizableButton.verticalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.verticalResizerAriaLabel',
       {
-        defaultMessage: 'Press up or down to adjust panels size',
+        defaultMessage: 'Press the up or down arrow keys to adjust panels size',
       }
     ),
     'euiResizablePanel.toggleButtonAriaLabel': i18n.translate(
@@ -1456,6 +1481,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     ),
     'euiSaturation.ariaLabel': i18n.translate('core.euiSaturation.ariaLabel', {
       defaultMessage: 'HSV color mode saturation and value 2-axis slider',
+    }),
+    'euiSearchBox.ariaLabel': i18n.translate('core.euiSearchBox.ariaLabel', {
+      defaultMessage:
+        'This is a search bar. After typing your query, hit enter to filter the results lower in the page.',
+    }),
+    'euiSearchBox.incrementalAriaLabel': i18n.translate('core.euiSearchBox.incrementalAriaLabel', {
+      defaultMessage:
+        'This is a search bar. As you type, the results lower in the page will automatically filter.',
+    }),
+    'euiSearchBox.placeholder': i18n.translate('core.euiSearchBox.placeholder', {
+      defaultMessage: 'Search...',
     }),
     'euiSelectable.loadingOptions': i18n.translate('core.euiSelectable.loadingOptions', {
       defaultMessage: 'Loading options',
@@ -1475,7 +1511,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiSelectable.screenReaderInstructions',
       {
         defaultMessage:
-          'Use up and down arrows to move focus over options. Enter to select. Escape to collapse options.',
+          'Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.',
       }
     ),
     'euiSelectable.searchResults': ({ resultsLength }: EuiValues) =>
@@ -1492,40 +1528,50 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Checked option.',
       }
     ),
-    'euiSelectableListItem.checkedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.checkedOptionInstructions',
-      {
-        defaultMessage: 'To uncheck this option, press enter.',
-      }
-    ),
-    'euiSelectableListItem.includedOption': i18n.translate(
-      'core.euiSelectableListItem.includedOption',
-      {
-        defaultMessage: 'Selected option.',
-      }
-    ),
-    'euiSelectableListItem.includedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.includedOptionInstructions',
-      {
-        defaultMessage: 'To exclude this option, press enter.',
-      }
-    ),
     'euiSelectableListItem.excludedOption': i18n.translate(
       'core.euiSelectableListItem.excludedOption',
       {
         defaultMessage: 'Excluded option.',
       }
     ),
-    'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.excludedOptionInstructions',
+    'euiSelectableListItem.checkOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.checkOptionInstructions',
       {
-        defaultMessage: 'To uncheck this option, press enter.',
+        defaultMessage: 'To check this option, press Enter.',
       }
     ),
-    'euiSelectableListItem.unckeckedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.unckeckedOptionInstructions',
+    'euiSelectableListItem.uncheckOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.uncheckOptionInstructions',
       {
-        defaultMessage: 'To select this option, press enter.',
+        defaultMessage: 'To uncheck this option, press Enter.',
+      }
+    ),
+    'euiSelectableListItem.excludeOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.excludeOptionInstructions',
+      {
+        defaultMessage: 'To exclude this option, press Enter.',
+      }
+    ),
+    'euiSelectableListItem.mixedOption': i18n.translate('core.euiSelectableListItem.mixedOption', {
+      defaultMessage: 'Mixed (indeterminate) option.',
+    }),
+
+    'euiSelectableListItem.mixedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionInstructions',
+      {
+        defaultMessage: 'To check this option for all, press Enter once.',
+      }
+    ),
+    'euiSelectableListItem.mixedOptionUncheckInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionUncheckInstructions',
+      {
+        defaultMessage: 'To uncheck this option for all, press Enter twice.',
+      }
+    ),
+    'euiSelectableListItem.mixedOptionExcludeInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionExcludeInstructions',
+      {
+        defaultMessage: 'To exclude this option for all, press Enter twice.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
@@ -1635,28 +1681,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} is loading',
         values: { number },
       }),
-    'euiSuggest.stateSavedTooltip': i18n.translate('core.euiSuggest.stateSavedTooltip', {
-      defaultMessage: 'Saved.',
-    }),
-
-    'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
-      defaultMessage: 'Changes have not been saved.',
-    }),
-
-    'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {
-      defaultMessage: 'State: loading.',
-    }),
-
-    'euiSuggest.stateSaved': i18n.translate('core.euiSuggest.stateSaved', {
-      defaultMessage: 'State: saved.',
-    }),
-
-    'euiSuggest.stateUnsaved': i18n.translate('core.euiSuggest.stateUnsaved', {
-      defaultMessage: 'State: unsaved.',
-    }),
-    'euiSuggest.stateUnchanged': i18n.translate('core.euiSuggest.stateUnchanged', {
-      defaultMessage: 'State: unchanged.',
-    }),
     'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
       'core.euiSuperSelect.screenReaderAnnouncement',
       {
@@ -1664,11 +1688,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'You are in a form selector and must select a single option. Use the Up and Down arrow keys to navigate or Escape to close.',
       }
     ),
-    'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
-      i18n.translate('core.euiSuperSelectControl.selectAnOption', {
-        defaultMessage: 'Select an option: {selectedValue}, is selected',
-        values: { selectedValue },
-      }),
     'euiSuperUpdateButton.cannotUpdateTooltip': i18n.translate(
       'core.euiSuperUpdateButton.cannotUpdateTooltip',
       {
@@ -1812,5 +1831,25 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Loaded {contentAriaLabel}',
         values: { contentAriaLabel },
       }),
+    'euiDualRange.sliderScreenReaderInstructions': i18n.translate(
+      'core.euiDualRange.sliderScreenReaderInstructions',
+      {
+        defaultMessage:
+          'You are in a custom range slider. Use the Up and Down arrow keys to change the minimum value. Press Tab to interact with the maximum value.',
+        description: 'Screen reader instructions for changing dual range slider values.',
+      }
+    ),
+    'euiRange.sliderScreenReaderInstructions': i18n.translate(
+      'core.euiRange.sliderScreenReaderInstructions',
+      {
+        defaultMessage:
+          'You are in a custom range slider. Use the Up and Down arrow keys to change the value.',
+        description: 'Screen reader instructions for changing range slider values.',
+      }
+    ),
+    'euiSuperSelect.ariaLabel': i18n.translate('core.euiSuperSelect.ariaLabel', {
+      defaultMessage: 'Select listbox',
+      description: 'Accessible label for Super Selects without a visible label.',
+    }),
   };
 };

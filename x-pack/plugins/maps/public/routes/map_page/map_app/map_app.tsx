@@ -9,7 +9,12 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters, ScopedHistory } from '@kbn/core/public';
+import {
+  AppLeaveAction,
+  AppMountParameters,
+  KibanaExecutionContext,
+  ScopedHistory,
+} from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
@@ -29,7 +34,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import {
   getData,
-  getExecutionContext,
+  getExecutionContextService,
   getCoreChrome,
   getIndexPatternService,
   getMapsCapabilities,
@@ -42,8 +47,12 @@ import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { getEditPath, getFullPath, APP_ID } from '../../../../common/constants';
-import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
+import {
+  getEditPath,
+  getFullPath,
+  APP_ID,
+  MAP_EMBEDDABLE_NAME,
+} from '../../../../common/constants';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -84,6 +93,7 @@ export interface Props {
   query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: ScopedHistory;
+  setExecutionContext: (executionContext: KibanaExecutionContext) => void;
 }
 
 export interface State {
@@ -123,11 +133,15 @@ export class MapApp extends React.Component<Props, State> {
   componentDidMount() {
     this._isMounted = true;
 
-    getExecutionContext().set({
+    const executionContext = {
       type: 'application',
-      page: 'editor',
+      name: APP_ID,
+      url: window.location.pathname,
       id: this.props.savedMap.getSavedObjectId() || 'new',
-    });
+      page: 'editor',
+    };
+    getExecutionContextService().set(executionContext); // set execution context in core ExecutionContextStartService
+    this.props.setExecutionContext(executionContext); // set execution context in redux store
 
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
@@ -244,9 +258,17 @@ export class MapApp extends React.Component<Props, State> {
     } else {
       indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
     }
-    if (this._isMounted) {
-      this.setState({ indexPatterns });
+
+    if (!this._isMounted) {
+      return;
     }
+
+    // ignore results for outdated requests
+    if (!_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
+      return;
+    }
+
+    this.setState({ indexPatterns });
   }
 
   _onQueryChange = ({
@@ -414,7 +436,7 @@ export class MapApp extends React.Component<Props, State> {
       await spaces.ui.redirectLegacyUrl({
         path: newPath,
         aliasPurpose: sharingSavedObjectProps.aliasPurpose,
-        objectNoun: getMapEmbeddableDisplayName(),
+        objectNoun: MAP_EMBEDDABLE_NAME,
       });
       return;
     }
@@ -500,7 +522,9 @@ export class MapApp extends React.Component<Props, State> {
         showSearchBar={true}
         showFilterBar={true}
         showDatePicker={true}
-        showSaveQuery={!!getMapsCapabilities().saveQuery}
+        saveQueryMenuVisibility={
+          getMapsCapabilities().saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
+        }
         savedQuery={this.state.savedQuery}
         onSaved={this._updateStateFromSavedQuery}
         onSavedQueryUpdated={this._updateStateFromSavedQuery}
@@ -529,7 +553,7 @@ export class MapApp extends React.Component<Props, State> {
     const spaces = getSpacesApi();
     return spaces && sharingSavedObjectProps?.outcome === 'conflict'
       ? spaces.ui.components.getLegacyUrlConflict({
-          objectNoun: getMapEmbeddableDisplayName(),
+          objectNoun: MAP_EMBEDDABLE_NAME,
           currentObjectId: this.props.savedMap.getSavedObjectId()!,
           otherObjectId: sharingSavedObjectProps.aliasTargetId!,
           otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId!)}${

@@ -6,8 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { v1 as uuidv1 } from 'uuid';
-import { FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { v4 as uuidv4 } from 'uuid';
+import { ALL_VALUE, FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   buildDegradingSummary,
   buildHealthySummary,
@@ -38,17 +38,17 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       filter: 'baz: foo and bar > 2',
       good: 'http_status: 2xx',
       total: 'a query',
+      timestampField: 'custom_timestamp',
     },
   },
   timeWindow: {
     duration: '30d',
-    isRolling: true,
+    type: 'rolling',
   },
   objective: { target: 0.98 },
   budgetingMethod: 'occurrences',
   revision: 1,
   settings: {
-    timestampField: '@timestamp',
     syncDelay: '1m',
     frequency: '1m',
   },
@@ -62,6 +62,9 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       isEstimated: false,
     },
   },
+  groupBy: ALL_VALUE,
+  instanceId: ALL_VALUE,
+  tags: ['k8s', 'production', 'critical'],
   enabled: true,
   createdAt: now,
   updatedAt: now,
@@ -148,5 +151,5 @@ export function buildForecastedSlo(
 }
 
 export function buildSlo(params: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse {
-  return cloneDeep({ ...baseSlo, id: uuidv1(), ...params });
+  return cloneDeep({ ...baseSlo, id: uuidv4(), ...params });
 }

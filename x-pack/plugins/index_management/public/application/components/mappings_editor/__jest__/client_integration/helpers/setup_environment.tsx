@@ -8,7 +8,6 @@
 import React, { ComponentType, MemoExoticComponent } from 'react';
 import SemVer from 'semver/classes/semver';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { MAJOR_VERSION } from '../../../../../../../common';
@@ -54,10 +53,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   const CodeEditorMock = (props: any) => (
     <input
       data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-value={props.value}
+      data-currentvalue={props.value}
       value={props.value}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        props.onChange(e.target.value);
+        props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
       }}
     />
   );

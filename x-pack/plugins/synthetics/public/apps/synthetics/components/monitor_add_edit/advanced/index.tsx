@@ -8,17 +8,14 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { useFormContext, FieldError } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
 
 export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
-  const {
-    watch,
-    formState: { errors },
-  } = useFormContext();
+  const { watch } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
 
   const formConfig = useMemo(() => {
@@ -36,25 +33,19 @@ export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
         <EuiSpacer />
         {formConfig.advanced?.map((configGroup) => {
           return (
-            <DescripedFormGroup
+            <DescribedFormGroup
               description={configGroup.description}
               title={<h4>{configGroup.title}</h4>}
               fullWidth
               key={configGroup.title}
-              descriptionFlexItemProps={{ style: { minWidth: 200 } }}
-              fieldFlexItemProps={{ style: { minWidth: 500 } }}
+              descriptionFlexItemProps={{ style: { minWidth: 208 } }}
+              fieldFlexItemProps={{ style: { minWidth: 208 } }}
               style={{ flexWrap: 'wrap' }}
             >
               {configGroup.components.map((field) => {
-                return (
-                  <Field
-                    {...field}
-                    key={field.fieldKey}
-                    fieldError={errors[field.fieldKey] as FieldError}
-                  />
-                );
+                return <Field {...field} key={field.fieldKey} />;
               })}
-            </DescripedFormGroup>
+            </DescribedFormGroup>
           );
         })}
       </EuiAccordion>
@@ -62,7 +53,7 @@ export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
   ) : null;
 };
 
-const DescripedFormGroup = styled(EuiDescribedFormGroup)`
+const DescribedFormGroup = styled(EuiDescribedFormGroup)`
   > div.euiFlexGroup {
     flex-wrap: wrap;
   }

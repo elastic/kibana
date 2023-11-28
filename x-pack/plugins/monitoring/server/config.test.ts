@@ -22,6 +22,7 @@ describe('config schema', () => {
           },
           "enabled": true,
         },
+        "enabled": true,
         "kibana": Object {
           "collection": Object {
             "enabled": true,
@@ -55,6 +56,7 @@ describe('config schema', () => {
           "debug_mode": false,
           "elasticsearch": Object {
             "apiVersion": "master",
+            "apisToRedactInLogs": Array [],
             "compression": false,
             "customHeaders": Object {},
             "healthCheck": Object {

@@ -18,7 +18,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '../../../../../../../common/types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { ElasticsearchIndexWithIngestion } from '../../../../../../../common/types/indices';
 
 import { isApiIndex } from '../../../../utils/indices';
@@ -91,7 +92,7 @@ export const DefaultPipelineItem: React.FC<{
           )}
           <EuiFlexItem grow={false}>
             <span>
-              <EuiBadge color="hollow">
+              <EuiBadge color="hollow" iconType="lock">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.managedBadge.label',
                   { defaultMessage: 'Managed' }

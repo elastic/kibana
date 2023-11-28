@@ -17,18 +17,6 @@ export const USER_RISK_SCORE = i18n.translate(
   }
 );
 
-export const USER_RISK_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.usersRiskTable.userRiskToolTip',
-  {
-    defaultMessage:
-      'User risk classification is determined by user risk score. Users classified as Critical or High are indicated as risky.',
-  }
-);
-
-export const USER_RISK = i18n.translate('xpack.securitySolution.usersRiskTable.riskTitle', {
-  defaultMessage: 'User risk classification',
-});
-
 export const VIEW_USERS_BY_SEVERITY = (severity: string) =>
   i18n.translate('xpack.securitySolution.usersRiskTable.filteredUsersTitle', {
     values: { severity },
@@ -51,10 +39,6 @@ export const ROWS_10 = i18n.translate('xpack.securitySolution.usersTable.rows', 
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
 });
 
-export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.hostsRiskTable.usersTableTooltip',
-  {
-    defaultMessage:
-      'The user risk table is not affected by the KQL time range. This table shows the latest recorded risk score for each user.',
-  }
-);
+export const LAST_UPDATED = i18n.translate('xpack.securitySolution.usersTable.lastUpdatedTitle', {
+  defaultMessage: 'Last updated',
+});

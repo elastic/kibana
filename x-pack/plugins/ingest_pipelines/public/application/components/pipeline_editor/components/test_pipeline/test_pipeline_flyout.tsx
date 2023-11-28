@@ -125,7 +125,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
                 />
               }
               color="danger"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="pipelineExecutionError"
             >
               <p>{testingError.message}</p>

@@ -6,26 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import {
-  GroupSelectorProps,
-  Grouping,
-  GroupingProps,
-  GroupSelector,
+import { getGroupingQuery, isNoneGroup, useGrouping } from './src';
+import type {
+  DynamicGroupingProps,
+  GroupOption,
+  GroupingAggregation,
+  NamedAggregation,
   RawBucket,
-  getGroupingQuery,
-  isNoneGroup,
+  StatRenderer,
 } from './src';
-import type { NamedAggregation, GroupingFieldTotalAggregation, GroupingAggregation } from './src';
 
-export const getGrouping = (props: GroupingProps): React.ReactElement<GroupingProps> => (
-  <Grouping {...props} />
-);
+export { getGroupingQuery, isNoneGroup, useGrouping };
 
-export const getGroupSelector = (
-  props: GroupSelectorProps
-): React.ReactElement<GroupSelectorProps> => <GroupSelector {...props} />;
-
-export { isNoneGroup, getGroupingQuery };
-
-export type { GroupingAggregation, GroupingFieldTotalAggregation, NamedAggregation, RawBucket };
+export type {
+  DynamicGroupingProps,
+  GroupOption,
+  GroupingAggregation,
+  NamedAggregation,
+  RawBucket,
+  StatRenderer,
+};

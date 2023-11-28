@@ -14,7 +14,7 @@ export const links: LinkItem = {
   id: SecurityPageName.timelines,
   title: TIMELINES,
   path: TIMELINES_PATH,
-  globalNavPosition: 4,
+  globalNavPosition: 6,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.timelines', {

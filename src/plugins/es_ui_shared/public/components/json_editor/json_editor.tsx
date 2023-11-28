@@ -9,8 +9,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
-import { EuiCodeEditor } from '../code_editor';
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props<T extends object = { [key: string]: any }> {
@@ -19,7 +19,7 @@ interface Props<T extends object = { [key: string]: any }> {
   helpText?: React.ReactNode;
   value?: string;
   defaultValue?: T;
-  euiCodeEditorProps?: { [key: string]: any };
+  codeEditorProps?: { [key: string]: any };
   error?: string | null;
 }
 
@@ -29,8 +29,9 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   onUpdate,
   value,
   defaultValue,
-  euiCodeEditorProps,
+  codeEditorProps,
   error: propsError,
+  ...rest
 }: Props<T>) {
   const {
     content,
@@ -82,24 +83,19 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
       isInvalid={typeof error === 'string'}
       error={error}
       fullWidth
+      {...rest}
     >
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        width="100%"
-        height="500px"
-        setOptions={{
-          showLineNumbers: false,
+      <CodeEditor
+        languageId="json"
+        height={500}
+        options={{
+          lineNumbers: 'off',
           tabSize: 2,
+          automaticLayout: true,
         }}
-        editorProps={{
-          $blockScrolling: Infinity,
-        }}
-        showGutter={false}
-        minLines={6}
-        value={isControlled ? value : content}
+        value={isControlled ? value! : content}
         onChange={onEuiCodeEditorChange}
-        {...euiCodeEditorProps}
+        {...codeEditorProps}
       />
     </EuiFormRow>
   );

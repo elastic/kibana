@@ -1,0 +1,5 @@
+type: array
+description: An array of space identifiers for sharing the data view between multiple spaces.
+items:
+  type: string
+  default: default

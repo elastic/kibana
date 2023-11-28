@@ -9,7 +9,7 @@ import type { Direction } from '@elastic/eui';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { SortingHint } from '../..';
+import type { SortingHint } from '../../types';
 import { CollapseFunction } from '../collapse';
 
 export type LensGridDirection = 'none' | Direction;
@@ -45,6 +45,7 @@ export interface ColumnState {
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;
+  isMetric?: boolean;
 }
 
 export type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };

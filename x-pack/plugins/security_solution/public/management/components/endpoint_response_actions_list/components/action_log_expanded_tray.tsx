@@ -8,20 +8,22 @@
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
+import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
 import { getUiCommand } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
-import { ExecuteActionHostResponseOutput } from '../../endpoint_execute_action';
+import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
+import type {
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
+} from '../../../../../common/endpoint/types';
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
-const EXECUTE_FILE_LINK_TITLE = i18n.translate(
-  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
-  { defaultMessage: 'Click here to download full output' }
-);
+
 const emptyValue = getEmptyValue();
 
 const customDescriptionListCss = css`
@@ -34,7 +36,6 @@ const customDescriptionListCss = css`
     > .euiDescriptionList__title,
     > .euiDescriptionList__description {
       font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
-      margin-top: ${(props) => props.theme.eui.euiSizeS};
     }
   }
 `;
@@ -79,14 +80,34 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
   overflow-y: auto;
 `;
 
+const isUploadAction = (
+  action: MaybeImmutable<ActionDetails>
+): action is ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters> => {
+  return action.command === 'upload';
+};
+
 const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const { canWriteFileOperations, canWriteExecuteOperations } =
-      useUserPrivileges().endpointPrivileges;
+    const {
+      canWriteFileOperations,
+      canReadActionsLogManagement,
+      canAccessEndpointActionsLogManagement,
+    } = useUserPrivileges().endpointPrivileges;
 
-    const { command, isCompleted, isExpired, wasSuccessful } = action;
+    const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
+
+    if (errors?.length) {
+      return (
+        // TODO: temporary solution, waiting for UI
+        <>
+          {errors.map((error) => (
+            <EuiFlexItem>{error}</EuiFlexItem>
+          ))}
+        </>
+      );
+    }
 
     if (isExpired) {
       return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
@@ -120,23 +141,31 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
           {action.agents.map((agentId) => (
             <div key={agentId}>
               {OUTPUT_MESSAGES.wasSuccessful(command)}
-              <EuiFlexItem>
-                <ResponseActionFileDownloadLink
-                  action={action}
-                  buttonTitle={EXECUTE_FILE_LINK_TITLE}
-                  canAccessFileDownloadLink={canWriteExecuteOperations}
-                  data-test-subj={getTestId('getExecuteLink')}
-                  textSize="xs"
-                />
-              </EuiFlexItem>
-              <ExecuteActionHostResponseOutput
+              <ExecuteActionHostResponse
                 action={action}
                 agentId={agentId}
-                data-test-subj={getTestId('executeResponseOutput')}
+                canAccessFileDownloadLink={
+                  canAccessEndpointActionsLogManagement || canReadActionsLogManagement
+                }
                 textSize="xs"
+                data-test-subj={getTestId('actionsLogTray')}
               />
             </div>
           ))}
+        </EuiFlexGroup>
+      );
+    }
+
+    if (isUploadAction(action)) {
+      return (
+        <EuiFlexGroup direction="column" data-test-subj={getTestId('uploadDetails')}>
+          <p>{OUTPUT_MESSAGES.wasSuccessful(command)}</p>
+
+          <EndpointUploadActionResult
+            action={action}
+            data-test-subj={getTestId('uploadOutput')}
+            textSize="xs"
+          />
         </EuiFlexGroup>
       );
     }
@@ -153,13 +182,13 @@ export const ActionsLogExpandedTray = memo<{
 }>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const { startedAt, completedAt, command: _command, comment, parameters } = action;
+  const { hosts, startedAt, completedAt, command: _command, comment, parameters } = action;
 
   const parametersList = useMemo(
     () =>
       parameters
         ? Object.entries(parameters).map(([key, value]) => {
-            return `${key}:${value}`;
+            return `${key}: ${value}`;
           })
         : undefined,
     [parameters]
@@ -188,11 +217,15 @@ export const ActionsLogExpandedTray = memo<{
         },
         {
           title: OUTPUT_MESSAGES.expandSection.parameters,
-          description: parametersList ? parametersList : emptyValue,
+          description: parametersList ? parametersList.join(', ') : emptyValue,
         },
         {
           title: OUTPUT_MESSAGES.expandSection.comment,
           description: comment ? comment : emptyValue,
+        },
+        {
+          title: OUTPUT_MESSAGES.expandSection.hostname,
+          description: map(hosts, (host) => host.name).join(', ') || emptyValue,
         },
       ].map(({ title, description }) => {
         return {
@@ -200,7 +233,7 @@ export const ActionsLogExpandedTray = memo<{
           description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
         };
       }),
-    [command, comment, completedAt, parametersList, startedAt]
+    [command, comment, completedAt, hosts, parametersList, startedAt]
   );
 
   const outputList = useMemo(

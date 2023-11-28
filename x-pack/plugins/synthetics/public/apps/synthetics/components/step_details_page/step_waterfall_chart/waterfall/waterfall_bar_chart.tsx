@@ -16,10 +16,12 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
-  TooltipInfo,
   TooltipContainer,
+  CustomTooltip as CustomChartTooltip,
+  Tooltip,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../hooks/use_chart_theme';
 import { BAR_HEIGHT } from './constants';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
@@ -36,7 +38,7 @@ const getChartHeight = (data: WaterfallData): number => {
   return noOfXBars * BAR_HEIGHT;
 };
 
-const Tooltip = (tooltipInfo: TooltipInfo) => {
+const CustomTooltip: CustomChartTooltip = (tooltipInfo) => {
   const { data, sidebarItems } = useWaterfallContext();
   return useMemo(() => {
     const sidebarItem = sidebarItems?.find((item) => item.index === tooltipInfo.header?.value);
@@ -89,18 +91,19 @@ export const WaterfallBarChart = ({
       data-test-subj="wfDataOnlyBarChart"
     >
       <Chart className="data-chart">
+        <Tooltip
+          // this is done to prevent the waterfall tooltip from rendering behind Kibana's
+          // stacked header when the user highlights an item at the top of the chart
+          boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+          customTooltip={CustomTooltip}
+        />
         <Settings
           showLegend={false}
           rotation={90}
-          tooltip={{
-            // this is done to prevent the waterfall tooltip from rendering behind Kibana's
-            // stacked header when the user highlights an item at the top of the chart
-            boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-            customTooltip: Tooltip,
-          }}
           theme={{ ...theme, tooltip: { maxWidth: 500 } }}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}
+          locale={i18n.getLocale()}
         />
 
         <Axis
@@ -109,7 +112,9 @@ export const WaterfallBarChart = ({
           position={Position.Top}
           tickFormat={memoizedTickFormat}
           domain={domain}
-          showGridLines={true}
+          gridLine={{
+            visible: true,
+          }}
           style={{
             axisLine: {
               visible: false,

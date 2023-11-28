@@ -1,0 +1,36 @@
+summary: Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
+value:
+  actions:
+    - group: query matched
+      params:
+        level: info
+        message: "The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts."
+      id: fdbece50-406c-11ee-850e-c71febc4ca7f
+      frequency:
+        throttle: "1d"
+        summary: true
+        notify_when: onThrottleInterval
+    - group: recovered
+      params:
+        level: info
+        message: Recovered
+      id: fdbece50-406c-11ee-850e-c71febc4ca7f
+      frequency: 
+        summary: false
+        notify_when: onActionGroupChange
+  consumer: alerts
+  name: my Elasticsearch query rule
+  params:    
+    esQuery: '"""{"query":{"match_all" : {}}}"""'
+    index:
+      - kibana_sample_data_logs
+    size: 100
+    threshold:
+      - 100
+    thresholdComparator: ">"
+    timeField: "@timestamp"
+    timeWindowSize: 1
+    timeWindowUnit: d
+  rule_type_id: .es-query
+  schedule:
+    interval: 1d

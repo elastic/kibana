@@ -82,6 +82,7 @@ const casesSchemaObject = schema.maybe(
     update: schema.maybe(casesSchema),
     delete: schema.maybe(casesSchema),
     push: schema.maybe(casesSchema),
+    settings: schema.maybe(casesSchema),
   })
 );
 
@@ -452,7 +453,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
       const values = Array.from(entry[1].values()).map(
         (managementPage) => `${entry[0]}.${managementPage}`
       );
-      return [...acc, ...values];
+      acc.push(...values);
+      return acc;
     }, [] as string[]);
 
     throw new Error(

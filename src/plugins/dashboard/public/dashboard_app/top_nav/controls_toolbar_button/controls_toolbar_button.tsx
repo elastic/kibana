@@ -8,28 +8,54 @@
 
 import React from 'react';
 
-import { EuiContextMenuPanel } from '@elastic/eui';
+import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
+import { EditControlGroupButton } from './edit_control_group_button';
 
-export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlGroupContainer }) {
+export function ControlsToolbarButton({
+  controlGroup,
+  isDisabled,
+}: {
+  controlGroup: ControlGroupContainer;
+  isDisabled?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <ToolbarPopover
       ownFocus
-      label={getControlButtonTitle()}
+      repositionOnScroll
       panelPaddingSize="none"
+      label={getControlButtonTitle()}
+      zIndex={Number(euiTheme.levels.header) - 1}
+      size="s"
+      iconType="controlsHorizontal"
       data-test-subj="dashboard-controls-menu-button"
+      isDisabled={isDisabled}
     >
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenuPanel
           items={[
-            <AddDataControlButton controlGroup={controlGroup} closePopover={closePopover} />,
-            <AddTimeSliderControlButton controlGroup={controlGroup} closePopover={closePopover} />,
-            controlGroup.getEditControlGroupButton(closePopover),
+            <AddDataControlButton
+              key="addControl"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
+            <AddTimeSliderControlButton
+              key="addTimeSliderControl"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
+            <EditControlGroupButton
+              key="manageControls"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
           ]}
         />
       )}

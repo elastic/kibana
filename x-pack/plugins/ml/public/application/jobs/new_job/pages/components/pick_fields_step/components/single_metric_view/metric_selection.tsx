@@ -6,12 +6,12 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
+import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';

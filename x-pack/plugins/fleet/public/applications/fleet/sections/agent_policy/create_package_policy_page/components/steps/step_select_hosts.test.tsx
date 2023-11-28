@@ -54,6 +54,7 @@ describe('StepSelectHosts', () => {
     updated_by: '',
     revision: 1,
     package_policies: [],
+    is_protected: false,
   };
   const newAgentPolicy = {
     name: '',

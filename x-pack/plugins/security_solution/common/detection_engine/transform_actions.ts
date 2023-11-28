@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
-import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
-import type { RuleAlertAction } from './types';
+import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
+import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
+import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
+import type {
+  ResponseAction,
+  RuleResponseAction,
+} from '../api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../api/detection_engine/model/rule_response_actions';
+import type { RuleAction } from '../api/detection_engine/model';
 
 export const transformRuleToAlertAction = ({
   group,
@@ -15,12 +21,18 @@ export const transformRuleToAlertAction = ({
   action_type_id: actionTypeId,
   params,
   uuid,
-}: RuleAlertAction): RuleAction => ({
+  frequency,
+  alerts_filter: alertsFilter,
+}: RuleAction): AlertingRuleAction => ({
   group,
   id,
-  params,
+  params: params as AlertingRuleAction['params'],
   actionTypeId,
+  ...(alertsFilter && {
+    alertsFilter: alertsFilter as AlertingRuleAction['alertsFilter'],
+  }),
   ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
 });
 
 export const transformAlertToRuleAction = ({
@@ -29,32 +41,75 @@ export const transformAlertToRuleAction = ({
   actionTypeId,
   params,
   uuid,
-}: RuleAction): RuleAlertAction => ({
+  frequency,
+  alertsFilter,
+}: AlertingRuleAction): RuleAction => ({
   group,
   id,
   params,
   action_type_id: actionTypeId,
+  ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
+});
+
+export const transformNormalizedRuleToAlertAction = ({
+  group,
+  id,
+  params,
+  frequency,
+  alerts_filter: alertsFilter,
+}: NormalizedRuleAction): NormalizedAlertAction => ({
+  group,
+  id,
+  params: params as AlertingRuleAction['params'],
+  ...(alertsFilter && {
+    // We use "unknown" as the alerts filter type which is stricter than the one
+    // used in the alerting plugin (what they use is essentially "any"). So we
+    // have to to cast here
+    alertsFilter: alertsFilter as AlertingRuleAction['alertsFilter'],
+  }),
+  ...(frequency && { frequency }),
+});
+
+export const transformAlertToNormalizedRuleAction = ({
+  group,
+  id,
+  params,
+  frequency,
+  alertsFilter,
+}: AlertingRuleAction): NormalizedRuleAction => ({
+  group,
+  id,
+  params,
+  ...(alertsFilter && { alerts_filter: alertsFilter }),
+  ...(frequency && { frequency }),
 });
 
 export const transformRuleToAlertResponseAction = ({
   action_type_id: actionTypeId,
   params,
 }: ResponseAction): RuleResponseAction => {
-  const {
-    saved_query_id: savedQueryId,
-    ecs_mapping: ecsMapping,
-    pack_id: packId,
-    ...rest
-  } = params;
+  if (actionTypeId === ResponseActionTypesEnum['.osquery']) {
+    const {
+      saved_query_id: savedQueryId,
+      ecs_mapping: ecsMapping,
+      pack_id: packId,
+      ...rest
+    } = params;
 
+    return {
+      params: {
+        ...rest,
+        savedQueryId,
+        ecsMapping,
+        packId,
+      },
+      actionTypeId,
+    };
+  }
   return {
-    params: {
-      ...rest,
-      savedQueryId,
-      ecsMapping,
-      packId,
-    },
+    params,
     actionTypeId,
   };
 };
@@ -63,14 +118,20 @@ export const transformAlertToRuleResponseAction = ({
   actionTypeId,
   params,
 }: RuleResponseAction): ResponseAction => {
-  const { savedQueryId, ecsMapping, packId, ...rest } = params;
+  if (actionTypeId === ResponseActionTypesEnum['.osquery']) {
+    const { savedQueryId, ecsMapping, packId, ...rest } = params;
+    return {
+      params: {
+        ...rest,
+        saved_query_id: savedQueryId,
+        ecs_mapping: ecsMapping,
+        pack_id: packId,
+      },
+      action_type_id: actionTypeId,
+    };
+  }
   return {
-    params: {
-      ...rest,
-      saved_query_id: savedQueryId,
-      ecs_mapping: ecsMapping,
-      pack_id: packId,
-    },
+    params,
     action_type_id: actionTypeId,
   };
 };

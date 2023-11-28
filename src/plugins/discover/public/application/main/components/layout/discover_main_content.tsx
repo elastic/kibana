@@ -7,46 +7,54 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { useCallback } from 'react';
+import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
+import React, { useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
+
+const DROP_PROPS = {
+  value: {
+    id: 'dscDropZoneTable',
+    humanData: {
+      label: i18n.translate('discover.dropZoneTableLabel', {
+        defaultMessage: 'Drop zone to add field as a column to the table',
+      }),
+    },
+  },
+  order: [1, 0, 0, 0],
+  types: ['field_add'] as DropType[],
+};
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
-  savedSearch: SavedSearch;
   isPlainRecord: boolean;
-  navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
-  expandedDoc?: DataTableRecord;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
   onFieldEdited: () => Promise<void>;
+  onDropFieldToTable?: () => void;
   columns: string[];
 }
 
 export const DiscoverMainContent = ({
   dataView,
   isPlainRecord,
-  navigateTo,
-  expandedDoc,
-  setExpandedDoc,
   viewMode,
   onAddFilter,
   onFieldEdited,
   columns,
   stateContainer,
-  savedSearch,
+  onDropFieldToTable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
 
@@ -65,40 +73,55 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
+  const isDropAllowed = Boolean(onDropFieldToTable);
+
+  const viewModeToggle = useMemo(() => {
+    return !isPlainRecord ? (
+      <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+    ) : undefined;
+  }, [viewMode, setDiscoverViewMode, isPlainRecord]);
+
+  const showChart = useAppStateSelector((state) => !state.hideChart);
+
   return (
-    <EuiFlexGroup
-      className="eui-fullHeight"
-      direction="column"
-      gutterSize="none"
-      responsive={false}
+    <DragDrop
+      draggable={false}
+      dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
+      value={DROP_PROPS.value}
+      order={DROP_PROPS.order}
+      onDrop={onDropFieldToTable}
     >
-      {!isPlainRecord && (
-        <EuiFlexItem grow={false}>
-          <EuiHorizontalRule margin="none" />
-          <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
-        </EuiFlexItem>
-      )}
-      {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-        <DiscoverDocuments
-          expandedDoc={expandedDoc}
-          dataView={dataView}
-          navigateTo={navigateTo}
-          onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-          savedSearch={savedSearch}
-          setExpandedDoc={setExpandedDoc}
-          stateContainer={stateContainer}
-          onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
-        />
-      ) : (
-        <FieldStatisticsTab
-          savedSearch={savedSearch}
-          dataView={dataView}
-          columns={columns}
-          stateContainer={stateContainer}
-          onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-          trackUiMetric={trackUiMetric}
-        />
-      )}
-    </EuiFlexGroup>
+      <DropOverlayWrapper isVisible={isDropAllowed}>
+        <EuiFlexGroup
+          className="eui-fullHeight"
+          direction="column"
+          gutterSize="none"
+          responsive={false}
+          data-test-subj="dscMainContent"
+        >
+          {showChart && <EuiHorizontalRule margin="none" />}
+          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+            <DiscoverDocuments
+              viewModeToggle={viewModeToggle}
+              dataView={dataView}
+              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              stateContainer={stateContainer}
+              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+            />
+          ) : (
+            <>
+              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+              <FieldStatisticsTab
+                dataView={dataView}
+                columns={columns}
+                stateContainer={stateContainer}
+                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                trackUiMetric={trackUiMetric}
+              />
+            </>
+          )}
+        </EuiFlexGroup>
+      </DropOverlayWrapper>
+    </DragDrop>
   );
 };

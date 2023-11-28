@@ -7,21 +7,18 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { useSelectedLocation } from '../hooks/use_selected_location';
 import { FAILED_TESTS_LABEL } from './failed_tests';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; id: string }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
-  const { ExploratoryViewEmbeddable } = observability;
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
-  const monitorId = useMonitorQueryId();
-
-  const selectedLocation = useSelectedLocation();
-
-  if (!monitorId || !selectedLocation) {
+  if (!queryIdFilter) {
     return null;
   }
 
@@ -32,10 +29,8 @@ export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; i
       attributes={[
         {
           time: { from, to },
-          reportDefinitions: {
-            'monitor.id': [monitorId],
-            'observer.geo.name': [selectedLocation?.label],
-          },
+          reportDefinitions: queryIdFilter,
+          filters: locationFilter,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_failed_tests',
           name: FAILED_TESTS_LABEL,

@@ -68,6 +68,7 @@ describe('getLayers', () => {
     {
       indexPatternId: 'test',
       layerId: 'test-layer-1',
+      ignoreGlobalFilters: false,
       columns: [
         {
           operationType: 'count',
@@ -111,6 +112,7 @@ describe('getLayers', () => {
     {
       indexPatternId: 'test',
       layerId: 'test-layer-1',
+      ignoreGlobalFilters: false,
       columns: [
         {
           operationType: 'static_value',
@@ -131,6 +133,7 @@ describe('getLayers', () => {
     {
       indexPatternId: 'test',
       layerId: 'test-layer-1',
+      ignoreGlobalFilters: false,
       columns: [
         {
           operationType: 'percentile',
@@ -164,6 +167,7 @@ describe('getLayers', () => {
     {
       indexPatternId: 'test',
       layerId: 'test-layer-1',
+      ignoreGlobalFilters: false,
       columns: [
         {
           operationType: 'percentile_rank',

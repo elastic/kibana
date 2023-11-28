@@ -19,38 +19,61 @@ export interface ActiveMigrations {
  * Structure containing all the required info to perform a type's conversion
  */
 export interface TypeTransforms {
-  /** Derived from the related transforms */
+  /**
+   * Latest non-deferred version for each transform type.
+   * This is the version that will be used to query outdated documents.
+   */
+  immediateVersion: Record<TransformType, string>;
+  /**
+   * Latest version for each transform type, including deferred transforms.
+   * This is the version that will be used to perform the migration.
+   */
   latestVersion: Record<TransformType, string>;
-  /** List of transforms registered for the type **/
+  /** Ordered list of transforms registered for the type **/
   transforms: Transform[];
+  /** Per-version schemas for the given type */
+  versionSchemas: Record<string, TypeVersionSchema>;
 }
 
 /**
  * Internal representation of a document transformation
  */
 export interface Transform {
-  /** The version this transform is registered for */
-  version: string;
-  /** The transformation function */
-  transform: TransformFn;
   /** The type of this transform */
   transformType: TransformType;
+  /** The version this transform is registered for */
+  version: string;
+  /** The upward transformation function */
+  transform: TransformFn;
+  /** The (optional) downward transformation function */
+  transformDown?: TransformFn;
+  /** Whether this transform is deferred */
+  deferred?: boolean;
 }
 
-/**
- * There are two "migrationVersion" transform types:
- *   * `migrate` - These transforms are defined and added by consumers using the type registry; each is applied to a single object type
- *     based on an object's `migrationVersion[type]` field. These are applied during index migrations and document migrations.
- *   * `convert` - These transforms are defined by core and added by consumers using the type registry; each is applied to a single object
- *     type based on an object's `migrationVersion[type]` field. These are applied during index migrations, NOT document migrations.
- *
- * There is one "coreMigrationVersion" transform type:
- *   * `reference` - These transforms are defined by core and added by consumers using the type registry; they are applied to all object
- *     types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
- */
 export enum TransformType {
-  Migrate = 'migrate',
+  /**
+   * These transforms are defined by core and added by consumers using the type registry; each is applied to a single object
+   * type based on an object's `typeMigrationVersion` field. These are applied during index migrations, NOT document migrations.
+   */
   Convert = 'convert',
+
+  /**
+   * These transforms are defined by core internally; they are applied to all object types based on their `coreMigrationVersion` field.
+   * These are applied during index migrations and before any document migrations to guarantee that all documents have the most recent schema.
+   */
+  Core = 'core',
+
+  /**
+   * These transforms are defined and added by consumers using the type registry; each is applied to a single object type
+   * based on an object's `typeMigrationVersion` field. These are applied during index migrations and document migrations.
+   */
+  Migrate = 'migrate',
+
+  /**
+   * These transforms are defined by core and added by consumers using the type registry; they are applied to all object
+   * types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
+   */
   Reference = 'reference',
 }
 
@@ -73,3 +96,8 @@ export interface TransformResult {
    */
   additionalDocs: SavedObjectUnsanitizedDoc[];
 }
+
+/**
+ * per-version persistence schema for {@link TypeTransforms}
+ */
+export type TypeVersionSchema = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;

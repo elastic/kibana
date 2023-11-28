@@ -13,7 +13,7 @@ import { render, screen } from '@testing-library/react';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
-import { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 const Wrapper: FC = ({ children }) => {
   return (
@@ -26,7 +26,7 @@ const Wrapper: FC = ({ children }) => {
 describe('Component BulkEditRuleErrorsList', () => {
   test('should not render component if no errors present', () => {
     const { container } = render(
-      <BulkActionRuleErrorsList bulkAction={BulkActionType.edit} ruleErrors={[]} />,
+      <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={[]} />,
       {
         wrapper: Wrapper,
       }
@@ -46,9 +46,12 @@ describe('Component BulkEditRuleErrorsList', () => {
         ruleIds: ['rule:1'],
       },
     ];
-    render(<BulkActionRuleErrorsList bulkAction={BulkActionType.edit} ruleErrors={ruleErrors} />, {
-      wrapper: Wrapper,
-    });
+    render(
+      <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={ruleErrors} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
 
     expect(screen.getByText("2 rules can't be edited (test failure)")).toBeInTheDocument();
     expect(screen.getByText("1 rule can't be edited (another failure)")).toBeInTheDocument();
@@ -64,6 +67,10 @@ describe('Component BulkEditRuleErrorsList', () => {
       "2 custom machine learning rules (these rules don't have index patterns)",
     ],
     [
+      BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN,
+      "2 custom ES|QL rules (these rules don't have index patterns)",
+    ],
+    [
       BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
       "2 machine learning rules can't be edited (test failure)",
     ],
@@ -76,9 +83,12 @@ describe('Component BulkEditRuleErrorsList', () => {
         ruleIds: ['rule:1', 'rule:2'],
       },
     ];
-    render(<BulkActionRuleErrorsList bulkAction={BulkActionType.edit} ruleErrors={ruleErrors} />, {
-      wrapper: Wrapper,
-    });
+    render(
+      <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={ruleErrors} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
 
     expect(screen.getByText(value)).toBeInTheDocument();
   });

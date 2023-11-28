@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import {
-  AttributesTypeAlerts,
-  AttributesTypeUser,
-  CommentType,
-} from '@kbn/cases-plugin/common/api';
+  AlertAttachmentAttributes,
+  UserCommentAttachmentAttributes,
+  AttachmentType,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -20,6 +21,8 @@ import {
   postCommentUserReq,
   postCommentAlertReq,
   getPostCaseRequest,
+  getFilesAttachmentReq,
+  fileAttachmentMetadata,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -30,6 +33,7 @@ import {
   createComment,
   updateComment,
   superUserSpace1Auth,
+  removeServerGeneratedPropertiesFromSavedObject,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -70,14 +74,14 @@ export default ({ getService }: FtrProviderContext): void => {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
 
-      const userComment = updatedCase.comments![0] as AttributesTypeUser;
+      const userComment = updatedCase.comments![0] as UserCommentAttachmentAttributes;
       expect(userComment.comment).to.eql(newComment);
-      expect(userComment.type).to.eql(CommentType.user);
+      expect(userComment.type).to.eql(AttachmentType.user);
       expect(updatedCase.updated_by).to.eql(defaultUser);
     });
 
@@ -94,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
         req: {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           alertId: 'new-id',
           index: postCommentAlertReq.index,
           rule: {
@@ -105,10 +109,10 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      const alertComment = updatedCase.comments![0] as AttributesTypeAlerts;
+      const alertComment = updatedCase.comments![0] as AlertAttachmentAttributes;
       expect(alertComment.alertId).to.eql('new-id');
       expect(alertComment.index).to.eql(postCommentAlertReq.index);
-      expect(alertComment.type).to.eql(CommentType.alert);
+      expect(alertComment.type).to.eql(AttachmentType.alert);
       expect(alertComment.rule).to.eql({
         id: 'id',
         name: 'name',
@@ -130,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
         req: {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
-          type: CommentType.user,
+          type: AttachmentType.user,
           comment: postCommentUserReq.comment,
           owner: 'changedOwner',
         },
@@ -146,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
         req: {
           id: 'id',
           version: 'version',
-          type: CommentType.user,
+          type: AttachmentType.user,
           comment: 'comment',
           owner: 'securitySolutionFixture',
         },
@@ -161,11 +165,78 @@ export default ({ getService }: FtrProviderContext): void => {
         req: {
           id: 'id',
           version: 'version',
-          type: CommentType.user,
+          type: AttachmentType.user,
           comment: 'comment',
           owner: 'securitySolutionFixture',
         },
         expectedHttpCode: 404,
+      });
+    });
+
+    it('unhappy path - 400s when comment is too long', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+      const longComment = Array(30001).fill('a').toString();
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: AttachmentType.user,
+          comment: longComment,
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('unhappy path - 400s when comment is empty', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: AttachmentType.user,
+          comment: '',
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('unhappy path - 400s when comment is a string of empty characters', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: AttachmentType.user,
+          comment: '   ',
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
       });
     });
 
@@ -183,7 +254,7 @@ export default ({ getService }: FtrProviderContext): void => {
         req: {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           alertId: 'test-id',
           index: 'test-index',
           rule: {
@@ -232,7 +303,7 @@ export default ({ getService }: FtrProviderContext): void => {
             id: patchedCase.comments![0].id,
             version: patchedCase.comments![0].version,
             comment: 'a comment',
-            type: CommentType.user,
+            type: AttachmentType.user,
             [attribute]: attribute,
             owner: 'securitySolutionFixture',
           },
@@ -250,7 +321,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const allRequestAttributes = {
-        type: CommentType.alert,
+        type: AttachmentType.alert,
         index: 'test-index',
         alertId: 'test-id',
         rule: {
@@ -290,7 +361,7 @@ export default ({ getService }: FtrProviderContext): void => {
           req: {
             id: patchedCase.comments![0].id,
             version: patchedCase.comments![0].version,
-            type: CommentType.alert,
+            type: AttachmentType.alert,
             index: 'test-index',
             alertId: 'test-id',
             rule: {
@@ -320,7 +391,7 @@ export default ({ getService }: FtrProviderContext): void => {
         req: {
           id: patchedCase.comments![0].id,
           version: 'version-mismatch',
-          type: CommentType.user,
+          type: AttachmentType.user,
           comment: newComment,
           owner: 'securitySolutionFixture',
         },
@@ -328,12 +399,95 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('files', () => {
+      it('should update the file attachment name to superfile', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
+
+        const attachmentWithUpdatedFileName = set(
+          getFilesAttachmentReq(),
+          'externalReferenceMetadata.files[0].name',
+          'superfile'
+        );
+
+        const updatedCase = await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...attachmentWithUpdatedFileName,
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+        });
+
+        const comparableAttachmentFields = removeServerGeneratedPropertiesFromSavedObject(
+          updatedCase.comments![0]
+        );
+
+        expect(comparableAttachmentFields).to.eql({
+          ...attachmentWithUpdatedFileName,
+          pushed_at: null,
+          pushed_by: null,
+          updated_by: defaultUser,
+          created_by: defaultUser,
+          owner: 'securitySolutionFixture',
+        });
+      });
+
+      it('should return a 400 when attempting to update a file attachment with empty metadata', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...getFilesAttachmentReq({ externalReferenceMetadata: {} }),
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('should return a 400 when attempting to update a file attachment with invalid metadata', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...getFilesAttachmentReq({
+              // intentionally creating an invalid format here by using foo instead of files
+              externalReferenceMetadata: { foo: fileAttachmentMetadata.files },
+            }),
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+    });
+
     describe('alert format', () => {
-      type AlertComment = CommentType.alert;
+      type AlertComment = AttachmentType.alert;
 
       for (const [alertId, index, type] of [
-        ['1', ['index1', 'index2'], CommentType.alert],
-        [['1', '2'], 'index', CommentType.alert],
+        ['1', ['index1', 'index2'], AttachmentType.alert],
+        [['1', '2'], 'index', AttachmentType.alert],
       ]) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -361,8 +515,8 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       for (const [alertId, index, type] of [
-        ['1', ['index1'], CommentType.alert],
-        [['1', '2'], ['index', 'other-index'], CommentType.alert],
+        ['1', ['index1'], AttachmentType.alert],
+        [['1', '2'], ['index', 'other-index'], AttachmentType.alert],
       ]) {
         it(`does not throw an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -430,9 +584,9 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space1' },
         });
 
-        const userComment = updatedCase.comments![0] as AttributesTypeUser;
+        const userComment = updatedCase.comments![0] as UserCommentAttachmentAttributes;
         expect(userComment.comment).to.eql(newComment);
-        expect(userComment.type).to.eql(CommentType.user);
+        expect(userComment.type).to.eql(AttachmentType.user);
         expect(updatedCase.updated_by).to.eql(defaultUser);
         expect(userComment.owner).to.eql('securitySolutionFixture');
       });

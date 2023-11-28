@@ -42,7 +42,7 @@ export function BottomBarActions({
           }}
         >
           <EuiHealth color="warning" />
-          <EuiText color="ghost">
+          <EuiText>
             {i18n.translate('xpack.apm.bottomBarActions.unsavedChanges', {
               defaultMessage:
                 '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
@@ -53,7 +53,11 @@ export function BottomBarActions({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="ghost" onClick={onDiscardChanges}>
+              <EuiButtonEmpty
+                data-test-subj="apmBottomBarActionsDiscardChangesButton"
+                color="text"
+                onClick={onDiscardChanges}
+              >
                 {i18n.translate(
                   'xpack.apm.bottomBarActions.discardChangesButton',
                   {
@@ -64,6 +68,7 @@ export function BottomBarActions({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="apmBottomBarActionsButton"
                 onClick={onSave}
                 fill
                 isLoading={isLoading}

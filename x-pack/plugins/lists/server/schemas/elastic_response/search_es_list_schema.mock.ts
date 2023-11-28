@@ -25,6 +25,7 @@ import { getShardMock } from '../common/get_shard.mock';
 import { SearchEsListSchema } from './search_es_list_schema';
 
 export const getSearchEsListMock = (): SearchEsListSchema => ({
+  '@timestamp': DATE_NOW,
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,

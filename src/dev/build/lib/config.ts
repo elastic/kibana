@@ -229,6 +229,13 @@ export class Config {
   }
 
   /**
+   * Get the ISO 8601 date for this build
+   */
+  getBuildDate() {
+    return this.versionInfo.buildDate;
+  }
+
+  /**
    * Resolve a set of paths based from the target directory for this build.
    */
   resolveFromTarget(...subPaths: string[]) {
@@ -244,6 +251,6 @@ export class Config {
   }
 
   getDistPluginsFromRepo() {
-    return getPackages(this.repoRoot).filter(this.pluginFilter);
+    return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
 }

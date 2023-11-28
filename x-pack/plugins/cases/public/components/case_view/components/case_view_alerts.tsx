@@ -7,10 +7,9 @@
 
 import React, { useMemo } from 'react';
 
-import type { EuiFlyoutSize } from '@elastic/eui';
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
 import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
@@ -18,7 +17,7 @@ import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
 import { CaseViewTabs } from '../case_view_tabs';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 interface CaseViewAlertsProps {
-  caseData: Case;
+  caseData: CaseUI;
 }
 export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
   const { triggersActionsUi } = useKibana().services;
@@ -47,10 +46,8 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
     configurationId: configId,
     id: `case-details-alerts-${caseData.owner}`,
-    flyoutSize: (alertFeatureIds?.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
     featureIds: alertFeatureIds ?? [],
     query: alertIdsQuery,
-    showExpandToDetails: Boolean(alertFeatureIds?.includes('siem')),
     showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
   };
 

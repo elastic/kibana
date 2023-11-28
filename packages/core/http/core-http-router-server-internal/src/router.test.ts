@@ -6,17 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { Router } from './router';
+import { Router, type RouterOptions } from './router';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { schema } from '@kbn/config-schema';
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
+const routerOptions: RouterOptions = {
+  isDev: false,
+  versionedRouteResolution: 'oldest',
+};
+
 describe('Router', () => {
   describe('Options', () => {
     it('throws if validation for a route is not defined explicitly', () => {
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       expect(
         // we use 'any' because validate is a required field
         () => router.get({ path: '/' } as any, (context, req, res) => res.ok({}))
@@ -25,7 +30,7 @@ describe('Router', () => {
       );
     });
     it('throws if validation for a route is declared wrong', () => {
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       expect(() =>
         router.get(
           // we use 'any' because validate requires valid Type or function usage
@@ -41,7 +46,7 @@ describe('Router', () => {
     });
 
     it('throws if options.body.output is not a valid value', () => {
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       expect(() =>
         router.post(
           // we use 'any' because TS already checks we cannot provide this body.output
@@ -58,14 +63,14 @@ describe('Router', () => {
     });
 
     it('should default `output: "stream" and parse: false` when no body validation is required but not a GET', () => {
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.post({ path: '/', validate: {} }, (context, req, res) => res.ok({}));
       const [route] = router.getRoutes();
       expect(route.options).toEqual({ body: { output: 'stream', parse: false } });
     });
 
     it('should NOT default `output: "stream" and parse: false` when the user has specified body options (he cares about it)', () => {
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.post(
         { path: '/', options: { body: { maxBytes: 1 } }, validate: {} },
         (context, req, res) => res.ok({})
@@ -75,7 +80,7 @@ describe('Router', () => {
     });
 
     it('should NOT default `output: "stream" and parse: false` when no body validation is required and GET', () => {
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.get({ path: '/', validate: {} }, (context, req, res) => res.ok({}));
       const [route] = router.getRoutes();
       expect(route.options).toEqual({});

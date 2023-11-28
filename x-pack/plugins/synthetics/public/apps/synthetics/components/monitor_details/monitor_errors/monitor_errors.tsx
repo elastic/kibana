@@ -19,10 +19,10 @@ import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
+import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 export const MonitorErrors = () => {
-  const { errorStates, loading, data } = useMonitorErrors();
-
+  const { errorStates, upStates, loading, data } = useMonitorErrors();
   const initialLoading = !data;
 
   const emptyState = !loading && errorStates && errorStates?.length === 0;
@@ -33,15 +33,15 @@ export const MonitorErrors = () => {
   }
 
   return (
-    <>
+    <MonitorPendingWrapper>
       <SyntheticsDatePicker fullWidth={true} />
       <EuiSpacer size="m" />
       {initialLoading && <LoadingErrors />}
       {emptyState && <EmptyErrors />}
       <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
-        <ErrorsTabContent errorStates={errorStates ?? []} loading={loading} />
+        <ErrorsTabContent errorStates={errorStates} upStates={upStates} loading={loading} />
       </div>
-    </>
+    </MonitorPendingWrapper>
   );
 };
 

@@ -8,7 +8,6 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
 
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
@@ -17,9 +16,11 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 
-import { InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
+import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
+import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
+import { PluginsStart, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
@@ -36,52 +37,87 @@ import { mountLicensingLogic } from './shared/licensing';
 
 export const renderApp = (
   App: React.FC<InitialAppData>,
-  { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
+  {
+    params,
+    core,
+    plugins,
+    isSidebarEnabled = true,
+  }: {
+    core: CoreStart;
+    isSidebarEnabled: boolean;
+    params: AppMountParameters;
+    plugins: PluginsStart;
+  },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { publicUrl, errorConnectingMessage, ...initialData } = data;
+  const {
+    access,
+    appSearch,
+    configuredLimits,
+    enterpriseSearchVersion,
+    errorConnectingMessage,
+    features,
+    kibanaVersion,
+    publicUrl,
+    readOnlyMode,
+    searchOAuth,
+    workplaceSearch,
+  } = data;
+  const { history } = params;
+  const { application, chrome, http, uiSettings } = core;
+  const { capabilities, navigateToUrl } = application;
+  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
+
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
 
   const noProductAccess: ProductAccess = {
     hasAppSearchAccess: false,
-    hasSearchEnginesAccess: false,
     hasWorkplaceSearchAccess: false,
   };
-  const productAccess = data.access || noProductAccess;
+
+  const productAccess = access || noProductAccess;
+  const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
   const EmptyContext: FC = ({ children }) => <>{children}</>;
-  const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
+  const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
-
   const unmountKibanaLogic = mountKibanaLogic({
-    application: core.application,
-    capabilities: core.application.capabilities,
+    application,
+    capabilities,
+    charts,
+    cloud,
     config,
+    data: plugins.data,
+    guidedOnboarding,
+    history,
+    isSidebarEnabled,
+    lens,
+    navigateToUrl,
     productAccess,
-    charts: plugins.charts,
-    cloud: plugins.cloud,
-    uiSettings: core.uiSettings,
-    guidedOnboarding: plugins.guidedOnboarding,
-    history: params.history,
-    navigateToUrl: core.application.navigateToUrl,
-    security: plugins.security,
-    setBreadcrumbs: core.chrome.setBreadcrumbs,
-    setChromeIsVisible: core.chrome.setIsVisible,
-    setDocTitle: core.chrome.docTitle.change,
+    productFeatures,
     renderHeaderActions: (HeaderActions) =>
-      params.setHeaderActionMenu((el) => renderHeaderActions(HeaderActions, store, el)),
+      params.setHeaderActionMenu(
+        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store) : undefined
+      ),
+    security,
+    setBreadcrumbs: chrome.setBreadcrumbs,
+    setChromeIsVisible: chrome.setIsVisible,
+    setDocTitle: chrome.docTitle.change,
+    share,
+    ml,
+    uiSettings,
   });
   const unmountLicensingLogic = mountLicensingLogic({
-    license$: plugins.licensing.license$,
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
+    license$: plugins.licensing.license$,
   });
   const unmountHttpLogic = mountHttpLogic({
-    http: core.http,
     errorConnectingMessage,
-    readOnlyMode: initialData.readOnlyMode,
+    http,
+    readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic();
 
@@ -92,7 +128,17 @@ export const renderApp = (
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>
-                <App {...initialData} />
+                <App
+                  access={productAccess}
+                  appSearch={appSearch}
+                  configuredLimits={configuredLimits}
+                  enterpriseSearchVersion={enterpriseSearchVersion}
+                  features={features}
+                  kibanaVersion={kibanaVersion}
+                  readOnlyMode={readOnlyMode}
+                  searchOAuth={searchOAuth}
+                  workplaceSearch={workplaceSearch}
+                />
                 <Toasts />
               </Router>
             </Provider>
@@ -108,6 +154,7 @@ export const renderApp = (
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
+    plugins.data.search.session.clear();
   };
 };
 

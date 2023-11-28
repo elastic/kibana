@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
-import type { IElasticsearchConfig, ElasticsearchSslConfig } from '@kbn/core-elasticsearch-server';
+import type {
+  IElasticsearchConfig,
+  ElasticsearchSslConfig,
+  ElasticsearchApiToRedactInLogs,
+} from '@kbn/core-elasticsearch-server';
 import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -53,7 +57,7 @@ export const configSchema = schema.object({
       },
     })
   ),
-  password: schema.maybe(schema.string()),
+  password: schema.maybe(schema.string({ coerceFromNumber: true })),
   serviceAccountToken: schema.maybe(
     schema.conditional(
       schema.siblingRef('username'),
@@ -141,19 +145,22 @@ export const configSchema = schema.object({
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
-  ignoreVersionMismatch: schema.conditional(
-    schema.contextRef('dev'),
-    false,
-    schema.boolean({
-      validate: (rawValue) => {
-        if (rawValue === true) {
-          return '"ignoreVersionMismatch" can only be set to true in development mode';
-        }
-      },
-      defaultValue: false,
-    }),
-    schema.boolean({ defaultValue: false })
-  ),
+  ignoreVersionMismatch: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: true }),
+    traditional: schema.conditional(
+      schema.contextRef('dev'),
+      false,
+      schema.boolean({
+        validate: (rawValue) => {
+          if (rawValue === true) {
+            return '"ignoreVersionMismatch" can only be set to true in development mode';
+          }
+        },
+        defaultValue: false,
+      }),
+      schema.boolean({ defaultValue: false })
+    ),
+  }),
   skipStartupConnectionCheck: schema.conditional(
     // Using dist over dev because integration_tests run with dev: false,
     // and this config is solely introduced to allow some of the integration tests to run without an ES server.
@@ -168,6 +175,13 @@ export const configSchema = schema.object({
       defaultValue: false,
     }),
     schema.boolean({ defaultValue: false })
+  ),
+  apisToRedactInLogs: schema.arrayOf(
+    schema.object({
+      path: schema.string(),
+      method: schema.maybe(schema.string()),
+    }),
+    { defaultValue: [] }
   ),
 });
 
@@ -402,6 +416,11 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
+  /**
+   * Extends the list of APIs that should be redacted in logs.
+   */
+  public readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
+
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -425,6 +444,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.idleSocketTimeout = rawConfig.idleSocketTimeout;
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
+    this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

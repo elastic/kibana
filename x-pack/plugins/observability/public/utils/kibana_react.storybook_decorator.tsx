@@ -5,34 +5,46 @@
  * 2.0.
  */
 import React, { ComponentType } from 'react';
+import { of } from 'rxjs';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { sloFeatureId } from '../../common';
-import { PluginContext } from '../context/plugin_context';
+import { CoreTheme } from '@kbn/core-theme-browser';
+import { MemoryRouter } from 'react-router-dom';
+import { casesFeatureId, sloFeatureId } from '../../common';
+import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const queryClient = new QueryClient();
 
-  const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
+  const appMountParameters = {
+    setHeaderActionMenu: () => {},
+  } as unknown as AppMountParameters;
   const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
   const config: ConfigSchema = {
     unsafe: {
-      slo: {
-        enabled: false,
-      },
       alertDetails: {
-        apm: { enabled: false },
         logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
+        observability: { enabled: false },
       },
+      thresholdRule: { enabled: false },
     },
   };
+
+  const mockTheme: CoreTheme = {
+    darkMode: false,
+  };
+
+  const createTheme$Mock = () => {
+    return of({ ...mockTheme });
+  };
+
   return (
     <KibanaContextProvider
       services={{
@@ -43,6 +55,14 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
               read: true,
               write: true,
             },
+            [casesFeatureId]: { read_cases: true },
+          },
+        },
+        cases: {
+          getAllCases: () => <>Get All Cases component from Cases app</>,
+          helpers: { getUICapabilities: () => ({ read_cases: true }) },
+          ui: {
+            getCases: () => <>Get Cases component from Cases app</>,
           },
         },
         charts: {
@@ -50,6 +70,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
             useChartsBaseTheme: () => {},
             useChartsTheme: () => {},
           },
+          activeCursor: () => {},
         },
         data: {},
         dataViews: {
@@ -70,13 +91,23 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
             addDanger: () => {},
           },
         },
+        share: {
+          url: { locators: { get: () => {} } },
+        },
         storage: {
           get: () => {},
         },
+        theme: {
+          theme$: createTheme$Mock(),
+        },
+        triggersActionsUi: { getAddRuleFlyout: {} },
         uiSettings: {
           get: (setting: string) => {
             if (setting === 'dateFormat') {
               return 'MMM D, YYYY @ HH:mm:ss.SSS';
+            }
+            if (setting === 'format:percent:defaultPattern') {
+              return '0,0.[000]%';
             }
           },
         },
@@ -91,9 +122,11 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
           ObservabilityPageTemplate: KibanaPageTemplate,
         }}
       >
-        <QueryClientProvider client={queryClient}>
-          <Story />
-        </QueryClientProvider>
+        <MemoryRouter>
+          <QueryClientProvider client={queryClient}>
+            <Story />
+          </QueryClientProvider>
+        </MemoryRouter>
       </PluginContext.Provider>
     </KibanaContextProvider>
   );

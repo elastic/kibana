@@ -4,7 +4,7 @@
   "owner": "@elastic/platform-deployment-management",
   "plugin": {
     "id": "devTools",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredPlugins": [
       "urlForwarding"

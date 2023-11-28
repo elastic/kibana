@@ -95,7 +95,6 @@ export const useStyles = ({
       display: 'block',
       cursor: 'pointer',
       position: 'relative',
-      marginBottom: isSessionLeader ? size.s : '0px',
       '&:hover:before': {
         backgroundColor: hoverColor,
       },
@@ -112,6 +111,10 @@ export const useStyles = ({
       '.euiToolTipAnchor': {
         verticalAlign: 'middle',
       },
+    };
+
+    const jumpToTop: CSSObject = {
+      float: 'right',
     };
 
     const textSection: CSSObject = {
@@ -131,13 +134,23 @@ export const useStyles = ({
         display: 'inline-block',
         verticalAlign: 'middle',
       },
+      paddingLeft: PROCESS_TREE_LEFT_PADDING,
     };
 
-    const searchHighlight = `
-      color: ${colors.fullShade};
-      border-radius: '0px';
-      background-color: ${searchResColor};
-    `;
+    if (isSessionLeader) {
+      processNode.position = 'sticky';
+      processNode.top = '-' + size.base;
+      processNode.zIndex = 1;
+      processNode.borderTop = `${size.base} solid transparent`;
+      processNode.backgroundColor = euiVars.euiColorLightestShade;
+      processNode.borderBottom = border.editable;
+    }
+
+    const searchHighlight: CSSObject = {
+      color: colors.fullShade,
+      borderRadius: '0px',
+      backgroundColor: searchResColor,
+    };
 
     const wrapper: CSSObject = {
       paddingLeft: size.s,
@@ -188,6 +201,7 @@ export const useStyles = ({
       icon,
       textSection,
       sessionLeader,
+      jumpToTop,
     };
   }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars, isSessionLeader]);
 

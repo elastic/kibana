@@ -18,6 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
+import { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -34,7 +35,12 @@ import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
   | RenderingSetupDeps
-  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never; customBranding?: never });
+  | (RenderingPrebootDeps & {
+      status?: never;
+      elasticsearch?: never;
+      customBranding?: never;
+      userSettings?: never;
+    });
 
 /** @internal */
 export class RenderingService {
@@ -49,7 +55,7 @@ export class RenderingService {
         router,
         renderer: bootstrapRendererFactory({
           uiPlugins,
-          serverBasePath: http.basePath.serverBasePath,
+          baseHref: http.staticAssets.getHrefBase(),
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
         }),
@@ -67,19 +73,28 @@ export class RenderingService {
     status,
     uiPlugins,
     customBranding,
+    userSettings,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
         uiPlugins,
-        serverBasePath: http.basePath.serverBasePath,
+        baseHref: http.staticAssets.getHrefBase(),
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
+        userSettingsService: userSettings,
       }),
     });
 
     return {
-      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status, customBranding }),
+      render: this.render.bind(this, {
+        elasticsearch,
+        http,
+        uiPlugins,
+        status,
+        customBranding,
+        userSettings,
+      }),
     };
   }
 
@@ -92,23 +107,39 @@ export class RenderingService {
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding } = renderOptions;
+    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings } = renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
     };
     const buildNum = env.packageInfo.buildNum;
+    const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
+
+    let settingsUserValues: Record<string, UserProvidedValues> = {};
+    let globalSettingsUserValues: Record<string, UserProvidedValues> = {};
+
+    if (!isAnonymousPage) {
+      const userValues = await Promise.all([
+        uiSettings.client?.getUserProvided(),
+        uiSettings.globalClient?.getUserProvided(),
+      ]);
+
+      settingsUserValues = userValues[0];
+      globalSettingsUserValues = userValues[1];
+    }
+
     const settings = {
       defaults: uiSettings.client?.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
+      user: settingsUserValues,
     };
     const globalSettings = {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
+      user: globalSettingsUserValues,
     };
+
     let clusterInfo = {};
     let branding: CustomBranding = {};
     try {
@@ -129,13 +160,28 @@ export class RenderingService {
       // swallow error
     }
 
-    const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    let userSettingDarkMode: boolean | undefined;
+
+    if (!isAnonymousPage) {
+      userSettingDarkMode = await userSettings?.getUserSettingDarkMode(request);
+    }
+
+    let darkMode: boolean;
+
+    const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
+
+    if (userSettingDarkMode !== undefined && !isThemeOverridden) {
+      darkMode = userSettingDarkMode;
+    } else {
+      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    }
+
     const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
       themeVersion,
-      basePath: serverBasePath,
+      baseHref: staticAssetsHrefBase,
       buildNum,
     });
 
@@ -143,7 +189,7 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
-      uiPublicUrl: `${basePath}/ui`,
+      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
@@ -163,10 +209,12 @@ export class RenderingService {
         basePath,
         serverBasePath,
         publicBaseUrl,
+        assetsHrefBase: staticAssetsHrefBase,
         env,
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
+          // TODO: Make this load as part of static assets!
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         theme: {

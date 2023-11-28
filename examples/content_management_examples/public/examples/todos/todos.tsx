@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiButtonGroup, EuiButtonIcon, EuiCheckbox, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFieldText,
+  EuiSpacer,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import {
   useCreateContentMutation,
   useDeleteContentMutation,
@@ -30,10 +37,11 @@ import {
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, TodoCreateOut>();
 const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, TodoDeleteOut>();
 const useUpdateTodoMutation = () => useUpdateContentMutation<TodoUpdateIn, TodoUpdateOut>();
-const useSearchTodosQuery = ({ filter }: { filter: TodoSearchIn['query']['filter'] }) =>
+const useSearchTodosQuery = ({ options: { filter } = {} }: { options: TodoSearchIn['options'] }) =>
   useSearchContentQuery<TodoSearchIn, TodoSearchOut>({
     contentTypeId: TODO_CONTENT_ID,
-    query: { filter },
+    query: {},
+    options: { filter },
   });
 
 type TodoFilter = 'all' | 'completed' | 'todo';
@@ -55,15 +63,21 @@ const filters = [
 export const Todos = () => {
   const [filterIdSelected, setFilterIdSelected] = React.useState<TodoFilter>('all');
 
-  const { data, isLoading, isError, error } = useSearchTodosQuery({
-    filter: filterIdSelected === 'all' ? undefined : filterIdSelected,
+  const { data, isError, error, isFetching, isLoading } = useSearchTodosQuery({
+    options: { filter: filterIdSelected === 'all' ? undefined : filterIdSelected },
   });
 
   const createTodoMutation = useCreateTodoMutation();
   const deleteTodoMutation = useDeleteTodoMutation();
   const updateTodoMutation = useUpdateTodoMutation();
 
-  if (isLoading) return <p>Loading...</p>;
+  const isPending =
+    isFetching ||
+    isLoading ||
+    createTodoMutation.isLoading ||
+    deleteTodoMutation.isLoading ||
+    updateTodoMutation.isLoading;
+
   if (isError) return <p>Error: {error}</p>;
 
   return (
@@ -77,46 +91,50 @@ export const Todos = () => {
         }}
       />
       <EuiSpacer />
-      <ul>
-        {data.hits.map((todo: Todo) => (
-          <React.Fragment key={todo.id}>
-            <li
-              style={{ display: 'flex', alignItems: 'center' }}
-              data-test-subj={`todoItem todoItem-${todo.id}`}
-            >
-              <EuiCheckbox
-                id={todo.id + ''}
-                key={todo.id}
-                checked={todo.completed}
-                onChange={(e) => {
-                  updateTodoMutation.mutate({
-                    contentTypeId: TODO_CONTENT_ID,
-                    id: todo.id,
-                    data: {
-                      completed: e.target.checked,
-                    },
-                  });
-                }}
-                label={todo.title}
-                data-test-subj={`todoCheckbox todoCheckbox-${todo.id}`}
-              />
+      {!isLoading && (
+        <ul>
+          {data.hits.map((todo: Todo) => (
+            <React.Fragment key={todo.id}>
+              <li
+                style={{ display: 'flex', alignItems: 'center' }}
+                data-test-subj={`todoItem todoItem-${todo.id}`}
+              >
+                <EuiCheckbox
+                  id={todo.id + ''}
+                  key={todo.id}
+                  checked={todo.completed}
+                  onChange={(e) => {
+                    updateTodoMutation.mutate({
+                      contentTypeId: TODO_CONTENT_ID,
+                      id: todo.id,
+                      data: {
+                        completed: e.target.checked,
+                      },
+                    });
+                  }}
+                  label={todo.title}
+                  data-test-subj={`todoCheckbox todoCheckbox-${todo.id}`}
+                />
 
-              <EuiButtonIcon
-                style={{ marginLeft: '8px' }}
-                display="base"
-                iconType="trash"
-                aria-label="Delete"
-                color="danger"
-                onClick={() => {
-                  deleteTodoMutation.mutate({ contentTypeId: TODO_CONTENT_ID, id: todo.id });
-                }}
-              />
-            </li>
-            <EuiSpacer size={'xs'} />
-          </React.Fragment>
-        ))}
-      </ul>
-      <EuiSpacer />
+                <EuiButtonIcon
+                  style={{ marginLeft: '8px' }}
+                  display="base"
+                  iconType="trash"
+                  aria-label="Delete"
+                  color="danger"
+                  onClick={() => {
+                    deleteTodoMutation.mutate({ contentTypeId: TODO_CONTENT_ID, id: todo.id });
+                  }}
+                />
+              </li>
+              <EuiSpacer size={'xs'} />
+            </React.Fragment>
+          ))}
+        </ul>
+      )}
+      <div style={{ minHeight: 24 }}>
+        {isPending && <EuiLoadingSpinner data-test-subj={'todoPending'} />}
+      </div>
       <form
         onSubmit={(e) => {
           const inputRef = (e.target as HTMLFormElement).elements.namedItem(

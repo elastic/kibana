@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/detection_engine/rule_management';
+import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 /**
@@ -37,7 +37,7 @@ import { assertUnreachable } from '../../../../../../common/utility_types';
  * @param sortField Sort field parameter from the request
  * @returns Sort field matching the Alerting framework schema
  */
-export function transformSortField(sortField: FindRulesSortFieldOrUndefined): string | undefined {
+export function transformSortField(sortField?: FindRulesSortField): string | undefined {
   if (!sortField) {
     return undefined;
   }

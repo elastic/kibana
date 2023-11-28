@@ -2,8 +2,11 @@ title: Connector types
 type: string
 description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
 enum:
+  - .bedrock
   - .cases-webhook
+  - .d3security
   - .email
+  - .gen-ai
   - .index
   - .jira
   - .opsgenie
@@ -14,9 +17,12 @@ enum:
   - .servicenow-sir
   - .server-log
   - .slack
+  - .slack_api
   - .swimlane
   - .teams
   - .tines
+  - .torq
   - .webhook
   - .xmatters
-example: .server-log
+examples:
+  - .server-log

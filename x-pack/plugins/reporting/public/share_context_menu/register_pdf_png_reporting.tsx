@@ -71,6 +71,7 @@ export const reportingScreenshotShareProvider = ({
     isDirty,
     onClose,
     shareableUrl,
+    shareableUrlForSavedObject,
     ...shareOpts
   }: ShareContext) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
@@ -81,7 +82,6 @@ export const reportingScreenshotShareProvider = ({
     let capabilityHasDashboardScreenshotReporting = false;
     let capabilityHasVisualizeScreenshotReporting = false;
     if (usesUiCapabilities) {
-      // TODO: add abstractions in ExportTypeRegistry to use here?
       capabilityHasDashboardScreenshotReporting =
         application.capabilities.dashboard?.generateScreenshot === true;
       capabilityHasVisualizeScreenshotReporting =
@@ -95,8 +95,9 @@ export const reportingScreenshotShareProvider = ({
     if (!licenseHasScreenshotReporting) {
       return [];
     }
+    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
 
-    if (!['dashboard', 'visualization'].includes(objectType)) {
+    if (!isSupportedType) {
       return [];
     }
 
@@ -104,7 +105,11 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
-    if (objectType === 'visualize' && !capabilityHasVisualizeScreenshotReporting) {
+    if (
+      isSupportedType &&
+      !capabilityHasVisualizeScreenshotReporting &&
+      !capabilityHasDashboardScreenshotReporting
+    ) {
       return [];
     }
 
@@ -116,7 +121,7 @@ export const reportingScreenshotShareProvider = ({
     });
 
     const jobProviderOptions: JobParamsProviderOptions = {
-      shareableUrl,
+      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
       objectType,
       sharingData,
     };
@@ -131,7 +136,7 @@ export const reportingScreenshotShareProvider = ({
         name: pngPanelTitle,
         icon: 'document',
         toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled,
+        disabled: licenseDisabled || sharingData.reportingDisabled,
         ['data-test-subj']: 'PNGReports',
         sortOrder: 10,
       },
@@ -166,7 +171,7 @@ export const reportingScreenshotShareProvider = ({
         name: pdfPanelTitle,
         icon: 'document',
         toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled,
+        disabled: licenseDisabled || sharingData.reportingDisabled,
         ['data-test-subj']: 'PDFReports',
         sortOrder: 10,
       },

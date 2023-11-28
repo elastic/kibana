@@ -13,6 +13,7 @@ import {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -22,17 +23,23 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  EVENT_ACTION,
+  EVENT_KIND,
+  TAGS,
 } from '@kbn/rule-data-utils';
 
 export const alertFieldMap = {
@@ -63,6 +70,11 @@ export const alertFieldMap = {
   },
   [ALERT_FLAPPING_HISTORY]: {
     type: 'boolean',
+    array: true,
+    required: false,
+  },
+  [ALERT_MAINTENANCE_WINDOW_IDS]: {
+    type: 'keyword',
     array: true,
     required: false,
   },
@@ -112,6 +124,11 @@ export const alertFieldMap = {
     array: false,
     required: true,
   },
+  [ALERT_RULE_REVISION]: {
+    type: 'long',
+    array: false,
+    required: true,
+  },
   [ALERT_RULE_TAGS]: {
     type: 'keyword',
     array: true,
@@ -143,6 +160,13 @@ export const alertFieldMap = {
     array: false,
     required: false,
   },
+  [ALERT_URL]: {
+    type: 'keyword',
+    array: false,
+    index: false,
+    required: false,
+    ignore_above: 2048,
+  },
   [ALERT_UUID]: {
     type: 'keyword',
     array: false,
@@ -153,10 +177,30 @@ export const alertFieldMap = {
     array: false,
     required: false,
   },
+  [ALERT_WORKFLOW_TAGS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [EVENT_ACTION]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [EVENT_KIND]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   [SPACE_IDS]: {
     type: 'keyword',
     array: true,
     required: true,
+  },
+  [TAGS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
   },
   [TIMESTAMP]: {
     type: 'date',

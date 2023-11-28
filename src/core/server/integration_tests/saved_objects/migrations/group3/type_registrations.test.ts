@@ -15,6 +15,7 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'alert',
   'api_key_pending_invalidation',
+  'apm-custom-dashboards',
   'apm-indices',
   'apm-server-schema',
   'apm-service-group',
@@ -42,6 +43,7 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
   'enterprise_search_telemetry',
@@ -62,6 +64,7 @@ const previouslyRegisteredTypes = [
   'fleet-message-signing-keys',
   'fleet-preconfiguration-deletion-record',
   'fleet-proxy',
+  'fleet-uninstall-tokens',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
@@ -79,19 +82,24 @@ const previouslyRegisteredTypes = [
   'legacy-url-alias',
   'lens',
   'lens-ui-telemetry',
+  'links',
+  'maintenance-window',
   'map',
   'maps-telemetry',
+  'metrics-data-source',
   'metrics-explorer-view',
   'ml-job',
   'ml-trained-model',
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'observability-onboarding-state',
   'osquery-pack',
   'osquery-pack-asset',
   'osquery-saved-query',
   'osquery-usage-metric',
   'osquery-manager-usage-metric',
+  'policy-settings-protection-updates-note',
   'query',
   'rules-settings',
   'sample-data-telemetry',
@@ -100,6 +108,7 @@ const previouslyRegisteredTypes = [
   'search-telemetry',
   'security-rule',
   'security-solution-signals-migration',
+  'risk-engine-configuration',
   'server',
   'siem-detection-engine-rule-actions',
   'siem-detection-engine-rule-execution-info',
@@ -107,6 +116,7 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline',
   'siem-ui-timeline-note',
   'siem-ui-timeline-pinned-event',
+  'slo',
   'space',
   'spaces-usage-stats',
   'synthetics-monitor',
@@ -117,6 +127,7 @@ const previouslyRegisteredTypes = [
   'telemetry',
   'timelion-sheet',
   'tsvb-validation-telemetry',
+  'threshold-explorer-view',
   'ui-counter',
   'ui-metric',
   'upgrade-assistant-ml-upgrade-operation',
@@ -131,8 +142,18 @@ const previouslyRegisteredTypes = [
 ].sort();
 
 describe('SO type registrations', () => {
+  let root: ReturnType<typeof createRoot>;
+
+  afterEach(() => {
+    try {
+      root?.shutdown();
+    } catch (e) {
+      /* trap */
+    }
+  });
+
   it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
-    const root = createRoot({}, { oss: false });
+    root = createRoot({}, { oss: false });
     await root.preboot();
     const setup = await root.setup();
     const currentlyRegisteredTypes = setup.savedObjects

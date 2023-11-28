@@ -15,7 +15,7 @@ import type { State } from 'xstate';
 export const InvalidStateCallout: React.FC<{ state: State<any, any, any, any, any> }> = ({
   state,
 }) => (
-  <EuiCallOut title={invalidStateCalloutTitle} color="danger" iconType="alert">
+  <EuiCallOut title={invalidStateCalloutTitle} color="danger" iconType="warning">
     <FormattedMessage
       id="xpack.infra.logs.common.invalidStateMessage"
       defaultMessage="Unable to handle state {stateValue}."

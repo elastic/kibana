@@ -7,8 +7,8 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import type { EsHitRecord } from '../types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 /*
   Extensions:
   gif: 5

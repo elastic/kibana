@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { LayerValue, SeriesIdentifier } from '@elastic/charts';
+import { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { BucketColumns, PartitionVisParams } from '../../common/types';
+import { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
 import { FilterEvent } from '../types';
 
 export const canFilter = async (
@@ -25,6 +25,45 @@ export const canFilter = async (
   const filters = await actions.createFiltersFromValueClickAction(event.data);
   return Boolean(filters.length);
 };
+
+export const getMultiFilterCells = (
+  tooltipSelectedValues: Array<TooltipValue<Record<'key', string | number>, SeriesIdentifier>>,
+  bucketColumns: Array<Partial<BucketColumns>>,
+  visData: Datatable
+) => {
+  const row = visData.rows.findIndex((r) =>
+    tooltipSelectedValues.every(({ valueAccessor, seriesIdentifier }) => {
+      if (typeof valueAccessor !== 'number' || valueAccessor < 1) return;
+      const index = valueAccessor - 1;
+      const bucketColumnId = bucketColumns[index].id;
+      if (!bucketColumnId) return;
+      return r[bucketColumnId] === seriesIdentifier.key;
+    })
+  );
+
+  return tooltipSelectedValues
+    .map(({ valueAccessor }) => {
+      if (typeof valueAccessor !== 'number' || valueAccessor < 1) return;
+      const index = valueAccessor - 1;
+      const bucketColumnId = bucketColumns[index].id;
+      if (!bucketColumnId) return;
+      const column = visData.columns.findIndex((c) => c.id === bucketColumnId);
+
+      if (column === -1) {
+        return;
+      }
+
+      return {
+        column,
+        row,
+      };
+    })
+    .filter(nonNullable);
+};
+
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 export const getFilterClickData = (
   clickedLayers: LayerValue[],
@@ -131,6 +170,13 @@ export const getSeriesValueColumnIndex = (value: string, visData: Datatable): nu
   return visData.columns.findIndex(({ id }) => !!visData.rows.find((r) => r[id] === value));
 };
 
+export const getAccessor = (buckets: Dimensions['buckets'], index: number) => {
+  const accessorForDimensionBuckets = buckets?.find((b) => {
+    return typeof b !== 'string' && b.accessor === index;
+  });
+  return accessorForDimensionBuckets || buckets?.[index];
+};
+
 export const getFilterPopoverTitle = (
   visParams: PartitionVisParams,
   visData: Datatable,
@@ -140,7 +186,7 @@ export const getFilterPopoverTitle = (
 ) => {
   let formattedTitle = '';
   if (visParams.dimensions.buckets) {
-    const accessor = visParams.dimensions.buckets[columnIndex];
+    const accessor = getAccessor(visParams.dimensions.buckets, columnIndex);
     formattedTitle = accessor
       ? formatter(getFormatByAccessor(accessor, visData.columns)).convert(seriesKey)
       : '';

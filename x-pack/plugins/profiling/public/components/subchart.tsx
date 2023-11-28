@@ -16,23 +16,29 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  Tooltip,
 } from '@elastic/charts';
 import {
+  EuiAccordion,
+  EuiAccordionProps,
   EuiBadge,
   EuiButton,
   EuiFlexGroup,
+  EuiFlexGroupProps,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { StackFrameMetadata } from '../../common/profiling';
-import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
+import type { StackFrameMetadata } from '@kbn/profiling-utils';
+import { groupBy } from 'lodash';
+import React, { Fragment, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
@@ -40,6 +46,7 @@ import { useProfilingParams } from '../hooks/use_profiling_params';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { asNumber } from '../utils/formatters/as_number';
 import { asPercentage } from '../utils/formatters/as_percentage';
+import { getTracesViewRouteParams } from '../views/stack_traces_view/utils';
 import { StackFrameSummary } from './stack_frame_summary';
 
 export interface SubChartProps {
@@ -53,8 +60,8 @@ export interface SubChartProps {
   data: CountPerTime[];
   showAxes: boolean;
   metadata: StackFrameMetadata[];
-  onShowMoreClick: (() => void) | null;
-  style?: React.ComponentProps<typeof EuiFlexGroup>['style'];
+  onShowMoreClick?: () => void;
+  style?: EuiFlexGroupProps['style'];
   showFrames: boolean;
   padTitle: boolean;
   sample: TopNSample | null;
@@ -62,7 +69,20 @@ export interface SubChartProps {
 
 const NUM_DISPLAYED_FRAMES = 5;
 
-export const SubChart: React.FC<SubChartProps> = ({
+function renderFrameItem(frame: StackFrameMetadata, parentIndex: number | string) {
+  return (
+    <EuiFlexItem grow={false} key={frame.FrameID}>
+      <EuiFlexGroup direction="row" alignItems="center">
+        <EuiFlexItem grow={false}>{parentIndex}</EuiFlexItem>
+        <EuiFlexItem grow>
+          <StackFrameSummary frame={frame} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+}
+
+export function SubChart({
   index,
   color,
   category,
@@ -78,24 +98,20 @@ export const SubChart: React.FC<SubChartProps> = ({
   showFrames,
   padTitle,
   sample,
-}) => {
+}: SubChartProps) {
   const theme = useEuiTheme();
+  const [accordionState, setAccordionState] = useState<
+    Record<string, EuiAccordionProps['forceState']>
+  >({});
 
   const profilingRouter = useProfilingRouter();
 
   const { path, query } = useProfilingParams('/stacktraces/{topNType}');
 
-  const href = profilingRouter.link('/stacktraces/{topNType}', {
-    path: {
-      topNType: TopNType.Traces,
-    },
-    query: {
-      ...query,
-      kuery: `${query.kuery ? `(${query.kuery}) AND ` : ''}${getFieldNameForTopNType(
-        path.topNType
-      )}:"${category}"`,
-    },
-  });
+  const href = profilingRouter.link(
+    '/stacktraces/{topNType}',
+    getTracesViewRouteParams({ query, topNType: path.topNType, category })
+  );
 
   const timeZone = useKibanaTimeZoneSetting();
 
@@ -103,9 +119,20 @@ export const SubChart: React.FC<SubChartProps> = ({
 
   const compact = !!onShowMoreClick;
 
+  const parentsMetadata = metadata.filter((item) => item.Inline === false);
   const displayedFrames = compact
-    ? metadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
-    : metadata.concat().reverse();
+    ? parentsMetadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
+    : parentsMetadata.concat().reverse();
+
+  const childrenMetadata = useMemo(() => {
+    const groupedMetadata = groupBy(metadata, 'AddressOrLine');
+    return Object.keys(groupedMetadata).reduce<Record<string, StackFrameMetadata[]>>((acc, key) => {
+      // Removes the first item as it will always be the parent item.
+      const [_, ...children] = groupedMetadata[key];
+      acc[key] = children;
+      return acc;
+    }, {});
+  }, [metadata]);
 
   const hasMoreFrames = displayedFrames.length < metadata.length;
 
@@ -121,27 +148,85 @@ export const SubChart: React.FC<SubChartProps> = ({
           }}
         >
           <EuiFlexGroup direction="column" gutterSize="none">
-            {displayedFrames.map((frame, frameIndex) => (
-              <>
-                <EuiFlexItem grow={false} key={frame.FrameID}>
-                  <EuiFlexGroup direction="row" alignItems="center">
-                    <EuiFlexItem grow={false}>{metadata.indexOf(frame) + 1}</EuiFlexItem>
-                    <EuiFlexItem grow>
-                      <StackFrameSummary frame={frame} />
+            {displayedFrames.map((frame, frameIndex) => {
+              const parentIndex = parentsMetadata.indexOf(frame) + 1;
+              const children = childrenMetadata[frame.AddressOrLine].concat().reverse();
+              const key = [frameIndex, frame.FrameID].join('|');
+              const currentAccordionState = accordionState[key];
+              return (
+                <Fragment key={key}>
+                  {children.length > 0 ? (
+                    <EuiAccordion
+                      // taking over the control of the EuiAccordion state
+                      // to avoid rendering the children items when the accordion is closed.
+                      // This renders the page way faster as it avoids unnecessary render of items that might never be visible
+                      forceState={currentAccordionState || 'closed'}
+                      onToggle={(isOpen) => {
+                        setAccordionState((state) => ({
+                          ...state,
+                          [key]: isOpen ? 'open' : 'closed',
+                        }));
+                      }}
+                      css={css`
+                        display: flex;
+                        flex-direction: column-reverse;
+
+                        .css-bknxw4-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isOpen {
+                          transform: rotate(-90deg) !important;
+                        }
+                      `}
+                      id={`accordion_${frame.AddressOrLine}`}
+                      buttonContent={renderFrameItem(frame, parentIndex)}
+                      paddingSize="s"
+                      extraAction={
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'xpack.profiling.traces.subChart.inlineDescription',
+                            {
+                              defaultMessage:
+                                'This frame has {numberOfChildren} inline {numberOfChildren, plural, one {frame} other {frames}} inside, this allows for optimised processes.',
+                              values: { numberOfChildren: children.length },
+                            }
+                          )}
+                        >
+                          <EuiBadge color="primary">{`-> ${children.length}`}</EuiBadge>
+                        </EuiToolTip>
+                      }
+                    >
+                      {currentAccordionState === 'open' ? (
+                        <EuiFlexGroup
+                          direction="column"
+                          gutterSize="s"
+                          style={{ marginLeft: '12px' }}
+                        >
+                          {children.map((child, childIndex) => {
+                            return (
+                              <Fragment key={[key, childIndex].join('|')}>
+                                {renderFrameItem(
+                                  child,
+                                  `${parentIndex}.${children.length - childIndex} ->`
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </EuiFlexGroup>
+                      ) : null}
+                    </EuiAccordion>
+                  ) : (
+                    renderFrameItem(frame, parentIndex)
+                  )}
+                  {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiHorizontalRule size="full" margin="s" />
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiHorizontalRule size="full" margin="s" />
-                  </EuiFlexItem>
-                ) : null}
-              </>
-            ))}
+                  ) : null}
+                </Fragment>
+              );
+            })}
           </EuiFlexGroup>
 
           {hasMoreFrames && !!onShowMoreClick && (
-            <EuiButton onClick={onShowMoreClick}>
+            <EuiButton data-test-subj="profilingSubChartShowMoreButton" onClick={onShowMoreClick}>
               {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
                 defaultMessage: 'Show more',
               })}
@@ -191,13 +276,13 @@ export const SubChart: React.FC<SubChartProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
             {showFrames ? (
-              <EuiLink onClick={() => onShowMoreClick?.()}>
+              <EuiLink data-test-subj="profilingSubChartLink" onClick={() => onShowMoreClick?.()}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             ) : category === OTHER_BUCKET_LABEL ? (
               <EuiText size="s">{label}</EuiText>
             ) : (
-              <EuiLink href={href}>
+              <EuiLink data-test-subj="profilingSubChartLink" href={href}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             )}
@@ -225,11 +310,12 @@ export const SubChart: React.FC<SubChartProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <Chart size={{ height, width }}>
+          <Tooltip showNullValues={false} />
           <Settings
             showLegend={false}
-            tooltip={{ showNullValues: false }}
             baseTheme={chartsBaseTheme}
             theme={chartsTheme}
+            locale={i18n.getLocale()}
           />
           <AreaSeries
             id={category}
@@ -270,7 +356,7 @@ export const SubChart: React.FC<SubChartProps> = ({
           <Axis
             id="left-axis"
             position="left"
-            showGridLines
+            gridLine={{ visible: true }}
             tickFormat={(d) => (showAxes ? Number(d).toFixed(0) : '')}
             style={
               showAxes
@@ -304,4 +390,4 @@ export const SubChart: React.FC<SubChartProps> = ({
       {bottomElement}
     </EuiFlexGroup>
   );
-};
+}

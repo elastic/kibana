@@ -87,13 +87,13 @@ describe('extractSavedObjectReferences()', () => {
     });
   });
 
-  test('correctly skips extracting action id if action is preconfigured', () => {
+  test('correctly skips extracting action id if action is in-memory', () => {
     expect(extractSavedObjectReferences('my-action-id', true)).toEqual({
       references: [],
     });
   });
 
-  test('correctly extracts related saved object into references array if isPreconfigured is true', () => {
+  test('correctly extracts related saved object into references array if isInMemory is true', () => {
     const relatedSavedObjects = [
       {
         id: 'abc',

@@ -6,7 +6,7 @@
  */
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   ScheduleUnit,
   MonitorFields,
   Validator,
@@ -87,7 +87,7 @@ const validateCommon: ValidationLibrary = {
     const { number, unit } = schedule as MonitorFields[ConfigKey.SCHEDULE];
 
     // Timeout is not currently supported by browser monitors
-    if (monitorType === DataStream.BROWSER) {
+    if (monitorType === MonitorTypeEnum.BROWSER) {
       return false;
     }
 
@@ -147,30 +147,27 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
 
 const validateBrowser: ValidationLibrary = {
   ...validateCommon,
-  [ConfigKey.SOURCE_ZIP_URL]: ({
-    [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
-    [ConfigKey.SOURCE_INLINE]: inlineScript,
-  }) => !zipUrl && !inlineScript,
-  [ConfigKey.SOURCE_INLINE]: ({
-    [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
-    [ConfigKey.SOURCE_INLINE]: inlineScript,
-  }) => !zipUrl && !inlineScript,
-  [ConfigKey.DOWNLOAD_SPEED]: ({ [ConfigKey.DOWNLOAD_SPEED]: downloadSpeed }) =>
-    validateThrottleValue(downloadSpeed),
-  [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>
-    validateThrottleValue(uploadSpeed),
-  [ConfigKey.LATENCY]: ({ [ConfigKey.LATENCY]: latency }) => validateThrottleValue(latency, true),
+  [ConfigKey.SOURCE_INLINE]: ({ [ConfigKey.SOURCE_INLINE]: inlineScript }) => !inlineScript,
+  [ConfigKey.THROTTLING_CONFIG]: ({ throttling }) => {
+    if (!throttling || throttling.value === null) return true;
+    const { download, upload, latency } = throttling.value;
+    return (
+      validateThrottleValue(String(download)) ||
+      validateThrottleValue(String(upload)) ||
+      validateThrottleValue(String(latency), true)
+    );
+  },
   [ConfigKey.PLAYWRIGHT_OPTIONS]: ({ [ConfigKey.PLAYWRIGHT_OPTIONS]: playwrightOptions }) =>
     playwrightOptions ? !validJSONFormat(playwrightOptions) : false,
   [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) =>
     params ? !validJSONFormat(params) : false,
 };
 
-export type ValidateDictionary = Record<DataStream, Validation>;
+export type ValidateDictionary = Record<MonitorTypeEnum, Validation>;
 
 export const validate: ValidateDictionary = {
-  [DataStream.HTTP]: validateHTTP,
-  [DataStream.TCP]: validateTCP,
-  [DataStream.ICMP]: validateICMP,
-  [DataStream.BROWSER]: validateBrowser,
+  [MonitorTypeEnum.HTTP]: validateHTTP,
+  [MonitorTypeEnum.TCP]: validateTCP,
+  [MonitorTypeEnum.ICMP]: validateICMP,
+  [MonitorTypeEnum.BROWSER]: validateBrowser,
 };

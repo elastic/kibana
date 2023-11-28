@@ -5,33 +5,53 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import {
-  addLastLiveQueryToCase,
+  addLiveQueryToCase,
   checkActionItemsInResults,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('Add to Cases', () => {
-  describe('observability', () => {
-    before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'case_observability');
-      login(ROLES.soc_manager);
+  let liveQueryId: string;
+  let liveQueryQuery: string;
+  before(() => {
+    initializeDataViews();
+    loadLiveQuery({
+      agent_all: true,
+      query: "SELECT * FROM os_version where name='Ubuntu';",
+      kuery: '',
+    }).then((liveQuery) => {
+      liveQueryId = liveQuery.action_id;
+      liveQueryQuery = liveQuery.queries[0].query;
+    });
+  });
+
+  describe('observability', { tags: ['@ess'] }, () => {
+    let caseId: string;
+    let caseTitle: string;
+    beforeEach(() => {
+      loadCase('observability').then((caseInfo) => {
+        caseId = caseInfo.id;
+        caseTitle = caseInfo.title;
+      });
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery');
     });
 
-    after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_observability');
+    afterEach(() => {
+      cleanupCase(caseId);
     });
+
     it('should add result a case and not have add to timeline in result', () => {
-      addLastLiveQueryToCase();
-      cy.contains('Test Obs case has been updated');
+      addLiveQueryToCase(liveQueryId, caseId);
+      cy.contains(`${caseTitle} has been updated`);
       viewRecentCaseAndCheckResults();
 
-      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+      cy.contains(liveQueryQuery);
       checkActionItemsInResults({
         lens: true,
         discover: true,
@@ -40,20 +60,27 @@ describe('Add to Cases', () => {
       });
     });
   });
-  describe('security', () => {
-    before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
-      login(ROLES.soc_manager);
+
+  describe('security', { tags: ['@ess', '@serverless'] }, () => {
+    let caseId: string;
+    let caseTitle: string;
+
+    beforeEach(() => {
+      loadCase('securitySolution').then((caseInfo) => {
+        caseId = caseInfo.id;
+        caseTitle = caseInfo.title;
+      });
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery');
     });
 
-    after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
+    afterEach(() => {
+      cleanupCase(caseId);
     });
 
     it('should add result a case and have add to timeline in result', () => {
-      addLastLiveQueryToCase();
-      cy.contains('Test Security Case has been updated');
+      addLiveQueryToCase(liveQueryId, caseId);
+      cy.contains(`${caseTitle} has been updated`);
       viewRecentCaseAndCheckResults();
 
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");

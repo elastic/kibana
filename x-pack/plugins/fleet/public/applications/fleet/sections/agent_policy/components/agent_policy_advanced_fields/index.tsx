@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -13,7 +13,6 @@ import {
   EuiComboBox,
   EuiIconTip,
   EuiCheckboxGroup,
-  EuiButton,
   EuiLink,
   EuiFieldNumber,
   EuiFieldText,
@@ -25,20 +24,27 @@ import {
   EuiFlexItem,
   EuiBetaBadge,
   EuiBadge,
+  EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, dataTypes } from '../../../../../../../common/constants';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  dataTypes,
+  DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
+} from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
-import { useStartServices, useConfig, useGetAgentPolicies } from '../../../../hooks';
+import { useStartServices, useConfig, useGetAgentPolicies, useLicense } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
+import { UninstallCommandFlyout } from '../../../../../../components';
 
-import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
+
+import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
   useOutputOptions,
@@ -52,7 +58,6 @@ interface Props {
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
   isEditing?: boolean;
-  onDelete?: () => void;
 }
 
 export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> = ({
@@ -60,13 +65,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   updateAgentPolicy,
   validation,
   isEditing = false,
-  onDelete = () => {},
 }) => {
-  const { agentFqdnMode: agentFqdnModeEnabled } = ExperimentalFeaturesService.get();
   const { docLinks } = useStartServices();
   const config = useConfig();
   const maxAgentPoliciesWithInactivityTimeout =
-    config.developer?.maxAgentPoliciesWithInactivityTimeout ?? 0;
+    config.developer?.maxAgentPoliciesWithInactivityTimeout ??
+    DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT;
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const {
     dataOutputOptions,
@@ -93,9 +97,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
 
-  const hasManagedPackagePolicy =
-    'package_policies' in agentPolicy &&
-    agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
+  const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+  const licenseService = useLicense();
+  const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
+  const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
 
   return (
     <>
@@ -115,6 +120,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
+        {isUninstallCommandFlyoutOpen && agentPolicy.id && (
+          <UninstallCommandFlyout
+            target="agent"
+            policyId={agentPolicy.id}
+            onClose={() => setIsUninstallCommandFlyoutOpen(false)}
+          />
+        )}
         <EuiFormRow
           fullWidth
           key="description"
@@ -281,6 +293,73 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
+      {agentTamperProtectionEnabled && licenseService.isPlatinum() && (
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.tamperingLabel"
+                defaultMessage="Agent tamper protection"
+              />
+            </h4>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.tamperingDescription"
+              defaultMessage="Prevent agents from being uninstalled locally. When enabled, agents can only be uninstalled using an authorization token in the uninstall command. Click { linkName } for the full command."
+              values={{ linkName: <strong>Get uninstall command</strong> }}
+            />
+          }
+        >
+          <EuiSwitch
+            label={
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.tamperingSwitchLabel"
+                  defaultMessage="Prevent agent tampering"
+                />{' '}
+                {!policyHasElasticDefend && (
+                  <span data-test-subj="tamperMissingIntegrationTooltip">
+                    <EuiIconTip
+                      type="iInCircle"
+                      color="subdued"
+                      content={i18n.translate(
+                        'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
+                        {
+                          defaultMessage:
+                            'Elastic Defend integration is required to enable this feature',
+                        }
+                      )}
+                    />
+                  </span>
+                )}
+              </>
+            }
+            checked={agentPolicy.is_protected ?? false}
+            onChange={(e) => {
+              updateAgentPolicy({ is_protected: e.target.checked });
+            }}
+            disabled={!policyHasElasticDefend}
+            data-test-subj="tamperProtectionSwitch"
+          />
+          {agentPolicy.id && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiLink
+                onClick={() => {
+                  setIsUninstallCommandFlyoutOpen(true);
+                }}
+                disabled={!agentPolicy.is_protected || !policyHasElasticDefend}
+                data-test-subj="uninstallCommandLink"
+              >
+                {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+                  defaultMessage: 'Get uninstall command',
+                })}
+              </EuiLink>
+            </>
+          )}
+        </EuiDescribedFormGroup>
+      )}
       <EuiDescribedFormGroup
         title={
           <h4>
@@ -553,66 +632,38 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {agentFqdnModeEnabled && (
-        <EuiDescribedFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
-                defaultMessage="Host name format"
-              />
-              &nbsp;
-              <EuiBetaBadge label="beta" size="s" color="accent" />
-            </h4>
-          }
-          description={
+      <EuiDescribedFormGroup
+        title={
+          <h4>
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.hostnameFormatLabelDescription"
-              defaultMessage="Select how you would like agent domain names to be displayed."
+              id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
+              defaultMessage="Host name format"
             />
-          }
-        >
-          <EuiFormRow fullWidth>
-            <EuiRadioGroup
-              options={[
-                {
-                  id: 'hostname',
-                  label: (
-                    <>
-                      <EuiFlexGroup gutterSize="xs" direction="column">
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s">
-                            <b>
-                              <FormattedMessage
-                                id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostname"
-                                defaultMessage="Hostname"
-                              />
-                            </b>
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s" color="subdued">
-                            <FormattedMessage
-                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostnameExample"
-                              defaultMessage="ex: My-Laptop"
-                            />
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      <EuiSpacer size="s" />
-                    </>
-                  ),
-                },
-                {
-                  id: 'fqdn',
-                  label: (
+            &nbsp;
+            <EuiBetaBadge label="beta" size="s" color="accent" />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.hostnameFormatLabelDescription"
+            defaultMessage="Select how you would like agent domain names to be displayed."
+          />
+        }
+      >
+        <EuiFormRow fullWidth>
+          <EuiRadioGroup
+            options={[
+              {
+                id: 'hostname',
+                label: (
+                  <>
                     <EuiFlexGroup gutterSize="xs" direction="column">
                       <EuiFlexItem grow={false}>
                         <EuiText size="s">
                           <b>
                             <FormattedMessage
-                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdn"
-                              defaultMessage="Fully Qualified Domain Name (FQDN)"
+                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostname"
+                              defaultMessage="Hostname"
                             />
                           </b>
                         </EuiText>
@@ -620,77 +671,53 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       <EuiFlexItem grow={false}>
                         <EuiText size="s" color="subdued">
                           <FormattedMessage
-                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdnExample"
-                            defaultMessage="ex: My-Laptop.admin.acme.co"
+                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostnameExample"
+                            defaultMessage="ex: My-Laptop"
                           />
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  ),
-                },
-              ]}
-              idSelected={agentPolicy.agent_features?.length ? 'fqdn' : 'hostname'}
-              onChange={(id: string) => {
-                updateAgentPolicy({
-                  agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
-                });
-              }}
-              name="radio group"
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      )}
-      {isEditing && 'id' in agentPolicy && !agentPolicy.is_managed ? (
-        <EuiDescribedFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.fleet.policyForm.deletePolicyGroupTitle"
-                defaultMessage="Delete policy"
-              />
-            </h4>
-          }
-          description={
-            <>
-              <FormattedMessage
-                id="xpack.fleet.policyForm.deletePolicyGroupDescription"
-                defaultMessage="Existing data will not be deleted."
-              />
-              <EuiSpacer size="s" />
-              <AgentPolicyDeleteProvider
-                hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
-              >
-                {(deleteAgentPolicyPrompt) => {
-                  return (
-                    <EuiToolTip
-                      content={
-                        hasManagedPackagePolicy ? (
+                    <EuiSpacer size="s" />
+                  </>
+                ),
+              },
+              {
+                id: 'fqdn',
+                label: (
+                  <EuiFlexGroup gutterSize="xs" direction="column">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <b>
                           <FormattedMessage
-                            id="xpack.fleet.policyForm.deletePolicyActionText.disabled"
-                            defaultMessage="Agent policy with managed package policies cannot be deleted."
+                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdn"
+                            defaultMessage="Fully Qualified Domain Name (FQDN)"
                           />
-                        ) : undefined
-                      }
-                    >
-                      <EuiButton
-                        data-test-subj="agentPolicyForm.downloadSource.deleteBtn"
-                        color="danger"
-                        onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
-                        isDisabled={hasManagedPackagePolicy}
-                      >
+                        </b>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color="subdued">
                         <FormattedMessage
-                          id="xpack.fleet.policyForm.deletePolicyActionText"
-                          defaultMessage="Delete policy"
+                          id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdnExample"
+                          defaultMessage="ex: My-Laptop.admin.acme.co"
                         />
-                      </EuiButton>
-                    </EuiToolTip>
-                  );
-                }}
-              </AgentPolicyDeleteProvider>
-            </>
-          }
-        />
-      ) : null}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              },
+            ]}
+            idSelected={agentPolicy.agent_features?.length ? 'fqdn' : 'hostname'}
+            onChange={(id: string) => {
+              updateAgentPolicy({
+                agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
+              });
+            }}
+            name="radio group"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiSpacer size="l" />
     </>
   );
 };

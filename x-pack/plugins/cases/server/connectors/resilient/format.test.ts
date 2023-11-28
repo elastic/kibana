@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 import { format } from './format';
 
 describe('IBM Resilient formatter', () => {
   const theCase = {
     connector: { fields: { incidentTypes: ['2'], severityCode: '2' } },
-  } as CaseResponse;
+  } as Case;
 
   it('it formats correctly', async () => {
     const res = await format(theCase, []);
@@ -19,7 +19,7 @@ describe('IBM Resilient formatter', () => {
   });
 
   it('it formats correctly when fields do not exist ', async () => {
-    const invalidFields = { tags: ['a tag'], connector: { fields: null } } as CaseResponse;
+    const invalidFields = { tags: ['a tag'], connector: { fields: null } } as Case;
     const res = await format(invalidFields, []);
     expect(res).toEqual({ incidentTypes: null, severityCode: null });
   });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { chromeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, chromeServiceMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardChromeService } from './types';
 
@@ -23,5 +23,6 @@ export const chromeServiceFactory: ChromeServiceFactory = () => {
     setBreadcrumbs: pluginMock.setBreadcrumbs,
     setHelpExtension: pluginMock.setHelpExtension,
     setIsVisible: pluginMock.setIsVisible,
+    theme: coreMock.createStart().theme,
   };
 };

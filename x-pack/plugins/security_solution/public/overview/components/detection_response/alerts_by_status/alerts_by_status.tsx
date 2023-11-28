@@ -16,10 +16,12 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import type { ShapeTreeNode } from '@elastic/charts';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
 
+import { ALERT_WORKFLOW_STATUS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { FILTER_OPEN, FILTER_ACKNOWLEDGED, FILTER_CLOSED } from '../../../../../common/types';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
@@ -35,6 +37,8 @@ import {
   ALERTS_TEXT,
   ALERTS_BY_SEVERITY_TEXT,
   INVESTIGATE_IN_TIMELINE,
+  OPEN_IN_ALERTS_TITLE_SEVERITY,
+  OPEN_IN_ALERTS_TITLE_STATUS,
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
   STATUS_CRITICAL_LABEL,
@@ -59,7 +63,7 @@ import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visua
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
 
 const StyledFlexItem = styled(EuiFlexItem)`
@@ -71,7 +75,7 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
   padding-top: 45px;
 `;
 
-const ChartSize = '120px';
+const ChartSize = 120;
 
 interface AlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];
@@ -80,7 +84,6 @@ interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
 
-const legendField = 'kibana.alert.severity';
 const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
   { key: 'critical', label: STATUS_CRITICAL_LABEL, color: SEVERITY_COLOR.critical },
   { key: 'high', label: STATUS_HIGH_LABEL, color: SEVERITY_COLOR.high },
@@ -105,11 +108,14 @@ export const AlertsByStatus = ({
 }: AlertsByStatusProps) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { openTimelineWithFilters } = useNavigateToTimeline();
+  const navigateToAlerts = useNavigateToAlertsPageWithFilters();
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
 
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const isDonutChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
+    'donutChartEmbeddablesEnabled'
+  );
   const { to, from } = useGlobalTime();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
@@ -136,7 +142,7 @@ export const AlertsByStatus = ({
     additionalFilters,
     entityFilter,
     signalIndexName,
-    skip: !toggleStatus || isChartEmbeddablesEnabled,
+    skip: !toggleStatus || isDonutChartEmbeddablesEnabled,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
     to,
     from,
@@ -145,10 +151,54 @@ export const AlertsByStatus = ({
     () =>
       chartConfigs.map((d) => ({
         color: d.color,
-        field: legendField,
+        field: ALERT_SEVERITY,
         value: d.label,
       })),
     []
+  );
+
+  const navigateToAlertsWithStatus = useCallback(
+    (status: Status, level?: string) =>
+      navigateToAlerts([
+        {
+          title: OPEN_IN_ALERTS_TITLE_STATUS,
+          selectedOptions: [status],
+          fieldName: ALERT_WORKFLOW_STATUS,
+        },
+        ...(level
+          ? [
+              {
+                title: OPEN_IN_ALERTS_TITLE_SEVERITY,
+                selectedOptions: [level],
+                fieldName: ALERT_SEVERITY,
+              },
+            ]
+          : []),
+        ...(entityFilter
+          ? [
+              {
+                selectedOptions: [entityFilter.value],
+                fieldName: entityFilter.field,
+              },
+            ]
+          : []),
+      ]),
+    [entityFilter, navigateToAlerts]
+  );
+
+  const navigateToAlertsWithStatusOpen = useCallback(
+    (level?: string) => navigateToAlertsWithStatus(FILTER_OPEN, level),
+    [navigateToAlertsWithStatus]
+  );
+
+  const navigateToAlertsWithStatusAcknowledged = useCallback(
+    (level?: string) => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED, level),
+    [navigateToAlertsWithStatus]
+  );
+
+  const navigateToAlertsWithStatusClosed = useCallback(
+    (level?: string) => navigateToAlertsWithStatus(FILTER_CLOSED, level),
+    [navigateToAlertsWithStatus]
   );
 
   const openCount = donutData?.open?.total ?? 0;
@@ -160,10 +210,10 @@ export const AlertsByStatus = ({
 
   const { total: visualizationTotalAlerts } = useAlertsByStatusVisualizationData();
 
-  const totalAlertsCount = isChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
+  const totalAlertsCount = isDonutChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
 
-  const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
-    return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
+  const fillColor: FillColor = useCallback((dataName) => {
+    return chartConfigs.find((cfg) => cfg.label === dataName)?.color ?? emptyDonutColor;
   }, []);
 
   return (
@@ -186,7 +236,7 @@ export const AlertsByStatus = ({
             inspectMultiple
             toggleStatus={toggleStatus}
             toggleQuery={setToggleStatus}
-            showInspectButton={!isChartEmbeddablesEnabled}
+            showInspectButton={!isDonutChartEmbeddablesEnabled}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -203,7 +253,7 @@ export const AlertsByStatus = ({
           {toggleStatus && (
             <>
               <EuiFlexGroup justifyContent="center" gutterSize="none">
-                <EuiFlexItem grow={isChartEmbeddablesEnabled}>
+                <EuiFlexItem grow={isDonutChartEmbeddablesEnabled}>
                   <EuiText className="eui-textCenter" size="s">
                     {totalAlerts !== 0 ||
                       (visualizationTotalAlerts !== 0 && (
@@ -219,8 +269,8 @@ export const AlertsByStatus = ({
 
                   <EuiSpacer size="l" />
                   <EuiFlexGroup justifyContent="center">
-                    <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>
-                      {isChartEmbeddablesEnabled ? (
+                    <StyledFlexItem key="alerts-status-open" grow={isDonutChartEmbeddablesEnabled}>
+                      {isDonutChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
                           applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={openDonutOptions}
@@ -230,26 +280,32 @@ export const AlertsByStatus = ({
                           isDonut={true}
                           label={STATUS_OPEN}
                           scopeId={SourcererScopeName.detections}
-                          stackByField="kibana.alert.workflow_status"
+                          stackByField={ALERT_WORKFLOW_STATUS}
                           timerange={timerange}
                           width={ChartSize}
                         />
                       ) : (
                         <DonutChart
+                          onPartitionClick={navigateToAlertsWithStatusOpen}
                           data={donutData?.open?.severities}
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_OPEN}
-                          title={<ChartLabel count={openCount} />}
+                          title={
+                            <ChartLabel
+                              onClick={navigateToAlertsWithStatusOpen}
+                              count={openCount}
+                            />
+                          }
                           totalCount={openCount}
                         />
                       )}
                     </StyledFlexItem>
                     <StyledFlexItem
                       key="alerts-status-acknowledged"
-                      grow={isChartEmbeddablesEnabled}
+                      grow={isDonutChartEmbeddablesEnabled}
                     >
-                      {isChartEmbeddablesEnabled ? (
+                      {isDonutChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
                           applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={acknowledgedDonutOptions}
@@ -259,7 +315,7 @@ export const AlertsByStatus = ({
                           isDonut={true}
                           label={STATUS_ACKNOWLEDGED}
                           scopeId={SourcererScopeName.detections}
-                          stackByField="kibana.alert.workflow_status"
+                          stackByField={ALERT_WORKFLOW_STATUS}
                           timerange={timerange}
                           width={ChartSize}
                         />
@@ -269,13 +325,22 @@ export const AlertsByStatus = ({
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_ACKNOWLEDGED}
-                          title={<ChartLabel count={acknowledgedCount} />}
+                          onPartitionClick={navigateToAlertsWithStatusAcknowledged}
+                          title={
+                            <ChartLabel
+                              onClick={navigateToAlertsWithStatusAcknowledged}
+                              count={acknowledgedCount}
+                            />
+                          }
                           totalCount={acknowledgedCount}
                         />
                       )}
                     </StyledFlexItem>
-                    <StyledFlexItem key="alerts-status-closed" grow={isChartEmbeddablesEnabled}>
-                      {isChartEmbeddablesEnabled ? (
+                    <StyledFlexItem
+                      key="alerts-status-closed"
+                      grow={isDonutChartEmbeddablesEnabled}
+                    >
+                      {isDonutChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
                           applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={closedDonutOptions}
@@ -285,7 +350,7 @@ export const AlertsByStatus = ({
                           isDonut={true}
                           label={STATUS_CLOSED}
                           scopeId={SourcererScopeName.detections}
-                          stackByField="kibana.alert.workflow_status"
+                          stackByField={ALERT_WORKFLOW_STATUS}
                           timerange={timerange}
                           width={ChartSize}
                         />
@@ -295,14 +360,20 @@ export const AlertsByStatus = ({
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_CLOSED}
-                          title={<ChartLabel count={closedCount} />}
+                          onPartitionClick={navigateToAlertsWithStatusClosed}
+                          title={
+                            <ChartLabel
+                              onClick={navigateToAlertsWithStatusClosed}
+                              count={closedCount}
+                            />
+                          }
                           totalCount={closedCount}
                         />
                       )}
                     </StyledFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                {!isChartEmbeddablesEnabled && (
+                {!isDonutChartEmbeddablesEnabled && (
                   <StyledLegendFlexItem grow={false}>
                     {legendItems.length > 0 && <Legend legendItems={legendItems} />}
                   </StyledLegendFlexItem>

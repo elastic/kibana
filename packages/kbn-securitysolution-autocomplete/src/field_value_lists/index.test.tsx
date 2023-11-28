@@ -211,6 +211,7 @@ describe('AutocompleteFieldListsComponent', () => {
 
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith({
+        '@timestamp': DATE_NOW,
         _version: undefined,
         created_at: DATE_NOW,
         created_by: 'some user',

@@ -63,6 +63,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         expect(taskRecord.task.enabled).to.eql(false);
       });
 
+      const { body: disabledRule } = await supertestWithoutAuth
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      // Ensure revision was not updated
+      expect(disabledRule.revision).to.eql(0);
+
       // Ensure AAD isn't broken
       await checkAAD({
         supertest: supertestWithoutAuth,
@@ -87,7 +95,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
     });
 
-    it('should create recovered-instance events for all alerts', async () => {
+    it('should create untracked-instance events for all alerts', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -130,7 +138,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
-            ['recovered-instance', { equal: 2 }],
+            ['untracked-instance', { equal: 2 }],
           ]),
         });
       });
@@ -143,7 +151,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         savedObjects: [
           { type: 'alert', id: ruleId, rel: 'primary', type_id: 'test.cumulative-firing' },
         ],
-        message: "instance 'instance-0' has recovered due to the rule was disabled",
+        message: "instance 'instance-0' has been untracked because the rule was disabled",
         shouldHaveEventEnd: false,
         shouldHaveTask: false,
         ruleTypeId: createdRule.rule_type_id,
@@ -172,6 +180,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         index: '.kibana_task_manager',
       });
       await ruleUtils.disable(createdRule.id);
+
+      const { body: disabledRule } = await supertestWithoutAuth
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      // Ensure revision was not updated
+      expect(disabledRule.revision).to.eql(0);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -208,6 +224,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           });
           expect(taskRecord.task.enabled).to.eql(false);
         });
+
+        const { body: disabledRule } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        // Ensure revision was not updated
+        expect(disabledRule.revision).to.eql(0);
 
         // Ensure AAD isn't broken
         await checkAAD({

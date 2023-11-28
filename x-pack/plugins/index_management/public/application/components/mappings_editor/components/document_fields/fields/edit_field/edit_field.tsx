@@ -18,9 +18,14 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiCallOut,
+  EuiText,
+  EuiToolTip,
+  EuiIcon,
+  EuiTextColor,
 } from '@elastic/eui';
 import SemVer from 'semver/classes/semver';
 
+import { useFormIsModified } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { documentationService } from '../../../../../../services/documentation';
 import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
@@ -63,6 +68,8 @@ export const EditField = React.memo(
     };
 
     const { isMultiField } = field;
+
+    const isFormModified = useFormIsModified({ form });
 
     return (
       <Form form={form} FormWrapper={FormWrapper}>
@@ -186,7 +193,39 @@ export const EditField = React.memo(
             </>
           )}
 
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            {isFormModified && (
+              <>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <p>
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.idxMgmt.mappingsEditor.editFieldFlyout.formCompletionTooltip',
+                          {
+                            defaultMessage:
+                              "Default settings are applied to the settings that you haven't changed.",
+                          }
+                        )}
+                        position="top"
+                      >
+                        <span>
+                          <EuiTextColor color="subdued">
+                            {i18n.translate(
+                              'xpack.idxMgmt.mappingsEditor.editFieldFlyout.formCompletionGuide',
+                              {
+                                defaultMessage: 'Review all settings before updating ',
+                              }
+                            )}
+                          </EuiTextColor>
+                          <EuiIcon type="questionInCircle" />
+                        </span>
+                      </EuiToolTip>
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+              </>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={exitEdit}>
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldCancelButtonLabel', {
@@ -199,7 +238,7 @@ export const EditField = React.memo(
                 fill
                 onClick={submitForm}
                 type="submit"
-                disabled={form.isSubmitted && !form.isValid}
+                disabled={(form.isSubmitted && !form.isValid) || !isFormModified}
                 data-test-subj="editFieldUpdateButton"
               >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel', {

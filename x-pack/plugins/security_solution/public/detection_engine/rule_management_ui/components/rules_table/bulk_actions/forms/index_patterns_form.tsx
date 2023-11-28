@@ -14,8 +14,8 @@ import * as i18n from '../../../../../../detections/pages/detection_engine/rules
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
@@ -31,9 +31,9 @@ import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 const CommonUseField = getUseField({ component: Field });
 
 type IndexPatternsEditActions =
-  | BulkActionEditType.add_index_patterns
-  | BulkActionEditType.delete_index_patterns
-  | BulkActionEditType.set_index_patterns;
+  | BulkActionEditTypeEnum['add_index_patterns']
+  | BulkActionEditTypeEnum['delete_index_patterns']
+  | BulkActionEditTypeEnum['set_index_patterns'];
 
 interface IndexPatternsFormData {
   index: string[];
@@ -70,7 +70,7 @@ const initialFormData: IndexPatternsFormData = {
 };
 
 const getFormConfig = (editAction: IndexPatternsEditActions) =>
-  editAction === BulkActionEditType.add_index_patterns
+  editAction === BulkActionEditTypeEnum.add_index_patterns
     ? {
         indexLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_LABEL,
         indexHelpText: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT,
@@ -115,13 +115,11 @@ const IndexPatternsFormComponent = ({
       return;
     }
 
-    const payload = {
+    onConfirm({
       value: data.index,
-      type: data.overwrite ? BulkActionEditType.set_index_patterns : editAction,
+      type: data.overwrite ? BulkActionEditTypeEnum.set_index_patterns : editAction,
       overwrite_data_views: data.overwriteDataViews,
-    };
-
-    onConfirm(payload);
+    });
   };
 
   return (
@@ -140,7 +138,7 @@ const IndexPatternsFormComponent = ({
           },
         }}
       />
-      {editAction === BulkActionEditType.add_index_patterns && (
+      {editAction === BulkActionEditTypeEnum.add_index_patterns && (
         <CommonUseField
           path="overwrite"
           componentProps={{
@@ -161,7 +159,7 @@ const IndexPatternsFormComponent = ({
           </EuiCallOut>
         </EuiFormRow>
       )}
-      {editAction === BulkActionEditType.add_index_patterns && (
+      {editAction === BulkActionEditTypeEnum.add_index_patterns && (
         <CommonUseField
           path="overwriteDataViews"
           componentProps={{
@@ -180,7 +178,7 @@ const IndexPatternsFormComponent = ({
           </EuiCallOut>
         </EuiFormRow>
       )}
-      {editAction === BulkActionEditType.delete_index_patterns && (
+      {editAction === BulkActionEditTypeEnum.delete_index_patterns && (
         <EuiFormRow fullWidth>
           <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesDataViewsWarning">
             <FormattedMessage

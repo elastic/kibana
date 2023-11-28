@@ -36,17 +36,20 @@ import type {
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
 import type {
-  IRouter,
   RequestHandler,
   KibanaResponseFactory,
   RouteMethod,
   HttpServiceSetup,
+  IRouter,
 } from '@kbn/core-http-server';
 import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
-import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-server-internal';
+import type {
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
+} from '@kbn/core-plugins-server-internal';
 
 export { bootstrap } from '@kbn/core-root-server-internal';
 
@@ -181,6 +184,7 @@ export type {
   ICspConfig,
   IExternalUrlConfig,
   IBasePath,
+  IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
@@ -234,6 +238,16 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
 } from '@kbn/core-plugins-server';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  NotFoundPluginContractResolverResponseItem,
+  FoundPluginContractResolverResponseItem,
+  PluginContractResolverResponseItem,
+  PluginContractMap,
+  PluginContractResolverResponse,
+  PluginContractResolver,
+} from '@kbn/core-plugins-contracts-server';
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
@@ -472,8 +486,8 @@ export type {
   ExecutionContextSetup,
   ExecutionContextStart,
   HttpResources,
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
 };
 
 /**

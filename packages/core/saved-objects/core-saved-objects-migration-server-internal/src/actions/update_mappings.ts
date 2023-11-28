@@ -18,7 +18,7 @@ import { DEFAULT_TIMEOUT } from './constants';
 export interface UpdateMappingsParams {
   client: ElasticsearchClient;
   index: string;
-  mappings: IndexMapping;
+  mappings: Partial<IndexMapping>;
 }
 
 /** @internal */

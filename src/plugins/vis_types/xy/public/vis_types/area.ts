@@ -7,8 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { Fit, Position } from '@elastic/charts';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
@@ -166,7 +165,6 @@ export const areaVisTypeDefinition = {
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
@@ -185,7 +183,6 @@ export const areaVisTypeDefinition = {
         min: 0,
         max: 3,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
@@ -204,7 +201,6 @@ export const areaVisTypeDefinition = {
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',

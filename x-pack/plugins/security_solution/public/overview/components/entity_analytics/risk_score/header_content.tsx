@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RiskSeverity, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SeverityFilterGroup } from '../../../../explore/components/risk_score/severity/severity_filter_group';
 import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
@@ -13,9 +13,9 @@ import { EMPTY_SEVERITY_COUNT } from '../../../../../common/search_strategy';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import type { SecurityPageName } from '../../../../../common/constants';
 import * as i18n from './translations';
+import { RiskInformationButtonEmpty } from '../../../../explore/components/risk_score/risk_information';
 
 const RiskScoreHeaderContentComponent = ({
-  entityDocLink,
   entityLinkProps,
   onSelectSeverityFilterGroup,
   riskEntity,
@@ -23,7 +23,6 @@ const RiskScoreHeaderContentComponent = ({
   severityCount,
   toggleStatus,
 }: {
-  entityDocLink: string;
   entityLinkProps: {
     deepLinkId: SecurityPageName;
     path: string;
@@ -48,15 +47,13 @@ const RiskScoreHeaderContentComponent = ({
       data-test-subj={`${riskEntity}-risk-score-header-content`}
     >
       <EuiFlexItem>
-        <EuiButtonEmpty rel="noopener nofollow noreferrer" href={entityDocLink} target="_blank">
-          {i18n.LEARN_MORE}
-        </EuiButtonEmpty>
+        <RiskInformationButtonEmpty riskEntity={riskEntity} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SeverityFilterGroup
           selectedSeverities={selectedSeverity}
           severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-          title={i18n.ENTITY_RISK(riskEntity)}
+          riskEntity={riskEntity}
           onSelect={onSelectSeverityFilterGroup}
         />
       </EuiFlexItem>

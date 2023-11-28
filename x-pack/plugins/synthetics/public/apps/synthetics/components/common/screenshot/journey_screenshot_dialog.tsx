@@ -27,19 +27,23 @@ import {
   EuiOutsideClickDetector,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
+import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../../contexts';
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
 
 import { ScreenshotImage } from './screenshot_image';
 
 export const JourneyScreenshotDialog = ({
+  timestamp,
   checkGroup,
   initialImgSrc,
   initialStepNumber,
   isOpen,
   onClose,
 }: {
+  timestamp?: string;
   checkGroup: string | undefined;
   initialImgSrc: string | undefined;
   initialStepNumber: number;
@@ -52,7 +56,7 @@ export const JourneyScreenshotDialog = ({
   const [stepNumber, setStepNumber] = useState(initialStepNumber);
 
   const { basePath } = useContext(SyntheticsSettingsContext);
-  const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
+  const imgPath = getScreenshotUrl({ basePath, checkGroup, stepNumber });
 
   const imageResult = useRetrieveStepImage({
     hasIntersected: true,
@@ -60,6 +64,7 @@ export const JourneyScreenshotDialog = ({
     imgPath,
     retryFetchOnRevisit: false,
     checkGroup,
+    timestamp,
   });
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
   const imgSrc = stepNumber === initialStepNumber ? initialImgSrc ?? url : url;
@@ -102,6 +107,7 @@ export const JourneyScreenshotDialog = ({
     <EuiOutsideClickDetector onOutsideClick={onClose}>
       <EuiModal
         onClose={(evt?: KeyboardEvent<HTMLDivElement> | MouseEvent<HTMLButtonElement>) => {
+          // for table row click to work
           evt?.stopPropagation?.();
           onClose();
         }}
@@ -114,16 +120,20 @@ export const JourneyScreenshotDialog = ({
         }}
         onKeyDown={onKeyDown}
       >
-        <EuiModalBody>
+        <ModalBodyStyled css={{ display: 'flex' }}>
           <ScreenshotImage
             label={stepCountLabel}
             imgSrc={imgSrc}
-            isLoading={loading ?? false}
+            isLoading={!!loading}
             animateLoading={false}
             hasBorder={false}
             size={'full'}
+            onClick={(evt) => {
+              // for table row click to work
+              evt.stopPropagation();
+            }}
           />
-        </EuiModalBody>
+        </ModalBodyStyled>
 
         <EuiModalFooter
           css={{
@@ -138,14 +148,14 @@ export const JourneyScreenshotDialog = ({
             // we don't want this to be captured by row click which leads to step list page
             evt.stopPropagation();
           }}
-          onKeyDown={(evt) => {
+          onKeyDown={(_evt) => {
             // Just to satisfy ESLint
           }}
         >
           {loading ? (
             <EuiProgress data-test-subj="screenshotImageLoadingProgress" size="xs" />
           ) : null}
-          <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexGroup alignItems="center" justifyContent="center" responsive={false}>
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
                 data-test-subj="screenshotImagePreviousButton"
@@ -161,7 +171,7 @@ export const JourneyScreenshotDialog = ({
                 {prevAriaLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
               <EuiText color={euiTheme.colors.text}>{stepCountLabel}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
@@ -200,6 +210,35 @@ export const JourneyScreenshotDialog = ({
       </EuiModal>
     </EuiOutsideClickDetector>
   ) : null;
+};
+
+const ModalBodyStyled = euiStyled(EuiModalBody)`
+  &&& {
+    & > div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 24px;
+    }
+  }
+`;
+
+export const getScreenshotUrl = ({
+  basePath,
+  checkGroup,
+  stepNumber,
+}: {
+  basePath: string;
+  checkGroup?: string;
+  stepNumber: number;
+}) => {
+  if (!checkGroup) {
+    return '';
+  }
+  return `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
+    '{checkGroup}',
+    checkGroup
+  ).replace('{stepIndex}', stepNumber.toString())}`;
 };
 
 export const formatScreenshotStepsCount = (stepNumber: number, totalSteps: number) =>

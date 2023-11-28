@@ -7,11 +7,13 @@
 
 import { isString } from 'lodash';
 
-export class AppActions {
+import type { AppActions as AppActionsType } from '@kbn/security-plugin-types-server';
+
+export class AppActions implements AppActionsType {
   private readonly prefix: string;
 
-  constructor(versionNumber: string) {
-    this.prefix = `app:${versionNumber}:`;
+  constructor() {
+    this.prefix = `app:`;
   }
 
   public get(appId: string) {

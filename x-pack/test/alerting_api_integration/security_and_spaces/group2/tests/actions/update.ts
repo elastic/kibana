@@ -73,6 +73,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: createdAction.id,
                 is_preconfigured: false,
+                is_system_action: false,
                 is_deprecated: false,
                 connector_type_id: 'test.index-record',
                 is_missing_secrets: false,
@@ -311,7 +312,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`shouldn't update action from preconfigured list`, async () => {
+        it(`shouldn't update a preconfigured action`, async () => {
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/actions/connector/custom-system-abc-connector`)
             .auth(user.username, user.password)
@@ -344,7 +345,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `Preconfigured action custom-system-abc-connector is not allowed to update.`,
+                message: `Preconfigured action custom-system-abc-connector can not be updated.`,
               });
               break;
             default:
@@ -380,6 +381,49 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message: `[request body.config.unencrypted]: value '' is not valid`,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't update a system action`, async () => {
+          const response = await supertestWithoutAuth
+            .put(
+              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test.system-action`
+            )
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action updated',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to update actions',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'System action system-connector-test.system-action can not be updated.',
               });
               break;
             default:

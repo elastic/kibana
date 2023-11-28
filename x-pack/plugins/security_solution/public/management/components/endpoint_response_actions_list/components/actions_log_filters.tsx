@@ -10,6 +10,7 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -29,6 +30,7 @@ export const ActionsLogFilters = memo(
     onChangeCommandsFilter,
     onChangeStatusesFilter,
     onChangeUsersFilter,
+    onChangeTypeFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
@@ -42,6 +44,7 @@ export const ActionsLogFilters = memo(
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
     onChangeStatusesFilter: (selectedStatuses: string[]) => void;
     onChangeUsersFilter: (selectedUsers: string[]) => void;
+    onChangeTypeFilter: (selectedTypes: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
@@ -50,6 +53,9 @@ export const ActionsLogFilters = memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const responseActionsEnabled = useIsExperimentalFeatureEnabled(
+      'endpointResponseActionsEnabled'
+    );
     const filters = useMemo(() => {
       return (
         <>
@@ -73,6 +79,14 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
+          {responseActionsEnabled && (
+            <ActionsLogFilter
+              filterName={'type'}
+              isFlyout={isFlyout}
+              onChangeFilterOptions={onChangeTypeFilter}
+              data-test-subj={dataTestSubj}
+            />
+          )}
         </>
       );
     }, [
@@ -80,7 +94,9 @@ export const ActionsLogFilters = memo(
       isFlyout,
       onChangeCommandsFilter,
       onChangeHostsFilter,
+      onChangeTypeFilter,
       onChangeStatusesFilter,
+      responseActionsEnabled,
       showHostsFilter,
     ]);
 
@@ -102,7 +118,6 @@ export const ActionsLogFilters = memo(
           <ActionLogDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
-            isFlyout={isFlyout}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}

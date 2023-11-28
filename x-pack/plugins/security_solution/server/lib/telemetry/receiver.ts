@@ -14,10 +14,11 @@ import type {
 } from '@kbn/core/server';
 import type {
   AggregationsAggregate,
+  OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -27,7 +28,13 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import type {
+  SearchHit,
+  SearchRequest as ESSearchRequest,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Agent, AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
 import type {
@@ -36,6 +43,7 @@ import type {
   PackageService,
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import moment from 'moment';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
   exceptionListItemToTelemetryEntry,
@@ -63,11 +71,12 @@ import type {
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
+import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 
 export interface ITelemetryReceiver {
   start(
     core?: CoreStart,
-    kibanaIndex?: string,
+    getIndexForType?: (type: string) => string,
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
@@ -75,6 +84,14 @@ export interface ITelemetryReceiver {
   ): Promise<void>;
 
   getClusterInfo(): ESClusterInfo | undefined;
+
+  fetchClusterInfo(): Promise<ESClusterInfo>;
+
+  fetchLicenseInfo(): Promise<ESLicense | undefined>;
+
+  openPointInTime(indexPattern: string): Promise<string>;
+
+  closePointInTime(pitId: string): Promise<void>;
 
   fetchDetectionRulesPackageVersion(): Promise<Installation | undefined>;
 
@@ -142,9 +159,15 @@ export interface ITelemetryReceiver {
     per_page: number;
   }>;
 
-  fetchClusterInfo(): Promise<ESClusterInfo>;
-
-  fetchLicenseInfo(): Promise<ESLicense | undefined>;
+  fetchPrebuiltRuleAlertsBatch(
+    pitId: string,
+    searchAfterValue: SortResults | undefined
+  ): Promise<{
+    moreToFetch: boolean;
+    newPitId: string;
+    searchAfter: SortResults | undefined;
+    alerts: TelemetryEvent[];
+  }>;
 
   copyLicenseFields(lic: ESLicense): {
     issuer?: string | undefined;
@@ -154,11 +177,11 @@ export interface ITelemetryReceiver {
     type: string;
   };
 
-  fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
-
-  fetchTimelineEndpointAlerts(
-    interval: number
-  ): Promise<SearchResponse<EnhancedAlertEvent, Record<string, AggregationsAggregate>>>;
+  fetchTimelineAlerts(
+    index: string,
+    rangeFrom: string,
+    rangeTo: string
+  ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   buildProcessTree(
     entityId: string,
@@ -172,6 +195,8 @@ export interface ITelemetryReceiver {
   ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
 
   fetchValueListMetaData(interval: number): Promise<ValueListResponse>;
+
+  getAlertsIndex(): string | undefined;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -181,7 +206,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
-  private kibanaIndex?: string;
+  private getIndexForType?: (type: string) => string;
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
   private processTreeFetcher?: Fetcher;
@@ -194,13 +219,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public async start(
     core?: CoreStart,
-    kibanaIndex?: string,
+    getIndexForType?: (type: string) => string,
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
     packageService?: PackageService
   ) {
-    this.kibanaIndex = kibanaIndex;
+    this.getIndexForType = getIndexForType;
     this.alertsIndex = alertsIndex;
     this.agentClient = endpointContextService?.getInternalFleetServices().agent;
     this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
@@ -217,6 +242,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public getAlertsIndex(): string | undefined {
+    return this.alertsIndex;
   }
 
   public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {
@@ -391,7 +420,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: '.logs-endpoint.diagnostic.collection-*',
+      index: `${DEFAULT_DIAGNOSTIC_INDEX}-*`,
       ignore_unavailable: true,
       size: telemetryConfiguration.telemetry_max_buffer_size,
       body: {
@@ -434,11 +463,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
+    const timeFrom = moment.utc().subtract(1, 'day').valueOf();
     const results = await this.exceptionListClient.findExceptionListItem({
-      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       page: 1,
       perPage: 10_000,
-      filter: undefined,
+      filter: `exception-list-agnostic.attributes.created_at >= ${timeFrom}`,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -460,11 +490,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createEndpointList();
 
+    const timeFrom = moment.utc().subtract(1, 'day').valueOf();
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,
       page: 1,
       perPage: this.maxRecords,
-      filter: undefined,
+      filter: `exception-list-agnostic.attributes.created_at >= ${timeFrom}`,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -489,7 +520,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
       body: {
         size: this.maxRecords,
@@ -503,6 +534,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                       'alert.alertTypeId': [
                         SIGNALS_ID,
                         EQL_RULE_TYPE_ID,
+                        ESQL_RULE_TYPE_ID,
                         ML_RULE_TYPE_ID,
                         QUERY_RULE_TYPE_ID,
                         SAVED_QUERY_RULE_TYPE_ID,
@@ -539,9 +571,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
+    const timeFrom = `exception-list.attributes.created_at >= ${moment
+      .utc()
+      .subtract(24, 'hours')
+      .valueOf()}`;
+
     const results = await this.exceptionListClient?.findExceptionListsItem({
       listId: [listId],
-      filter: [],
+      filter: [timeFrom],
       perPage: this.maxRecords,
       page: 1,
       sortField: 'exception-list.created_at',
@@ -557,156 +594,211 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
   }
 
-  /**
-   * Fetch an overview of detection rule alerts over the last 3 hours.
-   * Filters out custom rules and endpoint rules.
-   * @returns total of alerts by rules
-   */
-  public async fetchPrebuiltRuleAlerts() {
+  public async fetchPrebuiltRuleAlertsBatch(
+    pitId: string,
+    searchAfterValue: SortResults | undefined
+  ) {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve pre-built rule alerts');
+      throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
     }
 
-    const query: SearchRequest = {
-      expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.alertsIndex}*`,
-      ignore_unavailable: true,
-      body: {
-        size: 1_000,
-        _source: {
-          exclude: [
-            'message',
-            'kibana.alert.rule.note',
-            'kibana.alert.rule.parameters.note',
-            'powershell.file.script_block_text',
+    let newPitId = pitId;
+    let fetchMore = true;
+    let searchAfter: SortResults | undefined = searchAfterValue;
+    const query: ESSearchRequest = {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must_not: {
+                        bool: {
+                          should: [
+                            {
+                              match_phrase: {
+                                'kibana.alert.rule.name': 'Malware Prevention Alert',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        bool: {
+                          should: [
+                            {
+                              match_phrase: {
+                                'kibana.alert.rule.name': 'Malware Detection Alert',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        bool: {
+                          should: [
+                            {
+                              match_phrase: {
+                                'kibana.alert.rule.name': 'Ransomware Prevention Alert',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        bool: {
+                          should: [
+                            {
+                              match_phrase: {
+                                'kibana.alert.rule.name': 'Ransomware Detection Alert',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    match_phrase: {
+                      'kibana.alert.rule.parameters.immutable': 'true',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-1h',
+                  lte: 'now',
+                },
+              },
+            },
           ],
         },
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        must_not: {
-                          bool: {
-                            should: [
-                              {
-                                match_phrase: {
-                                  'kibana.alert.rule.name': 'Malware Prevention Alert',
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                    {
-                      bool: {
-                        must_not: {
-                          bool: {
-                            should: [
-                              {
-                                match_phrase: {
-                                  'kibana.alert.rule.name': 'Malware Detection Alert',
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                    {
-                      bool: {
-                        must_not: {
-                          bool: {
-                            should: [
-                              {
-                                match_phrase: {
-                                  'kibana.alert.rule.name': 'Ransomware Prevention Alert',
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                    {
-                      bool: {
-                        must_not: {
-                          bool: {
-                            should: [
-                              {
-                                match_phrase: {
-                                  'kibana.alert.rule.name': 'Ransomware Detection Alert',
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      match_phrase: {
-                        'kibana.alert.rule.parameters.immutable': 'true',
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1h',
-                    lte: 'now',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          prebuilt_rule_alert_count: {
-            cardinality: {
-              field: 'event.id',
-            },
-          },
-        },
       },
+      track_total_hits: false,
+      sort: [
+        { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
+        { _shard_doc: 'desc' },
+      ] as unknown as string[],
+      pit: { id: pitId },
+      search_after: searchAfter,
+      size: 1_000,
     };
 
-    const response = await this.esClient.search(query, { meta: true });
-    tlog(this.logger, `received prebuilt alerts: (${response.body.hits.hits.length})`);
+    let response = null;
+    try {
+      response = await this.esClient.search(query);
+      const numOfHits = response?.hits.hits.length;
 
-    const telemetryEvents: TelemetryEvent[] = response.body.hits.hits.flatMap((h) =>
+      if (numOfHits > 0) {
+        const lastHit = response?.hits.hits[numOfHits - 1];
+        searchAfter = lastHit?.sort;
+      }
+
+      fetchMore = numOfHits > 0 && numOfHits < 1_000;
+    } catch (e) {
+      tlog(this.logger, e);
+      fetchMore = false;
+    }
+
+    if (response == null) {
+      return {
+        moreToFetch: false,
+        newPitId: pitId,
+        searchAfter,
+        alerts: [] as TelemetryEvent[],
+      };
+    }
+
+    const alerts: TelemetryEvent[] = response.hits.hits.flatMap((h) =>
       h._source != null ? ([h._source] as TelemetryEvent[]) : []
     );
 
-    const aggregations = response.body?.aggregations as unknown as {
-      prebuilt_rule_alert_count: { value: number };
-    };
+    if (response?.pit_id != null) {
+      newPitId = response?.pit_id;
+    }
 
-    return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
+    tlog(this.logger, `Prebuilt rule alerts to return: ${alerts.length}`);
+
+    return {
+      moreToFetch: fetchMore,
+      newPitId,
+      searchAfter,
+      alerts,
+    };
   }
 
-  public async fetchTimelineEndpointAlerts(interval: number) {
+  public async openPointInTime(indexPattern: string) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
+    }
+
+    const keepAlive = '5m';
+    const pitId: OpenPointInTimeResponse['id'] = (
+      await this.esClient.openPointInTime({
+        index: `${indexPattern}*`,
+        keep_alive: keepAlive,
+      })
+    ).id;
+
+    return pitId;
+  }
+
+  public async closePointInTime(pitId: string) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
+    }
+
+    try {
+      await this.esClient.closePointInTime({ id: pitId });
+    } catch (error) {
+      tlog(this.logger, `Error trying to close point in time: "${pitId}". Error is: "${error}"`);
+    }
+  }
+
+  async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    const query: SearchRequest = {
-      expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.alertsIndex}*`,
-      ignore_unavailable: true,
-      body: {
-        size: 30,
+    // default is from looking at Kibana saved objects and online documentation
+    const keepAlive = '5m';
+
+    // create and assign an initial point in time
+    let pitId: OpenPointInTimeResponse['id'] = (
+      await this.esClient.openPointInTime({
+        index: `${index}*`,
+        keep_alive: keepAlive,
+      })
+    ).id;
+
+    let fetchMore = true;
+    let searchAfter: SortResults | undefined;
+    let alertsToReturn: Array<SearchHit<EnhancedAlertEvent>> = [];
+    while (fetchMore) {
+      const query: ESSearchRequest = {
         query: {
           bool: {
             filter: [
@@ -735,8 +827,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${interval}h`,
-                    lte: 'now',
+                    gte: rangeFrom,
+                    lte: rangeTo,
                   },
                 },
               },
@@ -750,10 +842,53 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             },
           },
         },
-      },
-    };
+        track_total_hits: false,
+        sort: [
+          { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
+          { _shard_doc: 'desc' },
+        ] as unknown as string[],
+        pit: { id: pitId },
+        search_after: searchAfter,
+        size: 1000,
+      };
 
-    return this.esClient.search<EnhancedAlertEvent>(query);
+      tlog(this.logger, `Getting alerts with point in time (PIT) query: ${JSON.stringify(query)}`);
+
+      let response = null;
+      try {
+        response = await this.esClient.search<EnhancedAlertEvent>(query);
+        const numOfHits = response?.hits.hits.length;
+
+        if (numOfHits > 0) {
+          const lastHit = response?.hits.hits[numOfHits - 1];
+          searchAfter = lastHit?.sort;
+        }
+
+        fetchMore = numOfHits > 0;
+      } catch (e) {
+        tlog(this.logger, e);
+        fetchMore = false;
+      }
+
+      const alerts = response?.hits.hits;
+      alertsToReturn = alertsToReturn.concat(alerts ?? []);
+
+      if (response?.pit_id != null) {
+        pitId = response?.pit_id;
+      }
+    }
+
+    try {
+      await this.esClient.closePointInTime({ id: pitId });
+    } catch (error) {
+      tlog(
+        this.logger,
+        `Error trying to close point in time: "${pitId}", it will expire within "${keepAlive}". Error is: "${error}"`
+      );
+    }
+
+    tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
+    return alertsToReturn || [];
   }
 
   public async buildProcessTree(
@@ -872,7 +1007,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     const exceptionListQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('exception-list'),
       ignore_unavailable: true,
       body: {
         size: 0, // no query results required - only aggregation quantity
@@ -892,7 +1027,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     const indicatorMatchRuleQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
       body: {
         size: 0,

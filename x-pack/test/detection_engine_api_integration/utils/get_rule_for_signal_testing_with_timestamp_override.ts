@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const getRuleForSignalTestingWithTimestampOverride = (
   index: string[],

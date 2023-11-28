@@ -11,9 +11,8 @@ import { reduce } from 'rxjs/operators';
 import { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { fetchAll } from './fetch_all';
+import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import {
   DataAvailableFieldsMsg,
   DataDocumentsMsg,
@@ -23,21 +22,21 @@ import {
   SavedSearchData,
 } from '../services/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
-import { fetchSql } from './fetch_sql';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { dataViewMock } from '../../../__mocks__/data_view';
-import { AppState } from '../services/discover_app_state_container';
+import { fetchTextBased } from './fetch_text_based';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_sql', () => ({
-  fetchSql: jest.fn().mockResolvedValue([]),
+jest.mock('./fetch_text_based', () => ({
+  fetchTextBased: jest.fn().mockResolvedValue([]),
 }));
 
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
-const mockFetchSQL = fetchSql as unknown as jest.MockedFunction<typeof fetchSql>;
+const mockfetchTextBased = fetchTextBased as unknown as jest.MockedFunction<typeof fetchTextBased>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   const promise = firstValueFrom(
@@ -54,7 +53,7 @@ const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('test fetchAll', () => {
   let subjects: SavedSearchData;
-  let deps: Parameters<typeof fetchAll>[3];
+  let deps: Parameters<typeof fetchAll>[2];
   let searchSource: SearchSource;
   beforeEach(() => {
     subjects = {
@@ -65,25 +64,31 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.UNINITIALIZED,
       }),
     };
+    searchSource = savedSearchMock.searchSource.createChild();
+
     deps = {
-      appStateContainer: {
-        getState: () => {
-          return { interval: 'auto' };
-        },
-      } as ReduxLikeStateContainer<AppState>,
       abortController: new AbortController(),
-      data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
+      getAppState: () => ({}),
+      getInternalState: () => ({
+        dataView: undefined,
+        savedDataViews: [],
+        adHocDataViews: [],
+        expandedDoc: undefined,
+        customFilters: [],
+      }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       useNewFieldsApi: true,
-      savedSearch: savedSearchMock,
+      savedSearch: {
+        ...savedSearchMock,
+        searchSource,
+      },
       services: discoverServiceMock,
     };
-    searchSource = savedSearchMock.searchSource.createChild();
 
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
-    mockFetchSQL.mockReset().mockResolvedValue({ records: [] });
+    mockfetchTextBased.mockReset().mockResolvedValue({ records: [] });
   });
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
@@ -91,7 +96,7 @@ describe('test fetchAll', () => {
 
     subjects.main$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, false, deps);
     await waitForNextTick();
 
     expect(stateArr).toEqual([
@@ -109,7 +114,7 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
-    fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, false, deps);
     await waitForNextTick();
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
@@ -136,7 +141,7 @@ describe('test fetchAll', () => {
       fetchStatus: FetchStatus.LOADING,
       recordRawType: RecordRawType.DOCUMENT,
     });
-    fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, false, deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -159,7 +164,7 @@ describe('test fetchAll', () => {
       fetchStatus: FetchStatus.LOADING,
       recordRawType: RecordRawType.DOCUMENT,
     });
-    fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, false, deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -186,7 +191,7 @@ describe('test fetchAll', () => {
       fetchStatus: FetchStatus.LOADING,
       recordRawType: RecordRawType.DOCUMENT,
     });
-    fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, false, deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.ERROR,
@@ -221,7 +226,7 @@ describe('test fetchAll', () => {
       fetchStatus: FetchStatus.LOADING,
       recordRawType: RecordRawType.DOCUMENT,
     });
-    fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, false, deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -241,46 +246,165 @@ describe('test fetchAll', () => {
     ]);
   });
 
-  test('emits loading and documents on documents$ correctly for SQL query', async () => {
+  test('emits loading and documents on documents$ correctly for ES|QL query', async () => {
     const collect = subjectCollector(subjects.documents$);
     const hits = [
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchSQL.mockResolvedValue({
+    mockfetchTextBased.mockResolvedValue({
       records: documents,
       textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
-    const query = { sql: 'SELECT * from foo' };
+    const query = { esql: 'from foo' };
     deps = {
-      appStateContainer: {
-        getState: () => {
-          return { interval: 'auto', query };
-        },
-      } as unknown as ReduxLikeStateContainer<AppState>,
       abortController: new AbortController(),
-      data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       useNewFieldsApi: true,
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
+      getAppState: () => ({ query }),
+      getInternalState: () => ({
+        dataView: undefined,
+        savedDataViews: [],
+        adHocDataViews: [],
+        expandedDoc: undefined,
+        customFilters: [],
+      }),
     };
-    fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, false, deps);
     await waitForNextTick();
 
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain', query },
       {
-        fetchStatus: FetchStatus.COMPLETE,
+        fetchStatus: FetchStatus.PARTIAL,
         recordRawType: 'plain',
         result: documents,
         textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
       },
     ]);
+  });
+
+  describe('fetchMoreDocuments', () => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const initialRecords = [records[0], records[1]];
+    const moreRecords = [records[2], records[3]];
+
+    const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
+
+    test('should add more records', async () => {
+      const collectDocuments = subjectCollector(subjects.documents$);
+      const collectMain = subjectCollector(subjects.main$);
+      mockFetchDocuments.mockResolvedValue({ records: moreRecords, interceptedWarnings });
+      subjects.documents$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.DOCUMENT,
+        result: initialRecords,
+      });
+      fetchMoreDocuments(subjects, deps);
+      await waitForNextTick();
+
+      expect(await collectDocuments()).toEqual([
+        { fetchStatus: FetchStatus.UNINITIALIZED },
+        {
+          fetchStatus: FetchStatus.COMPLETE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+        {
+          fetchStatus: FetchStatus.LOADING_MORE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+        {
+          fetchStatus: FetchStatus.COMPLETE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: [...initialRecords, ...moreRecords],
+          interceptedWarnings,
+        },
+      ]);
+      expect(await collectMain()).toEqual([
+        {
+          fetchStatus: FetchStatus.UNINITIALIZED,
+        },
+      ]);
+    });
+
+    test('should handle exceptions', async () => {
+      const collectDocuments = subjectCollector(subjects.documents$);
+      const collectMain = subjectCollector(subjects.main$);
+      mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
+      subjects.documents$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.DOCUMENT,
+        result: initialRecords,
+      });
+      fetchMoreDocuments(subjects, deps);
+      await waitForNextTick();
+
+      expect(await collectDocuments()).toEqual([
+        { fetchStatus: FetchStatus.UNINITIALIZED },
+        {
+          fetchStatus: FetchStatus.COMPLETE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+        {
+          fetchStatus: FetchStatus.LOADING_MORE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+        {
+          fetchStatus: FetchStatus.COMPLETE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+      ]);
+      expect(await collectMain()).toEqual([
+        {
+          fetchStatus: FetchStatus.UNINITIALIZED,
+        },
+        {
+          error: {
+            msg: 'This query failed',
+          },
+          fetchStatus: 'error',
+        },
+      ]);
+    });
+
+    test('should swallow abort errors', async () => {
+      const collect = subjectCollector(subjects.documents$);
+      mockfetchTextBased.mockRejectedValue({ msg: 'The query was aborted' });
+      const query = { esql: 'from foo' };
+      deps = {
+        abortController: new AbortController(),
+        inspectorAdapters: { requests: new RequestAdapter() },
+        searchSessionId: '123',
+        initialFetchStatus: FetchStatus.UNINITIALIZED,
+        useNewFieldsApi: true,
+        savedSearch: savedSearchMock,
+        services: discoverServiceMock,
+        getAppState: () => ({ query }),
+        getInternalState: () => ({
+          dataView: undefined,
+          savedDataViews: [],
+          adHocDataViews: [],
+          expandedDoc: undefined,
+          customFilters: [],
+        }),
+      };
+      fetchAll(subjects, false, deps);
+      deps.abortController.abort();
+      await waitForNextTick();
+
+      expect((await collect()).find(({ error }) => error)).toBeUndefined();
+    });
   });
 });

@@ -28,47 +28,23 @@ export const CREATE_RULE_ACTION = i18n.translate(
     defaultMessage: 'Create your own rules',
   }
 );
-
-export const UPDATE_PREPACKAGED_RULES_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.updatePrePackagedRulesTitle',
+export const RULE_UPDATES_LINK = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.ruleUpdatesLinkTitle',
   {
-    defaultMessage: 'Update available for Elastic prebuilt rules or timeline templates',
+    defaultMessage: 'Rule Updates',
   }
 );
 
-export const UPDATE_PREPACKAGED_RULES_MSG = (updateRules: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.updatePrePackagedRulesMsg', {
-    values: { updateRules },
-    defaultMessage:
-      'You can update {updateRules} Elastic prebuilt {updateRules, plural, =1 {rule} other {rules}}',
-  });
+export const ADD_ELASTIC_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addElasticRulesButtonTitle',
+  {
+    defaultMessage: 'Add Elastic rules',
+  }
+);
 
-export const UPDATE_PREPACKAGED_TIMELINES_MSG = (updateTimelines: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.updatePrePackagedTimelinesMsg', {
-    values: { updateTimelines },
-    defaultMessage:
-      'You can update {updateTimelines} Elastic prebuilt {updateTimelines, plural, =1 {timeline} other {timelines}}',
-  });
-
-export const UPDATE_PREPACKAGED_RULES_AND_TIMELINES_MSG = (
-  updateRules: number,
-  updateTimelines: number
-) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.updatePrePackagedRulesAndTimelinesMsg',
-    {
-      values: { updateRules, updateTimelines },
-      defaultMessage:
-        'You can update {updateRules} Elastic prebuilt {updateRules, plural, =1 {rule} other {rules}} and {updateTimelines} Elastic prebuilt {updateTimelines, plural, =1 {timeline} other {timelines}}. Note that this will reload deleted Elastic prebuilt rules.',
-    }
-  );
-
-export const UPDATE_PREPACKAGED_RULES = (updateRules: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.updatePrePackagedRulesButton', {
-    values: { updateRules },
-    defaultMessage:
-      'Update {updateRules} Elastic prebuilt {updateRules, plural, =1 {rule} other {rules}}',
-  });
+export const DISMISS = i18n.translate('xpack.securitySolution.detectionEngine.rules.dismissTitle', {
+  defaultMessage: 'Dismiss',
+});
 
 export const UPDATE_PREPACKAGED_TIMELINES = (updateTimelines: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.updatePrePackagedTimelinesButton', {

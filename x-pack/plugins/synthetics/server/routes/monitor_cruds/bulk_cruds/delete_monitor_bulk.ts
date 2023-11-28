@@ -6,6 +6,8 @@
  */
 import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import { SavedObject } from '@kbn/core-saved-objects-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SyntheticsServerSetup } from '../../../types';
 import {
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
@@ -14,10 +16,9 @@ import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitorWithId,
 } from '../../../../common/runtime_types';
-import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 
@@ -29,21 +30,23 @@ export const deleteMonitorBulk = async ({
   request,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
-  monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitor>>;
+  server: SyntheticsServerSetup;
+  monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
   const { logger, telemetry, stackVersion } = server;
 
   try {
-    const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+    const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
+      id: DEFAULT_SPACE_ID,
+    };
+
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,
         id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       })) as SyntheticsMonitorWithId[],
-      request,
       savedObjectsClient,
       spaceId
     );

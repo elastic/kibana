@@ -6,17 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { IndexPatternRef } from '../../types';
-
-export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
-  label: string;
-  title?: string;
-  isDisabled?: boolean;
-};
+import { css } from '@emotion/react';
+import { type IndexPatternRef } from '../../types';
+import { type ChangeIndexPatternTriggerProps, TriggerButton } from './trigger';
 
 export function ChangeIndexPattern({
   indexPatternRefs,
@@ -35,60 +31,48 @@ export function ChangeIndexPattern({
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  // be careful to only add color with a value, otherwise it will fallbacks to "primary"
-  const colorProp = isMissingCurrent
-    ? {
-        color: 'danger' as const,
-      }
-    : {};
-
-  const createTrigger = function () {
-    const { label, title, ...rest } = trigger;
-    return (
-      <ToolbarButton
-        title={title}
-        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-        fullWidth
-        {...colorProp}
-        {...rest}
-      >
-        {label}
-      </ToolbarButton>
-    );
-  };
-
   return (
-    <>
-      <EuiPopover
-        panelClassName="lnsChangeIndexPatternPopover"
-        button={createTrigger()}
-        panelProps={{
-          ['data-test-subj']: 'lnsChangeIndexPatternPopover',
-        }}
-        isOpen={isPopoverOpen}
-        closePopover={() => setPopoverIsOpen(false)}
-        display="block"
-        panelPaddingSize="none"
-        ownFocus
+    <EuiPopover
+      button={
+        <TriggerButton
+          {...trigger}
+          isMissingCurrent={isMissingCurrent}
+          togglePopover={() => setPopoverIsOpen(!isPopoverOpen)}
+        />
+      }
+      panelProps={{
+        ['data-test-subj']: 'lnsChangeIndexPatternPopover',
+      }}
+      isOpen={isPopoverOpen}
+      closePopover={() => setPopoverIsOpen(false)}
+      display="block"
+      panelPaddingSize="none"
+      ownFocus
+    >
+      <div
+        css={css`
+          width: ${calculateWidthFromEntries(indexPatternRefs, ['name', 'id'], {
+            minWidth: 320,
+            maxWidth: 600,
+          })}px;
+        `}
       >
-        <div>
-          <EuiPopoverTitle paddingSize="s">
-            {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
-              defaultMessage: 'Data view',
-            })}
-          </EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="s">
+          {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
+            defaultMessage: 'Data view',
+          })}
+        </EuiPopoverTitle>
 
-          <DataViewsList
-            dataViewsList={indexPatternRefs}
-            onChangeDataView={(newId) => {
-              onChangeIndexPattern(newId);
-              setPopoverIsOpen(false);
-            }}
-            currentDataViewId={indexPatternId}
-            selectableProps={selectableProps}
-          />
-        </div>
-      </EuiPopover>
-    </>
+        <DataViewsList
+          dataViewsList={indexPatternRefs}
+          onChangeDataView={(newId) => {
+            onChangeIndexPattern(newId);
+            setPopoverIsOpen(false);
+          }}
+          currentDataViewId={indexPatternId}
+          selectableProps={selectableProps}
+        />
+      </div>
+    </EuiPopover>
   );
 }

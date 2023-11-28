@@ -7,7 +7,8 @@
 
 import React, { FC, ReactNode, useContext, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlPageControlsContext } from '../ml_page';
 
@@ -17,6 +18,7 @@ export interface HeaderMenuPortalProps {
 
 export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
   const { services } = useMlKibana();
+  const { theme, i18n } = services;
 
   const { setHeaderActionMenu } = useContext(MlPageControlsContext);
 
@@ -32,7 +34,7 @@ export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
         <KibanaContextProvider services={services}>
           <OutPortal node={portalNode} />
         </KibanaContextProvider>,
-        { theme$: services.theme.theme$ }
+        { theme, i18n }
       );
       return mount(element);
     });

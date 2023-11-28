@@ -8,15 +8,11 @@
 import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { getDefaultConfigSettings } from '../common/config_settings';
 import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: Array<keyof ExperimentalFeatures> = [
-    // Remove property below once `get-file` FF is enabled or removed
-    'responseActionGetFileEnabled',
-    // remove property below once `execute` FF is enabled or removed
-    'responseActionExecuteEnabled',
-  ];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = ['responseActionUploadEnabled'];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
@@ -26,11 +22,15 @@ export const createMockConfig = (): ConfigType => {
     maxTimelineImportPayloadBytes: 10485760,
     enableExperimental,
     packagerTaskInterval: '60s',
+    packagerTaskPackagePolicyUpdateBatchSize: 10,
     prebuiltRulesPackageVersion: '',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
-
-    experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    maxUploadResponseActionFileBytes: 26214400,
+    settings: getDefaultConfigSettings(),
+    experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
+    enabled: true,
+    enableUiSettingsValidations: false,
   };
 };
 
@@ -42,7 +42,7 @@ const withExperimentalFeature = (
   return {
     ...config,
     enableExperimental,
-    experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
   };
 };
 

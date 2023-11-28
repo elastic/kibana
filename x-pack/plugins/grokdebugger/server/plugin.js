@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import { KibanaFramework } from './lib/kibana_framework';
 import { registerGrokdebuggerRoutes } from './routes/api/grokdebugger';
 
 export const config = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   }),
 };
 

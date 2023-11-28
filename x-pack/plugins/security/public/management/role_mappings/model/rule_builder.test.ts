@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { RoleMapping } from '../../../../common/model';
 import { FieldRule } from './field_rule';
 import { generateRulesFromRaw } from './rule_builder';
 import { RuleBuilderError } from './rule_builder_error';
+import type { RoleMapping } from '../../../../common';
 
 describe('generateRulesFromRaw', () => {
   it('returns null for an empty rule set', () => {

@@ -7,7 +7,7 @@
 
 import { readFileSync as fsReadFileSync } from 'fs';
 import { resolve as pathResolve, join as pathJoin } from 'path';
-import { schema, ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
 import { ActionsConfig } from '../config';
@@ -73,12 +73,7 @@ describe('custom_host_settings', () => {
       rejectUnauthorized: true,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration(60000),
-      cleanupFailedExecutionsTask: {
-        enabled: true,
-        cleanupInterval: schema.duration().validate('5m'),
-        idleInterval: schema.duration().validate('1h'),
-        pageSize: 100,
-      },
+      enableFooterInEmail: true,
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

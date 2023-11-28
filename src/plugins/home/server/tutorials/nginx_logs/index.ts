@@ -55,10 +55,10 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/nginx_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/nginx_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['web', 'observability'],
   };
 }

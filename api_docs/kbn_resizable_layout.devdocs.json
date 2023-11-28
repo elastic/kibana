@@ -1,0 +1,329 @@
+{
+  "id": "@kbn/resizable-layout",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/resizable-layout",
+        "id": "def-common.ResizableLayout",
+        "type": "Function",
+        "tags": [],
+        "label": "ResizableLayout",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "@kbn/resizable-layout",
+            "scope": "common",
+            "docId": "kibKbnResizableLayoutPluginApi",
+            "section": "def-common.ResizableLayoutProps",
+            "text": "ResizableLayoutProps"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-resizable-layout/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/resizable-layout",
+        "id": "def-common.ResizableLayoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResizableLayoutProps",
+        "description": [],
+        "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [
+              "\nClass name for the layout container"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.mode",
+            "type": "Enum",
+            "tags": [],
+            "label": "mode",
+            "description": [
+              "\nThe current layout mode"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/resizable-layout",
+                "scope": "common",
+                "docId": "kibKbnResizableLayoutPluginApi",
+                "section": "def-common.ResizableLayoutMode",
+                "text": "ResizableLayoutMode"
+              }
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.direction",
+            "type": "Enum",
+            "tags": [],
+            "label": "direction",
+            "description": [
+              "\nThe current layout direction"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/resizable-layout",
+                "scope": "common",
+                "docId": "kibKbnResizableLayoutPluginApi",
+                "section": "def-common.ResizableLayoutDirection",
+                "text": "ResizableLayoutDirection"
+              }
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.container",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "\nThe parent container element, used to calculate the layout size"
+            ],
+            "signature": [
+              "HTMLElement | null"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.fixedPanelSize",
+            "type": "number",
+            "tags": [],
+            "label": "fixedPanelSize",
+            "description": [
+              "\nCurrent size of the fixed panel in pixels"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.minFixedPanelSize",
+            "type": "number",
+            "tags": [],
+            "label": "minFixedPanelSize",
+            "description": [
+              "\nMinimum size of the fixed panel in pixels"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.minFlexPanelSize",
+            "type": "number",
+            "tags": [],
+            "label": "minFlexPanelSize",
+            "description": [
+              "\nMinimum size of the flex panel in pixels"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.fixedPanel",
+            "type": "Object",
+            "tags": [],
+            "label": "fixedPanel",
+            "description": [
+              "\nThe fixed panel"
+            ],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.flexPanel",
+            "type": "Object",
+            "tags": [],
+            "label": "flexPanel",
+            "description": [
+              "\nThe flex panel"
+            ],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.resizeButtonClassName",
+            "type": "string",
+            "tags": [],
+            "label": "resizeButtonClassName",
+            "description": [
+              "\nClass name for the resize button"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "['data-test-subj']",
+            "description": [
+              "\nTest subject for the layout container"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-common.ResizableLayoutProps.onFixedPanelSizeChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onFixedPanelSizeChange",
+            "description": [
+              "\nCallback when the fixed panel size changes, receives the new size in pixels"
+            ],
+            "signature": [
+              "((fixedPanelSize: number) => void) | undefined"
+            ],
+            "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/resizable-layout",
+                "id": "def-common.ResizableLayoutProps.onFixedPanelSizeChange.$1",
+                "type": "number",
+                "tags": [],
+                "label": "fixedPanelSize",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-resizable-layout/src/resizable_layout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/resizable-layout",
+        "id": "def-common.ResizableLayoutDirection",
+        "type": "Enum",
+        "tags": [],
+        "label": "ResizableLayoutDirection",
+        "description": [],
+        "path": "packages/kbn-resizable-layout/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/resizable-layout",
+        "id": "def-common.ResizableLayoutMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "ResizableLayoutMode",
+        "description": [],
+        "path": "packages/kbn-resizable-layout/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

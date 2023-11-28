@@ -10,11 +10,12 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useLensAttributes } from './use_lens_attributes';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { InfraClientStartDeps } from '../types';
+import type { InfraClientStartDeps } from '../types';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
+import { hostLensFormulas } from '../common/visualizations';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -29,6 +30,8 @@ const mockDataView = {
   fields: [],
   metaFields: [],
 } as unknown as jest.Mocked<DataView>;
+
+const normalizedLoad1m = hostLensFormulas.normalizedLoad1m;
 
 const lensPluginMockStart = lensPluginMock.createStartContract();
 const mockUseKibana = () => {
@@ -48,23 +51,56 @@ describe('useHostTable hook', () => {
   it('should return the basic lens attributes', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
-        type: 'load',
+        visualizationType: 'lnsXY',
+        layers: [
+          {
+            data: [normalizedLoad1m],
+            type: 'visualization',
+            options: {
+              buckets: {
+                type: 'date_histogram',
+              },
+              breakdown: {
+                field: 'host.name',
+                type: 'top_values',
+                params: {
+                  size: 10,
+                },
+              },
+            },
+          },
+          {
+            data: [
+              {
+                value: '1',
+                format: {
+                  id: 'percent',
+                  params: {
+                    decimals: 0,
+                  },
+                },
+              },
+            ],
+            type: 'referenceLines',
+          },
+        ],
+        title: 'Injected Normalized Load',
         dataView: mockDataView,
       })
     );
     await waitForNextUpdate();
 
     const { state, title } = result.current.attributes ?? {};
-    const { datasourceStates, filters } = state ?? {};
+    const { datasourceStates } = state ?? {};
 
-    expect(title).toBe('Normalized Load');
+    expect(title).toBe('Injected Normalized Load');
     expect(datasourceStates).toEqual({
       formBased: {
         layers: {
-          layer1: {
-            columnOrder: ['hosts_aggs_breakdown', 'x_date_histogram', 'y_cpu_cores_usage'],
+          layer_0: {
+            columnOrder: ['aggs_breakdown', 'x_date_histogram', 'formula_accessor_0_0'],
             columns: {
-              hosts_aggs_breakdown: {
+              aggs_breakdown: {
                 dataType: 'string',
                 isBucketed: true,
                 label: 'Top 10 values of host.name',
@@ -100,12 +136,12 @@ describe('useHostTable hook', () => {
                 scale: 'interval',
                 sourceField: '@timestamp',
               },
-              y_cpu_cores_usage: {
-                customLabel: false,
+              formula_accessor_0_0: {
+                customLabel: true,
                 dataType: 'number',
                 filter: undefined,
                 isBucketed: false,
-                label: 'average(system.load.1) / max(system.load.cores)',
+                label: 'Normalized Load',
                 operationType: 'formula',
                 params: {
                   format: {
@@ -124,10 +160,10 @@ describe('useHostTable hook', () => {
             },
             indexPatternId: 'mock-id',
           },
-          referenceLayer: {
-            columnOrder: ['referenceColumn'],
+          layer_1_reference: {
+            columnOrder: ['formula_accessor_1_0_reference_column'],
             columns: {
-              referenceColumn: {
+              formula_accessor_1_0_reference_column: {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
@@ -141,7 +177,7 @@ describe('useHostTable hook', () => {
                       decimals: 0,
                     },
                   },
-                  value: 1,
+                  value: '1',
                 },
                 references: [],
                 scale: 'ratio',
@@ -154,46 +190,29 @@ describe('useHostTable hook', () => {
         },
       },
     });
-    expect(filters).toEqual([
-      {
-        $state: { store: 'appState' },
-        meta: {
-          alias: null,
-          disabled: false,
-          index: 'c1ec8212-ecee-494a-80da-f6f33b3393f2',
-          key: 'system.load.cores',
-          negate: false,
-          type: 'exists',
-          value: 'exists',
-        },
-        query: { exists: { field: 'system.load.cores' } },
-      },
-      {
-        $state: { store: 'appState' },
-        meta: {
-          alias: null,
-          disabled: false,
-          index: 'c1ec8212-ecee-494a-80da-f6f33b3393f2',
-          key: 'system.load.1',
-          negate: false,
-          type: 'exists',
-          value: 'exists',
-        },
-        query: { exists: { field: 'system.load.1' } },
-      },
-    ]);
   });
 
-  it('should return attributes with injected values', async () => {
+  it('should return extra actions', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
-        type: 'load',
+        visualizationType: 'lnsXY',
+        layers: [
+          {
+            data: [normalizedLoad1m],
+            type: 'visualization',
+          },
+        ],
         dataView: mockDataView,
       })
     );
     await waitForNextUpdate();
 
-    const injectedData = {
+    const extraActions = result.current.getExtraActions({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+        mode: 'relative',
+      },
       query: {
         language: 'kuery',
         query: '{term: { host.name: "a"}}',
@@ -213,17 +232,8 @@ describe('useHostTable hook', () => {
           query: { range: { 'system.load.cores': { gte: 0 } } },
         },
       ],
-      title: 'Injected CPU Cores',
-    };
+    });
 
-    const injectedAttributes = result.current.injectData(injectedData);
-
-    const { state, title } = injectedAttributes ?? {};
-    const { filters, query } = state ?? {};
-
-    expect(title).toEqual(injectedData.title);
-    expect(query).toEqual(injectedData.query);
-    expect(filters).toHaveLength(3);
-    expect(filters).toContain(injectedData.filters[0]);
+    expect(extraActions).toHaveLength(1);
   });
 });

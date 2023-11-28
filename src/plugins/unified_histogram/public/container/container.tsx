@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { Subject } from 'rxjs';
 import { pick } from 'lodash';
+import useMount from 'react-use/lib/useMount';
+import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
-import type { UnifiedHistogramInputMessage } from '../types';
+import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
 import {
   createStateService,
   UnifiedHistogramStateOptions,
@@ -18,59 +20,52 @@ import {
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
-import {
-  dataViewSelector,
-  filtersSelector,
-  querySelector,
-  timeRangeSelector,
-  topPanelHeightSelector,
-} from './utils/state_selectors';
+import { topPanelHeightSelector, currentSuggestionSelector } from './utils/state_selectors';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
-  | 'services'
-  | 'disableAutoFetching'
-  | 'disableTriggers'
-  | 'disabledActions'
-  | 'getRelativeTimeRange'
->;
-
-/**
- * The props exposed by the container
- */
-export type UnifiedHistogramContainerProps = Pick<
-  UnifiedHistogramLayoutProps,
-  'className' | 'resizeRef' | 'appendHitsCounter' | 'children'
+  'disableAutoFetching' | 'disableTriggers' | 'disabledActions'
 >;
 
 /**
  * The options used to initialize the container
  */
-export type UnifiedHistogramInitializeOptions = UnifiedHistogramStateOptions &
-  Omit<LayoutProps, 'services'>;
+export type UnifiedHistogramCreationOptions = Omit<UnifiedHistogramStateOptions, 'services'> &
+  LayoutProps;
 
 /**
- * The uninitialized API exposed by the container
+ * The props exposed by the container
  */
-export interface UnifiedHistogramUninitializedApi {
-  /**
-   * Whether the container has been initialized
-   */
-  initialized: false;
-  /**
-   * Initialize the container
-   */
-  initialize: (options: UnifiedHistogramInitializeOptions) => void;
-}
+export type UnifiedHistogramContainerProps = {
+  getCreationOptions?: () =>
+    | UnifiedHistogramCreationOptions
+    | Promise<UnifiedHistogramCreationOptions>;
+  searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
+  requestAdapter?: UnifiedHistogramRequestContext['adapter'];
+  isChartLoading?: boolean;
+} & Pick<
+  UnifiedHistogramLayoutProps,
+  | 'services'
+  | 'className'
+  | 'dataView'
+  | 'query'
+  | 'filters'
+  | 'timeRange'
+  | 'relativeTimeRange'
+  | 'columns'
+  | 'container'
+  | 'appendHitsCounter'
+  | 'children'
+  | 'onBrushEnd'
+  | 'onFilter'
+  | 'withDefaultActions'
+  | 'disabledActions'
+>;
 
 /**
- * The initialized API exposed by the container
+ * The API exposed by the container
  */
-export type UnifiedHistogramInitializedApi = {
-  /**
-   * Whether the container has been initialized
-   */
-  initialized: true;
+export type UnifiedHistogramApi = {
   /**
    * Manually trigger a refetch of the data
    */
@@ -82,74 +77,67 @@ export type UnifiedHistogramInitializedApi = {
   | 'setTopPanelHeight'
   | 'setBreakdownField'
   | 'setTimeInterval'
-  | 'setRequestParams'
   | 'setTotalHits'
 >;
-
-/**
- * The API exposed by the container
- */
-export type UnifiedHistogramApi = UnifiedHistogramUninitializedApi | UnifiedHistogramInitializedApi;
 
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
 >((containerProps, ref) => {
-  const [initialized, setInitialized] = useState(false);
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
+  const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
-  const api = useMemo<UnifiedHistogramApi>(
-    () => ({
-      initialized,
-      initialize: (options: UnifiedHistogramInitializeOptions) => {
-        const {
-          services,
-          disableAutoFetching,
-          disableTriggers,
-          disabledActions,
-          getRelativeTimeRange,
-        } = options;
+  const [api, setApi] = useState<UnifiedHistogramApi>();
 
-        setLayoutProps({
-          services,
-          disableAutoFetching,
-          disableTriggers,
-          disabledActions,
-          getRelativeTimeRange,
-        });
-        setStateService(createStateService(options));
-        setInitialized(true);
-      },
+  // Expose the API to the parent component
+  useImperativeHandle(ref, () => api!, [api]);
+
+  // Call for creation options once the container is mounted
+  useMount(async () => {
+    const { getCreationOptions, services } = containerProps;
+    const options = await getCreationOptions?.();
+    const apiHelper = await services.lens.stateHelperApi();
+
+    setLayoutProps(pick(options, 'disableAutoFetching', 'disableTriggers', 'disabledActions'));
+    setStateService(createStateService({ services, ...options }));
+    setLensSuggestionsApi(() => apiHelper.suggestions);
+  });
+
+  // Initialize the API once the state service is available
+  useEffect(() => {
+    if (!stateService) {
+      return;
+    }
+
+    setApi({
       refetch: () => {
         input$.next({ type: 'refetch' });
       },
       ...pick(
-        stateService!,
+        stateService,
         'state$',
         'setChartHidden',
         'setTopPanelHeight',
         'setBreakdownField',
         'setTimeInterval',
-        'setRequestParams',
         'setTotalHits'
       ),
-    }),
-    [initialized, input$, stateService]
-  );
-
-  // Expose the API to the parent component
-  useImperativeHandle(ref, () => api, [api]);
-
-  const stateProps = useStateProps(stateService);
-  const dataView = useStateSelector(stateService?.state$, dataViewSelector);
-  const query = useStateSelector(stateService?.state$, querySelector);
-  const filters = useStateSelector(stateService?.state$, filtersSelector);
-  const timeRange = useStateSelector(stateService?.state$, timeRangeSelector);
+    });
+  }, [input$, stateService]);
+  const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
+  const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
+  const stateProps = useStateProps({
+    stateService,
+    dataView,
+    query,
+    searchSessionId,
+    requestAdapter,
+  });
 
   // Don't render anything until the container is initialized
-  if (!layoutProps || !dataView) {
+  if (!layoutProps || !lensSuggestionsApi || !api) {
     return null;
   }
 
@@ -158,12 +146,11 @@ export const UnifiedHistogramContainer = forwardRef<
       {...containerProps}
       {...layoutProps}
       {...stateProps}
-      dataView={dataView}
-      query={query}
-      filters={filters}
-      timeRange={timeRange}
+      currentSuggestion={currentSuggestion}
+      isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}
+      lensSuggestionsApi={lensSuggestionsApi}
     />
   );
 });

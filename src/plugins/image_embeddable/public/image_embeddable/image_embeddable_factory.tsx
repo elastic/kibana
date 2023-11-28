@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IExternalUrl } from '@kbn/core-http-browser';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import {
   IContainer,
   EmbeddableInput,
@@ -35,6 +35,7 @@ export interface ImageEmbeddableFactoryDeps {
     theme: ThemeServiceStart;
     getUser: () => Promise<AuthenticatedUser | undefined>;
     uiActions: UiActionsStart;
+    isScreenshotMode: () => boolean;
   };
 }
 
@@ -68,6 +69,7 @@ export class ImageEmbeddableFactoryDefinition
               .catch(() => [])
               .then((actions) => actions.length > 0),
         },
+        isScreenshotMode: () => this.deps.start().isScreenshotMode(),
       },
       initialInput,
       parent

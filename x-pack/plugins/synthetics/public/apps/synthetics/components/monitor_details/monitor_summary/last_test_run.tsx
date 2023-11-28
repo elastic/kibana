@@ -12,7 +12,8 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
+  EuiSkeletonRectangle,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -27,12 +28,11 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   EncryptedSyntheticsSavedMonitor,
   Ping,
   SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
-import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
@@ -42,6 +42,7 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 export const LastTestRun = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
@@ -60,6 +61,7 @@ export const LastTestRun = () => {
       latestPing={latestPing}
       loading={loading}
       stepsLoading={stepsLoading}
+      isErrorDetails={false}
     />
   );
 };
@@ -97,17 +99,15 @@ export const LastTestRunComponent = ({
           title={latestPing?.error.message}
           size="s"
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
-          {isErrorDetails ? (
-            <></>
-          ) : (
+          {isErrorDetails ? null : (
             <EuiButton
               data-test-subj="monitorTestRunViewErrorDetails"
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: monitor?.id!,
+                configId: monitor?.[ConfigKey.CONFIG_ID]!,
                 locationId: selectedLocation!.id,
                 stateId: latestPing.state?.id!,
               })}
@@ -122,7 +122,7 @@ export const LastTestRunComponent = ({
 
       <EuiSpacer size="m" />
 
-      {monitor?.type === DataStream.BROWSER ? (
+      {monitor?.type === MonitorTypeEnum.BROWSER ? (
         <BrowserStepsList
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
@@ -153,9 +153,10 @@ const PanelHeader = ({
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const lastRunTimestamp = useFormatTestRunAt(latestPing?.timestamp);
+  const formatter = useDateFormat();
+  const lastRunTimestamp = formatter(latestPing?.timestamp);
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
+  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
 
   const TitleNode = (
     <EuiTitle size="xs">
@@ -169,12 +170,12 @@ const PanelHeader = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
           <EuiFlexItem>
-            <EuiLoadingContent css={{ width: 52 }} lines={1} />
+            <EuiSkeletonRectangle width="52px" height="20px" />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <EuiLoadingContent lines={1} />
+            <EuiSkeletonText lines={1} />
           </EuiFlexItem>
-          <EuiFlexItem>{isBrowserMonitor ? <EuiLoadingContent lines={1} /> : null}</EuiFlexItem>
+          <EuiFlexItem>{isBrowserMonitor ? <EuiSkeletonText lines={1} /> : null}</EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
@@ -186,21 +187,21 @@ const PanelHeader = ({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
           <StatusBadge
             status={parseBadgeStatus(latestPing?.summary?.down! > 0 ? 'fail' : 'success')}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiText size="xs" color={euiTheme.colors.darkShade}>
+          <EuiText css={{ whiteSpace: 'nowrap' }} size="xs" color={euiTheme.colors.darkShade}>
             {lastRunTimestamp}
           </EuiText>
         </EuiFlexItem>
 
         {isBrowserMonitor ? (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem css={{ marginLeft: 'auto' }} grow={false}>
             <EuiButtonEmpty
               data-test-subj="monitorSummaryViewLastTestRun"
               size="xs"

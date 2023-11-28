@@ -26,6 +26,17 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async assertDiscoverQueryHitsMoreThanZero() {
+      await testSubjects.existOrFail('unifiedHistogramQueryHits');
+
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
+        'unifiedHistogramQueryHits'
+      );
+
+      const hits = parseInt(actualDiscoverQueryHits, 10);
+      expect(hits).to.greaterThan(0, `Discover query hits should be more than 0, got ${hits}`);
+    },
+
     async assertNoResults(expectedDestinationIndex: string) {
       await testSubjects.missingOrFail('unifiedHistogramQueryHits');
 

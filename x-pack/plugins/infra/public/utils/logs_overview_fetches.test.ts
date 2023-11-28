@@ -6,10 +6,11 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { createResolvedLogViewMock } from '../../common/log_views/resolved_log_view.mock';
+import { createResolvedLogViewMock } from '@kbn/logs-shared-plugin/common/mocks';
+import { createLogsSharedPluginStartMock } from '@kbn/logs-shared-plugin/public/mocks';
+import { of } from 'rxjs';
 import { createInfraPluginStartMock } from '../mocks';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './logs_overview_fetchers';
@@ -24,10 +25,18 @@ const DEFAULT_PARAMS = {
 function setup() {
   const core = coreMock.createStart();
   const data = dataPluginMock.createStartContract();
+  const logsShared = createLogsSharedPluginStartMock();
   const pluginStart = createInfraPluginStartMock();
-  const pluginDeps = { data } as InfraClientStartDeps;
+  const pluginDeps = { data, logsShared } as unknown as InfraClientStartDeps;
 
   const dataSearch = data.search.search as jest.MockedFunction<typeof data.search.search>;
+  const getResolvedLogView = logsShared.logViews.client.getResolvedLogView as jest.MockedFunction<
+    typeof logsShared.logViews.client.getResolvedLogView
+  >;
+  const getResolvedLogViewStatus = logsShared.logViews.client
+    .getResolvedLogViewStatus as jest.MockedFunction<
+    typeof logsShared.logViews.client.getResolvedLogViewStatus
+  >;
 
   const mockedGetStartServices = jest.fn(() =>
     Promise.resolve<[CoreStart, InfraClientStartDeps, InfraClientStartExports]>([
@@ -36,7 +45,15 @@ function setup() {
       pluginStart,
     ])
   );
-  return { core, dataSearch, mockedGetStartServices, pluginStart };
+  return {
+    core,
+    dataSearch,
+    mockedGetStartServices,
+    pluginDeps,
+    pluginStart,
+    getResolvedLogView,
+    getResolvedLogViewStatus,
+  };
 }
 
 describe('Logs UI Observability Homepage Functions', () => {
@@ -46,62 +63,59 @@ describe('Logs UI Observability Homepage Functions', () => {
 
   describe('getLogsHasDataFetcher()', () => {
     it('should return true when non-empty indices exist', async () => {
-      const { mockedGetStartServices, pluginStart } = setup();
+      const { mockedGetStartServices, pluginDeps, getResolvedLogView, getResolvedLogViewStatus } =
+        setup();
 
-      pluginStart.logViews.client.getResolvedLogView.mockResolvedValue(
-        createResolvedLogViewMock({ indices: 'test-index' })
-      );
-      pluginStart.logViews.client.getResolvedLogViewStatus.mockResolvedValue({
-        index: 'available',
-      });
+      getResolvedLogView.mockResolvedValue(createResolvedLogViewMock({ indices: 'test-index' }));
+      getResolvedLogViewStatus.mockResolvedValue({ index: 'available' });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();
 
-      expect(pluginStart.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(1);
+      expect(pluginDeps.logsShared.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(
+        1
+      );
       expect(response).toEqual({ hasData: true, indices: 'test-index' });
     });
 
     it('should return false when only empty indices exist', async () => {
-      const { mockedGetStartServices, pluginStart } = setup();
+      const { mockedGetStartServices, pluginDeps, getResolvedLogView, getResolvedLogViewStatus } =
+        setup();
 
-      pluginStart.logViews.client.getResolvedLogView.mockResolvedValue(
-        createResolvedLogViewMock({ indices: 'test-index' })
-      );
-      pluginStart.logViews.client.getResolvedLogViewStatus.mockResolvedValue({
-        index: 'empty',
-      });
+      getResolvedLogView.mockResolvedValue(createResolvedLogViewMock({ indices: 'test-index' }));
+      getResolvedLogViewStatus.mockResolvedValue({ index: 'empty' });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();
 
-      expect(pluginStart.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(1);
+      expect(pluginDeps.logsShared.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(
+        1
+      );
       expect(response).toEqual({ hasData: false, indices: 'test-index' });
     });
 
     it('should return false when no index exists', async () => {
-      const { mockedGetStartServices, pluginStart } = setup();
+      const { mockedGetStartServices, pluginDeps, getResolvedLogView, getResolvedLogViewStatus } =
+        setup();
 
-      pluginStart.logViews.client.getResolvedLogView.mockResolvedValue(
-        createResolvedLogViewMock({ indices: 'test-index' })
-      );
-      pluginStart.logViews.client.getResolvedLogViewStatus.mockResolvedValue({
-        index: 'missing',
-      });
+      getResolvedLogView.mockResolvedValue(createResolvedLogViewMock({ indices: 'test-index' }));
+      getResolvedLogViewStatus.mockResolvedValue({ index: 'missing' });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();
 
-      expect(pluginStart.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(1);
+      expect(pluginDeps.logsShared.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(
+        1
+      );
       expect(response).toEqual({ hasData: false, indices: 'test-index' });
     });
   });
 
   describe('getLogsOverviewDataFetcher()', () => {
     it('should work', async () => {
-      const { mockedGetStartServices, dataSearch, pluginStart } = setup();
+      const { mockedGetStartServices, dataSearch, getResolvedLogView } = setup();
 
-      pluginStart.logViews.client.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+      getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
 
       dataSearch.mockReturnValue(
         of({

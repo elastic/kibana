@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiCheckbox,
   EuiComboBox,
@@ -15,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
-import { SyntheticsParam } from '../../../../../../common/runtime_types';
+import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { ListParamItem } from './params_list';
 
 export const AddParamForm = ({
@@ -25,8 +26,8 @@ export const AddParamForm = ({
   items: ListParamItem[];
   isEditingItem: ListParamItem | null;
 }) => {
-  const { register, control } = useFormContext<SyntheticsParam>();
-  const { errors } = useFormState<SyntheticsParam>();
+  const { register, control } = useFormContext<SyntheticsParams>();
+  const { errors } = useFormState<SyntheticsParams>();
 
   const tagsList = items.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -42,6 +43,7 @@ export const AddParamForm = ({
         error={errors?.key?.message}
       >
         <EuiFieldText
+          data-test-subj="syntheticsAddParamFormFieldText"
           fullWidth
           aria-label={KEY_LABEL}
           {...register('key', {
@@ -66,6 +68,7 @@ export const AddParamForm = ({
         error={errors?.value?.message}
       >
         <EuiTextArea
+          data-test-subj="syntheticsAddParamFormTextArea"
           fullWidth
           aria-label={VALUE_LABEL}
           {...register('value', {
@@ -100,7 +103,12 @@ export const AddParamForm = ({
         />
       </EuiFormRow>
       <EuiFormRow fullWidth label={DESCRIPTION_LABEL}>
-        <EuiFieldText fullWidth aria-label={DESCRIPTION_LABEL} {...register('description', {})} />
+        <EuiFieldText
+          data-test-subj="syntheticsAddParamFormFieldText"
+          fullWidth
+          aria-label={DESCRIPTION_LABEL}
+          {...register('description', {})}
+        />
       </EuiFormRow>
       <EuiFormRow fullWidth label={NAMESPACES_LABEL}>
         <Controller
@@ -112,7 +120,7 @@ export const AddParamForm = ({
               aria-label={NAMESPACES_LABEL}
               onChange={(e) => {
                 if (e.target.checked) {
-                  field.onChange(['*']);
+                  field.onChange([ALL_SPACES_ID]);
                 } else {
                   field.onChange([]);
                 }

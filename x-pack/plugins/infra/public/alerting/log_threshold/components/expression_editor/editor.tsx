@@ -13,7 +13,8 @@ import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { PersistedLogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
+import { LogViewProvider, useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { PersistedLogViewReference, ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
 import {
   Comparator,
   isOptimizableGroupedThreshold,
@@ -27,9 +28,7 @@ import {
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { ObjectEntries } from '../../../../../common/utility_types';
-import { useSourceId } from '../../../../containers/source_id';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { LogViewProvider, useLogViewContext } from '../../../../hooks/use_log_view';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
@@ -53,11 +52,6 @@ const DEFAULT_BASE_EXPRESSION = {
 };
 
 const DEFAULT_FIELD = 'log.level';
-
-const createLogViewReference = (logViewId: string): PersistedLogViewReference => ({
-  logViewId,
-  type: 'log-view-reference',
-});
 
 const createDefaultCriterion = (
   availableFields: ResolvedLogViewField[],
@@ -100,9 +94,8 @@ export const ExpressionEditor: React.FC<
   RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
 > = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
-  const [logViewId] = useSourceId();
   const {
-    services: { logViews },
+    services: { logsShared },
   } = useKibanaContextForPlugin(); // injected during alert registration
 
   return (
@@ -112,7 +105,7 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogViewProvider logViewId={logViewId} logViews={logViews.client}>
+        <LogViewProvider logViews={logsShared.logViews.client}>
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>
@@ -139,9 +132,13 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
             defaultMessage: 'Sorry, there was a problem loading field information',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
-          <EuiButton onClick={load} iconType="refresh">
+          <EuiButton
+            data-test-subj="infraSourceStatusWrapperTryAgainButton"
+            onClick={load}
+            iconType="refresh"
+          >
             {i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
               defaultMessage: 'Try again',
             })}
@@ -159,7 +156,11 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
 ) => {
   const { setRuleParams, ruleParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  const { logViewId, resolvedLogView } = useLogViewContext();
+  const { logViewReference, resolvedLogView } = useLogViewContext();
+
+  if (logViewReference.type !== 'log-view-reference') {
+    throw new Error('The Log Threshold rule type only supports persisted Log Views');
+  }
 
   const {
     criteria: criteriaErrors,
@@ -226,8 +227,6 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
     [setRuleParams]
   );
 
-  const logViewReference = useMemo(() => createLogViewReference(logViewId), [logViewId]);
-
   const defaultCountAlertParams = useMemo(
     () => createDefaultCountRuleParams(supportedFields, logViewReference),
     [supportedFields, logViewReference]
@@ -275,7 +274,7 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
       defaultCriterion={defaultCountAlertParams.criteria[0]}
       errors={criteriaErrors}
       ruleParams={ruleParams}
-      sourceId={logViewId}
+      logViewReference={logViewReference}
       updateCriteria={updateCriteria}
     />
   ) : null;

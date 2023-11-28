@@ -19,8 +19,8 @@ export const mockAlertCountByRuleResult = {
             hits: {
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.uuid': '100',
+                  fields: {
+                    'kibana.alert.rule.uuid': ['100'],
                   },
                 },
               ],
@@ -34,8 +34,8 @@ export const mockAlertCountByRuleResult = {
             hits: {
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.uuid': '200',
+                  fields: {
+                    'kibana.alert.rule.uuid': ['200'],
                   },
                 },
               ],
@@ -49,8 +49,8 @@ export const mockAlertCountByRuleResult = {
             hits: {
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.uuid': '300',
+                  fields: {
+                    'kibana.alert.rule.uuid': ['300'],
                   },
                 },
               ],
@@ -64,8 +64,8 @@ export const mockAlertCountByRuleResult = {
             hits: {
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.uuid': '400',
+                  fields: {
+                    'kibana.alert.rule.uuid': ['400'],
                   },
                 },
               ],
@@ -79,8 +79,8 @@ export const mockAlertCountByRuleResult = {
             hits: {
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.uuid': '500',
+                  fields: {
+                    'kibana.alert.rule.uuid': ['500'],
                   },
                 },
               ],
@@ -94,8 +94,8 @@ export const mockAlertCountByRuleResult = {
             hits: {
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.uuid': '600',
+                  fields: {
+                    'kibana.alert.rule.uuid': ['600'],
                   },
                 },
               ],
@@ -109,8 +109,8 @@ export const mockAlertCountByRuleResult = {
             hits: {
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.uuid': '700',
+                  fields: {
+                    'kibana.alert.rule.uuid': ['700'],
                   },
                 },
               ],

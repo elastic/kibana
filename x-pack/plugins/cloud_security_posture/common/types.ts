@@ -4,13 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type TypeOf } from '@kbn/config-schema';
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
+import { CspRuleTemplate } from './schemas';
+import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
+import { getComplianceDashboardSchema } from './schemas/stats';
+
+export type AwsCredentialsType =
+  | 'assume_role'
+  | 'direct_access_keys'
+  | 'temporary_keys'
+  | 'shared_credentials'
+  | 'cloud_formation';
+
+export type AwsCredentialsTypeFieldMap = {
+  [key in AwsCredentialsType]: string[];
+};
+
+export type GcpCredentialsType = 'credentials-file' | 'credentials-json';
+
+export type GcpCredentialsTypeFieldMap = {
+  [key in GcpCredentialsType]: string[];
+};
+
+export type AzureCredentialsType = 'arm_template' | 'manual';
+
+export type AzureCredentialsTypeFieldMap = {
+  [key in AzureCredentialsType]: string[];
+};
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
+
+export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
 /** number between 1-100 */
 export type Score = number;
 
@@ -59,7 +87,8 @@ export type CspStatusCode =
   | 'unprivileged' // user lacks privileges for the latest findings index
   | 'index-timeout' // index timeout was surpassed since installation
   | 'not-deployed' // no healthy agents were deployed
-  | 'not-installed'; // number of installed csp integrations is 0;
+  | 'not-installed' // number of installed csp integrations is 0;
+  | 'waiting_for_results'; // have healthy agents but no findings at all, assumes data is being indexed for the 1st time
 
 export type IndexStatus =
   | 'not-empty' // Index contains documents
@@ -71,27 +100,23 @@ export interface IndexDetails {
   status: IndexStatus;
 }
 
-interface BaseCspSetupStatus {
-  indicesDetails: IndexDetails[];
-  latestPackageVersion: string;
+export interface BaseCspSetupBothPolicy {
+  status: CspStatusCode;
   installedPackagePolicies: number;
   healthyAgents: number;
+}
+
+export interface BaseCspSetupStatus {
+  indicesDetails: IndexDetails[];
+  latestPackageVersion: string;
+  cspm: BaseCspSetupBothPolicy;
+  kspm: BaseCspSetupBothPolicy;
+  vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
-  installedPolicyTemplates: CloudSecurityPolicyTemplate[];
+  installedPackageVersion?: string | undefined;
 }
 
-interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
-  status: Extract<CspStatusCode, 'not-installed'>;
-}
-
-interface CspSetupInstalledStatus extends BaseCspSetupStatus {
-  status: Exclude<CspStatusCode, 'not-installed'>;
-  // if installedPackageVersion == undefined but status != 'not-installed' it means the integration was installed in the past and findings were found
-  // status can be `indexed` but return with undefined package information in this case
-  installedPackageVersion: string | undefined;
-}
-
-export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
+export type CspSetupStatus = BaseCspSetupStatus;
 
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
@@ -103,8 +128,110 @@ export interface Benchmark {
 
 export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];
 export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
+export type RuleSection = CspRuleTemplateMetadata['section'];
 
 // Fleet Integration types
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
 export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
+
+export interface GetBenchmarkResponse {
+  items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
+
+export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;
+
+export interface GetCspRuleTemplateResponse {
+  items: CspRuleTemplate[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+// CNVM DASHBOARD
+
+interface AccountVulnStats {
+  cloudAccountId: string;
+  cloudAccountName: string;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
+
+export interface VulnStatsTrend {
+  '@timestamp': string;
+  policy_template: 'vuln_mgmt';
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  vulnerabilities_stats_by_cloud_account?: Record<
+    AccountVulnStats['cloudAccountId'],
+    AccountVulnStats
+  >;
+}
+
+export interface CnvmStatistics {
+  criticalCount: number | undefined;
+  highCount: number | undefined;
+  mediumCount: number | undefined;
+  resourcesScanned: number | undefined;
+  cloudRegions: number | undefined;
+}
+
+export interface CnvmDashboardData {
+  cnvmStatistics: CnvmStatistics;
+  vulnTrends: VulnStatsTrend[];
+  topVulnerableResources: VulnerableResourceStat[];
+  topPatchableVulnerabilities: PatchableVulnerabilityStat[];
+  topVulnerabilities: VulnerabilityStat[];
+}
+
+export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+
+export interface VulnerableResourceStat {
+  vulnerabilityCount: number | undefined;
+  resource: {
+    id: string | undefined;
+    name: string | undefined;
+  };
+  cloudRegion: string | undefined;
+}
+
+export interface PatchableVulnerabilityStat {
+  vulnerabilityCount: number | undefined;
+  packageFixVersion: string | undefined;
+  cve: string | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
+}
+
+export interface VulnerabilityStat {
+  packageFixVersion: string | undefined;
+  packageName: string | undefined;
+  packageVersion: string | undefined;
+  severity: string | undefined;
+  vulnerabilityCount: number | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
+  cve: string | undefined;
+}
+
+export interface AggFieldBucket {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: Array<{
+    key?: string;
+    doc_count?: string;
+  }>;
+}

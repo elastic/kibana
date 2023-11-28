@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import type { RuleExecutionStatus } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { ExecutionStatusIndicator } from '../../indicators/execution_status_indicator';
 import { MultiselectFilter } from '../multiselect_filter';
 

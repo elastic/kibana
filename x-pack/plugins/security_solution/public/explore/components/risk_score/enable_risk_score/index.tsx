@@ -6,7 +6,6 @@
  */
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { RiskScoreUpgradeButton } from '../risk_score_onboarding/risk_score_upgrade_button';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { inputsModel } from '../../../../common/store';
@@ -61,23 +60,12 @@ const EnableRiskScoreComponent = ({
         }
         actions={
           <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            {isDeprecated ? (
-              <RiskScoreUpgradeButton
-                refetch={refetch}
-                riskScoreEntity={entityType}
-                disabled={!signalIndexExists}
-                timerange={timerange}
-                data-test-subj={`upgrade_${entityType}_risk_score`}
-                title={text.cta}
-              />
-            ) : (
-              <RiskScoreEnableButton
-                disabled={!signalIndexExists}
-                refetch={refetch}
-                riskScoreEntity={entityType}
-                timerange={timerange}
-              />
-            )}
+            <RiskScoreEnableButton
+              disabled={!signalIndexExists}
+              refetch={refetch}
+              riskScoreEntity={entityType}
+              timerange={timerange}
+            />
           </EuiToolTip>
         }
       />

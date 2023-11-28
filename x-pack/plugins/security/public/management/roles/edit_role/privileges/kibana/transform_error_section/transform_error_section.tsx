@@ -15,7 +15,7 @@ export class TransformErrorSection extends PureComponent<{}, {}> {
     return (
       <EuiEmptyPrompt
         color="danger"
-        iconType="alert"
+        iconType="warning"
         title={
           <h2>
             <FormattedMessage

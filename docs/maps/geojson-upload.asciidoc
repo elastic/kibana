@@ -39,6 +39,6 @@ the Elasticsearch responses are shown on the *Layer add panel* and the indexed d
 appears on the map. The geospatial data on the map
 should be identical to the locally-previewed data, but now it's indexed data from Elasticsearch.
 
-. To continue adding data to the map, click *Add layer*.
+. To continue adding data to the map, click *Add and continue*.
 . In *Layer settings*, adjust any settings or <<maps-vector-style-properties, properties>> as needed.
-. Click *Save & close*.
+. Click *Keep changes*.

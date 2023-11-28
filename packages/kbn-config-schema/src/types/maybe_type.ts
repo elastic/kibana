@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Type } from './type';
+import { Type, ExtendsDeepOptions } from './type';
 
 export class MaybeType<V> extends Type<V | undefined> {
+  private readonly maybeType: Type<V>;
+
   constructor(type: Type<V>) {
     super(
       type
@@ -16,5 +18,10 @@ export class MaybeType<V> extends Type<V | undefined> {
         .optional()
         .default(() => undefined)
     );
+    this.maybeType = type;
+  }
+
+  public extendsDeep(options: ExtendsDeepOptions) {
+    return new MaybeType(this.maybeType.extendsDeep(options));
   }
 }

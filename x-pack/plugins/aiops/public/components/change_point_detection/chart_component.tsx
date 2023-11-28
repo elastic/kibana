@@ -5,216 +5,86 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-
-import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { FilterStateStore } from '@kbn/es-query';
-import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-
-import { useDataSource } from '../../hooks/use_data_source';
+import React, { FC, useCallback, useEffect, useRef } from 'react';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useCommonChartProps } from './use_common_chart_props';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-
-import {
-  type ChangePointAnnotation,
-  useChangePointDetectionContext,
-} from './change_point_detection_context';
-import { fnOperationTypeMapping } from './constants';
+import type { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
 
 export interface ChartComponentProps {
+  fieldConfig: FieldConfig;
   annotation: ChangePointAnnotation;
+
+  interval: string;
+
+  onLoading?: (isLoading: boolean) => void;
+  onRenderComplete?: () => void;
 }
 
-export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation }) => {
-  const {
-    lens: { EmbeddableComponent },
-  } = useAiopsAppContext();
+export interface ChartComponentPropsAll {
+  fn: string;
+  metricField: string;
+  splitField?: string;
+  maxResults: number;
+  timeRange: TimeRange;
+  filters?: Filter[];
+  query?: Query;
+}
 
-  const timeRange = useTimeRangeUpdates();
-  const { dataView } = useDataSource();
-  const { requestParams, bucketInterval } = useChangePointDetectionContext();
+export const ChartComponent: FC<ChartComponentProps> = React.memo(
+  ({ annotation, fieldConfig, interval, onLoading, onRenderComplete }) => {
+    const {
+      lens: { EmbeddableComponent },
+    } = useAiopsAppContext();
 
-  const filters = useMemo(() => {
-    return annotation.group
-      ? [
-          {
-            meta: {
-              index: dataView.id!,
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: annotation.group.name,
-              params: {
-                query: annotation.group.value,
-              },
-            },
-            query: {
-              match_phrase: {
-                [annotation.group.name]: annotation.group.value,
-              },
-            },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
-          },
-        ]
-      : [];
-  }, [dataView.id, annotation.group]);
+    const chartWrapperRef = useRef<HTMLDivElement>(null);
 
-  // @ts-ignore incorrect types for attributes
-  const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
-    return {
-      title: annotation.group?.value ?? '',
-      description: '',
-      visualizationType: 'lnsXY',
-      type: 'lens',
-      references: [
-        {
-          type: 'index-pattern',
-          id: dataView.id!,
-          name: 'indexpattern-datasource-layer-2d61a885-abb0-4d4e-a5f9-c488caec3c22',
-        },
-        {
-          type: 'index-pattern',
-          id: dataView.id!,
-          name: 'xy-visualization-layer-8d26ab67-b841-4877-9d02-55bf270f9caf',
-        },
-      ],
-      state: {
-        visualization: {
-          yLeftExtent: {
-            mode: 'dataBounds',
-          },
-          legend: {
-            isVisible: false,
-            position: 'right',
-          },
-          valueLabels: 'hide',
-          fittingFunction: 'None',
-          axisTitlesVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          tickLabelsVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          labelsOrientation: {
-            x: 0,
-            yLeft: 0,
-            yRight: 0,
-          },
-          gridlinesVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          preferredSeriesType: 'line',
-          layers: [
-            {
-              layerId: '2d61a885-abb0-4d4e-a5f9-c488caec3c22',
-              accessors: ['e9f26d17-fb36-4982-8539-03f1849cbed0'],
-              position: 'top',
-              seriesType: 'line',
-              showGridlines: false,
-              layerType: 'data',
-              xAccessor: '877e6638-bfaa-43ec-afb9-2241dc8e1c86',
-            },
-            ...(annotation.timestamp
-              ? [
-                  {
-                    layerId: '8d26ab67-b841-4877-9d02-55bf270f9caf',
-                    layerType: 'annotations',
-                    annotations: [
-                      {
-                        type: 'manual',
-                        label: annotation.label,
-                        icon: 'triangle',
-                        textVisibility: true,
-                        key: {
-                          type: 'point_in_time',
-                          timestamp: annotation.timestamp,
-                        },
-                        id: 'a8fb297c-8d96-4011-93c0-45af110d5302',
-                        isHidden: false,
-                        color: '#F04E98',
-                        lineStyle: 'solid',
-                        lineWidth: 2,
-                        outside: false,
-                      },
-                    ],
-                    ignoreGlobalFilters: true,
-                  },
-                ]
-              : []),
-          ],
-        },
-        query: {
-          query: '',
-          language: 'kuery',
-        },
-        filters,
-        datasourceStates: {
-          formBased: {
-            layers: {
-              '2d61a885-abb0-4d4e-a5f9-c488caec3c22': {
-                columns: {
-                  '877e6638-bfaa-43ec-afb9-2241dc8e1c86': {
-                    label: dataView.timeFieldName,
-                    dataType: 'date',
-                    operationType: 'date_histogram',
-                    sourceField: dataView.timeFieldName,
-                    isBucketed: true,
-                    scale: 'interval',
-                    params: {
-                      interval: bucketInterval.expression,
-                      includeEmptyRows: true,
-                      dropPartials: false,
-                    },
-                  },
-                  'e9f26d17-fb36-4982-8539-03f1849cbed0': {
-                    label: `${requestParams.fn}(${requestParams.metricField})`,
-                    dataType: 'number',
-                    operationType: fnOperationTypeMapping[requestParams.fn],
-                    sourceField: requestParams.metricField,
-                    isBucketed: false,
-                    scale: 'ratio',
-                    params: {
-                      emptyAsNull: true,
-                    },
-                  },
-                },
-                columnOrder: [
-                  '877e6638-bfaa-43ec-afb9-2241dc8e1c86',
-                  'e9f26d17-fb36-4982-8539-03f1849cbed0',
-                ],
-                incompleteColumns: {},
-              },
-            },
-          },
-          textBased: {
-            layers: {},
-          },
-        },
-        internalReferences: [],
-        adHocDataViews: {},
+    const renderCompleteListener = useCallback(
+      (event: Event) => {
+        if (event.target === chartWrapperRef.current) return;
+        if (onRenderComplete) {
+          onRenderComplete();
+        }
       },
-    };
-  }, [dataView.id, dataView.timeFieldName, annotation, requestParams, filters, bucketInterval]);
+      [onRenderComplete]
+    );
 
-  return (
-    <EmbeddableComponent
-      id={`changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
-      style={{ height: 350 }}
-      timeRange={timeRange}
-      attributes={attributes}
-      renderMode={'view'}
-      executionContext={{
-        type: 'aiops_change_point_detection_chart',
-        name: 'Change point detection',
-      }}
-    />
-  );
-});
+    useEffect(() => {
+      if (!chartWrapperRef.current) {
+        throw new Error('Reference to the chart wrapper is not set');
+      }
+      const chartWrapper = chartWrapperRef.current;
+      chartWrapper.addEventListener('renderComplete', renderCompleteListener);
+      return () => {
+        chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
+      };
+    }, [renderCompleteListener]);
+
+    const { filters, timeRange, query, attributes } = useCommonChartProps({
+      fieldConfig,
+      annotation,
+      bucketInterval: interval,
+    });
+
+    return (
+      <div ref={chartWrapperRef}>
+        <EmbeddableComponent
+          id={`changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
+          style={{ height: 350 }}
+          timeRange={timeRange}
+          query={query}
+          filters={filters}
+          // @ts-ignore
+          attributes={attributes}
+          renderMode={'view'}
+          executionContext={{
+            type: 'aiops_change_point_detection_chart',
+            name: 'Change point detection',
+          }}
+          disableTriggers
+          onLoad={onLoading}
+        />
+      </div>
+    );
+  }
+);

@@ -24,6 +24,7 @@ import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
 } from '../filter_bar/filter_editor';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getAddFilterButtonLabel: () =>
@@ -36,21 +37,25 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   isDisabled?: boolean;
   buttonProps?: Partial<EuiButtonIconProps>;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   indexPatterns,
   filters,
   timeRangeForSuggestionsOverride,
+  filtersForSuggestions,
   onFiltersUpdated,
   buttonProps,
   isDisabled,
   onCloseFilterPopover,
   onLocalFilterUpdate,
   onLocalFilterCreate,
+  suggestionsAbstraction,
 }: AddFilterPopoverProps) {
   const euiTheme = useEuiTheme();
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
@@ -96,6 +101,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
           indexPatterns={indexPatterns}
           filters={filters}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={filtersForSuggestions}
           onFiltersUpdated={onFiltersUpdated}
           onLocalFilterUpdate={onLocalFilterUpdate}
           onLocalFilterCreate={onLocalFilterCreate}
@@ -105,6 +111,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
           closePopoverOnCancel={() => {
             setShowAddFilterPopover(false);
           }}
+          suggestionsAbstraction={suggestionsAbstraction}
         />
       </EuiPopover>
     </EuiFlexItem>

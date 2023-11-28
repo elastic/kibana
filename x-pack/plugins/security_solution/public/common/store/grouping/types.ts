@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-export interface GroupOption {
-  key: string;
-  label: string;
-}
-
 export interface GroupModel {
-  activeGroup: string;
-  options: GroupOption[];
-  activePage: number;
-  itemsPerPage: number;
+  activeGroups: string[];
+  options: Array<{ key: string; label: string }>;
 }
 
-export interface GroupsById {
-  [id: string]: GroupModel;
-}
-
-export interface GroupMap {
-  groupById: GroupsById;
+export interface Groups {
+  [tableId: string]: GroupModel;
 }
 
 export interface GroupState {
-  groups: GroupMap;
+  groups: Groups;
 }

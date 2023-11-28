@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiLoadingContent, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSkeletonText, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { SearchResult } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,54 +45,54 @@ export const OrganicDocuments: React.FC = () => {
         </h2>
       }
     >
-      {hasDocuments ? (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {documents.map((document: SearchResult, index) => (
-            <EuiFlexItem key={index}>
-              <CurationResult
-                result={document}
-                index={index}
-                actions={
-                  isAutomated
-                    ? []
-                    : [
-                        {
-                          ...HIDE_DOCUMENT_ACTION,
-                          onClick: () => addHiddenId(document.id.raw),
-                        },
-                        {
-                          ...PROMOTE_DOCUMENT_ACTION,
-                          onClick: () => addPromotedId(document.id.raw),
-                        },
-                      ]
-                }
+      <EuiSkeletonText lines={5} isLoading={organicDocumentsLoading}>
+        {hasDocuments ? (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {documents.map((document: SearchResult, index) => (
+              <EuiFlexItem key={index}>
+                <CurationResult
+                  result={document}
+                  index={index}
+                  actions={
+                    isAutomated
+                      ? []
+                      : [
+                          {
+                            ...HIDE_DOCUMENT_ACTION,
+                            onClick: () => addHiddenId(document.id.raw),
+                          },
+                          {
+                            ...PROMOTE_DOCUMENT_ACTION,
+                            onClick: () => addPromotedId(document.id.raw),
+                          },
+                        ]
+                  }
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : (
+          <EuiEmptyPrompt
+            body={
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.description"
+                defaultMessage="No organic results to display.{manualDescription}"
+                values={{
+                  manualDescription: !isAutomated && (
+                    <>
+                      {' '}
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.manualDescription"
+                        defaultMessage="Add or change the active query above."
+                      />
+                    </>
+                  ),
+                }}
               />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ) : organicDocumentsLoading ? (
-        <EuiLoadingContent lines={5} />
-      ) : (
-        <EuiEmptyPrompt
-          body={
-            <FormattedMessage
-              id="xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.description"
-              defaultMessage="No organic results to display.{manualDescription}"
-              values={{
-                manualDescription: !isAutomated && (
-                  <>
-                    {' '}
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.manualDescription"
-                      defaultMessage="Add or change the active query above."
-                    />
-                  </>
-                ),
-              }}
-            />
-          }
-        />
-      )}
+            }
+          />
+        )}
+      </EuiSkeletonText>
     </DataPanel>
   );
 };

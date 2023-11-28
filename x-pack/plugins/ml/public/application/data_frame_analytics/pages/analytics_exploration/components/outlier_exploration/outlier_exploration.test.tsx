@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { MlContext } from '../../../../../contexts/ml';
-import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
-
 import { OutlierExploration } from './outlier_exploration';
+import { kibanaContextMock } from '../../../../../contexts/kibana/__mocks__/kibana_context';
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
@@ -21,9 +20,9 @@ jest.mock('react', () => {
 describe('Data Frame Analytics: <Exploration />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(
-      <MlContext.Provider value={kibanaContextValueMock}>
+      <KibanaContextProvider services={kibanaContextMock.services}>
         <OutlierExploration jobId="the-job-id" />
-      </MlContext.Provider>
+      </KibanaContextProvider>
     );
     // Without the jobConfig being loaded, the component will just return empty.
     expect(wrapper.text()).toMatch('');

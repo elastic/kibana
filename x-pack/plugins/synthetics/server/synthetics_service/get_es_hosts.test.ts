@@ -20,6 +20,7 @@ describe('getEsHostsTest', () => {
     cloudId:
       'TLS_Test:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJDI0ZDYwY2NjYmZjODRhZmZhNGRjYTQ3M2M2YjFlZDgwJGUxMjkyY2YzMTczZTRkNTViZDViM2NlNzYyZDg1NzY3',
     isCloudEnabled: true,
+    elasticsearchUrl: 'https://24d60cccbfc84affa4dca473c6b1ed80.us-central1.gcp.cloud.es.io:443',
   } as CloudSetup;
 
   it('should return expected host in cloud', function () {

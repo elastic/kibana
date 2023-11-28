@@ -33,7 +33,19 @@ export const integrations: ExternalIntegration[] = [
         'Collect logs using AWS Lambda application available in AWS Serverless Application Repository.',
     }),
     docUrlTemplate: `https://serverlessrepo.aws.amazon.com/applications/eu-central-1/267093732750/elastic-serverless-forwarder`,
-    categories: ['aws', 'custom'],
+    categories: ['aws', 'observability'],
+  },
+  {
+    id: 'esc',
+    title: i18n.translate('customIntegrations.placeholders.EscTitle', {
+      defaultMessage: 'Confluent Cloud',
+    }),
+    icon: 'logo_confluent.svg',
+    description: i18n.translate('customIntegrations.placeholders.EscDescription', {
+      defaultMessage: 'Collect data from Confluent Cloud with the Elastic Sink Connector.',
+    }),
+    docUrlTemplate: `https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch`,
+    categories: ['message_queue', 'observability', 'security'],
   },
 ];
 

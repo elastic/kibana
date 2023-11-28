@@ -6,15 +6,11 @@
  */
 
 import React, { memo } from 'react';
-import { LandingCards } from '../landing_cards';
-import { SecuritySolutionPageWrapper } from '../page_wrapper';
+import { useContractComponents } from '../../hooks/use_contract_component';
 
 export const LandingPageComponent = memo(() => {
-  return (
-    <SecuritySolutionPageWrapper>
-      <LandingCards />
-    </SecuritySolutionPageWrapper>
-  );
+  const { GetStarted } = useContractComponents();
+  return GetStarted ? <GetStarted /> : null;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

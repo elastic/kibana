@@ -6,7 +6,7 @@
  */
 
 import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
@@ -251,22 +251,22 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/150557
-  describe.skip('export jobs', function () {
+  describe('export jobs', function () {
     this.tags(['ml']);
+
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
-      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_bank_marketing', '@timestamp');
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
-      await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_egs_regression', '@timestamp');
 
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -282,16 +282,17 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToStackManagement();
       await ml.navigation.navigateToStackManagementJobsListPage();
     });
+
     after(async () => {
       await ml.api.cleanMlIndices();
       ml.stackManagementJobs.deleteExportedFiles([
         'anomaly_detection_jobs',
         'data_frame_analytics_jobs',
       ]);
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
-      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
-      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_bank_marketing');
+      await ml.testResources.deleteDataViewByTitle('ft_ihp_outlier');
+      await ml.testResources.deleteDataViewByTitle('ft_egs_regression');
     });
 
     it('opens export flyout and exports anomaly detector jobs', async () => {

@@ -56,9 +56,11 @@ from a different monitoring cluster, set `monitoring.ui.elasticsearch.hosts`.
 See <<monitoring-settings-kb>>.
 
 . Confirm that there is monitoring data available at that URL. It is stored in
-indices such as `.monitoring-kibana-*` and `.monitoring-es-*`. At a minimum, you
-must have monitoring data for the {es} production cluster. Once that data exists,
-{kib} can display monitoring data for other products in the cluster.
+indices such as `.monitoring-kibana-*` and `.monitoring-es-*` or
+`metrics-kibana.stack_monitoring.*`, depending on which method is
+used to collect monitoring data. At a minimum, you must have monitoring data
+for the {es} production cluster. Once that data exists, {kib} can display
+monitoring data for other products in the cluster.
 
 . Set the time filter to “Last 1 hour”.  When monitoring data appears in your
 cluster, the page automatically refreshes with the monitoring summary.

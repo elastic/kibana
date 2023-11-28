@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { EuiCodeEditor } from '../../shared_imports';
 
 export function EventOutput({ value }) {
   return (
@@ -21,20 +19,15 @@ export function EventOutput({ value }) {
         />
       }
       fullWidth
-      data-test-subj="aceEventOutput"
     >
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        isReadOnly
-        width="100%"
-        height="340px"
-        value={JSON.stringify(value, null, 2)}
-        setOptions={{
-          highlightActiveLine: false,
-          highlightGutterLine: false,
-        }}
-      />
+      <EuiCodeBlock
+        paddingSize="m"
+        language="json"
+        isCopyable
+        data-test-subj="eventOutputCodeBlock"
+      >
+        {JSON.stringify(value, null, 2)}
+      </EuiCodeBlock>
     </EuiFormRow>
   );
 }

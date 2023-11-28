@@ -71,6 +71,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
         defaultMessage: 'Comment',
       }
     ),
+    hostname: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.hostname',
+      {
+        defaultMessage: 'Hostname',
+      }
+    ),
   },
 });
 
@@ -92,6 +98,9 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
   }),
   status: i18n.translate('xpack.securitySolution.responseActionsList.list.status', {
     defaultMessage: 'Status',
+  }),
+  rule: i18n.translate('xpack.securitySolution.responseActionsList.list.rule', {
+    defaultMessage: 'Rule',
   }),
 });
 
@@ -164,6 +173,12 @@ export const UX_MESSAGES = Object.freeze({
         records: totalItemCount,
       },
     }),
+  triggeredByRule: i18n.translate(
+    'xpack.securitySolution.responseActionsList.list.rule.triggeredByRule',
+    {
+      defaultMessage: 'Triggered by rule',
+    }
+  ),
 });
 
 export const FILTER_NAMES = Object.freeze({
@@ -179,6 +194,9 @@ export const FILTER_NAMES = Object.freeze({
   users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
     defaultMessage: 'Filter by username',
   }),
+  type: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.type', {
+    defaultMessage: 'Type',
+  }),
 });
 
 export const ARIA_LABELS = Object.freeze({
@@ -190,5 +208,19 @@ export const ARIA_LABELS = Object.freeze({
   ),
   expand: i18n.translate('xpack.securitySolution.responseActionsList.list.expandButton.expand', {
     defaultMessage: 'Expand',
+  }),
+});
+
+export const EXECUTE_FILE_LINK_TITLE = i18n.translate(
+  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
+  { defaultMessage: 'Click here to download full output' }
+);
+
+export const FILTER_TYPE_OPTIONS = Object.freeze({
+  manual: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.manual', {
+    defaultMessage: 'Triggered manually',
+  }),
+  automated: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.automated', {
+    defaultMessage: 'Triggered by rule',
   }),
 });

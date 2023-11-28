@@ -30,7 +30,7 @@ export const RelevanceTuningCallouts: React.FC = () => {
   const invalidBoostsCallout = () => (
     <EuiCallOut
       color="warning"
-      iconType="alert"
+      iconType="warning"
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoostsBannerLabel',
         {
@@ -52,7 +52,7 @@ export const RelevanceTuningCallouts: React.FC = () => {
   const unsearchedUnconfirmedFieldsCallout = () => (
     <EuiCallOut
       color="warning"
-      iconType="alert"
+      iconType="warning"
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.uncofirmedFieldsBannerLabel',
         {
@@ -83,7 +83,7 @@ export const RelevanceTuningCallouts: React.FC = () => {
   const schemaFieldsWithConflictsCallout = () => (
     <EuiCallOut
       color="warning"
-      iconType="alert"
+      iconType="warning"
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.schemaConflictsBannerLabel',
         {

@@ -18,9 +18,15 @@ import { getHealthStatuses } from './get_health_statuses';
 import { getServicesWithoutTransactions } from './get_services_without_transactions';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
-import { mergeServiceStats } from './merge_service_stats';
+import { MergedServiceStat, mergeServiceStats } from './merge_service_stats';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
+
+export interface ServicesItemsResponse {
+  items: MergedServiceStat[];
+  maxServiceCountExceeded: boolean;
+  serviceOverflowCount: number;
+}
 
 export async function getServicesItems({
   environment,
@@ -35,6 +41,7 @@ export async function getServicesItems({
   randomSampler,
   documentType,
   rollupInterval,
+  useDurationSummary,
 }: {
   environment: string;
   kuery: string;
@@ -48,7 +55,8 @@ export async function getServicesItems({
   randomSampler: RandomSampler;
   documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
-}) {
+  useDurationSummary: boolean;
+}): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
       environment,
@@ -60,6 +68,7 @@ export async function getServicesItems({
       randomSampler,
       documentType,
       rollupInterval,
+      useDurationSummary,
     };
 
     const [

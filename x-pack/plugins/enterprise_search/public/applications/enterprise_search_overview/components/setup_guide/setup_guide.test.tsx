@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout } from '../../../shared/setup_guide';
 
 import { SetupGuide } from '.';

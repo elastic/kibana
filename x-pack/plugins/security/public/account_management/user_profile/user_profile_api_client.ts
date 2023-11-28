@@ -5,63 +5,22 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
+import type {
+  UserProfileAPIClient as UserProfileAPIClientType,
+  UserProfileBulkGetParams,
+  UserProfileGetCurrentParams,
+  UserProfileSuggestParams,
+} from '@kbn/security-plugin-types-public';
+import type { UserProfileData } from '@kbn/user-profile-components';
 
-import type { GetUserProfileResponse, UserProfile, UserProfileData } from '../../../common';
+import type { GetUserProfileResponse, UserProfile } from '../../../common';
 
-/**
- * Parameters for the get user profile for the current user API.
- */
-export interface UserProfileGetCurrentParams {
-  /**
-   * By default, get API returns user information, but does not return any user data. The optional "dataPath"
-   * parameter can be used to return personal data for this user (within `kibana` namespace only).
-   */
-  dataPath: string;
-}
-
-/**
- * Parameters for the bulk get API.
- */
-export interface UserProfileBulkGetParams {
-  /**
-   * List of user profile identifiers.
-   */
-  uids: Set<string>;
-
-  /**
-   * By default, suggest API returns user information, but does not return any user data. The optional "dataPath"
-   * parameter can be used to return personal data for this user (within `kibana` namespace only).
-   */
-  dataPath?: string;
-}
-
-/**
- * Parameters for the suggest API.
- */
-export interface UserProfileSuggestParams {
-  /**
-   * Query string used to match name-related fields in user profiles. The following fields are treated as
-   * name-related: username, full_name and email.
-   */
-  name: string;
-
-  /**
-   * Desired number of suggestions to return. The default value is 10.
-   */
-  size?: number;
-
-  /**
-   * By default, suggest API returns user information, but does not return any user data. The optional "dataPath"
-   * parameter can be used to return personal data for this user (within `kibana` namespace only).
-   */
-  dataPath?: string;
-}
-
-export class UserProfileAPIClient {
+export class UserProfileAPIClient implements UserProfileAPIClientType {
   private readonly internalDataUpdates$: Subject<UserProfileData> = new Subject();
 
   /**
@@ -69,6 +28,11 @@ export class UserProfileAPIClient {
    */
   public readonly dataUpdates$: Observable<UserProfileData> =
     this.internalDataUpdates$.asObservable();
+
+  private readonly _userProfile$ = new BehaviorSubject<UserProfileData | null>(null);
+
+  /** Observable of the current user profile data */
+  public readonly userProfile$ = this._userProfile$.asObservable();
 
   constructor(private readonly http: HttpStart) {}
 
@@ -80,9 +44,16 @@ export class UserProfileAPIClient {
    * optional "dataPath" parameter can be used to return personal data for this user.
    */
   public getCurrent<D extends UserProfileData>(params?: UserProfileGetCurrentParams) {
-    return this.http.get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
-      query: { dataPath: params?.dataPath },
-    });
+    return this.http
+      .get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
+        query: { dataPath: params?.dataPath },
+      })
+      .then((response) => {
+        const data = response?.data ?? {};
+        const updated = merge(this._userProfile$.getValue(), data);
+        this._userProfile$.next(updated);
+        return response;
+      });
   }
 
   /**
@@ -126,10 +97,19 @@ export class UserProfileAPIClient {
    * @param data Application data to be written (merged with existing data).
    */
   public update<D extends UserProfileData>(data: D) {
+    // Optimistic update the user profile Observable.
+    const previous = this._userProfile$.getValue();
+    this._userProfile$.next(data);
+
     return this.http
       .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
       .then(() => {
         this.internalDataUpdates$.next(data);
+      })
+      .catch((err) => {
+        // Revert the user profile data to the previous state.
+        this._userProfile$.next(previous);
+        return Promise.reject(err);
       });
   }
 }

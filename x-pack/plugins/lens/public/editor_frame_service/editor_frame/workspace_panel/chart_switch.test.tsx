@@ -47,7 +47,7 @@ describe('chart_switch', () => {
           groupLabel: `${id}Group`,
         },
       ],
-      initialize: jest.fn((_frame, state?: unknown) => {
+      initialize: jest.fn((_addNewLayer, state) => {
         return state || `${id} initial state`;
       }),
       getSuggestions: jest.fn((options) => {
@@ -297,7 +297,7 @@ describe('chart_switch', () => {
         .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
         .first()
         .props().type
-    ).toEqual('alert');
+    ).toEqual('warning');
   });
 
   it('should indicate data loss if not all layers will be used', async () => {
@@ -324,7 +324,7 @@ describe('chart_switch', () => {
         .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
         .first()
         .props().type
-    ).toEqual('alert');
+    ).toEqual('warning');
   });
 
   it('should support multi-layer suggestions without data loss', async () => {
@@ -400,7 +400,7 @@ describe('chart_switch', () => {
         .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
         .first()
         .props().type
-    ).toEqual('alert');
+    ).toEqual('warning');
   });
 
   it('should not indicate data loss if there is no data', async () => {
@@ -519,7 +519,10 @@ describe('chart_switch', () => {
   it('should query main palette from active chart and pass into suggestions', async () => {
     const visualizationMap = mockVisualizationMap();
     const mockPalette: PaletteOutput = { type: 'palette', name: 'mock' };
-    visualizationMap.visA.getMainPalette = jest.fn(() => mockPalette);
+    visualizationMap.visA.getMainPalette = jest.fn(() => ({
+      type: 'legacyPalette',
+      value: mockPalette,
+    }));
     visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a', 'b', 'c']);
     const currentVisState = {};
@@ -550,7 +553,7 @@ describe('chart_switch', () => {
     expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
         keptLayerIds: ['a'],
-        mainPalette: mockPalette,
+        mainPalette: { type: 'legacyPalette', value: mockPalette },
       })
     );
   });

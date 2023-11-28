@@ -6,12 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-
 import { ChartData } from '../../../typings/slo';
-import { toHighPrecisionPercentage } from '../helpers/number';
+import { useKibana } from '../../../utils/kibana_react';
+import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { WideChart } from './wide_chart';
 
 export interface Props {
@@ -21,11 +22,14 @@ export interface Props {
 }
 
 export function SliChartPanel({ data, isLoading, slo }: Props) {
+  const { uiSettings } = useKibana().services;
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
+
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
   const hasNoData = slo.summary.status === 'NO_DATA';
 
   return (
-    <EuiPanel paddingSize="m" color="transparent" hasBorder>
+    <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="sliChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
@@ -39,10 +43,15 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.duration', {
-                defaultMessage: 'Last {duration}',
-                values: { duration: slo.timeWindow.duration },
-              })}
+              {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                ? i18n.translate(
+                    'xpack.observability.slo.sloDetails.sliHistoryChartPanel.duration',
+                    {
+                      defaultMessage: 'Last {duration}',
+                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                    }
+                  )
+                : toDurationAdverbLabel(slo.timeWindow.duration)}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -51,7 +60,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem grow={false}>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
-              title={hasNoData ? '-' : `${toHighPrecisionPercentage(slo.summary.sliValue)}%`}
+              title={hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat)}
               titleSize="s"
               description={i18n.translate(
                 'xpack.observability.slo.sloDetails.sliHistoryChartPanel.current',
@@ -62,7 +71,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiStat
-              title={`${toHighPrecisionPercentage(slo.objective.target)}%`}
+              title={numeral(slo.objective.target).format(percentFormat)}
               titleSize="s"
               description={i18n.translate(
                 'xpack.observability.slo.sloDetails.sliHistoryChartPanel.objective',

@@ -20,6 +20,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
+    servers: {
+      ...kibanaCommonTestsConfig.get('servers'),
+      fleetserver: {
+        protocol: 'https',
+        hostname: 'host.docker.internal',
+        port: 8220,
+      },
+    },
+
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
       serverArgs: [
@@ -43,6 +52,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://host.docker.internal:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,
+        `--xpack.fleet.packages.0.name=osquery_manager`,
+        `--xpack.fleet.packages.0.version=latest`,
       ],
     },
   };

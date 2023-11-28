@@ -9,33 +9,47 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
-import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '.';
+import {
+  createTaskRunError,
+  TaskErrorSource,
+  TaskManagerRunner,
+  TaskRunningStage,
+  TaskRunResult,
+} from '.';
 import {
   TaskEvent,
   asTaskRunEvent,
   asTaskMarkRunningEvent,
   TaskRun,
   TaskPersistence,
+  asTaskManagerStatEvent,
 } from '../task_events';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
-import { throwUnrecoverableError } from './errors';
-import { taskStoreMock } from '../task_store.mock';
+import { createSkipError, throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
   calculateDelay,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
+import { schema } from '@kbn/config-schema';
+import { RequeueInvalidTasksConfig } from '../config';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
+const mockRequeueInvalidTasksConfig = {
+  enabled: false,
+  delay: 3000,
+  max_attempts: 20,
+};
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -306,12 +320,10 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('uses getRetry (returning date) to set retryAt when defined', async () => {
+    test('sets retryAt when there is an error', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -323,7 +335,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -334,11 +345,11 @@ describe('TaskManagerRunner', () => {
       await runner.markTaskAsRunning();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
       const instance = store.update.mock.calls[0][0];
 
+      const expectedRetryAt = new Date(Date.now() + calculateDelay(initialAttempts + 1));
       expect(instance.retryAt!.getTime()).toEqual(
-        new Date(nextRetry.getTime() + timeoutMinutes * 60 * 1000).getTime()
+        new Date(expectedRetryAt.getTime() + timeoutMinutes * 60 * 1000).getTime()
       );
       expect(instance.enabled).not.toBeDefined();
     });
@@ -346,9 +357,7 @@ describe('TaskManagerRunner', () => {
     test('it returns false when markTaskAsRunning fails due to VERSION_CONFLICT_STATUS', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -359,7 +368,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -377,9 +385,7 @@ describe('TaskManagerRunner', () => {
     test('it throw when markTaskAsRunning fails for unexpected reasons', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -390,7 +396,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -410,9 +415,7 @@ describe('TaskManagerRunner', () => {
     test(`it tries to increment a task's attempts when markTaskAsRunning fails for unexpected reasons`, async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -423,7 +426,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -444,25 +446,26 @@ describe('TaskManagerRunner', () => {
         `[Error: type: Bad Request]`
       );
 
-      expect(store.update).toHaveBeenCalledWith({
-        ...mockInstance({
-          id,
-          attempts: initialAttempts + 1,
-          schedule: undefined,
-        }),
-        status: TaskStatus.Idle,
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
-      });
+      expect(store.update).toHaveBeenCalledWith(
+        {
+          ...mockInstance({
+            id,
+            attempts: initialAttempts + 1,
+            schedule: undefined,
+          }),
+          status: TaskStatus.Idle,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        },
+        { validate: false }
+      );
     });
 
     test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails for version conflict`, async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -473,7 +476,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -500,9 +502,7 @@ describe('TaskManagerRunner', () => {
     test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails due to Saved Object not being found`, async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -513,7 +513,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -539,79 +538,6 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledTimes(1);
     });
 
-    test('uses getRetry (returning true) to set retryAt when defined', async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(true);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-      const instance = store.update.mock.calls[0][0];
-
-      const attemptDelay = calculateDelay(initialAttempts + 1);
-      const timeoutDelay = timeoutMinutes * 60 * 1000;
-      expect(instance.retryAt!.getTime()).toEqual(
-        new Date(Date.now() + attemptDelay + timeoutDelay).getTime()
-      );
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('uses getRetry (returning false) to set retryAt when defined', async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(false);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.retryAt!).toBeNull();
-      expect(instance.status).toBe('running');
-      expect(instance.enabled).not.toBeDefined();
-    });
-
     test('bypasses getRetry (returning false) of a recurring task to set retryAt when defined', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
@@ -629,7 +555,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -926,7 +851,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test('reschedules tasks that return a schedule', async () => {
@@ -954,7 +881,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
@@ -988,9 +917,8 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      const instance = store.update.mock.calls[0][0];
-      expect(instance.status).toBe('failed');
-      expect(instance.enabled).not.toBeDefined();
+      expect(store.remove).toHaveBeenCalled();
+      expect(store.update).not.toHaveBeenCalled();
 
       expect(onTaskEvent).toHaveBeenCalledWith(
         withAnyTiming(
@@ -1001,11 +929,15 @@ describe('TaskManagerRunner', () => {
               persistence: TaskPersistence.Recurring,
               task: originalInstance,
               result: TaskRunResult.Failed,
+              isExpired: false,
             })
           )
         )
       );
-      expect(onTaskEvent).toHaveBeenCalledTimes(1);
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+      );
+      expect(onTaskEvent).toHaveBeenCalledTimes(2);
     });
 
     test('tasks that return runAt override the schedule', async () => {
@@ -1029,7 +961,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test('removes non-recurring tasks after they complete', async () => {
@@ -1105,11 +1039,10 @@ describe('TaskManagerRunner', () => {
       expect(logger.debug).toHaveBeenCalledWith(`The task bar "foo" is not cancellable.`);
     });
 
-    test('uses getRetry function (returning date) on error when defined', async () => {
+    test('throws retry error (returning date) on error when defined', async () => {
       const initialAttempts = _.random(1, 3);
       const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const id = Date.now().toString();
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const error = new Error('Dangit!');
       const { runner, store } = await readyToRunStageSetup({
         instance: {
@@ -1120,10 +1053,9 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               async run() {
-                throw error;
+                throw throwRetryableError(error, nextRetry);
               },
             }),
           },
@@ -1133,17 +1065,15 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts, error);
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.runAt.getTime()).toEqual(nextRetry.getTime());
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('uses getRetry function (returning true) on error when defined', async () => {
+    test('throws retry error (returning true) on error when defined', async () => {
       const initialAttempts = _.random(1, 3);
       const id = Date.now().toString();
-      const getRetryStub = sinon.stub().returns(true);
       const error = new Error('Dangit!');
       const { runner, store } = await readyToRunStageSetup({
         instance: {
@@ -1154,10 +1084,9 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
-              async run() {
-                throw error;
+              run: async () => {
+                throwRetryableError(error, true);
               },
             }),
           },
@@ -1167,7 +1096,6 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts, error);
       const instance = store.update.mock.calls[0][0];
 
       const expectedRunAt = new Date(Date.now() + calculateDelay(initialAttempts));
@@ -1175,10 +1103,9 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('uses getRetry function (returning false) on error when defined', async () => {
+    test('throws retry error (returning false) on error when defined', async () => {
       const initialAttempts = _.random(1, 3);
       const id = Date.now().toString();
-      const getRetryStub = sinon.stub().returns(false);
       const error = new Error('Dangit!');
       const { runner, store } = await readyToRunStageSetup({
         instance: {
@@ -1189,10 +1116,9 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               async run() {
-                throw error;
+                throwRetryableError(error, false);
               },
             }),
           },
@@ -1201,12 +1127,8 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts, error);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.status).toBe('failed');
-      expect(instance.enabled).not.toBeDefined();
+      expect(store.remove).toHaveBeenCalled();
+      expect(store.update).not.toHaveBeenCalled();
     });
 
     test('bypasses getRetry function (returning false) on error of a recurring task', async () => {
@@ -1225,7 +1147,6 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               async run() {
                 throw error;
@@ -1272,13 +1193,8 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-      expect(instance.attempts).toEqual(3);
-      expect(instance.status).toEqual('failed');
-      expect(instance.retryAt!).toBeNull();
-      expect(instance.runAt.getTime()).toBeLessThanOrEqual(Date.now());
-      expect(instance.enabled).not.toBeDefined();
+      expect(store.remove).toHaveBeenCalled();
+      expect(store.update).not.toHaveBeenCalled();
     });
 
     test(`Doesn't fail recurring tasks when maxAttempts reached`, async () => {
@@ -1349,9 +1265,53 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.Success,
+                isExpired: false,
               })
             )
           )
+        );
+      });
+
+      test('emits TaskEvent when a task is run successfully but completes after timeout', async () => {
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        const id = _.random(1, 20).toString();
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `1s`,
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        await runner.run();
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asOk({
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.Success,
+                isExpired: true,
+              })
+            )
+          )
+        );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
         );
       });
 
@@ -1387,6 +1347,143 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.Success,
+                isExpired: false,
+              })
+            )
+          )
+        );
+      });
+
+      test('emits TaskEvent when a recurring task is run successfully but completes after timeout', async () => {
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1m' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `1s`,
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        await runner.run();
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asOk({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Success,
+                isExpired: true,
+              })
+            )
+          )
+        );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+      });
+
+      test('emits TaskEvent when a recurring task returns a success result with taskRunError', async () => {
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1m' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return {
+                    runAt,
+                    state: {},
+                    taskRunError: createTaskRunError(new Error('test'), TaskErrorSource.FRAMEWORK),
+                  };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Success,
+                error: new Error(`Alerting task failed to run.`),
+                isExpired: false,
+              })
+            )
+          )
+        );
+      });
+
+      test('emits TaskEvent when a recurring task returns a success result with taskRunError but completes after timeout', async () => {
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1m' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `1s`,
+              createTaskRunner: () => ({
+                async run() {
+                  return {
+                    runAt,
+                    state: {},
+                    taskRunError: createTaskRunError(new Error('test'), TaskErrorSource.FRAMEWORK),
+                  };
+                },
+              }),
+            },
+          },
+        });
+
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        await runner.run();
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Success,
+                isExpired: true,
+                error: new Error(`Alerting task failed to run.`),
               })
             )
           )
@@ -1424,11 +1521,57 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.RetryScheduled,
+                isExpired: false,
               })
             )
           )
         );
-        expect(onTaskEvent).toHaveBeenCalledTimes(1);
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
+      });
+
+      test('emits TaskEvent when a task run throws an error and has timed out', async () => {
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        const id = _.random(1, 20).toString();
+        const error = new Error('Dangit!');
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `1s`,
+              createTaskRunner: () => ({
+                async run() {
+                  throw error;
+                },
+              }),
+            },
+          },
+        });
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        await runner.run();
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                error,
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.Failed,
+                isExpired: true,
+              })
+            )
+          )
+        );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
 
       test('emits TaskEvent when a task run returns an error', async () => {
@@ -1465,11 +1608,15 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.RetryScheduled,
+                isExpired: false,
               })
             )
           )
         );
-        expect(onTaskEvent).toHaveBeenCalledTimes(1);
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
 
       test('emits TaskEvent when a task returns an error and is marked as failed', async () => {
@@ -1490,10 +1637,13 @@ describe('TaskManagerRunner', () => {
           definitions: {
             bar: {
               title: 'Bar!',
-              getRetry: () => false,
               createTaskRunner: () => ({
                 async run() {
-                  return { error, state: {} };
+                  try {
+                    throwUnrecoverableError(error);
+                  } catch (e) {
+                    return { error: e, state: {} };
+                  }
                 },
               }),
             },
@@ -1502,9 +1652,8 @@ describe('TaskManagerRunner', () => {
 
         await runner.run();
 
-        const instance = store.update.mock.calls[0][0];
-        expect(instance.status).toBe('failed');
-        expect(instance.enabled).not.toBeDefined();
+        expect(store.remove).toHaveBeenCalled();
+        expect(store.update).not.toHaveBeenCalled();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -1515,11 +1664,15 @@ describe('TaskManagerRunner', () => {
                 task: originalInstance,
                 persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.Failed,
+                isExpired: false,
               })
             )
           )
         );
-        expect(onTaskEvent).toHaveBeenCalledTimes(1);
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
     });
 
@@ -1537,7 +1690,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: '1m',
-            getRetry: () => false,
             createTaskRunner: () => ({
               async run() {
                 return { error, state: {}, runAt: moment().add(1, 'm').toDate() };
@@ -1607,12 +1759,665 @@ describe('TaskManagerRunner', () => {
         tags: ['task:end', 'foo', 'bar'],
       });
     });
+
+    describe('Skip Tasks', () => {
+      test('skips task.run when the task has invalid params', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          schedule: { interval: '10m' },
+          status: TaskStatus.Idle,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStatePAram: 'foo' },
+          runAt: new Date(),
+          params: { foo: 'bar' },
+        };
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: { foo: 'bar' } };
+                },
+              }),
+              paramsSchema: schema.object({
+                baz: schema.string(), // { foo: 'bar' } is valid
+              }),
+            },
+          },
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledTimes(1);
+        const instance = store.update.mock.calls[0][0];
+
+        expect(instance.runAt.getTime()).toBe(
+          new Date(Date.now()).getTime() + mockRequeueInvalidTasksConfig.delay
+        );
+        expect(instance.state).toEqual(mockTaskInstance.state);
+        expect(instance.schedule).toEqual(mockTaskInstance.schedule);
+        expect(instance.attempts).toBe(0);
+        expect(instance.numSkippedRuns).toBe(1);
+        expect(result).toEqual(
+          asErr({
+            error: createSkipError(
+              new Error('[baz]: expected value of type [string] but got [undefined]')
+            ),
+            state: {
+              existingStatePAram: 'foo',
+            },
+          })
+        );
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task (bar/foo) has a validation error: [baz]: expected value of type [string] but got [undefined]'
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task Manager has skipped executing the Task (bar/foo) 1 times as it has invalid params.'
+        );
+      });
+
+      test('skips task.run when the task has invalid indirect params e.g. rule', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          schedule: { interval: '10m' },
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStatePAram: 'foo' },
+          runAt: new Date(),
+        };
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            delay: 3000,
+            enabled: true,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { foo: 'bar' } } };
+                },
+                async run() {
+                  return { state: {} };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                baz: schema.string(), // { foo: 'bar' } is valid
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledTimes(1);
+        const instance = store.update.mock.calls[0][0];
+
+        expect(instance.runAt.getTime()).toBe(
+          new Date(Date.now()).getTime() + mockRequeueInvalidTasksConfig.delay
+        );
+        expect(instance.state).toEqual(mockTaskInstance.state);
+        expect(instance.schedule).toEqual(mockTaskInstance.schedule);
+        expect(instance.attempts).toBe(0);
+        expect(instance.numSkippedRuns).toBe(1);
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task (bar/foo) has a validation error in its indirect params: [baz]: expected value of type [string] but got [undefined]'
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task Manager has skipped executing the Task (bar/foo) 1 times as it has invalid params.'
+        );
+        expect(result).toEqual(
+          asErr({
+            state: mockTaskInstance.state,
+            error: createSkipError(
+              new Error('[baz]: expected value of type [string] but got [undefined]')
+            ),
+          })
+        );
+      });
+
+      test('does not skip when disabled (recurring task)', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          schedule: { interval: '10m' },
+          attempts: 1,
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStatePAram: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: mockRequeueInvalidTasksConfig.max_attempts,
+        };
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            delay: 3000,
+            enabled: false,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { foo: 'bar' } } };
+                },
+                async run() {
+                  return { state: { new: 'foo' } };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                baz: schema.string(), // { foo: 'bar' } is valid
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledTimes(1);
+        const instance = store.update.mock.calls[0][0];
+
+        expect(instance.runAt.getTime()).toBeGreaterThan(mockTaskInstance.runAt!.getTime()); // reschedule attempt
+        expect(instance.state).toEqual({ new: 'foo' });
+        expect(instance.schedule).toEqual(mockTaskInstance.schedule);
+        expect(instance.attempts).toBe(0);
+        expect(instance.numSkippedRuns).toBe(0);
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(result).toEqual(asOk({ state: { new: 'foo' } }));
+      });
+
+      test('does not skip when disabled (non-recurring task)', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          attempts: 5, // defaultMaxAttempts
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStatePAram: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: 0,
+        };
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            delay: 3000,
+            enabled: false,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { foo: 'bar' } } };
+                },
+                async run() {
+                  return { state: { new: 'foo' } };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                baz: schema.string(), // { foo: 'bar' } is valid
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        expect(store.update).not.toHaveBeenCalled();
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(store.remove).toHaveBeenCalled();
+      });
+
+      test('resets skip attempts on the first successful run', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          schedule: { interval: '10m' },
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStateParam: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: 20,
+        };
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { foo: 'bar' } } };
+                },
+                async run() {
+                  return { state: {} };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledTimes(1);
+        const instance = store.update.mock.calls[0][0];
+        expect(instance.state).toEqual({});
+        expect(instance.attempts).toBe(0);
+        expect(instance.numSkippedRuns).toBe(0);
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(result).toEqual(asOk({ state: {} }));
+      });
+
+      test('removes the non-recurring tasks on the first successful run after skipping', async () => {
+        const cleanupFn = jest.fn();
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStateParam: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: 20,
+        };
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { foo: 'bar' } } };
+                },
+                async run() {
+                  return { state: {} };
+                },
+                cleanup: cleanupFn,
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).not.toHaveBeenCalled();
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(cleanupFn).toHaveBeenCalled();
+        expect(store.remove).toHaveBeenCalledWith('foo');
+        expect(result).toEqual(asOk({ state: {} }));
+      });
+
+      test('does not resets skip attempts for a recurring task as long as there is an error', async () => {
+        const taskRunError = createTaskRunError(new Error('test'), TaskErrorSource.FRAMEWORK);
+
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          schedule: { interval: '10m' },
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStateParam: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: 20,
+        };
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { foo: 'bar' } } };
+                },
+                async run() {
+                  return {
+                    state: {},
+                    taskRunError,
+                  };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledTimes(1);
+        expect(store.remove).not.toHaveBeenCalled();
+        const instance = store.update.mock.calls[0][0];
+        expect(instance.numSkippedRuns).toBe(mockTaskInstance.numSkippedRuns);
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(result).toEqual(
+          asOk({
+            state: {},
+            taskRunError,
+          })
+        );
+      });
+
+      test('does not resets skip attempts for a non-recurring task as long as there is an error', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStateParam: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: 20,
+          attempts: 3,
+        };
+        const error = new Error('test');
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { foo: 'bar' } } };
+                },
+                async run() {
+                  return { state: {}, error };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attempts: 3,
+            numSkippedRuns: 20,
+            state: {},
+            status: TaskStatus.Idle,
+          }),
+          { validate: true }
+        );
+        expect(store.remove).not.toHaveBeenCalled();
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(result).toEqual(asErr({ state: {}, error }));
+      });
+
+      test("sets non recurring task's status as dead_letter after skip and retry attempts ", async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStateParam: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: 20, // max
+          attempts: 5, // default max
+        };
+        const error = new Error('test');
+
+        const { runner, store } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            delay: 3000,
+            enabled: true,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { foo: 'bar' } } };
+                },
+                async run() {
+                  return { state: {}, error };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                baz: schema.string(),
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attempts: mockTaskInstance.attempts, // default max
+            numSkippedRuns: mockTaskInstance.numSkippedRuns,
+            state: mockTaskInstance.state,
+            status: TaskStatus.DeadLetter,
+          }),
+          { validate: true }
+        );
+        expect(store.remove).not.toHaveBeenCalled();
+        expect(result).toEqual(asErr({ state: {}, error }));
+      });
+
+      test('stops skipping when the max skip limit is reached', async () => {
+        const taskRunError = createTaskRunError(new Error('test'), TaskErrorSource.FRAMEWORK);
+
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          schedule: { interval: '3s' },
+          enabled: true,
+          state: { existingStateParam: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: 20,
+          attempts: 0,
+        };
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async loadIndirectParams() {
+                  return { data: { indirectParams: { baz: 'bar' } } };
+                },
+                async run() {
+                  return {
+                    state: {},
+                    taskRunError,
+                  };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attempts: 0,
+            numSkippedRuns: 20,
+            state: {},
+            status: TaskStatus.Idle,
+          }),
+          { validate: true }
+        );
+        expect(store.remove).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task (bar/foo) has a validation error in its indirect params: [foo]: expected value of type [string] but got [undefined]'
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task Manager has reached the max skip attempts for task bar/foo'
+        );
+        expect(result).toEqual(
+          asOk({
+            state: {},
+            taskRunError,
+          })
+        );
+      });
+    });
+  });
+
+  describe('isAdHocTaskAndOutOfAttempts', () => {
+    it(`should return false if the task doesn't have a schedule`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(false);
+    });
+
+    it(`should return false if the recurring task still has attempts remaining`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 4,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(false);
+    });
+
+    it(`should return true if the recurring task is out of attempts`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 5,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(true);
+    });
+  });
+
+  describe('removeTask()', () => {
+    it(`should remove the task saved-object`, async () => {
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+        },
+      });
+
+      await runner.run();
+      await runner.removeTask();
+      expect(store.remove).toHaveBeenCalledWith('foo');
+    });
+
+    it(`should call the task cleanup function if defined`, async () => {
+      const cleanupFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar2',
+        },
+        definitions: {
+          testbar2: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+              cancel: jest.fn(),
+              cleanup: cleanupFn,
+            }),
+          },
+        },
+      });
+
+      // Remove task is called after run() with the this.task object defined
+      await runner.run();
+      expect(cleanupFn).toHaveBeenCalledTimes(1);
+    });
+
+    it(`doesn't throw an error if the cleanup function throws an error`, async () => {
+      const cleanupFn = jest.fn().mockRejectedValue(new Error('Fail'));
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar2',
+        },
+        definitions: {
+          testbar2: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+              cancel: jest.fn(),
+              cleanup: cleanupFn,
+            }),
+          },
+        },
+      });
+
+      // Remove task is called after run() with the this.task object defined
+      await runner.run();
+      expect(cleanupFn).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error encountered when running onTaskRemoved() hook for testbar2 "foo": Fail`
+      );
+    });
   });
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
+    requeueInvalidTasksConfig?: RequeueInvalidTasksConfig;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -1657,7 +2462,7 @@ describe('TaskManagerRunner', () => {
 
     const instance = mockInstance(opts.instance);
 
-    const store = taskStoreMock.create();
+    const store = bufferedTaskStoreMock.create();
     const usageCounter = usageCountersServiceMock.createSetupContract().createUsageCounter('test');
 
     store.update.mockResolvedValue(instance);
@@ -1688,6 +2493,7 @@ describe('TaskManagerRunner', () => {
         monitor: true,
         warn_threshold: 5000,
       },
+      requeueInvalidTasksConfig: opts.requeueInvalidTasksConfig || mockRequeueInvalidTasksConfig,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

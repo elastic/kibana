@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
+
 import { packagePolicyService } from '../..';
+import { auditLoggingService } from '../../audit_logging';
 
 import { removeInstallation } from './remove';
 
@@ -15,15 +18,28 @@ jest.mock('../..', () => {
       getLogger: jest.fn().mockReturnValue({
         info: jest.fn(),
         error: jest.fn(),
+        warn: jest.fn(),
       }),
     },
     packagePolicyService: {
-      list: jest.fn().mockResolvedValue({ total: 1, items: [{ id: 'system-1' }] }),
+      list: jest.fn().mockImplementation((soClient, params) => {
+        if (params.kuery.includes('system'))
+          return Promise.resolve({ total: 1, items: [{ id: 'system-1', agents: 1 }] });
+        else
+          return Promise.resolve({
+            total: 2,
+            items: [{ id: 'elastic_agent-1' }, { id: 'elastic_agent-2' }],
+          });
+      }),
       delete: jest.fn(),
     },
   };
 });
+jest.mock('../../audit_logging');
 
+jest.mock('../../package_policies/populate_package_policy_assigned_agents_count');
+
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 describe('removeInstallation', () => {
@@ -63,7 +79,34 @@ describe('removeInstallation', () => {
         force: false,
       })
     ).rejects.toThrowError(
-      `unable to remove package with existing package policy(s) in use by agent(s)`
+      `Unable to remove package with existing package policy(s) in use by agent(s)`
     );
+  });
+
+  it('should remove package policies when not used by agents', async () => {
+    await removeInstallation({
+      savedObjectsClient: soClientMock,
+      pkgName: 'elastic_agent',
+      pkgVersion: '1.0.0',
+      esClient: esClientMock,
+      force: false,
+    });
+    expect(mockPackagePolicyService.delete).toHaveBeenCalledTimes(2);
+  });
+
+  it('should call audit logger', async () => {
+    await removeInstallation({
+      savedObjectsClient: soClientMock,
+      pkgName: 'system',
+      pkgVersion: '1.0.0',
+      esClient: esClientMock,
+      force: true,
+    });
+
+    expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      action: 'delete',
+      id: 'system',
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
   });
 });

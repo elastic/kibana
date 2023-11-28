@@ -7,9 +7,9 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AnyAction, Reducer } from 'redux';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { HostsState } from './hosts/store';
 import type { UsersState } from './users/store';
-import { TableId } from '../../common/types';
 import type { SecuritySubPluginWithStore } from '../app/types';
 import { routes } from './routes';
 import type { NetworkState } from './network/store';

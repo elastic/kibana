@@ -10,6 +10,7 @@ import type {
   AggregationsMultiBucketBase,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import type { CspmRulesStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
@@ -40,7 +41,14 @@ interface PostureType {
   metrics: { 'rule.benchmark.posture_type': string };
 }
 
+interface Accounts {
+  accounts: {
+    buckets: RulesStats[];
+  };
+}
+
 interface RulesStats {
+  key: string; // account_id
   rules: {
     buckets: RuleEntity[];
   };
@@ -65,141 +73,154 @@ const getRulesStatsQuery = (): SearchRequest => ({
   query: {
     match_all: {},
   },
+  // generates the 'asset_identifier' field
+  runtime_mappings: getIdentifierRuntimeMapping(),
   aggs: {
-    rules: {
+    accounts: {
       terms: {
-        field: 'rule.id',
+        field: 'asset_identifier',
         order: {
           _count: 'desc',
         },
-        size: 100,
+        size: 1000,
       },
       aggs: {
-        rule_name: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.name',
+        rules: {
+          terms: {
+            field: 'rule.id',
+            order: {
+              _count: 'desc',
             },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
+            size: 1000,
           },
-        },
-        rule_section: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.section',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
-        rule_version: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.version',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
-        posture_type: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.benchmark.posture_type',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
-        rule_number: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.benchmark.rule_number',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
-        benchmark_id: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.benchmark.id',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
-        benchmark_version: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.benchmark.version',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
-        benchmark_name: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.benchmark.name',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
-        passed_findings_count: {
-          filter: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          'result.evaluation': 'passed',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
+          aggs: {
+            rule_name: {
+              top_metrics: {
+                metrics: {
+                  field: 'rule.name',
                 },
-              ],
-            },
-          },
-        },
-        failed_findings_count: {
-          filter: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          'result.evaluation': 'failed',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
+                size: 1,
+                sort: {
+                  '@timestamp': 'desc',
                 },
-              ],
+              },
+            },
+            rule_section: {
+              top_metrics: {
+                metrics: {
+                  field: 'rule.section',
+                },
+                size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            rule_version: {
+              top_metrics: {
+                metrics: {
+                  field: 'rule.version',
+                },
+                size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            posture_type: {
+              top_metrics: {
+                metrics: {
+                  field: 'rule.benchmark.posture_type',
+                },
+                size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            rule_number: {
+              top_metrics: {
+                metrics: {
+                  field: 'rule.benchmark.rule_number',
+                },
+                size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            benchmark_id: {
+              top_metrics: {
+                metrics: {
+                  field: 'rule.benchmark.id',
+                },
+                size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            benchmark_version: {
+              top_metrics: {
+                metrics: {
+                  field: 'rule.benchmark.version',
+                },
+                size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            benchmark_name: {
+              top_metrics: {
+                metrics: {
+                  field: 'rule.benchmark.name',
+                },
+                size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            passed_findings_count: {
+              filter: {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            term: {
+                              'result.evaluation': 'passed',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            failed_findings_count: {
+              filter: {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            term: {
+                              'result.evaluation': 'failed',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
         },
@@ -211,24 +232,30 @@ const getRulesStatsQuery = (): SearchRequest => ({
   _source: false,
 });
 
-const getCspmRulesStats = (aggregatedRulesStats: RulesStats, logger: Logger): CspmRulesStats[] => {
-  const rules = aggregatedRulesStats.rules.buckets;
+const getCspmRulesStats = (aggregatedRulesStats: Accounts, logger: Logger): CspmRulesStats[] => {
+  const accounts = aggregatedRulesStats.accounts.buckets;
 
-  const cspmRulesStats = rules.map((rule) => ({
-    rule_id: rule.key,
-    rule_name: rule.rule_name.top[0].metrics['rule.name'],
-    rule_section: rule.rule_section.top[0].metrics['rule.section'],
-    rule_version: rule.rule_version.top[0].metrics['rule.version'],
-    rule_number: rule.rule_number.top[0].metrics['rule.benchmark.rule_number'],
-    posture_type: rule.posture_type.top[0].metrics['rule.benchmark.posture_type'],
-    benchmark_name: rule.benchmark_name.top[0].metrics['rule.benchmark.name'],
-    benchmark_id: rule.benchmark_id.top[0].metrics['rule.benchmark.id'],
-    passed_findings_count: rule.passed_findings_count.doc_count,
-    benchmark_version: rule.benchmark_version.top[0].metrics['rule.benchmark.version'],
-    failed_findings_count: rule.failed_findings_count.doc_count,
-  }));
+  const cspmRulesStats = accounts.map((account) => {
+    const accountId = account.key;
+    return account.rules.buckets.map((rule) => {
+      return {
+        account_id: accountId,
+        rule_id: rule.key,
+        rule_name: rule.rule_name.top[0].metrics['rule.name'],
+        rule_section: rule.rule_section.top[0].metrics['rule.section'],
+        rule_version: rule.rule_version.top[0].metrics['rule.version'],
+        rule_number: rule.rule_number.top[0].metrics['rule.benchmark.rule_number'],
+        posture_type: rule.posture_type.top[0].metrics['rule.benchmark.posture_type'],
+        benchmark_name: rule.benchmark_name.top[0].metrics['rule.benchmark.name'],
+        benchmark_id: rule.benchmark_id.top[0].metrics['rule.benchmark.id'],
+        benchmark_version: rule.benchmark_version.top[0].metrics['rule.benchmark.version'],
+        passed_findings_count: rule.passed_findings_count.doc_count,
+        failed_findings_count: rule.failed_findings_count.doc_count,
+      };
+    });
+  });
 
-  return cspmRulesStats;
+  return cspmRulesStats.flat(2);
 };
 
 export const getRulesStats = async (
@@ -241,7 +268,7 @@ export const getRulesStats = async (
     });
 
     if (isIndexExists) {
-      const rulesStatsResponse = await esClient.search<unknown, RulesStats>(getRulesStatsQuery());
+      const rulesStatsResponse = await esClient.search<unknown, Accounts>(getRulesStatsQuery());
 
       const cspmRulesStats = rulesStatsResponse.aggregations
         ? getCspmRulesStats(rulesStatsResponse.aggregations, logger)

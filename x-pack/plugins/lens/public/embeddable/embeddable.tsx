@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isEqual, uniqBy } from 'lodash';
+import { partition, uniqBy } from 'lodash';
 import React from 'react';
+import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -18,6 +19,7 @@ import {
   AggregateQuery,
   TimeRange,
   isOfQueryType,
+  getAggregateQueryMode,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
@@ -30,10 +32,10 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
-import { Subscription } from 'rxjs';
-import { toExpression, Ast } from '@kbn/interpreter';
+import { merge, Subscription, switchMap } from 'rxjs';
+import { toExpression } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -44,6 +46,7 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import {
+  EmbeddableStateTransfer,
   Embeddable as AbstractEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
@@ -75,8 +78,7 @@ import {
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -95,14 +97,21 @@ import {
   GetCompatibleCellValueActions,
   UserMessage,
   IndexPatternRef,
-  FrameDatasourceAPI,
+  FramePublicAPI,
   AddUserMessages,
   isMessageRemovable,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
 } from '../types';
 
-import { getEditPath, DOC_TYPE } from '../../common';
+import type {
+  AllowedChartOverrides,
+  AllowedPartitionOverrides,
+  AllowedSettingsOverrides,
+  AllowedGaugeOverrides,
+  AllowedXYOverrides,
+} from '../../common/types';
+import { getEditPath, DOC_TYPE, APP_ID } from '../../common/constants';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -113,6 +122,7 @@ import {
   getIndexPatternsObjects,
   getSearchWarningMessages,
   inferTimeField,
+  extractReferencesFromState,
 } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import {
@@ -120,6 +130,12 @@ import {
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
+import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
+import type { TypedLensByValueInput } from './embeddable_component';
+import type { LensPluginStartDependencies } from '../plugin';
+import { EmbeddableFeatureBadge } from './embeddable_info_badges';
+import { getDatasourceLayers } from '../state_management/utils';
+import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -132,6 +148,12 @@ export interface LensUnwrapResult {
   metaInfo?: LensUnwrapMetaInfo;
 }
 
+interface PreventableEvent {
+  preventDefault(): void;
+}
+
+export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
@@ -142,14 +164,35 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   style?: React.CSSProperties;
   className?: string;
   noPadding?: boolean;
-  onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
-  onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void;
-  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
+  onBrushEnd?: (data: Simplify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
+  onLoad?: (
+    isLoading: boolean,
+    adapters?: Partial<DefaultInspectorAdapters>,
+    output$?: Observable<LensEmbeddableOutput>
+  ) => void;
+  onFilter?: (
+    data: Simplify<(ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) & PreventableEvent>
+  ) => void;
+  onTableRowClick?: (
+    data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
+  ) => void;
 }
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
+  /**
+   * Overrides can tweak the style of the final embeddable and are executed at the end of the Lens rendering pipeline.
+   * Each visualization type offers various type of overrides, per component (i.e. 'setting', 'axisX', 'partition', etc...)
+   *
+   * While it is not possible to pass function/callback/handlers to the renderer, it is possible to overwrite
+   * the current behaviour by passing the "ignore" string to the override prop (i.e. onBrushEnd: "ignore" to stop brushing)
+   */
+  overrides?:
+    | AllowedChartOverrides
+    | AllowedSettingsOverrides
+    | AllowedXYOverrides
+    | AllowedPartitionOverrides
+    | AllowedGaugeOverrides;
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
@@ -162,11 +205,7 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (doc: Document) => Promise<{
-    ast: Ast | null;
-    indexPatterns: IndexPatternMap;
-    indexPatternRefs: IndexPatternRef[];
-  }>;
+  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -179,6 +218,7 @@ export interface LensEmbeddableDeps {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: {
     canSaveVisualizations: boolean;
+    canOpenVisualizations: boolean;
     canSaveDashboards: boolean;
     navLinks: Capabilities['navLinks'];
     discover: Capabilities['discover'];
@@ -204,7 +244,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         data-test-subj="embeddable-lens-failure"
         body={
@@ -248,8 +288,14 @@ const getExpressionFromDocument = async (
   document: Document,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
 ) => {
-  const { ast, indexPatterns, indexPatternRefs } = await documentToExpression(document);
-  return { ast: ast ? toExpression(ast) : null, indexPatterns, indexPatternRefs };
+  const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
+    await documentToExpression(document);
+  return {
+    ast: ast ? toExpression(ast) : null,
+    indexPatterns,
+    indexPatternRefs,
+    activeVisualizationState,
+  };
 };
 
 function getViewUnderlyingDataArgs({
@@ -329,13 +375,15 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
+  if (!messages.length) {
+    return null;
+  }
+
   return (
     <MessageList
       messages={messages}
-      useSmallIconsOnButton={true}
       customButtonStyles={css`
         block-size: ${euiTheme.size.l};
-        border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
         font-size: ${xsFontSize};
         padding: 0 ${euiTheme.size.xs};
         & > * {
@@ -382,11 +430,9 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private subscription: Subscription;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
-  private embeddableTitle?: string;
   private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
@@ -396,18 +442,13 @@ export class Embeddable
     );
   }
 
-  private externalSearchContext: {
-    timeRange?: TimeRange;
-    query?: Query;
-    filters?: Filter[];
-    searchSessionId?: string;
-  } = {};
-
   private activeData?: TableInspectorAdapter;
 
   private dataViews: DataView[] = [];
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
+
+  private activeVisualizationState?: unknown;
 
   constructor(
     private deps: LensEmbeddableDeps,
@@ -424,25 +465,13 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
       .then(() => {
-        this.loadUserMessages();
-        if (!containerStateChangedCalledAlready) {
-          this.onContainerStateChanged(initialInput);
-        } else {
-          this.reload();
-        }
+        this.reload();
       })
       .catch((e) => this.onFatalError(e));
 
-    this.subscription = this.getUpdated$().subscribe(() => {
-      containerStateChangedCalledAlready = true;
-      this.onContainerStateChanged(this.input);
-    });
-
     const input$ = this.getInput$();
-    this.embeddableTitle = this.getTitle();
 
     this.inputReloadSubscriptions = [];
 
@@ -481,35 +510,55 @@ export class Embeddable
         })
     );
 
-    // Re-initialize the visualization if either the attributes or the saved object id changes
+    // Use a trigger to distinguish between observables in the subscription
+    const withTrigger = (trigger: 'attributesOrSavedObjectId' | 'searchContext') =>
+      map((input: LensEmbeddableInput) => ({ trigger, input }));
 
-    this.inputReloadSubscriptions.push(
-      input$
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-            )
-          ),
-          skip(1)
+    // Re-initialize the visualization if either the attributes or the saved object id changes
+    const attributesOrSavedObjectId$ = input$.pipe(
+      distinctUntilChanged((a, b) =>
+        fastIsEqual(
+          [
+            'attributes' in a && a.attributes,
+            'savedObjectId' in a && a.savedObjectId,
+            'overrides' in a && a.overrides,
+            'disableTriggers' in a && a.disableTriggers,
+          ],
+          [
+            'attributes' in b && b.attributes,
+            'savedObjectId' in b && b.savedObjectId,
+            'overrides' in b && b.overrides,
+            'disableTriggers' in b && b.disableTriggers,
+          ]
         )
-        .subscribe(async (input) => {
-          await this.initializeSavedVis(input);
-          this.reload();
-        })
+      ),
+      skip(1),
+      withTrigger('attributesOrSavedObjectId')
     );
 
     // Update search context and reload on changes related to search
+    const searchContext$ = shouldFetch$<LensEmbeddableInput>(input$, () => this.getInput()).pipe(
+      withTrigger('searchContext')
+    );
+
+    // Merge and debounce the observables to avoid multiple reloads
     this.inputReloadSubscriptions.push(
-      shouldFetch$<LensEmbeddableInput>(this.getUpdated$(), () => this.getInput()).subscribe(
-        (input) => {
-          // reset removable messages
-          // Dashboard search/context changes are detected here
-          this.additionalUserMessages = {};
-          this.onContainerStateChanged(input);
-        }
-      )
+      merge(searchContext$, attributesOrSavedObjectId$)
+        .pipe(
+          debounceTime(0),
+          switchMap(async ({ trigger, input }) => {
+            if (trigger === 'attributesOrSavedObjectId') {
+              await this.initializeSavedVis(input);
+            }
+
+            // reset removable messages
+            // Dashboard search/context changes are detected here
+            this.additionalUserMessages = {};
+
+            this.reload();
+          })
+        )
+        .subscribe()
     );
   }
 
@@ -531,20 +580,12 @@ export class Embeddable
     return this.deps.visualizationMap[this.activeVisualizationId];
   }
 
-  private get activeVisualizationState() {
-    if (!this.activeVisualization) return;
-    return this.activeVisualization.initialize(
-      () => '',
-      this.savedVis?.state.visualization,
-      undefined,
-      this.savedVis?.references
-    );
-  }
-
   private indexPatterns: IndexPatternMap = {};
 
   private indexPatternRefs: IndexPatternRef[] = [];
 
+  // TODO - consider getting this from the persistedStateToExpression function
+  // where it is already computed
   private get activeDatasourceState(): undefined | unknown {
     if (!this.activeDatasourceId || !this.activeDatasource) return;
 
@@ -559,30 +600,26 @@ export class Embeddable
     );
   }
 
+  private fullAttributes: LensSavedObjectAttributes | undefined;
+
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
-    return filterAndSortUserMessages(
-      [...this._userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
-    );
-  };
-
-  private _userMessages: UserMessage[] = [];
-
-  // loads all available user messages
-  private loadUserMessages() {
     const userMessages: UserMessage[] = [];
-
     userMessages.push(
       ...getApplicationUserMessages({
         visualizationType: this.savedVis?.visualizationType,
-        visualization: {
+        visualizationState: {
           state: this.activeVisualizationState,
           activeId: this.activeVisualizationId,
         },
-        visualizationMap: this.deps.visualizationMap,
+        visualization:
+          this.activeVisualizationId && this.deps.visualizationMap[this.activeVisualizationId]
+            ? this.deps.visualizationMap[this.activeVisualizationId]
+            : undefined,
         activeDatasource: this.activeDatasource,
-        activeDatasourceState: { state: this.activeDatasourceState },
+        activeDatasourceState: {
+          isLoading: !this.activeDatasourceState,
+          state: this.activeDatasourceState,
+        },
         dataViews: {
           indexPatterns: this.indexPatterns,
           indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
@@ -596,12 +633,21 @@ export class Embeddable
     }
     const mergedSearchContext = this.getMergedSearchContext();
 
-    const frameDatasourceAPI: FrameDatasourceAPI = {
+    const framePublicAPI: FramePublicAPI = {
       dataViews: {
         indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
       },
-      datasourceLayers: {}, // TODO
+      datasourceLayers: getDatasourceLayers(
+        {
+          [this.activeDatasourceId!]: {
+            isLoading: !this.activeDatasourceState,
+            state: this.activeDatasourceState,
+          },
+        },
+        this.deps.datasourceMap,
+        this.indexPatterns
+      ),
       query: this.savedVis.state.query,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
@@ -614,15 +660,23 @@ export class Embeddable
     userMessages.push(
       ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
-        frame: frameDatasourceAPI,
+        frame: framePublicAPI,
+        visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
+          this.activeVisualizationState,
+          framePublicAPI
+        ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
-        frame: frameDatasourceAPI,
+        frame: framePublicAPI,
       }) ?? [])
     );
 
-    this._userMessages = userMessages;
-  }
+    return filterAndSortUserMessages(
+      [...userMessages, ...Object.values(this.additionalUserMessages)],
+      locationId,
+      filters ?? {}
+    );
+  };
 
   private additionalUserMessages: Record<string, UserMessage> = {};
 
@@ -668,6 +722,164 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
+  public getFullAttributes() {
+    return this.fullAttributes;
+  }
+
+  public isTextBasedLanguage() {
+    if (!this.savedVis) {
+      return;
+    }
+    const query = this.savedVis.state.query;
+    return !isOfQueryType(query);
+  }
+
+  public getTextBasedLanguage(): string | undefined {
+    if (!this.isTextBasedLanguage() || !this.savedVis?.state.query) {
+      return;
+    }
+    const query = this.savedVis?.state.query as unknown as AggregateQuery;
+    const language = getAggregateQueryMode(query);
+    return String(language).toUpperCase();
+  }
+
+  /**
+   * Gets the Lens embeddable's datasource and visualization states
+   * updates the embeddable input
+   */
+  async updateVisualization(
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualizationType?: string
+  ) {
+    const viz = this.savedVis;
+    const activeDatasourceId = (this.activeDatasourceId ??
+      'formBased') as EditLensConfigurationProps['datasourceId'];
+    if (viz?.state) {
+      const datasourceStates = {
+        ...viz.state.datasourceStates,
+        [activeDatasourceId]: datasourceState,
+      };
+      const references = extractReferencesFromState({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: this.deps.datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates: Object.fromEntries(
+          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
+        ),
+        visualizationState,
+        activeVisualization: this.activeVisualizationId
+          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
+          : undefined,
+      });
+      const attrs = {
+        ...viz,
+        state: {
+          ...viz.state,
+          visualization: visualizationState,
+          datasourceStates,
+        },
+        references,
+        visualizationType: visualizationType ?? viz.visualizationType,
+      };
+
+      /**
+       * SavedObjectId is undefined for by value panels and defined for the by reference ones.
+       * Here we are converting the by reference panels to by value when user is inline editing
+       */
+      this.updateInput({ attributes: attrs, savedObjectId: undefined });
+      /**
+       * Should load again the user messages,
+       * otherwise the embeddable state is stuck in an error state
+       */
+      this.renderUserMessages();
+    }
+  }
+
+  async updateSuggestion(attrs: LensSavedObjectAttributes) {
+    const viz = this.savedVis;
+    const newViz = {
+      ...viz,
+      ...attrs,
+    };
+    this.updateInput({ attributes: newViz });
+  }
+
+  /**
+   * Callback which allows the navigation to the editor.
+   * Used for the Edit in Lens link inside the inline editing flyout.
+   */
+  private async navigateToLensEditor() {
+    const appContext = this.getAppContext();
+    /**
+     * The origininating app variable is very important for the Save and Return button
+     * of the editor to work properly.
+     */
+    const transferState = {
+      originatingApp: appContext?.currentAppId ?? 'dashboards',
+      originatingPath: appContext?.getCurrentPath?.(),
+      valueInput: this.getExplicitInput(),
+      embeddableId: this.id,
+      searchSessionId: this.getInput().searchSessionId,
+    };
+    const transfer = new EmbeddableStateTransfer(
+      this.deps.coreStart.application.navigateToApp,
+      this.deps.coreStart.application.currentAppId$
+    );
+    if (transfer) {
+      await transfer.navigateToEditor(APP_ID, {
+        path: this.output.editPath,
+        state: transferState,
+        skipAppLeave: true,
+      });
+    }
+  }
+
+  public updateByRefInput(savedObjectId: string) {
+    const attrs = this.savedVis;
+    this.updateInput({ attributes: attrs, savedObjectId });
+  }
+
+  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+    const { getEditLensConfiguration } = await import('../async_services');
+    const Component = await getEditLensConfiguration(
+      this.deps.coreStart,
+      startDependencies,
+      this.deps.visualizationMap,
+      this.deps.datasourceMap
+    );
+
+    const datasourceId = (this.activeDatasourceId ??
+      'formBased') as EditLensConfigurationProps['datasourceId'];
+
+    const attributes = this.savedVis as TypedLensByValueInput['attributes'];
+    if (attributes) {
+      return (
+        <Component
+          attributes={attributes}
+          updatePanelState={this.updateVisualization.bind(this)}
+          updateSuggestion={this.updateSuggestion.bind(this)}
+          datasourceId={datasourceId}
+          lensAdapters={this.lensInspector.adapters}
+          output$={this.getOutput$()}
+          panelId={this.id}
+          savedObjectId={this.savedVis?.savedObjectId}
+          updateByRefInput={this.updateByRefInput.bind(this)}
+          navigateToLensEditor={
+            !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
+          }
+          displayFlyoutHeader={true}
+          canEditTextBasedQuery={this.isTextBasedLanguage()}
+        />
+      );
+    }
+    return null;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
     const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
@@ -680,7 +892,7 @@ export class Embeddable
     }
 
     const { metaInfo, attributes } = unwrapResult;
-
+    this.fullAttributes = attributes;
     this.savedVis = {
       ...attributes,
       type: this.type,
@@ -688,14 +900,13 @@ export class Embeddable
     };
 
     try {
-      const { ast, indexPatterns, indexPatternRefs } = await getExpressionFromDocument(
-        this.savedVis,
-        this.deps.documentToExpression
-      );
+      const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
+        await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
 
       this.expression = ast;
       this.indexPatterns = indexPatterns;
       this.indexPatternRefs = indexPatternRefs;
+      this.activeVisualizationState = activeVisualizationState;
     } catch {
       // nothing, errors should be reported via getUserMessages
     }
@@ -728,45 +939,6 @@ export class Embeddable
     this.isInitialized = true;
   }
 
-  onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState)) {
-      this.reload();
-    }
-  }
-
-  handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
-    let isDirty = false;
-    const cleanedFilters = containerState.filters
-      ? containerState.filters.filter((filter) => !filter.meta.disabled)
-      : undefined;
-    const nextTimeRange =
-      containerState.timeslice !== undefined
-        ? {
-            from: new Date(containerState.timeslice[0]).toISOString(),
-            to: new Date(containerState.timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : containerState.timeRange;
-    if (
-      !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
-      !isEqual(containerState.query, this.externalSearchContext.query) ||
-      !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
-      this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
-      this.embeddableTitle !== this.getTitle()
-    ) {
-      this.externalSearchContext = {
-        timeRange: nextTimeRange,
-        query: containerState.query,
-        filters: cleanedFilters,
-        searchSessionId: containerState.searchSessionId,
-      };
-      this.embeddableTitle = this.getTitle();
-      isDirty = true;
-    }
-
-    return isDirty;
-  }
-
   private getSearchWarningMessages(adapters?: Partial<DefaultInspectorAdapters>): UserMessage[] {
     if (!this.activeDatasource || !this.activeDatasourceId || !adapters?.requests) {
       return [];
@@ -790,7 +962,7 @@ export class Embeddable
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
-      this.input.onLoad(false, adapters);
+      this.input.onLoad(false, adapters, this.getOutput$());
     }
 
     const { type, error } = data as { type: string; error: ErrorLike };
@@ -808,6 +980,8 @@ export class Embeddable
     );
 
     this.activeData = newActiveData;
+
+    this.renderUserMessages();
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -886,6 +1060,7 @@ export class Embeddable
       return;
     }
     super.render(domNode as HTMLElement);
+
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
@@ -927,12 +1102,13 @@ export class Embeddable
               variables={{
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
+                ...('overrides' in input ? { overrides: input.overrides } : {}),
               }}
-              searchSessionId={this.externalSearchContext.searchSessionId}
+              searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
-              interactive={!input.disableTriggers}
+              interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
               renderMode={input.renderMode}
               syncColors={input.syncColors}
               syncTooltips={input.syncTooltips}
@@ -948,6 +1124,7 @@ export class Embeddable
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
+              docLinks={this.deps.coreStart.docLinks}
             />
           </KibanaThemeProvider>
           <MessagesBadge
@@ -1004,11 +1181,16 @@ export class Embeddable
    */
   private renderBadgeMessages = () => {
     const messages = this.getUserMessages('embeddableBadge');
+    const [warningOrErrorMessages, infoMessages] = partition(
+      messages,
+      ({ severity }) => severity !== 'info'
+    );
 
-    if (messages.length && this.badgeDomNode) {
+    if (this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <EmbeddableMessagesPopover messages={messages} />
+          <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
+          <EmbeddableFeatureBadge messages={infoMessages} />
         </KibanaThemeProvider>,
         this.badgeDomNode
       );
@@ -1050,6 +1232,7 @@ export class Embeddable
         .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
         .map((action) => ({
           id: action.id,
+          type: action.type,
           iconType: action.getIconType({ embeddable, data, trigger: cellValueTrigger })!,
           displayName: action.getDisplayName({ embeddable, data, trigger: cellValueTrigger }),
           execute: (cellData) =>
@@ -1068,22 +1251,33 @@ export class Embeddable
       throw new Error('savedVis is required for getMergedSearchContext');
     }
 
+    const input = this.getInput();
     const context: ExecutionContextSearch = {
-      timeRange: this.externalSearchContext.timeRange,
+      timeRange:
+        input.timeslice !== undefined
+          ? {
+              from: new Date(input.timeslice[0]).toISOString(),
+              to: new Date(input.timeslice[1]).toISOString(),
+              mode: 'absolute' as 'absolute',
+            }
+          : input.timeRange,
       query: [this.savedVis.state.query],
       filters: this.deps.injectFilterReferences(
         this.savedVis.state.filters,
         this.savedVis.references
       ),
-      disableShardWarnings: true,
+      disableWarningToasts: true,
     };
 
-    if (this.externalSearchContext.query) {
-      context.query = [this.externalSearchContext.query, ...(context.query as Query[])];
+    if (input.query) {
+      context.query = [input.query, ...(context.query as Query[])];
     }
 
-    if (this.externalSearchContext.filters?.length) {
-      context.filters = [...this.externalSearchContext.filters, ...(context.filters as Filter[])];
+    if (input.filters?.length) {
+      context.filters = [
+        ...input.filters.filter((filter) => !filter.meta.disabled),
+        ...(context.filters as Filter[]),
+      ];
     }
 
     return context;
@@ -1103,46 +1297,50 @@ export class Embeddable
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }
-    if (isLensBrushEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName:
-            event.data.timeFieldName ||
-            inferTimeField(this.deps.data.datatableUtilities, event.data),
-        },
-        embeddable: this,
-      });
 
-      if (this.input.onBrushEnd) {
-        this.input.onBrushEnd(event.data);
-      }
+    let eventHandler:
+      | LensBaseEmbeddableInput['onBrushEnd']
+      | LensBaseEmbeddableInput['onFilter']
+      | LensBaseEmbeddableInput['onTableRowClick'];
+    let shouldExecuteDefaultTriggers = true;
+
+    if (isLensBrushEvent(event)) {
+      eventHandler = this.input.onBrushEnd;
+    } else if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
+      eventHandler = this.input.onFilter;
+    } else if (isLensTableRowContextMenuClickEvent(event)) {
+      eventHandler = this.input.onTableRowClick;
     }
-    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName:
-            event.data.timeFieldName ||
-            inferTimeField(this.deps.data.datatableUtilities, event.data),
-        },
-        embeddable: this,
-      });
-      if (this.input.onFilter) {
-        this.input.onFilter(event.data);
+
+    eventHandler?.({
+      ...event.data,
+      preventDefault: () => {
+        shouldExecuteDefaultTriggers = false;
+      },
+    });
+
+    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event) || isLensBrushEvent(event)) {
+      if (shouldExecuteDefaultTriggers) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: {
+            ...event.data,
+            timeFieldName:
+              event.data.timeFieldName || inferTimeField(this.deps.data.datatableUtilities, event),
+          },
+          embeddable: this,
+        });
       }
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
-        {
-          data: event.data,
-          embeddable: this,
-        },
-        true
-      );
-      if (this.input.onTableRowClick) {
-        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
+      if (shouldExecuteDefaultTriggers) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+          {
+            data: event.data,
+            embeddable: this,
+          },
+          true
+        );
       }
     }
 
@@ -1163,7 +1361,6 @@ export class Embeddable
 
       this.expression = ast;
 
-      this.loadUserMessages();
       this.reload();
     }
   };
@@ -1172,11 +1369,7 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
-    if (this.handleContainerStateChanged(this.input)) {
-      // reset removable messages
-      // Unified histogram search/context changes are detected here
-      this.additionalUserMessages = {};
-    }
+
     if (this.domNode) {
       this.render(this.domNode);
     }
@@ -1293,7 +1486,11 @@ export class Embeddable
     this.updateOutput({
       defaultTitle: this.savedVis.title,
       defaultDescription: this.savedVis.description,
+      /** lens visualizations allow inline editing action
+       *  navigation to the editor is allowed through the flyout
+       */
       editable: this.getIsEditable(),
+      inlineEditable: true,
       title,
       description,
       editPath: getEditPath(savedObjectId),
@@ -1302,10 +1499,12 @@ export class Embeddable
     });
   }
 
-  private getIsEditable() {
+  public getIsEditable() {
     return (
       this.deps.capabilities.canSaveVisualizations ||
-      (!this.inputIsRefType(this.getInput()) && this.deps.capabilities.canSaveDashboards)
+      (!this.inputIsRefType(this.getInput()) &&
+        this.deps.capabilities.canSaveDashboards &&
+        this.deps.capabilities.canOpenVisualizations)
     );
   }
 
@@ -1361,9 +1560,6 @@ export class Embeddable
     }
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
     }
   }
 

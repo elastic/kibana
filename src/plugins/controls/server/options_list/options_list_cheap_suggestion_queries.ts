@@ -13,7 +13,7 @@ import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/opt
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
 import {
-  getEscapedQuery,
+  getEscapedRegexQuery,
   getIpBuckets,
   getSortType,
 } from './options_list_suggestion_query_helpers';
@@ -40,22 +40,26 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
    * (such as a keyword field or a keyword+text multi-field)
    */
   keywordOrText: {
-    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, fieldSpec, searchString, sort }: OptionsListRequestBody) => ({
       suggestions: {
         terms: {
           field: fieldName,
-          include: `${getEscapedQuery(searchString)}.*`,
+          // disabling for date fields because applying a search string will return an error
+          ...(fieldSpec?.type !== 'date' && searchString && searchString.length > 0
+            ? { include: `${getEscapedRegexQuery(searchString)}.*` }
+            : {}),
           shard_size: 10,
           order: getSortType(sort),
         },
       },
     }),
     parse: (rawEsResult) => ({
-      suggestions: get(rawEsResult, 'aggregations.suggestions.buckets').reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+      suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
+        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
         },
-        {}
+        []
       ),
     }),
   },
@@ -75,13 +79,11 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
     }),
     parse: (rawEsResult) => ({
       suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
-          return {
-            ...suggestions,
-            [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
-          };
+        (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
+          acc.push({ value: suggestion.key_as_string, docCount: suggestion.doc_count });
+          return acc;
         },
-        {}
+        []
       ),
     }),
   },
@@ -102,7 +104,7 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
         ],
       };
 
-      if (searchString) {
+      if (searchString && searchString.length > 0) {
         ipRangeQuery = getIpRangeQuery(searchString);
         if (!ipRangeQuery.validSearch) {
           // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
@@ -134,7 +136,7 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
-        return { suggestions: {} };
+        return { suggestions: [] };
       }
 
       const buckets: EsBucket[] = [];
@@ -153,9 +155,10 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       return {
         suggestions: sortedSuggestions
           .slice(0, 10) // only return top 10 results
-          .reduce((suggestions, suggestion: EsBucket) => {
-            return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-          }, {}),
+          .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
+            acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+            return acc;
+          }, []),
       };
     },
   },
@@ -180,7 +183,9 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
             suggestions: {
               terms: {
                 field: fieldName,
-                include: `${getEscapedQuery(searchString)}.*`,
+                ...(searchString && searchString.length > 0
+                  ? { include: `${getEscapedRegexQuery(searchString)}.*` }
+                  : {}),
                 shard_size: 10,
                 order: getSortType(sort),
               },
@@ -190,11 +195,12 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       };
     },
     parse: (rawEsResult) => ({
-      suggestions: get(rawEsResult, 'aggregations.nestedSuggestions.suggestions.buckets').reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+      suggestions: get(rawEsResult, 'aggregations.nestedSuggestions.suggestions.buckets')?.reduce(
+        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
+          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          return acc;
         },
-        {}
+        []
       ),
     }),
   },

@@ -24,6 +24,14 @@ export const USERS = i18n.translate('xpack.securitySolution.riskScore.overview.u
   defaultMessage: 'Users',
 });
 
+export const ENTITY = i18n.translate('xpack.securitySolution.riskScore.overview.entityTitle', {
+  defaultMessage: 'Entity',
+});
+
+export const ENTITIES = i18n.translate('xpack.securitySolution.riskScore.overview.entities', {
+  defaultMessage: 'Entities',
+});
+
 export const RISK_SCORE_TITLE = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.riskScore.overview.riskScoreTitle', {
     defaultMessage: '{riskEntity} Risk Score',
@@ -32,23 +40,35 @@ export const RISK_SCORE_TITLE = (riskEntity: RiskScoreEntity) =>
     },
   });
 
+export const ENTITY_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskLevelTitle', {
+    defaultMessage: '{riskEntity} risk level',
+    values: {
+      riskEntity: getRiskEntityTranslation(riskEntity),
+    },
+  });
+
 export const getRiskEntityTranslation = (
-  riskEntity: RiskScoreEntity,
+  riskEntity?: RiskScoreEntity,
   lowercase = false,
   plural = false
 ) => {
-  if (lowercase) {
-    if (plural) {
-      return (riskEntity === RiskScoreEntity.host ? HOSTS : USERS).toLowerCase();
-    }
+  const text = getRiskEntityTranslationText(riskEntity, plural);
+  return lowercase ? text.toLowerCase() : text;
+};
 
-    return (riskEntity === RiskScoreEntity.host ? HOST : USER).toLowerCase();
+export const getRiskEntityTranslationText = (
+  riskEntity: RiskScoreEntity | undefined,
+  plural: boolean
+) => {
+  switch (riskEntity) {
+    case RiskScoreEntity.host:
+      return plural ? HOSTS : HOST;
+    case RiskScoreEntity.user:
+      return plural ? USERS : USER;
+    default:
+      return plural ? ENTITIES : ENTITY;
   }
-  if (plural) {
-    return riskEntity === RiskScoreEntity.host ? HOSTS : USERS;
-  }
-
-  return riskEntity === RiskScoreEntity.host ? HOST : USER;
 };
 
 export const ALERTS = i18n.translate('xpack.securitySolution.riskScore.overview.alerts', {

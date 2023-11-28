@@ -10,6 +10,7 @@ import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useLicense as _useLicense } from '../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import {
   createAppRootMockRenderer,
@@ -27,16 +28,14 @@ import {
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
+import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
 
-jest.mock('./policy_forms/components/policy_form_layout', () => ({
-  PolicyFormLayout: () => <></>,
-}));
 jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/hooks/use_license');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useIsExperimentalFeatureMock = useIsExperimentalFeatureEnabled as jest.Mock;
+const useLicenseMock = _useLicense as jest.Mock;
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
@@ -66,9 +65,6 @@ describe('Policy Details', () => {
     let releaseApiFailure: () => void;
 
     beforeEach(() => {
-      useIsExperimentalFeatureMock.mockReturnValue({
-        policyListEnabled: true,
-      });
       http.get.mockImplementation(async () => {
         await new Promise((_, reject) => {
           releaseApiFailure = reject.bind(null, new Error('policy not found'));
@@ -219,6 +215,36 @@ describe('Policy Details', () => {
       const tab = policyView.find('button#hostIsolationExceptions');
       expect(tab).toHaveLength(1);
       expect(tab.text()).toBe('Host isolation exceptions');
+    });
+
+    it('should display the protection updates tab', async () => {
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+      const tab = policyView.find('button#protectionUpdates');
+      expect(tab).toHaveLength(1);
+      expect(tab.text()).toBe('Protection updates');
+    });
+
+    describe('without enterprise license', () => {
+      beforeEach(() => {
+        const licenseServiceMock = createLicenseServiceMock();
+        licenseServiceMock.isEnterprise.mockReturnValue(false);
+
+        useLicenseMock.mockReturnValue(licenseServiceMock);
+      });
+
+      afterEach(() => {
+        useLicenseMock.mockReturnValue(licenseServiceMocked);
+      });
+
+      it('should not display the protection updates tab', async () => {
+        policyView = render();
+        await asyncActions;
+        policyView.update();
+        const tab = policyView.find('button#protectionUpdates');
+        expect(tab).toHaveLength(0);
+      });
     });
 
     describe('without required permissions', () => {

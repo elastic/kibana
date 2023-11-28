@@ -52,7 +52,7 @@ describe('AggConfig', () => {
   ];
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
     indexPattern = {
       id: '1234',
       title: 'logstash-*',
@@ -314,6 +314,7 @@ describe('AggConfig', () => {
       objs.forEach((obj, i) => {
         expect(obj).toHaveProperty('id', String(start + i));
       });
+      spy.mockRestore();
     });
   });
 

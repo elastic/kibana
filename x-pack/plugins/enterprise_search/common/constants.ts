@@ -7,13 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from './types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
+import { ProductFeatures } from './types';
+
+export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
+  defaultMessage: 'Search',
+});
+export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.productName', {
+  defaultMessage: 'Enterprise Search',
+});
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
   }),
@@ -26,9 +33,7 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   ID: 'enterpriseSearchContent',
-  NAME: i18n.translate('xpack.enterpriseSearch.content.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
     defaultMessage: 'Content',
   }),
@@ -39,6 +44,22 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   URL: '/app/enterprise_search/content',
   LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
+export const AI_SEARCH_PLUGIN = {
+  ID: 'enterpriseSearchAISearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.aiSearch.productName', {
+    defaultMessage: 'AI Search',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.aiSearch.navTitle', {
+    defaultMessage: 'AI Search',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.aiSearch.description', {
+    defaultMessage:
+      'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
+  }),
+  URL: '/app/enterprise_search/ai_search',
+  LOGO: 'logoEnterpriseSearch',
 };
 
 export const ANALYTICS_PLUGIN = {
@@ -59,7 +80,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'elasticsearch',
+  ID: 'enterpriseSearchElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
@@ -117,10 +138,34 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
   WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
 };
 
-export const ENGINES_PLUGIN = {
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
-    defaultMessage: 'Engines',
+export const APPLICATIONS_PLUGIN = {
+  ID: 'enterpriseSearchApplications',
+  LOGO: 'logoEnterpriseSearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
+    defaultMessage: 'Applications',
   }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
+    defaultMessage: 'Search Applications',
+  }),
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  URL: '/app/enterprise_search/applications',
+};
+
+export const VECTOR_SEARCH_PLUGIN = {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.vectorSearch.description', {
+    defaultMessage:
+      'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
+  }),
+  ID: 'enterpriseSearchVectorSearch',
+  LOGO: 'logoEnterpriseSearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.vectorSearch.productName', {
+    defaultMessage: 'Vector Search',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.vectorSearch.navTitle', {
+    defaultMessage: 'Vector Search',
+  }),
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  URL: '/app/enterprise_search/vector_search',
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
@@ -152,5 +197,37 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   extract_binary_content: true,
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
-  run_ml_inference: false,
+  run_ml_inference: true,
 };
+
+export interface DefaultConnectorsPipelineMeta {
+  default_extract_binary_content: boolean;
+  default_name: string;
+  default_reduce_whitespace: boolean;
+  default_run_ml_inference: boolean;
+}
+
+export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
+  default_extract_binary_content: DEFAULT_PIPELINE_VALUES.extract_binary_content,
+  default_name: DEFAULT_PIPELINE_NAME,
+  default_reduce_whitespace: DEFAULT_PIPELINE_VALUES.reduce_whitespace,
+  default_run_ml_inference: DEFAULT_PIPELINE_VALUES.run_ml_inference,
+};
+
+export enum INGESTION_METHOD_IDS {
+  API = 'api',
+  CONNECTOR = 'connector',
+  CRAWLER = 'crawler',
+}
+
+export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
+  hasConnectors: true,
+  hasDefaultIngestPipeline: true,
+  hasDocumentLevelSecurityEnabled: true,
+  hasIncrementalSyncEnabled: true,
+  hasNativeConnectors: true,
+  hasWebCrawler: true,
+};
+
+export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
+export const PLUGIN_ID = 'enterpriseSearch';

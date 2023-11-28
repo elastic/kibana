@@ -27,6 +27,7 @@ Object {
   "type": "render",
   "value": Object {
     "canNavigateToLens": false,
+    "overrides": undefined,
     "params": Object {
       "listenOnChange": true,
     },
@@ -60,6 +61,7 @@ Object {
           "type": "vis_dimension",
         },
       ],
+      "colorMapping": undefined,
       "dimensions": Object {
         "buckets": Array [
           Object {
@@ -168,6 +170,7 @@ Object {
   "type": "render",
   "value": Object {
     "canNavigateToLens": false,
+    "overrides": undefined,
     "params": Object {
       "listenOnChange": true,
     },
@@ -201,6 +204,7 @@ Object {
           "type": "vis_dimension",
         },
       ],
+      "colorMapping": undefined,
       "dimensions": Object {
         "buckets": Array [
           Object {

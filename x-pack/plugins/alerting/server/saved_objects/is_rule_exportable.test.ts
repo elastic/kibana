@@ -15,6 +15,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { isRuleExportable } from './is_rule_exportable';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { AlertingConfig } from '../config';
 
 let ruleTypeRegistryParams: ConstructorOptions;
 let logger: MockedLogger;
@@ -27,8 +28,10 @@ beforeEach(() => {
   mockedLicenseState = licenseStateMock.create();
   logger = loggerMock.create();
   ruleTypeRegistryParams = {
+    config: {} as AlertingConfig,
     logger: loggingSystemMock.create().get(),
     taskManager,
+    alertsService: null,
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
@@ -53,7 +56,11 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
     expect(
       isRuleExportable(
@@ -109,7 +116,11 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
     expect(
       isRuleExportable(
@@ -168,7 +179,11 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
     expect(
       isRuleExportable(

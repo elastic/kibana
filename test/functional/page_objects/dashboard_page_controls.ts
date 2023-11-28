@@ -12,6 +12,7 @@ import {
   RANGE_SLIDER_CONTROL,
   ControlWidth,
 } from '@kbn/controls-plugin/common';
+import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/types';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 
@@ -19,12 +20,13 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
 
 const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
-  default: 'Please select a field',
+  default: 'No field selected yet',
   [OPTIONS_LIST_CONTROL]: 'Options list',
   [RANGE_SLIDER_CONTROL]: 'Range slider',
 };
 
 interface OptionsListAdditionalSettings {
+  searchTechnique?: OptionsListSearchTechnique;
   defaultSortType?: OptionsListSortingType;
   ignoreTimeout?: boolean;
   allowMultiple?: boolean;
@@ -52,25 +54,10 @@ export class DashboardPageControls extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
   private readonly common = this.ctx.getPageObject('common');
-  private readonly header = this.ctx.getPageObject('header');
-  private readonly settings = this.ctx.getPageObject('settings');
 
   /* -----------------------------------------------------------
      General controls functions
      ----------------------------------------------------------- */
-
-  public async enableControlsLab() {
-    await this.header.clickStackManagement();
-    await this.settings.clickKibanaSettings();
-
-    const currentValue = await this.settings.getAdvancedSettingAriaCheckbox(
-      'labs:dashboard:dashboardControls'
-    );
-
-    if (currentValue !== 'true') {
-      await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:dashboardControls');
-    }
-  }
 
   public async expectControlsEmpty() {
     await this.testSubjects.existOrFail('controls-empty');
@@ -333,24 +320,56 @@ export class DashboardPageControls extends FtrService {
     await this.common.clickConfirmOnModal();
   }
 
+  public async clearControlSelections(controlId: string) {
+    this.log.debug(`clearing all selections from control ${controlId}`);
+    await this.hoverOverExistingControl(controlId);
+    await this.testSubjects.click(`control-action-${controlId}-erase`);
+  }
+
   public async verifyControlType(controlId: string, expectedType: string) {
-    const controlButton = await this.find.byXPath(
-      `//div[@id='controlFrame--${controlId}']//button`
-    );
-    const testSubj = await controlButton.getAttribute('data-test-subj');
-    expect(testSubj).to.equal(`${expectedType}-${controlId}`);
+    let controlButton;
+    switch (expectedType) {
+      case OPTIONS_LIST_CONTROL: {
+        controlButton = await this.find.byXPath(`//div[@id='controlFrame--${controlId}']//button`);
+        break;
+      }
+      case RANGE_SLIDER_CONTROL: {
+        controlButton = await this.find.byXPath(
+          `//div[@id='controlFrame--${controlId}']//div[contains(@class, 'rangeSliderAnchor__button')]`
+        );
+        break;
+      }
+      default: {
+        this.log.error('An invalid control type was provided.');
+        break;
+      }
+    }
+
+    if (controlButton) {
+      const testSubj = await controlButton.getAttribute('data-test-subj');
+      expect(testSubj).to.equal(`${expectedType}-${controlId}`);
+    }
   }
 
   // Options list functions
   public async optionsListSetAdditionalSettings({
     ignoreTimeout,
     allowMultiple,
+    searchTechnique,
   }: OptionsListAdditionalSettings) {
     const getSettingTestSubject = (setting: string) =>
       `optionsListControl__${setting}AdditionalSetting`;
 
     if (allowMultiple) await this.testSubjects.click(getSettingTestSubject('allowMultiple'));
     if (ignoreTimeout) await this.testSubjects.click(getSettingTestSubject('runPastTimeout'));
+    if (searchTechnique) {
+      this.log.debug(`clicking search technique: ${searchTechnique}`);
+      await this.find.clickByCssSelector(
+        `[data-test-subj=${getSettingTestSubject(
+          `${searchTechnique}SearchOption`
+        )}] label[for="${searchTechnique}"]`
+      );
+    }
   }
 
   public async optionsListGetSelectionsString(controlId: string) {
@@ -360,8 +379,15 @@ export class DashboardPageControls extends FtrService {
     return (await controlElement.getVisibleText()).split('\n')[1];
   }
 
+  public async isOptionsListPopoverOpen(controlId: string) {
+    const isPopoverOpen = await this.find.existsByCssSelector(`#control-popover-${controlId}`);
+    this.log.debug(`Is popover open: ${isPopoverOpen} for Options List: ${controlId}`);
+    return isPopoverOpen;
+  }
+
   public async optionsListOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
+
     await this.testSubjects.click(`optionsList-control-${controlId}`);
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(`optionsList-control-popover`);
@@ -369,9 +395,14 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async optionsListEnsurePopoverIsClosed(controlId: string) {
-    this.log.debug(`Opening popover for Options List: ${controlId}`);
-    await this.testSubjects.click(`optionsList-control-${controlId}`);
-    await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
+    this.log.debug(`Ensure popover is closed for Options List: ${controlId}`);
+    await this.retry.try(async () => {
+      const isPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
+      if (isPopoverOpen) {
+        await this.testSubjects.click(`optionsList-control-${controlId}`);
+        await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
+      }
+    });
   }
 
   public async optionsListPopoverAssertOpen() {
@@ -448,12 +479,14 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`searching for ${search} in options list`);
     await this.optionsListPopoverAssertOpen();
     await this.testSubjects.setValue(`optionsList-control-search-input`, search);
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverClearSearch() {
     this.log.debug(`clearing search from options list`);
     await this.optionsListPopoverAssertOpen();
     await this.find.clickByCssSelector('.euiFormControlLayoutClearButton');
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverSetSort(sort: OptionsListSortingType) {
@@ -464,14 +497,14 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('optionsListControl__sortingOptionsPopover');
     });
-
     await this.testSubjects.click(`optionsList__sortOrder_${sort.direction}`);
     await this.testSubjects.click(`optionsList__sortBy_${sort.by}`);
-
     await this.testSubjects.click('optionsListControl__sortingOptionsButton');
     await this.retry.try(async () => {
       await this.testSubjects.missingOrFail(`optionsListControl__sortingOptionsPopover`);
     });
+
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverSelectExists() {
@@ -484,7 +517,6 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverSelectOption(availableOption: string) {
     this.log.debug(`selecting ${availableOption} from options list`);
     await this.optionsListPopoverSearchForOption(availableOption);
-    await this.optionsListPopoverWaitForLoading();
 
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
@@ -492,13 +524,6 @@ export class DashboardPageControls extends FtrService {
     });
 
     await this.optionsListPopoverClearSearch();
-    await this.optionsListPopoverWaitForLoading();
-  }
-
-  public async optionsListPopoverClearSelections() {
-    this.log.debug(`clearing all selections from options list`);
-    await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.click(`optionsList-control-clear-all-selections`);
   }
 
   public async optionsListPopoverSetIncludeSelections(include: boolean) {
@@ -516,7 +541,10 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListWaitForLoading(controlId: string) {
     this.log.debug(`wait for ${controlId} to load`);
-    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
+    const enabled = await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
+    if (!enabled) {
+      throw new Error(`${controlId} did not finish loading within the given time limit`);
+    }
   }
 
   public async optionsListPopoverWaitForLoading() {
@@ -556,10 +584,10 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async controlEditorCancel(confirm?: boolean) {
+  public async controlEditorCancel() {
     this.log.debug(`Canceling changes in control editor`);
     await this.testSubjects.click(`control-editor-cancel`);
-    if (confirm) {
+    if (await this.testSubjects.exists('confirmModalTitleText')) {
       await this.common.clickConfirmOnModal();
     }
   }
@@ -568,7 +596,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Setting control data view to ${dataViewTitle}`);
     await this.testSubjects.click('open-data-view-picker');
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('data-view-picker-title');
+      await this.testSubjects.existOrFail('data-view-picker-popover');
     });
     await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
   }
@@ -602,7 +630,7 @@ export class DashboardPageControls extends FtrService {
     }
     const dataViewName = (await this.testSubjects.find('open-data-view-picker')).getVisibleText();
     if (openAndCloseFlyout) {
-      await this.controlEditorCancel(true);
+      await this.controlEditorCancel();
     }
     return dataViewName;
   }
@@ -622,56 +650,59 @@ export class DashboardPageControls extends FtrService {
       attribute
     );
   }
-  public async rangeSliderGetDualRangeAttribute(controlId: string, attribute: string) {
-    this.log.debug(`Getting range slider dual range ${attribute} for ${controlId}`);
-    return await this.testSubjects.getAttribute(`rangeSlider__slider`, attribute);
-  }
+
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
-    await this.testSubjects.setValue(
-      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
-      value
-    );
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue(
+        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
+        value
+      );
+      expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
+    });
   }
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
-    await this.testSubjects.setValue(
-      `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
-      value
-    );
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue(
+        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
+        value
+      );
+      expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);
+    });
   }
 
   public async rangeSliderOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
-    await this.testSubjects.click(`range-slider-control-${controlId}`);
+    // EuiDualRange only opens the popover when one of the number **inputs** is clicked - it does not open when
+    // the delimiter is clicked, so need to ensure we're clicking an input
+    await this.testSubjects.click(
+      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
+    );
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`rangeSlider-control-actions`);
+      await this.testSubjects.existOrFail(`rangeSlider__slider`);
     });
   }
 
   public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
-    this.log.debug(`Opening popover for Range Slider: ${controlId}`);
-    await this.testSubjects.click(`range-slider-control-${controlId}`);
-    await this.testSubjects.waitForDeleted(`rangeSlider-control-actions`);
+    this.log.debug(`Closing popover for Range Slider: ${controlId}`);
+    const controlLabel = await this.find.byXPath(`//div[@data-control-id='${controlId}']//label`);
+    await controlLabel.click();
+    await this.testSubjects.waitForDeleted(`rangeSlider__slider`);
   }
 
   public async rangeSliderPopoverAssertOpen() {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(`rangeSlider-control-actions`))) {
-        throw new Error('options list popover must be open before calling selectOption');
+      if (!(await this.testSubjects.exists(`rangeSlider__slider`))) {
+        throw new Error('range slider popover must be open before calling selectOption');
       }
     });
   }
 
-  public async rangeSliderWaitForLoading() {
-    await this.testSubjects.waitForDeleted('range-slider-loading-spinner');
-  }
-
-  public async rangeSliderClearSelection(controlId: string) {
-    this.log.debug(`Clearing range slider selection from control: ${controlId}`);
-    await this.rangeSliderOpenPopover(controlId);
-    await this.rangeSliderPopoverAssertOpen();
-    await this.testSubjects.click('rangeSlider__clearRangeButton');
+  public async rangeSliderWaitForLoading(controlId: string) {
+    await this.find.waitForDeletedByCssSelector(
+      `[data-test-subj="range-slider-control-${controlId}"] .euiLoadingSpinner`
+    );
   }
 
   public async validateRange(
@@ -690,6 +721,7 @@ export class DashboardPageControls extends FtrService {
 
   // Time slider functions
   public async gotoNextTimeSlice() {
+    await this.closeTimeSliderPopover(); // prevents the pin tooltip from getting in the way
     await this.testSubjects.click('timeSlider-nextTimeWindow');
   }
 

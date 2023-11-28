@@ -7,17 +7,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import {
   dataViewPluginMocks,
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import { InnerFormBasedDataPanel, FormBasedDataPanel } from './datapanel';
-import { FieldListGrouped } from '@kbn/unified-field-list-plugin/public';
-import * as UseExistingFieldsApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
-import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
-import { FieldItem } from './field_item';
+import { FieldListGrouped } from '@kbn/unified-field-list';
+import * as UseExistingFieldsApi from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
+import { FieldItem } from '../common/field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { FormBasedPrivateState } from './types';
@@ -30,13 +29,14 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
-import { DOCUMENT_FIELD_NAME } from '../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
 import { DataViewsState } from '../../state_management';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ReactWrapper } from 'enzyme';
+import { IndexPatternField } from '../../types';
 
 const fieldsOne = [
   {
@@ -335,7 +335,6 @@ describe('FormBased Data Panel', () => {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onIndexPatternRefresh: jest.fn(),
-      dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
       core,
       dateRange: {
@@ -386,10 +385,6 @@ describe('FormBased Data Panel', () => {
           currentIndexPatternId: '',
         }}
         setState={jest.fn()}
-        dragDropContext={{
-          ...createMockedDragDropContext(),
-          dragging: { id: '1', humanData: { label: 'Label' } },
-        }}
         frame={createMockFramePublicAPI()}
       />
     );
@@ -412,10 +407,6 @@ describe('FormBased Data Panel', () => {
           dataViews,
         }),
         setState: jest.fn(),
-        dragDropContext: {
-          ...createMockedDragDropContext(),
-          dragging: { id: '1', humanData: { label: 'Label' } },
-        },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         frame: getFrameAPIMock({
           indexPatterns: indexPatterns as unknown as DataViewsState['indexPatterns'],
@@ -787,7 +778,11 @@ describe('FormBased Data Panel', () => {
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');
+      expect(wrapper.find(FieldItem).first().prop('field')).toEqual(
+        expect.objectContaining({
+          displayName: 'Records',
+        })
+      );
       const availableAccordion = wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]');
       expect(
         availableAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
@@ -803,7 +798,9 @@ describe('FormBased Data Panel', () => {
         emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['client', 'source', 'timestamp']);
       expect(
-        emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        emptyAccordion
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['client', 'source', 'timestampLabel']);
       expect(emptyAccordion.find(FieldItem).at(1).prop('exists')).toEqual(false);
     });
@@ -872,7 +869,7 @@ describe('FormBased Data Panel', () => {
         wrapper
           .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
           .find(FieldItem)
-          .map((fieldItem) => fieldItem.prop('field').displayName)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
@@ -974,7 +971,9 @@ describe('FormBased Data Panel', () => {
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
       expect(
-        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        wrapper
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['amemory', 'bytes']);
     });
 
@@ -1010,7 +1009,9 @@ describe('FormBased Data Panel', () => {
         .first()
         .simulate('click');
       expect(
-        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        wrapper
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['Records', 'amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 

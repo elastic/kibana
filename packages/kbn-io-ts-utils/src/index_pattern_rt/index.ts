@@ -25,12 +25,10 @@ export interface IndexPatternBrand {
   readonly IndexPattern: unique symbol;
 }
 
-type IndexPattern = rt.Branded<string, IndexPatternBrand>;
+export type IndexPattern = rt.Branded<string, IndexPatternBrand>;
 
 export const indexPatternRt = rt.brand(
   rt.string,
   (pattern): pattern is IndexPattern => validateIndexPattern(pattern),
   'IndexPattern'
 );
-
-export type IndexPatternType = rt.TypeOf<typeof indexPatternRt>;

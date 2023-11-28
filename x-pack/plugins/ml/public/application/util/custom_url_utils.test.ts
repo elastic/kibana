@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import type {
+  MlAnomalyRecordDoc,
+  MlCustomUrlAnomalyRecordDoc,
+  MlKibanaUrlConfig,
+  MlUrlConfig,
+} from '@kbn/ml-anomaly-utils';
+
 import {
   replaceTokensInUrlValue,
   getUrlForRecord,
@@ -13,15 +20,9 @@ import {
   openCustomUrlWindow,
   getQueryField,
 } from './custom_url_utils';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
-import {
-  CustomUrlAnomalyRecordDoc,
-  KibanaUrlConfig,
-  UrlConfig,
-} from '../../../common/types/custom_urls';
 
 describe('ML - custom URL utils', () => {
-  const TEST_DOC: AnomalyRecordDoc = {
+  const TEST_DOC: MlAnomalyRecordDoc = {
     job_id: 'farequote',
     result_type: 'record',
     probability: 6.533287347648861e-45,
@@ -47,7 +48,7 @@ describe('ML - custom URL utils', () => {
     airline: ['AAL'],
   };
 
-  const TEST_RECORD: CustomUrlAnomalyRecordDoc = {
+  const TEST_RECORD: MlCustomUrlAnomalyRecordDoc = {
     ...TEST_DOC,
     earliest: '2017-02-09T15:10:00.000Z',
     latest: '2017-02-09T17:15:00.000Z',
@@ -72,7 +73,7 @@ describe('ML - custom URL utils', () => {
     'odd:field,name': [">:&12<'"],
   };
 
-  const TEST_RECORD_MULTIPLE_INFLUENCER_VALUES: CustomUrlAnomalyRecordDoc = {
+  const TEST_RECORD_MULTIPLE_INFLUENCER_VALUES: MlCustomUrlAnomalyRecordDoc = {
     ...TEST_RECORD,
     influencers: [
       {
@@ -83,7 +84,7 @@ describe('ML - custom URL utils', () => {
     airline: ['AAL', 'AWE'],
   };
 
-  const TEST_RECORD_NO_INFLUENCER_VALUES: CustomUrlAnomalyRecordDoc = {
+  const TEST_RECORD_NO_INFLUENCER_VALUES: MlCustomUrlAnomalyRecordDoc = {
     ...TEST_RECORD,
     influencers: [
       {
@@ -94,33 +95,33 @@ describe('ML - custom URL utils', () => {
     airline: null,
   };
 
-  const TEST_DASHBOARD_URL: KibanaUrlConfig = {
+  const TEST_DASHBOARD_URL: MlKibanaUrlConfig = {
     url_name: 'Show dashboard',
     time_range: '1h',
     url_value:
       "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'airline:\"$airline$\"'))",
   };
 
-  const TEST_DISCOVER_URL: KibanaUrlConfig = {
+  const TEST_DISCOVER_URL: MlKibanaUrlConfig = {
     url_name: 'Raw data',
     time_range: 'auto',
     url_value:
       "discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"$airline$\" and odd:field,name : $odd:field,name$'))",
   };
 
-  const TEST_DASHBOARD_LUCENE_URL: KibanaUrlConfig = {
+  const TEST_DASHBOARD_LUCENE_URL: MlKibanaUrlConfig = {
     url_name: 'Show dashboard',
     time_range: '1h',
     url_value:
       "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'airline:\"$airline$\"'))",
   };
 
-  const TEST_OTHER_URL: UrlConfig = {
+  const TEST_OTHER_URL: MlUrlConfig = {
     url_name: 'Show airline',
     url_value: 'http://airlinecodes.info/airline-code-$airline$',
   };
 
-  const TEST_OTHER_URL_NO_TOKENS: UrlConfig = {
+  const TEST_OTHER_URL_NO_TOKENS: MlUrlConfig = {
     url_name: 'Show docs',
     url_value: 'https://www.elastic.co/guide/index.html',
   };
@@ -198,11 +199,11 @@ describe('ML - custom URL utils', () => {
     });
 
     test('replaces tokens outside of a query', () => {
-      const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
+      const TEST_DOC_WITH_METHOD: MlAnomalyRecordDoc = {
         ...TEST_DOC,
         method: ['POST'],
       };
-      const TEST_MULTIPLE_NON_QUERY_TOKENS: UrlConfig = {
+      const TEST_MULTIPLE_NON_QUERY_TOKENS: MlUrlConfig = {
         url_name: 'no_query',
         url_value: `dashboards#/view/b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'2018-12-17T00:00:00.000Z',mode:absolute,to:'2018-12-17T09:00:00.000Z'))&_a=(description:'',filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:$method$),type:phrase,value:$method$),query:(match:(method:(query:$method$,type:phrase))))))`,
       };
@@ -219,7 +220,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('truncates long queries', () => {
-      const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
+      const TEST_DOC_WITH_METHOD: MlAnomalyRecordDoc = {
         ...TEST_DOC,
         influencers: [
           {
@@ -240,7 +241,7 @@ describe('ML - custom URL utils', () => {
         referer: ['http://www.example.com/wp-admin/post.php?post=51&action=edit'],
         method: 'POST',
       };
-      const TEST_MULTIPLE_NON_QUERY_TOKENS: UrlConfig = {
+      const TEST_MULTIPLE_NON_QUERY_TOKENS: MlUrlConfig = {
         url_name: 'massive_url',
         url_value: `discover#/11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:$method$),type:phrase,value:$method$),query:(match:(method:(query:$method$,type:phrase))))),index:'7e06e310-dae4-11e9-8260-995f99197467',interval:auto,query:(language:kuery,query:'clientip:$clientip$ and action:$action$ and referer:$referer$'),sort:!(!('@timestamp',desc)))`,
       };
@@ -323,7 +324,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('replaces tokens with nesting', () => {
-      const testUrlApache: KibanaUrlConfig = {
+      const testUrlApache: MlKibanaUrlConfig = {
         url_name: 'Raw data',
         time_range: 'auto',
         url_value:
@@ -360,7 +361,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('does not escape special characters for Lucene query language inside of the filter', () => {
-      const testUrlLuceneFilters: KibanaUrlConfig = {
+      const testUrlLuceneFilters: MlKibanaUrlConfig = {
         url_name: 'Lucene query with filters',
         time_range: 'auto',
         url_value:
@@ -588,7 +589,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('returns expected URL with preserving custom filter', () => {
-      const urlWithCustomFilter: UrlConfig = {
+      const urlWithCustomFilter: MlUrlConfig = {
         url_name: 'URL with a custom filter',
         url_value: `discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:subSystem.keyword,negate:!f,params:(query:JDBC),type:phrase),query:(match_phrase:(subSystem.keyword:JDBC)))),index:'eap_wls_server_12c*,*:eap_wls_server_12c*',query:(language:kuery,query:'wlscluster.keyword:"$wlscluster.keyword$"'))`,
       };

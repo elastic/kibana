@@ -24,7 +24,6 @@ describe('Alert by type panel', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('renders correctly', async () => {

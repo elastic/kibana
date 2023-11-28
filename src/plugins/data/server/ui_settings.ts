@@ -32,7 +32,8 @@ const requestPreferenceOptionLabels = {
 };
 
 export function getUiSettings(
-  docLinks: DocLinksServiceSetup
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
 ): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.META_FIELDS]: {
@@ -463,13 +464,22 @@ export function getUiSettings(
             '</a>',
         },
       }),
-      schema: schema.arrayOf(
-        schema.object({
-          from: schema.string(),
-          to: schema.string(),
-          display: schema.string(),
-        })
-      ),
+      schema: enableValidations
+        ? schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            }),
+            { maxSize: 10 }
+          )
+        : schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            })
+          ),
     },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
@@ -504,7 +514,7 @@ export function getUiSettings(
           'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the ' +
           'Elasticsearch terms enum API for improved autocomplete suggestion performance. (Note that terms_enum is ' +
           'incompatible with Document Level Security.) Select terms_agg to use an Elasticsearch terms aggregation. ' +
-          '{learnMoreLink}',
+          '(Note that terms_agg is incompatible with IP-type fields.) {learnMoreLink}',
         values: {
           learnMoreLink:
             `<a href=${docLinks.links.kibana.autocompleteSuggestions} target="_blank" rel="noopener">` +

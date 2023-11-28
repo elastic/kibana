@@ -17,7 +17,7 @@ export const choroplethLayerWizardConfig: LayerWizard = {
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.choropleth.desc', {
-    defaultMessage: 'Shaded areas to compare statistics across boundaries',
+    defaultMessage: 'Shade areas to compare statistics across boundaries',
   }),
   icon: ChoroplethLayerIcon,
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {

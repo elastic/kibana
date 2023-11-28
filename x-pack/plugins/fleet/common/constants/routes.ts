@@ -21,25 +21,33 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
+const EPM_PACKAGES_INSTALLED = `${EPM_API_ROOT}/packages/installed`;
 const EPM_PACKAGES_BULK = `${EPM_PACKAGES_MANY}/_bulk`;
 const EPM_PACKAGES_ONE_DEPRECATED = `${EPM_PACKAGES_MANY}/{pkgkey}`;
 const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
 export const EPM_API_ROUTES = {
   BULK_INSTALL_PATTERN: EPM_PACKAGES_BULK,
   LIST_PATTERN: EPM_PACKAGES_MANY,
+  INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
   INFO_PATTERN: EPM_PACKAGES_ONE,
+  DATA_STREAMS_PATTERN: `${EPM_API_ROOT}/data_streams`,
   INSTALL_FROM_REGISTRY_PATTERN: EPM_PACKAGES_ONE,
   INSTALL_BY_UPLOAD_PATTERN: EPM_PACKAGES_MANY,
+  CUSTOM_INTEGRATIONS_PATTERN: `${EPM_API_ROOT}/custom_integrations`,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
+  BULK_ASSETS_PATTERN: `${EPM_API_ROOT}/bulk_assets`,
+  INPUTS_PATTERN: `${EPM_API_ROOT}/templates/{pkgName}/{pkgVersion}/inputs`,
 
   INFO_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   DELETE_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
+
+  REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };
 
 // Data stream API routes
@@ -163,10 +171,20 @@ export const ENROLLMENT_API_KEY_ROUTES = {
   DELETE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
 };
 
+export const UNINSTALL_TOKEN_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
+  INFO_PATTERN: `${API_ROOT}/uninstall_tokens/{uninstallTokenId}`,
+};
+
 // Agents setup API routes
 export const AGENTS_SETUP_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/agents/setup`,
   CREATE_PATTERN: `${API_ROOT}/agents/setup`,
+};
+
+// Message signing service
+export const MESSAGE_SIGNING_SERVICE_API_ROUTES = {
+  ROTATE_KEY_PAIR: `${API_ROOT}/message_signing_service/rotate_key_pair`,
 };
 
 export const SETUP_API_ROUTE = `${API_ROOT}/setup`;
@@ -187,3 +205,16 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };
+
+// API versioning constants
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v1: '1',
+  },
+};
+
+export const PUBLIC_API_ACCESS = 'public';
+export const INTERNAL_API_ACCESS = 'internal';

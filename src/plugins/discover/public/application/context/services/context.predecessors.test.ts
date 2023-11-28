@@ -14,8 +14,9 @@ import { Query } from '@kbn/es-query';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataTableRecord, EsHitRecord } from '../../../types';
-import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -37,7 +38,7 @@ describe('context predecessors', function () {
     tieBreakerField: string,
     tieBreakerValue: number,
     size: number
-  ) => Promise<DataTableRecord[]>;
+  ) => ReturnType<typeof fetchSurroundingDocs>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
@@ -82,7 +83,9 @@ describe('context predecessors', function () {
           SortDirection.desc,
           size,
           [],
-          dataPluginMock
+          dataPluginMock,
+          false,
+          discoverServiceMock
         );
       };
     });
@@ -97,9 +100,9 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
-        (hits) => {
+        ({ rows }) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-          expect(hits).toEqual(
+          expect(rows).toEqual(
             buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), dataView)
           );
         }
@@ -116,7 +119,7 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 6).then(
-        (hits) => {
+        ({ rows }) => {
           const intervals: Timestamp[] = mockSearchSource.setField.args
             .filter(([property]: string) => property === 'query')
             .map(([, { query }]: [string, { query: Query }]) =>
@@ -131,7 +134,7 @@ describe('context predecessors', function () {
           // should have ended with a half-open interval
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
           expect(intervals.length).toBeGreaterThan(1);
-          expect(hits).toEqual(
+          expect(rows).toEqual(
             buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), dataView)
           );
         }
@@ -147,7 +150,7 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_1000, MS_PER_DAY * 1000, '_doc', 0, 3).then(
-        (hits) => {
+        ({ rows }) => {
           const intervals: Timestamp[] = mockSearchSource.setField.args
             .filter(([property]: string) => property === 'query')
             .map(([, { query }]: [string, { query: Query }]) => {
@@ -167,7 +170,7 @@ describe('context predecessors', function () {
           expect(moment(last(intervals)?.lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
           expect(intervals.length).toBeGreaterThan(1);
 
-          expect(hits).toEqual(
+          expect(rows).toEqual(
             buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
           );
         }
@@ -175,9 +178,11 @@ describe('context predecessors', function () {
     });
 
     it('should return an empty array when no hits were found', function () {
-      return fetchPredecessors(ANCHOR_TIMESTAMP_3, MS_PER_DAY * 3, '_doc', 0, 3).then((hits) => {
-        expect(hits).toEqual([]);
-      });
+      return fetchPredecessors(ANCHOR_TIMESTAMP_3, MS_PER_DAY * 3, '_doc', 0, 3).then(
+        ({ rows }) => {
+          expect(rows).toEqual([]);
+        }
+      );
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
@@ -233,7 +238,8 @@ describe('context predecessors', function () {
           size,
           [],
           dataPluginMock,
-          true
+          true,
+          discoverServiceMock
         );
       };
     });
@@ -248,13 +254,13 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
-        (hits) => {
+        ({ rows }) => {
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
-          expect(hits).toEqual(
+          expect(rows).toEqual(
             buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), dataView)
           );
         }

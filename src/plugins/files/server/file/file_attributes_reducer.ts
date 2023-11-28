@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { FileHashObj } from '../saved_objects/file';
 import { FileJSON, UpdatableFileMetadata } from '../../common';
 
 export type Action =
@@ -17,7 +18,10 @@ export type Action =
       action: 'uploading';
       payload?: undefined;
     }
-  | { action: 'uploaded'; payload: { size: number } }
+  | {
+      action: 'uploaded';
+      payload: { size: number; hash?: FileHashObj };
+    }
   | { action: 'uploadError'; payload?: undefined }
   | { action: 'updateFile'; payload: Partial<UpdatableFileMetadata> };
 

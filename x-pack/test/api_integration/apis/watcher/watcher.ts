@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('watcher', () => {
     before(async () => {
       try {
-        await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+        await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       } catch (error) {
         log.debug('[Setup error] Error creating index pattern');
         throw error;
@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       try {
-        await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+        await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
       } catch (error) {
         log.debug('[Cleanup error] Error deleting index pattern');
         throw error;

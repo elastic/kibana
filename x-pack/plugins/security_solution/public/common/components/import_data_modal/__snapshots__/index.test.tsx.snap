@@ -20,7 +20,7 @@ Object {
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+            class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -118,21 +118,21 @@ Object {
             class="euiModalFooter emotion-euiModalFooter"
           >
             <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Cancel
                 </span>
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-m-fill-disabled"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
               data-test-subj="import-data-modal-button"
               disabled=""
               type="button"
@@ -227,7 +227,7 @@ Object {
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+            class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -293,14 +293,14 @@ Object {
                     </div>
                     <button
                       aria-label="Clear selected files"
-                      class="euiButtonEmpty euiButtonEmpty--xSmall euiFilePicker__clearButton css-9t7nyf-empty-primary"
+                      class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary"
                       type="button"
                     >
                       <span
-                        class="euiButtonContent euiButtonEmpty__content"
+                        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                       >
                         <span
-                          class="euiButtonEmpty__text"
+                          class="eui-textTruncate euiButtonEmpty__text"
                         >
                           Remove
                         </span>
@@ -323,7 +323,7 @@ Object {
                     aria-hidden="true"
                     class="emotion-euiCallOut__icon"
                     color="inherit"
-                    data-euiicon-type="alert"
+                    data-euiicon-type="warning"
                   />
                   <span
                     data-test-subj="actionConnectorsWarningsCallOutTitle"
@@ -332,7 +332,10 @@ Object {
                   </span>
                 </h2>
                 <div
-                  class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <div
+                  class="euiText emotion-euiText-s-euiTextColor-default"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
@@ -354,7 +357,7 @@ Object {
                         class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                           data-test-subj="actionConnectorsWarningsCallOutButton"
                           type="button"
                         >
@@ -401,21 +404,21 @@ Object {
             class="euiModalFooter emotion-euiModalFooter"
           >
             <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Cancel
                 </span>
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-m-fill-disabled"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
               data-test-subj="import-data-modal-button"
               disabled=""
               type="button"
@@ -510,7 +513,7 @@ Object {
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+            class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -576,14 +579,14 @@ Object {
                     </div>
                     <button
                       aria-label="Clear selected files"
-                      class="euiButtonEmpty euiButtonEmpty--xSmall euiFilePicker__clearButton css-9t7nyf-empty-primary"
+                      class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary"
                       type="button"
                     >
                       <span
-                        class="euiButtonContent euiButtonEmpty__content"
+                        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                       >
                         <span
-                          class="euiButtonEmpty__text"
+                          class="eui-textTruncate euiButtonEmpty__text"
                         >
                           Remove
                         </span>
@@ -623,21 +626,21 @@ Object {
             class="euiModalFooter emotion-euiModalFooter"
           >
             <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Cancel
                 </span>
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-m-fill-disabled"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
               data-test-subj="import-data-modal-button"
               disabled=""
               type="button"

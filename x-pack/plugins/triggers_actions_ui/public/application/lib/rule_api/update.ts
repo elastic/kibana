@@ -17,17 +17,21 @@ type RuleUpdatesBody = Pick<
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
   ...res,
-  actions: actions.map(({ group, id, params, frequency, uuid }) => ({
-    group,
-    id,
-    params,
-    frequency: {
-      notify_when: frequency!.notifyWhen,
-      throttle: frequency!.throttle,
-      summary: frequency!.summary,
-    },
-    ...(uuid && { uuid }),
-  })),
+  actions: actions.map(
+    ({ group, id, params, frequency, uuid, alertsFilter, useAlertDataForTemplate }) => ({
+      group,
+      id,
+      params,
+      frequency: {
+        notify_when: frequency!.notifyWhen,
+        throttle: frequency!.throttle,
+        summary: frequency!.summary,
+      },
+      alerts_filter: alertsFilter,
+      use_alert_data_for_template: useAlertDataForTemplate,
+      ...(uuid && { uuid }),
+    })
+  ),
 });
 
 export async function updateRule({

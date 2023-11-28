@@ -30,7 +30,8 @@ export const Bar = styled.aside.attrs({
     ${border &&
     css`
       border-bottom: ${theme.eui.euiBorderThin};
-      padding-bottom: ${theme.eui.euiSizeS};
+      padding-bottom: ${theme.eui.euiSizeXS};
+      align-items: center;
     `}
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
@@ -47,6 +48,7 @@ export const BarSection = styled.div.attrs({
   ${({ grow, theme }) => css`
     & + & {
       margin-top: ${theme.eui.euiSizeS};
+      align-items: center;
     }
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {

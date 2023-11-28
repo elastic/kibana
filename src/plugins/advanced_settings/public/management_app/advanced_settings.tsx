@@ -61,7 +61,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps> {
     return (
       <div>
         <EuiSpacer size="xl" />
-        <EuiCallOut title={this.props.callOutTitle} iconType="alert">
+        <EuiCallOut title={this.props.callOutTitle} iconType="warning">
           <p>{this.props.callOutSubtitle}</p>
         </EuiCallOut>
         <EuiSpacer size="xl" />
@@ -74,6 +74,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps> {
           services={{
             uiSettings: this.props.settingsService.client,
             settings: this.props.settingsService,
+            theme: { theme$: this.props.theme },
           }}
         >
           <Form

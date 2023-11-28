@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { getAdvancedButton } from '../../screens/integrations';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -18,14 +17,19 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('EcsMapping', () => {
+describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    login(ROLES.soc_manager);
-    navigateTo('/app/osquery');
+    initializeDataViews();
+  });
+
+  beforeEach(() => {
+    cy.login(ServerlessRoleName.SOC_MANAGER);
   });
 
   it('should properly show static values in form and results', () => {
+    navigateTo('/app/osquery');
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery('select * from processes;');
@@ -36,7 +40,7 @@ describe('EcsMapping', () => {
     submitQuery();
     checkResults();
     cy.contains('[ "test1", "test2" ]');
-    typeInECSFieldInput('labels{downArrow}{enter}', 1);
+    typeInECSFieldInput('client.domain{downArrow}{enter}', 1);
 
     getOsqueryFieldTypes('Static value', 1);
 
@@ -50,5 +54,26 @@ describe('EcsMapping', () => {
     checkResults();
     cy.contains('[ "test2" ]');
     cy.contains('test3');
+  });
+
+  it('should hide and show ecs mappings on Advanced accordion click', () => {
+    navigateTo('/app/osquery');
+    cy.contains('New live query').click();
+    selectAllAgents();
+    cy.getBySel('savedQuerySelect').within(() => {
+      cy.getBySel('comboBoxInput').type('processes_elastic{downArrow}{enter}');
+    });
+
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'be.visible'
+    );
+    cy.contains('Advanced').click();
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'not.be.visible'
+    );
+    cy.contains('Advanced').click();
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'be.visible'
+    );
   });
 });

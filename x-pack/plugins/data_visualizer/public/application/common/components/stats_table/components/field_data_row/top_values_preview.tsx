@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ChartData, OrdinalDataItem } from './field_histograms';
+import type { ChartData, OrdinalDataItem } from '@kbn/ml-data-grid';
 import { ColumnChart } from './column_chart';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 

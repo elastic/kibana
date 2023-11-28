@@ -6,15 +6,25 @@
  * Side Public License, v 1.
  */
 
-import type {
-  IncompatibleClusterRoutingAllocation,
-  RetryableEsClientError,
-  WaitForTaskCompletionTimeout,
-  IndexNotFound,
-} from '../../actions';
+import type { ActionErrorTypeMap as BaseActionErrorTypeMap } from '../../actions';
 
 export {
   initAction as init,
+  waitForIndexStatus,
+  createIndex,
+  updateAliases,
+  updateMappings,
+  updateAndPickupMappings,
+  cleanupUnknownAndExcluded,
+  waitForDeleteByQueryTask,
+  waitForPickupUpdatedMappingsTask,
+  refreshIndex,
+  openPit,
+  readWithPit,
+  closePit,
+  transformDocs,
+  bulkOverwriteTransformedDocuments,
+  noop,
   type InitActionParams,
   type IncompatibleClusterRoutingAllocation,
   type RetryableEsClientError,
@@ -22,12 +32,11 @@ export {
   type IndexNotFound,
 } from '../../actions';
 
-export interface ActionErrorTypeMap {
-  wait_for_task_completion_timeout: WaitForTaskCompletionTimeout;
-  incompatible_cluster_routing_allocation: IncompatibleClusterRoutingAllocation;
-  retryable_es_client_error: RetryableEsClientError;
-  index_not_found_exception: IndexNotFound;
-}
+export { updateIndexMeta, type UpdateIndexMetaParams } from './update_index_meta';
+export { waitForDelay, type WaitForDelayParams } from './wait_for_delay';
+
+// alias in case we need to extend it with zdt specific actions/errors
+export type ActionErrorTypeMap = BaseActionErrorTypeMap;
 
 /** Type guard for narrowing the type of a left */
 export function isTypeof<T extends keyof ActionErrorTypeMap>(

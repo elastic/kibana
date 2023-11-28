@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type {
-  ControlGroupInput,
-  ControlPanelState,
-  OptionsListEmbeddableInput,
-} from '@kbn/controls-plugin/common';
+import type { ControlGroupInput } from '@kbn/controls-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { formatPageFilterSearchParam } from '../../../../../common/utils/format_page_filter_search_param';
 import { URL_PARAM_KEY } from '../../../hooks/use_url_state';
 import { updateUrlParam } from '../../../store/global_url_param/actions';
 import type { FilterItemObj } from '../types';
+import { getFilterItemObjListFromControlInput } from '../utils';
 
 export interface UseFilterUrlSyncParams {
   controlGroupInput: ControlGroupInput | undefined;
@@ -26,28 +24,17 @@ export const useFilterUpdatesToUrlSync = ({ controlGroupInput }: UseFilterUrlSyn
 
   const formattedFilters: FilterItemObj[] | undefined = useMemo(() => {
     if (!controlGroupInput) return;
-    const { panels } = controlGroupInput;
-    return Object.keys(panels).map((panelId) => {
-      const {
-        explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude },
-      } = panels[panelId] as ControlPanelState<OptionsListEmbeddableInput>;
-      return {
-        fieldName: fieldName as string,
-        selectedOptions: selectedOptions ?? [],
-        title,
-        existsSelected,
-        exclude,
-      };
-    });
+    return getFilterItemObjListFromControlInput(controlGroupInput);
   }, [controlGroupInput]);
 
   useEffect(() => {
     if (!formattedFilters) return;
+    if (controlGroupInput?.viewMode !== ViewMode.VIEW) return;
     dispatch(
       updateUrlParam({
         key: URL_PARAM_KEY.pageFilter,
         value: formatPageFilterSearchParam(formattedFilters),
       })
     );
-  }, [formattedFilters, dispatch]);
+  }, [formattedFilters, dispatch, controlGroupInput]);
 };

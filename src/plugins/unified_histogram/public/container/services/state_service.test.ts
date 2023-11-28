@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Filter } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { UnifiedHistogramFetchStatus } from '../..';
-import { dataViewMock } from '../../__mocks__/data_view';
-import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
+import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import {
   getChartHidden,
   getTopPanelHeight,
@@ -48,42 +46,29 @@ describe('UnifiedHistogramStateService', () => {
   const initialState: UnifiedHistogramState = {
     breakdownField: 'bytes',
     chartHidden: false,
-    dataView: dataViewWithTimefieldMock,
-    filters: [],
     lensRequestAdapter: new RequestAdapter(),
-    query: { language: 'kuery', query: '' },
-    requestAdapter: new RequestAdapter(),
-    searchSessionId: '123',
+    lensAdapters: lensAdaptersMock,
     timeInterval: 'auto',
-    timeRange: { from: 'now-15m', to: 'now' },
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
+    currentSuggestion: undefined,
   };
 
   it('should initialize state with default values', () => {
-    const stateService = createStateService({
-      services: unifiedHistogramServicesMock,
-      initialState: {
-        dataView: dataViewWithTimefieldMock,
-      },
-    });
+    const stateService = createStateService({ services: unifiedHistogramServicesMock });
     let state: UnifiedHistogramState | undefined;
     stateService.state$.subscribe((s) => (state = s));
     expect(state).toEqual({
       breakdownField: undefined,
       chartHidden: false,
-      dataView: dataViewWithTimefieldMock,
-      filters: [],
       lensRequestAdapter: undefined,
-      query: unifiedHistogramServicesMock.data.query.queryString.getDefaultQuery(),
-      requestAdapter: undefined,
-      searchSessionId: undefined,
       timeInterval: 'auto',
-      timeRange: unifiedHistogramServicesMock.data.query.timefilter.timefilter.getTimeDefaults(),
       topPanelHeight: undefined,
       totalHitsResult: undefined,
       totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
+      currentSuggestion: undefined,
+      allSuggestions: undefined,
     });
   });
 
@@ -149,19 +134,13 @@ describe('UnifiedHistogramStateService', () => {
     stateService.setTimeInterval('test');
     newState = { ...newState, timeInterval: 'test' };
     expect(state).toEqual(newState);
-    const requestParams = {
-      dataView: dataViewMock,
-      filters: ['test'] as unknown as Filter[],
-      query: { language: 'kuery', query: 'test' },
-      requestAdapter: undefined,
-      searchSessionId: '321',
-      timeRange: { from: 'now-30m', to: 'now' },
-    };
-    stateService.setRequestParams(requestParams);
-    newState = { ...newState, ...requestParams };
-    expect(state).toEqual(newState);
     stateService.setLensRequestAdapter(undefined);
     newState = { ...newState, lensRequestAdapter: undefined };
+    stateService.setLensAdapters(undefined);
+    newState = { ...newState, lensAdapters: undefined };
+    expect(state).toEqual(newState);
+    stateService.setLensEmbeddableOutput$(undefined);
+    newState = { ...newState, lensEmbeddableOutput$: undefined };
     expect(state).toEqual(newState);
     stateService.setTotalHits({
       totalHitsStatus: UnifiedHistogramFetchStatus.complete,

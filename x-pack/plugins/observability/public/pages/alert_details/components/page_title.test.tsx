@@ -7,22 +7,63 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
 import { PageTitle, PageTitleProps } from './page_title';
+import { alert } from '../mock/alert';
 
 describe('Page Title', () => {
   const defaultProps = {
-    title: 'Great success',
-    active: true,
+    alert,
+    dataTestSubj: 'ruleTypeId',
   };
 
   const renderComp = (props: PageTitleProps) => {
-    return render(<PageTitle {...props} />);
+    return render(
+      <IntlProvider locale="en">
+        <PageTitle {...props} />
+      </IntlProvider>
+    );
   };
 
-  it('should display a title when it is passed', () => {
-    const { getByText } = renderComp(defaultProps);
-    expect(getByText(defaultProps.title)).toBeTruthy();
+  it('should display Log threshold title', () => {
+    const { getByTestId } = renderComp(defaultProps);
+
+    expect(getByTestId('ruleTypeId').textContent).toContain('Log threshold breached');
+  });
+
+  it('should display Anomaly title', () => {
+    const props: PageTitleProps = {
+      alert: {
+        ...defaultProps.alert,
+        fields: {
+          ...defaultProps.alert.fields,
+          [ALERT_RULE_CATEGORY]: 'Anomaly',
+        },
+      },
+      dataTestSubj: defaultProps.dataTestSubj,
+    };
+
+    const { getByTestId } = renderComp(props);
+
+    expect(getByTestId('ruleTypeId').textContent).toContain('Anomaly detected');
+  });
+
+  it('should display Inventory title', () => {
+    const props: PageTitleProps = {
+      alert: {
+        ...defaultProps.alert,
+        fields: {
+          ...defaultProps.alert.fields,
+          [ALERT_RULE_CATEGORY]: 'Inventory',
+        },
+      },
+      dataTestSubj: defaultProps.dataTestSubj,
+    };
+
+    const { getByTestId } = renderComp(props);
+
+    expect(getByTestId('ruleTypeId').textContent).toContain('Inventory threshold breached');
   });
 
   it('should display an active badge when active is true', async () => {
@@ -31,14 +72,10 @@ describe('Page Title', () => {
   });
 
   it('should display an inactive badge when active is false', async () => {
-    const { getByText } = renderComp({ ...defaultProps, active: false });
+    const updatedProps = { alert, dataTestSubj: defaultProps.dataTestSubj };
+    updatedProps.alert.active = false;
 
+    const { getByText } = renderComp({ ...updatedProps });
     expect(getByText('Recovered')).toBeTruthy();
-  });
-
-  it('should display no badge when active is not passed', async () => {
-    const { queryByTestId } = renderComp({ title: '123' });
-
-    expect(queryByTestId('page-title-active-badge')).not.toBeInTheDocument();
   });
 });

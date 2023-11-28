@@ -12,9 +12,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { VersionMismatchPage } from '../shared/version_mismatch';
-import { rerender } from '../test_helpers';
 
-import { ErrorConnecting } from './components/error_connecting';
 import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
 
@@ -32,29 +30,6 @@ describe('EnterpriseSearchOverview', () => {
     expect(wrapper.find(ProductSelector)).toHaveLength(1);
   });
 
-  it('renders the error connecting prompt only if host is configured', () => {
-    setMockValues({
-      errorConnectingMessage: '502 Bad Gateway',
-      config: { host: 'localhost' },
-    });
-    const wrapper = shallow(<EnterpriseSearchOverview />);
-
-    expect(wrapper.find(VersionMismatchPage)).toHaveLength(0);
-    const errorConnecting = wrapper.find(ErrorConnecting);
-    expect(errorConnecting).toHaveLength(1);
-    expect(wrapper.find(ProductSelector)).toHaveLength(0);
-
-    setMockValues({
-      errorConnectingMessage: '502 Bad Gateway',
-      config: { host: '' },
-    });
-    rerender(wrapper);
-
-    expect(wrapper.find(VersionMismatchPage)).toHaveLength(0);
-    expect(wrapper.find(ErrorConnecting)).toHaveLength(0);
-    expect(wrapper.find(ProductSelector)).toHaveLength(1);
-  });
-
   it('renders the version error message if versions mismatch and the host is configured', () => {
     setMockValues({
       errorConnectingMessage: '',
@@ -65,7 +40,6 @@ describe('EnterpriseSearchOverview', () => {
     );
 
     expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
-    expect(wrapper.find(ErrorConnecting)).toHaveLength(0);
     expect(wrapper.find(ProductSelector)).toHaveLength(0);
   });
 });

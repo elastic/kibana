@@ -9,6 +9,10 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
+
 import type {
   PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -40,6 +44,7 @@ export interface PackagePolicyClient {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
@@ -51,6 +56,11 @@ export interface PackagePolicyClient {
     request?: KibanaRequest
   ): Promise<PackagePolicy>;
 
+  inspect(
+    soClient: SavedObjectsClientContract,
+    packagePolicy: NewPackagePolicyWithId
+  ): Promise<NewPackagePolicy>;
+
   bulkCreate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -59,16 +69,26 @@ export interface PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
     }
-  ): Promise<PackagePolicy[]>;
+  ): Promise<{
+    created: PackagePolicy[];
+    failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+  }>;
 
   bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
+    packagePolicyUpdates: UpdatePackagePolicy[],
     options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
-  ): Promise<PackagePolicy[] | null>;
+  ): Promise<{
+    updatedPolicies: PackagePolicy[] | null;
+    failedPolicies: Array<{
+      packagePolicy: NewPackagePolicyWithId;
+      error: Error | SavedObjectError;
+    }>;
+  }>;
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 

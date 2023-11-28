@@ -17,7 +17,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
-import { AggregationType, FieldOption } from '../types';
+import { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
 import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 import './of.scss';
@@ -76,7 +76,11 @@ export const OfExpression = ({
 
   const availableFieldOptions: OfFieldOption[] = fields.reduce(
     (esFieldOptions: OfFieldOption[], field: FieldOption) => {
-      if (aggregationTypes[aggType].validNormalizedTypes.includes(field.normalizedType)) {
+      if (
+        aggregationTypes[aggType].validNormalizedTypes.includes(
+          field.normalizedType as ValidNormalizedTypes
+        )
+      ) {
         esFieldOptions.push({
           label: field.name,
         });

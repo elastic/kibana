@@ -23,7 +23,6 @@ jest.mock('../../common/navigation/hooks');
 describe('Configuration button', () => {
   let wrapper: ReactWrapper;
   const props: ConfigureCaseButtonProps = {
-    isDisabled: false,
     label: 'My label',
     msgTooltip: <></>,
     showToolTip: false,

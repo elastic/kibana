@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isErr, tryAsResult } from './lib/result_type';
+import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { DecoratedError } from './task_running';
 
 /*
  * Type definitions and validations for tasks.
@@ -47,6 +48,7 @@ export type SuccessfulRunResult = {
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
+  taskRunError?: DecoratedError;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -74,7 +76,7 @@ export type FailedRunResult = SuccessfulRunResult & {
    * If specified, indicates that the task failed to accomplish its work. This is
    * logged out as a warning, and the task will be reattempted after a delay.
    */
-  error: Error;
+  error: DecoratedError;
 };
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;
@@ -83,17 +85,40 @@ export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
 
 export interface FailedTaskResult {
-  status: TaskStatus.Failed;
+  status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
+type IndirectParamsType = Record<string, unknown>;
+
+export interface LoadedIndirectParams<
+  IndirectParams extends IndirectParamsType = IndirectParamsType
+> {
+  [key: string]: unknown;
+  indirectParams: IndirectParams;
+}
+
+export type LoadIndirectParamsResult<T extends LoadedIndirectParams = LoadedIndirectParams> =
+  | {
+      data: T;
+      error?: never;
+    }
+  | {
+      data?: never;
+      error: Error;
+    };
+export type LoadIndirectParamsFunction = () => Promise<LoadIndirectParamsResult>;
 export type RunFunction = () => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
-export interface CancellableTask {
+export interface CancellableTask<T = never> {
+  loadIndirectParams?: LoadIndirectParamsFunction;
   run: RunFunction;
   cancel?: CancelFunction;
+  cleanup?: () => Promise<void>;
 }
 
-export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;
+export type TaskRunCreatorFunction = (
+  context: RunContext
+) => CancellableTask<RunContext['taskInstance']>;
 
 export const taskDefinitionSchema = schema.object(
   {
@@ -137,6 +162,19 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
+    stateSchemaByVersion: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          schema: schema.any(),
+          up: schema.any(),
+        })
+      )
+    ),
+
+    paramsSchema: schema.maybe(schema.any()),
+    // schema of the data fetched by the task runner (in loadIndirectParams) e.g. rule, action etc.
+    indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
     validate({ timeout }) {
@@ -151,21 +189,21 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
-  /**
-   * Function that customizes how the task should behave when the task fails. This
-   * function can return `true`, `false` or a Date. True will tell task manager
-   * to retry using default delay logic. False will tell task manager to stop retrying
-   * this task. Date will suggest when to the task manager the task should retry.
-   * This function isn't used for recurring tasks, those retry as per their configured recurring schedule.
-   */
-  getRetry?: (attempts: number, error: object) => boolean | Date;
-
+export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }
+  >;
+  paramsSchema?: ObjectType;
+  indirectParamsSchema?: ObjectType;
 };
 
 export enum TaskStatus {
@@ -174,6 +212,7 @@ export enum TaskStatus {
   Running = 'running',
   Failed = 'failed',
   Unrecognized = 'unrecognized',
+  DeadLetter = 'dead_letter',
 }
 
 export enum TaskLifecycleResult {
@@ -256,6 +295,7 @@ export interface TaskInstance {
   // this can be fixed by supporting generics in the future
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
+  stateVersion?: number;
 
   /**
    * The serialized traceparent string of the current APM transaction or span.
@@ -282,6 +322,11 @@ export interface TaskInstance {
    * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
    */
   enabled?: boolean;
+
+  /**
+   * Indicates the number of skipped executions.
+   */
+  numSkippedRuns?: number;
 }
 
 /**

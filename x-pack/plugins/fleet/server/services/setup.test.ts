@@ -26,6 +26,11 @@ jest.mock('./download_source');
 jest.mock('./epm/packages');
 jest.mock('./managed_package_policies');
 jest.mock('./setup/upgrade_package_install_version');
+jest.mock('./epm/elasticsearch/template/install', () => {
+  return {
+    ...jest.requireActual('./epm/elasticsearch/template/install'),
+  };
+});
 
 const mockedMethodThrowsError = (mockFn: jest.Mock) =>
   mockFn.mockImplementation(() => {

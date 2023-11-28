@@ -31,12 +31,12 @@ export function CorrelationsEmptyStatePrompt() {
               <p>
                 <FormattedMessage
                   id="xpack.apm.correlations.noCorrelationsTextLine1"
-                  defaultMessage="Correlations will only be identified if they have significant impact."
+                  defaultMessage="Correlations are only identified if they have significant impact."
                 />
                 <br />
                 <FormattedMessage
                   id="xpack.apm.correlations.noCorrelationsTextLine2"
-                  defaultMessage="Try selecting another time range or remove any added filter."
+                  defaultMessage="Try selecting another time range or removing any added filters."
                 />
               </p>
             </EuiText>

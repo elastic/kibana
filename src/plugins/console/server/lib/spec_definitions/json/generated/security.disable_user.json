@@ -1,6 +1,10 @@
 {
   "security.disable_user": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "refresh": [
         "true",
         "false",
@@ -14,6 +18,10 @@
     "patterns": [
       "_security/user/{username}/_disable"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-disable-user.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-disable-user.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

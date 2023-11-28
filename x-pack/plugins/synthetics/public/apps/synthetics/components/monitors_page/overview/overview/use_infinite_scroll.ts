@@ -9,6 +9,7 @@ import useThrottle from 'react-use/lib/useThrottle';
 import { useEffect, useState, MutableRefObject } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import { useSelector } from 'react-redux';
+import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectOverviewState } from '../../../../state';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
@@ -75,7 +76,7 @@ const getCurrentMonitors = ({
   monitorsSortedByStatus,
   statusFilter,
 }: {
-  sortField: string;
+  sortField: MonitorListSortField;
   perPage: number;
   page: number;
   monitors: MonitorOverviewItem[];

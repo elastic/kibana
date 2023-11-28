@@ -42,7 +42,7 @@ export const EndpointPolicyLink = memo<
         {children}
         {
           <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-            <EuiIcon size="m" type="alert" color="warning" />
+            <EuiIcon size="m" type="warning" color="warning" />
             &nbsp;
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policyNotFound"

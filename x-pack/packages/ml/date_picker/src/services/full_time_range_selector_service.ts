@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -22,7 +22,7 @@ import type { GetTimeFieldRangeResponse } from './types';
  */
 export type SetFullTimeRangeApiPath =
   | '/internal/file_upload/time_field_range'
-  | '/api/ml/fields_service/time_field_range';
+  | '/internal/ml/fields_service/time_field_range';
 
 /**
  * Determines the full available time range of the given Data View and updates
@@ -45,7 +45,7 @@ export async function setFullTimeRange(
   query?: QueryDslQueryContainer,
   excludeFrozenData?: boolean,
   path: SetFullTimeRangeApiPath = '/internal/file_upload/time_field_range'
-): Promise<GetTimeFieldRangeResponse> {
+): Promise<GetTimeFieldRangeResponse | undefined> {
   try {
     const runtimeMappings = dataView.getRuntimeMappings();
     const resp = await getTimeFieldRange({
@@ -62,6 +62,7 @@ export async function setFullTimeRange(
         from: moment(resp.start.epoch).toISOString(),
         to: moment(resp.end.epoch).toISOString(),
       });
+      return resp;
     } else if (typeof resp.start === 'number' && typeof resp.end === 'number') {
       timefilter.setTime({
         from: moment(resp.start).toISOString(),
@@ -79,9 +80,7 @@ export async function setFullTimeRange(
         }),
       });
     }
-
-    return resp;
-  } catch (resp) {
+  } catch (error) {
     toasts.addDanger(
       i18n.translate(
         'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
@@ -90,7 +89,6 @@ export async function setFullTimeRange(
         }
       )
     );
-    return resp;
   }
 }
 

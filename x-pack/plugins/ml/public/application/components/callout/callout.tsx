@@ -32,7 +32,7 @@ export const statusToEuiIconType = (status: VALIDATION_STATUS) => {
     case VALIDATION_STATUS.SUCCESS:
       return 'check';
     case VALIDATION_STATUS.WARNING:
-      return 'alert';
+      return 'warning';
     default:
       return status;
   }

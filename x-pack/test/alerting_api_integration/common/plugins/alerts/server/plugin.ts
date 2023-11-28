@@ -22,6 +22,8 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { IEventLogClientService } from '@kbn/event-log-plugin/server';
+import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineAlertTypes } from './alert_types';
@@ -41,13 +43,18 @@ export interface FixtureStartDeps {
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
+  eventLog: IEventLogClientService;
+  notifications: NotificationsPluginStart;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   private readonly logger: Logger;
 
-  taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
-  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
+  taskManagerStart$ = new Subject<TaskManagerStartContract>();
+  taskManagerStart = firstValueFrom(this.taskManagerStart$);
+
+  notificationsStart$ = new Subject<NotificationsPluginStart>();
+  notificationsStart = firstValueFrom(this.notificationsStart$);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('fixtures', 'plugins', 'alerts');
@@ -80,6 +87,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.longRunning',
         'test.exceedsAlertLimit',
         'test.always-firing-alert-as-data',
+        'test.patternFiringAad',
+        'test.waitingRule',
       ],
       privileges: {
         all: {
@@ -108,6 +117,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.longRunning',
                 'test.exceedsAlertLimit',
                 'test.always-firing-alert-as-data',
+                'test.patternFiringAad',
+                'test.waitingRule',
               ],
             },
           },
@@ -139,6 +150,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.longRunning',
                 'test.exceedsAlertLimit',
                 'test.always-firing-alert-as-data',
+                'test.patternFiringAad',
+                'test.waitingRule',
               ],
             },
           },
@@ -149,12 +162,15 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     defineActionTypes(core, { actions });
     defineAlertTypes(core, { alerting, ruleRegistry }, this.logger);
-    defineRoutes(core, this.taskManagerStart, { logger: this.logger });
+    defineRoutes(core, this.taskManagerStart, this.notificationsStart, { logger: this.logger });
   }
 
-  public start(core: CoreStart, { taskManager }: FixtureStartDeps) {
+  public start(core: CoreStart, { taskManager, notifications }: FixtureStartDeps) {
     this.taskManagerStart$.next(taskManager);
     this.taskManagerStart$.complete();
+
+    this.notificationsStart$.next(notifications);
+    this.notificationsStart$.complete();
   }
   public stop() {}
 }

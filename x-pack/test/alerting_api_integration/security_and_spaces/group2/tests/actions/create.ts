@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
@@ -59,6 +60,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: response.body.id,
                 is_preconfigured: false,
+                is_system_action: false,
                 is_deprecated: false,
                 is_missing_secrets: false,
                 name: 'My action',
@@ -251,6 +253,143 @@ export default function createActionTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message: `[request body.config.encrypted]: value '' is not valid`,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create action request appropriately with a predefined id', async () => {
+          const predefinedId = uuidv4();
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${predefinedId}`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to create a "test.index-record" action',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'action', 'actions');
+              expect(response.body).to.eql({
+                id: predefinedId,
+                is_preconfigured: false,
+                is_system_action: false,
+                is_deprecated: false,
+                is_missing_secrets: false,
+                name: 'My action',
+                connector_type_id: 'test.index-record',
+                config: {
+                  unencrypted: `This value shouldn't get encrypted`,
+                },
+              });
+              expect(typeof response.body.id).to.be('string');
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'action',
+                id: response.body.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't create a preconfigured action with the same id as an existing one`, async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/custom-system-abc-connector`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: 'system-abc-action-type',
+              config: {},
+              secrets: {},
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to create a "system-abc-action-type" action',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'This custom-system-abc-connector already exists in a preconfigured action.',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't create a system action`, async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My system action',
+              connector_type_id: 'test.system-action',
+              config: {},
+              secrets: {},
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to create a "test.system-action" action',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'System action creation is forbidden. Action type: test.system-action.',
               });
               break;
             default:

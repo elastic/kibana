@@ -22,6 +22,7 @@ import {
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { CaseMetricsFeature } from '../../../common/types/api';
 
 jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../case_view/use_on_refresh_case_view_page');
@@ -152,7 +153,7 @@ describe('CaseActionBar', () => {
   it('should not show the Case open text when the lifespan feature is enabled', () => {
     const props: CaseActionBarProps = { ...defaultProps };
     const { queryByText } = render(
-      <TestProviders features={{ metrics: ['lifespan'] }}>
+      <TestProviders features={{ metrics: [CaseMetricsFeature.LIFESPAN] }}>
         <CaseActionBar {...props} />
       </TestProviders>
     );

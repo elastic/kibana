@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { Subject } from 'rxjs';
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import type { SecurityAppStore } from '../../../common/store/types';
-import { createAddToTimelineLensAction } from './add_to_timeline';
+import { createAddToTimelineLensAction, getInvestigatedValue } from './add_to_timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../common/constants';
-import { Subject } from 'rxjs';
-import { TimelineId } from '../../../../common/types';
-import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
+import type { DataProvider } from '../../../../common/types';
+import { TimelineId, EXISTS_OPERATOR } from '../../../../common/types';
+import { addProvider } from '../../../timelines/store/timeline/actions';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 jest.mock('../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
 const mockWarningToast = jest.fn();
+const mockSuccessToast = jest.fn();
 KibanaServices.get().notifications.toasts.addWarning = mockWarningToast;
-
+KibanaServices.get().notifications.toasts.addSuccess = mockSuccessToast;
 const mockDispatch = jest.fn();
 const store = {
   dispatch: mockDispatch,
@@ -158,7 +159,7 @@ describe('createAddToTimelineLensAction', () => {
   describe('execute', () => {
     it('should execute normally', async () => {
       await addToTimelineAction.execute(context);
-      expect(mockDispatch).toHaveBeenCalledTimes(2);
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
       expect(mockDispatch).toHaveBeenCalledWith({
         type: addProvider.type,
         payload: {
@@ -180,13 +181,8 @@ describe('createAddToTimelineLensAction', () => {
           ],
         },
       });
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: showTimeline.type,
-        payload: {
-          id: TimelineId.active,
-          show: true,
-        },
-      });
+
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
@@ -195,7 +191,7 @@ describe('createAddToTimelineLensAction', () => {
         ...context,
         data: [{ columnMeta }],
       });
-      expect(mockDispatch).toHaveBeenCalledTimes(2);
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
       expect(mockDispatch).toHaveBeenCalledWith({
         type: addProvider.type,
         payload: {
@@ -217,13 +213,7 @@ describe('createAddToTimelineLensAction', () => {
           ],
         },
       });
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: showTimeline.type,
-        payload: {
-          id: TimelineId.active,
-          show: true,
-        },
-      });
+      expect(mockSuccessToast).toHaveBeenCalledTimes(1);
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
@@ -242,7 +232,7 @@ describe('createAddToTimelineLensAction', () => {
           },
         ],
       });
-      expect(mockDispatch).toHaveBeenCalledTimes(2);
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
       expect(mockDispatch).toHaveBeenCalledWith({
         type: addProvider.type,
         payload: {
@@ -264,13 +254,8 @@ describe('createAddToTimelineLensAction', () => {
           ],
         },
       });
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: showTimeline.type,
-        payload: {
-          id: TimelineId.active,
-          show: true,
-        },
-      });
+
+      expect(mockSuccessToast).toHaveBeenCalledTimes(1);
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
@@ -291,5 +276,30 @@ describe('createAddToTimelineLensAction', () => {
       expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();
     });
+  });
+});
+
+describe('getInvestigatedValue', () => {
+  it('handles empty input', () => {
+    const result = getInvestigatedValue([
+      { queryMatch: { value: null } },
+    ] as unknown as DataProvider[]);
+    expect(result).toEqual('');
+  });
+  it('handles array input', () => {
+    const result = getInvestigatedValue([
+      {
+        queryMatch: { value: ['hello', 'world'] },
+      },
+    ] as unknown as DataProvider[]);
+    expect(result).toEqual('hello, world');
+  });
+  it('handles number value', () => {
+    const result = getInvestigatedValue([
+      {
+        queryMatch: { value: '', operator: EXISTS_OPERATOR, field: 'host.name' },
+      },
+    ] as unknown as DataProvider[]);
+    expect(result).toEqual('host.name');
   });
 });

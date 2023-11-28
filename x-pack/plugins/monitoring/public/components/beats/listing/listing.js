@@ -10,7 +10,6 @@ import { uniq, get } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiLink,
   EuiScreenReaderOnly,
@@ -159,7 +158,7 @@ export class Listing extends PureComponent {
             <Stats stats={stats} />
           </EuiPanel>
           <EuiSpacer size="m" />
-          <EuiPageContent>
+          <EuiPanel>
             {setupModeCallOut}
             <EuiMonitoringTable
               className="beatsTable"
@@ -202,7 +201,7 @@ export class Listing extends PureComponent {
                 defaultFields: ['name', 'type'],
               }}
             />
-          </EuiPageContent>
+          </EuiPanel>
         </EuiPageBody>
       </EuiPage>
     );

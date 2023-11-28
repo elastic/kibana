@@ -6,6 +6,7 @@
  */
 
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { isNoSuchRemoteClusterMessage, NoSuchRemoteClusterError } from '../../sources/errors';
 import { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
 import { InfraDatabaseGetIndicesResponse } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
@@ -29,10 +30,10 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
     ]);
 
-    return indexMaps.reduce(
-      (indexNames, indexMap) => [...indexNames, ...Object.keys(indexMap)],
-      [] as string[]
-    );
+    return indexMaps.reduce((indexNames, indexMap) => {
+      indexNames.push(...Object.keys(indexMap));
+      return indexNames;
+    }, [] as string[]);
   }
 
   public async hasAlias(requestContext: InfraPluginRequestHandlerContext, aliasName: string) {
@@ -70,6 +71,11 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
           if (err.status === 404) {
             return 'missing';
           }
+
+          if (isNoSuchRemoteClusterMessage(err.message)) {
+            throw new NoSuchRemoteClusterError();
+          }
+
           throw err;
         }
       );

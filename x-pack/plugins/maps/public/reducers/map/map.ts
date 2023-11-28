@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_ID } from '../../../common/constants';
 import {
   SET_SELECTED_LAYER,
   UPDATE_LAYER_ORDER,
@@ -12,7 +13,6 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   ADD_LAYER,
-  SET_LAYER_ERROR_STATUS,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_LAYER_PROP,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
@@ -46,6 +46,7 @@ import {
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
   UPDATE_EDIT_STATE,
+  SET_EXECUTION_CONTEXT,
 } from '../../actions/map_action_constants';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -63,6 +64,7 @@ import { startDataRequest, stopDataRequest, updateSourceDataRequest } from './da
 import { MapState } from './types';
 
 export const DEFAULT_MAP_STATE: MapState = {
+  executionContext: { name: APP_ID },
   ready: false,
   mapInitError: null,
   goto: null,
@@ -173,25 +175,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           [action.settingKey]: action.settingValue,
         },
       };
-    case SET_LAYER_ERROR_STATUS:
-      const { layerList } = state;
-      const layerIdx = getLayerIndex(layerList, action.layerId);
-      if (layerIdx === -1) {
-        return state;
-      }
-
-      return {
-        ...state,
-        layerList: [
-          ...layerList.slice(0, layerIdx),
-          {
-            ...layerList[layerIdx],
-            __isInErrorState: action.isInErrorState,
-            __errorMessage: action.errorMessage,
-          },
-          ...layerList.slice(layerIdx + 1),
-        ],
-      };
     case UPDATE_SOURCE_DATA_REQUEST:
       return updateSourceDataRequest(state, action.layerId, action.newData);
     case LAYER_DATA_LOAD_STARTED:
@@ -203,7 +186,15 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         action.meta
       );
     case LAYER_DATA_LOAD_ERROR:
-      return stopDataRequest(state, action.layerId, action.dataId, action.requestToken);
+      return stopDataRequest(
+        state,
+        action.layerId,
+        action.dataId,
+        action.requestToken,
+        undefined, // responseMeta meta
+        undefined, // response data
+        action.error
+      );
     case LAYER_DATA_LOAD_ENDED:
       return stopDataRequest(
         state,
@@ -322,6 +313,12 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           embeddableSearchContext: action.embeddableSearchContext,
         },
       };
+    case SET_EXECUTION_CONTEXT: {
+      return {
+        ...state,
+        executionContext: action.executionContext,
+      };
+    }
     default:
       return state;
   }

@@ -10,6 +10,8 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { escapeKuery } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
+import moment from 'moment';
 
 import {
   EuiButtonIcon,
@@ -24,34 +26,40 @@ import {
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-
+import { type MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import {
-  isClassificationAnalysis,
-  isRegressionAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../../../../common/types/es_client';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
-
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
-import {
+  type DataGridItem,
   DataGrid,
   RowCountRelation,
   UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
+import {
+  getAnalysisType,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+
+import { getToastNotifications } from '../../../../../util/dependency_cache';
+import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
+import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
+
 import {
-  defaultSearchQuery,
-  DataFrameAnalyticsConfig,
-  INDEX_STATUS,
-  SEARCH_SIZE,
-  getAnalysisType,
-} from '../../../../common';
+  replaceTokensInDFAUrlValue,
+  openCustomUrlWindow,
+} from '../../../../../util/custom_url_utils';
+import { replaceStringTokens } from '../../../../../util/string_utils';
+import { parseInterval } from '../../../../../../../common/util/parse_interval';
 
 import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
-import { IndexPatternPrompt } from '../index_pattern_prompt';
+import { DataViewPrompt } from '../data_view_prompt';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -113,27 +121,32 @@ const getResultsSectionHeaderItems = (
 interface ExpandableSectionResultsProps {
   colorRange?: ReturnType<typeof useColorRange>;
   indexData: UseIndexDataReturnType;
-  indexPattern?: DataView;
+  dataView?: DataView;
   jobConfig?: DataFrameAnalyticsConfig;
-  needsDestIndexPattern: boolean;
+  needsDestDataView: boolean;
   resultsField?: string;
-  searchQuery: SavedSearchQuery;
+  searchQuery: estypes.QueryDslQueryContainer;
 }
 
 export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   colorRange,
   indexData,
-  indexPattern,
+  dataView,
   jobConfig,
-  needsDestIndexPattern,
+  needsDestDataView,
   resultsField,
   searchQuery,
 }) => {
   const {
-    services: { application, share, data },
+    services: {
+      application,
+      share,
+      data,
+      http: { basePath },
+    },
   } = useMlKibana();
 
-  const dataViewId = indexPattern?.id;
+  const dataViewId = dataView?.id;
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
@@ -193,7 +206,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
 
       if (discoverLocator !== undefined) {
         const url = await discoverLocator.getRedirectUrl({
-          indexPatternId: dataViewId,
+          dataViewId,
           timeRange: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
           query: {
@@ -217,6 +230,44 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     [indexData?.visibleColumns, discoverLocator, dataViewId, resultsField, tableItems, data]
   );
 
+  const openCustomUrl = (item: DataGridItem, customUrl: MlKibanaUrlConfig) => {
+    const timeRangeInterval =
+      customUrl.time_range !== undefined ? parseInterval(customUrl.time_range) : null;
+    let urlPath;
+
+    // Interval time range
+    if (timeRangeInterval !== null) {
+      // Create a copy of the record as we are adding properties into it.
+      const record = cloneDeep(item);
+      const timestamp = record[dataView!.timeFieldName!];
+      const configuredUrlValue = customUrl.url_value;
+
+      if (configuredUrlValue.includes('$earliest$')) {
+        const earliestMoment = moment(timestamp);
+        earliestMoment.subtract(timeRangeInterval);
+        record.earliest = earliestMoment.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
+      }
+
+      if (configuredUrlValue.includes('$latest$')) {
+        const latestMoment = moment(timestamp);
+        latestMoment.add(timeRangeInterval);
+        record.latest = latestMoment.toISOString();
+      }
+
+      urlPath = replaceStringTokens(customUrl.url_value, record, true);
+    } else {
+      // Custom time range
+      // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
+      urlPath = replaceTokensInDFAUrlValue(
+        customUrl,
+        item,
+        data.query.timefilter.timefilter.getTime()
+      );
+    }
+
+    openCustomUrlWindow(urlPath, customUrl, basePath.get());
+  };
+
   const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = [
     {
       id: 'actions',
@@ -228,13 +279,14 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
         />
       ),
       rowCellRender: function RowCellRender({ rowIndex }) {
+        const item = tableItems[rowIndex];
         const [isPopoverVisible, setIsPopoverVisible] = useState(false);
         const closePopover = () => setIsPopoverVisible(false);
 
         const actions = [
           <EuiContextMenuItem
             icon="discoverApp"
-            key="custom-discover-url"
+            key="custom_discover_url"
             disabled={discoverUrlError !== undefined}
             onClick={async () => {
               const openInDiscoverUrl = await generateDiscoverUrl(rowIndex);
@@ -259,6 +311,24 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
           </EuiContextMenuItem>,
         ];
 
+        if (jobConfig && jobConfig._meta && Array.isArray(jobConfig._meta.custom_urls)) {
+          jobConfig?._meta.custom_urls.forEach((customUrl, index) => {
+            actions.push(
+              <EuiContextMenuItem
+                key={`custom_url_${index}`}
+                icon="popout"
+                onClick={() => {
+                  closePopover();
+                  openCustomUrl(item, customUrl);
+                }}
+                data-test-subj={`mlExplorationDataGridRowActionCustomUrlButton_${index}`}
+              >
+                {customUrl.url_name}
+              </EuiContextMenuItem>
+            );
+          });
+        }
+
         return (
           <EuiPopover
             isOpen={isPopoverVisible}
@@ -281,11 +351,31 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     },
   ];
 
+  const renderCellPopover = useMemo(
+    () =>
+      renderCellPopoverFactory({
+        analysisType,
+        baseline: indexData.baseline,
+        data: indexData.tableItems,
+        pagination: indexData.pagination,
+        predictionFieldName: indexData.predictionFieldName,
+        resultsField: indexData.resultsField,
+      }),
+    [
+      analysisType,
+      indexData.baseline,
+      indexData.tableItems,
+      indexData.pagination,
+      indexData.predictionFieldName,
+      indexData.resultsField,
+    ]
+  );
+
   const resultsSectionContent = (
     <>
-      {jobConfig !== undefined && needsDestIndexPattern && (
+      {jobConfig !== undefined && needsDestDataView && (
         <div className="mlExpandableSection-contentPadding">
-          <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+          <DataViewPrompt destIndex={jobConfig.dest.index} />
         </div>
       )}
       {jobConfig !== undefined &&
@@ -296,7 +386,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
           </EuiText>
         )}
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
-        indexPattern !== undefined && (
+        dataView !== undefined && (
           <>
             {columnsWithCharts.length > 0 &&
               (tableItems.length > 0 || status === INDEX_STATUS.LOADED) && (
@@ -305,8 +395,8 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
                   trailingControlColumns={
                     indexData.visibleColumns.length ? trailingControlColumns : undefined
                   }
-                  analysisType={analysisType}
                   dataTestSubj="mlExplorationDataGrid"
+                  renderCellPopover={renderCellPopover}
                   toastNotifications={getToastNotifications()}
                 />
               )}

@@ -10,6 +10,8 @@ import React from 'react';
 import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
+import { ExperimentalFeaturesService } from '../../../../../../services';
+import { useStartServices } from '../../../../hooks';
 
 import { EditOutputFlyout } from '.';
 
@@ -24,6 +26,16 @@ jest.mock('../../../../../../hooks/use_fleet_status', () => ({
   useFleetStatus: jest.fn().mockReturnValue({}),
 }));
 
+jest.mock('../../../../hooks', () => {
+  return {
+    ...jest.requireActual('../../../../hooks'),
+    useBreadcrumbs: jest.fn(),
+    useStartServices: jest.fn(),
+  };
+});
+
+const mockUseStartServices = useStartServices as jest.Mock;
+
 const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
 function renderFlyout(output?: Output) {
@@ -35,7 +47,53 @@ function renderFlyout(output?: Output) {
 
   return { utils };
 }
+
+const logstashInputsLabels = [
+  'Client SSL certificate key',
+  'Client SSL certificate',
+  'Server SSL certificate authorities (optional)',
+];
+
+const kafkaInputsLabels = [
+  'Partitioning strategy',
+  'Number of events',
+  'Default topic',
+  'Key',
+  'Value',
+  'Broker timeout',
+  'Broker reachability timeout',
+  'ACK Reliability',
+  'Key (optional)',
+];
+
+const kafkaSectionsLabels = [
+  'Authentication',
+  'Partitioning',
+  'Topics',
+  'Headers',
+  'Compression',
+  'Broker settings',
+];
+
+const remoteEsOutputLabels = ['Hosts', 'Service Token'];
+
 describe('EditOutputFlyout', () => {
+  const mockStartServices = (isServerlessEnabled?: boolean) => {
+    mockUseStartServices.mockReturnValue({
+      notifications: { toasts: {} },
+      docLinks: {
+        links: { fleet: {}, logstash: {}, kibana: {} },
+      },
+      cloud: {
+        isServerlessEnabled,
+      },
+    });
+  };
+
+  beforeEach(() => {
+    mockStartServices(false);
+  });
+
   it('should render the flyout if there is not output provided', async () => {
     renderFlyout();
   });
@@ -52,10 +110,20 @@ describe('EditOutputFlyout', () => {
     expect(
       utils.queryByLabelText('Elasticsearch CA trusted fingerprint (optional)')
     ).not.toBeNull();
+
     // Does not show logstash SSL inputs
-    expect(utils.queryByLabelText('Client SSL certificate key')).toBeNull();
-    expect(utils.queryByLabelText('Client SSL certificate')).toBeNull();
-    expect(utils.queryByLabelText('Server SSL certificate authorities (optional)')).toBeNull();
+    logstashInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).toBeNull();
+    });
+
+    // Does not show kafka inputs nor sections
+    kafkaInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).toBeNull();
+    });
+
+    kafkaSectionsLabels.forEach((label) => {
+      expect(utils.queryByText(label)).toBeNull();
+    });
   });
 
   it('should render the flyout if the output provided is a logstash output', async () => {
@@ -68,9 +136,42 @@ describe('EditOutputFlyout', () => {
     });
 
     // Show logstash SSL inputs
-    expect(utils.queryByLabelText('Client SSL certificate key')).not.toBeNull();
-    expect(utils.queryByLabelText('Client SSL certificate')).not.toBeNull();
-    expect(utils.queryByLabelText('Server SSL certificate authorities (optional)')).not.toBeNull();
+    logstashInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+
+    // Does not show kafka inputs nor sections
+    kafkaInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).toBeNull();
+    });
+
+    kafkaSectionsLabels.forEach((label) => {
+      expect(utils.queryByText(label)).toBeNull();
+    });
+  });
+
+  it('should render the flyout if the output provided is a kafka output', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'output123',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    // Show kafka inputs
+    kafkaInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+
+    kafkaSectionsLabels.forEach((label) => {
+      expect(utils.queryByText(label)).not.toBeNull();
+    });
+
+    // Does not show logstash inputs
+    ['Client SSL certificate key', 'Client SSL certificate'].forEach((label) => {
+      expect(utils.queryByLabelText(label)).toBeNull();
+    });
   });
 
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
@@ -87,5 +188,46 @@ describe('EditOutputFlyout', () => {
 
     // Show logstash SSL inputs
     expect(utils.getByText('Additional setup required')).not.toBeNull();
+  });
+
+  it('should render the flyout if the output provided is a remote ES output', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true });
+    const { utils } = renderFlyout({
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    remoteEsOutputLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+    expect(utils.queryByTestId('serviceTokenCallout')).not.toBeNull();
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).toContain(
+      'Remote Elasticsearch'
+    );
+
+    expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
+  });
+
+  it('should not display remote ES output in type lists if serverless', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ remoteESOutput: true });
+    mockUseStartServices.mockReset();
+    mockStartServices(true);
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'dummy',
+      id: 'output',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).not.toContain(
+      'Remote Elasticsearch'
+    );
   });
 });

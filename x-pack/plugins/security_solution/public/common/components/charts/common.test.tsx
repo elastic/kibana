@@ -17,8 +17,9 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  useThemes,
 } from './common';
+import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 
@@ -169,22 +170,25 @@ describe('checkIfAllValuesAreZero', () => {
     });
   });
 
-  describe('useTheme', () => {
-    it('merges our spacing with the default theme', () => {
-      const { result } = renderHook(() => useTheme());
+  describe('useThemes', () => {
+    it('should return custom spacing theme', () => {
+      const { result } = renderHook(() => useThemes());
 
-      expect(result.current).toEqual(
-        expect.objectContaining({ chartMargins: expect.objectContaining({ top: 4, bottom: 0 }) })
-      );
+      expect(result.current.theme.chartMargins).toMatchObject({ top: 4, bottom: 0 });
     });
 
-    it('returns a different theme depending on user settings', () => {
-      const { result: defaultResult } = renderHook(() => useTheme());
+    it('should return light baseTheme when isDarkMode false', () => {
+      (useUiSetting as jest.Mock).mockImplementation(() => false);
+      const { result } = renderHook(() => useThemes());
+
+      expect(result.current.baseTheme).toBe(LIGHT_THEME);
+    });
+
+    it('should return dark baseTheme when isDarkMode true', () => {
       (useUiSetting as jest.Mock).mockImplementation(() => true);
+      const { result } = renderHook(() => useThemes());
 
-      const { result: darkResult } = renderHook(() => useTheme());
-
-      expect(defaultResult.current).not.toMatchObject(darkResult.current);
+      expect(result.current.baseTheme).toBe(DARK_THEME);
     });
   });
 });

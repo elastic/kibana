@@ -35,7 +35,7 @@ export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ onClose, pipe
             />
           }
           color="danger"
-          iconType="alert"
+          iconType="warning"
         />
       </EuiFlyoutBody>
     </EuiFlyout>

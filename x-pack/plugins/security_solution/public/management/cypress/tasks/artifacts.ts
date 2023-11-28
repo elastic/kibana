@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { GetPackagePoliciesResponse } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import type {
   ExceptionListItemSchema,
@@ -25,6 +26,11 @@ export const removeAllArtifacts = () => {
   }
 };
 
+export const removeAllArtifactsPromise = () =>
+  Cypress.Promise.all(ENDPOINT_ARTIFACT_LIST_IDS.map(removeExceptionsListPromise)).then(
+    (result) => result.filter(Boolean).length
+  );
+
 export const removeExceptionsList = (listId: string) => {
   request({
     method: 'DELETE',
@@ -32,6 +38,19 @@ export const removeExceptionsList = (listId: string) => {
     failOnStatusCode: false,
   }).then(({ status }) => {
     expect(status).to.be.oneOf([200, 404]); // should either be success or not found
+  });
+};
+
+const removeExceptionsListPromise = (listId: string) => {
+  return new Cypress.Promise((resolve) => {
+    request({
+      method: 'DELETE',
+      url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
+      failOnStatusCode: false,
+    }).then(({ status }) => {
+      expect(status).to.be.oneOf([200, 404]); // should either be success or not found
+      resolve(status === 200);
+    });
   });
 };
 
@@ -79,14 +98,11 @@ export const createPerPolicyArtifact = (name: string, body: object, policyId?: '
   });
 };
 
-export const yieldFirstPolicyID = () => {
-  return cy
-    .request({
-      method: 'GET',
-      url: `${PACKAGE_POLICY_API_ROOT}?page=1&perPage=1&kuery=ingest-package-policies.package.name: endpoint`,
-    })
-    .then(({ body }) => {
-      expect(body.items.length).to.be.least(1);
-      return body.items[0].id;
-    });
-};
+export const yieldFirstPolicyID = (): Cypress.Chainable<string> =>
+  request<GetPackagePoliciesResponse>({
+    method: 'GET',
+    url: `${PACKAGE_POLICY_API_ROOT}?page=1&perPage=1&kuery=ingest-package-policies.package.name: endpoint`,
+  }).then(({ body }) => {
+    expect(body.items.length).to.be.least(1);
+    return body.items[0].id;
+  });

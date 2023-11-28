@@ -27,7 +27,7 @@ const MlAuditIconComponent: FC<MlAuditIconProps> = ({ message }) => {
   }
 
   let color = 'primary';
-  let icon = 'alert';
+  let icon = 'warning';
 
   if (message.level === MessageLevels.info) {
     icon = 'iInCircle';

@@ -50,7 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
             id: resp.body.id,
             type: 'visualization',
             migrationVersion: resp.body.migrationVersion,
-            coreMigrationVersion: '8.0.0',
+            coreMigrationVersion: '8.8.0',
+            typeMigrationVersion: resp.body.typeMigrationVersion,
+            managed: resp.body.managed,
             updated_at: resp.body.updated_at,
             created_at: resp.body.created_at,
             version: resp.body.version,
@@ -61,6 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
             namespaces: ['default'],
           });
           expect(resp.body.migrationVersion).to.be.ok();
+          expect(resp.body.typeMigrationVersion).to.be.ok();
+          expect(resp.body.managed).to.not.be.ok();
         });
     });
 
@@ -71,11 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
           attributes: {
             title: 'My favorite vis',
           },
-          coreMigrationVersion: '1.2.3',
+          coreMigrationVersion: '8.8.0',
         })
         .expect(200)
         .then((resp) => {
-          expect(resp.body.coreMigrationVersion).to.eql('1.2.3');
+          expect(resp.body.coreMigrationVersion).to.eql('8.8.0');
         });
     });
   });

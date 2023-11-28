@@ -37,12 +37,24 @@ export const matchedIndiciesDefault = {
   visibleIndices: [],
 };
 
+/**
+ * ConstructorArgs for DataViewEditorService
+ */
 export interface DataViewEditorServiceConstructorArgs {
+  /**
+   * Dependencies for the DataViewEditorService
+   */
   services: {
     http: HttpSetup;
     dataViews: DataViewsServicePublic;
   };
+  /**
+   * Whether service requires requireTimestampField
+   */
   requireTimestampField?: boolean;
+  /**
+   * Initial type, indexPattern, and name to populate service
+   */
   initialValues: {
     name?: string;
     type?: INDEX_PATTERN_TYPE;
@@ -330,10 +342,12 @@ export class DataViewEditorService {
 
     const getFieldsOptions: GetFieldsOptions = {
       pattern: this.indexPattern,
+      allowHidden: this.allowHidden,
     };
     if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
       getFieldsOptions.rollupIndex = currentState.rollupIndexName || '';
+      getFieldsOptions.allowNoIndex = true;
     }
 
     let timestampFieldOptions: TimestampOption[] = [];

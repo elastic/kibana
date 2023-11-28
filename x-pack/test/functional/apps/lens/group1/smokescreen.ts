@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // Verify that the field was persisted from the transition
-      expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`ip : *`, `geo.src : CN`]);
+      expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`"ip" : *`, `geo.src : CN`]);
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });
 
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      await testSubjects.click('lnsXY_splitDimensionPanel > indexPattern-dimension-remove');
+      await PageObjects.lens.removeDimension('lnsXY_splitDimensionPanel');
       await PageObjects.lens.switchToVisualization('line');
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionColor('#ff0000');
       await PageObjects.lens.openVisualOptions();
 
-      await PageObjects.lens.useCurvedLines();
+      await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
@@ -200,9 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         longLabel
       );
-      expect(
-        await testSubjects.isDisplayed('lnsXY_yDimensionPanel >  indexPattern-dimension-remove')
-      ).to.equal(true);
+      expect(await PageObjects.lens.canRemoveDimension('lnsXY_yDimensionPanel')).to.equal(true);
       await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
       await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
     });
@@ -315,7 +313,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.save('twolayerchart');
-      await testSubjects.click('lnsSuggestion-asDonut > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-donut > lnsSuggestion');
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
@@ -336,7 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
@@ -346,7 +344,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('bar');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Average of bytes'
@@ -367,7 +365,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Average of bytes'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
     });
 
@@ -380,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
         await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
-      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
+      ).to.eql(['Top 7 values of geo.dest', 'Top 3 values of geo.src']);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
       );
@@ -762,6 +760,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
       expect(hasVisualOptionsButton).to.be(false);
+    });
+
+    it('should allow edit meta-data for Lens chart on listing page', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('Afancilenstest');
+      await listingTable.inspectVisualization();
+      await listingTable.editVisualizationDetails({
+        title: 'Anewfancilenstest',
+        description: 'new description',
+      });
+      await listingTable.searchForItemWithName('Anewfancilenstest');
+      await listingTable.expectItemsCount('visualize', 1);
+    });
+
+    it('should correctly optimize multiple percentile metrics', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      for (const percentileValue of [90, 95.5, 99.9]) {
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'percentile',
+          field: 'bytes',
+          keepOpen: true,
+        });
+
+        await retry.try(async () => {
+          const value = `${percentileValue}`;
+          // Can not use testSubjects because data-test-subj is placed range input and number input
+          const percentileInput = await PageObjects.lens.getNumericFieldReady(
+            'lns-indexPattern-percentile-input'
+          );
+          await percentileInput.type(value);
+
+          const attrValue = await percentileInput.getAttribute('value');
+          if (attrValue !== value) {
+            throw new Error(`layerPanelTopHitsSize not set to ${value}`);
+          }
+        });
+
+        await PageObjects.lens.closeDimensionEditor();
+      }
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
     });
   });
 }

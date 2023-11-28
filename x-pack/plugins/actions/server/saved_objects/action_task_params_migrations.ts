@@ -15,7 +15,7 @@ import {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
-import { ActionTaskParams, PreConfiguredAction } from '../types';
+import { ActionTaskParams, InMemoryConnector } from '../types';
 import { RelatedSavedObjects } from '../lib/related_saved_objects';
 
 interface ActionTaskParamsLogMeta extends LogMeta {
@@ -40,12 +40,12 @@ function createEsoMigration(
 
 export function getActionTaskParamsMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  preconfiguredActions: PreConfiguredAction[]
+  inMemoryConnectors: InMemoryConnector[]
 ): SavedObjectMigrationMap {
   const migrationActionTaskParamsSixteen = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => true,
-    pipeMigrations(getUseSavedObjectReferencesFn(preconfiguredActions))
+    pipeMigrations(getUseSavedObjectReferencesFn(inMemoryConnectors))
   );
 
   const migrationActionsTaskParams800 = createEsoMigration(
@@ -86,22 +86,22 @@ function executeMigrationWithErrorHandling(
   };
 }
 
-export function isPreconfiguredAction(
+export function isInMemoryAction(
   doc: SavedObjectUnsanitizedDoc<ActionTaskParams>,
-  preconfiguredActions: PreConfiguredAction[]
+  inMemoryConnectors: InMemoryConnector[]
 ): boolean {
-  return !!preconfiguredActions.find((action) => action.id === doc.attributes.actionId);
+  return !!inMemoryConnectors.find((action) => action.id === doc.attributes.actionId);
 }
 
-function getUseSavedObjectReferencesFn(preconfiguredActions: PreConfiguredAction[]) {
+function getUseSavedObjectReferencesFn(inMemoryConnectors: InMemoryConnector[]) {
   return (doc: SavedObjectUnsanitizedDoc<ActionTaskParams>) => {
-    return useSavedObjectReferences(doc, preconfiguredActions);
+    return useSavedObjectReferences(doc, inMemoryConnectors);
   };
 }
 
 function useSavedObjectReferences(
   doc: SavedObjectUnsanitizedDoc<ActionTaskParams>,
-  preconfiguredActions: PreConfiguredAction[]
+  inMemoryConnectors: InMemoryConnector[]
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   const {
     attributes: { actionId, relatedSavedObjects },
@@ -111,7 +111,7 @@ function useSavedObjectReferences(
   const newReferences: SavedObjectReference[] = [];
   const relatedSavedObjectRefs: RelatedSavedObjects = [];
 
-  if (!isPreconfiguredAction(doc, preconfiguredActions)) {
+  if (!isInMemoryAction(doc, inMemoryConnectors)) {
     newReferences.push({
       id: actionId,
       name: 'actionRef',

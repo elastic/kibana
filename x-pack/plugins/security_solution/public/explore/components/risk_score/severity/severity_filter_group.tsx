@@ -13,12 +13,15 @@ import {
   EuiFilterSelectItem,
   EuiPopover,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 
-import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { SEVERITY_UI_SORT_ORDER } from '../../../../../common/search_strategy';
+import { SEVERITY_UI_SORT_ORDER } from '../../../../entity_analytics/common/utils';
+import type { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from './types';
-import { RiskScore } from './common';
+import { RiskScoreLevel } from './common';
+import { ENTITY_RISK_LEVEL } from '../translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface SeverityItems {
   risk: RiskSeverity;
@@ -29,8 +32,10 @@ export const SeverityFilterGroup: React.FC<{
   severityCount: SeverityCount;
   selectedSeverities: RiskSeverity[];
   onSelect: (newSelection: RiskSeverity[]) => void;
-  title: string;
-}> = ({ severityCount, selectedSeverities, onSelect, title }) => {
+  riskEntity: RiskScoreEntity;
+}> = ({ severityCount, selectedSeverities, onSelect, riskEntity }) => {
+  const { euiTheme } = useEuiTheme();
+  const { telemetry } = useKibana().services;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -57,13 +62,19 @@ export const SeverityFilterGroup: React.FC<{
   const updateSeverityFilter = useCallback(
     (selectedSeverity: RiskSeverity) => {
       const currentSelection = selectedSeverities ?? [];
-      const newSelection = currentSelection.includes(selectedSeverity)
-        ? currentSelection.filter((s) => s !== selectedSeverity)
-        : [...currentSelection, selectedSeverity];
+      const isAddingSeverity = !currentSelection.includes(selectedSeverity);
+
+      const newSelection = isAddingSeverity
+        ? [...currentSelection, selectedSeverity]
+        : currentSelection.filter((s) => s !== selectedSeverity);
+
+      if (isAddingSeverity) {
+        telemetry.reportEntityRiskFiltered({ entity: riskEntity, selectedSeverity });
+      }
 
       onSelect(newSelection);
     },
-    [selectedSeverities, onSelect]
+    [selectedSeverities, onSelect, telemetry, riskEntity]
   );
 
   const totalActiveItem = useMemo(
@@ -81,10 +92,10 @@ export const SeverityFilterGroup: React.FC<{
         numActiveFilters={totalActiveItem}
         onClick={onButtonClick}
       >
-        {title}
+        {ENTITY_RISK_LEVEL(riskEntity)}
       </EuiFilterButton>
     ),
-    [isPopoverOpen, items, onButtonClick, totalActiveItem, title]
+    [isPopoverOpen, items, onButtonClick, totalActiveItem, riskEntity]
   );
 
   return (
@@ -96,7 +107,10 @@ export const SeverityFilterGroup: React.FC<{
         closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <div className="euiFilterSelect__items">
+        {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+            instead of EuiFilterSelectItem (which is pending deprecation).
+            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
           {items.map((item, index) => (
             <EuiFilterSelectItem
               data-test-subj={`risk-filter-item-${item.risk}`}
@@ -104,7 +118,7 @@ export const SeverityFilterGroup: React.FC<{
               key={index + item.risk}
               onClick={() => updateSeverityFilter(item.risk)}
             >
-              <RiskScore severity={item.risk} />
+              <RiskScoreLevel severity={item.risk} />
             </EuiFilterSelectItem>
           ))}
         </div>

@@ -26,6 +26,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { createCoreStartMock } from './core_start.mock';
+import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
@@ -47,12 +48,14 @@ export function createCoreSetupMock({
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
     registerGlobal: uiSettingsServiceMock.createSetupContract().registerGlobal,
+    setAllowlist: uiSettingsServiceMock.createSetupContract().setAllowlist,
   };
 
   const mock: CoreSetupMockType = {
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     capabilities: capabilitiesServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),
+    userSettings: userSettingsServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
@@ -66,6 +69,10 @@ export function createCoreSetupMock({
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     coreUsageData: {
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
+    },
+    plugins: {
+      onSetup: jest.fn(),
+      onStart: jest.fn(),
     },
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()

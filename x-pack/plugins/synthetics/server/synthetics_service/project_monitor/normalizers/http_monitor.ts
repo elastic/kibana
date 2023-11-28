@@ -7,11 +7,11 @@
 import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
+  CodeEditorMode,
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPFields,
-  Mode,
   TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
@@ -34,7 +34,7 @@ export const getNormalizeHTTPFields = ({
   namespace,
   version,
 }: NormalizedProjectProps): NormalizerResult<HTTPFields> => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
+  const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.HTTP];
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
   const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
@@ -46,7 +46,7 @@ export const getNormalizeHTTPFields = ({
     version,
   });
 
-  // Add common erros to errors arary
+  // Add common errors to errors array
   errors.push(...commonErrors);
 
   /* Check if monitor has multiple urls */
@@ -61,20 +61,24 @@ export const getNormalizeHTTPFields = ({
   const normalizedFields = {
     ...yamlConfig,
     ...commonFields,
-    [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+    [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
     [ConfigKey.URLS]: getOptionalArrayField(monitor.urls) || defaultFields[ConfigKey.URLS],
-    [ConfigKey.MAX_REDIRECTS]:
-      monitor[ConfigKey.MAX_REDIRECTS] || defaultFields[ConfigKey.MAX_REDIRECTS],
+    [ConfigKey.MAX_REDIRECTS]: formatMaxRedirects(monitor[ConfigKey.MAX_REDIRECTS]),
     [ConfigKey.REQUEST_BODY_CHECK]: getRequestBodyField(
       (yamlConfig as Record<keyof HTTPFields, unknown>)[ConfigKey.REQUEST_BODY_CHECK] as string,
       defaultFields[ConfigKey.REQUEST_BODY_CHECK]
     ),
+    [ConfigKey.RESPONSE_BODY_MAX_BYTES]: `${get(
+      yamlConfig,
+      ConfigKey.RESPONSE_BODY_MAX_BYTES,
+      defaultFields[ConfigKey.RESPONSE_BODY_MAX_BYTES]
+    )}`,
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
     [ConfigKey.METADATA]: {
-      ...DEFAULT_FIELDS[DataStream.HTTP][ConfigKey.METADATA],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP][ConfigKey.METADATA],
       is_tls_enabled: getHasTLSFields(monitor),
     },
   };
@@ -94,17 +98,27 @@ export const getRequestBodyField = (
   defaultValue: HTTPFields[ConfigKey.REQUEST_BODY_CHECK]
 ): HTTPFields[ConfigKey.REQUEST_BODY_CHECK] => {
   let parsedValue: string;
-  let type: Mode;
+  let type: CodeEditorMode;
 
   if (typeof value === 'object') {
     parsedValue = JSON.stringify(value);
-    type = Mode.JSON;
+    type = CodeEditorMode.JSON;
   } else {
     parsedValue = value;
-    type = Mode.PLAINTEXT;
+    type = CodeEditorMode.PLAINTEXT;
   }
   return {
     type,
     value: parsedValue || defaultValue.value,
   };
+};
+
+export const formatMaxRedirects = (value?: string | number): string => {
+  if (typeof value === 'number') {
+    return `${value}`;
+  }
+
+  const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.HTTP];
+
+  return value ?? defaultFields[ConfigKey.MAX_REDIRECTS];
 };

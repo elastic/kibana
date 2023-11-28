@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { SavedObjectIndexStore } from './saved_object_store';
 
 describe('LensStore', () => {
   function testStore(testId?: string) {
     const client = {
-      create: jest.fn(() => Promise.resolve({ id: testId || 'testid' })),
-      resolve: jest.fn(),
+      create: jest.fn(() => Promise.resolve({ item: { id: testId || 'testid' } })),
+      update: jest.fn(() => Promise.resolve({ item: { id: testId || 'testid' } })),
+      get: jest.fn(),
     };
 
     return {
       client,
-      store: new SavedObjectIndexStore(client as unknown as SavedObjectsClientContract),
+      store: new SavedObjectIndexStore({
+        client,
+        registry: jest.fn(),
+      } as unknown as ContentManagementPublicStart),
     };
   }
 
@@ -56,9 +60,9 @@ describe('LensStore', () => {
       });
 
       expect(client.create).toHaveBeenCalledTimes(1);
-      expect(client.create).toHaveBeenCalledWith(
-        'lens',
-        {
+      expect(client.create).toHaveBeenCalledWith({
+        contentTypeId: 'lens',
+        data: {
           title: 'Hello',
           description: 'My doc',
           visualizationType: 'bar',
@@ -71,10 +75,10 @@ describe('LensStore', () => {
             filters: [],
           },
         },
-        {
+        options: {
           references: [],
-        }
-      );
+        },
+      });
     });
 
     test('updates and returns a visualization document', async () => {
@@ -105,21 +109,24 @@ describe('LensStore', () => {
         },
       });
 
-      expect(client.create).toHaveBeenCalledTimes(1);
-      expect(client.create.mock.calls).toEqual([
+      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.update.mock.calls).toEqual([
         [
-          'lens',
           {
-            title: 'Even the very wise cannot see all ends.',
-            visualizationType: 'line',
-            state: {
-              datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
-              visualization: { gear: ['staff', 'pointy hat'] },
-              query: { query: '', language: 'lucene' },
-              filters: [],
+            contentTypeId: 'lens',
+            id: 'Gandalf',
+            data: {
+              title: 'Even the very wise cannot see all ends.',
+              visualizationType: 'line',
+              state: {
+                datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
+                visualization: { gear: ['staff', 'pointy hat'] },
+                query: { query: '', language: 'lucene' },
+                filters: [],
+              },
             },
+            options: { references: [] },
           },
-          { references: [], id: 'Gandalf', overwrite: true },
         ],
       ]);
     });
@@ -128,9 +135,9 @@ describe('LensStore', () => {
   describe('load', () => {
     test('throws if an error is returned', async () => {
       const { client, store } = testStore();
-      client.resolve = jest.fn(async () => ({
-        outcome: 'exactMatch',
-        saved_object: {
+      client.get = jest.fn(async () => ({
+        meta: { outcome: 'exactMatch' },
+        item: {
           id: 'Paul',
           type: 'lens',
           attributes: {

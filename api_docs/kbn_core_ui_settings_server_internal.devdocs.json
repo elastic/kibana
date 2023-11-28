@@ -298,7 +298,15 @@
                 "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
-              "<{}>; }>"
+              "<{}>; publicApiEnabled: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ConditionalType",
+                "text": "ConditionalType"
+              },
+              "<true, boolean, boolean>; }>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_config.ts",
             "deprecated": false,

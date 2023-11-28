@@ -14,7 +14,7 @@ import { encode, decode } from '../route_state';
 import { State } from '../../../../types';
 
 export const useWorkpadHistory = () => {
-  const history = useHistory();
+  const history = useHistory<string>();
   const historyState = useSelector((state: State) => state.persistent);
   const hasRun = useRef<boolean>(false);
 

@@ -7,7 +7,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 
-import type { LOCATORS_IDS } from '../constants';
+import { LOCATORS_IDS } from '../constants';
 
 import { useStartServices } from './use_core';
 
@@ -16,4 +16,8 @@ export function useLocator<T extends SerializableRecord>(
 ) {
   const services = useStartServices();
   return services.share.url.locators.get<T>(locatorId);
+}
+
+export function useDashboardLocator() {
+  return useLocator(LOCATORS_IDS.DASHBOARD_APP);
 }

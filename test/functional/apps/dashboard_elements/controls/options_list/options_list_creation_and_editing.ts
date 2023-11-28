@@ -18,15 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  const { dashboardControls, dashboard } = getPageObjects([
-    'dashboardControls',
-    'timePicker',
-    'dashboard',
-    'settings',
-    'console',
-    'common',
-    'header',
-  ]);
+  const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
   describe('Dashboard options list creation and editing', () => {
     before(async () => {
@@ -137,7 +129,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
 
         const newTitle = 'wow! Animal sounds?';
-        await testSubjects.click(`control-action-${secondId}-edit`);
         await dashboardControls.editExistingControl(secondId);
         await dashboardControls.controlEditorSetTitle(newTitle);
         await dashboardControls.controlEditorSetWidth('small');
@@ -164,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'animals-*'
         );
         await testSubjects.missingOrFail('field-picker-select-isDog');
-        await dashboardControls.controlEditorCancel(true);
+        await dashboardControls.controlEditorCancel();
       });
     });
   });

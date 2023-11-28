@@ -20,7 +20,7 @@ import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
-  INTERNAL_BASE_ALERTING_API_PATH,
+  INTERNAL_ALERTING_API_FIND_RULES_PATH,
 } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
@@ -47,6 +47,7 @@ const querySchema = schema.object({
   ),
   fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),
+  filter_consumers: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
@@ -56,11 +57,13 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   per_page: perPage,
   sort_field: sortField,
   sort_order: sortOrder,
+  filter_consumers: filterConsumers,
   ...rest
 }) => ({
   ...rest,
   defaultSearchOperator,
   perPage,
+  filterConsumers,
   ...(sortField ? { sortField } : {}),
   ...(sortOrder ? { sortOrder } : {}),
   ...(hasReference ? { hasReference } : {}),
@@ -136,7 +139,7 @@ const buildFindRulesRoute = ({
       })
     )
   );
-  if (path === `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`) {
+  if (path === INTERNAL_ALERTING_API_FIND_RULES_PATH) {
     router.post(
       {
         path,
@@ -205,7 +208,7 @@ export const findInternalRulesRoute = (
   buildFindRulesRoute({
     excludeFromPublicApi: false,
     licenseState,
-    path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`,
+    path: INTERNAL_ALERTING_API_FIND_RULES_PATH,
     router,
     usageCounter,
   });

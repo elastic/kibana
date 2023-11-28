@@ -248,8 +248,7 @@ export function mlSavedObjectServiceFactory(
       filter,
     };
 
-    const jobs = await _savedObjectsClientFindMemo<JobObject>(options);
-    return jobs.saved_objects;
+    return (await internalSavedObjectsClient.find<JobObject>(options)).saved_objects;
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {

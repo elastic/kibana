@@ -1,12 +1,5 @@
 @import 'src/core/public/mixins';
 
-.dshAppWrapper {
-  @include kibanaFullBodyHeight();
-
-  display: flex;
-  flex-direction: column;
-}
-
 .dshUnsavedListingItem {
   margin-top: $euiSizeM;
 }

@@ -65,7 +65,6 @@ describe('Aggs service', () => {
           "filters",
           "significant_terms",
           "significant_text",
-          "geohash_grid",
           "geotile_grid",
           "sampler",
           "diversified_sampler",
@@ -121,7 +120,6 @@ describe('Aggs service', () => {
           "filters",
           "significant_terms",
           "significant_text",
-          "geohash_grid",
           "geotile_grid",
           "sampler",
           "diversified_sampler",
@@ -210,7 +208,7 @@ describe('Aggs service', () => {
     test('types registry returns initialized type providers', () => {
       service.setup(setupDeps);
       const start = service.start(startDeps);
-      expect(start.types.get('terms').name).toBe('terms');
+      expect(start.types.get('terms')?.name).toBe('terms');
     });
   });
 });

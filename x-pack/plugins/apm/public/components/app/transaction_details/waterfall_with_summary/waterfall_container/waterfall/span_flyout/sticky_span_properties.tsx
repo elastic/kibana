@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
+import {
+  METRIC_TYPE,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,

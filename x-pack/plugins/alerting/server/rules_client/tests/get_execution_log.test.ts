@@ -7,7 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -32,6 +36,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -42,15 +47,21 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -91,6 +102,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
       error: null,
       warning: null,
     },
+    revision: 0,
   },
   references: [],
 };
@@ -130,7 +142,7 @@ const aggregateResults = {
               numRecoveredAlerts: {
                 value: 0.0,
               },
-              outcomeAndMessage: {
+              outcomeMessageAndMaintenanceWindow: {
                 hits: {
                   total: {
                     value: 1,
@@ -239,7 +251,7 @@ const aggregateResults = {
               numRecoveredAlerts: {
                 value: 5.0,
               },
-              outcomeAndMessage: {
+              outcomeMessageAndMaintenanceWindow: {
                 hits: {
                   total: {
                     value: 1,
@@ -258,6 +270,9 @@ const aggregateResults = {
                         },
                         kibana: {
                           version: '8.2.0',
+                          alert: {
+                            maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                          },
                           alerting: {
                             outcome: 'success',
                           },
@@ -386,6 +401,7 @@ describe('getExecutionLogForRule()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -409,6 +425,7 @@ describe('getExecutionLogForRule()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
         },
       ],
     });
@@ -722,6 +739,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -745,6 +763,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
         },
       ],
     });

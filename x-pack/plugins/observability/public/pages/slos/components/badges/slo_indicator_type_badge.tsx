@@ -6,40 +6,84 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiBadge, EuiFlexItem, EuiToolTip, EuiBadgeProps } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { assertNever } from '@kbn/std';
+import { i18n } from '@kbn/i18n';
+
 import { euiLightVars } from '@kbn/ui-theme';
+import { useKibana } from '../../../../utils/kibana_react';
+import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
+import { isApmIndicatorType } from '../../../../utils/slo/indicator';
+import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
+
 export interface Props {
+  color?: EuiBadgeProps['color'];
   slo: SLOWithSummaryResponse;
 }
 
-export function SloIndicatorTypeBadge({ slo }: Props) {
-  return (
-    <div>
-      <EuiBadge color={euiLightVars.euiColorDisabled}>
-        {toIndicatorLabel(slo.indicator.type)}
-      </EuiBadge>
-    </div>
-  );
-}
+export function SloIndicatorTypeBadge({ slo, color }: Props) {
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana().services;
 
-function toIndicatorLabel(indicatorType: SLOWithSummaryResponse['indicator']['type']) {
-  switch (indicatorType) {
-    case 'sli.kql.custom':
-      return i18n.translate('xpack.observability.slo.slo.indicator.customKql', {
-        defaultMessage: 'KQL',
+  const handleNavigateToApm = () => {
+    if (
+      slo.indicator.type === 'sli.apm.transactionDuration' ||
+      slo.indicator.type === 'sli.apm.transactionErrorRate'
+    ) {
+      const {
+        indicator: {
+          params: { environment, filter, service, transactionName, transactionType },
+        },
+        timeWindow: { duration },
+      } = slo;
+
+      const url = convertSliApmParamsToApmAppDeeplinkUrl({
+        duration,
+        environment,
+        filter,
+        service,
+        transactionName,
+        transactionType,
       });
-    case 'sli.apm.transactionDuration':
-      return i18n.translate('xpack.observability.slo.slo.indicator.apmLatency', {
-        defaultMessage: 'Latency',
-      });
-    case 'sli.apm.transactionErrorRate':
-      return i18n.translate('xpack.observability.slo.slo.indicator.apmAvailability', {
-        defaultMessage: 'Availability',
-      });
-    default:
-      assertNever(indicatorType);
-  }
+
+      navigateToUrl(basePath.prepend(url));
+    }
+  };
+
+  return (
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color={color ?? euiLightVars.euiColorDisabled}>
+          {toIndicatorTypeLabel(slo.indicator.type)}
+        </EuiBadge>
+      </EuiFlexItem>
+      {isApmIndicatorType(slo.indicator.type) && 'service' in slo.indicator.params && (
+        <EuiFlexItem grow={false} style={{ maxWidth: 100 }}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.observability.slo.indicatorTypeBadge.exploreInApm', {
+              defaultMessage: 'View {service} details',
+              values: { service: slo.indicator.params.service },
+            })}
+          >
+            <EuiBadge
+              color={color ?? euiLightVars.euiColorDisabled}
+              onClick={handleNavigateToApm}
+              onClickAriaLabel={i18n.translate(
+                'xpack.observability.slo.indicatorTypeBadge.exploreInApm',
+                {
+                  defaultMessage: 'View {service} details',
+                  values: { service: slo.indicator.params.service },
+                }
+              )}
+            >
+              {slo.indicator.params.service}
+            </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+    </>
+  );
 }

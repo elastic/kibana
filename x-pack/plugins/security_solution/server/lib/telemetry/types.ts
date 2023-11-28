@@ -64,6 +64,19 @@ export interface TelemetryEvent {
     id?: string;
     kind?: string;
   };
+  kubernetes?: {
+    audit?: {
+      user?: {
+        username?: string;
+        groups?: string[];
+      };
+      impersonated_user?: {
+        username?: string;
+        groups?: string[];
+      };
+      pod?: SearchTypes;
+    };
+  };
 }
 
 // EP Policy Response
@@ -443,4 +456,20 @@ export interface ValueListResponse {
   itemMetricsResponse: ValueListItemsResponseAggregation;
   exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
   indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+}
+
+export interface ExtraInfo {
+  clusterInfo: ESClusterInfo;
+  licenseInfo: ESLicense | undefined;
+}
+
+export interface TimeFrame {
+  startOfDay: string;
+  endOfDay: string;
+}
+
+export interface TimelineResult {
+  nodes: number;
+  events: number;
+  timeline: TimelineTelemetryTemplate | undefined;
 }

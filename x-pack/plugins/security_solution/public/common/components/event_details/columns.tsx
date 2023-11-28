@@ -17,6 +17,8 @@ import type { EventFieldsData } from './types';
 import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
+import { getSourcererScopeId } from '../../../helpers';
+import type { ColumnsProvider } from './event_fields_browser';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -37,7 +39,8 @@ export const getFieldFromBrowserField = memoizeOne(
     get(browserFields, keys),
   (newArgs, lastArgs) => newArgs[0].join() === lastArgs[0].join()
 );
-export const getColumns = ({
+
+export const getColumns: ColumnsProvider = ({
   browserFields,
   eventId,
   contextId,
@@ -45,17 +48,9 @@ export const getColumns = ({
   getLinkValue,
   isDraggable,
   isReadOnly,
-}: {
-  browserFields: BrowserFields;
-  eventId: string;
-  contextId: string;
-  scopeId: string;
-  getLinkValue: (field: string) => string | null;
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
 }) => [
   ...(!isReadOnly
-    ? [
+    ? ([
         {
           field: 'values',
           name: (
@@ -66,29 +61,23 @@ export const getColumns = ({
           sortable: false,
           truncateText: false,
           width: '132px',
-          render: (values: string[] | null | undefined, data: EventFieldsData) => {
-            const fieldFromBrowserField = getFieldFromBrowserField(
-              [data.category, 'fields', data.field],
-              browserFields
-            );
-
+          render: (values, data) => {
             return (
               <SecurityCellActions
-                field={{
-                  name: data.field,
+                data={{
+                  field: data.field,
                   value: values,
-                  type: data.type,
-                  aggregatable: fieldFromBrowserField?.aggregatable,
                 }}
                 triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
                 mode={CellActionsMode.INLINE}
                 visibleCellActions={3}
+                sourcererScopeId={getSourcererScopeId(scopeId)}
                 metadata={{ scopeId, isObjectArray: data.isObjectArray }}
               />
             );
           },
         },
-      ]
+      ] as ReturnType<ColumnsProvider>)
     : []),
   {
     field: 'field',
@@ -100,8 +89,10 @@ export const getColumns = ({
     ),
     sortable: true,
     truncateText: false,
-    render: (field: string, data: EventFieldsData) => {
-      return <FieldNameCell data={data} field={field} fieldMapping={undefined} />;
+    render: (field, data) => {
+      return (
+        <FieldNameCell data={data as EventFieldsData} field={field} fieldMapping={undefined} />
+      );
     },
   },
   {
@@ -114,15 +105,15 @@ export const getColumns = ({
     ),
     sortable: true,
     truncateText: false,
-    render: (values: string[] | null | undefined, data: EventFieldsData) => {
+    render: (values, data) => {
       const fieldFromBrowserField = getFieldFromBrowserField(
-        [data.category, 'fields', data.field],
+        [data.category as string, 'fields', data.field],
         browserFields
       );
       return (
         <FieldValueCell
           contextId={contextId}
-          data={data}
+          data={data as EventFieldsData}
           eventId={eventId}
           fieldFromBrowserField={fieldFromBrowserField}
           getLinkValue={getLinkValue}

@@ -85,13 +85,12 @@ describe('rule_execution_summary_and_chart', () => {
     const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
     expect(avgExecutionDurationPanel.exists()).toBeTruthy();
     expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+    expect(wrapper.find('EuiPanel[data-test-subj="avgExecutionDurationPanel"]').text()).toEqual(
       'Average duration00:00:00.100'
     );
     expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
 
     expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="avgExecutionDurationPanel"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleEventLogListAvgDuration"]').first().text()).toEqual(
       '00:00:00.100'
     );
@@ -115,15 +114,17 @@ describe('rule_execution_summary_and_chart', () => {
     // Does not fetch for the rule summary by itself
     expect(loadRuleSummaryMock).toHaveBeenCalledTimes(1);
 
-    (
-      wrapper
-        .find('[data-test-subj="executionDurationChartPanelSelect"]')
-        .first()
-        .prop('onChange') as any
-    )({
-      target: {
-        value: 30,
-      },
+    await act(async () => {
+      (
+        wrapper
+          .find('[data-test-subj="executionDurationChartPanelSelect"]')
+          .first()
+          .prop('onChange') as any
+      )({
+        target: {
+          value: 30,
+        },
+      });
     });
 
     await act(async () => {
@@ -137,13 +138,12 @@ describe('rule_execution_summary_and_chart', () => {
     const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
     expect(avgExecutionDurationPanel.exists()).toBeTruthy();
     expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+    expect(wrapper.find('EuiPanel[data-test-subj="avgExecutionDurationPanel"]').text()).toEqual(
       'Average duration00:00:00.100'
     );
     expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
 
     expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="avgExecutionDurationPanel"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleEventLogListAvgDuration"]').first().text()).toEqual(
       '00:00:00.100'
     );

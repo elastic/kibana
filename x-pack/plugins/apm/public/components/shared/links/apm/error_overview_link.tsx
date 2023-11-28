@@ -27,5 +27,11 @@ export function ErrorOverviewLink({ serviceName, query, ...rest }: Props) {
     query,
   });
 
-  return <EuiLink href={errorOverviewLink} {...rest} />;
+  return (
+    <EuiLink
+      data-test-subj="apmErrorOverviewLinkLink"
+      href={errorOverviewLink}
+      {...rest}
+    />
+  );
 }

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { HOSTS_PATH } from '../../../../common/constants';
 import { HostDetails } from './details';
@@ -36,7 +36,7 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.sessions})`;
 
 export const HostsContainer = React.memo(() => (
-  <Switch>
+  <Routes>
     <Route path={`${HOSTS_PATH}/ml-hosts`}>
       <MlHostConditionalContainer />
     </Route>
@@ -105,7 +105,7 @@ export const HostsContainer = React.memo(() => (
         <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
       )}
     />
-  </Switch>
+  </Routes>
 ));
 
 HostsContainer.displayName = 'HostsContainer';

@@ -39,7 +39,7 @@ export function infobloxLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-infoblox.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/infoblox.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/infoblox.svg'),
     artifacts: {
       dashboards: [],
       application: {
@@ -56,6 +56,6 @@ export function infobloxLogsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['network'],
+    integrationBrowserCategories: ['network', 'security', 'dns_security'],
   };
 }

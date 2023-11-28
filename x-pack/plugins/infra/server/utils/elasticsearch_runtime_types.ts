@@ -17,8 +17,6 @@ export const shardFailureRT = rt.partial({
   shard: rt.number,
 });
 
-export type ShardFailure = rt.TypeOf<typeof shardFailureRT>;
-
 export const commonSearchSuccessResponseFieldsRT = rt.type({
   _shards: rt.intersection([
     rt.type({
@@ -33,9 +31,4 @@ export const commonSearchSuccessResponseFieldsRT = rt.type({
   ]),
   timed_out: rt.boolean,
   took: rt.number,
-});
-
-export const commonHitFieldsRT = rt.type({
-  _index: rt.string,
-  _id: rt.string,
 });

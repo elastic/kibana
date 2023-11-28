@@ -7,11 +7,17 @@
 
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { of } from 'rxjs';
+import { parseDeploymentIdFromDeploymentUrl } from './parse_deployment_id_from_deployment_url';
 
 export interface CloudDeploymentMetadata {
   id?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
+  deployment_url?: string;
+  serverless?: {
+    project_id?: string;
+    project_type?: string;
+  };
 }
 
 export function registerCloudDeploymentMetadataAnalyticsContext(
@@ -25,15 +31,27 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
     id: cloudId,
     trial_end_date: cloudTrialEndDate,
     is_elastic_staff_owned: cloudIsElasticStaffOwned,
+    serverless: { project_id: projectId, project_type: projectType } = {},
   } = cloudMetadata;
 
   analytics.registerContextProvider({
     name: 'Cloud Deployment Metadata',
-    context$: of({ cloudId, cloudTrialEndDate, cloudIsElasticStaffOwned }),
+    context$: of({
+      cloudId,
+      deploymentId: parseDeploymentIdFromDeploymentUrl(cloudMetadata.deployment_url),
+      cloudTrialEndDate,
+      cloudIsElasticStaffOwned,
+      projectId,
+      projectType,
+    }),
     schema: {
       cloudId: {
         type: 'keyword',
-        _meta: { description: 'The Cloud Deployment ID' },
+        _meta: { description: 'The Cloud ID' },
+      },
+      deploymentId: {
+        type: 'keyword',
+        _meta: { description: 'The Deployment ID', optional: true },
       },
       cloudTrialEndDate: {
         type: 'date',
@@ -45,6 +63,14 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
           description: '`true` if the owner of the deployment is an Elastician',
           optional: true,
         },
+      },
+      projectId: {
+        type: 'keyword',
+        _meta: { description: 'The Serverless Project ID', optional: true },
+      },
+      projectType: {
+        type: 'keyword',
+        _meta: { description: 'The Serverless Project type', optional: true },
       },
     },
   });

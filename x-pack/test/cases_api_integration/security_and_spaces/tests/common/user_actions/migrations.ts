@@ -6,12 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import {
-  ActionTypes,
-  CaseUserActionsDeprecatedResponse,
-  CommentType,
-} from '@kbn/cases-plugin/common/api';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import { CaseUserActionsDeprecatedResponse } from '@kbn/cases-plugin/common/types/api';
+import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/api';
 
@@ -23,6 +21,239 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   describe('migrations', () => {
+    describe('7.7.1', () => {
+      const CASE_ID = '2ea28c10-7855-11eb-9ca6-83ec5acb735f';
+
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.7.1/data.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.7.1/data.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('migrates user actions correctly', async () => {
+        const userActions = await getCaseUserActions({
+          supertest,
+          caseID: CASE_ID,
+        });
+
+        expect(userActions).to.eql([
+          {
+            action: 'create',
+            action_id: '70306700-7abd-11eb-9ca6-83ec5acb735f',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T08:06:06.216Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              assignees: [],
+              connector: {
+                fields: null,
+                id: 'none',
+                name: 'none',
+                type: '.none',
+              },
+              description: 'test',
+              owner: 'securitySolution',
+              settings: {
+                syncAlerts: true,
+              },
+              severity: 'low',
+              status: 'open',
+              tags: [],
+              title: 'test',
+            },
+            type: 'create_case',
+          },
+          {
+            action: 'create',
+            action_id: '23332380-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:49:40.055Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              comment: {
+                comment: 'yo!',
+                owner: 'securitySolution',
+                type: 'user',
+              },
+            },
+            type: 'comment',
+          },
+          {
+            action: 'update',
+            action_id: '29743e50-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:49:50.132Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              status: 'closed',
+            },
+            type: 'status',
+          },
+          {
+            action: 'update',
+            action_id: '2b40e800-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:49:53.378Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              status: 'open',
+            },
+            type: 'status',
+          },
+          {
+            action: 'add',
+            action_id: '30a22a20-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:50:02.565Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              tags: ['test', 'one'],
+            },
+            type: 'tags',
+          },
+          {
+            action: 'delete',
+            action_id: '335451d0-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:50:06.959Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              tags: ['one'],
+            },
+            type: 'tags',
+          },
+          {
+            action: 'update',
+            action_id: '37837c90-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:50:13.728Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              title: 'test!!',
+            },
+            type: 'title',
+          },
+          {
+            action: 'update',
+            action_id: '3c4dfcf0-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:50:22.092Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              comment: {
+                comment: 'yo!!!',
+                owner: 'securitySolution',
+                type: 'user',
+              },
+            },
+            type: 'comment',
+          },
+          {
+            action: 'update',
+            action_id: '3f49b0c0-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:50:27.117Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              description: 'test!!',
+            },
+            type: 'description',
+          },
+          {
+            action: 'push_to_service',
+            action_id: '8b93df50-f94f-11ed-84eb-d959d286ba88',
+            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            comment_id: null,
+            created_at: '2023-05-23T09:52:35.744Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              externalService: {
+                connector_id: '42ecf449-2398-4b8a-b6c2-75cf51103447',
+                connector_name: 'ITSM',
+                external_id: '7ea98d6887c3ed5009c0404e0ebb351f',
+                external_title: 'INC0010382',
+                external_url:
+                  'https://ven04334.service-now.com//nav_to.do?uri=incident.do?sys_id=7ea98d6887c3ed5009c0404e0ebb351f',
+                pushed_at: '2023-05-23T09:52:35.744Z',
+                pushed_by: {
+                  email: null,
+                  full_name: null,
+                  username: 'elastic',
+                },
+              },
+            },
+            type: 'pushed',
+          },
+        ]);
+      });
+    });
+
     describe('7.10.0', () => {
       const CASE_ID = 'e1900ac0-017f-11eb-93f8-d161651bf509';
 
@@ -40,13 +271,12 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('7.10.0 migrates user actions connector', async () => {
-        const { body } = await supertest
-          .get(`${CASES_URL}/${CASE_ID}/user_actions`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+        const userActions = await getCaseUserActions({
+          supertest,
+          caseID: CASE_ID,
+        });
 
-        const connectorUserAction = body[1];
+        const connectorUserAction = userActions[1];
 
         expect(connectorUserAction.type).to.be('connector');
         expect(connectorUserAction.payload).to.eql({
@@ -327,6 +557,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               username: '1234',
             },
             payload: {
+              description: 'a description',
+              tags: ['super'],
+              title: 'a case',
               connector: {
                 name: 'none',
                 type: '.none',
@@ -682,7 +915,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
         const userAction = getUserActionById(userActions, 'a5509250-cf9d-11eb-a603-13e7747d215c')!;
 
-        expect(userAction.payload.comment.type).to.be(CommentType.alert);
+        expect(userAction.payload.comment.type).to.be(AttachmentType.alert);
         expect(userAction.payload.comment.alertId).to.be(
           '4eb4cd05b85bc65c7b9f22b776e0136f970f7538eb0d1b2e6e8c7d35b2e875cb'
         );
@@ -1137,7 +1370,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           const userActionsWithoutCreateAction = userActions.filter(
-            (userAction) => userAction.type !== ActionTypes.create_case
+            (userAction) => userAction.type !== UserActionTypes.create_case
           );
 
           for (const userAction of userActionsWithoutCreateAction) {
@@ -1216,7 +1449,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           const userActionsWithoutCreateAction = userActions.filter(
-            (userAction) => userAction.type !== ActionTypes.create_case
+            (userAction) => userAction.type !== UserActionTypes.create_case
           );
 
           for (const userAction of userActionsWithoutCreateAction) {

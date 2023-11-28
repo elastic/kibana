@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { CommonProps } from '@elastic/eui/src/components/common';
+
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 
 export const StepDetailsLinkIcon = ({
   stepIndex,
@@ -17,22 +19,29 @@ export const StepDetailsLinkIcon = ({
   configId,
   asButton,
   label,
-}: {
+  target = '_self',
+  ...commonProps
+}: CommonProps & {
   checkGroup: string;
   label?: string;
   configId: string;
   stepIndex?: number;
   asButton?: boolean;
+  target?: '_self' | '_blank';
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
 
+  const stepDetailsLink = `${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`;
+
   if (asButton) {
     return (
       <EuiButtonEmpty
+        data-test-subj="syntheticsStepDetailsLinkIconButton"
+        {...commonProps}
         flush="left"
         iconType="apmTrace"
-        href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}
+        href={stepDetailsLink}
       >
         {label ?? VIEW_DETAILS}
       </EuiButtonEmpty>
@@ -41,11 +50,13 @@ export const StepDetailsLinkIcon = ({
 
   return (
     <EuiButtonIcon
+      data-test-subj="syntheticsStepDetailsLinkIconButton"
+      {...commonProps}
       aria-label={VIEW_DETAILS}
       title={VIEW_DETAILS}
       size="s"
-      href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}
-      target="_self"
+      href={stepDetailsLink}
+      target={target}
       iconType="apmTrace"
     />
   );

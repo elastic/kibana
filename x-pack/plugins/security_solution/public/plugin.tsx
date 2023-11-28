@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Subscription } from 'rxjs';
-import { Subject } from 'rxjs';
-import { combineLatestWith } from 'rxjs/operators';
+import { Subject, mergeMap } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -18,8 +16,12 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
   PluginSetup,
   PluginStart,
@@ -30,27 +32,20 @@ import type {
   StartedSubPlugins,
   StartPluginsDependencies,
 } from './types';
-import { initTelemetry } from './common/lib/telemetry';
+import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
 
-import {
-  APP_ID,
-  APP_UI_ID,
-  APP_PATH,
-  APP_ICON_SOLUTION,
-  ENABLE_GROUPED_NAVIGATION,
-} from '../common/constants';
+import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import type { LinksPermissions } from './common/links';
-import { updateAppLinks } from './common/links';
+import { updateAppLinks, type LinksPermissions } from './common/links';
+import { registerDeepLinksUpdater } from './common/links/deep_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
-import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
+import { getLazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
@@ -60,6 +55,9 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 import type { SecurityAppStore } from './common/store/types';
+import { PluginContract } from './plugin_contract';
+import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -70,6 +68,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * The current Kibana version. e.g. '8.0.0' or '8.0.0-SNAPSHOT'
    */
   readonly kibanaVersion: string;
+  /**
+   * Whether the environment is 'serverless' or 'traditional'
+   */
+  readonly buildFlavor: string;
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
    * when upgrading rules. If not provided, the latest compatible package will be installed,
@@ -83,14 +85,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   readonly prebuiltRulesPackageVersion?: string;
   private config: SecuritySolutionUiConfigType;
+  private contract: PluginContract;
+  private telemetry: TelemetryService;
+
   readonly experimentalFeatures: ExperimentalFeatures;
+  readonly configSettings: ConfigSettings;
+  private queryService: QueryService = new QueryService();
+  private nowProvider: NowProvider = new NowProvider();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
-    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental || []
+    ).features;
+    this.configSettings = parseConfigSettings(this.config.offeringSettings ?? {}).settings;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
+    this.contract = new PluginContract(this.experimentalFeatures);
+    this.telemetry = new TelemetryService();
+    this.storage = new Storage(window.localStorage);
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -120,6 +135,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
       APP_UI_ID
     );
+    const telemetryContext = {
+      prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
+    };
+    this.telemetry.setup({ analytics: core.analytics }, telemetryContext);
+
+    this.queryService?.setup({
+      uiSettings: core.uiSettings,
+      storage: this.storage,
+      nowProvider: this.nowProvider,
+    });
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
@@ -147,11 +172,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       const { savedObjectsTaggingOss, ...startPlugins } = startPluginsDeps;
 
+      const query = this.queryService.start({
+        uiSettings: core.uiSettings,
+        storage: this.storage,
+        http: core.http,
+      });
+
+      // used for creating a custom stateful KQL Query Bar
+      const customDataService: DataPublicPluginStart = {
+        ...startPlugins.data,
+        query,
+        // @ts-expect-error
+        _name: 'custom',
+      };
+
+      // @ts-expect-error
+      customDataService.query.filterManager._name = 'customFilterManager';
+
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
+        ...this.contract.getStartServices(),
+        configSettings: this.configSettings,
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+        setHeaderActionMenu: params.setHeaderActionMenu,
         storage: this.storage,
         sessionStorage: this.sessionStorage,
         security: startPluginsDeps.security,
@@ -159,6 +204,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         securityLayout: {
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
+        contentManagement: startPluginsDeps.contentManagement,
+        telemetry: this.telemetry.start(),
+        customDataService,
+        topValuesPopover: new TopValuesPopoverService(),
       };
       return services;
     };
@@ -184,7 +233,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const store = await this.store(coreStart, startPlugins, subPlugins);
         const services = await startServices(params);
-        await this.registerActions(startPlugins, store, params.history, services);
+        await this.registerActions(store, params.history, services);
 
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
@@ -196,7 +245,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
             subPlugins,
-            coreStart.application.capabilities
+            coreStart.application.capabilities,
+            services
           ),
         });
       },
@@ -221,26 +271,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    return {
-      resolver: async () => {
-        /**
-         * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-         * See https://webpack.js.org/api/module-methods/#magic-comments
-         */
-        const { resolverPluginSetup } = await import(
-          /* webpackChunkName: "resolver" */ './resolver'
-        );
-        return resolverPluginSetup();
-      },
-    };
+    return this.contract.getSetupContract();
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     KibanaServices.init({
       ...core,
       ...plugins,
       kibanaBranch: this.kibanaBranch,
       kibanaVersion: this.kibanaVersion,
+      buildFlavor: this.buildFlavor,
       prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
     });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -248,30 +288,36 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
+      const registerOptions: FleetUiExtensionGetterOptions = {
+        coreStart: core,
+        depsStart: plugins,
+        services: {
+          upsellingService: this.contract.upsellingService,
+        },
+      };
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-edit',
-        Component: getLazyEndpointPolicyEditExtension(core, plugins),
+        Component: getLazyEndpointPolicyEditExtension(registerOptions),
       });
 
-      if (this.experimentalFeatures.policyResponseInFleetEnabled) {
-        registerExtension({
-          package: 'endpoint',
-          view: 'package-policy-response',
-          Component: getLazyEndpointPolicyResponseExtension(core, plugins),
-        });
-        registerExtension({
-          package: 'endpoint',
-          view: 'package-generic-errors-list',
-          Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
-        });
-      }
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-response',
+        Component: getLazyEndpointPolicyResponseExtension(registerOptions),
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-generic-errors-list',
+        Component: getLazyEndpointGenericErrorsListExtension(registerOptions),
+      });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-create',
-        Component: LazyEndpointPolicyCreateExtension,
+        Component: getLazyEndpointPolicyCreateExtension(registerOptions),
       });
 
       registerExtension({
@@ -283,7 +329,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-detail-custom',
-        Component: getLazyEndpointPackageCustomExtension(core, plugins),
+        Component: getLazyEndpointPackageCustomExtension(registerOptions),
       });
 
       registerExtension({
@@ -296,12 +342,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    return {};
+    return this.contract.getStartContract();
   }
 
   public stop() {
+    this.queryService.stop();
     licenseService.stop();
-    return {};
+    this.contract.getStopContract();
   }
 
   private lazyHelpersForRoutes() {
@@ -389,15 +436,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         rules: new subPluginClasses.Rules(),
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
+        dashboards: new subPluginClasses.Dashboards(),
         explore: new subPluginClasses.Explore(),
         kubernetes: new subPluginClasses.Kubernetes(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
-        landingPages: new subPluginClasses.LandingPages(),
         cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
+        entityAnalytics: new subPluginClasses.EntityAnalytics(),
       };
     }
     return this._subPlugins;
@@ -413,19 +461,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.subPlugins();
     return {
-      overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
       cases: subPlugins.cases.start(),
-      rules: subPlugins.rules.start(storage),
-      exceptions: subPlugins.exceptions.start(storage),
-      explore: subPlugins.explore.start(storage),
-      timelines: subPlugins.timelines.start(),
-      kubernetes: subPlugins.kubernetes.start(),
-      management: subPlugins.management.start(core, plugins),
-      landingPages: subPlugins.landingPages.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
+      dashboards: subPlugins.dashboards.start(),
+      exceptions: subPlugins.exceptions.start(storage),
+      explore: subPlugins.explore.start(storage),
+      kubernetes: subPlugins.kubernetes.start(),
+      management: subPlugins.management.start(core, plugins),
+      overview: subPlugins.overview.start(),
+      rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
+      timelines: subPlugins.timelines.start(),
+      entityAnalytics: subPlugins.entityAnalytics.start(
+        this.experimentalFeatures.riskScoringRoutesEnabled
+      ),
     };
   }
   /**
@@ -454,14 +505,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   private async registerActions(
-    plugins: StartPlugins,
     store: SecurityAppStore,
     history: H.History,
     services: StartServices
   ) {
     if (!this._actionsRegistered) {
       const { registerActions } = await this.lazyActions();
-      registerActions(plugins, store, history, services);
+      registerActions(store, history, services);
       this._actionsRegistered = true;
     }
   }
@@ -471,46 +521,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
-
     const { license$ } = plugins.licensing;
-    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, true);
+    const { upsellingService, appLinksSwitcher, deepLinksFormatter } = this.contract;
 
-    let appLinksSubscription: Subscription | null = null;
-    license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {
-      const linksPermissions: LinksPermissions = {
-        experimentalFeatures: this.experimentalFeatures,
-        capabilities: core.application.capabilities,
-      };
+    registerDeepLinksUpdater(this.appUpdater$, deepLinksFormatter);
 
-      if (license.type !== undefined) {
-        linksPermissions.license = license;
-      }
+    const baseLinksPermissions: LinksPermissions = {
+      experimentalFeatures: this.experimentalFeatures,
+      upselling: upsellingService,
+      capabilities: core.application.capabilities,
+    };
 
-      if (appLinksSubscription) {
-        appLinksSubscription.unsubscribe();
-        appLinksSubscription = null;
-      }
+    license$
+      .pipe(
+        mergeMap(async (license) => {
+          const linksPermissions: LinksPermissions = {
+            ...baseLinksPermissions,
+            ...(license.type != null && { license }),
+          };
 
-      if (newNavEnabled) {
-        appLinksSubscription = registerDeepLinksUpdater(this.appUpdater$);
-      } else {
-        // old nav links update
-        this.appUpdater$.next(() => ({
-          navLinkStatus: AppNavLinkStatus.hidden,
-          deepLinks: getDeepLinks(
-            this.experimentalFeatures,
-            license.type,
-            core.application.capabilities
-          ),
-        }));
-      }
+          // set initial links to not block rendering
+          updateAppLinks(appLinksSwitcher(links), linksPermissions);
 
-      // set initial links to not block rendering
-      updateAppLinks(links, linksPermissions);
-
-      // set filtered links asynchronously
-      const filteredLinks = await getFilteredLinks(core, plugins);
-      updateAppLinks(filteredLinks, linksPermissions);
-    });
+          // set filtered links asynchronously
+          const filteredLinks = await getFilteredLinks(core, plugins);
+          updateAppLinks(appLinksSwitcher(filteredLinks), linksPermissions);
+        })
+      )
+      .subscribe();
   }
 }

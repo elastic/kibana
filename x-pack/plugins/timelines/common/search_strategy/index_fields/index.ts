@@ -35,6 +35,9 @@ export interface IndexField extends Omit<FieldSpec, 'format'> {
   format?: Maybe<string>;
 }
 
+/**
+ * @deprecated use EcsFlat from @kbn/ecs or kibana data views api
+ */
 export type BeatFields = Record<string, FieldInfo>;
 
 export interface IndexFieldsStrategyRequestByIndices extends IEsSearchRequest {
@@ -47,22 +50,35 @@ export interface IndexFieldsStrategyRequestById extends IEsSearchRequest {
   onlyCheckIfIndicesExist: boolean;
 }
 
+/**
+ * @deprecated use kibana data views api https://github.com/elastic/kibana/blob/83f1fb4f26219f32cab43706db78d544c7bc2f6d/src/plugins/data_views/common/data_views/data_views.ts#L294
+ */
 export type IndexFieldsStrategyRequest<T extends 'indices' | 'dataView'> = T extends 'dataView'
   ? IndexFieldsStrategyRequestById
   : IndexFieldsStrategyRequestByIndices;
 
+/**
+ * @deprecated use kibana data views api https://github.com/elastic/kibana/blob/83f1fb4f26219f32cab43706db78d544c7bc2f6d/src/plugins/data_views/common/data_views/data_views.ts#L294
+ */
 export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   indexFields: IndexField[];
   indicesExist: string[];
   runtimeMappings: MappingRuntimeFields;
 }
 
+/**
+ * @deprecated use fields list on dataview / "indexPattern"
+ * about to use browserFields? Reconsider! Maybe you can accomplish
+ * everything you need via the `fields` property on the data view
+ * you are working with? Or perhaps you need a description for a
+ * particular field? Consider using the EcsFlat module from `@kbn/ecs`
+ */
 export interface BrowserField {
   aggregatable: boolean;
   category: string;
   description: string | null;
   example: string | number | null;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  fields: Record<string, Partial<BrowserField>>;
   format: string;
   indexes: string[];
   name: string;
@@ -74,7 +90,14 @@ export interface BrowserField {
   runtimeField?: RuntimeField;
 }
 
-export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
+/**
+ * @deprecated use fields list on dataview / "indexPattern"
+ * about to use browserFields? Reconsider! Maybe you can accomplish
+ * everything you need via the `fields` property on the data view
+ * you are working with? Or perhaps you need a description for a
+ * particular field? Consider using the EcsFlat module from `@kbn/ecs`
+ */
+export type BrowserFields = Record<string, Partial<BrowserField>>;
 
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

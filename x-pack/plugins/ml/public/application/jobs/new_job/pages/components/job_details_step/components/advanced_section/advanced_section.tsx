@@ -20,6 +20,7 @@ import { DedicatedIndexSwitch } from './components/dedicated_index';
 import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
+import { IgnoreUnavailableSwitch } from './components/ignore_unavailable';
 
 const buttonContent = i18n.translate(
   'xpack.ml.newJob.wizard.jobDetailsStep.advancedSectionButton',
@@ -43,10 +44,20 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem>
             <ModelPlotSwitch />
-            <AnnotationsSwitch />
           </EuiFlexItem>
           <EuiFlexItem>
             <DedicatedIndexSwitch />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer />
+
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem>
+            <AnnotationsSwitch />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <IgnoreUnavailableSwitch />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>
@@ -71,12 +82,38 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
         >
           <EuiFlexItem>
             <ModelPlotSwitch />
-            <AnnotationsSwitch />
-            <ModelMemoryLimitInput />
           </EuiFlexItem>
           <EuiFlexItem>
             <DedicatedIndexSwitch />
           </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer />
+
+        <EuiFlexGroup
+          gutterSize="xl"
+          style={{ marginLeft: '0px', marginRight: '0px' }}
+          data-test-subj="mlJobWizardAdvancedSection"
+        >
+          <EuiFlexItem>
+            <AnnotationsSwitch />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <IgnoreUnavailableSwitch />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer />
+
+        <EuiFlexGroup
+          gutterSize="xl"
+          style={{ marginLeft: '0px', marginRight: '0px' }}
+          data-test-subj="mlJobWizardAdvancedSection"
+        >
+          <EuiFlexItem>
+            <ModelMemoryLimitInput />
+          </EuiFlexItem>
+          <EuiFlexItem />
         </EuiFlexGroup>
       </EuiAccordion>
     </Fragment>

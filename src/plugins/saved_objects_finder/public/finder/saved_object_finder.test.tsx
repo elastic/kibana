@@ -10,17 +10,23 @@ const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import lodash from 'lodash';
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
-import { EuiInMemoryTable, EuiLink, EuiSearchBarProps, Query } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiLink,
+  EuiSearchBarProps,
+  EuiText,
+  EuiButton,
+  Query,
+} from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
-import { coreMock } from '@kbn/core/public/mocks';
-import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { findTestSubject } from '@kbn/test-jest-helpers';
-import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('SavedObjectsFinder', () => {
   const doc = {
@@ -60,23 +66,14 @@ describe('SavedObjectsFinder', () => {
     },
   ];
 
-  const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
-  savedObjectsManagement.parseQuery.mockImplementation(
-    (query: Query, types: SavedObjectManagementTypeInfo[]) => {
-      const queryTypes = query.ast.getFieldClauses('type')?.[0].value as string[] | undefined;
-      return {
-        queryText: query.ast
-          .getTermClauses()
-          .map((clause: any) => clause.value)
-          .join(' '),
-        visibleTypes: queryTypes?.filter((name) => types.some((type) => type.name === name)),
-        selectedTags: query.ast.getFieldClauses('tag')?.[0].value as string[] | undefined,
-      };
-    }
-  );
-  savedObjectsManagement.getTagFindReferences.mockImplementation(
-    ({ selectedTags }) => selectedTags as any
-  );
+  const contentManagement = contentManagementMock.createStartContract();
+  const contentClient = contentManagement.client;
+  beforeEach(() => {
+    (contentClient.mSearch as any as jest.SpyInstance).mockClear();
+  });
+  const coreStart = coreMock.createStart();
+  const uiSettings = coreStart.uiSettings;
+  uiSettings.get.mockImplementation(() => 10);
 
   const savedObjectsTagging = {
     ui: {
@@ -95,22 +92,20 @@ describe('SavedObjectsFinder', () => {
         multiSelect: 'or',
         options: [],
       })),
+      convertNameToReference: jest.fn((name: string) => ({ type: 'tag', id: name })),
     },
   } as any as SavedObjectsTaggingApi;
 
   it('should call API on startup', async () => {
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [doc] })
+    (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ hits: [doc] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
         services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
+          uiSettings,
+          contentClient,
           savedObjectsTagging,
         }}
         savedObjectMetaData={searchMetaData}
@@ -119,95 +114,114 @@ describe('SavedObjectsFinder', () => {
 
     wrapper.instance().componentDidMount!();
     await nextTick();
-    expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
-      query: {
-        type: ['search'],
-        fields: ['title', 'name'],
-        search: undefined,
-        hasReference: undefined,
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description', 'name'],
-        defaultSearchOperator: 'AND',
-      },
+    expect(contentClient.mSearch).toHaveBeenCalledWith({
+      contentTypes: [{ contentTypeId: 'search' }],
+      query: { limit: 10 },
     });
   });
 
-  it('should list initial items', async () => {
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [doc] })
-    );
-    core.uiSettings.get.mockImplementation(() => 10);
+  describe('render', () => {
+    it('lists initial items', async () => {
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc] })
+      );
 
-    const wrapper = shallow(
-      <SavedObjectFinder
-        services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
-          savedObjectsTagging,
-        }}
-        savedObjectMetaData={searchMetaData}
-      />
-    );
+      const wrapper = shallow(
+        <SavedObjectFinder
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
+          savedObjectMetaData={searchMetaData}
+        />
+      );
 
-    wrapper.instance().componentDidMount!();
-    await nextTick();
-    expect(
-      wrapper
-        .find(EuiInMemoryTable)
-        .prop('items')
-        .map((item: any) => item.attributes)
-    ).toEqual([doc.attributes]);
-  });
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      expect(
+        wrapper
+          .find(EuiInMemoryTable)
+          .prop('items')
+          .map((item: any) => item.attributes)
+      ).toEqual([doc.attributes]);
+    });
 
-  it('should call onChoose on item click', async () => {
-    const chooseStub = sinon.stub();
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [doc] })
-    );
-    core.uiSettings.get.mockImplementation(() => 10);
+    it('calls onChoose on item click', async () => {
+      const chooseStub = sinon.stub();
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc] })
+      );
 
-    const wrapper = mount(
-      <SavedObjectFinder
-        services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
-          savedObjectsTagging,
-        }}
-        onChoose={chooseStub}
-        savedObjectMetaData={searchMetaData}
-      />
-    );
+      const wrapper = mount(
+        <SavedObjectFinder
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
+          onChoose={chooseStub}
+          savedObjectMetaData={searchMetaData}
+        />
+      );
 
-    wrapper.instance().componentDidMount!();
-    await nextTick();
-    wrapper.update();
-    findTestSubject(wrapper, 'savedObjectTitleExample-title').simulate('click');
-    expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
-      true
-    );
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      wrapper.update();
+      findTestSubject(wrapper, 'savedObjectTitleExample-title').simulate('click');
+      expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
+        true
+      );
+    });
+
+    it('with help text', async () => {
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc] })
+      );
+
+      const wrapper = shallow(
+        <SavedObjectFinder
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
+          savedObjectMetaData={searchMetaData}
+          helpText="This is some description about the action"
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      expect(wrapper.find(EuiText).childAt(0).text()).toEqual(
+        'This is some description about the action'
+      );
+    });
+
+    it('with left button', async () => {
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc] })
+      );
+      const button = <EuiButton>Hello</EuiButton>;
+      const wrapper = shallow(
+        <SavedObjectFinder
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
+          savedObjectMetaData={searchMetaData}
+          leftChildren={button}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      const searchBar = wrapper.find(EuiInMemoryTable).prop('search') as EuiSearchBarProps;
+      const toolsLeft = searchBar!.toolsLeft;
+      expect(toolsLeft).toMatchInlineSnapshot(`
+        <React.Fragment>
+          <EuiButton>
+            Hello
+          </EuiButton>
+        </React.Fragment>
+      `);
+    });
   });
 
   describe('sorting', () => {
     it('should list items by type ascending', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc3, doc2] })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc3, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -225,20 +239,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should list items by type descending', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc3, doc2] })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc3, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -260,20 +267,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should list items by title ascending', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc2] })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -287,20 +287,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should list items by title descending', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc2] })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -317,20 +310,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should list items by tag ascending', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc3, doc2] })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc3, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -348,20 +334,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should list items by tag descending', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc3, doc2] })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc3, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -384,20 +363,13 @@ describe('SavedObjectsFinder', () => {
   });
 
   it('should not show the saved objects which get filtered by showSavedObject', async () => {
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [doc, doc2] })
+    (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ hits: [doc, doc2] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
-        services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
-          savedObjectsTagging,
-        }}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -418,20 +390,13 @@ describe('SavedObjectsFinder', () => {
 
   describe('search', () => {
     it('should request filtered list on search input', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc2] })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -441,84 +406,25 @@ describe('SavedObjectsFinder', () => {
       wrapper
         .find('[data-test-subj="savedObjectFinderSearchInput"] input')
         .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
-      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
-        query: {
-          type: ['search'],
-          fields: ['title', 'name'],
-          search: 'abc*',
-          hasReference: undefined,
-          page: 1,
-          perPage: 10,
-          searchFields: ['title^3', 'description', 'name'],
-          defaultSearchOperator: 'AND',
-        },
-      });
-    });
 
-    it('should include additional fields in search if listed in meta data', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as jest.Mock).mockResolvedValue({ saved_objects: [] });
-      core.uiSettings.get.mockImplementation(() => 10);
-
-      const wrapper = mount(
-        <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
-          savedObjectMetaData={[
-            {
-              type: 'type1',
-              name: '',
-              getIconForSavedObject: () => 'search',
-              includeFields: ['field1', 'field2'],
-            },
-            {
-              type: 'type2',
-              name: '',
-              getIconForSavedObject: () => 'search',
-              includeFields: ['field2', 'field3'],
-            },
-          ]}
-        />
-      );
-
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
-        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
-      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
-        query: {
-          type: ['type1', 'type2'],
-          fields: ['title', 'name', 'field1', 'field2', 'field3'],
-          search: 'abc*',
-          hasReference: undefined,
-          page: 1,
-          perPage: 10,
-          searchFields: ['title^3', 'description'],
-          defaultSearchOperator: 'AND',
-        },
+      expect(contentClient.mSearch).toHaveBeenCalledWith({
+        contentTypes: [
+          {
+            contentTypeId: 'search',
+          },
+        ],
+        query: { limit: 10, text: 'abc*' },
       });
     });
 
     it('should respect response order on search input', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc2] })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -535,20 +441,13 @@ describe('SavedObjectsFinder', () => {
   });
 
   it('should request multiple saved object types at once', async () => {
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [doc, doc2] })
+    (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ hits: [doc, doc2] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
-        services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
-          savedObjectsTagging,
-        }}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -566,37 +465,28 @@ describe('SavedObjectsFinder', () => {
 
     wrapper.instance().componentDidMount!();
 
-    expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
-      query: {
-        type: ['search', 'vis'],
-        fields: ['title', 'name'],
-        search: undefined,
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
-      },
+    expect(contentClient.mSearch).toHaveBeenCalledWith({
+      contentTypes: [
+        {
+          contentTypeId: 'search',
+        },
+        {
+          contentTypeId: 'vis',
+        },
+      ],
+      query: { limit: 10, text: undefined },
     });
   });
 
   describe('filter', () => {
     it('should render filter buttons if enabled', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({
-          saved_objects: [doc, doc2, doc3],
-        })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2, doc3] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -605,27 +495,18 @@ describe('SavedObjectsFinder', () => {
       wrapper.instance().componentDidMount!();
       await nextTick();
       expect(wrapper.find('button.euiFilterButton')).toHaveLength(2);
-      expect(wrapper.find('button.euiFilterButton [data-text="Types"]')).toHaveLength(1);
-      expect(wrapper.find('button.euiFilterButton [data-text="Tags"]')).toHaveLength(1);
+      expect(wrapper.find('button.euiFilterButton span[data-text="Types"]')).toHaveLength(1);
+      expect(wrapper.find('button.euiFilterButton span[data-text="Tags"]')).toHaveLength(1);
     });
 
     it('should not render filter buttons if disabled', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({
-          saved_objects: [doc, doc2, doc3],
-        })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2, doc3] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={false}
           savedObjectMetaData={metaDataConfig}
         />
@@ -637,22 +518,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should not render types filter button if there is only one type in the metadata list', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({
-          saved_objects: [doc, doc2],
-        })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={searchMetaData}
         />
@@ -665,22 +537,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should not render tags filter button if savedObjectsTagging is undefined', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({
-          saved_objects: [doc, doc2, doc3],
-        })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2, doc3] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging: undefined,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -693,22 +556,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should apply types filter if selected', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({
-          saved_objects: [doc, doc2, doc3],
-        })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2, doc3] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -719,50 +573,36 @@ describe('SavedObjectsFinder', () => {
       const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
       const search = table.prop('search') as EuiSearchBarProps;
       search.onChange?.({ query: Query.parse('type:(vis)'), queryText: '', error: null });
-      expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
-        query: {
-          type: ['vis'],
-          fields: ['title', 'name'],
-          search: undefined,
-          hasReference: undefined,
-          page: 1,
-          perPage: 10,
-          searchFields: ['title^3', 'description'],
-          defaultSearchOperator: 'AND',
-        },
+      expect(contentClient.mSearch).toHaveBeenLastCalledWith({
+        contentTypes: [
+          {
+            contentTypeId: 'vis',
+          },
+        ],
+        query: { limit: 10, text: undefined },
       });
       search.onChange?.({ query: Query.parse('type:(search or vis)'), queryText: '', error: null });
-      expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
-        query: {
-          type: ['search', 'vis'],
-          fields: ['title', 'name'],
-          search: undefined,
-          hasReference: undefined,
-          page: 1,
-          perPage: 10,
-          searchFields: ['title^3', 'description'],
-          defaultSearchOperator: 'AND',
-        },
+      expect(contentClient.mSearch).toHaveBeenLastCalledWith({
+        contentTypes: [
+          {
+            contentTypeId: 'search',
+          },
+          {
+            contentTypeId: 'vis',
+          },
+        ],
+        query: { limit: 10, text: undefined },
       });
     });
 
     it('should apply tags filter if selected', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({
-          saved_objects: [doc, doc2, doc3],
-        })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2, doc3] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -773,50 +613,53 @@ describe('SavedObjectsFinder', () => {
       const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
       const search = table.prop('search') as EuiSearchBarProps;
       search.onChange?.({ query: Query.parse('tag:(tag1)'), queryText: '', error: null });
-      expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
+      expect(contentClient.mSearch).toHaveBeenLastCalledWith({
+        contentTypes: [
+          {
+            contentTypeId: 'search',
+          },
+          {
+            contentTypeId: 'vis',
+          },
+        ],
         query: {
-          type: ['search', 'vis'],
-          fields: ['title', 'name'],
-          search: undefined,
-          hasReference: JSON.stringify(['tag1']),
-          page: 1,
-          perPage: 10,
-          searchFields: ['title^3', 'description'],
-          defaultSearchOperator: 'AND',
+          limit: 10,
+          text: undefined,
+          tags: {
+            included: ['tag1'],
+          },
         },
       });
       search.onChange?.({ query: Query.parse('tag:(tag1 or tag2)'), queryText: '', error: null });
-      expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
+      expect(contentClient.mSearch).toHaveBeenLastCalledWith({
+        contentTypes: [
+          {
+            contentTypeId: 'search',
+          },
+          {
+            contentTypeId: 'vis',
+          },
+        ],
         query: {
-          type: ['search', 'vis'],
-          fields: ['title', 'name'],
-          search: undefined,
-          hasReference: JSON.stringify(['tag1', 'tag2']),
-          page: 1,
-          perPage: 10,
-          searchFields: ['title^3', 'description'],
-          defaultSearchOperator: 'AND',
+          limit: 10,
+          text: undefined,
+          tags: {
+            included: ['tag1', 'tag2'],
+          },
         },
       });
     });
   });
 
   it('should display no items message if there are no items', async () => {
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [] })
+    (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ hits: [] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const noItemsMessage = <span id="myNoItemsMessage" />;
     const wrapper = mount(
       <SavedObjectFinder
-        services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
-          savedObjectsTagging,
-        }}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
         noItemsMessage={noItemsMessage}
         savedObjectMetaData={searchMetaData}
       />
@@ -838,20 +681,13 @@ describe('SavedObjectsFinder', () => {
     }));
 
     it('should show a table pagination with initial per page', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: longItemList })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -867,20 +703,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should allow switching the page size', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: longItemList })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -902,20 +731,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should switch page correctly', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: longItemList })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -940,20 +762,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should show an ordinary pagination for fixed page sizes', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: longItemList })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
         />
@@ -969,20 +784,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should switch page correctly for fixed page sizes', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: longItemList })
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
         />
@@ -1009,18 +817,11 @@ describe('SavedObjectsFinder', () => {
 
   describe('loading state', () => {
     it('should display a loading indicator during initial loading', () => {
-      const core = coreMock.createStart();
-      (core.http.get as jest.Mock).mockResolvedValue({ saved_objects: [] });
-      core.uiSettings.get.mockImplementation(() => 10);
+      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [] });
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -1029,20 +830,11 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should hide the loading indicator if data is shown', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc] })
-      );
-      core.uiSettings.get.mockImplementation(() => 10);
+      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc] });
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={[
             {
               type: 'search',
@@ -1060,20 +852,11 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should show the loading indicator if there are already items and the search is updated', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc] })
-      );
-      core.uiSettings.get.mockImplementation(() => 10);
+      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc] });
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -1091,20 +874,11 @@ describe('SavedObjectsFinder', () => {
   });
 
   it('should render with children', async () => {
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [doc, doc2] })
-    );
-    core.uiSettings.get.mockImplementation(() => 10);
+    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc, doc2] });
 
     const wrapper = mount(
       <SavedObjectFinder
-        services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
-          savedObjectsTagging,
-        }}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -1126,20 +900,13 @@ describe('SavedObjectsFinder', () => {
 
   describe('columns', () => {
     it('should show all columns', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc2, doc3] })
-      );
-      core.uiSettings.get.mockImplementation(() => 10);
+      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
+        hits: [doc, doc2, doc3],
+      });
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -1154,20 +921,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should hide the type column if there is only one type in the metadata list', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc2] })
-      );
-      core.uiSettings.get.mockImplementation(() => 10);
+      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
+        hits: [doc, doc2],
+      });
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, savedObjectsTagging, contentClient }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -1182,20 +942,13 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('should hide the tags column if savedObjectsTagging is undefined', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ saved_objects: [doc, doc2, doc3] })
-      );
-      core.uiSettings.get.mockImplementation(() => 10);
+      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
+        hits: [doc, doc2, doc3],
+      });
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging: undefined,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
           savedObjectMetaData={metaDataConfig}
         />
       );

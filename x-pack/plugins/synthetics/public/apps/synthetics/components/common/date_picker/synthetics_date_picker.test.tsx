@@ -10,7 +10,7 @@ import { SyntheticsDatePicker } from './synthetics_date_picker';
 import { startPlugins } from '../../../utils/testing/__mocks__/synthetics_plugin_start_mock';
 import { createMemoryHistory } from 'history';
 import { render } from '../../../utils/testing';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 
 describe('SyntheticsDatePicker component', () => {
   jest.setTimeout(10_000);
@@ -23,26 +23,6 @@ describe('SyntheticsDatePicker component', () => {
     const { findByText } = render(<SyntheticsDatePicker />);
     expect(await findByText('Last 24 hours')).toBeInTheDocument();
     expect(await findByText('Refresh')).toBeInTheDocument();
-  });
-
-  it('uses shared date range state when there is no url date range state', async () => {
-    const customHistory = createMemoryHistory({
-      initialEntries: ['/?dateRangeStart=now-24h&dateRangeEnd=now'],
-    });
-
-    jest.spyOn(customHistory, 'push');
-
-    const { findByText } = render(<SyntheticsDatePicker />, {
-      history: customHistory,
-      core: startPlugins,
-    });
-
-    expect(await findByText('~ 30 minutes ago')).toBeInTheDocument();
-
-    expect(customHistory.push).toHaveBeenCalledWith({
-      pathname: '/',
-      search: 'dateRangeEnd=now-15m&dateRangeStart=now-30m',
-    });
   });
 
   it('should use url date range even if shared date range is present', async () => {

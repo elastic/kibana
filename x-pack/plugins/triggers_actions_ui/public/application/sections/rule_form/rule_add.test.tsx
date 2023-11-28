@@ -16,12 +16,16 @@ import RuleAdd from './rule_add';
 import { createRule } from '../../lib/rule_api/create';
 import { alertingFrameworkHealth } from '../../lib/rule_api/health';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
   Rule,
   RuleAddProps,
   RuleFlyoutCloseReason,
   GenericValidationResult,
   ValidationResult,
+  RuleCreationValidConsumer,
+  RuleType,
+  RuleTypeModel,
 } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
@@ -84,17 +88,30 @@ describe('rule_add', () => {
   });
   let wrapper: ReactWrapper<any>;
 
-  async function setup(
-    initialValues?: Partial<Rule>,
-    onClose: RuleAddProps['onClose'] = jest.fn(),
-    defaultScheduleInterval?: string,
-    ruleTypeId?: string,
-    actionsShow: boolean = false
-  ) {
+  async function setup({
+    initialValues,
+    onClose = jest.fn(),
+    defaultScheduleInterval,
+    ruleTypeId,
+    actionsShow = false,
+    validConsumers,
+    ruleTypesOverwrite,
+    ruleTypeModelOverwrite,
+  }: {
+    initialValues?: Partial<Rule>;
+    onClose?: RuleAddProps['onClose'];
+    defaultScheduleInterval?: string;
+    ruleTypeId?: string;
+    actionsShow?: boolean;
+    validConsumers?: RuleCreationValidConsumer[];
+    ruleTypesOverwrite?: RuleType[];
+    ruleTypeModelOverwrite?: RuleTypeModel;
+  }) {
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
     const mocks = coreMock.createSetup();
     const { loadRuleTypes } = jest.requireMock('../../lib/rule_api/rule_types');
-    const ruleTypes = [
+
+    const ruleTypes = ruleTypesOverwrite || [
       {
         id: 'my-rule-type',
         name: 'Test',
@@ -144,7 +161,7 @@ describe('rule_add', () => {
       hasPermanentEncryptionKey: true,
     });
 
-    const ruleType = {
+    const ruleType = ruleTypeModelOverwrite || {
       id: 'my-rule-type',
       iconClass: 'test',
       description: 'test',
@@ -186,6 +203,7 @@ describe('rule_add', () => {
         ruleTypeRegistry={ruleTypeRegistry}
         metadata={{ test: 'some value', fields: ['test'] }}
         ruleTypeId={ruleTypeId}
+        validConsumers={validConsumers}
       />
     );
 
@@ -201,7 +219,10 @@ describe('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({}, onClose);
+    await setup({
+      initialValues: {},
+      onClose,
+    });
 
     await act(async () => {
       await nextTick();
@@ -223,7 +244,10 @@ describe('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({}, onClose);
+    await setup({
+      initialValues: {},
+      onClose,
+    });
 
     await act(async () => {
       await nextTick();
@@ -245,8 +269,8 @@ describe('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup(
-      {
+    await setup({
+      initialValues: {
         name: 'Simple status rule',
         tags: ['uptime', 'logs'],
         schedule: {
@@ -254,9 +278,8 @@ describe('rule_add', () => {
         },
       },
       onClose,
-      undefined,
-      'my-rule-type'
-    );
+      ruleTypeId: 'my-rule-type',
+    });
 
     expect(wrapper.find('input#ruleName').props().value).toBe('Simple status rule');
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('uptimelogs');
@@ -266,7 +289,7 @@ describe('rule_add', () => {
 
   it('renders rule add flyout with DEFAULT_RULE_INTERVAL if no initialValues specified and no minimumScheduleInterval', async () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({});
-    await setup(undefined, undefined, undefined, 'my-rule-type');
+    await setup({ ruleTypeId: 'my-rule-type' });
 
     expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
     expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
@@ -276,7 +299,7 @@ describe('rule_add', () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '5m', enforce: false },
     });
-    await setup(undefined, undefined, undefined, 'my-rule-type');
+    await setup({ ruleTypeId: 'my-rule-type' });
 
     expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(5);
     expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
@@ -291,8 +314,8 @@ describe('rule_add', () => {
 
     (createRule as jest.MockedFunction<typeof createRule>).mockResolvedValue(rule);
 
-    await setup(
-      {
+    await setup({
+      initialValues: {
         name: 'Simple status rule',
         ruleTypeId: 'my-rule-type',
         tags: ['uptime', 'logs'],
@@ -300,8 +323,8 @@ describe('rule_add', () => {
           interval: '1h',
         },
       },
-      onClose
-    );
+      onClose,
+    });
 
     wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
 
@@ -317,11 +340,177 @@ describe('rule_add', () => {
     });
   });
 
+  it('should NOT allow to save the rule if the consumer is not set', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+    const onClose = jest.fn();
+    await setup({
+      initialValues: {
+        name: 'Simple rule',
+        consumer: 'alerts',
+        ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+        tags: ['uptime', 'logs'],
+        schedule: {
+          interval: '1h',
+        },
+      },
+      onClose,
+      ruleTypesOverwrite: [
+        {
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          name: 'Threshold Rule',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          enabledInLicense: true,
+          defaultActionGroupId: 'threshold.fired',
+          minimumLicenseRequired: 'basic',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          producer: ALERTS_FEATURE_ID,
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            apm: { read: true, all: true },
+            discover: { read: true, all: true },
+            infrastructure: { read: true, all: true },
+            logs: { read: true, all: true },
+            ml: { read: true, all: true },
+            monitoring: { read: true, all: true },
+            siem: { read: true, all: true },
+            // Setting SLO all to false, this shouldn't show up
+            slo: { read: true, all: false },
+            stackAlerts: { read: true, all: true },
+            uptime: { read: true, all: true },
+          },
+          actionVariables: {
+            context: [],
+            state: [],
+            params: [],
+          },
+        },
+      ],
+      ruleTypeModelOverwrite: {
+        id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+        iconClass: 'test',
+        description: 'test',
+        documentationUrl: null,
+        validate: (): ValidationResult => {
+          return { errors: {} };
+        },
+        ruleParamsExpression: TestExpression,
+        requiresAppContext: false,
+      },
+      validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
+    });
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(createRule).toBeCalledTimes(0);
+  });
+
+  it('should set consumer automatically if only 1 authorized consumer exists', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+    const onClose = jest.fn();
+    await setup({
+      initialValues: {
+        name: 'Simple rule',
+        consumer: 'alerts',
+        ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+        tags: ['uptime', 'logs'],
+        schedule: {
+          interval: '1h',
+        },
+      },
+      onClose,
+      ruleTypesOverwrite: [
+        {
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          name: 'Threshold Rule',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          enabledInLicense: true,
+          defaultActionGroupId: 'threshold.fired',
+          minimumLicenseRequired: 'basic',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          producer: ALERTS_FEATURE_ID,
+          authorizedConsumers: {
+            logs: { read: true, all: true },
+          },
+          actionVariables: {
+            context: [],
+            state: [],
+            params: [],
+          },
+        },
+      ],
+      ruleTypeModelOverwrite: {
+        id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+        iconClass: 'test',
+        description: 'test',
+        documentationUrl: null,
+        validate: (): ValidationResult => {
+          return { errors: {} };
+        },
+        ruleParamsExpression: TestExpression,
+        requiresAppContext: false,
+      },
+      validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
+    });
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
+
+    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(createRule).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        rule: expect.objectContaining({
+          consumer: 'logs',
+        }),
+      })
+    );
+  });
+
   it('should enforce any default interval', async () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
-    await setup({ ruleTypeId: 'my-rule-type' }, jest.fn(), '3h', 'my-rule-type', true);
+    await setup({
+      initialValues: { ruleTypeId: 'my-rule-type' },
+      onClose: jest.fn(),
+      defaultScheduleInterval: '3h',
+      ruleTypeId: 'my-rule-type',
+      actionsShow: true,
+    });
 
     // Wait for handlers to fire
     await act(async () => {
@@ -344,7 +533,12 @@ describe('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
 
-    await setup({}, jest.fn(), undefined, 'my-rule-type', true);
+    await setup({
+      initialValues: {},
+      onClose: jest.fn(),
+      ruleTypeId: 'my-rule-type',
+      actionsShow: true,
+    });
 
     expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
     expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
@@ -361,7 +555,12 @@ describe('rule_add', () => {
       hasPermanentEncryptionKey: false,
     });
 
-    await setup({}, jest.fn(), undefined, 'my-rule-type', true);
+    await setup({
+      initialValues: {},
+      onClose: jest.fn(),
+      ruleTypeId: 'my-rule-type',
+      actionsShow: true,
+    });
 
     expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
     expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
@@ -397,6 +596,7 @@ function mockRule(overloads: Partial<Rule> = {}): Rule {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    revision: 0,
     ...overloads,
   };
 }

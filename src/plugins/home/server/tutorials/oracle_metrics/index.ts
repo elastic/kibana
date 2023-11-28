@@ -40,7 +40,7 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/oracle.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/oracle.svg'),
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.oracleMetrics.artifacts.application.label', {
@@ -57,6 +57,6 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['security'],
+    integrationBrowserCategories: ['observability', 'datastore'],
   };
 }

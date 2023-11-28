@@ -15,6 +15,7 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -27,7 +28,6 @@ import {
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { useDebouncedValue } from '../../../../shared_components';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey, groupByKey } from './get_group_by_key';
@@ -67,6 +67,40 @@ function ofName(
 }
 
 const DEFAULT_PERCENTILE_VALUE = 95;
+const ALLOWED_DECIMAL_DIGITS = 4;
+
+function getInvalidErrorMessage(
+  value: string | undefined,
+  isInline: boolean | undefined,
+  max: number,
+  min: number
+) {
+  if (
+    !isInline &&
+    isValidNumber(
+      value,
+      false,
+      max,
+      min,
+      15 // max supported digits in JS
+    )
+  ) {
+    return i18n.translate('xpack.lens.indexPattern.percentile.errorMessageTooManyDigits', {
+      defaultMessage: 'Only {digits} numbers allowed after the decimal point.',
+      values: {
+        digits: ALLOWED_DECIMAL_DIGITS,
+      },
+    });
+  }
+
+  return i18n.translate('xpack.lens.indexPattern.percentile.errorMessage', {
+    defaultMessage: 'Percentile has to be an integer between {min} and {max}',
+    values: {
+      min,
+      max,
+    },
+  });
+}
 
 const supportedFieldTypes = ['number', 'histogram'];
 
@@ -88,10 +122,16 @@ export const percentileOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   canReduceTimeRange: true,
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type: fieldType,
+    timeSeriesMetric,
+  }) => {
     if (
       supportedFieldTypes.includes(fieldType) &&
       aggregatable &&
+      timeSeriesMetric !== 'counter' &&
       (!aggregationRestrictions || aggregationRestrictions.percentiles)
     ) {
       return {
@@ -111,7 +151,7 @@ export const percentileOperation: OperationDefinition<
         (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentiles)
     );
   },
-  getDefaultLabel: (column, indexPattern, columns) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.params.percentile,
@@ -303,10 +343,13 @@ export const percentileOperation: OperationDefinition<
       i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
         defaultMessage: 'Percentile',
       });
+
+    const step = isInline ? 1 : 0.0001;
+    const upperBound = isInline ? 99 : 99.9999;
     const onChange = useCallback(
       (value) => {
         if (
-          !isValidNumber(value, true, 99, 1) ||
+          !isValidNumber(value, isInline, upperBound, step, ALLOWED_DECIMAL_DIGITS) ||
           Number(value) === currentColumn.params.percentile
         ) {
           return;
@@ -328,7 +371,7 @@ export const percentileOperation: OperationDefinition<
           },
         } as PercentileIndexPatternColumn);
       },
-      [paramEditorUpdater, currentColumn, indexPattern]
+      [isInline, upperBound, step, currentColumn, paramEditorUpdater, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
@@ -336,7 +379,13 @@ export const percentileOperation: OperationDefinition<
       onChange,
       value: String(currentColumn.params.percentile),
     });
-    const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
+    const inputValueIsValid = isValidNumber(
+      inputValue,
+      isInline,
+      upperBound,
+      step,
+      ALLOWED_DECIMAL_DIGITS
+    );
 
     const handleInputChange = useCallback(
       (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
@@ -351,12 +400,7 @@ export const percentileOperation: OperationDefinition<
         display="rowCompressed"
         fullWidth
         isInvalid={!inputValueIsValid}
-        error={
-          !inputValueIsValid &&
-          i18n.translate('xpack.lens.indexPattern.percentile.errorMessage', {
-            defaultMessage: 'Percentile has to be an integer between 1 and 99',
-          })
-        }
+        error={!inputValueIsValid && getInvalidErrorMessage(inputValue, isInline, upperBound, step)}
       >
         {isInline ? (
           <EuiFieldNumber
@@ -364,9 +408,9 @@ export const percentileOperation: OperationDefinition<
             data-test-subj="lns-indexPattern-percentile-input"
             compressed
             value={inputValue ?? ''}
-            min={1}
-            max={99}
-            step={1}
+            min={step}
+            max={upperBound}
+            step={step}
             onChange={handleInputChange}
             aria-label={percentileLabel}
           />
@@ -376,9 +420,9 @@ export const percentileOperation: OperationDefinition<
             data-test-subj="lns-indexPattern-percentile-input"
             compressed
             value={inputValue ?? ''}
-            min={1}
-            max={99}
-            step={1}
+            min={step}
+            max={upperBound}
+            step={step}
             onChange={handleInputChange}
             showInput
             aria-label={percentileLabel}

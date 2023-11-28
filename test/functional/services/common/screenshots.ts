@@ -84,14 +84,9 @@ export class ScreenshotsService extends FtrService {
   }
 
   private async capture(path: string, el?: WebElementWrapper) {
-    try {
-      this.log.info(`Taking screenshot "${path}"`);
-      const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
-      await mkdirAsync(dirname(path), { recursive: true });
-      await writeFileAsync(path, screenshot, 'base64');
-    } catch (err) {
-      this.log.error('SCREENSHOT FAILED');
-      this.log.error(err);
-    }
+    this.log.info(`Taking ${el ? 'element' : 'window'} screenshot "${path}"`);
+    const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
+    await mkdirAsync(dirname(path), { recursive: true });
+    await writeFileAsync(path, screenshot, 'base64');
   }
 }

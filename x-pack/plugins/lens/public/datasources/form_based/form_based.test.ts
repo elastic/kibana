@@ -26,7 +26,6 @@ import {
   Datasource,
   FramePublicAPI,
   OperationDescriptor,
-  FrameDatasourceAPI,
   UserMessage,
 } from '../../types';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -48,9 +47,10 @@ import {
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { createMockFramePublicAPI } from '../../mocks';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { createMockFramePublicAPI } from '../../mocks';
+import { createMockDataViewsState } from '../../data_views_service/mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -58,6 +58,8 @@ jest.mock('./operations');
 jest.mock('./dimension_panel/reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
+
+const nowInstant = new Date();
 
 const fieldsOne = [
   {
@@ -194,11 +196,17 @@ describe('IndexPattern Data Source', () => {
   let FormBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState>;
 
   beforeEach(() => {
+    const data = dataPluginMock.createStartContract();
+    data.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
+      from: '',
+      to: '',
+    }));
+
     FormBasedDatasource = getFormBasedDatasource({
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
-      data: dataPluginMock.createStartContract(),
+      data,
       dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
@@ -239,32 +247,36 @@ describe('IndexPattern Data Source', () => {
         dataType: 'number',
         isBucketed: false,
         label: 'Foo',
+        customLabel: true,
         operationType: 'count',
         sourceField: '___records___',
       };
-      const map = FormBasedDatasource.uniqueLabels({
-        layers: {
-          a: {
-            columnOrder: ['a', 'b'],
-            columns: {
-              a: col,
-              b: col,
-            },
-            indexPatternId: 'foo',
-          },
-          b: {
-            columnOrder: ['c', 'd'],
-            columns: {
-              c: col,
-              d: {
-                ...col,
-                label: 'Foo [1]',
+      const map = FormBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columnOrder: ['a', 'b'],
+              columns: {
+                a: col,
+                b: col,
               },
+              indexPatternId: 'foo',
             },
-            indexPatternId: 'foo',
+            b: {
+              columnOrder: ['c', 'd'],
+              columns: {
+                c: col,
+                d: {
+                  ...col,
+                  label: 'Foo [1]',
+                },
+              },
+              indexPatternId: 'foo',
+            },
           },
-        },
-      } as unknown as FormBasedPrivateState);
+        } as unknown as FormBasedPrivateState,
+        indexPatterns
+      );
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -359,7 +371,14 @@ describe('IndexPattern Data Source', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
       expect(
-        FormBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange, 'testing-seed')
+        FormBasedDatasource.toExpression(
+          state,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        )
       ).toEqual(null);
     });
 
@@ -389,6 +408,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         )
       ).toEqual({
@@ -444,6 +464,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         )
       ).toMatchInlineSnapshot(`
@@ -525,6 +546,9 @@ describe('IndexPattern Data Source', () => {
                     "type": "expression",
                   },
                 ],
+                "ignoreGlobalFilters": Array [
+                  false,
+                ],
                 "index": Array [
                   Object {
                     "chain": Array [
@@ -563,7 +587,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
+                  "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"timestampLabel\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
                 ],
               },
               "function": "lens_map_to_columns",
@@ -631,6 +655,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
@@ -672,6 +697,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
@@ -885,6 +911,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
@@ -955,6 +982,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
@@ -1085,6 +1113,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
@@ -1102,7 +1131,7 @@ describe('IndexPattern Data Source', () => {
             "col1",
           ],
           "outputColumnName": Array [
-            "Count of records",
+            "Count of records per hour",
           ],
           "reducedTimeRange": Array [],
           "targetUnit": Array [
@@ -1156,6 +1185,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
@@ -1213,6 +1243,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
@@ -1267,6 +1298,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
@@ -1312,6 +1344,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
@@ -1375,6 +1408,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         );
 
@@ -1449,6 +1483,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1519,6 +1554,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1538,7 +1574,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "string",
                 "id": "col1",
                 "isBucketed": true,
-                "label": "My Op",
+                "label": "Top 5 values of Missing field",
                 "operationType": "terms",
                 "params": Object {
                   "orderBy": Object {
@@ -1556,7 +1592,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col2",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -1565,7 +1601,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col3",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -1574,7 +1610,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col4",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -1630,6 +1666,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
@@ -1669,6 +1706,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1762,6 +1800,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
         const chainLength = ast.chain.length;
@@ -1799,6 +1838,7 @@ describe('IndexPattern Data Source', () => {
             columns: {},
             sampling: 1,
             linkToLayers: ['link-to-id'],
+            ignoreGlobalFilters: false,
           },
         },
       });
@@ -1889,6 +1929,7 @@ describe('IndexPattern Data Source', () => {
               indexPatternId: '1',
               columnOrder: [],
               columns: {},
+              ignoreGlobalFilters: false,
               linkToLayers: ['some-layer'],
               sampling: 1,
             },
@@ -1919,7 +1960,12 @@ describe('IndexPattern Data Source', () => {
         newState: {
           ...state,
           layers: {
-            first: { ...state.layers.first, linkToLayers: undefined, sampling: 1 },
+            first: {
+              ...state.layers.first,
+              linkToLayers: undefined,
+              sampling: 1,
+              ignoreGlobalFilters: false,
+            },
           },
         },
       });
@@ -2112,12 +2158,15 @@ describe('IndexPattern Data Source', () => {
     describe('getOperationForColumnId', () => {
       it('should get an operation for col1', () => {
         expect(publicAPI.getOperationForColumnId('col1')).toEqual({
-          label: 'My Op',
+          label: 'Top 5 values of Missing field',
           dataType: 'string',
           isBucketed: true,
           isStaticValue: false,
           hasTimeShift: false,
           hasReducedTimeRange: false,
+          scale: undefined,
+          sortingHint: undefined,
+          interval: undefined,
         } as OperationDescriptor);
       });
 
@@ -2242,7 +2291,7 @@ describe('IndexPattern Data Source', () => {
           disabled: { kuery: [], lucene: [] },
         });
       });
-      it('shuold collect top values fields as kuery existence filters if no data is provided', () => {
+      it('should collect top values fields as kuery existence filters if no data is provided', () => {
         publicAPI = FormBasedDatasource.getPublicAPI({
           state: {
             ...baseState,
@@ -2286,10 +2335,10 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
             kuery: [
-              [{ language: 'kuery', query: 'geo.src: *' }],
+              [{ language: 'kuery', query: '"geo.src": *' }],
               [
-                { language: 'kuery', query: 'geo.dest: *' },
-                { language: 'kuery', query: 'myField: *' },
+                { language: 'kuery', query: '"geo.dest": *' },
+                { language: 'kuery', query: '"myField": *' },
               ],
             ],
             lucene: [],
@@ -2854,8 +2903,8 @@ describe('IndexPattern Data Source', () => {
                 { language: 'kuery', query: 'memory > 500000' },
               ],
               [
-                { language: 'kuery', query: 'geo.src: *' },
-                { language: 'kuery', query: 'myField: *' },
+                { language: 'kuery', query: '"geo.src": *' },
+                { language: 'kuery', query: '"myField": *' },
               ],
             ],
             lucene: [
@@ -3029,7 +3078,9 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3081,7 +3132,9 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3170,7 +3223,9 @@ describe('IndexPattern Data Source', () => {
           (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           });
 
@@ -3208,7 +3263,9 @@ describe('IndexPattern Data Source', () => {
           ] as ReturnType<typeof getErrorMessages>);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           });
 
@@ -3320,7 +3377,7 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
         };
 
-        framePublicAPI = {
+        framePublicAPI = createMockFramePublicAPI({
           activeData: {
             first: {
               type: 'datatable',
@@ -3354,15 +3411,10 @@ describe('IndexPattern Data Source', () => {
               ],
             },
           },
-          dataViews: {
-            ...createMockFramePublicAPI().dataViews,
+          dataViews: createMockDataViewsState({
             indexPatterns: expectedIndexPatterns,
-            indexPatternRefs: Object.values(expectedIndexPatterns).map(({ id, title }) => ({
-              id,
-              title,
-            })),
-          },
-        } as unknown as FramePublicAPI;
+          }),
+        });
       });
 
       const extractTranslationIdsFromWarnings = (warnings: UserMessage[]) => {
@@ -3378,7 +3430,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should return mismatched time shifts', () => {
         const warnings = FormBasedDatasource.getUserMessages!(state, {
-          frame: framePublicAPI as FrameDatasourceAPI,
+          frame: framePublicAPI,
           setState: () => {},
         });
 
@@ -3394,7 +3446,7 @@ describe('IndexPattern Data Source', () => {
         framePublicAPI.activeData!.first.columns[1].meta.sourceParams!.hasPrecisionError = true;
 
         const warnings = FormBasedDatasource.getUserMessages!(state, {
-          frame: framePublicAPI as FrameDatasourceAPI,
+          frame: framePublicAPI,
           setState: () => {},
         });
 
@@ -3405,6 +3457,133 @@ describe('IndexPattern Data Source', () => {
                     "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
                   ]
               `);
+      });
+    });
+
+    describe('info messages', () => {
+      function createLayer(
+        index: number = 0,
+        sampling?: number
+      ): FormBasedPrivateState['layers'][number] {
+        return {
+          sampling,
+          indexPatternId: '1',
+          columnOrder: [`col-${index}-1`, `col-${index}-2`],
+          columns: {
+            [`col-${index}-1`]: {
+              operationType: 'date_histogram',
+              params: {
+                interval: '12h',
+              },
+              label: '',
+              dataType: 'date',
+              isBucketed: true,
+              sourceField: 'timestamp',
+            } as DateHistogramIndexPatternColumn,
+            [`col-${index}-2`]: {
+              operationType: 'count',
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'records',
+            },
+          },
+        };
+      }
+
+      function createDatatableForLayer(index: number): Datatable {
+        return {
+          type: 'datatable' as const,
+          rows: [],
+          columns: [
+            {
+              id: `col-${index}-1`,
+              name: `col-${index}-1`,
+              meta: {
+                type: 'date',
+                source: 'esaggs',
+                sourceParams: {
+                  type: 'date_histogram',
+                  params: {
+                    used_interval: '12h',
+                  },
+                },
+              },
+            },
+            {
+              id: `col-${index}-2`,
+              name: `col-${index}-2`,
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+        };
+      }
+
+      beforeEach(() => {
+        (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+      });
+
+      it.each`
+        sampling     | infoMessages
+        ${undefined} | ${0}
+        ${1}         | ${0}
+        ${0.1}       | ${1}
+      `(
+        'should return $infoMessages info messages when sampling is set to $sampling',
+        ({ sampling, infoMessages }) => {
+          const messages = FormBasedDatasource.getUserMessages!(
+            {
+              layers: {
+                first: createLayer(0, sampling),
+              },
+              currentIndexPatternId: '1',
+            },
+            {
+              frame: createMockFramePublicAPI({
+                activeData: {
+                  first: createDatatableForLayer(0),
+                },
+                dataViews: createMockDataViewsState({
+                  indexPatterns: expectedIndexPatterns,
+                }),
+              }),
+              setState: () => {},
+              visualizationInfo: { layers: [] },
+            }
+          );
+          expect(messages.filter(({ severity }) => severity === 'info')).toHaveLength(infoMessages);
+        }
+      );
+
+      it('should return a single info message for multiple layers with sampling < 100%', () => {
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: createLayer(0, 0.1),
+            second: createLayer(1, 0.001),
+          },
+          currentIndexPatternId: '1',
+        };
+        const messages = FormBasedDatasource.getUserMessages!(state, {
+          frame: createMockFramePublicAPI({
+            activeData: {
+              first: createDatatableForLayer(0),
+              second: createDatatableForLayer(1),
+            },
+            dataViews: createMockDataViewsState({
+              indexPatterns: expectedIndexPatterns,
+            }),
+          }),
+          setState: () => {},
+          visualizationInfo: { layers: [] },
+        });
+        const infoMessages = messages.filter(({ severity }) => severity === 'info');
+        expect(infoMessages).toHaveLength(1);
+        const [info] = infoMessages;
+        if (isFragment(info.longMessage)) {
+          expect(info.longMessage.props.layers).toHaveLength(2);
+        }
       });
     });
   });

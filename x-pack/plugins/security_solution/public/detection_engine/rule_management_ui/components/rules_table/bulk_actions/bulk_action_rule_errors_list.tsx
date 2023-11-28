@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
 
@@ -53,6 +53,16 @@ const BulkEditRuleErrorItem = ({
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesAuthDescription"
             defaultMessage="{rulesCount, plural, =1 {# machine learning rule} other {# machine learning rules}} can't be edited ({message})"
             values={{ rulesCount, message }}
+          />
+        </li>
+      );
+    case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.esqlRulesIndexEditDescription"
+            defaultMessage="{rulesCount, plural, =1 {# custom ES|QL rule} other {# custom ES|QL rules}} (these rules don't have index patterns)"
+            values={{ rulesCount }}
           />
         </li>
       );
@@ -122,7 +132,7 @@ const BulkActionRuleErrorsListComponent = ({
         {ruleErrors.map(({ message, errorCode, ruleIds }) => {
           const rulesCount = ruleIds.length;
           switch (bulkAction) {
-            case BulkActionType.edit:
+            case BulkActionTypeEnum.edit:
               return (
                 <BulkEditRuleErrorItem
                   message={message}
@@ -131,7 +141,7 @@ const BulkActionRuleErrorsListComponent = ({
                 />
               );
 
-            case BulkActionType.export:
+            case BulkActionTypeEnum.export:
               return (
                 <BulkExportRuleErrorItem
                   message={message}

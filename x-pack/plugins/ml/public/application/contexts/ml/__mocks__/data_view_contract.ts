@@ -10,7 +10,6 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 export const dataViewsContractMock = new (class {
   fieldFormats = [];
   config = {};
-  savedObjectsClient = {};
   refreshSavedObjectsCache = {};
   clearCache = jest.fn();
   get = jest.fn();

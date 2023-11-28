@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
@@ -13,7 +14,7 @@ import type {
   SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { createConcatStream, createMapStream, createPromiseFromStreams } from '@kbn/utils';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface DefaultActionConnectorDetails {
   exported_action_connector_count: number;
@@ -42,11 +43,30 @@ const mapExportedActionConnectorsDetailsToDefault = (
     excluded_action_connections: exportDetails.excludedObjects,
   };
 };
+const filterOutPredefinedActionConnectorsIds = async (
+  actionsClient: ActionsClient,
+  actionsIdsToExport: string[]
+): Promise<string[]> => {
+  const allActions = await actionsClient.getAll();
+  const predefinedActionsIds = allActions
+    .filter(({ isPreconfigured }) => isPreconfigured)
+    .map(({ id }) => id);
+  if (predefinedActionsIds.length)
+    return actionsIdsToExport.filter((id) => !predefinedActionsIds.includes(id));
+  return actionsIdsToExport;
+};
+
+// This function is used to get, and return the exported actions' connectors'
+// using the ISavedObjectsExporter and it filters out any Preconfigured
+// Connectors as they shouldn't be exported, imported or changed
+// by the user, that's why the function also accepts the actionsClient
+// to getAll actions connectors
 
 export const getRuleActionConnectorsForExport = async (
   rules: RuleResponse[],
   actionsExporter: ISavedObjectsExporter,
-  request: KibanaRequest
+  request: KibanaRequest,
+  actionsClient: ActionsClient
 ) => {
   const exportedActionConnectors: {
     actionConnectors: string;
@@ -56,7 +76,11 @@ export const getRuleActionConnectorsForExport = async (
     actionConnectorDetails: defaultActionConnectorDetails,
   };
 
-  const actionsIds = [...new Set(rules.flatMap((rule) => rule.actions.map(({ id }) => id)))];
+  let actionsIds = [...new Set(rules.flatMap((rule) => rule.actions.map(({ id }) => id)))];
+  if (!actionsIds.length) return exportedActionConnectors;
+
+  // handle preconfigured connectors
+  actionsIds = await filterOutPredefinedActionConnectorsIds(actionsClient, actionsIds);
 
   if (!actionsIds.length) return exportedActionConnectors;
 

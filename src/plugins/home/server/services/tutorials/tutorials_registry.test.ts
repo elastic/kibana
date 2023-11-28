@@ -27,7 +27,7 @@ const INVALID_TUTORIAL: TutorialSchema = {
   name: '',
   isBeta: false,
   shortDescription: 'short description',
-  euiIconType: 'alert',
+  euiIconType: 'warning',
   longDescription: 'long description with lots of text',
   completionTimeMinutes: 10,
   previewImagePath: 'path',
@@ -49,7 +49,7 @@ const VALID_TUTORIAL: TutorialSchema = {
   moduleName: 'test',
   isBeta: false,
   shortDescription: 'short description',
-  euiIconType: 'alert',
+  euiIconType: 'warning',
   longDescription: 'long description with lots of text',
   completionTimeMinutes: 10,
   previewImagePath: 'path',
@@ -128,7 +128,7 @@ describe('TutorialsRegistry', () => {
             description: 'short description',
             icons: [
               {
-                src: 'alert',
+                src: 'warning',
                 type: 'eui',
               },
             ],
@@ -166,10 +166,9 @@ describe('TutorialsRegistry', () => {
 
   describe('start', () => {
     test('exposes proper contract', () => {
-      const start = new TutorialsRegistry(mockInitContext).start(
-        coreMock.createStart(),
-        mockCustomIntegrationsPluginSetup
-      );
+      const registry = new TutorialsRegistry(mockInitContext);
+      registry.setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
+      const start = registry.start(coreMock.createStart(), mockCustomIntegrationsPluginSetup);
       expect(start).toBeDefined();
     });
   });

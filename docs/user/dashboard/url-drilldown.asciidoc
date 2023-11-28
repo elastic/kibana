@@ -244,7 +244,7 @@ Note:
 
 |
 | event.values
-| An array of all cell values for the raw on which the action will execute.
+| An array of all cell values for the row on which the action will execute. To access a column value, use `{{event.values.[x]}}`, where `x` represents the column number.
 
 |
 | event.keys

@@ -12,6 +12,7 @@ import { EmbeddableInput } from '../embeddables';
 export type FilterableEmbeddableInput = EmbeddableInput & {
   filters?: Filter[];
   query?: Query;
+  searchSessionId?: string;
   timeRange?: TimeRange;
   timeslice?: [number, number];
 };

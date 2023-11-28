@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
+import { UptimeEsClient } from '../../lib';
+import { SyntheticsServerSetup } from '../../types';
 import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
-import { serviceApiKeyPrivileges } from '../get_api_key';
+import { serviceApiKeyPrivileges, syntheticsIndex } from '../get_api_key';
 
 export const checkHasPrivileges = async (
-  server: UptimeServerSetup,
+  server: SyntheticsServerSetup,
   apiKey: { id: string; apiKey: string }
 ) => {
   return await server.coreStart.elasticsearch.client
@@ -21,4 +23,17 @@ export const checkHasPrivileges = async (
         cluster: serviceApiKeyPrivileges.cluster,
       },
     });
+};
+
+export const checkIndicesReadPrivileges = async (uptimeEsClient: UptimeEsClient) => {
+  return await uptimeEsClient.baseESClient.security.hasPrivileges({
+    body: {
+      index: [
+        {
+          names: [syntheticsIndex],
+          privileges: ['read'] as SecurityIndexPrivilege[],
+        },
+      ],
+    },
+  });
 };

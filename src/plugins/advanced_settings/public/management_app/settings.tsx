@@ -26,31 +26,36 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { parse } from 'query-string';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { SectionRegistryStart } from '@kbn/management-settings-section-registry';
+import type { RegistryEntry } from '@kbn/management-settings-section-registry';
 import { mapConfig, mapSettings, initCategoryCounts, initCategories } from './settings_helper';
 import { parseErrorMsg } from './components/search/search';
 import { AdvancedSettings, QUERY } from './advanced_settings';
-import { ComponentRegistry } from '..';
 import { Search } from './components/search';
 import { FieldSetting } from './types';
 import { i18nTexts } from './i18n_texts';
 import { getAriaName } from './lib';
 
 interface AdvancedSettingsState {
-  footerQueryMatched: boolean;
   query: Query;
   filteredSettings: Record<UiSettingsScope, Record<string, FieldSetting[]>>;
+  filteredSections: {
+    global: RegistryEntry[];
+    space: RegistryEntry[];
+  };
 }
 
 export type GroupedSettings = Record<string, FieldSetting[]>;
 
 interface Props {
   history: ScopedHistory;
-  enableSaving: boolean;
+  enableSaving: Record<UiSettingsScope, boolean>;
+  enableShowing: Record<UiSettingsScope, boolean>;
   settingsService: SettingsStart;
   docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   theme: ThemeServiceStart['theme$'];
-  componentRegistry: ComponentRegistry['start'];
+  sectionRegistry: SectionRegistryStart;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
@@ -58,7 +63,7 @@ const SPACE_SETTINGS_ID = 'space-settings';
 const GLOBAL_SETTINGS_ID = 'global-settings';
 
 export const Settings = (props: Props) => {
-  const { componentRegistry, history, settingsService, ...rest } = props;
+  const { sectionRegistry, history, settingsService, enableSaving, enableShowing, ...rest } = props;
   const uiSettings = settingsService.client;
   const globalUiSettings = settingsService.globalClient;
 
@@ -87,7 +92,10 @@ export const Settings = (props: Props) => {
       global: {},
       namespace: {},
     },
-    footerQueryMatched: false,
+    filteredSections: {
+      global: sectionRegistry.getGlobalSections(),
+      space: sectionRegistry.getSpacesSections(),
+    },
     query: Query.parse(''),
   });
 
@@ -204,12 +212,15 @@ export const Settings = (props: Props) => {
         categories={categories[scope]}
         visibleSettings={queryState.filteredSettings[scope]}
         clearQuery={() => setUrlQuery('')}
-        noResults={!queryState.footerQueryMatched}
+        noResults={
+          queryState.filteredSections.global.length + queryState.filteredSections.space.length === 0
+        }
         queryText={queryState.query.text}
         callOutTitle={callOutTitle(scope)}
         callOutSubtitle={callOutSubtitle(scope)}
         settingsService={settingsService}
         uiSettingsClient={getClientForScope(scope)}
+        enableSaving={enableSaving[scope]}
         {...rest}
       />
     );
@@ -222,24 +233,27 @@ export const Settings = (props: Props) => {
       append:
         queryState.query.text !== '' ? (
           <EuiNotificationBadge className="eui-alignCenter" size="m" key="spaceSettings-badge">
-            {Object.keys(queryState.filteredSettings.namespace).length}
+            {Object.keys(queryState.filteredSettings.namespace).length +
+              queryState.filteredSections.space.length}
           </EuiNotificationBadge>
         ) : null,
       content: renderAdvancedSettings('namespace'),
     },
-    {
+  ];
+  if (enableShowing.global) {
+    tabs.push({
       id: GLOBAL_SETTINGS_ID,
       name: i18nTexts.globalTabTitle,
       append:
         queryState.query.text !== '' ? (
           <EuiNotificationBadge className="eui-alignCenter" size="m" key="spaceSettings-badge">
             {Object.keys(queryState.filteredSettings.global).length +
-              Number(queryState.footerQueryMatched)}
+              queryState.filteredSections.global.length}
           </EuiNotificationBadge>
         ) : null,
       content: renderAdvancedSettings('global'),
-    },
-  ];
+    });
+  }
 
   const [selectedTabId, setSelectedTabId] = useState(SPACE_SETTINGS_ID);
 
@@ -292,7 +306,14 @@ export const Settings = (props: Props) => {
     return {
       query,
       filteredSettings,
-      footerQueryMatched: initialQuery ? false : queryState.footerQueryMatched,
+      filteredSections: {
+        global: sectionRegistry
+          .getGlobalSections()
+          .filter(({ queryMatch }) => queryMatch(query.text)),
+        space: sectionRegistry
+          .getSpacesSections()
+          .filter(({ queryMatch }) => queryMatch(query.text)),
+      },
     };
   };
 
@@ -303,19 +324,25 @@ export const Settings = (props: Props) => {
     [setUrlQuery]
   );
 
-  const onFooterQueryMatchChange = useCallback(
-    (matched: boolean) => {
-      setQueryState({ ...queryState, footerQueryMatched: matched });
-    },
-    [queryState]
-  );
-
   const PageTitle = (
     <EuiText>
       <h1 data-test-subj="managementSettingsTitle">{i18nTexts.advancedSettingsTitle}</h1>
     </EuiText>
   );
-  const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
+
+  const mapSections = (entries: RegistryEntry[]) =>
+    entries.map(({ Component, queryMatch }, index) => {
+      if (queryMatch(queryState.query.text)) {
+        return (
+          <Component
+            key={`component-${index}`}
+            toasts={props.toasts}
+            enableSaving={props.enableSaving}
+          />
+        );
+      }
+      return null;
+    });
 
   return (
     <div>
@@ -332,14 +359,11 @@ export const Settings = (props: Props) => {
       <EuiSpacer size="m" />
       <EuiTabs>{renderTabs()}</EuiTabs>
       {selectedTabContent}
-      {selectedTabId === GLOBAL_SETTINGS_ID ? (
-        <PageFooter
-          toasts={props.toasts}
-          query={queryState.query}
-          onQueryMatchChange={onFooterQueryMatchChange}
-          enableSaving={props.enableSaving}
-        />
-      ) : null}
+      {selectedTabId === SPACE_SETTINGS_ID ? (
+        <>{mapSections(queryState.filteredSections.space)}</>
+      ) : (
+        <>{mapSections(queryState.filteredSections.global)}</>
+      )}
     </div>
   );
 };

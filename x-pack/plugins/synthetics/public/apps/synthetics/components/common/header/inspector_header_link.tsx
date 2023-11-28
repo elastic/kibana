@@ -9,7 +9,8 @@ import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { enableInspectEsQueries, useInspectorContext } from '@kbn/observability-plugin/public';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 

@@ -3,7 +3,7 @@
 exports[`UtilityBarAction it renders 1`] = `
 <UtilityBarAction
   dataTestSubj="alert"
-  iconType="alert"
+  iconType="warning"
 >
   Test action
 </UtilityBarAction>

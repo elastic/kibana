@@ -1,7 +1,7 @@
 format_version: 1.0.0
-name: all_assets 
+name: all_assets
 title: All Assets Updated
-description: tests that all assets are updated 
+description: tests that all assets are updated
 version: 0.2.0
 categories: []
 release: beta

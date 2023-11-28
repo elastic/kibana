@@ -11,7 +11,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { UX_MESSAGES } from '../translations';
 
 const StyledEuiButtonEmpty = euiStyled(EuiButtonEmpty).attrs({
-  iconType: 'crossInACircleFilled',
+  iconType: 'cross',
   color: 'danger',
 })`
   border-top: ${(props) => `${props.theme.eui.euiBorderThin}`};

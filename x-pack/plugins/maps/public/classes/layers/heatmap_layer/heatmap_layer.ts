@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
+import type { FilterSpecification, Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
@@ -21,6 +21,7 @@ import { DataRequestContext } from '../../../actions';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { IMvtVectorSource } from '../../sources/vector_source';
 import { getAggsMeta } from '../../util/tile_meta_feature_utils';
+import { Mask } from '../vector_layer/mask';
 
 export class HeatmapLayer extends AbstractLayer {
   private readonly _style: HeatmapStyle;
@@ -48,8 +49,13 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
+  }
+
   getLayerIcon(isTocIcon: boolean) {
-    const { docCount } = getAggsMeta(this._getMetaFromTiles());
+    const { docCount } = getAggsMeta(this._getTileMetaFeatures());
     return docCount === 0 ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT : super.getLayerIcon(isTocIcon);
   }
 
@@ -94,7 +100,7 @@ export class HeatmapLayer extends AbstractLayer {
       prevDataRequest: this.getSourceDataRequest(),
       requestMeta: buildVectorRequestMeta(
         this.getSource(),
-        this.getSource().getFieldNames(),
+        [], // fieldNames is empty because heatmap layer only support metrics
         syncContext.dataFilters,
         this.getQuery(),
         syncContext.isForceRefresh,
@@ -163,7 +169,9 @@ export class HeatmapLayer extends AbstractLayer {
     const metricField = metricFields[0];
 
     // do not use tile meta features from previous tile URL to avoid styling new tiles from previous tile meta features
-    const tileMetaFeatures = this._requiresPrevSourceCleanup(mbMap) ? [] : this._getMetaFromTiles();
+    const tileMetaFeatures = this._requiresPrevSourceCleanup(mbMap)
+      ? []
+      : this._getTileMetaFeatures();
     let max = 0;
     for (let i = 0; i < tileMetaFeatures.length; i++) {
       const range = metricField.pluckRangeFromTileMetaFeature(tileMetaFeatures[i]);
@@ -181,6 +189,19 @@ export class HeatmapLayer extends AbstractLayer {
 
     this.syncVisibilityWithMb(mbMap, heatmapLayerId);
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
+
+    // heatmap can implement mask with filter expression because
+    // feature-state support is not needed since heatmap layers do not support joins
+    const maskDescriptor = metricField.getMask();
+    if (maskDescriptor) {
+      const mask = new Mask({
+        esAggField: metricField,
+        isGeometrySourceMvt: true,
+        ...maskDescriptor,
+      });
+      mbMap.setFilter(heatmapLayerId, mask.getMatchUnmaskedExpression() as FilterSpecification);
+    }
+
     mbMap.setLayerZoomRange(heatmapLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 

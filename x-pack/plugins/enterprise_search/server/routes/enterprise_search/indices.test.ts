@@ -7,10 +7,14 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
-import { RequestHandlerContext } from '@kbn/core/server';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type {
+  KibanaRequest,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
-import { SharedServices } from '@kbn/ml-plugin/server/shared_services';
+import type { MlPluginSetup, MlTrainedModels } from '@kbn/ml-plugin/server';
+import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -26,7 +30,7 @@ jest.mock(
 jest.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline',
   () => ({
-    createAndReferenceMlInferencePipeline: jest.fn(),
+    preparePipelineAndIndexForMlInference: jest.fn(),
   })
 );
 jest.mock(
@@ -56,15 +60,34 @@ jest.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_errors', ()
 jest.mock('../../lib/pipelines/ml_inference/get_ml_inference_pipelines', () => ({
   getMlInferencePipelines: jest.fn(),
 }));
+jest.mock('../../lib/ml/get_ml_model_deployment_status', () => ({
+  getMlModelDeploymentStatus: jest.fn(),
+}));
+jest.mock('../../lib/ml/start_ml_model_deployment', () => ({
+  startMlModelDeployment: jest.fn(),
+}));
+jest.mock('../../lib/ml/start_ml_model_download', () => ({
+  startMlModelDownload: jest.fn(),
+}));
+jest.mock('@kbn/ml-plugin/server/saved_objects/service', () => ({
+  mlSavedObjectServiceFactory: jest.fn(),
+}));
+jest.mock('@kbn/ml-plugin/server/lib/ml_client/ml_client', () => ({
+  getMlClient: jest.fn(),
+}));
 
+import { MlModelDeploymentState } from '../../../common/types/ml';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { getMlInferenceErrors } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_errors';
 import { fetchMlInferencePipelineHistory } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history';
 import { attachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline';
-import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
+import { preparePipelineAndIndexForMlInference } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment_status';
+import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
+import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
@@ -149,7 +172,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -163,14 +186,13 @@ describe('Enterprise Search Managed Indices', () => {
         path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
       });
 
-      mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
-      } as MlTrainedModels;
+      mockMl = mlPluginServerMock.createSetupContract();
+      mockTrainedModelsProvider = mockMl.trainedModelsProvider(
+        {} as KibanaRequest,
+        {} as SavedObjectsClientContract
+      );
 
-      mockMl = {
-        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      mlPluginServerMock.createSetupContract();
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -269,40 +291,50 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter.shouldThrow(request);
     });
 
-    it('creates an ML inference pipeline', async () => {
-      (createAndReferenceMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+    it('creates an ML inference pipeline from pipeline definition', async () => {
+      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve({
-          id: 'ml-inference-my-pipeline-name',
-          created: true,
-          addedToParentPipeline: true,
+          added_to_parent_pipeline: true,
+          created_pipeline: true,
+          mapping_updated: true,
+          pipeline_id: 'ml-inference-my-pipeline-name',
         });
       });
 
       await mockRouter.callRoute({
         params: { indexName: 'my-index-name' },
-        body: mockRequestBody,
+        body: {
+          field_mappings: [],
+          model_id: mockRequestBody.model_id,
+          pipeline_definition: {
+            processors: [],
+          },
+          pipeline_name: mockRequestBody.pipeline_name,
+        },
       });
 
-      expect(createAndReferenceMlInferencePipeline).toHaveBeenCalledWith(
+      expect(preparePipelineAndIndexForMlInference).toHaveBeenCalledWith(
         'my-index-name',
         mockRequestBody.pipeline_name,
+        {
+          processors: [],
+        },
         mockRequestBody.model_id,
-        mockRequestBody.source_field,
-        mockRequestBody.destination_field,
-        undefined,
+        [],
         mockClient.asCurrentUser
       );
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
           created: 'ml-inference-my-pipeline-name',
+          mapping_updated: true,
         },
         headers: { 'content-type': 'application/json' },
       });
     });
 
     it('responds with 409 CONFLICT if the pipeline already exists', async () => {
-      (createAndReferenceMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
         return Promise.reject(new Error(ErrorCode.PIPELINE_ALREADY_EXISTS));
       });
 
@@ -875,7 +907,7 @@ describe('Enterprise Search Managed Indices', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
+          message: 'Search encountered an error. Check Kibana Server logs for details.',
         },
         statusCode: 502,
       });
@@ -960,7 +992,7 @@ describe('Enterprise Search Managed Indices', () => {
 
   describe('GET /internal/enterprise_search/pipelines/ml_inference', () => {
     let mockTrainedModelsProvider: MlTrainedModels;
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
 
     beforeEach(() => {
       const context = {
@@ -973,14 +1005,11 @@ describe('Enterprise Search Managed Indices', () => {
         path: '/internal/enterprise_search/pipelines/ml_inference',
       });
 
-      mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
-      } as MlTrainedModels;
-
-      mockMl = {
-        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      mockMl = mlPluginServerMock.createSetupContract();
+      mockTrainedModelsProvider = mockMl.trainedModelsProvider(
+        {} as KibanaRequest,
+        {} as SavedObjectsClientContract
+      );
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1015,6 +1044,274 @@ describe('Enterprise Search Managed Indices', () => {
         body: pipelinesResult,
         headers: { 'content-type': 'application/json' },
       });
+    });
+  });
+
+  describe('POST /internal/enterprise_search/ml/models/{modelName}', () => {
+    let mockMl: MlPluginSetup;
+    let mockTrainedModelsProvider: MlTrainedModels;
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'post',
+        path: '/internal/enterprise_search/ml/models/{modelName}',
+      });
+
+      mockTrainedModelsProvider = {
+        getTrainedModels: jest.fn(),
+        getTrainedModelsStats: jest.fn(),
+        putTrainedModel: jest.fn(),
+      } as unknown as MlTrainedModels;
+
+      mockMl = {
+        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
+      } as unknown as jest.Mocked<MlPluginSetup>;
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        ml: mockMl,
+        router: mockRouter.router,
+      });
+    });
+    const modelName = '.elser_model_2';
+
+    it('fails validation without modelName', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('downloads the model', async () => {
+      const request = {
+        params: { modelName },
+      };
+
+      const mockResponse = {
+        deploymentState: MlModelDeploymentState.Downloading,
+        modelId: modelName,
+        nodeAllocationCount: 0,
+        startTime: 0,
+        targetAllocationCount: 0,
+      };
+
+      (startMlModelDownload as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await mockRouter.callRoute(request);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: mockResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
+
+  describe('POST /internal/enterprise_search/ml/models/{modelName}/deploy', () => {
+    let mockMl: MlPluginSetup;
+    let mockTrainedModelsProvider: MlTrainedModels;
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'post',
+        path: '/internal/enterprise_search/ml/models/{modelName}/deploy',
+      });
+
+      mockTrainedModelsProvider = {
+        getTrainedModels: jest.fn(),
+        getTrainedModelsStats: jest.fn(),
+        startTrainedModelDeployment: jest.fn(),
+      } as unknown as MlTrainedModels;
+
+      mockMl = {
+        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
+      } as unknown as jest.Mocked<MlPluginSetup>;
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        ml: mockMl,
+        router: mockRouter.router,
+      });
+    });
+    const modelName = '.elser_model_2';
+
+    it('fails validation without modelName', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('deploys the model', async () => {
+      const request = {
+        params: { modelName },
+      };
+
+      const mockResponse = {
+        deploymentState: MlModelDeploymentState.Starting,
+        modelId: modelName,
+        nodeAllocationCount: 0,
+        startTime: 123456,
+        targetAllocationCount: 3,
+      };
+
+      (startMlModelDeployment as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await mockRouter.callRoute(request);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: mockResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
+
+  describe('GET /internal/enterprise_search/ml/models/{modelName}', () => {
+    let mockMl: MlPluginSetup;
+    let mockTrainedModelsProvider: MlTrainedModels;
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/ml/models/{modelName}',
+      });
+
+      mockTrainedModelsProvider = {
+        getTrainedModels: jest.fn(),
+        getTrainedModelsStats: jest.fn(),
+      } as unknown as MlTrainedModels;
+
+      mockMl = {
+        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
+      } as unknown as jest.Mocked<MlPluginSetup>;
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        ml: mockMl,
+        router: mockRouter.router,
+      });
+    });
+    const modelName = '.elser_model_2';
+
+    it('fails validation without modelName', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('deploys or downloads the model', async () => {
+      const request = {
+        params: { modelName },
+      };
+
+      const mockResponse = {
+        deploymentState: MlModelDeploymentState.Starting,
+        modelId: modelName,
+        nodeAllocationCount: 0,
+        startTime: 123456,
+        targetAllocationCount: 3,
+      };
+
+      (getMlModelDeploymentStatus as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await mockRouter.callRoute(request);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: mockResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
+
+  describe('GET /internal/enterprise_search/pipelines/ml_inference/pipeline_processors/{pipelineName}', () => {
+    const pipelineName = 'my-pipeline';
+    const pipelineBody = {
+      description: 'Some pipeline',
+      processors: [
+        {
+          set: {
+            field: 'some_field',
+            value: 'some value',
+          },
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/pipelines/{pipelineName}',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fails validation without pipelineName', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('returns error if pipeline does not exist', async () => {
+      const request = {
+        params: { pipelineName },
+      };
+
+      mockClient.asCurrentUser.ingest.getPipeline.mockRejectedValue({
+        name: 'ResponseError',
+        meta: {
+          statusCode: 404,
+        },
+      });
+
+      await mockRouter.callRoute(request);
+
+      expect(mockClient.asCurrentUser.ingest.getPipeline).toHaveBeenCalledWith({
+        id: pipelineName,
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledTimes(0);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns pipeline if it does exist', async () => {
+      const request = {
+        params: { pipelineName },
+      };
+      mockClient.asCurrentUser.ingest.getPipeline.mockResolvedValueOnce({
+        [pipelineName]: pipelineBody,
+      });
+
+      await mockRouter.callRoute(request);
+
+      expect(mockClient.asCurrentUser.ingest.getPipeline).toHaveBeenCalledWith({
+        id: pipelineName,
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledTimes(1);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(0);
     });
   });
 });

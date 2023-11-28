@@ -7,21 +7,21 @@
 
 import React, { Fragment } from 'react';
 import {
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiButton,
   EuiTitle,
   EuiSpacer,
-  EuiButtonIcon,
   EuiToolTip,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LayerTOC } from './layer_toc';
 import { isScreenshotMode } from '../../../kibana_services';
 import { ILayer } from '../../../classes/layers/layer';
+import { ExpandButton } from './expand_button';
 
 export interface Props {
   isReadOnly: boolean;
@@ -33,46 +33,7 @@ export interface Props {
   openLayerTOC: () => void;
   hideAllLayers: () => void;
   showAllLayers: () => void;
-}
-
-function renderExpandButton({
-  hasErrors,
-  isLoading,
-  onClick,
-}: {
-  hasErrors: boolean;
-  isLoading: boolean;
-  onClick: () => void;
-}) {
-  const expandLabel = i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
-    defaultMessage: 'Expand layers panel',
-  });
-
-  if (isLoading) {
-    // Can not use EuiButtonIcon with spinner because spinner is a class and not an icon
-    return (
-      <button
-        className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
-        type="button"
-        onClick={onClick}
-        aria-label={expandLabel}
-        data-test-subj="mapExpandLayerControlButton"
-      >
-        <EuiLoadingSpinner size="m" />
-      </button>
-    );
-  }
-
-  return (
-    <EuiButtonIcon
-      className="mapLayerControl__openLayerTOCButton"
-      color="text"
-      onClick={onClick}
-      iconType={hasErrors ? 'alert' : 'menuLeft'}
-      aria-label={expandLabel}
-      data-test-subj="mapExpandLayerControlButton"
-    />
-  );
+  zoom: number;
 }
 
 export function LayerControl({
@@ -85,16 +46,17 @@ export function LayerControl({
   isFlyoutOpen,
   hideAllLayers,
   showAllLayers,
+  zoom,
 }: Props) {
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
       return null;
     }
-    const hasErrors = layerList.some((layer) => {
-      return layer.hasErrors();
+    const hasErrorsOrWarnings = layerList.some((layer) => {
+      return layer.hasErrors() || layer.hasWarnings();
     });
     const isLoading = layerList.some((layer) => {
-      return layer.isLayerLoading() && layer.isVisible();
+      return layer.isLayerLoading(zoom);
     });
 
     return (
@@ -105,7 +67,11 @@ export function LayerControl({
         })}
         position="left"
       >
-        {renderExpandButton({ hasErrors, isLoading, onClick: openLayerTOC })}
+        <ExpandButton
+          hasErrorsOrWarnings={hasErrorsOrWarnings}
+          isLoading={isLoading}
+          onClick={openLayerTOC}
+        />
       </EuiToolTip>
     );
   }

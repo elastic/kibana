@@ -14,7 +14,7 @@ import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { findPluginDir } from './find_plugin_dir';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
 import * as Tasks from './tasks';
-import { BuildContext } from './build_context';
+import { TaskContext } from './task_context';
 import { resolveKibanaVersion } from './resolve_kibana_version';
 import { loadConfig } from './config';
 
@@ -42,7 +42,7 @@ export function runCli() {
         },
         help: `
           --skip-archive        Don't create the zip file, just create the build/kibana directory
-          --kibana-version, -v  Kibana version that the
+          --kibana-version, -v  Kibana version this plugin will be built for
         `,
       },
       async run({ log, flags }) {
@@ -56,7 +56,7 @@ export function runCli() {
           throw createFlagError('expected a single --skip-archive flag');
         }
 
-        const found = await findPluginDir();
+        const found = findPluginDir();
         if (!found) {
           throw createFailError(
             `Unable to find Kibana Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a kibana.json file?`
@@ -73,8 +73,10 @@ export function runCli() {
         const sourceDir = plugin.directory;
         const buildDir = Path.resolve(plugin.directory, 'build/kibana', plugin.manifest.id);
 
-        const context: BuildContext = {
+        const context: TaskContext = {
           log,
+          dev: false,
+          dist: true,
           plugin,
           config,
           sourceDir,
@@ -83,7 +85,9 @@ export function runCli() {
         };
 
         await Tasks.initTargets(context);
+        await Tasks.buildBazelPackages(context);
         await Tasks.optimize(context);
+        await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
         await Tasks.writeServerFiles(context);
         await Tasks.yarnInstall(context);
@@ -91,6 +95,75 @@ export function runCli() {
         if (skipArchive !== true) {
           await Tasks.createArchive(context);
         }
+      },
+    })
+    .command({
+      name: 'dev',
+      description: `
+        Builds the current plugin ui browser side so it can be picked up by Kibana
+        during development
+
+      `,
+      flags: {
+        boolean: ['dist', 'watch'],
+        alias: {
+          d: 'dist',
+          w: 'watch',
+        },
+        help: `
+          --dist, -d  Outputs bundles in dist mode instead
+          --watch, -w  Starts the watch mode
+        `,
+      },
+      async run({ log, flags }) {
+        const dist = flags.dist;
+        if (dist !== undefined && typeof dist !== 'boolean') {
+          throw createFlagError('expected a single --dist flag');
+        }
+
+        const watch = flags.watch;
+        if (watch !== undefined && typeof watch !== 'boolean') {
+          throw createFlagError('expected a single --watch flag');
+        }
+
+        const found = findPluginDir();
+        if (!found) {
+          throw createFailError(
+            `Unable to find Kibana Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a kibana.json file?`
+          );
+        }
+
+        if (found.type === 'package') {
+          throw createFailError(`the plugin helpers do not currently support "package plugins"`);
+        }
+
+        const plugin = loadKibanaPlatformPlugin(found.dir);
+
+        if (!plugin.manifest.ui) {
+          log.info(
+            'Your plugin is server only and there is no need to run a dev task in order to get it ready to test. Please just run `yarn start` at the Kibana root and your plugin will be started.'
+          );
+          return;
+        }
+
+        const config = await loadConfig(log, plugin);
+        const sourceDir = plugin.directory;
+
+        const context: TaskContext = {
+          log,
+          dev: true,
+          dist,
+          watch,
+          plugin,
+          config,
+          sourceDir,
+          buildDir: '',
+          kibanaVersion: 'kibana',
+        };
+
+        await Tasks.initDev(context);
+        await Tasks.buildBazelPackages(context);
+        await Tasks.optimize(context);
       },
     })
     .execute();

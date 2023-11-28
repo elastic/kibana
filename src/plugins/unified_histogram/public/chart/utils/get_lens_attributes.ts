@@ -15,8 +15,22 @@ import type {
   GenericIndexPatternColumn,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
+  Suggestion,
 } from '@kbn/lens-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
+
+export interface LensRequestData {
+  dataViewId?: string;
+  timeField?: string;
+  timeInterval?: string;
+  breakdownField?: string;
+}
+
+export interface LensAttributesContext {
+  attributes: TypedLensByValueInput['attributes'];
+  requestData: LensRequestData;
+}
 
 export const getLensAttributes = ({
   title,
@@ -25,6 +39,7 @@ export const getLensAttributes = ({
   dataView,
   timeInterval,
   breakdownField,
+  suggestion,
 }: {
   title?: string;
   filters: Filter[];
@@ -32,7 +47,8 @@ export const getLensAttributes = ({
   dataView: DataView;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
-}) => {
+  suggestion: Suggestion | undefined;
+}): LensAttributesContext => {
   const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
   let columnOrder = ['date_column', 'count_column'];
@@ -103,35 +119,27 @@ export const getLensAttributes = ({
     };
   }
 
-  return {
-    title:
-      title ??
-      i18n.translate('unifiedHistogram.lensTitle', {
-        defaultMessage: 'Edit visualization',
-      }),
-    references: [
-      {
-        id: dataView.id ?? '',
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: dataView.id ?? '',
-        name: 'indexpattern-datasource-layer-unifiedHistogram',
-        type: 'index-pattern',
-      },
-    ],
-    state: {
-      datasourceStates: {
-        formBased: {
-          layers: {
-            unifiedHistogram: { columnOrder, columns },
+  const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
+  const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+  const datasourceStates =
+    suggestion && suggestion.datasourceState
+      ? {
+          [suggestion.datasourceId!]: {
+            ...suggestionDatasourceState,
           },
-        },
-      },
-      filters,
-      query: 'language' in query ? query : { language: 'kuery', query: '' },
-      visualization: {
+        }
+      : {
+          formBased: {
+            layers: {
+              unifiedHistogram: { columnOrder, columns },
+            },
+          },
+        };
+  const visualization = suggestion
+    ? {
+        ...suggestionVisualizationState,
+      }
+    : {
         layers: [
           {
             accessors: ['count_column'],
@@ -153,6 +161,8 @@ export const getLensAttributes = ({
         legend: {
           isVisible: true,
           position: 'right',
+          legendSize: LegendSize.EXTRA_LARGE,
+          shouldTruncate: false,
         },
         preferredSeriesType: 'bar_stacked',
         valueLabels: 'hide',
@@ -173,8 +183,49 @@ export const getLensAttributes = ({
           yLeft: true,
           yRight: false,
         },
+      };
+  const attributes = {
+    title:
+      title ??
+      suggestion?.title ??
+      i18n.translate('unifiedHistogram.lensTitle', {
+        defaultMessage: 'Edit visualization',
+      }),
+    references: [
+      {
+        id: dataView.id ?? '',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
       },
+      {
+        id: dataView.id ?? '',
+        name: 'indexpattern-datasource-layer-unifiedHistogram',
+        type: 'index-pattern',
+      },
+    ],
+    state: {
+      datasourceStates,
+      filters,
+      query,
+      visualization,
+      ...(dataView &&
+        dataView.id &&
+        !dataView.isPersisted() && {
+          adHocDataViews: {
+            [dataView.id]: dataView.toSpec(false),
+          },
+        }),
     },
-    visualizationType: 'lnsXY',
+    visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];
+
+  return {
+    attributes,
+    requestData: {
+      dataViewId: dataView.id,
+      timeField: dataView.timeFieldName,
+      timeInterval,
+      breakdownField: breakdownField?.name,
+    },
+  };
 };

@@ -88,13 +88,40 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                 }),
                 includeIn: 'all',
                 savedObject: {
-                  all: [],
-                  read: [],
+                  all: [...filesSavedObjectTypes],
+                  read: [...filesSavedObjectTypes],
                 },
                 cases: {
                   delete: [APP_ID],
                 },
                 ui: capabilities.delete,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.casesSettingsSubFeatureName', {
+          defaultMessage: 'Case Settings',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'cases_settings',
+                name: i18n.translate('xpack.cases.features.casesSettingsSubFeatureDetails', {
+                  defaultMessage: 'Edit Case Settings',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [...filesSavedObjectTypes],
+                  read: [...filesSavedObjectTypes],
+                },
+                cases: {
+                  settings: [APP_ID],
+                },
+                ui: capabilities.settings,
               },
             ],
           },

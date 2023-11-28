@@ -6,8 +6,12 @@
  */
 
 import { format, ALLOWED_FIELDS } from './formatter';
-import { DataStream } from '../../../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../../../common/constants/monitor_defaults';
+import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
+import {
+  DEFAULT_FIELDS,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../../../common/constants/monitor_defaults';
 
 describe('format', () => {
   let formValues: Record<string, unknown>;
@@ -92,10 +96,23 @@ describe('format', () => {
     };
   });
 
+  it('leaves un-nested fields as is', () => {
+    const projectSourceContent = 'UUUUUUUIJLVIK';
+    formValues['source.project.content'] = projectSourceContent;
+    formValues['ssl.verification_mode'] = 'full';
+    formValues.type = 'browser';
+    expect(format(formValues)).toEqual(
+      expect.objectContaining({
+        ['source.project.content']: projectSourceContent,
+        ['ssl.verification_mode']: 'full',
+      })
+    );
+  });
+
   it.each([[true], [false]])('correctly formats form fields to monitor type', (enabled) => {
     formValues.enabled = enabled;
     expect(format(formValues)).toEqual({
-      ...DEFAULT_FIELDS[DataStream.HTTP],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
       __ui: {
         is_tls_enabled: false,
       },
@@ -188,16 +205,10 @@ describe('format', () => {
             is_generated_script: false,
             file_name: '',
           },
-          is_zip_url_tls_enabled: false,
         },
         params: '',
         'source.inline.script': '',
         'source.project.content': '',
-        'source.zip_url.url': '',
-        'source.zip_url.username': '',
-        'source.zip_url.password': '',
-        'source.zip_url.folder': '',
-        'source.zip_url.proxy_url': '',
         playwright_text_assertion: '',
         urls: '',
         screenshots: 'on',
@@ -205,11 +216,6 @@ describe('format', () => {
         'filter_journeys.match': '',
         'filter_journeys.tags': [],
         ignore_https_errors: false,
-        'throttling.is_enabled': true,
-        'throttling.download_speed': '5',
-        'throttling.upload_speed': '3',
-        'throttling.latency': '20',
-        'throttling.config': '5d/3u/20l',
         'ssl.certificate_authorities': '',
         'ssl.certificate': '',
         'ssl.key': '',
@@ -221,9 +227,7 @@ describe('format', () => {
           script: '',
           fileName: '',
         },
-        throttling: {
-          config: '5d/3u/20l',
-        },
+        throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
         source: {
           inline: {
             type: scriptType,
@@ -241,7 +245,7 @@ describe('format', () => {
         },
       };
       expect(format(browserFormFields)).toEqual({
-        ...DEFAULT_FIELDS[DataStream.BROWSER],
+        ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
         __ui: {
           script_source: {
             file_name: fileName,
@@ -276,17 +280,6 @@ describe('format', () => {
         'service.name': '',
         'source.inline.script': script,
         'source.project.content': '',
-        'source.zip_url.folder': '',
-        'source.zip_url.password': '',
-        'source.zip_url.proxy_url': '',
-        'source.zip_url.ssl.certificate': undefined,
-        'source.zip_url.ssl.certificate_authorities': undefined,
-        'source.zip_url.ssl.key': undefined,
-        'source.zip_url.ssl.key_passphrase': undefined,
-        'source.zip_url.ssl.supported_protocols': undefined,
-        'source.zip_url.ssl.verification_mode': undefined,
-        'source.zip_url.url': '',
-        'source.zip_url.username': '',
         'ssl.certificate': '',
         'ssl.certificate_authorities': '',
         'ssl.key': '',
@@ -295,11 +288,6 @@ describe('format', () => {
         'ssl.verification_mode': 'full',
         synthetics_args: [],
         tags: [],
-        'throttling.config': '5d/3u/20l',
-        'throttling.download_speed': '5',
-        'throttling.is_enabled': true,
-        'throttling.latency': '20',
-        'throttling.upload_speed': '3',
         timeout: '16',
         type: 'browser',
         'url.port': null,
@@ -326,7 +314,7 @@ describe('format', () => {
         },
       })
     ).toEqual({
-      ...DEFAULT_FIELDS[DataStream.HTTP],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
       __ui: {
         is_tls_enabled: isTLSEnabled,
       },

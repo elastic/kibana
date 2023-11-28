@@ -8,13 +8,26 @@
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status/route';
-import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines/route';
+import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route';
+import { getPrebuiltRulesStatusRoute } from './get_prebuilt_rules_status/get_prebuilt_rules_status_route';
+import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
+import { reviewRuleInstallationRoute } from './review_rule_installation/review_rule_installation_route';
+import { reviewRuleUpgradeRoute } from './review_rule_upgrade/review_rule_upgrade_route';
+import { performRuleInstallationRoute } from './perform_rule_installation/perform_rule_installation_route';
+import { performRuleUpgradeRoute } from './perform_rule_upgrade/perform_rule_upgrade_route';
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
   security: SetupPlugins['security']
 ) => {
+  // Legacy endpoints that we're going to deprecate
   getPrebuiltRulesAndTimelinesStatusRoute(router, security);
   installPrebuiltRulesAndTimelinesRoute(router);
+
+  // New endpoints for the rule upgrade and installation workflows
+  getPrebuiltRulesStatusRoute(router);
+  performRuleInstallationRoute(router);
+  performRuleUpgradeRoute(router);
+  reviewRuleInstallationRoute(router);
+  reviewRuleUpgradeRoute(router);
 };

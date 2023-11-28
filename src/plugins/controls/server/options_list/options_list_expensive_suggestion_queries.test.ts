@@ -115,6 +115,100 @@ describe('options list expensive queries', () => {
         `);
       });
 
+      test('test keyword field, with wildcard search and basic search string', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          searchString: 'c',
+          searchTechnique: 'wildcard',
+          allowExpensiveQueries: true,
+          fieldName: 'coolTestField.keyword',
+          sort: { by: '_key', direction: 'desc' },
+          fieldSpec: { aggregatable: true } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "filteredSuggestions": Object {
+              "aggs": Object {
+                "suggestions": Object {
+                  "terms": Object {
+                    "field": "coolTestField.keyword",
+                    "order": Object {
+                      "_key": "desc",
+                    },
+                    "shard_size": 10,
+                    "size": 10,
+                  },
+                },
+                "unique_terms": Object {
+                  "cardinality": Object {
+                    "field": "coolTestField.keyword",
+                  },
+                },
+              },
+              "filter": Object {
+                "wildcard": Object {
+                  "coolTestField.keyword": Object {
+                    "case_insensitive": true,
+                    "value": "*c*",
+                  },
+                },
+              },
+            },
+          }
+        `);
+      });
+
+      test('test keyword field, with wildcard search and search string that needs to be escaped', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          searchString: '.c?o&o[l*',
+          searchTechnique: 'wildcard',
+          allowExpensiveQueries: true,
+          fieldName: 'coolTestField.keyword',
+          sort: { by: '_key', direction: 'desc' },
+          fieldSpec: { aggregatable: true } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "filteredSuggestions": Object {
+              "aggs": Object {
+                "suggestions": Object {
+                  "terms": Object {
+                    "field": "coolTestField.keyword",
+                    "order": Object {
+                      "_key": "desc",
+                    },
+                    "shard_size": 10,
+                    "size": 10,
+                  },
+                },
+                "unique_terms": Object {
+                  "cardinality": Object {
+                    "field": "coolTestField.keyword",
+                  },
+                },
+              },
+              "filter": Object {
+                "wildcard": Object {
+                  "coolTestField.keyword": Object {
+                    "case_insensitive": true,
+                    "value": "*.c\\\\?o&o[l\\\\**",
+                  },
+                },
+              },
+            },
+          }
+        `);
+      });
+
       test('test nested field, with a search string', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
@@ -169,31 +263,102 @@ describe('options list expensive queries', () => {
       });
     });
 
-    test('boolean field', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
-        size: 10,
-        fieldName: 'coolean',
-        allowExpensiveQueries: false,
-        sort: { by: '_key', direction: 'desc' },
-        fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
-      };
-      const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
-        optionsListRequestBodyMock
-      );
-      expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
-        Object {
-          "suggestions": Object {
-            "terms": Object {
-              "field": "coolean",
-              "order": Object {
-                "_key": "desc",
+    describe('boolean field', () => {
+      test('creates boolean aggregation for boolean field', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          fieldName: 'coolean',
+          allowExpensiveQueries: true,
+          sort: { by: '_key', direction: 'desc' },
+          fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+                  Object {
+                    "suggestions": Object {
+                      "terms": Object {
+                        "field": "coolean",
+                        "order": Object {
+                          "_key": "desc",
+                        },
+                        "shard_size": 10,
+                      },
+                    },
+                  }
+              `);
+      });
+    });
+
+    describe('date field field', () => {
+      test('creates date aggregation for date field', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          fieldName: '@timestamp',
+          allowExpensiveQueries: true,
+          sort: { by: '_key', direction: 'desc' },
+          fieldSpec: { type: 'date' } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "suggestions": Object {
+              "terms": Object {
+                "field": "@timestamp",
+                "order": Object {
+                  "_key": "desc",
+                },
+                "shard_size": 10,
+                "size": 10,
               },
-              "shard_size": 10,
             },
-          },
-        }
-      `);
+            "unique_terms": Object {
+              "cardinality": Object {
+                "field": "@timestamp",
+              },
+            },
+          }
+        `);
+      });
+
+      test('does not throw error when receiving search string', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          fieldName: '@timestamp',
+          allowExpensiveQueries: true,
+          sort: { by: '_key', direction: 'desc' },
+          searchString: '2023',
+          fieldSpec: { type: 'date' } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "suggestions": Object {
+              "terms": Object {
+                "field": "@timestamp",
+                "order": Object {
+                  "_key": "desc",
+                },
+                "shard_size": 10,
+                "size": 10,
+              },
+            },
+            "unique_terms": Object {
+              "cardinality": Object {
+                "field": "@timestamp",
+              },
+            },
+          }
+        `);
+      });
     });
 
     describe('IP field', () => {
@@ -466,17 +631,20 @@ describe('options list expensive queries', () => {
       expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
-          "suggestions": Object {
-            "cool1": Object {
-              "doc_count": 5,
+          "suggestions": Array [
+            Object {
+              "docCount": 5,
+              "value": "cool1",
             },
-            "cool2": Object {
-              "doc_count": 15,
+            Object {
+              "docCount": 15,
+              "value": "cool2",
             },
-            "cool3": Object {
-              "doc_count": 10,
+            Object {
+              "docCount": 10,
+              "value": "cool3",
             },
-          },
+          ],
           "totalCardinality": 3,
         }
       `);
@@ -503,14 +671,16 @@ describe('options list expensive queries', () => {
       expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
-          "suggestions": Object {
-            "false": Object {
-              "doc_count": 55,
+          "suggestions": Array [
+            Object {
+              "docCount": 55,
+              "value": "false",
             },
-            "true": Object {
-              "doc_count": 155,
+            Object {
+              "docCount": 155,
+              "value": "true",
             },
-          },
+          ],
           "totalCardinality": 2,
         }
       `);
@@ -546,17 +716,20 @@ describe('options list expensive queries', () => {
       expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
-          "suggestions": Object {
-            "cool1": Object {
-              "doc_count": 5,
+          "suggestions": Array [
+            Object {
+              "docCount": 5,
+              "value": "cool1",
             },
-            "cool2": Object {
-              "doc_count": 15,
+            Object {
+              "docCount": 15,
+              "value": "cool2",
             },
-            "cool3": Object {
-              "doc_count": 10,
+            Object {
+              "docCount": 10,
+              "value": "cool3",
             },
-          },
+          ],
           "totalCardinality": 3,
         }
       `);
@@ -621,55 +794,98 @@ describe('options list expensive queries', () => {
         rawSearchResponseMock,
         optionsListRequestBodyMock
       ).suggestions;
-      /** first, verify that the sorting worked as expected */
-      expect(Object.keys(parsed)).toMatchInlineSnapshot(`
+
+      expect(parsed).toMatchInlineSnapshot(`
         Array [
-          "52:ae76:5947:5e2a:551:fe6a:712a:c72",
-          "111.52.174.2",
-          "196.162.13.39",
-          "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63",
-          "23.216.241.120",
-          "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172",
-          "21.35.91.62",
-          "21.35.91.61",
-          "203.88.33.151",
-          "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8",
+          Object {
+            "docCount": 12,
+            "value": "52:ae76:5947:5e2a:551:fe6a:712a:c72",
+          },
+          Object {
+            "docCount": 11,
+            "value": "111.52.174.2",
+          },
+          Object {
+            "docCount": 10,
+            "value": "196.162.13.39",
+          },
+          Object {
+            "docCount": 10,
+            "value": "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63",
+          },
+          Object {
+            "docCount": 9,
+            "value": "23.216.241.120",
+          },
+          Object {
+            "docCount": 9,
+            "value": "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172",
+          },
+          Object {
+            "docCount": 8,
+            "value": "21.35.91.62",
+          },
+          Object {
+            "docCount": 8,
+            "value": "21.35.91.61",
+          },
+          Object {
+            "docCount": 7,
+            "value": "203.88.33.151",
+          },
+          Object {
+            "docCount": 6,
+            "value": "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8",
+          },
         ]
       `);
-      /** then, make sure the object is structured properly */
+    });
+
+    test('parses date result', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
+        fieldName: '@timestamp',
+        allowExpensiveQueries: true,
+        fieldSpec: { type: 'date' } as unknown as FieldSpec,
+      };
+      const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+        optionsListRequestBodyMock
+      );
+      rawSearchResponseMock.aggregations = {
+        suggestions: {
+          buckets: [
+            { doc_count: 20, key: 1696824675 },
+            { doc_count: 13, key: 1686086625 },
+            { doc_count: 4, key: 1703684229 },
+            { doc_count: 34, key: 1688603684 },
+          ],
+        },
+      };
+
+      const parsed = suggestionAggBuilder.parse(
+        rawSearchResponseMock,
+        optionsListRequestBodyMock
+      ).suggestions;
+
       expect(parsed).toMatchInlineSnapshot(`
-        Object {
-          "111.52.174.2": Object {
-            "doc_count": 11,
+        Array [
+          Object {
+            "docCount": 20,
+            "value": 1696824675,
           },
-          "196.162.13.39": Object {
-            "doc_count": 10,
+          Object {
+            "docCount": 13,
+            "value": 1686086625,
           },
-          "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8": Object {
-            "doc_count": 6,
+          Object {
+            "docCount": 4,
+            "value": 1703684229,
           },
-          "203.88.33.151": Object {
-            "doc_count": 7,
+          Object {
+            "docCount": 34,
+            "value": 1688603684,
           },
-          "21.35.91.61": Object {
-            "doc_count": 8,
-          },
-          "21.35.91.62": Object {
-            "doc_count": 8,
-          },
-          "23.216.241.120": Object {
-            "doc_count": 9,
-          },
-          "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172": Object {
-            "doc_count": 9,
-          },
-          "52:ae76:5947:5e2a:551:fe6a:712a:c72": Object {
-            "doc_count": 12,
-          },
-          "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63": Object {
-            "doc_count": 10,
-          },
-        }
+        ]
       `);
     });
   });

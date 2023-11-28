@@ -7,8 +7,8 @@
 
 import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useResolverDispatch } from './use_resolver_dispatch';
-
+import { useDispatch } from 'react-redux';
+import { appReceivedNewExternalProperties } from '../store/actions';
 /**
  * This is a hook that is meant to be used once at the top level of Resolver.
  * It dispatches actions that keep the store in sync with external properties.
@@ -29,20 +29,20 @@ export function useStateSyncingActions({
   shouldUpdate: boolean;
   filters: object;
 }) {
-  const dispatch = useResolverDispatch();
+  const dispatch = useDispatch();
   const locationSearch = useLocation().search;
   useLayoutEffect(() => {
-    dispatch({
-      type: 'appReceivedNewExternalProperties',
-      payload: {
+    dispatch(
+      appReceivedNewExternalProperties({
+        id: resolverComponentInstanceID,
         databaseDocumentID,
         resolverComponentInstanceID,
         locationSearch,
         indices,
         shouldUpdate,
         filters,
-      },
-    });
+      })
+    );
   }, [
     dispatch,
     databaseDocumentID,

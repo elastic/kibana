@@ -9,6 +9,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { isEmpty } from 'lodash';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { RelatedSavedObjects } from './related_saved_objects';
+import { ActionExecutionSource, isSavedObjectExecutionSource } from './action_execution_source';
 
 export type Event = Exclude<IEvent, undefined>;
 
@@ -34,7 +35,8 @@ interface CreateActionEventLogRecordParams {
     relation?: string;
   }>;
   relatedSavedObjects?: RelatedSavedObjects;
-  isPreconfigured?: boolean;
+  isInMemory?: boolean;
+  source?: ActionExecutionSource<unknown>;
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
@@ -49,8 +51,9 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     relatedSavedObjects,
     name,
     actionExecutionId,
-    isPreconfigured,
+    isInMemory,
     actionId,
+    source,
   } = params;
 
   const kibanaAlertRule = {
@@ -77,8 +80,8 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         type: so.type,
         id: so.id,
         type_id: so.typeId,
-        // set space_agnostic to true for preconfigured connectors
-        ...(so.type === 'action' && isPreconfigured ? { space_agnostic: isPreconfigured } : {}),
+        // set space_agnostic to true for in-memory connectors
+        ...(so.type === 'action' && isInMemory ? { space_agnostic: isInMemory } : {}),
         ...(namespace ? { namespace } : {}),
       })),
       ...(spaceId ? { space_ids: [spaceId] } : {}),
@@ -93,6 +96,14 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     },
     ...(message ? { message } : {}),
   };
+
+  if (source) {
+    if (isSavedObjectExecutionSource(source)) {
+      set(event, 'kibana.action.execution.source', source.source.type);
+    } else {
+      set(event, 'kibana.action.execution.source', source.type?.toLowerCase());
+    }
+  }
 
   for (const relatedSavedObject of relatedSavedObjects || []) {
     const ruleTypeId = relatedSavedObject.type === 'alert' ? relatedSavedObject.typeId : null;

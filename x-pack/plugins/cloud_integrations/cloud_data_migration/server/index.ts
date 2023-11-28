@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import { CloudDataMigrationPlugin } from './plugin';
+export { config } from './config';
 
-export const plugin = () => new CloudDataMigrationPlugin();
+export const plugin = async () => {
+  const { CloudDataMigrationPlugin } = await import('./plugin');
+  return new CloudDataMigrationPlugin();
+};

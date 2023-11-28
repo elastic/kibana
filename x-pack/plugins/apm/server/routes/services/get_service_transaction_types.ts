@@ -6,29 +6,38 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import {
-  getDocumentTypeFilterForTransactions,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
+import { RollupInterval } from '../../../common/rollup';
+
+export interface ServiceTransactionTypesResponse {
+  transactionTypes: string[];
+}
 
 export async function getServiceTransactionTypes({
   apmEventClient,
   serviceName,
-  searchAggregatedTransactions,
   start,
   end,
+  documentType,
+  rollupInterval,
 }: {
   serviceName: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
   start: number;
   end: number;
-}) {
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+}): Promise<ServiceTransactionTypesResponse> {
   const params = {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      sources: [
+        {
+          documentType,
+          rollupInterval,
+        },
+      ],
     },
     body: {
       track_total_hits: false,
@@ -36,9 +45,6 @@ export async function getServiceTransactionTypes({
       query: {
         bool: {
           filter: [
-            ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
-            ),
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
           ],

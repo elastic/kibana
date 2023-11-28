@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  SavedObjectReferenceWithContext,
+  SavedObjectsClient,
+  SavedObjectsFindResult,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   AuthorizeBulkGetObject,
@@ -14,21 +20,17 @@ import type {
   BulkResolveError,
 } from '@kbn/core-saved-objects-server';
 import type {
-  SavedObjectReferenceWithContext,
-  SavedObjectsClient,
-  SavedObjectsFindResult,
-  SavedObjectsResolveResponse,
-} from '@kbn/core/server';
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
-import { auditLoggerMock } from '../audit/mocks';
-import type { CheckSavedObjectsPrivileges } from '../authorization';
-import { Actions } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
 import {
   AuditAction,
   SavedObjectsSecurityExtension,
   SecurityAction,
 } from './saved_objects_security_extension';
+import { auditLoggerMock } from '../audit/mocks';
+import { Actions } from '../authorization';
 
 const checkAuthorizationSpy = jest.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
@@ -96,7 +98,7 @@ function setupSimpleCheckPrivsMockResolve(
 }
 
 function setup() {
-  const actions = new Actions('some-version');
+  const actions = new Actions();
   jest
     .spyOn(actions.savedObject, 'get')
     .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
@@ -450,6 +452,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User is updating saved objects',
@@ -465,6 +469,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User is creating saved objects',
@@ -501,6 +507,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User has updated saved objects',
@@ -516,6 +524,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User has created saved objects',
@@ -532,17 +542,19 @@ describe('#authorize (unpublished by interface)', () => {
           { type: 'c', id: '3' },
         ];
 
+        const enforceMap = new Map([
+          ['a', new Set(['x', 'y', 'z'])],
+          ['b', new Set(['x', 'y'])],
+          ['c', new Set(['y'])],
+        ]);
+
         // Disable to test method
         // eslint-disable-next-line dot-notation
         await securityExtension['authorize']({
           actions,
           types,
           spaces,
-          enforceMap: new Map([
-            ['a', new Set(['x', 'y', 'z'])],
-            ['b', new Set(['x', 'y'])],
-            ['c', new Set(['y'])],
-          ]),
+          enforceMap,
           auditOptions: {
             objects: auditObjects,
           },
@@ -562,6 +574,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -582,6 +596,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -602,17 +618,19 @@ describe('#authorize (unpublished by interface)', () => {
           { type: 'c', id: '3' },
         ];
 
+        const enforceMap = new Map([
+          ['a', new Set(['x', 'y', 'z'])],
+          ['b', new Set(['x', 'y'])],
+          ['c', new Set(['y'])],
+        ]);
+
         // Disable to test method
         // eslint-disable-next-line dot-notation
         await securityExtension['authorize']({
           actions,
           types,
           spaces,
-          enforceMap: new Map([
-            ['a', new Set(['x', 'y', 'z'])],
-            ['b', new Set(['x', 'y'])],
-            ['c', new Set(['y'])],
-          ]),
+          enforceMap,
           auditOptions: {
             objects: auditObjects,
             useSuccessOutcome: true,
@@ -633,6 +651,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -653,6 +673,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -723,6 +745,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User is updating saved objects',
@@ -738,6 +762,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User is creating saved objects',
@@ -780,6 +806,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'Failed attempt to update saved objects',
@@ -796,6 +824,11 @@ describe('#authorize (unpublished by interface)', () => {
           { type: 'c', id: '3' },
         ];
 
+        const enforceMap = new Map([
+          ['a', new Set(['x', 'y', 'z'])],
+          ['b', new Set(['x', 'y'])],
+          ['c', new Set(['x', 'y'])],
+        ]);
         await expect(() =>
           // Disable to test method
           // eslint-disable-next-line dot-notation
@@ -803,11 +836,7 @@ describe('#authorize (unpublished by interface)', () => {
             actions,
             types,
             spaces,
-            enforceMap: new Map([
-              ['a', new Set(['x', 'y', 'z'])],
-              ['b', new Set(['x', 'y'])],
-              ['c', new Set(['x', 'y'])],
-            ]),
+            enforceMap,
             auditOptions: { objects: auditObjects },
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
@@ -828,6 +857,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -902,6 +933,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'Failed attempt to update saved objects',
@@ -914,6 +947,11 @@ describe('#authorize (unpublished by interface)', () => {
         const { securityExtension, checkPrivileges, auditLogger } = setup();
         checkPrivileges.mockResolvedValue(unauthorizedCheckPrivilegesResponse);
 
+        const enforceMap = new Map([
+          ['a', new Set(['y', 'z'])],
+          ['b', new Set(['x', 'z'])],
+          ['c', new Set(['x', 'y'])],
+        ]);
         await expect(() =>
           // Disable to test method
           // eslint-disable-next-line dot-notation
@@ -921,11 +959,7 @@ describe('#authorize (unpublished by interface)', () => {
             actions,
             types,
             spaces,
-            enforceMap: new Map([
-              ['a', new Set(['y', 'z'])],
-              ['b', new Set(['x', 'z'])],
-              ['c', new Set(['x', 'y'])],
-            ]),
+            enforceMap,
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
@@ -944,6 +978,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'Failed attempt to update saved objects',
@@ -960,6 +996,12 @@ describe('#authorize (unpublished by interface)', () => {
           { type: 'c', id: '3' },
         ];
 
+        const enforceMap = new Map([
+          ['a', new Set(['x', 'y', 'z'])],
+          ['b', new Set(['x', 'y'])],
+          ['c', new Set(['x', 'y'])],
+        ]);
+
         await expect(() =>
           // Disable to test method
           // eslint-disable-next-line dot-notation
@@ -967,18 +1009,15 @@ describe('#authorize (unpublished by interface)', () => {
             actions,
             types,
             spaces,
-            enforceMap: new Map([
-              ['a', new Set(['x', 'y', 'z'])],
-              ['b', new Set(['x', 'y'])],
-              ['c', new Set(['x', 'y'])],
-            ]),
+            enforceMap,
             auditOptions: { objects: auditObjects },
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
+        let i = 1;
         for (const obj of auditObjects) {
-          expect(auditLogger.log).toHaveBeenCalledWith({
+          expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
             error: {
               code: 'Error',
               message: 'Unable to bulk_update a,b,c',
@@ -992,6 +1031,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -1066,6 +1107,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'Failed attempt to update saved objects',
@@ -1409,6 +1452,8 @@ describe('#create', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is creating ${obj1.type} [id=${obj1.id}]`,
@@ -1456,6 +1501,8 @@ describe('#create', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to create ${obj1.type} [id=${obj1.id}]`,
@@ -1688,6 +1735,8 @@ describe('#create', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User is creating ${obj.type} [id=${obj.id}]`,
@@ -1754,6 +1803,8 @@ describe('#create', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to create ${obj.type} [id=${obj.id}]`,
@@ -1889,6 +1940,8 @@ describe('update', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is updating ${obj1.type} [id=${obj1.id}]`,
@@ -1936,6 +1989,8 @@ describe('update', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to update ${obj1.type} [id=${obj1.id}]`,
@@ -2166,6 +2221,8 @@ describe('update', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User is updating ${obj.type} [id=${obj.id}]`,
@@ -2209,8 +2266,9 @@ describe('update', () => {
       expect(auditHelperSpy).toHaveBeenCalledTimes(1);
       expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
       expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+      let i = 1;
       for (const obj of objects) {
-        expect(auditLogger.log).toHaveBeenCalledWith({
+        expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
           error: {
             code: 'Error',
             message: `Unable to bulk_update ${obj1.type},${obj2.type},${obj3.type},${obj4.type}`,
@@ -2224,6 +2282,8 @@ describe('update', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to update ${obj.type} [id=${obj.id}]`,
@@ -2361,6 +2421,8 @@ describe('delete', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is deleting ${obj1.type} [id=${obj1.id}]`,
@@ -2408,6 +2470,8 @@ describe('delete', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to delete ${obj1.type} [id=${obj1.id}]`,
@@ -2634,6 +2698,8 @@ describe('delete', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User is deleting ${obj.type} [id=${obj.id}]`,
@@ -2692,6 +2758,8 @@ describe('delete', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to delete ${obj.type} [id=${obj.id}]`,
@@ -2858,6 +2926,8 @@ describe('get', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is accessing ${obj1.type} [id=${obj1.id}]`,
@@ -2920,6 +2990,8 @@ describe('get', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to access ${obj1.type} [id=${obj1.id}]`,
@@ -2955,6 +3027,8 @@ describe('get', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to access ${obj1.type} [id=${obj1.id}]`,
@@ -2967,7 +3041,7 @@ describe('get', () => {
 
     const objA = {
       ...obj1,
-      objectNamespaces: ['y', namespace], // include multiple spaces
+      objectNamespaces: [namespace, 'y'], // include multiple spaces
     };
     const objB = { ...obj2, objectNamespaces: ['z'], existingNamespaces: ['y'] }; // use a different namespace than the options namespace;
 
@@ -3160,6 +3234,8 @@ describe('get', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User has accessed ${obj.type} [id=${obj.id}]`,
@@ -3190,6 +3266,8 @@ describe('get', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: objA.type, id: objA.id },
         },
         message: `User has accessed ${objA.type} [id=${objA.id}]`,
@@ -3233,8 +3311,9 @@ describe('get', () => {
       expect(auditHelperSpy).toHaveBeenCalledTimes(1);
       expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
       expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+      let i = 1;
       for (const obj of objects) {
-        expect(auditLogger.log).toHaveBeenCalledWith({
+        expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
           error: {
             code: 'Error',
             message: `Unable to bulk_get ${objA.type},${objB.type}`,
@@ -3248,6 +3327,8 @@ describe('get', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to access ${obj.type} [id=${obj.id}]`,
@@ -3666,6 +3747,8 @@ describe(`#authorizeRemoveReferences`, () => {
       kibana: {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
+        unauthorized_spaces: undefined,
+        unauthorized_types: undefined,
         saved_object: { type: obj1.type, id: obj1.id },
       },
       message: `User is removing references to ${obj1.type} [id=${obj1.id}]`,
@@ -3709,6 +3792,8 @@ describe(`#authorizeRemoveReferences`, () => {
       kibana: {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
+        unauthorized_spaces: undefined,
+        unauthorized_types: undefined,
         saved_object: { type: obj1.type, id: obj1.id },
       },
       message: `Failed attempt to remove references to ${obj1.type} [id=${obj1.id}]`,
@@ -3733,17 +3818,31 @@ describe(`#authorizeOpenPointInTime`, () => {
     privileges: {
       kibana: [
         { privilege: 'mock-saved_object:a/open_point_in_time', authorized: true },
+        { privilege: 'mock-saved_object:b/open_point_in_time', authorized: true },
+        { privilege: 'mock-saved_object:c/open_point_in_time', authorized: true },
         { privilege: 'login:', authorized: true },
       ],
     },
   } as CheckPrivilegesResponse;
 
-  const expectedTypes = new Set([obj1.type]);
-  const expectedSpaces = new Set([namespace]);
-  const expectedTypeMap = new Map().set('a', {
-    open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
-    ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-  });
+  const multipleSpaces = [namespace, 'foo', 'bar'];
+  const multipleTypes = ['a', 'b', 'c'];
+
+  const expectedTypes = new Set(multipleTypes);
+  const expectedSpaces = new Set(multipleSpaces);
+  const expectedTypeMap = new Map()
+    .set('a', {
+      open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('b', {
+      open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('c', {
+      open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    });
 
   test('throws an error when `namespaces` is empty', async () => {
     const { securityExtension, checkPrivileges } = setup();
@@ -3785,7 +3884,7 @@ describe(`#authorizeOpenPointInTime`, () => {
 
   test(`calls authorize methods with expected actions, types, spaces, and no enforce map`, async () => {
     const { securityExtension, checkPrivileges } = setup();
-    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
     await securityExtension.authorizeOpenPointInTime({
       namespaces: expectedSpaces,
@@ -3809,8 +3908,13 @@ describe(`#authorizeOpenPointInTime`, () => {
 
     expect(checkPrivileges).toHaveBeenCalledTimes(1);
     expect(checkPrivileges).toHaveBeenCalledWith(
-      [`mock-saved_object:${obj1.type}/${actionString}`, 'login:'],
-      [...expectedSpaces]
+      [
+        `mock-saved_object:a/${actionString}`,
+        `mock-saved_object:b/${actionString}`,
+        `mock-saved_object:c/${actionString}`,
+        'login:',
+      ],
+      multipleSpaces
     );
 
     expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
@@ -3861,8 +3965,8 @@ describe(`#authorizeOpenPointInTime`, () => {
     checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
     await securityExtension.authorizeOpenPointInTime({
-      namespaces: expectedSpaces,
-      types: expectedTypes,
+      namespaces: new Set(multipleSpaces),
+      types: new Set(multipleTypes),
     });
 
     expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, as open PIT calls the addAudit method directly
@@ -3880,6 +3984,8 @@ describe(`#authorizeOpenPointInTime`, () => {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
         saved_object: undefined,
+        unauthorized_spaces: undefined,
+        unauthorized_types: undefined,
       },
       message: `User is opening point-in-time saved objects`,
     });
@@ -3922,6 +4028,8 @@ describe(`#authorizeOpenPointInTime`, () => {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
         saved_object: undefined,
+        unauthorized_spaces: multipleSpaces,
+        unauthorized_types: multipleTypes,
       },
       message: `Failed attempt to open point-in-time saved objects`,
     });
@@ -4324,6 +4432,8 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User has collected references and spaces of ${obj.type} [id=${obj.id}]`,
@@ -4385,6 +4495,8 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: undefined,
         },
         message: `Failed attempt to collect references and spaces of saved objects`,
@@ -4641,6 +4753,13 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       ['login:']: { authorizedSpaces: ['x', 'foo'] },
     });
 
+  const auditObjects = objects.map((obj) => {
+    return {
+      type: obj.saved_object.type,
+      id: obj.saved_object.id,
+    };
+  });
+
   test('returns empty array when no objects are provided`', async () => {
     const { securityExtension } = setup();
     const emptyObjects: Array<SavedObjectsResolveResponse<unknown> | BulkResolveError> = [];
@@ -4680,6 +4799,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       spaces: expectedSpaces,
       enforceMap: expectedEnforceMap,
       auditOptions: {
+        objects: auditObjects,
         useSuccessOutcome: true,
       },
     });
@@ -4707,7 +4827,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       action: SecurityAction.INTERNAL_BULK_RESOLVE,
       typesAndSpaces: expectedEnforceMap,
       typeMap: partiallyAuthorizedTypeMap,
-      auditOptions: { useSuccessOutcome: true },
+      auditOptions: { objects: auditObjects, useSuccessOutcome: true },
     });
   });
 
@@ -4725,7 +4845,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       action: SecurityAction.INTERNAL_BULK_RESOLVE,
       typesAndSpaces: expectedEnforceMap,
       typeMap: fullyAuthorizedTypeMap,
-      auditOptions: { useSuccessOutcome: true },
+      auditOptions: { objects: auditObjects, useSuccessOutcome: true },
     });
     expect(result).toEqual(objects);
   });
@@ -4754,33 +4874,46 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
     expect(auditHelperSpy).toHaveBeenCalledTimes(1);
     expect(auditHelperSpy).toHaveBeenCalledWith({
       action: 'saved_object_resolve',
-      objects: undefined,
-      useSuccessOutcome: true,
-    });
-    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
-    expect(addAuditEventSpy).toHaveBeenCalledWith({
-      action: 'saved_object_resolve',
       addToSpaces: undefined,
       deleteFromSpaces: undefined,
-      error: undefined,
-      outcome: 'success',
+      objects: auditObjects,
+      useSuccessOutcome: true,
     });
-    expect(auditLogger.log).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledWith({
-      error: undefined,
-      event: {
-        action: AuditAction.RESOLVE,
-        category: ['database'],
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(auditObjects.length);
+    let i = 1;
+    for (const auditObj of auditObjects) {
+      expect(addAuditEventSpy).toHaveBeenNthCalledWith(i++, {
+        action: 'saved_object_resolve',
+        addToSpaces: undefined,
+        deleteFromSpaces: undefined,
+        unauthorizedSpaces: undefined,
+        unauthorizedTypes: undefined,
+        error: undefined,
         outcome: 'success',
-        type: ['access'],
-      },
-      kibana: {
-        add_to_spaces: undefined,
-        delete_from_spaces: undefined,
-        saved_object: undefined,
-      },
-      message: `User has resolved saved objects`,
-    });
+        savedObject: auditObj,
+      });
+    }
+    expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
+    i = 1;
+    for (const auditObj of auditObjects) {
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+        error: undefined,
+        event: {
+          action: AuditAction.RESOLVE,
+          category: ['database'],
+          outcome: 'success',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
+          saved_object: auditObj,
+        },
+        message: `User has resolved ${auditObj.type} [id=${auditObj.id}]`,
+      });
+    }
   });
 
   test(`throws when unauthorized`, async () => {
@@ -4823,26 +4956,31 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
     );
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
 
-    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledWith({
-      error: {
-        code: 'Error',
-        message: `Unable to bulk_get ${resolveObj1.saved_object.type},${resolveObj2.saved_object.type}`,
-      },
-      event: {
-        action: AuditAction.RESOLVE,
-        category: ['database'],
-        outcome: 'failure',
-        type: ['access'],
-      },
-      kibana: {
-        add_to_spaces: undefined,
-        delete_from_spaces: undefined,
-        saved_object: undefined,
-      },
-      message: `Failed attempt to resolve saved objects`,
-    });
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+    expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+    let i = 1;
+    for (const auditObj of auditObjects) {
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+        error: {
+          code: 'Error',
+          message: `Unable to bulk_get ${resolveObj1.saved_object.type},${resolveObj2.saved_object.type}`,
+        },
+        event: {
+          action: AuditAction.RESOLVE,
+          category: ['database'],
+          outcome: 'failure',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
+          saved_object: auditObj,
+        },
+        message: `Failed attempt to resolve ${auditObj.type} [id=${auditObj.id}]`,
+      });
+    }
   });
 });
 
@@ -5287,8 +5425,10 @@ describe('#authorizeUpdateSpaces', () => {
           type: ['change'],
         },
         kibana: {
-          add_to_spaces: undefined,
-          delete_from_spaces: undefined,
+          add_to_spaces: spacesToAdd,
+          delete_from_spaces: spacesToRemove,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj.type, id: obj.id },
         },
         message: `User is updating spaces of ${obj.type} [id=${obj.id}]`,
@@ -5358,6 +5498,8 @@ describe('#authorizeUpdateSpaces', () => {
         kibana: {
           add_to_spaces: spacesToAdd,
           delete_from_spaces: spacesToRemove,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj.type, id: obj.id },
         },
         message: `Failed attempt to update spaces of ${obj.type} [id=${obj.id}]`,
@@ -5558,6 +5700,8 @@ describe('find', () => {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
           saved_object: undefined,
+          unauthorized_spaces: [namespace],
+          unauthorized_types: [obj1.type],
         },
         message: `Failed attempt to access saved objects`,
       });
@@ -5712,6 +5856,8 @@ describe('find', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User has accessed ${obj.type} [id=${obj.id}]`,
@@ -5743,6 +5889,8 @@ describe('find', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User has accessed ${obj.type} [id=${obj.id}]`,
@@ -5957,6 +6105,8 @@ describe('#authorizeDisableLegacyUrlAliases', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: 'legacy-url-alias', id: legacyObjectId },
         },
         message: `User is updating legacy-url-alias [id=${legacyObjectId}]`,
@@ -6010,6 +6160,8 @@ describe('#authorizeDisableLegacyUrlAliases', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: 'legacy-url-alias', id: legacyObjectId },
         },
         message: `Failed attempt to update legacy-url-alias [id=${legacyObjectId}]`,
@@ -6064,25 +6216,39 @@ describe(`#auditObjectsForSpaceDeletion`, () => {
     expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, the addAudit method is called directly
     expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length - 1);
     expect(auditLogger.log).toHaveBeenCalledTimes(objects.length - 1);
-    const i = 0;
-    for (const obj of objects) {
-      if (i === 0) continue; // The first object namespaces includes '*', so there will not be an audit for it
 
-      expect(auditLogger.log).toHaveBeenNthCalledWith(i, {
-        error: undefined,
-        event: {
-          action: AuditAction.UPDATE_OBJECTS_SPACES,
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['change'],
-        },
-        kibana: {
-          add_to_spaces: undefined,
-          delete_from_spaces: obj.namespaces!.length > 1 ? obj.namespaces : undefined,
-          saved_object: undefined,
-        },
-        message: `User is updating spaces of dashboard [id=${obj.id}]`,
-      });
-    }
+    // The first object's namespaces includes '*', so there will not be an audit for it
+
+    // The second object only exists in the space we're deleting, so it is audited as a delete
+    expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+      error: undefined,
+      event: {
+        action: AuditAction.DELETE,
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['deletion'],
+      },
+      kibana: {
+        delete_from_spaces: undefined,
+        saved_object: { type: objects[1].type, id: objects[1].id },
+      },
+      message: `User is deleting dashboard [id=${objects[1].id}]`,
+    });
+
+    // The third object exists in spaces other than what we're deleting, so it is audited as a change
+    expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+      error: undefined,
+      event: {
+        action: AuditAction.UPDATE_OBJECTS_SPACES,
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['change'],
+      },
+      kibana: {
+        delete_from_spaces: [spaceId],
+        saved_object: { type: objects[2].type, id: objects[2].id },
+      },
+      message: `User is updating spaces of dashboard [id=${objects[2].id}]`,
+    });
   });
 });

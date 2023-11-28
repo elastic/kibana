@@ -27,7 +27,6 @@ describe('Alert by grouping', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('progress bars renders correctly', () => {
@@ -64,15 +63,17 @@ describe('Alert by grouping', () => {
       ).not.toBeInTheDocument();
 
       parsedAlerts.forEach((alert, i) => {
-        expect(
-          container.querySelector(`[data-test-subj="progress-bar-${alert.key}"]`)
-        ).toBeInTheDocument();
-        expect(
-          container.querySelector(`[data-test-subj="progress-bar-${alert.key}"]`)?.textContent
-        ).toContain(parsedAlerts[i].label);
-        expect(
-          container.querySelector(`[data-test-subj="progress-bar-${alert.key}"]`)?.textContent
-        ).toContain(parsedAlerts[i].percentage.toString());
+        if (alert.key !== '-') {
+          expect(
+            container.querySelector(`[data-test-subj="progress-bar-${alert.key}"]`)
+          ).toBeInTheDocument();
+          expect(
+            container.querySelector(`[data-test-subj="progress-bar-${alert.key}"]`)?.textContent
+          ).toContain(parsedAlerts[i].label);
+          expect(
+            container.querySelector(`[data-test-subj="progress-bar-${alert.key}"]`)?.textContent
+          ).toContain(parsedAlerts[i].percentageLabel);
+        }
       });
     });
   });

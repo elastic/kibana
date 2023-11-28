@@ -5,18 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsState, VisualizationState } from '../state_management';
+import { Dispatch } from '@reduxjs/toolkit';
+import {
+  updateDatasourceState,
+  type DataViewsState,
+  type VisualizationState,
+  DatasourceState,
+} from '../state_management';
 import type {
+  AddUserMessages,
   Datasource,
+  FramePublicAPI,
   UserMessage,
   UserMessageFilters,
   UserMessagesDisplayLocationId,
-  VisualizationMap,
+  UserMessagesGetter,
+  Visualization,
 } from '../types';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
 
@@ -26,17 +35,17 @@ import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/sta
 export const getApplicationUserMessages = ({
   visualizationType,
   visualization,
-  visualizationMap,
+  visualizationState,
   activeDatasource,
   activeDatasourceState,
   dataViews,
   core,
 }: {
   visualizationType: string | null | undefined;
-  visualization: VisualizationState | undefined;
-  visualizationMap: VisualizationMap;
+  visualization: Visualization | undefined;
+  visualizationState: VisualizationState | undefined;
   activeDatasource: Datasource | null | undefined;
-  activeDatasourceState: { state: unknown } | null;
+  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
   dataViews: DataViewsState;
   core: CoreStart;
 }): UserMessage[] => {
@@ -46,8 +55,8 @@ export const getApplicationUserMessages = ({
     messages.push(getMissingVisTypeError());
   }
 
-  if (visualization?.activeId && !visualizationMap[visualization.activeId]) {
-    messages.push(getUnknownVisualizationTypeError(visualization.activeId));
+  if (visualizationState?.activeId && !visualization) {
+    messages.push(getUnknownVisualizationTypeError(visualizationState.activeId));
   }
 
   if (!activeDatasource) {
@@ -182,8 +191,8 @@ function getMissingIndexPatternsErrors(
 
 export const filterAndSortUserMessages = (
   userMessages: UserMessage[],
-  locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
-  { dimensionId, severity }: UserMessageFilters
+  locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[],
+  { dimensionId, severity }: UserMessageFilters = {}
 ) => {
   const locationIds = Array.isArray(locationId)
     ? locationId
@@ -198,11 +207,7 @@ export const filterAndSortUserMessages = (
           return false;
         }
 
-        if (location.id === 'dimensionButton' && location.dimensionId !== dimensionId) {
-          return false;
-        }
-
-        return true;
+        return !(location.id === 'dimensionButton' && location.dimensionId !== dimensionId);
       });
 
       if (!hasMatch) {
@@ -221,11 +226,126 @@ export const filterAndSortUserMessages = (
 };
 
 function bySeverity(a: UserMessage, b: UserMessage) {
-  if (a.severity === 'warning' && b.severity === 'error') {
-    return 1;
-  } else if (a.severity === 'error' && b.severity === 'warning') {
-    return -1;
-  } else {
+  if (a.severity === b.severity) {
     return 0;
   }
+  if (a.severity === 'error') {
+    return -1;
+  }
+  if (b.severity === 'error') {
+    return 1;
+  }
+  if (a.severity === 'warning') {
+    return -1;
+  }
+  return 1;
 }
+
+export const useApplicationUserMessages = ({
+  coreStart,
+  dispatch,
+  activeDatasourceId,
+  datasource,
+  datasourceState,
+  framePublicAPI,
+  visualizationType,
+  visualization,
+  visualizationState,
+}: {
+  activeDatasourceId: string | null;
+  coreStart: CoreStart;
+  datasource: Datasource | null;
+  datasourceState: DatasourceState | null;
+  dispatch: Dispatch;
+  framePublicAPI: FramePublicAPI;
+  visualizationType: string | null;
+  visualizationState?: VisualizationState;
+  visualization?: Visualization;
+}) => {
+  const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
+  // these are messages managed from other parts of Lens
+  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
+    {}
+  );
+
+  useEffect(() => {
+    setUserMessages([
+      ...(datasourceState && datasourceState.state && datasource && activeDatasourceId
+        ? datasource.getUserMessages(datasourceState.state, {
+            frame: framePublicAPI,
+            setState: (newStateOrUpdater) => {
+              dispatch(
+                updateDatasourceState({
+                  newDatasourceState:
+                    typeof newStateOrUpdater === 'function'
+                      ? newStateOrUpdater(datasourceState.state)
+                      : newStateOrUpdater,
+                  datasourceId: activeDatasourceId,
+                })
+              );
+            },
+          })
+        : []),
+      ...(visualizationState?.activeId && visualizationState.state
+        ? visualization?.getUserMessages?.(visualizationState.state, {
+            frame: framePublicAPI,
+          }) ?? []
+        : []),
+      ...getApplicationUserMessages({
+        visualizationType,
+        visualization,
+        visualizationState,
+        activeDatasource: datasource,
+        activeDatasourceState: datasourceState,
+        core: coreStart,
+        dataViews: framePublicAPI.dataViews,
+      }),
+    ]);
+  }, [
+    activeDatasourceId,
+    datasource,
+    datasourceState,
+    dispatch,
+    framePublicAPI,
+    visualization,
+    visualizationState,
+    visualizationType,
+    coreStart,
+  ]);
+
+  const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
+    filterAndSortUserMessages(
+      [...userMessages, ...Object.values(additionalUserMessages)],
+      locationId,
+      filterArgs ?? {}
+    );
+
+  const addUserMessages: AddUserMessages = (messages) => {
+    const newMessageMap = {
+      ...additionalUserMessages,
+    };
+
+    const addedMessageIds: string[] = [];
+    messages.forEach((message) => {
+      if (!newMessageMap[message.uniqueId]) {
+        addedMessageIds.push(message.uniqueId);
+        newMessageMap[message.uniqueId] = message;
+      }
+    });
+
+    if (addedMessageIds.length) {
+      setAdditionalUserMessages(newMessageMap);
+    }
+
+    return () => {
+      const withMessagesRemoved = {
+        ...additionalUserMessages,
+      };
+
+      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+
+      setAdditionalUserMessages(withMessagesRemoved);
+    };
+  };
+  return { getUserMessages, addUserMessages };
+};

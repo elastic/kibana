@@ -10,6 +10,8 @@ import { Observable } from 'rxjs';
 import { ScopedHistory, Capabilities } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
+import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
+import { AppNavLinkStatus } from '@kbn/core/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
@@ -27,8 +29,14 @@ export interface DefinedSections {
   stack: ManagementSection;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ManagementStart {}
+export interface ManagementStart {
+  setIsSidebarEnabled: (enabled: boolean) => void;
+  setupCardsNavigation: ({
+    enabled,
+    hideLinksTo,
+    extendCardNavDefinitions,
+  }: NavigationCardsSubject) => void;
+}
 
 export interface ManagementSectionsStartPrivate {
   getSectionsEnabled: () => ManagementSection[];
@@ -76,4 +84,22 @@ export interface CreateManagementItemArgs {
   icon?: string; // URL to image file; fallback if no `euiIconType`
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
+}
+
+export interface NavigationCardsSubject extends Pick<CardsNavigationComponentProps, 'hideLinksTo'> {
+  enabled: boolean;
+  extendCardNavDefinitions?: CardsNavigationComponentProps['extendedCardNavigationDefinitions'];
+}
+
+export interface AppDependencies {
+  appBasePath: string;
+  kibanaVersion: string;
+  sections: ManagementSection[];
+  cardsNavigationConfig?: NavigationCardsSubject;
+}
+
+export interface ConfigSchema {
+  deeplinks: {
+    navLinkStatus: keyof typeof AppNavLinkStatus;
+  };
 }

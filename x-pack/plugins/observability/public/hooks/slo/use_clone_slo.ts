@@ -5,64 +5,82 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
-
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCloneSlo() {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const cloneSlo = useMutation<
+  return useMutation<
     CreateSLOResponse,
-    string,
-    { slo: CreateSLOInput; idToCopyFrom?: string },
-    { previousSloList: FindSLOResponse | undefined }
+    ServerError,
+    { slo: CreateSLOInput; originalSloId?: string },
+    { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
     ['cloneSlo'],
-    ({ slo }: { slo: CreateSLOInput; idToCopyFrom?: string }) => {
+    ({ slo }: { slo: CreateSLOInput; originalSloId?: string }) => {
       const body = JSON.stringify(slo);
       return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
     {
-      onMutate: async ({ slo, idToCopyFrom }) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['fetchSloList']);
+      onMutate: async ({ slo, originalSloId }) => {
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        const latestFetchSloListRequest = (
-          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
-        ).at(0);
+        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
+          queryKey: sloKeys.lists(),
+          exact: false,
+        });
+        const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
-        const [queryKey, data] = latestFetchSloListRequest || [];
-
-        const sloUsedToClone = data?.results.find((el) => el.id === idToCopyFrom);
-
+        const originalSlo = previousData?.results?.find((el) => el.id === originalSloId);
         const optimisticUpdate = {
-          ...data,
-          results: [...(data?.results || []), { ...sloUsedToClone, name: slo.name }],
-          total: data?.total && data.total + 1,
+          page: previousData?.page ?? 1,
+          perPage: previousData?.perPage ?? 25,
+          total: previousData?.total ? previousData.total + 1 : 1,
+          results: [
+            ...(previousData?.results ?? []),
+            { ...originalSlo, name: slo.name, id: uuidv4(), summary: undefined },
+          ],
         };
 
-        // Optimistically update to the new value
         if (queryKey) {
           queryClient.setQueryData(queryKey, optimisticUpdate);
         }
 
-        // Return a context object with the snapshotted value
-        return { previousSloList: data };
+        return { queryKey, previousData };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, _slo, context) => {
-        if (context?.previousSloList) {
-          queryClient.setQueryData(['fetchSloList'], context.previousSloList);
+      onError: (error, { slo }, context) => {
+        if (context?.previousData && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousData);
         }
+
+        toasts.addError(new Error(error.body?.message ?? error.message), {
+          title: i18n.translate('xpack.observability.slo.clone.errorNotification', {
+            defaultMessage: 'Failed to clone {name}',
+            values: { name: slo.name },
+          }),
+        });
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries(['fetchSloList']);
+      onSuccess: (_data, { slo }) => {
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.clone.successNotification', {
+            defaultMessage: 'Successfully created {name}',
+            values: { name: slo.name },
+          })
+        );
       },
     }
   );
-
-  return cloneSlo;
 }

@@ -31,6 +31,11 @@
     "@kbn/utils",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/std",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-server",
+    "@kbn/analytics-collection-utils",
   ],
   "exclude": [
     "target/**/*",

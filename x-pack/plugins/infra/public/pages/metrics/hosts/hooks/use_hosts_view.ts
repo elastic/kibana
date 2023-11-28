@@ -12,52 +12,78 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import createContainer from 'constate';
 import { BoolQuery } from '@kbn/es-query';
-import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { useSnapshot, type UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { StringDateRangeTimestamp } from './use_unified_search_url_state';
+import {
+  GetInfraMetricsRequestBodyPayload,
+  GetInfraMetricsResponsePayload,
+  InfraAssetMetricType,
+} from '../../../../../common/http_api';
+import { StringDateRange } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
+const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
+  { type: 'cpu' },
+  { type: 'diskSpaceUsage' },
+  { type: 'memory' },
+  { type: 'memoryFree' },
+  { type: 'normalizedLoad1m' },
   { type: 'rx' },
   { type: 'tx' },
-  { type: 'memory' },
-  { type: 'cpu' },
-  { type: 'diskLatency' },
-  { type: 'memoryTotal' },
 ];
+
+const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const {
+    services: { http, data },
+  } = useKibanaContextForPlugin();
+  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const abortCtrlRef = useRef(new AbortController());
+  const [searchSessionId, setSearchSessionId] = useState(() => data.search.session.start());
 
   const baseRequest = useMemo(
     () =>
-      createSnapshotRequest({
-        dateRange: getDateRangeAsTimestamp(),
+      createInfraMetricsRequest({
+        dateRange: parsedDateRange,
         esQuery: buildQuery(),
         sourceId,
+        limit: searchCriteria.limit,
       }),
-    [buildQuery, getDateRangeAsTimestamp, sourceId]
+    [buildQuery, parsedDateRange, sourceId, searchCriteria.limit]
   );
 
-  // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
-  // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
-  // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
-  const {
-    loading,
-    error,
-    nodes: hostNodes,
-  } = useSnapshot({ ...baseRequest, metrics: HOST_TABLE_METRICS });
+  const [state, refetch] = useAsyncFn(
+    () => {
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
+
+      return http.post<GetInfraMetricsResponsePayload>(`${BASE_INFRA_METRICS_PATH}`, {
+        signal: abortCtrlRef.current.signal,
+        body: JSON.stringify(baseRequest),
+      });
+    },
+    [baseRequest, http],
+    { loading: true }
+  );
+
+  useEffect(() => {
+    refetch();
+    setSearchSessionId(data.search.session.start());
+  }, [data.search.session, refetch]);
+
+  const { value, error, loading } = state;
 
   return {
-    baseRequest,
     loading,
     error,
-    hostNodes,
+    hostNodes: value?.nodes ?? [],
+    searchSessionId,
   };
 };
 
@@ -67,30 +93,25 @@ export const [HostsViewProvider, useHostsViewContext] = HostsView;
 /**
  * Helpers
  */
-const createSnapshotRequest = ({
+
+const createInfraMetricsRequest = ({
   esQuery,
   sourceId,
   dateRange,
+  limit,
 }: {
-  esQuery: { bool: BoolQuery } | null;
+  esQuery: { bool: BoolQuery };
   sourceId: string;
-  dateRange: StringDateRangeTimestamp;
-}): UseSnapshotRequest => ({
-  filterQuery: esQuery ? JSON.stringify(esQuery) : null,
-  metrics: [],
-  groupBy: [],
-  nodeType: 'host',
-  sourceId,
-  currentTime: dateRange.to,
-  includeTimeseries: false,
-  sendRequestImmediately: true,
-  timerange: {
-    interval: '1m',
+  dateRange: StringDateRange;
+  limit: number;
+}): GetInfraMetricsRequestBodyPayload => ({
+  type: 'host',
+  query: esQuery,
+  range: {
     from: dateRange.from,
     to: dateRange.to,
-    ignoreLookback: true,
   },
-  // The user might want to click on the submit button without changing the filters
-  // This makes sure all child components will re-render.
-  requestTs: Date.now(),
+  metrics: HOST_TABLE_METRICS,
+  limit,
+  sourceId,
 });

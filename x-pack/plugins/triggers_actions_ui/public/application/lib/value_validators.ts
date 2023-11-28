@@ -7,7 +7,23 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { constant, get } from 'lodash';
-import { UserConfiguredActionConnector, IErrorObject, Rule } from '../../types';
+import { i18n } from '@kbn/i18n';
+import { UserConfiguredActionConnector, IErrorObject, Rule, RuleAction } from '../../types';
+
+const filterQueryRequiredError = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionTypeForm.error.requiredFilterQuery',
+  {
+    defaultMessage: 'A custom query is required.',
+  }
+);
+
+export const validateActionFilterQuery = (actionItem: RuleAction): string | null => {
+  const query = actionItem.alertsFilter?.query;
+  if (query && !query.kql) {
+    return filterQueryRequiredError;
+  }
+  return null;
+};
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {

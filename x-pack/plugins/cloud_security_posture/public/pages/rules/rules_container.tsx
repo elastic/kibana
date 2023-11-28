@@ -7,28 +7,23 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
+import { CspRuleTemplate } from '../../../common/schemas';
+import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
-import {
-  useFindCspRuleTemplates,
-  type RuleSavedObject,
-  type RulesQuery,
-  type RulesQueryResult,
-} from './use_csp_rules';
+import { useFindCspRuleTemplates, type RulesQuery, type RulesQueryResult } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
 
 interface RulesPageData {
-  rules_page: RuleSavedObject[];
-  all_rules: RuleSavedObject[];
-  rules_map: Map<string, RuleSavedObject>;
+  rules_page: CspRuleTemplate[];
+  all_rules: CspRuleTemplate[];
+  rules_map: Map<string, CspRuleTemplate>;
   total: number;
   error?: string;
   loading: boolean;
-  lastModified: string | null;
 }
 
 export type RulesState = RulesPageData & RulesQuery;
@@ -37,26 +32,21 @@ const getRulesPageData = (
   { status, data, error }: Pick<RulesQueryResult, 'data' | 'status' | 'error'>,
   query: RulesQuery
 ): RulesPageData => {
-  const rules = data?.savedObjects || [];
+  const rules = data?.items || ([] as CspRuleTemplate[]);
+
   const page = getPage(rules, query);
+
   return {
     loading: status === 'loading',
     error: error ? extractErrorMessage(error) : undefined,
     all_rules: rules,
-    rules_map: new Map(rules.map((rule) => [rule.id, rule])),
+    rules_map: new Map(rules.map((rule) => [rule.metadata.id, rule])),
     rules_page: page,
     total: data?.total || 0,
-    lastModified: getLastModified(rules) || null,
   };
 };
 
-const getLastModified = (data: RuleSavedObject[]): string | undefined =>
-  data
-    .map((v) => v.updatedAt)
-    .filter(isNonNullable)
-    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
-
-const getPage = (data: readonly RuleSavedObject[], { page, perPage }: RulesQuery) =>
+const getPage = (data: CspRuleTemplate[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
 
 const MAX_ITEMS_PER_PAGE = 10000;
@@ -68,7 +58,7 @@ export const RulesContainer = () => {
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: '',
+    section: undefined,
     search: '',
     page: 0,
     perPage: pageSize || 10,
@@ -76,7 +66,7 @@ export const RulesContainer = () => {
 
   const { data, status, error } = useFindCspRuleTemplates(
     {
-      filter: rulesQuery.filter,
+      section: rulesQuery.section,
       search: rulesQuery.search,
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
@@ -89,13 +79,33 @@ export const RulesContainer = () => {
     [data, error, status, rulesQuery]
   );
 
+  // We need to make this call again without the filters. this way the section list is always full
+  const allRules = useFindCspRuleTemplates(
+    {
+      page: 1,
+      perPage: MAX_ITEMS_PER_PAGE,
+    },
+    params.packagePolicyId
+  );
+
+  const sectionList = useMemo(
+    () => allRules.data?.items.map((rule) => rule.metadata.section),
+    [allRules.data]
+  );
+  const cleanedSectionList = [...new Set(sectionList)];
+
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
       <EuiPanel hasBorder={false} hasShadow={false}>
         <RulesTableHeader
+          onSectionChange={(value) =>
+            setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
+          }
+          sectionSelectOptions={cleanedSectionList}
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
-          searchValue={rulesQuery.search}
+          searchValue={rulesQuery.search || ''}
           totalRulesCount={rulesPageData.all_rules.length}
+          pageSize={rulesPageData.rules_page.length}
           isSearching={status === 'loading'}
         />
         <EuiSpacer />

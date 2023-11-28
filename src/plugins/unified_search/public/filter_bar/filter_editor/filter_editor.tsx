@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiFormRowProps,
   EuiIcon,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -22,6 +23,8 @@ import {
   EuiToolTip,
   EuiBadge,
   withEuiTheme,
+  EuiTextColor,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -30,6 +33,7 @@ import {
   buildCombinedFilter,
   buildCustomFilter,
   buildEmptyFilter,
+  FILTERS,
   filterToQueryDsl,
   getFilterParams,
   isCombinedFilter,
@@ -43,6 +47,7 @@ import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { cx } from '@emotion/css';
 import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -51,12 +56,17 @@ import {
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
-import { flattenFilters } from './lib/helpers';
+import {
+  MIDDLE_TRUNCATION_PROPS,
+  SINGLE_SELECTION_AS_TEXT_PROPS,
+  flattenFilters,
+} from './lib/helpers';
 import {
   filterBadgeStyle,
   filterPreviewLabelStyle,
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -100,9 +110,18 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filterEditor.queryDslLabel', {
       defaultMessage: 'Elasticsearch Query DSL',
     }),
+  getQueryDslDocsLinkLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.queryDslDocsLinkLabel', {
+      defaultMessage: 'Learn about Query DSL syntax',
+    }),
   getQueryDslAriaLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
       defaultMessage: 'Elasticsearch Query DSL editor',
+    }),
+  getSpatialFilterQueryDslHelpText: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.spatialFilterQueryDslHelpText', {
+      defaultMessage:
+        'Editing Elasticsearch Query DSL prevents filter geometry from displaying in map.',
     }),
 };
 
@@ -119,7 +138,10 @@ export interface FilterEditorComponentProps {
   onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
   onLocalFilterUpdate?: (filter: Filter | QueryDslFilter) => void;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   mode?: 'edit' | 'add';
+  suggestionsAbstraction?: SuggestionsAbstraction;
+  docLinks: DocLinksStart;
 }
 
 export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
@@ -140,7 +162,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       selectedDataView: dataView,
       customLabel: props.filter.meta.alias || '',
       queryDsl: this.parseFilterToQueryDsl(props.filter),
-      isCustomEditorOpen: this.isUnknownFilterType(),
+      isCustomEditorOpen: this.isUnknownFilterType() || !!this.props.filter?.meta.isMultiIndex,
       localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
     };
   }
@@ -160,6 +182,23 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   public render() {
+    const toggleEditorFlexItem = this.props.filter?.meta.isMultiIndex ? null : (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty size="xs" data-test-subj="editQueryDSL" onClick={this.toggleCustomEditor}>
+          {this.state.isCustomEditorOpen ? (
+            <FormattedMessage
+              id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
+              defaultMessage="Edit filter values"
+            />
+          ) : (
+            <FormattedMessage
+              id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
+              defaultMessage="Edit as Query DSL"
+            />
+          )}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    );
     return (
       <div>
         <EuiPopoverTitle paddingSize="s">
@@ -173,25 +212,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               </EuiBadge>
             </EuiFlexGroup>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="editQueryDSL"
-                onClick={this.toggleCustomEditor}
-              >
-                {this.state.isCustomEditorOpen ? (
-                  <FormattedMessage
-                    id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
-                    defaultMessage="Edit filter values"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
-                    defaultMessage="Edit as Query DSL"
-                  />
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {toggleEditorFlexItem}
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
@@ -255,6 +276,11 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private renderIndexPatternInput() {
+    if (this.props.filter?.meta.isMultiIndex) {
+      // Don't render index pattern selector if filter supports multiple index patterns
+      return null;
+    }
+
     if (
       this.props.indexPatterns.length <= 1 &&
       this.props.indexPatterns.find(
@@ -266,7 +292,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
        * and if the index pattern the filter was LOADED with is in the indexPatterns list.
        **/
 
-      return '';
+      return null;
     }
     const { selectedDataView } = this.state;
     return (
@@ -279,9 +305,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             selectedOptions={selectedDataView ? [selectedDataView] : []}
             getLabel={(indexPattern) => indexPattern.getName()}
             onChange={this.onIndexPatternChange}
-            singleSelection={{ asPlainText: true }}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
+            singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+            truncationProps={MIDDLE_TRUNCATION_PROPS}
           />
         </EuiFormRow>
         <EuiSpacer size="s" />
@@ -323,9 +350,11 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             <FiltersBuilder
               filters={[localFilter]}
               timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+              filtersForSuggestions={this.props.filtersForSuggestions}
               dataView={selectedDataView!}
               onChange={this.onLocalFilterChange}
               disabled={!selectedDataView}
+              suggestionsAbstraction={this.props.suggestionsAbstraction}
             />
           </EuiToolTip>
         </div>
@@ -347,7 +376,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               </strong>
             }
           >
-            <EuiText size="xs" data-test-subj="filter-preview">
+            <EuiText size="xs" data-test-subj="filter-preview" css={{ overflowWrap: 'break-word' }}>
               <FilterBadgeGroup
                 filters={[localFilter]}
                 dataViews={this.props.indexPatterns}
@@ -362,8 +391,24 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private renderCustomEditor() {
+    let helpText: EuiFormRowProps['helpText'] = '';
+
+    if (this.props.docLinks) {
+      helpText = (
+        <EuiLink href={this.props.docLinks.links.query.queryDsl} target="_blank">
+          {strings.getQueryDslDocsLinkLabel()}
+        </EuiLink>
+      );
+    }
+
+    if (this.props.filter?.meta.type === FILTERS.SPATIAL_FILTER) {
+      helpText = (
+        <EuiTextColor color="warning">{strings.getSpatialFilterQueryDslHelpText()}</EuiTextColor>
+      );
+    }
+
     return (
-      <EuiFormRow fullWidth label={strings.getQueryDslLabel()}>
+      <EuiFormRow fullWidth label={strings.getQueryDslLabel()} helpText={helpText}>
         <CodeEditor
           languageId={XJsonLang.ID}
           width="100%"
@@ -493,7 +538,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     const alias = customLabel || null;
     const {
       $state,
-      meta: { disabled = false, negate = false },
+      meta: { disabled = false },
     } = this.props.filter;
 
     if (!$state || !$state.store || !selectedDataView) {
@@ -516,12 +561,14 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         },
       };
     } else {
+      // for the combined filters created on the builder, negate should always be false,
+      // the global negation changes only from the exclude/inclue results panel item
       newFilter = buildCombinedFilter(
         BooleanRelation.AND,
         updatedFilters,
         selectedDataView,
         disabled,
-        negate,
+        false,
         alias,
         $state.store
       );
@@ -540,7 +587,18 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     if (isCustomEditorOpen) {
-      const filter = this.getFilterFromQueryDsl(queryDsl);
+      const filter =
+        this.props.filter?.meta.type === FILTERS.CUSTOM ||
+        // only convert non-custom filters to custom when DSL changes
+        queryDsl !== this.parseFilterToQueryDsl(this.props.filter)
+          ? this.getFilterFromQueryDsl(queryDsl)
+          : {
+              ...this.props.filter,
+              meta: {
+                ...(this.props.filter.meta ?? {}),
+                alias: customLabel || null,
+              },
+            };
       if (!filter) {
         return;
       }

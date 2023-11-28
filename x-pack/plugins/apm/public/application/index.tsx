@@ -7,7 +7,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'react-vis/dist/style.css';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
   AppMountParameters,
@@ -16,7 +15,7 @@ import {
 } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ConfigSchema } from '..';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps, ApmServices } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { setHelpExtension } from '../set_help_extension';
 import { setReadonlyBadge } from '../update_badge';
@@ -25,7 +24,6 @@ import { ApmAppRoot } from '../components/routing/app_root';
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
-
 export const renderApp = ({
   coreStart,
   pluginsSetup,
@@ -33,6 +31,7 @@ export const renderApp = ({
   config,
   pluginsStart,
   observabilityRuleTypeRegistry,
+  apmServices,
 }: {
   coreStart: CoreStart;
   pluginsSetup: ApmPluginSetupDeps;
@@ -40,6 +39,7 @@ export const renderApp = ({
   config: ConfigSchema;
   pluginsStart: ApmPluginStartDeps;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  apmServices: ApmServices;
 }) => {
   const { element, theme$ } = appMountParameters;
   const apmPluginContextValue = {
@@ -50,10 +50,14 @@ export const renderApp = ({
     data: pluginsStart.data,
     inspector: pluginsStart.inspector,
     observability: pluginsStart.observability,
+    observabilityShared: pluginsStart.observabilityShared,
     observabilityRuleTypeRegistry,
     dataViews: pluginsStart.dataViews,
     unifiedSearch: pluginsStart.unifiedSearch,
     lens: pluginsStart.lens,
+    uiActions: pluginsStart.uiActions,
+    observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
+    share: pluginsSetup.share,
   };
 
   // render APM feedback link in global help menu
@@ -77,6 +81,7 @@ export const renderApp = ({
       <ApmAppRoot
         apmPluginContextValue={apmPluginContextValue}
         pluginsStart={pluginsStart}
+        apmServices={apmServices}
       />
     </KibanaThemeProvider>,
     element

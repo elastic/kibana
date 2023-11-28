@@ -10,8 +10,11 @@ import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
+import { LicenseType } from '../../../../../types';
+
 import {
   Append,
+  Attachment,
   Bytes,
   Circle,
   CommunityId,
@@ -26,6 +29,7 @@ import {
   Fail,
   Fingerprint,
   Foreach,
+  GeoGrid,
   GeoIP,
   Grok,
   Gsub,
@@ -52,6 +56,7 @@ import {
   UserAgent,
   FormFieldsComponent,
   UriParts,
+  Reroute,
 } from '../processor_form/processors';
 
 interface FieldDescriptor {
@@ -69,6 +74,10 @@ interface FieldDescriptor {
    * Default
    */
   getDefaultDescription: (processorOptions: Record<string, any>) => string | undefined;
+  /**
+   * Some processors are only available for certain license types
+   */
+  forLicenseAtLeast?: LicenseType;
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
@@ -90,6 +99,23 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
           value,
+        },
+      }),
+  },
+  attachment: {
+    FieldsComponent: Attachment,
+    docLinkPath: '/attachment.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.attachment', {
+      defaultMessage: 'Attachment',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.attachment', {
+      defaultMessage: 'Extract file attachments in common formats (such as PPT, XLS, and PDF).',
+    }),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.attachment', {
+        defaultMessage: 'Extracts attachment from "{field}"',
+        values: {
+          field,
         },
       }),
   },
@@ -368,6 +394,24 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         },
       }),
   },
+  geo_grid: {
+    FieldsComponent: GeoGrid,
+    docLinkPath: '/ingest-geo-grid-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.geogrid', {
+      defaultMessage: 'GeoGrid',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.geogrid', {
+      defaultMessage:
+        'Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape.',
+    }),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.geogrid', {
+        defaultMessage: 'Adds geo-grid data to documents based on the value of "{field}"',
+        values: {
+          field,
+        },
+      }),
+  },
   geoip: {
     FieldsComponent: GeoIP,
     docLinkPath: '/geoip-processor.html',
@@ -580,6 +624,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   },
   redact: {
     FieldsComponent: Redact,
+    forLicenseAtLeast: 'platinum',
     docLinkPath: '/redact-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.redact', {
       defaultMessage: 'Redact',
@@ -651,6 +696,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           field,
           target_field: targetField,
         },
+      }),
+  },
+  reroute: {
+    FieldsComponent: Reroute,
+    docLinkPath: '/reroute-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.reroute', {
+      defaultMessage: 'Reroute',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.reroute', {
+      defaultMessage: 'Routes a document to another target index or data stream.',
+    }),
+    getDefaultDescription: ({ field, target_field: targetField }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.reroute', {
+        defaultMessage: 'Routes a document to another target index or data stream',
       }),
   },
   script: {

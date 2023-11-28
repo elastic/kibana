@@ -1,0 +1,2 @@
+type: boolean
+description: Indicates whether you want to run the rule on an interval basis after it is created.

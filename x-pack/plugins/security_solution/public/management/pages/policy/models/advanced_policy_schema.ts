@@ -190,6 +190,26 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -389,6 +409,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.harden.self_protect',
       {
         defaultMessage: 'Enables self-protection on macOS. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
       }
     ),
   },
@@ -1067,6 +1097,364 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'The list of environment variables to capture (up to five), separated by commas.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.disable_fd_kprobes',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.disable_fd_kprobes',
+      {
+        defaultMessage:
+          'When only process events are being collected, this option will disable file descriptor tracking probes. This can be used to reduce Endpoint processing at the expense of missing fchdir based working directory changes. This only applies if the capture_mode is kprobe or if auto resolves tracefs (kprobe) probes. ebpf based event collection ignores this setting. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.emit_in_events',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.emit_in_events',
+      {
+        defaultMessage:
+          'If set, callstacks will be included in regular events where they are collected. Otherwise, they are only included in events that trigger behavioral protection rules. Note that setting this may significantly increase data volumes. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.process',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.process',
+      {
+        defaultMessage: 'Collect callstacks during process events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.image_load',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.image_load',
+      {
+        defaultMessage: 'Collect callstacks during image/library load events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.file',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.file',
+      {
+        defaultMessage: 'Collect callstacks during file events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.registry',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.registry',
+      {
+        defaultMessage: 'Collect callstacks during registry events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading global artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.user.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading user artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.user.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading global artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.user.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading user artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.user.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading global artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.user.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading user artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.user.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
+      {
+        defaultMessage:
+          'Controls whether ETW API events are enabled. Set to false to disable ETW event collection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api_disabled',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_disabled',
+      {
+        defaultMessage: 'A comma separated list of API names to selectively disable.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api_verbose',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_verbose',
+      {
+        defaultMessage:
+          'Controls whether high volume API events are forwarded. Event filtering is recommended if enabled. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.rollback.self_healing.registry_enabled',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.registry_enabled',
+      {
+        defaultMessage:
+          'Enables self-healing of registry based malware artifacts. Requires rollback.self_healing.enabled to also be enabled. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.include_network_images',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.include_network_images',
+      {
+        defaultMessage:
+          'Should executables and DLLs on network shares be parsed for call stack symbols?  This may cause Endpoint to hang on some networks. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.ppl.harden_images',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.ppl.harden_images',
+      {
+        defaultMessage:
+          'Mitigate attacks like PPLFault by preventing Protected Process Light (PPL) processes from loading DLLs over the network. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.ppl.harden_am_images',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.ppl.harden_am_images',
+      {
+        defaultMessage:
+          'Apply the windows.advanced.kernel.ppl.harden_images mitigation to Anti-Malware PPL as well. Disable this if third-party Anti-Malware is blocked from loading DLLs over the network. If this happens, there will be Event ID 8 events in the "Microsoft-Windows-Security-Mitigations/Kernel Mode" event log. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.malware.networkshare',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.networkshare',
+      {
+        defaultMessage:
+          'Controls whether malware protection is applied to network drives. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.check_debug_registers',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.check_debug_registers',
+      {
+        defaultMessage:
+          'Check debug registers inline to detect the use of hardware breakpoints. Malware may use hardware breakpoints to forge benign-looking call stacks. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.kernel.fileaccess',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'A value of false overrides other config settings that would enable kernel fileaccess events. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.image_load',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
+      {
+        defaultMessage:
+          'A value of false overrides other config settings that would enable kernel image load events. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.image_load.capture',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.image_load.collect',
+      {
+        defaultMessage:
+          'Collect and send image load events to Elasticsearch. Take caution, this can be a very high data volume. Adding an event filter to drop unwanted events is strongly recommended. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
       }
     ),
   },

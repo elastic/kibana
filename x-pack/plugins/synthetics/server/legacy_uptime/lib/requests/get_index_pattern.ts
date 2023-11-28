@@ -6,8 +6,8 @@
  */
 
 import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import { UptimeEsClient } from '../lib';
-import { savedObjectsAdapter } from '../saved_objects/saved_objects';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
+import { UptimeEsClient } from '../../../lib';
 
 export interface IndexPatternTitleAndFields {
   title: string;
@@ -21,28 +21,21 @@ export const getUptimeIndexPattern = async ({
 }): Promise<IndexPatternTitleAndFields | undefined> => {
   const indexPatternsFetcher = new IndexPatternsFetcher(uptimeEsClient.baseESClient);
 
-  const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-    uptimeEsClient.getSavedObjectsClient()!
-  );
-  // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
-  // and since `getFieldsForWildcard` will throw if the specified indices don't exist,
-  // we have to catch errors here to avoid all endpoints returning 500 for users without APM data
-  // (would be a bad first time experience)
   try {
     const { fields } = await indexPatternsFetcher.getFieldsForWildcard({
-      pattern: dynamicSettings.heartbeatIndices,
+      pattern: SYNTHETICS_INDEX_PATTERN,
     });
 
     return {
       fields,
-      title: dynamicSettings.heartbeatIndices,
+      title: SYNTHETICS_INDEX_PATTERN,
     };
   } catch (e) {
     const notExists = e.output?.statusCode === 404;
     if (notExists) {
       // eslint-disable-next-line no-console
       console.error(
-        `Could not get dynamic index pattern because indices "${dynamicSettings.heartbeatIndices}" don't exist`
+        `Could not get dynamic index pattern because indices "${SYNTHETICS_INDEX_PATTERN}" don't exist`
       );
       return;
     }

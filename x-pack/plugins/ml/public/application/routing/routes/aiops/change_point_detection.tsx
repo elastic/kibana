@@ -8,15 +8,13 @@
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { parse } from 'query-string';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute } from '../..';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { createPath, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { checkBasicLicense } from '../../../license';
-import { cacheDataViewsContract } from '../../../util/index_utils';
+import { createPath, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { ChangePointDetectionPage as Page } from '../../../aiops';
 
 export const changePointDetectionRouteFactory = (
@@ -28,7 +26,7 @@ export const changePointDetectionRouteFactory = (
   title: i18n.translate('xpack.ml.aiops.changePointDetection.docTitle', {
     defaultMessage: 'Change point detection',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION', navigateToPath, basePath),
@@ -41,23 +39,14 @@ export const changePointDetectionRouteFactory = (
   disabled: !CHANGE_POINT_DETECTION_ENABLED,
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(
-    index,
-    savedSearchId,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      checkBasicLicense,
-      cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-    }
-  );
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('full', ['canUseAiops']);
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

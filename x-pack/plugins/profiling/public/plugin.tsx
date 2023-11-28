@@ -13,16 +13,20 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { NavigationSection } from '@kbn/observability-plugin/public';
-import { Location } from 'history';
+import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
+import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
+import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
+import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
+
+export type ProfilingPluginSetup = void;
+export type ProfilingPluginStart = void;
 
 export class ProfilingPlugin implements Plugin {
   public setup(coreSetup: CoreSetup, pluginsSetup: ProfilingPluginPublicSetupDeps) {
     // Register an application into the side navigation menu
-
     const links = [
       {
         id: 'stacktraces',
@@ -50,31 +54,35 @@ export class ProfilingPlugin implements Plugin {
     const kuerySubject = new BehaviorSubject<string>('');
 
     const section$ = combineLatest([from(coreSetup.getStartServices()), kuerySubject]).pipe(
-      map(([_, kuery]) => {
-        const sections: NavigationSection[] = [
-          {
-            label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
-              defaultMessage: 'Universal Profiling',
-            }),
-            isBetaFeature: true,
-            entries: links.map((link) => {
-              return {
-                app: 'profiling',
-                label: link.title,
-                path: `${link.path}?kuery=${kuery ?? ''}`,
-                matchPath: (path) => {
-                  return path.startsWith(link.path);
-                },
-              };
-            }),
-            sortKey: 700,
-          },
-        ];
-        return sections;
+      map(([[coreStart], kuery]) => {
+        if (coreStart.application.capabilities.profiling.show) {
+          const sections: NavigationSection[] = [
+            {
+              label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
+                defaultMessage: 'Universal Profiling',
+              }),
+              entries: links.map((link) => {
+                return {
+                  app: 'profiling',
+                  label: link.title,
+                  path: `${link.path}?kuery=${kuery ?? ''}`,
+                  matchPath: (path) => {
+                    return path.startsWith(link.path);
+                  },
+                };
+              }),
+              sortKey: 700,
+            },
+          ];
+          return sections;
+        }
+        return [];
       })
     );
 
-    pluginsSetup.observability.navigation.registerSections(section$);
+    pluginsSetup.observabilityShared.navigation.registerSections(section$);
+
+    const profilingFetchServices = getServices();
 
     coreSetup.application.register({
       id: 'profiling',
@@ -90,7 +98,6 @@ export class ProfilingPlugin implements Plugin {
           unknown
         ];
 
-        const profilingFetchServices = getServices();
         const { renderApp } = await import('./app');
 
         function pushKueryToSubject(location: Location) {
@@ -122,6 +129,26 @@ export class ProfilingPlugin implements Plugin {
         };
       },
     });
+
+    const getProfilingEmbeddableDependencies =
+      async (): Promise<ProfilingEmbeddablesDependencies> => {
+        const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
+          CoreStart,
+          ProfilingPluginPublicStartDeps,
+          unknown
+        ];
+        return {
+          coreStart,
+          coreSetup,
+          pluginsStart,
+          pluginsSetup,
+          profilingFetchServices,
+        };
+      };
+
+    registerEmbeddables(pluginsSetup.embeddable, getProfilingEmbeddableDependencies);
+
+    return {};
   }
 
   public start(core: CoreStart) {

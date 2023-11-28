@@ -69,7 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });
 
       // post new job
-      const { status } = await postJobJSON(`/api/reporting/generate/png`, {
+      const { status } = await postJobJSON(`/api/reporting/generate/pngV2`, {
         jobParams: JOB_PARAMS_ECOM_MARKDOWN,
       });
       expect(status).to.be(200);

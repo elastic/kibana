@@ -7,7 +7,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Query } from '@kbn/es-query';
-import type { DateRange } from '../../../../../../common';
+import type { DateRange } from '../../../../../../common/types';
 import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
 import type { IndexPattern } from '../../../../../types';
 import type { PersistedIndexPatternLayer } from '../../../types';
@@ -41,6 +41,7 @@ export interface FormulaPublicApi {
         id: string;
         params?: {
           decimals: number;
+          compact?: boolean;
         };
       };
     },

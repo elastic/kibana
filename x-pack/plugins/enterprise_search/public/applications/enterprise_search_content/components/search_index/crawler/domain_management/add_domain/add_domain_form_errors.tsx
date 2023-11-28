@@ -21,7 +21,7 @@ export const AddDomainFormErrors: React.FC = () => {
     return (
       <EuiCallOut
         color="danger"
-        iconType="alert"
+        iconType="warning"
         title={i18n.translate('xpack.enterpriseSearch.crawler.addDomainForm.errorsTitle', {
           defaultMessage: 'Something went wrong. Please address the errors and try again.',
         })}

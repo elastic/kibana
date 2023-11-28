@@ -17,9 +17,9 @@ import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
+import { FlyoutHeaderPanel } from '../flyout/header';
 import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
@@ -77,6 +77,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     timelineType,
     description,
     sessionViewConfig,
+    initialized,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -87,6 +88,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'timelineType',
         'description',
         'sessionViewConfig',
+        'initialized',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -95,7 +97,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const { timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
-    if (!savedObjectId) {
+    if (!savedObjectId && !initialized) {
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
@@ -190,28 +192,31 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         ref={containerElement}
       >
         <TimelineSavingProgress timelineId={timelineId} />
-        {timelineType === TimelineType.template && (
-          <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
-        )}
-        {resolveConflictComponent}
-        <HideShowContainer
-          $isVisible={!timelineFullScreen}
-          data-test-subj="timeline-hide-show-container"
-        >
-          <FlyoutHeaderPanel timelineId={timelineId} />
-          <FlyoutHeader timelineId={timelineId} />
-        </HideShowContainer>
+        <div className="timeline-body" data-test-subj="timeline-body">
+          {timelineType === TimelineType.template && (
+            <TimelineTemplateBadge className="timeline-template-badge">
+              {i18n.TIMELINE_TEMPLATE}
+            </TimelineTemplateBadge>
+          )}
+          {resolveConflictComponent}
+          <HideShowContainer
+            $isVisible={!timelineFullScreen}
+            data-test-subj="timeline-hide-show-container"
+          >
+            <FlyoutHeaderPanel timelineId={timelineId} />
+          </HideShowContainer>
 
-        <TabsContent
-          graphEventId={graphEventId}
-          sessionViewConfig={sessionViewConfig}
-          renderCellValue={renderCellValue}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-          timelineType={timelineType}
-          timelineDescription={description}
-          timelineFullScreen={timelineFullScreen}
-        />
+          <TabsContent
+            graphEventId={graphEventId}
+            sessionViewConfig={sessionViewConfig}
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+            timelineType={timelineType}
+            timelineDescription={description}
+            timelineFullScreen={timelineFullScreen}
+          />
+        </div>
       </TimelineContainer>
     </TimelineContext.Provider>
   );

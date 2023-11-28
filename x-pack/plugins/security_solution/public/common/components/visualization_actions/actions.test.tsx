@@ -8,7 +8,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
-import { dnsTopDomainsLensAttributes } from './lens_attributes/network/dns_top_domains';
+import { getDnsTopDomainsLensAttributes } from './lens_attributes/network/dns_top_domains';
 import { VisualizationActions } from './actions';
 import {
   createSecuritySolutionStorageMock,
@@ -27,6 +27,9 @@ import { CASES_FEATURE_ID } from '../../../../common/constants';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { allCasesCapabilities, allCasesPermissions } from '../../../cases_test_utils';
 import { InputsModelId } from '../../store/inputs/constants';
+import type { VisualizationActionsProps } from './types';
+import * as useLensAttributesModule from './use_lens_attributes';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -43,6 +46,7 @@ jest.mock('../../utils/route/use_route_spy', () => {
     useRouteSpy: jest.fn(() => [{ pageName: 'network', detailName: '', tabName: 'dns' }]),
   };
 });
+
 describe('VisualizationActions', () => {
   const refetch = jest.fn();
   const state: State = mockGlobalState;
@@ -58,16 +62,19 @@ describe('VisualizationActions', () => {
     refetch,
     state: state.inputs,
   };
+  const spyUseLensAttributes = jest.spyOn(useLensAttributesModule, 'useLensAttributes');
 
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  const props = {
-    lensAttributes: dnsTopDomainsLensAttributes,
+  const props: VisualizationActionsProps = {
+    getLensAttributes: getDnsTopDomainsLensAttributes,
     queryId: 'networkDnsHistogramQuery',
     timerange: {
       from: '2022-03-06T16:00:00.000Z',
       to: '2022-03-07T15:59:59.999Z',
     },
     title: 'mock networkDnsHistogram',
+    extraOptions: { dnsIsPtrIncluded: true },
+    stackByField: 'dns.question.registered_domain',
   };
   const mockNavigateToPrefilledEditor = jest.fn();
   const mockGetCreateCaseFlyoutOpen = jest.fn();
@@ -87,13 +94,14 @@ describe('VisualizationActions', () => {
         cases: {
           ...mockCasesContract(),
           hooks: {
-            getUseCasesAddToExistingCaseModal: jest
+            useCasesAddToExistingCaseModal: jest
               .fn()
               .mockReturnValue({ open: mockGetAllCasesSelectorModalOpen }),
-            getUseCasesAddToNewCaseFlyout: jest
+            useCasesAddToNewCaseFlyout: jest
               .fn()
               .mockReturnValue({ open: mockGetCreateCaseFlyoutOpen }),
           },
+          helpers: { canUseCases: jest.fn().mockReturnValue(allCasesPermissions()) },
         },
         application: {
           capabilities: { [CASES_FEATURE_ID]: allCasesCapabilities() },
@@ -121,6 +129,25 @@ describe('VisualizationActions', () => {
     const myState = cloneDeep(state);
     myState.inputs = upsertQuery(newQuery);
     store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  });
+
+  test('Should generate attributes', () => {
+    render(
+      <TestProviders store={store}>
+        <VisualizationActions {...props} />
+      </TestProviders>
+    );
+    expect(spyUseLensAttributes.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        applyGlobalQueriesAndFilters: true,
+        extraOptions: props.extraOptions,
+        getLensAttributes: props.getLensAttributes,
+        lensAttributes: props.lensAttributes,
+        scopeId: SourcererScopeName.default,
+        stackByField: props.stackByField,
+        title: '',
+      })
+    );
   });
 
   test('Should render VisualizationActions button', () => {
@@ -156,21 +183,13 @@ describe('VisualizationActions', () => {
 
     fireEvent.click(screen.getByText('Open in Lens'));
     expect(mockNavigateToPrefilledEditor.mock.calls[0][0].timeRange).toEqual(props.timerange);
-    expect(mockNavigateToPrefilledEditor.mock.calls[0][0].attributes.title).toEqual(
-      props.lensAttributes.title
-    );
+    expect(mockNavigateToPrefilledEditor.mock.calls[0][0].attributes.title).toEqual('');
     expect(mockNavigateToPrefilledEditor.mock.calls[0][0].attributes.references).toEqual([
-      {
-        id: 'security-solution',
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
       {
         id: 'security-solution',
         name: 'indexpattern-datasource-layer-b1c3efc6-c886-4fba-978f-3b6bb5e7948a',
         type: 'index-pattern',
       },
-      { id: 'security-solution', name: 'filter-index-pattern-0', type: 'index-pattern' },
     ]);
     expect(mockNavigateToPrefilledEditor.mock.calls[0][1].openInNewTab).toEqual(true);
   });

@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 import type { FieldStatsType } from '../common/types';
+import {
+  type DiscoverUrlConfig,
+  type DashboardUrlConfig,
+  type OtherUrlConfig,
+} from '../../../services/ml/data_frame_analytics_edit';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -28,18 +34,39 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
+  const testDiscoverCustomUrl: DiscoverUrlConfig = {
+    label: 'Show data',
+    indexName: 'ft_egs_regression',
+    queryEntityFieldNames: ['stabf'],
+    timeRange: TIME_RANGE_TYPE.AUTO,
+  };
+
+  const testDashboardCustomUrl: DashboardUrlConfig = {
+    label: 'Show dashboard',
+    dashboardName: 'ML Test',
+    queryEntityFieldNames: ['stabf'],
+    timeRange: TIME_RANGE_TYPE.AUTO,
+  };
+
+  const testOtherCustomUrl: OtherUrlConfig = {
+    label: 'elastic.co',
+    url: 'https://www.elastic.co/',
+  };
+
   describe('regression creation', function () {
+    let testDashboardId: string | null = null;
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
-      await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression');
+      await ml.testResources.createDataViewIfNeeded('ft_egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
 
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
+      await ml.testResources.deleteDataViewByTitle('ft_egs_regression');
     });
 
     const jobId = `egs_1_${Date.now()}`;
@@ -63,7 +90,12 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'stab',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
+        advancedEditorContent: [
+          '{',
+          '  "description": "Regression job based on ft_egs_regression dataset with runtime fields",',
+          '  "source": {',
+        ],
         expected: {
           scatterplotMatrixColorStats: [
             // some marker colors of the continuous color scale
@@ -85,16 +117,76 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '16mb',
+                  'Version',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '400',
+                  'Test docs',
+                  '1600',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: [
+                  'Phase 8/8',
+                  'reindexing',
+                  '100%',
+                  'loading_data',
+                  '100%',
+                  'feature_selection',
+                  '100%',
+                  'coarse_parameter_search',
+                  '100%',
+                  'fine_tuning_parameters',
+                  '100%',
+                  'final_training',
+                  '100%',
+                  'writing_results',
+                  '100%',
+                  'inference',
+                  '100%',
+                ],
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: jobId,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":400,"test_docs_count":1600,"skipped_docs_count":0}',
-                  description:
-                    'Regression job based on ft_egs_regression dataset with runtime fields',
+                  '': '',
+                  timestamp: 'February 28th 2023, 22:20:30',
+                  timing_stats: '{"elapsed_time":0,"iteration_time":0}',
+                  alpha: '0.0001097308602104853',
+                  downsample_factor: '1',
+                  eta: '0.020888927310242174',
+                  eta_growth_rate_per_tree: '1.010444463655121',
+                  feature_bag_fraction: '0.6317118309501533',
+                  gamma: '0.0000023617026632010964',
+                  lambda: '2.668084016785013',
+                  max_attempts_to_add_tree: '0',
+                  max_optimization_rounds_per_hyperparameter: '2',
+                  max_trees: '272',
+                  num_folds: '0',
+                  num_splits_per_feature: '0',
+                  soft_tree_depth_limit: '2',
+                  soft_tree_depth_tolerance: '0.15',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '8/8' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -105,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
-          await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await ml.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the data frame analytics wizard', async () => {
@@ -235,14 +327,20 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
           await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
 
+          // switch to json editor and back
+          await ml.testExecution.logTestStep('switches to advanced editor then back to form');
+          await ml.dataFrameAnalyticsCreation.openAdvancedEditor();
+          await ml.dataFrameAnalyticsCreation.assertAdvancedEditorCodeEditorContent(
+            testData.advancedEditorContent
+          );
+          await ml.dataFrameAnalyticsCreation.closeAdvancedEditor();
+
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
 
           await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {
@@ -282,6 +380,40 @@ export default function ({ getService }: FtrProviderContext) {
             testData.jobId,
             testData.expected.rowDetails
           );
+        });
+
+        it('adds discover custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for discover url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds discover custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
+            testData.jobId,
+            testDiscoverCustomUrl
+          );
+        });
+
+        it('adds dashboard custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds dashboard custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(
+            testData.jobId,
+            testDashboardCustomUrl,
+            {
+              index: 1,
+              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'stabf:\"$stabf$\"'))`,
+            }
+          );
+        });
+
+        it('adds other custom url type to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for other url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds other type custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

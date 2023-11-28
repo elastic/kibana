@@ -8,20 +8,26 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { EuiFlexGroup } from '@elastic/eui';
 import { buildForecastedSlo } from '../../../../data/slo/slo';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { SloBadges as Component, Props } from './slo_badges';
+import { SloBadges as Component, SloBadgesProps } from './slo_badges';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/Badges/SloBadges',
+  title: 'app/SLO/Badges/SloBadges',
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
+const Template: ComponentStory<typeof Component> = (props: SloBadgesProps) => (
+  <EuiFlexGroup>
+    <Component {...props} />
+  </EuiFlexGroup>
+);
 
 const defaultProps = {
   slo: buildForecastedSlo(),
+  rules: [],
 };
 
 export const SloBadges = Template.bind({});

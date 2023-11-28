@@ -7,23 +7,27 @@
  */
 import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
-const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
+
+const scenario: Scenario<ApmFields> = async () => {
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const withTx = apm
-        .service('service-with-transactions', 'production', 'java')
+        .service('service-with-transactions', ENVIRONMENT, 'java')
         .instance('instance');
 
       const withErrorsOnly = apm
-        .service('service-with-errors-only', 'production', 'java')
+        .service('service-with-errors-only', ENVIRONMENT, 'java')
         .instance('instance');
 
       const withAppMetricsOnly = apm
-        .service('service-with-app-metrics-only', 'production', 'java')
+        .service('service-with-app-metrics-only', ENVIRONMENT, 'java')
         .instance('instance');
 
-      return range
+      const data = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -42,6 +46,8 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
               .timestamp(timestamp),
           ];
         });
+
+      return withClient(apmEsClient, data);
     },
   };
 };

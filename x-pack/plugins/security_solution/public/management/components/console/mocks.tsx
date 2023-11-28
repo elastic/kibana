@@ -10,8 +10,7 @@
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { act } from '@testing-library/react';
-import { within } from '@testing-library/dom';
+import { act, within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
 import type {
@@ -29,17 +28,9 @@ interface ConsoleSelectorsAndActionsMock {
   getInputText: () => string;
   openHelpPanel: () => void;
   closeHelpPanel: () => void;
-}
-
-export interface ConsoleTestSetup
-  extends Pick<
-    AppContextTestRender,
-    'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history' | 'setExperimentalFlag'
-  > {
-  renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
-
-  commands: CommandDefinition[];
-
+  /** Clicks on the submit button on the far right of the console's input area */
+  submitCommand: () => void;
+  /** Enters a command into the console's input area */
   enterCommand(
     cmd: string,
     options?: Partial<{
@@ -52,6 +43,18 @@ export interface ConsoleTestSetup
       useKeyboard: boolean;
     }>
   ): void;
+}
+
+export interface ConsoleTestSetup
+  extends Pick<
+    AppContextTestRender,
+    'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history' | 'setExperimentalFlag'
+  > {
+  renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
+
+  commands: CommandDefinition[];
+
+  enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'];
 
   selectors: ConsoleSelectorsAndActionsMock;
 }
@@ -90,6 +93,12 @@ export const getConsoleSelectorsAndActionMock = (
       renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`).click();
     }
   };
+  const submitCommand: ConsoleSelectorsAndActionsMock['submitCommand'] = () => {
+    renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
+  };
+  const enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'] = (cmd, options = {}) => {
+    enterConsoleCommand(renderResult, cmd, options);
+  };
 
   return {
     getInputText,
@@ -97,6 +106,8 @@ export const getConsoleSelectorsAndActionMock = (
     getRightOfCursorInputText,
     openHelpPanel,
     closeHelpPanel,
+    submitCommand,
+    enterCommand,
   };
 };
 
@@ -205,6 +216,17 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
       closeHelpPanel: () => {
         initSelectorsIfNeeded();
         return selectors.closeHelpPanel();
+      },
+      submitCommand: () => {
+        initSelectorsIfNeeded();
+        return selectors.submitCommand();
+      },
+      enterCommand: (
+        cmd: string,
+        options?: Partial<{ inputOnly: boolean; useKeyboard: boolean }>
+      ) => {
+        initSelectorsIfNeeded();
+        return selectors.enterCommand(cmd, options);
       },
     },
   };

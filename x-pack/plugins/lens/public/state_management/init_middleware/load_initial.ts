@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { setState, initEmpty, LensStoreDeps } from '..';
+import { setState, initExisting, initEmpty, LensStoreDeps } from '..';
 import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
@@ -91,21 +91,17 @@ export function loadInitial(
     redirectCallback,
     initialInput,
     history,
+    inlineEditing,
   }: {
-    redirectCallback: (savedObjectId?: string) => void;
+    redirectCallback?: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
     history?: History<unknown>;
+    inlineEditing?: boolean;
   },
   autoApplyDisabled: boolean
 ) {
-  const {
-    lensServices,
-    datasourceMap,
-    embeddableEditorIncomingState,
-    initialContext,
-    initialStateFromLocator,
-    visualizationMap,
-  } = storeDeps;
+  const { lensServices, datasourceMap, initialContext, initialStateFromLocator, visualizationMap } =
+    storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
@@ -114,6 +110,7 @@ export function loadInitial(
   const loaderSharedArgs = {
     dataViews: lensServices.dataViews,
     storage: lensServices.storage,
+    eventAnnotationService: lensServices.eventAnnotationService,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 
@@ -121,11 +118,7 @@ export function loadInitial(
   if (initialContext && 'query' in initialContext) {
     activeDatasourceId = 'textBased';
   }
-
   if (initialStateFromLocator) {
-    const locatorReferences =
-      'references' in initialStateFromLocator ? initialStateFromLocator.references : undefined;
-
     const newFilters = initialStateFromLocator.filters
       ? cloneDeep(initialStateFromLocator.filters)
       : undefined;
@@ -141,61 +134,76 @@ export function loadInitial(
       };
       data.query.timefilter.timefilter.setTime(newTimeRange);
     }
+    // URL Reporting is using the locator params but also passing the savedObjectId
+    // so be sure to not go here as there's no full snapshot URL
+    if (!initialInput) {
+      const locatorReferences =
+        'references' in initialStateFromLocator ? initialStateFromLocator.references : undefined;
 
-    return initializeSources(
-      {
-        datasourceMap,
-        visualizationMap,
-        visualizationState: emptyState.visualization,
-        datasourceStates: emptyState.datasourceStates,
-        initialContext,
-        adHocDataViews:
-          lens.persistedDoc?.state.adHocDataViews || initialStateFromLocator.dataViewSpecs,
-        references: locatorReferences,
-        ...loaderSharedArgs,
-      },
-      {
-        isFullEditor: true,
-      }
-    )
-      .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
-        const currentSessionId =
-          initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
-        store.dispatch(
-          setState({
-            isSaveable: true,
-            filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
-            query: initialStateFromLocator.query || emptyState.query,
-            searchSessionId: currentSessionId,
-            activeDatasourceId: emptyState.activeDatasourceId,
-            visualization: {
-              activeId: emptyState.visualization.activeId,
-              state: visualizationState,
-            },
-            dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
-            datasourceStates: Object.entries(datasourceStates).reduce(
-              (state, [datasourceId, datasourceState]) => ({
-                ...state,
-                [datasourceId]: {
-                  ...datasourceState,
-                  isLoading: false,
-                },
-              }),
-              {}
-            ),
-            isLoading: false,
-          })
-        );
-
-        if (autoApplyDisabled) {
-          store.dispatch(disableAutoApply());
+      return initializeSources(
+        {
+          datasourceMap,
+          visualizationMap,
+          visualizationState: emptyState.visualization,
+          datasourceStates: emptyState.datasourceStates,
+          initialContext,
+          adHocDataViews:
+            lens.persistedDoc?.state.adHocDataViews || initialStateFromLocator.dataViewSpecs,
+          references: locatorReferences,
+          ...loaderSharedArgs,
+        },
+        {
+          isFullEditor: true,
         }
-      })
-      .catch((e: { message: string }) => {
-        notifications.toasts.addDanger({
-          title: e.message,
+      )
+        .then(
+          ({
+            datasourceStates,
+            visualizationState,
+            indexPatterns,
+            indexPatternRefs,
+            annotationGroups,
+          }) => {
+            const currentSessionId =
+              initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
+            store.dispatch(
+              initExisting({
+                isSaveable: true,
+                filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
+                query: initialStateFromLocator.query || emptyState.query,
+                searchSessionId: currentSessionId,
+                activeDatasourceId: emptyState.activeDatasourceId,
+                visualization: {
+                  activeId: emptyState.visualization.activeId,
+                  state: visualizationState,
+                },
+                dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+                datasourceStates: Object.entries(datasourceStates).reduce(
+                  (state, [datasourceId, datasourceState]) => ({
+                    ...state,
+                    [datasourceId]: {
+                      ...datasourceState,
+                      isLoading: false,
+                    },
+                  }),
+                  {}
+                ),
+                isLoading: false,
+                annotationGroups,
+              })
+            );
+
+            if (autoApplyDisabled) {
+              store.dispatch(disableAutoApply());
+            }
+          }
+        )
+        .catch((e: { message: string }) => {
+          notifications.toasts.addDanger({
+            title: e.message,
+          });
         });
-      });
+    }
   }
 
   if (
@@ -257,7 +265,7 @@ export function loadInitial(
         notifications.toasts.addDanger({
           title: e.message,
         });
-        redirectCallback();
+        redirectCallback?.();
       });
   }
 
@@ -285,9 +293,13 @@ export function loadInitial(
             {}
           );
 
-          const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
-          // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(filters);
+          // when the embeddable is initialized from the dashboard we don't want to inject the filters
+          // as this will replace the parent application filters (such as a dashboard)
+          if (!Boolean(inlineEditing)) {
+            const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
+            // Don't overwrite any pinned filters
+            data.query.filterManager.setAppFilters(filters);
+          }
 
           const docVisualizationState = {
             activeId: doc.visualizationType,
@@ -302,59 +314,68 @@ export function loadInitial(
               references: [...doc.references, ...(doc.state.internalReferences || [])],
               initialContext,
               dataViews: lensServices.dataViews,
+              eventAnnotationService: lensServices.eventAnnotationService,
               storage: lensServices.storage,
               adHocDataViews: doc.state.adHocDataViews,
               defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
             },
             { isFullEditor: true }
           )
-            .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
-              const currentSessionId = data.search.session.getSessionId();
-              store.dispatch(
-                setState({
-                  isSaveable: true,
-                  sharingSavedObjectProps,
-                  filters: data.query.filterManager.getFilters(),
-                  query: doc.state.query,
-                  searchSessionId:
-                    dashboardFeatureFlag.allowByValueEmbeddables &&
-                    Boolean(embeddableEditorIncomingState?.originatingApp) &&
-                    !(initialInput as LensByReferenceInput)?.savedObjectId &&
-                    currentSessionId
-                      ? currentSessionId
-                      : data.search.session.start(),
-                  persistedDoc: doc,
-                  activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
-                  visualization: {
-                    activeId: doc.visualizationType,
-                    state: visualizationState,
-                  },
-                  dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
-                  datasourceStates: Object.entries(datasourceStates).reduce(
-                    (state, [datasourceId, datasourceState]) => ({
-                      ...state,
-                      [datasourceId]: {
-                        ...datasourceState,
-                        isLoading: false,
-                      },
-                    }),
-                    {}
-                  ),
-                  isLoading: false,
-                })
-              );
+            .then(
+              ({
+                datasourceStates,
+                visualizationState,
+                indexPatterns,
+                indexPatternRefs,
+                annotationGroups,
+              }) => {
+                const currentSessionId = data.search.session.getSessionId();
+                store.dispatch(
+                  initExisting({
+                    isSaveable: true,
+                    sharingSavedObjectProps,
+                    filters: data.query.filterManager.getFilters(),
+                    query: doc.state.query,
+                    searchSessionId:
+                      dashboardFeatureFlag.allowByValueEmbeddables &&
+                      !(initialInput as LensByReferenceInput)?.savedObjectId &&
+                      currentSessionId
+                        ? currentSessionId
+                        : data.search.session.start(),
+                    persistedDoc: doc,
+                    activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
+                    visualization: {
+                      activeId: doc.visualizationType,
+                      state: visualizationState,
+                    },
+                    dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+                    datasourceStates: Object.entries(datasourceStates).reduce(
+                      (state, [datasourceId, datasourceState]) => ({
+                        ...state,
+                        [datasourceId]: {
+                          ...datasourceState,
+                          isLoading: false,
+                        },
+                      }),
+                      {}
+                    ),
+                    isLoading: false,
+                    annotationGroups,
+                  })
+                );
 
-              if (autoApplyDisabled) {
-                store.dispatch(disableAutoApply());
+                if (autoApplyDisabled) {
+                  store.dispatch(disableAutoApply());
+                }
               }
-            })
+            )
             .catch((e: { message: string }) =>
               notifications.toasts.addDanger({
                 title: e.message,
               })
             );
         } else {
-          redirectCallback();
+          redirectCallback?.();
         }
       },
       () => {
@@ -363,13 +384,13 @@ export function loadInitial(
             isLoading: false,
           })
         );
-        redirectCallback();
+        redirectCallback?.();
       }
     )
     .catch((e: { message: string }) => {
       notifications.toasts.addDanger({
         title: e.message,
       });
-      redirectCallback();
+      redirectCallback?.();
     });
 }

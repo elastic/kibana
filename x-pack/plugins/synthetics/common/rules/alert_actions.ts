@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ActionConnector, ActionTypeId } from './types';
 import { DefaultEmail } from '../runtime_types';
 
-export const SLACK_ACTION_ID: ActionTypeId = '.slack';
+export const SLACK_WEBHOOK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
 export const SERVER_LOG_ACTION_ID: ActionTypeId = '.server-log';
 export const INDEX_ACTION_ID: ActionTypeId = '.index';
@@ -36,6 +36,7 @@ interface Translations {
   defaultActionMessage: string;
   defaultRecoveryMessage: string;
   defaultSubjectMessage: string;
+  defaultRecoverySubjectMessage: string;
 }
 
 export function populateAlertActions({
@@ -43,13 +44,11 @@ export function populateAlertActions({
   defaultEmail,
   groupId,
   translations,
-  isLegacy = false,
 }: {
   groupId: string;
   defaultActions: ActionConnector[];
   defaultEmail?: DefaultEmail;
   translations: Translations;
-  isLegacy?: boolean;
 }) {
   const actions: RuleAction[] = [];
   defaultActions.forEach((aId) => {
@@ -57,6 +56,11 @@ export function populateAlertActions({
       id: aId.id,
       group: groupId,
       params: {},
+      frequency: {
+        notifyWhen: 'onActionGroupChange',
+        throttle: null,
+        summary: false,
+      },
     };
 
     const recoveredAction: RuleAction = {
@@ -64,6 +68,11 @@ export function populateAlertActions({
       group: 'recovered',
       params: {
         message: translations.defaultRecoveryMessage,
+      },
+      frequency: {
+        notifyWhen: 'onActionGroupChange',
+        throttle: null,
+        summary: false,
       },
     };
 
@@ -80,8 +89,8 @@ export function populateAlertActions({
         actions.push(recoveredAction);
         break;
       case INDEX_ACTION_ID:
-        action.params = getIndexActionParams(translations, false, isLegacy);
-        recoveredAction.params = getIndexActionParams(translations, true, isLegacy);
+        action.params = getIndexActionParams(translations, false);
+        recoveredAction.params = getIndexActionParams(translations, true);
         actions.push(recoveredAction);
         break;
       case SERVICE_NOW_ACTION_ID:
@@ -97,7 +106,7 @@ export function populateAlertActions({
         recoveredAction.params = getWebhookActionParams(translations, true);
         actions.push(recoveredAction);
         break;
-      case SLACK_ACTION_ID:
+      case SLACK_WEBHOOK_ACTION_ID:
       case TEAMS_ACTION_ID:
         action.params = {
           message: translations.defaultActionMessage,
@@ -107,6 +116,8 @@ export function populateAlertActions({
       case EMAIL_ACTION_ID:
         if (defaultEmail) {
           action.params = getEmailActionParams(translations, defaultEmail);
+          recoveredAction.params = getEmailActionParams(translations, defaultEmail, true);
+          actions.push(recoveredAction);
         }
         break;
       default:
@@ -121,41 +132,7 @@ export function populateAlertActions({
   return actions;
 }
 
-function getIndexActionParams(
-  translations: Translations,
-  recovery = false,
-  isLegacy = false
-): IndexActionParams {
-  if (isLegacy && recovery) {
-    return {
-      documents: [
-        {
-          monitorName: '{{context.monitorName}}',
-          monitorUrl: '{{{context.monitorUrl}}}',
-          statusMessage: translations.defaultRecoveryMessage,
-          latestErrorMessage: '',
-          observerLocation: '{{context.observerLocation}}',
-        },
-      ],
-      indexOverride: null,
-    };
-  }
-
-  if (isLegacy) {
-    return {
-      documents: [
-        {
-          monitorName: '{{context.monitorName}}',
-          monitorUrl: '{{{context.monitorUrl}}}',
-          statusMessage: '{{{context.statusMessage}}}',
-          latestErrorMessage: '{{{context.latestErrorMessage}}}',
-          observerLocation: '{{context.observerLocation}}',
-        },
-      ],
-      indexOverride: null,
-    };
-  }
-
+function getIndexActionParams(translations: Translations, recovery = false): IndexActionParams {
   if (recovery) {
     return {
       documents: [
@@ -270,13 +247,20 @@ function getJiraActionParams({ defaultActionMessage }: Translations): JiraAction
 }
 
 function getEmailActionParams(
-  { defaultActionMessage, defaultSubjectMessage }: Translations,
-  defaultEmail: DefaultEmail
+  {
+    defaultActionMessage,
+    defaultSubjectMessage,
+    defaultRecoverySubjectMessage,
+    defaultRecoveryMessage,
+  }: Translations,
+  defaultEmail: DefaultEmail,
+  isRecovery?: boolean
 ): EmailActionParams {
   return {
     to: defaultEmail.to,
-    subject: defaultSubjectMessage,
-    message: defaultActionMessage,
+    subject: isRecovery ? defaultRecoverySubjectMessage : defaultSubjectMessage,
+    message: isRecovery ? defaultRecoveryMessage : defaultActionMessage,
+    messageHTML: null,
     cc: defaultEmail.cc ?? [],
     bcc: defaultEmail.bcc ?? [],
     kibanaFooterLink: {

@@ -37,7 +37,7 @@ const ChartContentComponent = ({
 }: ChartContentProps) => {
   return isChartEmbeddablesEnabled ? (
     <VisualizationEmbeddable
-      data-test-subj="embeddable-matrix-histogram"
+      data-test-subj="embeddable-alerts-count"
       extraActions={extraActions}
       extraOptions={extraOptions}
       getLensAttributes={getLensAttributes}

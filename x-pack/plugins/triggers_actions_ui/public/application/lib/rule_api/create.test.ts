@@ -82,7 +82,7 @@ describe('createRule', () => {
           params: {
             level: 'info',
             message:
-              "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
+              "Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
           },
           actionTypeId: '.server-log',
           frequency: {
@@ -95,6 +95,7 @@ describe('createRule', () => {
       createdAt: new Date('2021-04-01T21:33:13.247Z'),
       updatedAt: new Date('2021-04-01T21:33:13.247Z'),
       apiKeyOwner: '',
+      revision: 0,
     };
     http.post.mockResolvedValueOnce(resolvedValue);
 

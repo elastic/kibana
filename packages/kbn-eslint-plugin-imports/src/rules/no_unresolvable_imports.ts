@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import { Rule } from 'eslint';
+import type { Rule } from 'eslint';
 
 import { report } from '../helpers/report';
 import { getSourcePath } from '../helpers/source';

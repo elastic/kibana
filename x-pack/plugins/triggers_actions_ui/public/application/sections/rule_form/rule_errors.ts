@@ -27,6 +27,7 @@ export function validateBaseProperties(
   const errors = {
     name: new Array<string>(),
     'schedule.interval': new Array<string>(),
+    consumer: new Array<string>(),
     ruleTypeId: new Array<string>(),
     actionConnectors: new Array<string>(),
   };
@@ -35,6 +36,13 @@ export function validateBaseProperties(
     errors.name.push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredNameText', {
         defaultMessage: 'Name is required.',
+      })
+    );
+  }
+  if (ruleObject.consumer === null) {
+    errors.consumer.push(
+      i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredConsumerText', {
+        defaultMessage: 'Scope is required.',
       })
     );
   }
@@ -60,10 +68,12 @@ export function validateBaseProperties(
   }
 
   const invalidThrottleActions = ruleObject.actions.filter((a) => {
-    const throttleDuration = a.frequency?.throttle ? parseDuration(a.frequency.throttle) : 0;
-    const intervalDuration = ruleObject.schedule.interval
-      ? parseDuration(ruleObject.schedule.interval)
-      : 0;
+    if (!a.frequency?.throttle) return false;
+    const throttleDuration = parseDuration(a.frequency.throttle);
+    const intervalDuration =
+      ruleObject.schedule.interval && ruleObject.schedule.interval.length > 1
+        ? parseDuration(ruleObject.schedule.interval)
+        : 0;
     return (
       a.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE && throttleDuration < intervalDuration
     );

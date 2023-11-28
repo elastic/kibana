@@ -6,14 +6,16 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ReportingCore } from '../..';
-import { RunContext } from '@kbn/task-manager-plugin/server';
+import { KibanaShuttingDownError } from '@kbn/reporting-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import type { ExportType, ReportingConfigType } from '@kbn/reporting-server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { KibanaShuttingDownError } from '../../../common/errors';
-import type { SavedReport } from '../store';
-import { ReportingConfigType } from '../../config';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+
 import { ExecuteReportTask } from '.';
+import type { ReportingCore } from '../..';
+import { createMockReportingCore } from '../../test_helpers';
+import type { SavedReport } from '../store';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -86,12 +88,14 @@ describe('Execute Report Task', () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'noop',
       name: 'Noop',
-      createJobFnFactory: () => async () => new Promise(() => {}),
-      runTaskFnFactory: () => async () => new Promise(() => {}),
-      jobContentExtension: 'none',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: () => new Promise(() => {}),
+      jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
-    });
+    } as unknown as ExportType);
     const store = await mockReporting.getStore();
     store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
@@ -115,10 +119,14 @@ describe('Execute Report Task', () => {
     });
     await taskPromise;
 
-    expect(store.setReportFailed).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(store.setReportFailed).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        output: expect.objectContaining({ error_code: new KibanaShuttingDownError().code }),
+        _id: 'test',
+      }),
+      expect.objectContaining({
+        output: expect.objectContaining({
+          error_code: new KibanaShuttingDownError().code,
+        }),
       })
     );
   });

@@ -18,7 +18,7 @@ import {
 } from './utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
@@ -69,11 +69,11 @@ export const cumulativeSumOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern, columns) => {
+  getDefaultLabel: (column, columns, indexPattern) => {
     const ref = columns[column.references[0]];
     return ofName(
       ref && 'sourceField' in ref
-        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        ? indexPattern?.getFieldByName(ref.sourceField)?.displayName
         : undefined,
       undefined,
       column.timeShift

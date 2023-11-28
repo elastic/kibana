@@ -6,23 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-
-import type { SpacesService } from '../plugin';
 import type {
+  CheckPrivilegesDynamicallyWithRequest,
   CheckPrivilegesOptions,
   CheckPrivilegesPayload,
-  CheckPrivilegesResponse,
   CheckPrivilegesWithRequest,
-} from './types';
+} from '@kbn/security-plugin-types-server';
 
-export type CheckPrivilegesDynamically = (
-  privileges: CheckPrivilegesPayload,
-  options?: CheckPrivilegesOptions
-) => Promise<CheckPrivilegesResponse>;
-
-export type CheckPrivilegesDynamicallyWithRequest = (
-  request: KibanaRequest
-) => CheckPrivilegesDynamically;
+import type { SpacesService } from '../plugin';
 
 export function checkPrivilegesDynamicallyWithRequestFactory(
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,

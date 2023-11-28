@@ -7,11 +7,11 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
-import { TopAlert } from '../pages/alerts';
 import * as pluginContext from './use_plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '..';
-import { PluginContextValue } from '../context/plugin_context';
+import { PluginContextValue } from '../context/plugin_context/plugin_context';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
+import type { TopAlert } from '../typings/alerts';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -27,6 +27,7 @@ describe('useFetchAlertDetail', () => {
     'kibana.alert.rule.execution.uuid': 'e62c418d-734d-47e7-bbeb-e6f182f5fb45',
     'kibana.alert.rule.name': 'A super rule',
     'kibana.alert.rule.producer': 'infrastructure',
+    'kibana.alert.rule.revision': 0,
     'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
     'kibana.alert.rule.uuid': '69411af0-82a2-11ec-8139-c1568734434e',
     'kibana.space_ids': ['default'],
@@ -124,6 +125,7 @@ describe('useFetchAlertDetail', () => {
               "kibana.alert.rule.execution.uuid": "e62c418d-734d-47e7-bbeb-e6f182f5fb45",
               "kibana.alert.rule.name": "A super rule",
               "kibana.alert.rule.producer": "infrastructure",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "metrics.alert.threshold",
               "kibana.alert.rule.tags": Array [],
               "kibana.alert.rule.uuid": "69411af0-82a2-11ec-8139-c1568734434e",

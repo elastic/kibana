@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
+  const dashboardSettings = getService('dashboardSettings');
   const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common']);
 
   describe('dashboard integration', () => {
@@ -117,6 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
           {
             submit: true,
+            clearWithKeyboard: true,
           }
         );
 
@@ -161,7 +163,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('retains dashboard saved object tags after quicksave', async () => {
         // edit and save dashboard
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard 4 with real data (tag-1)');
-        await PageObjects.dashboard.useMargins(false); // turn margins off to cause quicksave to be enabled
+        await PageObjects.dashboard.openSettingsFlyout();
+        await dashboardSettings.setCustomPanelDescription('this should trigger unsaved changes'); // change description to cause quicksave to be enabled
+        await dashboardSettings.clickApplyButton();
         await PageObjects.dashboard.clickQuickSave();
 
         // verify dashboard still has original tags

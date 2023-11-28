@@ -44,10 +44,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${samlIdPPlugin}`,
-        '--xpack.cloud.id=ftr_fake_cloud_id',
+        // Note: the base64 string in the cloud.id config contains the ES endpoint required in the functional tests
+        '--xpack.cloud.id=ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM=',
         '--xpack.cloud.base_url=https://cloud.elastic.co',
         '--xpack.cloud.deployment_url=/deployments/deploymentId',
         '--xpack.cloud.organization_url=/organization/organizationId',
+        '--xpack.cloud.billing_url=/billing',
         '--xpack.cloud.profile_url=/user/userId',
         '--xpack.security.authc.selector.enabled=false',
         `--xpack.security.authc.providers=${JSON.stringify({

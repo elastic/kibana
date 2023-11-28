@@ -6,7 +6,7 @@
  */
 
 import type { ObservabilityApp } from '../../../typings/common';
-import type { UXMetrics } from '../../components/shared/core_web_vitals';
+import type { UXMetrics } from '../../pages/overview/components/sections/ux/core_web_vitals/core_vitals';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 export interface Stat {
@@ -66,6 +66,10 @@ export interface InfraLogsHasDataResponse {
   indices: string;
 }
 
+interface UniversalProfilingHasDataResponse {
+  hasData: boolean;
+}
+
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
@@ -76,7 +80,7 @@ export type HasData<T extends ObservabilityFetchDataPlugins> = (
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'stack_monitoring' | 'uptime' | 'fleet'
+  'observability-overview' | 'stack_monitoring' | 'fleet' | 'synthetics'
 >;
 
 export interface DataHandler<
@@ -150,18 +154,22 @@ export interface UxFetchDataResponse extends FetchDataResponse {
   coreWebVitals: UXMetrics;
 }
 
+export type UniversalProfilingDataResponse = FetchDataResponse;
+
 export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
-  synthetics: UptimeFetchDataResponse;
+  uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
+  universal_profiling: UniversalProfilingDataResponse;
 }
 
 export interface ObservabilityHasDataResponse {
   apm: APMHasDataResponse;
   infra_metrics: InfraMetricsHasDataResponse;
   infra_logs: InfraLogsHasDataResponse;
-  synthetics: SyntheticsHasDataResponse;
+  uptime: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
+  universal_profiling: UniversalProfilingHasDataResponse;
 }

@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.common.navigateToApp('dashboards');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         await PageObjects.dashboard.waitForRenderComplete();
         await validateQueryAndFilter();
@@ -85,10 +85,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await validateQueryAndFilter();
       });
 
-      after(async () => {
-        // discard changes made in view mode
-        await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
+      it('can discard changes', async () => {
+        await PageObjects.dashboard.clickDiscardChanges();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        const query = await queryBar.getQueryString();
+        expect(query).to.eql('');
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.eql(0);
       });
     });
 
@@ -134,14 +138,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.common.navigateToApp('dashboards');
+        await PageObjects.dashboard.navigateToApp();
+        if (await PageObjects.dashboard.onDashboardLandingPage()) {
+          await testSubjects.existOrFail('unsavedDashboardsCallout');
+        }
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(currentPanelCount).to.eql(unsavedPanelCount);
       });
 
-      it('resets to original panel count after discarding changes', async () => {
+      it('can discard changes', async () => {
+        unsavedPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
+
+        await PageObjects.dashboard.clickDiscardChanges();
+        const currentPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(currentPanelCount).to.eql(originalPanelCount);
+      });
+
+      it('resets to original panel count after switching to view mode and discarding changes', async () => {
+        await addPanels();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        unsavedPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
+
         await PageObjects.dashboard.clickCancelOutOfEditMode();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();

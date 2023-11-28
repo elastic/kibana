@@ -10,67 +10,74 @@ Object {
         data-test-subj="fieldAutocompleteComboBox"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiPopover euiInputPopover emotion-euiPopover-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiPopover__anchor css-zih94u-render"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
-              data-test-subj="comboBoxInput"
-              tabindex="-1"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth"
             >
-              <span
-                class="euiComboBoxPill euiComboBoxPill--plainText"
-              >
-                machine.os.raw
-              </span>
               <div
-                class="euiComboBox__input"
-                style="font-size: 14px; display: inline-block;"
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  data-test-subj="comboBoxSearchInput"
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="box-sizing: content-box; width: 2px;"
-                  value=""
-                />
                 <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                />
+                  class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                  data-test-subj="comboBoxInput"
+                  tabindex="-1"
+                >
+                  <span
+                    class="euiComboBoxPill euiComboBoxPill--plainText"
+                    data-test-subj="euiComboBoxPill"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      machine.os.raw
+                    </span>
+                  </span>
+                  <input
+                    aria-autocomplete="list"
+                    aria-controls=""
+                    aria-expanded="false"
+                    aria-invalid="false"
+                    class="euiComboBox__input"
+                    data-test-subj="comboBoxSearchInput"
+                    id="generated-id__eui-combobox-id"
+                    role="combobox"
+                    style="inline-size: 2px;"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                >
+                  <button
+                    aria-label="Clear input"
+                    class="euiFormControlLayoutClearButton"
+                    data-test-subj="comboBoxClearButton"
+                    type="button"
+                  >
+                    <span
+                      class="euiFormControlLayoutClearButton__icon"
+                      data-euiicon-type="cross"
+                    />
+                  </button>
+                  <button
+                    aria-label="Open list of options"
+                    class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                    data-test-subj="comboBoxToggleListButton"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-            >
-              <button
-                aria-label="Clear input"
-                class="euiFormControlLayoutClearButton"
-                data-test-subj="comboBoxClearButton"
-                type="button"
-              >
-                <span
-                  class="euiFormControlLayoutClearButton__icon"
-                  data-euiicon-type="cross"
-                />
-              </button>
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
             </div>
           </div>
         </div>
@@ -83,67 +90,74 @@ Object {
       data-test-subj="fieldAutocompleteComboBox"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+        class="euiPopover euiInputPopover emotion-euiPopover-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiPopover__anchor css-zih94u-render"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
-            data-test-subj="comboBoxInput"
-            tabindex="-1"
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
           >
-            <span
-              class="euiComboBoxPill euiComboBoxPill--plainText"
-            >
-              machine.os.raw
-            </span>
             <div
-              class="euiComboBox__input"
-              style="font-size: 14px; display: inline-block;"
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                data-test-subj="comboBoxSearchInput"
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="box-sizing: content-box; width: 2px;"
-                value=""
-              />
               <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-              />
+                class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <span
+                  class="euiComboBoxPill euiComboBoxPill--plainText"
+                  data-test-subj="euiComboBoxPill"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    machine.os.raw
+                  </span>
+                </span>
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  aria-invalid="false"
+                  class="euiComboBox__input"
+                  data-test-subj="comboBoxSearchInput"
+                  id="generated-id__eui-combobox-id"
+                  role="combobox"
+                  style="inline-size: 2px;"
+                  value=""
+                />
+              </div>
+              <div
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              >
+                <button
+                  aria-label="Clear input"
+                  class="euiFormControlLayoutClearButton"
+                  data-test-subj="comboBoxClearButton"
+                  type="button"
+                >
+                  <span
+                    class="euiFormControlLayoutClearButton__icon"
+                    data-euiicon-type="cross"
+                  />
+                </button>
+                <button
+                  aria-label="Open list of options"
+                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                  data-test-subj="comboBoxToggleListButton"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
             </div>
-          </div>
-          <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-          >
-            <button
-              aria-label="Clear input"
-              class="euiFormControlLayoutClearButton"
-              data-test-subj="comboBoxClearButton"
-              type="button"
-            >
-              <span
-                class="euiFormControlLayoutClearButton__icon"
-                data-euiicon-type="cross"
-              />
-            </button>
-            <button
-              aria-label="Open list of options"
-              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-              data-test-subj="comboBoxToggleListButton"
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
-              />
-            </button>
           </div>
         </div>
       </div>
@@ -213,58 +227,47 @@ Object {
         data-test-subj="fieldAutocompleteComboBox"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiPopover euiInputPopover emotion-euiPopover-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiPopover__anchor css-zih94u-render"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
-              data-test-subj="comboBoxInput"
-              tabindex="-1"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth"
             >
-              <span
-                class="euiComboBoxPill euiComboBoxPill--plainText"
-              >
-                machine.os.raw
-              </span>
               <div
-                class="euiComboBox__input"
-                style="font-size: 14px; display: inline-block;"
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  data-test-subj="comboBoxSearchInput"
-                  disabled=""
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="box-sizing: content-box; width: 2px;"
-                  value=""
-                />
                 <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                />
+                  class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                  data-test-subj="comboBoxInput"
+                  tabindex="-1"
+                >
+                  <span
+                    class="euiComboBoxPill euiComboBoxPill--plainText"
+                    data-test-subj="euiComboBoxPill"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      machine.os.raw
+                    </span>
+                  </span>
+                  <input
+                    aria-autocomplete="list"
+                    aria-controls=""
+                    aria-expanded="false"
+                    aria-invalid="false"
+                    class="euiComboBox__input"
+                    data-test-subj="comboBoxSearchInput"
+                    disabled=""
+                    id="generated-id__eui-combobox-id"
+                    role="combobox"
+                    style="inline-size: 2px;"
+                    value=""
+                  />
+                </div>
               </div>
-            </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-            >
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                disabled=""
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
             </div>
           </div>
         </div>
@@ -277,58 +280,47 @@ Object {
       data-test-subj="fieldAutocompleteComboBox"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+        class="euiPopover euiInputPopover emotion-euiPopover-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiPopover__anchor css-zih94u-render"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
-            data-test-subj="comboBoxInput"
-            tabindex="-1"
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
           >
-            <span
-              class="euiComboBoxPill euiComboBoxPill--plainText"
-            >
-              machine.os.raw
-            </span>
             <div
-              class="euiComboBox__input"
-              style="font-size: 14px; display: inline-block;"
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                data-test-subj="comboBoxSearchInput"
-                disabled=""
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="box-sizing: content-box; width: 2px;"
-                value=""
-              />
               <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-              />
+                class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <span
+                  class="euiComboBoxPill euiComboBoxPill--plainText"
+                  data-test-subj="euiComboBoxPill"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    machine.os.raw
+                  </span>
+                </span>
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  aria-invalid="false"
+                  class="euiComboBox__input"
+                  data-test-subj="comboBoxSearchInput"
+                  disabled=""
+                  id="generated-id__eui-combobox-id"
+                  role="combobox"
+                  style="inline-size: 2px;"
+                  value=""
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-          >
-            <button
-              aria-label="Open list of options"
-              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-              data-test-subj="comboBoxToggleListButton"
-              disabled=""
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
-              />
-            </button>
           </div>
         </div>
       </div>
@@ -398,56 +390,63 @@ Object {
         data-test-subj="fieldAutocompleteComboBox"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiPopover euiInputPopover emotion-euiPopover-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiPopover__anchor css-zih94u-render"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
-              data-test-subj="comboBoxInput"
-              tabindex="-1"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth"
             >
-              <span
-                class="euiComboBoxPill euiComboBoxPill--plainText"
-              >
-                machine.os.raw
-              </span>
               <div
-                class="euiComboBox__input"
-                style="font-size: 14px; display: inline-block;"
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  data-test-subj="comboBoxSearchInput"
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="box-sizing: content-box; width: 2px;"
-                  value=""
-                />
                 <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                />
+                  class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                  data-test-subj="comboBoxInput"
+                  tabindex="-1"
+                >
+                  <span
+                    class="euiComboBoxPill euiComboBoxPill--plainText"
+                    data-test-subj="euiComboBoxPill"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      machine.os.raw
+                    </span>
+                  </span>
+                  <input
+                    aria-autocomplete="list"
+                    aria-controls=""
+                    aria-expanded="false"
+                    aria-invalid="false"
+                    class="euiComboBox__input"
+                    data-test-subj="comboBoxSearchInput"
+                    id="generated-id__eui-combobox-id"
+                    role="combobox"
+                    style="inline-size: 2px;"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                >
+                  <button
+                    aria-label="Open list of options"
+                    class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                    data-test-subj="comboBoxToggleListButton"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-            >
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
             </div>
           </div>
         </div>
@@ -460,56 +459,63 @@ Object {
       data-test-subj="fieldAutocompleteComboBox"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+        class="euiPopover euiInputPopover emotion-euiPopover-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiPopover__anchor css-zih94u-render"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
-            data-test-subj="comboBoxInput"
-            tabindex="-1"
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
           >
-            <span
-              class="euiComboBoxPill euiComboBoxPill--plainText"
-            >
-              machine.os.raw
-            </span>
             <div
-              class="euiComboBox__input"
-              style="font-size: 14px; display: inline-block;"
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                data-test-subj="comboBoxSearchInput"
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="box-sizing: content-box; width: 2px;"
-                value=""
-              />
               <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-              />
+                class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <span
+                  class="euiComboBoxPill euiComboBoxPill--plainText"
+                  data-test-subj="euiComboBoxPill"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    machine.os.raw
+                  </span>
+                </span>
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  aria-invalid="false"
+                  class="euiComboBox__input"
+                  data-test-subj="comboBoxSearchInput"
+                  id="generated-id__eui-combobox-id"
+                  role="combobox"
+                  style="inline-size: 2px;"
+                  value=""
+                />
+              </div>
+              <div
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              >
+                <button
+                  aria-label="Open list of options"
+                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                  data-test-subj="comboBoxToggleListButton"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
             </div>
-          </div>
-          <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-          >
-            <button
-              aria-label="Open list of options"
-              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-              data-test-subj="comboBoxToggleListButton"
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
-              />
-            </button>
           </div>
         </div>
       </div>
@@ -579,63 +585,56 @@ Object {
         data-test-subj="fieldAutocompleteComboBox"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiPopover euiInputPopover emotion-euiPopover-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiPopover__anchor css-zih94u-render"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
-              data-test-subj="comboBoxInput"
-              tabindex="-1"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth"
             >
-              <span
-                class="euiComboBoxPill euiComboBoxPill--plainText"
-              >
-                machine.os.raw
-              </span>
               <div
-                class="euiComboBox__input"
-                style="font-size: 14px; display: inline-block;"
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  data-test-subj="comboBoxSearchInput"
-                  disabled=""
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="box-sizing: content-box; width: 2px;"
-                  value=""
-                />
                 <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                />
+                  class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                  data-test-subj="comboBoxInput"
+                  tabindex="-1"
+                >
+                  <span
+                    class="euiComboBoxPill euiComboBoxPill--plainText"
+                    data-test-subj="euiComboBoxPill"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      machine.os.raw
+                    </span>
+                  </span>
+                  <input
+                    aria-autocomplete="list"
+                    aria-controls=""
+                    aria-expanded="false"
+                    aria-invalid="false"
+                    class="euiComboBox__input"
+                    data-test-subj="comboBoxSearchInput"
+                    disabled=""
+                    id="generated-id__eui-combobox-id"
+                    role="combobox"
+                    style="inline-size: 2px;"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                >
+                  <span
+                    aria-label="Loading"
+                    class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                    role="progressbar"
+                  />
+                </div>
               </div>
-            </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-            >
-              <span
-                aria-label="Loading"
-                class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-                role="progressbar"
-              />
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                disabled=""
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
             </div>
           </div>
         </div>
@@ -648,63 +647,56 @@ Object {
       data-test-subj="fieldAutocompleteComboBox"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+        class="euiPopover euiInputPopover emotion-euiPopover-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiPopover__anchor css-zih94u-render"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
-            data-test-subj="comboBoxInput"
-            tabindex="-1"
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
           >
-            <span
-              class="euiComboBoxPill euiComboBoxPill--plainText"
-            >
-              machine.os.raw
-            </span>
             <div
-              class="euiComboBox__input"
-              style="font-size: 14px; display: inline-block;"
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                data-test-subj="comboBoxSearchInput"
-                disabled=""
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="box-sizing: content-box; width: 2px;"
-                value=""
-              />
               <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-              />
+                class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <span
+                  class="euiComboBoxPill euiComboBoxPill--plainText"
+                  data-test-subj="euiComboBoxPill"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    machine.os.raw
+                  </span>
+                </span>
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  aria-invalid="false"
+                  class="euiComboBox__input"
+                  data-test-subj="comboBoxSearchInput"
+                  disabled=""
+                  id="generated-id__eui-combobox-id"
+                  role="combobox"
+                  style="inline-size: 2px;"
+                  value=""
+                />
+              </div>
+              <div
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              >
+                <span
+                  aria-label="Loading"
+                  class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                  role="progressbar"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-          >
-            <span
-              aria-label="Loading"
-              class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-              role="progressbar"
-            />
-            <button
-              aria-label="Open list of options"
-              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-              data-test-subj="comboBoxToggleListButton"
-              disabled=""
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
-              />
-            </button>
           </div>
         </div>
       </div>

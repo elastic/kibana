@@ -20,7 +20,12 @@ export const RecreateMLJobsButton: React.FunctionComponent<{
         defaultMessage="This removes previously detected anomalies."
         tagName="p"
       />
-      <EuiButton isDisabled={isDisabled} fill onClick={onClick}>
+      <EuiButton
+        data-test-subj="infraRecreateMLJobsButtonRecreateMlJobsButton"
+        isDisabled={isDisabled}
+        fill
+        onClick={onClick}
+      >
         <FormattedMessage
           id="xpack.infra.analysisSetup.recreateMlJobButton"
           defaultMessage="Recreate ML jobs"

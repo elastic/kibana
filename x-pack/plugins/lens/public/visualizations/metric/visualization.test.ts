@@ -10,7 +10,7 @@ import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
 import {
   DatasourceLayers,
   DatasourcePublicAPI,
@@ -68,6 +68,7 @@ describe('metric visualization', () => {
     breakdownByAccessor: 'breakdown-col-id',
     collapseFn: 'sum',
     subtitle: 'subtitle',
+    icon: 'empty',
     secondaryPrefix: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
@@ -81,7 +82,14 @@ describe('metric visualization', () => {
     ...trendlineProps,
   };
 
-  const mockFrameApi = createMockFramePublicAPI();
+  const mockFrameApi = createMockFramePublicAPI({
+    activeData: generateActiveData([
+      {
+        id: 'first',
+        rows: Array(3).fill({ 'metric-col-id': 20, 'max-metric-col-id': 100 }),
+      },
+    ]),
+  });
 
   describe('initialization', () => {
     test('returns a default state', () => {
@@ -267,6 +275,7 @@ describe('metric visualization', () => {
       mockDatasource.publicAPIMock.getMaxPossibleNumValues.mockReturnValue(maxPossibleNumValues);
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         isStaticValue: false,
+        dataType: 'number',
       } as OperationDescriptor);
 
       datasourceLayers = {
@@ -302,6 +311,9 @@ describe('metric visualization', () => {
               "arguments": Object {
                 "color": Array [
                   "static-color",
+                ],
+                "icon": Array [
+                  "empty",
                 ],
                 "inspectorTableId": Array [
                   "first",
@@ -363,6 +375,9 @@ describe('metric visualization', () => {
                 ],
                 "color": Array [
                   "static-color",
+                ],
+                "icon": Array [
+                  "empty",
                 ],
                 "inspectorTableId": Array [
                   "first",
@@ -609,7 +624,7 @@ describe('metric visualization', () => {
       it('always applies max function to static max dimensions', () => {
         (
           datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
-        ).getOperationForColumnId.mockReturnValueOnce({
+        ).getOperationForColumnId.mockReturnValue({
           isStaticValue: true,
         } as OperationDescriptor);
 
@@ -641,6 +656,9 @@ describe('metric visualization', () => {
             "type": "function",
           }
         `);
+        (
+          datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
+        ).getOperationForColumnId.mockClear();
       });
     });
 
@@ -746,6 +764,7 @@ describe('metric visualization', () => {
   it('clears a layer', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
+        "icon": "empty",
         "layerId": "first",
         "layerType": "data",
       }
@@ -915,7 +934,6 @@ describe('metric visualization', () => {
       expect(supportedLayers[0].initialDimensions).toBeUndefined();
       expect(supportedLayers[0]).toMatchInlineSnapshot(`
         Object {
-          "canAddViaMenu": true,
           "disabled": true,
           "initialDimensions": undefined,
           "label": "Visualization",
@@ -925,7 +943,6 @@ describe('metric visualization', () => {
 
       expect({ ...supportedLayers[1], initialDimensions: undefined }).toMatchInlineSnapshot(`
         Object {
-          "canAddViaMenu": true,
           "disabled": false,
           "initialDimensions": undefined,
           "label": "Trendline",
@@ -1101,6 +1118,30 @@ describe('metric visualization', () => {
     expect(visualization.getDisplayOptions!()).toEqual({
       noPanelTitle: false,
       noPadding: true,
+    });
+  });
+
+  describe('#getUserMessages', () => {
+    it('returns error for non numeric primary metric if maxAccessor exists', () => {
+      const frame = createMockFramePublicAPI({
+        activeData: generateActiveData([
+          {
+            id: 'first',
+            rows: Array(3).fill({ 'metric-col-id': '100', 'max-metric-col-id': 100 }),
+          },
+        ]),
+      });
+      expect(visualization.getUserMessages!(fullState, { frame })).toHaveLength(1);
+
+      const frameNoErrors = createMockFramePublicAPI({
+        activeData: generateActiveData([
+          {
+            id: 'first',
+            rows: Array(3).fill({ 'metric-col-id': 30, 'max-metric-col-id': 100 }),
+          },
+        ]),
+      });
+      expect(visualization.getUserMessages!(fullState, { frame: frameNoErrors })).toHaveLength(0);
     });
   });
 });

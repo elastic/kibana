@@ -5,18 +5,38 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { SyntheticsMonitorClient } from './synthetics_monitor_client';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../synthetics_service';
 import times from 'lodash/times';
 import {
   LocationStatus,
   MonitorFields,
-  PrivateLocation,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { mockEncryptedSO } from '../utils/mocks';
+import { SyntheticsServerSetup } from '../../types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+
+const mockCoreStart = coreMock.createStart() as CoreStart;
+
+mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+  license: {
+    status: 'active',
+    uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+    type: 'platinum',
+    issue_date: '2022-11-29T00:00:00.000Z',
+    issue_date_in_millis: 1669680000000,
+    expiry_date: '2024-12-31T23:59:59.999Z',
+    expiry_date_in_millis: 1735689599999,
+    max_nodes: 100,
+    max_resource_units: null,
+    issued_to: 'Elastic - INTERNAL (development environments)',
+    issuer: 'API',
+    start_date_in_millis: 1669680000000,
+  },
+});
 
 describe('SyntheticsMonitorClient', () => {
   const mockEsClient = {
@@ -30,7 +50,7 @@ describe('SyntheticsMonitorClient', () => {
 
   const logger = loggerMock.create();
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: {
@@ -44,12 +64,12 @@ describe('SyntheticsMonitorClient', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
-  } as unknown as UptimeServerSetup;
+    encryptedSavedObjects: mockEncryptedSO(),
+  } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
 
-  syntheticsService.addConfig = jest.fn();
+  syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
 
@@ -67,7 +87,7 @@ describe('SyntheticsMonitorClient', () => {
     };
   });
 
-  const privateLocations: PrivateLocation[] = times(1).map((n) => {
+  const privateLocations: PrivateLocationAttributes[] = times(1).map((n) => {
     return {
       id: `loc-${n}`,
       label: 'Test private location',
@@ -77,7 +97,6 @@ describe('SyntheticsMonitorClient', () => {
       },
       isServiceManaged: false,
       agentPolicyId: `loc-${n}`,
-      concurrentMonitors: 1,
     };
   });
 
@@ -109,18 +128,17 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.createMonitors = jest.fn();
+    client.privateLocationAPI.createPackagePolicies = jest.fn();
 
     await client.addMonitors(
       [{ monitor, id }],
-      mockRequest,
       savedObjectsClientMock,
       privateLocations,
       'test-space'
     );
 
-    expect(syntheticsService.addConfig).toHaveBeenCalledTimes(1);
-    expect(client.privateLocationAPI.createMonitors).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.addConfigs).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledTimes(1);
   });
 
   it('should edit a monitor', async () => {
@@ -128,7 +146,7 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.editMonitors = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
 
     await client.editMonitors(
       [
@@ -139,8 +157,10 @@ describe('SyntheticsMonitorClient', () => {
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      mockRequest,
-      savedObjectsClientMock,
+      {
+        request: mockRequest,
+        savedObjectsClient: savedObjectsClientMock,
+      } as any,
       privateLocations,
       'test-space'
     );
@@ -155,7 +175,7 @@ describe('SyntheticsMonitorClient', () => {
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     syntheticsService.editConfig = jest.fn();
-    client.privateLocationAPI.editMonitors = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
 
     monitor.locations = previousMonitor.attributes.locations.filter(
       (loc: any) => loc.id !== locations[0].id
@@ -170,14 +190,25 @@ describe('SyntheticsMonitorClient', () => {
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      mockRequest,
-      savedObjectsClientMock,
+      {
+        request: mockRequest,
+        savedObjectsClient: savedObjectsClientMock,
+      } as any,
       privateLocations,
       'test-space'
     );
 
     expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
-    expect(syntheticsService.editConfig).toHaveBeenCalledWith(deletePayload);
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith([
+      {
+        monitor,
+        configId: id,
+        params: {
+          username: 'elastic',
+        },
+        spaceId: 'test-space',
+      },
+    ]);
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });
@@ -191,7 +222,6 @@ describe('SyntheticsMonitorClient', () => {
 
     await client.deleteMonitors(
       [monitor as unknown as SyntheticsMonitorWithId],
-      mockRequest,
       savedObjectsClientMock,
       'test-space'
     );
@@ -200,45 +230,3 @@ describe('SyntheticsMonitorClient', () => {
     expect(client.privateLocationAPI.deleteMonitors).toHaveBeenCalledTimes(1);
   });
 });
-
-const deletePayload = [
-  {
-    enabled: true,
-    fields: {
-      config_id: 'test-id-1',
-      'monitor.project.id': undefined,
-      'monitor.project.name': undefined,
-      run_once: undefined,
-      test_run_id: undefined,
-    },
-    fields_under_root: true,
-    id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
-    locations: [
-      {
-        geo: { lat: 0, lon: 0 },
-        id: 'loc-1',
-        isServiceManaged: false,
-        label: 'Location 1',
-        status: 'ga',
-        url: 'https://example.com/1',
-      },
-      {
-        geo: { lat: 0, lon: 0 },
-        id: 'loc-2',
-        isServiceManaged: true,
-        label: 'Location 2',
-        status: 'ga',
-        url: 'https://example.com/2',
-      },
-    ],
-    max_redirects: '0',
-    name: 'my mon',
-    params: '',
-    password: '',
-    proxy_url: '',
-    schedule: { number: '3', unit: 'm' },
-    secrets: '{}',
-    type: 'http',
-    urls: 'http://google.com',
-  },
-];

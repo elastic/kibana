@@ -152,13 +152,21 @@ export class TaskScheduling {
     return await this.store.bulkSchedule(modifiedTasks);
   }
 
-  public async bulkDisable(taskIds: string[]) {
+  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !!task.enabled,
-      map: (task) => ({ ...task, enabled: false }),
+      map: (task) => ({
+        ...task,
+        enabled: false,
+        ...((Array.isArray(clearStateIdsOrBoolean) && clearStateIdsOrBoolean.includes(task.id)) ||
+        clearStateIdsOrBoolean === true
+          ? { state: {} }
+          : {}),
+      }),
+      validate: false,
     });
   }
 
@@ -174,6 +182,24 @@ export class TaskScheduling {
         }
         return { ...task, enabled: true };
       },
+      validate: false,
+    });
+  }
+
+  public async bulkUpdateState(
+    taskIds: string[],
+    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state']
+  ) {
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: () => true,
+      map: (task) => ({
+        ...task,
+        state: stateMapFn(task.state, task.id),
+      }),
+      validate: false,
     });
   }
 
@@ -208,6 +234,7 @@ export class TaskScheduling {
 
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       },
+      validate: false,
     });
   }
 
@@ -229,12 +256,15 @@ export class TaskScheduling {
   public async runSoon(taskId: string): Promise<RunSoonResult> {
     const task = await this.getNonRunningTask(taskId);
     try {
-      await this.store.update({
-        ...task,
-        status: TaskStatus.Idle,
-        scheduledAt: new Date(),
-        runAt: new Date(),
-      });
+      await this.store.update(
+        {
+          ...task,
+          status: TaskStatus.Idle,
+          scheduledAt: new Date(),
+          runAt: new Date(),
+        },
+        { validate: false }
+      );
     } catch (e) {
       if (e.statusCode === 409) {
         this.logger.debug(

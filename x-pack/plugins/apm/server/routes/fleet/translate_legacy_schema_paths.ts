@@ -10,12 +10,14 @@ import { LEGACY_TO_CURRENT_SCHEMA_PATHS } from '../../../common/fleet';
 export function translateLegacySchemaPaths(
   apmServerSchema: Record<string, any>
 ) {
-  return Object.keys(apmServerSchema).reduce((acc, apmServerSchemaKey) => {
-    const currentSchemaPath =
-      LEGACY_TO_CURRENT_SCHEMA_PATHS[apmServerSchemaKey] || apmServerSchemaKey;
-    return {
-      ...acc,
-      [currentSchemaPath]: apmServerSchema[apmServerSchemaKey],
-    };
-  }, {});
+  return Object.keys(apmServerSchema).reduce<Record<string, any>>(
+    (acc, apmServerSchemaKey) => {
+      const currentSchemaPath =
+        LEGACY_TO_CURRENT_SCHEMA_PATHS[apmServerSchemaKey] ||
+        apmServerSchemaKey;
+      acc[currentSchemaPath] = apmServerSchema[apmServerSchemaKey];
+      return acc;
+    },
+    {}
+  );
 }

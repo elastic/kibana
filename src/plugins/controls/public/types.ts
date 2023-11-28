@@ -7,6 +7,7 @@
  */
 
 import { ReactNode } from 'react';
+
 import { Filter } from '@kbn/es-query';
 import {
   EmbeddableFactory,
@@ -15,10 +16,12 @@ import {
   EmbeddableStart,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ControlInput } from '../common/types';
+
+import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
 import { ControlsServiceType } from './services/controls/types';
 
 export interface CommonControlOutput {
@@ -43,16 +46,25 @@ export type ControlEmbeddable<
   renderPrepend?: () => ReactNode | undefined;
 };
 
+export interface IClearableControl extends ControlEmbeddable {
+  clearSelections: () => void;
+}
+
+export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {
+  return Boolean((control as IClearableControl).clearSelections);
+};
+
 /**
  * Control embeddable editor types
  */
-export interface IEditableControlFactory<T extends ControlInput = ControlInput> {
+export interface IEditableControlFactory<T extends ControlInput = ControlInput>
+  extends Pick<EmbeddableFactory, 'type'> {
   controlEditorOptionsComponent?: (props: ControlEditorProps<T>) => JSX.Element;
   presaveTransformFunction?: (
     newState: Partial<T>,
     embeddable?: ControlEmbeddable<T>
   ) => Partial<T>;
-  isFieldCompatible?: (dataControlField: DataControlField) => void; // reducer
+  isFieldCompatible?: (field: DataViewField) => boolean;
 }
 
 export interface ControlEditorProps<T extends ControlInput = ControlInput> {
@@ -68,6 +80,12 @@ export interface DataControlField {
 
 export interface DataControlFieldRegistry {
   [fieldName: string]: DataControlField;
+}
+
+export interface DataControlEditorChanges {
+  input: Partial<DataControlInput>;
+  width?: ControlWidth;
+  grow?: boolean;
 }
 
 /**
@@ -86,10 +104,11 @@ export interface ControlsPluginSetupDeps {
   embeddable: EmbeddableSetup;
 }
 export interface ControlsPluginStartDeps {
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 // re-export from common

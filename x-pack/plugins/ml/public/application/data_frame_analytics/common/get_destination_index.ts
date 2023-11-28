@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 export const getDestinationIndex = (jobConfig: DataFrameAnalyticsConfig | undefined) =>
-  (Array.isArray(jobConfig?.dest.index) ? jobConfig?.dest.index[0] : jobConfig?.dest.index) ?? '';
+  jobConfig?.dest.index ?? '';

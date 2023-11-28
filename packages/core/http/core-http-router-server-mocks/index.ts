@@ -7,4 +7,10 @@
  */
 
 export { mockRouter } from './src/router.mock';
+export { createVersionedRouterMock } from './src/versioned_router.mock';
+export type {
+  MockedVersionedRoute,
+  MockedVersionedRouter,
+  RegisteredVersionedRoute,
+} from './src/versioned_router.mock';
 export type { RouterMock, RequestFixtureOptions } from './src/router.mock';

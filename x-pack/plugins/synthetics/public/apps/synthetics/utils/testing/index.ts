@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './mock_globals';
 export * from './rtl_helpers';

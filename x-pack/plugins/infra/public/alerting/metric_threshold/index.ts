@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { lazy } from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
@@ -16,9 +16,39 @@ import {
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
 
-interface MetricThresholdRuleTypeParams extends RuleTypeParams {
+export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
 }
+
+const metricThresholdDefaultActionMessage = i18n.translate(
+  'xpack.infra.metrics.alerting.metric.threshold.defaultActionMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active with the following conditions:
+
+- Affected: \\{\\{context.group\\}\\}
+- Metric: \\{\\{context.metric\\}\\}
+- Observed value: \\{\\{context.value\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+const metricThresholdDefaultRecoveryMessage = i18n.translate(
+  'xpack.infra.metrics.alerting.metric.threshold.defaultRecoveryMessage',
+  {
+    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+
+- Affected: \\{\\{context.group\\}\\}
+- Metric: \\{\\{context.metric\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
 
 export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<MetricThresholdRuleTypeParams> {
   return {
@@ -30,19 +60,13 @@ export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<Metr
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.metricsThreshold}`;
     },
-    ruleParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
-    defaultActionMessage: i18n.translate(
-      'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
-
-Reason:
-\\{\\{context.reason\\}\\}
-`,
-      }
-    ),
+    defaultActionMessage: metricThresholdDefaultActionMessage,
+    defaultRecoveryMessage: metricThresholdDefaultRecoveryMessage,
     requiresAppContext: false,
     format: formatReason,
+    alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
+    priority: 10,
   };
 }

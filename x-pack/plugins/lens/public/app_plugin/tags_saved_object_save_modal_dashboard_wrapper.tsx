@@ -28,6 +28,7 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
   initialTags: string[];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   onSave: (props: DashboardSaveProps) => void;
+  getOriginatingPath?: (dashboardId: string) => string;
 };
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -43,6 +44,7 @@ export const TagEnhancedSavedObjectSaveModalDashboard: FC<
         <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
           initialSelection={initialTags}
           onTagsSelected={setSelectedTags}
+          markOptional
         />
       ) : undefined,
     [savedObjectsTagging, initialTags]

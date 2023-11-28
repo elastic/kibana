@@ -113,6 +113,11 @@ const expectedTransformResult = [
     description: 'This has been deprecated in favor of rule.tags.',
     name: 'tags',
   },
+  {
+    deprecated: true,
+    description: 'This has been deprecated in favor of rule.params.',
+    name: 'params',
+  },
 ];
 
 const expectedContextTransformResult = (withBraces: boolean = false) => [
@@ -139,7 +144,7 @@ const expectedStateTransformResult = (withBraces: boolean = false) => [
 const expectedParamsTransformResult = (withBraces: boolean = false) => [
   {
     description: 'fooP-description',
-    name: 'params.fooP',
+    name: 'rule.params.fooP',
     ...(withBraces && { useWithTripleBracesInTemplates: true }),
   },
 ];
@@ -281,7 +286,7 @@ describe('transformActionVariables', () => {
       state: mockStateVariables(),
       params: mockParamsVariables(),
     });
-    expect(transformActionVariables(alertType.actionVariables, 'all')).toEqual([
+    expect(transformActionVariables(alertType.actionVariables, undefined, 'all')).toEqual([
       ...expectedTransformResult,
       ...expectedParamsTransformResult(),
     ]);
@@ -293,7 +298,7 @@ describe('transformActionVariables', () => {
       state: mockStateVariables(),
       params: mockParamsVariables(),
     });
-    expect(transformActionVariables(alertType.actionVariables, 'keepContext')).toEqual([
+    expect(transformActionVariables(alertType.actionVariables, undefined, 'keepContext')).toEqual([
       ...expectedTransformResult,
       ...expectedContextTransformResult(),
       ...expectedParamsTransformResult(),
@@ -301,7 +306,7 @@ describe('transformActionVariables', () => {
   });
   test('should return correct variables when isAlertSummary = true', async () => {
     const alertType = getAlertType({ context: [], state: [], params: [] });
-    expect(transformActionVariables(alertType.actionVariables, undefined, true)).toEqual(
+    expect(transformActionVariables(alertType.actionVariables, undefined, undefined, true)).toEqual(
       expectedSummaryTransformResult
     );
   });

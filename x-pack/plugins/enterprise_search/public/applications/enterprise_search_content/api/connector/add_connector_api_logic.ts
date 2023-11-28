@@ -18,6 +18,7 @@ export interface AddConnectorApiLogicArgs {
   indexName: string;
   isNative: boolean;
   language: string | null;
+  serviceType?: string;
 }
 
 export interface AddConnectorApiLogicResponse {
@@ -30,6 +31,7 @@ export const addConnector = async ({
   indexName,
   isNative,
   language,
+  serviceType,
 }: AddConnectorApiLogicArgs): Promise<AddConnectorApiLogicResponse> => {
   const route = '/internal/enterprise_search/connectors';
 
@@ -41,6 +43,7 @@ export const addConnector = async ({
     index_name: indexName,
     is_native: isNative,
     language,
+    service_type: serviceType,
   };
   const result = await HttpLogic.values.http.post<AddConnectorValue>(route, {
     body: JSON.stringify(params),

@@ -8,14 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React, { memo } from 'react';
+import type { AssigneesUserAction, User } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 import type { SnakeToCamelCase } from '../../../common/types';
-import type { AssigneesUserAction, User } from '../../../common/api';
-import { Actions } from '../../../common/api';
 import { getName } from '../user_profiles/display_name';
 import type { Assignee } from '../user_profiles/types';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { createCommonUpdateUserActionBuilder } from './common';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { UserActionBuilder } from './types';
 import * as i18n from './translations';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 
@@ -126,7 +126,7 @@ const doesAssigneeMatchCreatedByUser = (
 };
 
 const getLabelTitle = (
-  userAction: UserActionResponse<AssigneesUserAction>,
+  userAction: SnakeToCamelCase<AssigneesUserAction>,
   userProfiles?: Map<string, UserProfileWithAvatar>
 ) => {
   const assignees = userAction.payload.assignees.map((assignee) => {
@@ -140,8 +140,8 @@ const getLabelTitle = (
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span" responsive={false}>
       <EuiFlexItem data-test-subj="ua-assignees-label" grow={false}>
-        {userAction.action === Actions.add && i18n.ASSIGNED}
-        {userAction.action === Actions.delete && i18n.UNASSIGNED}
+        {userAction.action === UserActionActions.add && i18n.ASSIGNED}
+        {userAction.action === UserActionActions.delete && i18n.UNASSIGNED}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Assignees createdByUser={userAction.createdBy} assignees={assignees} />
@@ -156,7 +156,7 @@ export const createAssigneesUserActionBuilder: UserActionBuilder = ({
   userProfiles,
 }) => ({
   build: () => {
-    const assigneesUserAction = userAction as UserActionResponse<AssigneesUserAction>;
+    const assigneesUserAction = userAction as SnakeToCamelCase<AssigneesUserAction>;
     const label = getLabelTitle(assigneesUserAction, userProfiles);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,

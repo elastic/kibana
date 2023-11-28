@@ -11,14 +11,26 @@ import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
+import {
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
+import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
+import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import { getInfraHref } from '../links/infra_link';
 import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
-import { TRACE_ID } from '../../../../common/es_fields/apm';
+import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import { ApmRouter } from '../../routing/apm_route_config';
+import {
+  getNodeLogsHref,
+  getTraceLogsHref,
+} from '../links/observability_logs_link';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -35,25 +47,38 @@ export const getSections = ({
   basePath,
   location,
   apmRouter,
+  infraLinksAvailable,
+  profilingLocators,
+  rangeFrom,
+  rangeTo,
+  environment,
+  allDatasetsLocator,
+  logsLocator,
+  nodeLogsLocator,
+  dataViewId,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
   location: Location;
   apmRouter: ApmRouter;
+  infraLinksAvailable: boolean;
+  profilingLocators?: ProfilingLocators;
+  rangeFrom: string;
+  rangeTo: string;
+  environment: Environment;
+  allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
+  logsLocator: LocatorPublic<LogsLocatorParams>;
+  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  dataViewId: string;
 }) => {
   if (!transaction) return [];
+
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
-
-  const routeParams = apmRouter.getParams(
-    '/services/{serviceName}/transactions/view',
-    location
-  );
-  const { rangeFrom, rangeTo, environment } = routeParams.query;
 
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
@@ -69,6 +94,35 @@ export const getSections = ({
     )}`,
   });
 
+  // Logs hrefs
+  const podLogsHref = getNodeLogsHref(
+    'pod',
+    podId!,
+    time,
+    allDatasetsLocator,
+    nodeLogsLocator
+  );
+  const containerLogsHref = getNodeLogsHref(
+    'container',
+    containerId!,
+    time,
+    allDatasetsLocator,
+    nodeLogsLocator
+  );
+  const hostLogsHref = getNodeLogsHref(
+    'host',
+    hostName!,
+    time,
+    allDatasetsLocator,
+    nodeLogsLocator
+  );
+  const traceLogsHref = getTraceLogsHref(
+    transaction.trace.id!,
+    time,
+    allDatasetsLocator,
+    logsLocator
+  );
+
   const podActions: Action[] = [
     {
       key: 'podLogs',
@@ -76,12 +130,7 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
         { defaultMessage: 'Pod logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/pod-logs/${podId}`,
-        query: { time },
-      }),
+      href: podLogsHref,
       condition: !!podId,
     },
     {
@@ -96,7 +145,7 @@ export const getSections = ({
         path: `/link-to/pod-detail/${podId}`,
         query: infraMetricsQuery,
       }),
-      condition: !!podId,
+      condition: !!podId && infraLinksAvailable,
     },
   ];
 
@@ -107,12 +156,7 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
         { defaultMessage: 'Container logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/container-logs/${containerId}`,
-        query: { time },
-      }),
+      href: containerLogsHref,
       condition: !!containerId,
     },
     {
@@ -127,7 +171,7 @@ export const getSections = ({
         path: `/link-to/container-detail/${containerId}`,
         query: infraMetricsQuery,
       }),
-      condition: !!containerId,
+      condition: !!containerId && infraLinksAvailable,
     },
   ];
 
@@ -138,12 +182,7 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
         { defaultMessage: 'Host logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/host-logs/${hostName}`,
-        query: { time },
-      }),
+      href: hostLogsHref,
       condition: !!hostName,
     },
     {
@@ -158,7 +197,43 @@ export const getSections = ({
         path: `/link-to/host-detail/${hostName}`,
         query: infraMetricsQuery,
       }),
-      condition: !!hostName,
+      condition: !!hostName && infraLinksAvailable,
+    },
+    {
+      key: 'hostProfilingFlamegraph',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingFlamegraphLinkLabel',
+        { defaultMessage: 'Host flamegraph' }
+      ),
+      href: profilingLocators?.flamegraphLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
+    },
+    {
+      key: 'hostProfilingTopNFunctions',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingTopNFunctionsLinkLabel',
+        { defaultMessage: 'Host topN functions' }
+      ),
+      href: profilingLocators?.topNFunctionsLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
+    },
+    {
+      key: 'hostProfilingStacktraces',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingStacktracesLinkLabel',
+        { defaultMessage: 'Host stacktraces' }
+      ),
+      href: profilingLocators?.stacktracesLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
     },
   ];
 
@@ -169,15 +244,7 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
         { defaultMessage: 'Trace logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/logs`,
-        query: {
-          time,
-          filter: `trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`,
-        },
-      }),
+      href: traceLogsHref,
       condition: true,
     },
   ];
@@ -206,6 +273,7 @@ export const getSections = ({
         basePath,
         query: getDiscoverQuery(transaction),
         location,
+        dataViewId,
       }),
       condition: true,
     },
@@ -311,7 +379,7 @@ export const getSections = ({
         title: i18n.translate(
           'xpack.apm.transactionActionMenu.serviceMap.title',
           {
-            defaultMessage: 'Service map',
+            defaultMessage: 'Service Map',
           }
         ),
         subtitle: i18n.translate(

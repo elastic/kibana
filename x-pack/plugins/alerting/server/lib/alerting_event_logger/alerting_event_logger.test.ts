@@ -7,6 +7,7 @@
 
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   AlertingEventLogger,
   RuleContextOpts,
@@ -19,7 +20,6 @@ import {
 } from './alerting_event_logger';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
-  ActionsCompletion,
   RecoveredActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
@@ -27,6 +27,7 @@ import {
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
+import { schema } from '@kbn/config-schema';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -40,8 +41,13 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   ruleTaskTimeout: '1m',
+  validate: {
+    params: schema.any(),
+  },
+  validLegacyConsumers: [],
 };
 
 const context: RuleContextOpts = {
@@ -51,6 +57,7 @@ const context: RuleContextOpts = {
   spaceId: 'test-space',
   executionId: 'abcd-efgh-ijklmnop',
   taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
+  ruleRevision: 0,
 };
 
 const contextWithScheduleDelay = { ...context, taskScheduleDelay: 7200000 };
@@ -59,6 +66,7 @@ const contextWithName = { ...contextWithScheduleDelay, ruleName: 'my-super-cool-
 const alert = {
   action: EVENT_LOG_ACTIONS.activeInstance,
   id: 'aaabbb',
+  uuid: 'u-u-i-d',
   message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`,
   group: 'aGroup',
   state: {
@@ -67,6 +75,7 @@ const alert = {
     duration: '2343252346',
   },
   flapping: false,
+  maintenanceWindowIds: ['window-id1', 'window-id2'],
 };
 
 const action = {
@@ -76,12 +85,15 @@ const action = {
   alertGroup: 'aGroup',
 };
 
+let runDate: Date;
+
 describe('AlertingEventLogger', () => {
   let alertingEventLogger: AlertingEventLogger;
 
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(mockNow));
+    runDate = new Date();
   });
 
   beforeEach(() => {
@@ -108,28 +120,28 @@ describe('AlertingEventLogger', () => {
 
   describe('start()', () => {
     test('should throw error if alertingEventLogger has not been initialized', () => {
-      expect(() => alertingEventLogger.start()).toThrowErrorMatchingInlineSnapshot(
+      expect(() => alertingEventLogger.start(runDate)).toThrowErrorMatchingInlineSnapshot(
         `"AlertingEventLogger not initialized"`
       );
     });
 
     test('should throw error if alertingEventLogger rule context is null', () => {
       alertingEventLogger.initialize(null as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.start()).toThrowErrorMatchingInlineSnapshot(
+      expect(() => alertingEventLogger.start(runDate)).toThrowErrorMatchingInlineSnapshot(
         `"AlertingEventLogger not initialized"`
       );
     });
 
     test('should throw error if alertingEventLogger rule context is undefined', () => {
       alertingEventLogger.initialize(undefined as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.start()).toThrowErrorMatchingInlineSnapshot(
+      expect(() => alertingEventLogger.start(runDate)).toThrowErrorMatchingInlineSnapshot(
         `"AlertingEventLogger not initialized"`
       );
     });
 
     test('should call eventLogger "startTiming" and "logEvent"', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
 
       expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -147,7 +159,7 @@ describe('AlertingEventLogger', () => {
       mockEventLoggerStartTiming();
 
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
 
       const event = initializeExecuteRecord(contextWithScheduleDelay);
       expect(alertingEventLogger.getEvent()).toEqual({
@@ -176,7 +188,7 @@ describe('AlertingEventLogger', () => {
 
     test('should update event with rule name correctly', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.setRuleName('my-super-cool-rule');
 
       const event = initializeExecuteRecord(contextWithScheduleDelay);
@@ -208,7 +220,7 @@ describe('AlertingEventLogger', () => {
       mockEventLoggerStartTiming();
 
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.setRuleName('my-super-cool-rule');
       alertingEventLogger.setExecutionSucceeded('success!');
 
@@ -253,7 +265,7 @@ describe('AlertingEventLogger', () => {
       mockEventLoggerStartTiming();
 
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.setExecutionFailed('rule failed!', 'something went wrong!');
 
       const event = initializeExecuteRecord(contextWithScheduleDelay);
@@ -274,6 +286,51 @@ describe('AlertingEventLogger', () => {
           },
         },
         message: 'rule failed!',
+      });
+    });
+  });
+
+  describe('setMaintenanceWindowIds()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.setMaintenanceWindowIds([])
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    test('should throw error if event is null', () => {
+      alertingEventLogger.initialize(context);
+      expect(() =>
+        alertingEventLogger.setMaintenanceWindowIds([])
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    it('should update event maintenance window IDs correctly', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start(runDate);
+      alertingEventLogger.setMaintenanceWindowIds([]);
+
+      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            maintenance_window_ids: [],
+          },
+        },
+      });
+
+      alertingEventLogger.setMaintenanceWindowIds(['test-id-1', 'test-id-2']);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            maintenance_window_ids: ['test-id-1', 'test-id-2'],
+          },
+        },
       });
     });
   });
@@ -401,7 +458,7 @@ describe('AlertingEventLogger', () => {
 
     test('should log event if no status or metrics are provided', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({});
 
       const event = initializeExecuteRecord(contextWithScheduleDelay);
@@ -411,7 +468,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution status if provided', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         status: { lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'), status: 'active' },
       });
@@ -432,7 +489,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution status if execution status is error', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -471,7 +528,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution status if execution status is error and uses "unknown" if no reason is provided', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -510,7 +567,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution status if execution status is error and does not overwrite existing error message', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -553,7 +610,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution status if execution status is warning', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -588,7 +645,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution status if execution status is warning and uses "unknown" if no reason is provided', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -623,7 +680,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution status if execution status is warning and uses existing message if no message is provided', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -660,7 +717,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution metrics if provided', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         metrics: {
           numberOfTriggeredActions: 1,
@@ -673,6 +730,7 @@ describe('AlertingEventLogger', () => {
           totalSearchDurationMs: 10333,
           hasReachedAlertLimit: false,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
+          hasReachedQueuedActionsLimit: false,
         },
       });
 
@@ -711,7 +769,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution timings if provided', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         timings: {
           [TaskRunnerTimerSpan.StartTaskRun]: 10,
@@ -719,8 +777,9 @@ describe('AlertingEventLogger', () => {
           [TaskRunnerTimerSpan.PrepareRule]: 30,
           [TaskRunnerTimerSpan.RuleTypeRun]: 40,
           [TaskRunnerTimerSpan.ProcessAlerts]: 50,
-          [TaskRunnerTimerSpan.TriggerActions]: 60,
-          [TaskRunnerTimerSpan.ProcessRuleRun]: 70,
+          [TaskRunnerTimerSpan.PersistAlerts]: 60,
+          [TaskRunnerTimerSpan.TriggerActions]: 70,
+          [TaskRunnerTimerSpan.ProcessRuleRun]: 80,
         },
       });
 
@@ -741,8 +800,9 @@ describe('AlertingEventLogger', () => {
                   prepare_rule_duration_ms: 30,
                   rule_type_run_duration_ms: 40,
                   process_alerts_duration_ms: 50,
-                  trigger_actions_duration_ms: 60,
-                  process_rule_duration_ms: 70,
+                  persist_alerts_duration_ms: 60,
+                  trigger_actions_duration_ms: 70,
+                  process_rule_duration_ms: 80,
                 },
               },
             },
@@ -756,7 +816,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields from execution metrics and timings if both provided', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         metrics: {
           numberOfTriggeredActions: 1,
@@ -769,6 +829,7 @@ describe('AlertingEventLogger', () => {
           totalSearchDurationMs: 10333,
           hasReachedAlertLimit: false,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
+          hasReachedQueuedActionsLimit: false,
         },
         timings: {
           [TaskRunnerTimerSpan.StartTaskRun]: 10,
@@ -776,8 +837,9 @@ describe('AlertingEventLogger', () => {
           [TaskRunnerTimerSpan.PrepareRule]: 30,
           [TaskRunnerTimerSpan.RuleTypeRun]: 40,
           [TaskRunnerTimerSpan.ProcessAlerts]: 50,
-          [TaskRunnerTimerSpan.TriggerActions]: 60,
-          [TaskRunnerTimerSpan.ProcessRuleRun]: 70,
+          [TaskRunnerTimerSpan.PersistAlerts]: 60,
+          [TaskRunnerTimerSpan.TriggerActions]: 70,
+          [TaskRunnerTimerSpan.ProcessRuleRun]: 80,
         },
       });
 
@@ -808,8 +870,9 @@ describe('AlertingEventLogger', () => {
                   prepare_rule_duration_ms: 30,
                   rule_type_run_duration_ms: 40,
                   process_alerts_duration_ms: 50,
-                  trigger_actions_duration_ms: 60,
-                  process_rule_duration_ms: 70,
+                  persist_alerts_duration_ms: 60,
+                  trigger_actions_duration_ms: 70,
+                  process_rule_duration_ms: 80,
                 },
               },
             },
@@ -823,7 +886,7 @@ describe('AlertingEventLogger', () => {
 
     test('should set fields to 0 execution metrics are provided but undefined', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.done({
         metrics: {} as unknown as RuleRunMetrics,
       });
@@ -863,7 +926,7 @@ describe('AlertingEventLogger', () => {
 
     test('overwrites the message when the final status is error', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.setExecutionSucceeded('success message');
 
       expect(alertingEventLogger.getEvent()!.message).toBe('success message');
@@ -881,7 +944,7 @@ describe('AlertingEventLogger', () => {
 
     test('does not overwrites the message when there is already a failure message', () => {
       alertingEventLogger.initialize(context);
-      alertingEventLogger.start();
+      alertingEventLogger.start(runDate);
       alertingEventLogger.setExecutionFailed('first failure message', 'failure error message');
 
       expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
@@ -1067,6 +1130,7 @@ describe('createAlertRecord', () => {
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
     expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
+    expect(record.kibana?.alert?.maintenance_window_ids).toEqual(alert.maintenanceWindowIds);
     expect(record.kibana?.alerting?.instance_id).toEqual(alert.id);
     expect(record.kibana?.alerting?.action_group_id).toEqual(alert.group);
     expect(record.kibana?.saved_objects).toEqual([
@@ -1089,6 +1153,7 @@ describe('createAlertRecord', () => {
     expect(record.event?.provider).toBeUndefined();
     expect(record.event?.outcome).toBeUndefined();
     expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+    expect(record.kibana?.alert?.uuid).toBe(alert.uuid);
     expect(record.kibana?.server_uuid).toBeUndefined();
     expect(record.kibana?.task).toBeUndefined();
     expect(record.kibana?.version).toBeUndefined();

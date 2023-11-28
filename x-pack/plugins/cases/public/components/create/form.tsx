@@ -17,14 +17,16 @@ import styled, { css } from 'styled-components';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
+import type { ActionConnector } from '../../../common/types/domain';
+import type { CasePostRequest } from '../../../common/types/api';
+import type { CasesConfigurationUI } from '../../../common/ui';
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
 import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import type { ActionConnector, CasePostRequest } from '../../../common/api';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
@@ -42,6 +44,8 @@ import { Severity } from './severity';
 import { Assignees } from './assignees';
 import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
+import { Category } from './category';
+import { CustomFields } from './custom_fields';
 
 interface ContainerProps {
   big?: boolean;
@@ -62,6 +66,8 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
+  customFieldsConfiguration: CasesConfigurationUI['customFields'];
+  isLoadingCaseConfiguration: boolean;
   isLoadingConnectors: boolean;
   withSteps: boolean;
   owner: string[];
@@ -69,10 +75,10 @@ export interface CreateCaseFormFieldsProps {
 }
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
-  onSuccess: (theCase: Case) => Promise<void>;
+  onSuccess: (theCase: CaseUI) => void;
   afterCaseCreated?: (
-    theCase: Case,
-    createAttachments: UseCreateAttachments['createAttachments']
+    theCase: CaseUI,
+    createAttachments: UseCreateAttachments['mutate']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
@@ -81,12 +87,19 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, withSteps, owner, draftStorageKey }) => {
+  ({
+    connectors,
+    isLoadingConnectors,
+    withSteps,
+    owner,
+    draftStorageKey,
+    customFieldsConfiguration,
+    isLoadingCaseConfiguration,
+  }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-
     const availableOwners = useAvailableCasesOwners();
-    const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
+    const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
     const firstStep = useMemo(
       () => ({
@@ -103,6 +116,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
               <Tags isLoading={isSubmitting} />
             </Container>
             <Container>
+              <Category isLoading={isSubmitting} />
+            </Container>
+            <Container>
               <Severity isLoading={isSubmitting} />
             </Container>
             {canShowCaseSolutionSelection && (
@@ -116,6 +132,12 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container big>
               <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
             </Container>
+            <Container>
+              <CustomFields
+                isLoading={isSubmitting || isLoadingCaseConfiguration}
+                customFieldsConfiguration={customFieldsConfiguration}
+              />
+            </Container>
             <Container />
           </>
         ),
@@ -126,6 +148,8 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         canShowCaseSolutionSelection,
         availableOwners,
         draftStorageKey,
+        customFieldsConfiguration,
+        isLoadingCaseConfiguration,
       ]
     );
 
@@ -208,7 +232,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         onConfirmationCallback: handleOnConfirmationCallback,
       });
 
-    const handleOnSuccess = (theCase: Case): Promise<void> => {
+    const handleOnSuccess = (theCase: CaseUI): void => {
       removeItemFromSessionStorage(draftStorageKey);
       return onSuccess(theCase);
     };
@@ -223,7 +247,9 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         >
           <CreateCaseFormFields
             connectors={empty}
+            customFieldsConfiguration={[]}
             isLoadingConnectors={false}
+            isLoadingCaseConfiguration={false}
             withSteps={withSteps}
             owner={owner}
             draftStorageKey={draftStorageKey}

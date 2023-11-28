@@ -8,6 +8,7 @@
 
 import { defaults, keyBy, sortBy } from 'lodash';
 
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
@@ -22,6 +23,7 @@ interface FieldCapabilitiesParams {
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
+  expandWildcards?: ExpandWildcard;
 }
 
 /**
@@ -42,6 +44,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     indexFilter,
     metaFields = [],
     fields,
+    expandWildcards,
   } = params;
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
@@ -49,13 +52,15 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     fieldCapsOptions,
     indexFilter,
     fields,
+    expandWildcards,
   });
-  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
+  const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
+  const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     // not all meta fields are provided, so remove and manually add
     .filter((name) => !fieldsFromFieldCapsByName[name].metadata_field)
-    .concat(metaFields)
+    .concat(fieldCapsArr.length ? metaFields : [])
     .reduce<{ names: string[]; map: Map<string, string> }>(
       (agg, value) => {
         // This is intentionally using a Map to be highly optimized with very large indexes AND be safe for user provided data

@@ -113,14 +113,15 @@ export function Waterfall({
     <Container>
       {waterfall.exceedsMax && (
         <EuiCallOut
+          data-test-subj="apmWaterfallSizeWarning"
           color="warning"
           size="s"
-          iconType="alert"
+          iconType="warning"
           title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
             defaultMessage:
-              'The number of items in this trace is {traceItemCount} which is higher than the current limit of {maxTraceItems}. Please increase the limit to see the full trace',
+              'The number of items in this trace is {traceDocsTotal} which is higher than the current limit of {maxTraceItems}. Please increase the limit via `xpack.apm.ui.maxTraceItems` to see the full trace',
             values: {
-              traceItemCount: waterfall.traceItemCount,
+              traceDocsTotal: waterfall.traceDocsTotal,
               maxTraceItems: waterfall.maxTraceItems,
             },
           })}
@@ -129,6 +130,7 @@ export function Waterfall({
       <div>
         <div style={{ display: 'flex' }}>
           <EuiButtonEmpty
+            data-test-subj="apmWaterfallButton"
             style={{ zIndex: 3, position: 'absolute' }}
             iconType={isAccordionOpen ? 'fold' : 'unfold'}
             onClick={() => {
@@ -160,9 +162,9 @@ export function Waterfall({
               ) => toggleFlyout({ history, item, flyoutDetailTab })}
               showCriticalPath={showCriticalPath}
               maxLevelOpen={
-                waterfall.traceItemCount > 500
+                waterfall.traceDocsTotal > 500
                   ? maxLevelOpen
-                  : waterfall.traceItemCount
+                  : waterfall.traceDocsTotal
               }
             />
           )}

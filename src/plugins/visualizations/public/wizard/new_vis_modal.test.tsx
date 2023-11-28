@@ -12,11 +12,12 @@ import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
 import NewVisModal from './new_vis_modal';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
-    hidden: false,
+    disableCreate: false,
+    disableEdit: false,
     requiresSearch: false,
   };
   const _visTypes = [
@@ -46,8 +47,10 @@ describe('NewVisModal', () => {
       title: 'Vis with alias Url',
       stage: 'production',
       group: VisGroups.PROMOTED,
-      aliasApp: 'otherApp',
-      aliasPath: '#/aliasUrl',
+      alias: {
+        app: 'otherApp',
+        path: '#/aliasUrl',
+      },
     },
     {
       name: 'visWithSearch',
@@ -76,7 +79,8 @@ describe('NewVisModal', () => {
       },
     },
   };
-  const http = httpServiceMock.createStartContract({ basePath: '' });
+
+  const contentManagement = contentManagementMock.createStartContract();
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
@@ -100,7 +104,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
@@ -117,7 +121,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
@@ -133,7 +137,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visType-vis2"]').exists()).toBe(true);
@@ -150,7 +154,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -169,7 +173,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -179,7 +183,7 @@ describe('NewVisModal', () => {
       );
     });
 
-    it('closes and redirects properly if visualization with aliasPath and originatingApp in props', () => {
+    it('closes and redirects properly if visualization with alias.path and originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
@@ -195,7 +199,7 @@ describe('NewVisModal', () => {
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           stateTransfer={stateTransfer}
-          http={http}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -220,7 +224,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -241,7 +245,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
+          contentClient={contentManagement.client}
         />
       );
       const aggBasedGroupCard = wrapper

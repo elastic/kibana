@@ -57,6 +57,7 @@ const RuleStatusComponent: React.FC<Props> = ({
       onClickAriaLabel={onClickAriaLabel}
       iconType={iconType}
       iconSide={iconSide}
+      data-test-subj="rule-status-badge"
     >
       {value}
     </StyledEuiBadge>

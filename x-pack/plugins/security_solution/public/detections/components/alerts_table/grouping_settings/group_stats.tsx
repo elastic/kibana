@@ -7,10 +7,11 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { RawBucket } from '@kbn/securitysolution-grouping';
+import type { RawBucket, StatRenderer } from '@kbn/securitysolution-grouping';
+import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 
-const getSingleGroupSeverity = (severity?: string) => {
+const getSeverity = (severity?: string) => {
   switch (severity) {
     case 'low':
       return (
@@ -63,108 +64,117 @@ const multiSeverity = (
   </>
 );
 
-export const getSelectedGroupBadgeMetrics = (selectedGroup: string, bucket: RawBucket) => {
-  const defaultBadges = [
-    {
-      title: i18n.STATS_GROUP_ALERTS,
-      value: bucket.doc_count,
-      width: 50,
-      color: '#a83632',
-    },
-  ];
-  switch (selectedGroup) {
-    case 'kibana.alert.rule.name':
-      return [
-        {
-          title: i18n.STATS_GROUP_USERS,
-          value: bucket.usersCountAggregation?.value ?? 0,
-        },
-        {
-          title: i18n.STATS_GROUP_HOSTS,
-          value: bucket.hostsCountAggregation?.value ?? 0,
-        },
-        ...defaultBadges,
-      ];
-    case 'host.name':
-      return [
-        {
-          title: i18n.STATS_GROUP_USERS,
-          value: bucket.usersCountAggregation?.value ?? 0,
-        },
-        {
-          title: i18n.STATS_GROUP_RULES,
-          value: bucket.rulesCountAggregation?.value ?? 0,
-        },
-        ...defaultBadges,
-      ];
-    case 'user.name':
-      return [
-        {
-          title: i18n.STATS_GROUP_IPS,
-          value: bucket.hostsCountAggregation?.value ?? 0,
-        },
-        {
-          title: i18n.STATS_GROUP_RULES,
-          value: bucket.rulesCountAggregation?.value ?? 0,
-        },
-        ...defaultBadges,
-      ];
-    case 'source.ip':
-      return [
-        {
-          title: i18n.STATS_GROUP_IPS,
-          value: bucket.hostsCountAggregation?.value ?? 0,
-        },
-        {
-          title: i18n.STATS_GROUP_RULES,
-          value: bucket.rulesCountAggregation?.value ?? 0,
-        },
-        ...defaultBadges,
-      ];
-  }
-  return [
-    {
-      title: i18n.STATS_GROUP_RULES,
-      value: bucket.rulesCountAggregation?.value ?? 0,
-    },
-    ...defaultBadges,
-  ];
-};
-
-export const getSelectedGroupCustomMetrics = (selectedGroup: string, bucket: RawBucket) => {
+export const getStats = (
+  selectedGroup: string,
+  bucket: RawBucket<AlertsGroupingAggregation>
+): StatRenderer[] => {
   const singleSeverityComponent =
     bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
-      ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())
+      ? getSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())
       : null;
   const severityComponent =
     bucket.countSeveritySubAggregation?.value && bucket.countSeveritySubAggregation?.value > 1
       ? multiSeverity
       : singleSeverityComponent;
-  if (!severityComponent) {
-    return [];
-  }
+
+  const severityStat = !severityComponent
+    ? []
+    : [
+        {
+          title: i18n.STATS_GROUP_SEVERITY,
+          renderer: severityComponent,
+        },
+      ];
+
+  const defaultBadges = [
+    {
+      title: i18n.STATS_GROUP_ALERTS,
+      badge: {
+        value: bucket.doc_count,
+        width: 50,
+        color: '#a83632',
+      },
+    },
+  ];
+
   switch (selectedGroup) {
     case 'kibana.alert.rule.name':
       return [
+        ...severityStat,
         {
-          title: i18n.STATS_GROUP_SEVERITY,
-          customStatRenderer: severityComponent,
+          title: i18n.STATS_GROUP_USERS,
+          badge: {
+            value: bucket.usersCountAggregation?.value ?? 0,
+          },
         },
+        {
+          title: i18n.STATS_GROUP_HOSTS,
+          badge: {
+            value: bucket.hostsCountAggregation?.value ?? 0,
+          },
+        },
+        ...defaultBadges,
       ];
     case 'host.name':
       return [
+        ...severityStat,
         {
-          title: i18n.STATS_GROUP_SEVERITY,
-          customStatRenderer: severityComponent,
+          title: i18n.STATS_GROUP_USERS,
+          badge: {
+            value: bucket.usersCountAggregation?.value ?? 0,
+          },
         },
+        {
+          title: i18n.STATS_GROUP_RULES,
+          badge: {
+            value: bucket.rulesCountAggregation?.value ?? 0,
+          },
+        },
+        ...defaultBadges,
       ];
     case 'user.name':
       return [
+        ...severityStat,
         {
-          title: i18n.STATS_GROUP_SEVERITY,
-          customStatRenderer: severityComponent,
+          title: i18n.STATS_GROUP_HOSTS,
+          badge: {
+            value: bucket.hostsCountAggregation?.value ?? 0,
+          },
         },
+        {
+          title: i18n.STATS_GROUP_RULES,
+          badge: {
+            value: bucket.rulesCountAggregation?.value ?? 0,
+          },
+        },
+        ...defaultBadges,
+      ];
+    case 'source.ip':
+      return [
+        ...severityStat,
+        {
+          title: i18n.STATS_GROUP_HOSTS,
+          badge: {
+            value: bucket.hostsCountAggregation?.value ?? 0,
+          },
+        },
+        {
+          title: i18n.STATS_GROUP_RULES,
+          badge: {
+            value: bucket.rulesCountAggregation?.value ?? 0,
+          },
+        },
+        ...defaultBadges,
       ];
   }
-  return [];
+  return [
+    ...severityStat,
+    {
+      title: i18n.STATS_GROUP_RULES,
+      badge: {
+        value: bucket.rulesCountAggregation?.value ?? 0,
+      },
+    },
+    ...defaultBadges,
+  ];
 };

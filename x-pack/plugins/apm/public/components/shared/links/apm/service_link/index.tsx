@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
@@ -16,13 +17,9 @@ import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent'
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
-import { AgentIcon } from '../../../agent_icon';
 import { PopoverTooltip } from '../../../popover_tooltip';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
-import {
-  OTHER_SERVICE_NAME,
-  ServiceMaxGroupsMessage,
-} from './service_max_groups_message';
+import { OTHER_SERVICE_NAME, MaxGroupsMessage } from '../max_groups_message';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -40,7 +37,6 @@ export function ServiceLink({
   agentName,
   query,
   serviceName,
-  serviceOverflowCount,
 }: ServiceLinkProps) {
   const { link } = useApmRouter();
 
@@ -67,12 +63,10 @@ export function ServiceLink({
               defaultMessage:
                 'Number of services instrumented has reached the current capacity of the APM server',
             })}
-            iconType="alert"
+            iconType="warning"
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
-              <ServiceMaxGroupsMessage
-                serviceOverflowCount={serviceOverflowCount}
-              />
+              <MaxGroupsMessage />
             </EuiText>
           </PopoverTooltip>
         </EuiFlexItem>
@@ -94,7 +88,7 @@ export function ServiceLink({
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <AgentIcon agentName={agentName} />
+              <AgentIcon agentName={agentName} size="l" />
             </EuiFlexItem>
             <EuiFlexItem className="eui-textTruncate">
               <span className="eui-textTruncate">{serviceName}</span>

@@ -21,6 +21,7 @@ import type {
   RiskSeverity,
   RiskScoreFields,
 } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { State } from '../../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import * as i18nHosts from './translations';
@@ -30,6 +31,7 @@ import { SeverityBar } from '../../../components/risk_score/severity/severity_ba
 import { SeverityFilterGroup } from '../../../components/risk_score/severity/severity_filter_group';
 
 import type { SeverityCount } from '../../../components/risk_score/severity/types';
+import { RiskInformationButtonEmpty } from '../../../components/risk_score/risk_information';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -58,6 +60,7 @@ interface HostRiskScoreTableProps {
 
 export type HostRiskScoreColumns = [
   Columns<RiskScoreItem[RiskScoreFields.hostName]>,
+  Columns<RiskScoreItem[RiskScoreFields.timestamp]>,
   Columns<RiskScoreItem[RiskScoreFields.hostRiskScore]>,
   Columns<RiskScoreItem[RiskScoreFields.hostRisk]>
 ];
@@ -172,17 +175,23 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerFilters={
-        <SeverityFilterGroup
-          selectedSeverities={severitySelectionRedux}
-          severityCount={severityCount}
-          title={i18n.HOST_RISK}
-          onSelect={onSelect}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.host} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SeverityFilterGroup
+              selectedSeverities={severitySelectionRedux}
+              severityCount={severityCount}
+              onSelect={onSelect}
+              riskEntity={RiskScoreEntity.host}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       headerSupplement={risk}
       headerTitle={i18nHosts.HOST_RISK_TITLE}
       headerUnit={i18n.UNIT(totalCount)}
-      headerTooltip={i18nHosts.HOST_RISK_TABLE_TOOLTIP}
       id={id}
       isInspect={isInspect}
       itemsPerRow={rowItems}

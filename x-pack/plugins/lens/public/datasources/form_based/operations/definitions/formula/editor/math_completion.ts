@@ -23,10 +23,11 @@ import type {
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import moment from 'moment';
+import { nonNullable } from '../../../../../../utils';
 import { DateRange } from '../../../../../../../common/types';
 import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { tinymathFunctions, groupArgsByType, unquotedStringRegex, nonNullable } from '../util';
+import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
@@ -218,7 +219,9 @@ export function getPossibleFunctions(
   available.forEach((a) => {
     if (a.operationMetaData.dataType === 'number' && !a.operationMetaData.isBucketed) {
       possibleOperationNames.push(
-        ...a.operations.filter((o) => o.type !== 'managedReference').map((o) => o.operationType)
+        ...a.operations
+          .filter((o) => o.type !== 'managedReference' || o.usedInMath)
+          .map((o) => o.operationType)
       );
     }
   });
@@ -606,7 +609,7 @@ function getSignaturesForFunction(
         }
       : null;
 
-    const functionLabel = getFunctionSignatureLabel(name, operationDefinitionMap, firstParam);
+    const functionLabel = getFunctionSignatureLabel(name, operationDefinitionMap);
     const documentation = getOperationTypeHelp(name, operationDefinitionMap);
     if ('operationParams' in def && def.operationParams) {
       return [

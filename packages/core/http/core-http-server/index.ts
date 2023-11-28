@@ -107,6 +107,8 @@ export type { ICspConfig } from './src/csp';
 
 export type { IExternalUrlConfig } from './src/external_url';
 
+export type { IHttpEluMonitorConfig } from './src/elu_monitor';
+
 export type { IBasePath } from './src/base_path';
 
 export type {
@@ -128,3 +130,17 @@ export type {
   HttpServiceSetup,
   HttpServiceStart,
 } from './src/http_contract';
+
+export type {
+  AddVersionOpts,
+  VersionedRouteRequestValidation,
+  VersionedRouteResponseValidation,
+  ApiVersion,
+  FullValidationConfig,
+  VersionedRoute,
+  VersionedRouteConfig,
+  VersionedRouteRegistrar,
+  VersionedRouter,
+} from './src/versioning';
+
+export type { IStaticAssets } from './src/static_assets';

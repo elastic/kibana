@@ -20,8 +20,11 @@ import { ALERTS_HEADERS_RULE_NAME } from '../../alerts_table/translations';
 import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import * as i18n from './translations';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
-export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTypeData>> => [
+export const getAlertsTypeTableColumns = (
+  isAlertTypeEnabled: boolean
+): Array<EuiBasicTableColumn<AlertsTypeData>> => [
   {
     field: 'rule',
     name: ALERTS_HEADERS_RULE_NAME,
@@ -42,35 +45,39 @@ export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTyp
       </EuiText>
     ),
   },
-  {
-    field: 'type',
-    name: i18n.ALERTS_TYPE_COLUMN_TITLE,
-    'data-test-subj': 'detectionsTable-type',
-    truncateText: true,
-    render: (type: string) => {
-      return (
-        <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
-          <EuiText grow={false} size="xs">
-            <SecurityCellActions
-              mode={CellActionsMode.HOVER}
-              visibleCellActions={4}
-              showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'event.type',
-                value: 'denied',
-                type: 'keyword',
-              }}
-              metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
-            >
-              {ALERT_TYPE_LABEL[type as AlertType]}
-            </SecurityCellActions>
-          </EuiText>
-        </EuiHealth>
-      );
-    },
-    width: '30%',
-  },
+  ...(isAlertTypeEnabled
+    ? [
+        {
+          field: 'type',
+          name: i18n.ALERTS_TYPE_COLUMN_TITLE,
+          'data-test-subj': 'detectionsTable-type',
+          truncateText: true,
+          render: (type: string) => {
+            return (
+              <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
+                <EuiText grow={false} size="xs">
+                  <SecurityCellActions
+                    mode={CellActionsMode.HOVER_DOWN}
+                    visibleCellActions={4}
+                    showActionTooltips
+                    triggerId={SecurityCellActionsTrigger.DEFAULT}
+                    data={{
+                      value: 'denied',
+                      field: 'event.type',
+                    }}
+                    sourcererScopeId={SourcererScopeName.detections}
+                    metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
+                  >
+                    {ALERT_TYPE_LABEL[type as AlertType]}
+                  </SecurityCellActions>
+                </EuiText>
+              </EuiHealth>
+            );
+          },
+          width: '30%',
+        },
+      ]
+    : []),
   {
     field: 'value',
     name: COUNT_TABLE_TITLE,

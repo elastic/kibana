@@ -10,6 +10,7 @@ import { ActionsCommonServiceProvider } from './common';
 import { ActionsOpsgenieServiceProvider } from './opsgenie';
 import { ActionsTinesServiceProvider } from './tines';
 import { ActionsAPIServiceProvider } from './api';
+import { ActionsSlackServiceProvider } from './slack';
 
 export function ActionsServiceProvider(context: FtrProviderContext) {
   const common = ActionsCommonServiceProvider(context);
@@ -19,5 +20,6 @@ export function ActionsServiceProvider(context: FtrProviderContext) {
     common: ActionsCommonServiceProvider(context),
     opsgenie: ActionsOpsgenieServiceProvider(context, common),
     tines: ActionsTinesServiceProvider(context, common),
+    slack: ActionsSlackServiceProvider(context, common),
   };
 }

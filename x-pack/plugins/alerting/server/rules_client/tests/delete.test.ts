@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
+
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -17,6 +23,18 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { migrateLegacyActions } from '../lib';
+
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
+(migrateLegacyActions as jest.Mock).mockResolvedValue({
+  hasLegacyActions: false,
+  resultedActions: [],
+  resultedReferences: [],
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -29,12 +47,14 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   authorization: authorization as unknown as AlertingAuthorization,
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
@@ -43,11 +63,16 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -161,6 +186,20 @@ describe('delete()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
+  test(`doesn't invalidate API key if set by the user when authenticated using api keys`, async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+
+    await rulesClient.delete({ id: '1' });
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+  });
+
   test('swallows error when invalidate API key throws', async () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await rulesClient.delete({ id: '1' });
@@ -197,6 +236,27 @@ describe('delete()', () => {
     await expect(rulesClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"TM Fail"`
     );
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions', async () => {
+      const existingDecryptedSiemAlert = {
+        ...existingDecryptedAlert,
+        attributes: { ...existingDecryptedAlert.attributes, consumer: AlertConsumers.SIEM },
+      };
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        existingDecryptedSiemAlert
+      );
+
+      await rulesClient.delete({ id: '1' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: '1',
+        skipActionsValidation: true,
+        attributes: existingDecryptedSiemAlert.attributes,
+      });
+    });
   });
 
   describe('authorization', () => {

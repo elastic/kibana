@@ -210,6 +210,7 @@
             "type": "Function",
             "tags": [
               "property",
+              "property",
               "property"
             ],
             "label": "bulkCreate",
@@ -743,6 +744,7 @@
             "id": "def-common.ISavedObjectsRepository.bulkGet",
             "type": "Function",
             "tags": [
+              "property",
               "property"
             ],
             "label": "bulkGet",
@@ -763,8 +765,8 @@
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-common.SavedObjectsGetOptions",
+                "text": "SavedObjectsGetOptions"
               },
               " | undefined) => Promise<",
               {
@@ -811,15 +813,15 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the bulk get operation"
+                  "{@link SavedObjectsGetOptions } - options for the bulk get operation"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
+                    "section": "def-common.SavedObjectsGetOptions",
+                    "text": "SavedObjectsGetOptions"
                   },
                   " | undefined"
                 ],
@@ -838,6 +840,7 @@
             "id": "def-common.ISavedObjectsRepository.bulkResolve",
             "type": "Function",
             "tags": [
+              "property",
               "property"
             ],
             "label": "bulkResolve",
@@ -858,8 +861,8 @@
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-common.SavedObjectsResolveOptions",
+                "text": "SavedObjectsResolveOptions"
               },
               " | undefined) => Promise<",
               {
@@ -906,15 +909,15 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the bulk resolve operation"
+                  "{@link SavedObjectsResolveOptions } - options for the bulk resolve operation"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
+                    "section": "def-common.SavedObjectsResolveOptions",
+                    "text": "SavedObjectsResolveOptions"
                   },
                   " | undefined"
                 ],
@@ -933,6 +936,7 @@
             "id": "def-common.ISavedObjectsRepository.get",
             "type": "Function",
             "tags": [
+              "property",
               "property"
             ],
             "label": "get",
@@ -945,8 +949,8 @@
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-common.SavedObjectsGetOptions",
+                "text": "SavedObjectsGetOptions"
               },
               " | undefined) => Promise<",
               {
@@ -1003,15 +1007,15 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the get operation"
+                  "{@link SavedObjectsGetOptions } - options for the get operation"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
+                    "section": "def-common.SavedObjectsGetOptions",
+                    "text": "SavedObjectsGetOptions"
                   },
                   " | undefined"
                 ],
@@ -1030,6 +1034,7 @@
             "id": "def-common.ISavedObjectsRepository.resolve",
             "type": "Function",
             "tags": [
+              "property",
               "property"
             ],
             "label": "resolve",
@@ -1042,8 +1047,8 @@
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-common.SavedObjectsResolveOptions",
+                "text": "SavedObjectsResolveOptions"
               },
               " | undefined) => Promise<",
               {
@@ -1100,15 +1105,15 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the resolve operation"
+                  "{@link SavedObjectsResolveOptions } - options for the resolve operation"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
+                    "section": "def-common.SavedObjectsResolveOptions",
+                    "text": "SavedObjectsResolveOptions"
                   },
                   " | undefined"
                 ],
@@ -2067,6 +2072,40 @@
             "returnComment": [
               "- the point-in-time finder {@link ISavedObjectsPointInTimeFinder }"
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.ISavedObjectsRepository.getCurrentNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentNamespace",
+            "description": [
+              "\nIf the spaces extension is enabled, it's used to get the current namespace (and optionally throws an error if a\nconsumer attempted to specify the namespace explicitly).\n\nIf the spaces extension is *not* enabled, this function simply normalizes the specified namespace so that\n`'default'` can be used interchangeably with `undefined` i.e. the method always returns `undefined` for the default\nnamespace."
+            ],
+            "signature": [
+              "(namespace?: string | undefined) => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-common.ISavedObjectsRepository.getCurrentNamespace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2234,10 +2273,12 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObject.migrationVersion",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
             "description": [
-              "{@inheritdoc SavedObjectsMigrationVersion}"
+              "\n{@inheritdoc SavedObjectsMigrationVersion}"
             ],
             "signature": [
               {
@@ -2250,8 +2291,198 @@
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-api-browser",
+                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -2261,6 +2492,22 @@
             "label": "coreMigrationVersion",
             "description": [
               "A semver value that is used when upgrading objects between Kibana versions."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObject.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [
+              "A semver value that is used when migrating documents between Kibana versions."
             ],
             "signature": [
               "string | undefined"
@@ -2296,6 +2543,22 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObject.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
@@ -2341,35 +2604,31 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
@@ -2384,14 +2643,6 @@
             "path": "x-pack/plugins/actions/server/types.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/common/rule.ts"
           },
@@ -2425,11 +2676,35 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "path": "x-pack/plugins/alerting/common/rule.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
           },
           {
             "plugin": "alerting",
@@ -2438,6 +2713,14 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "alerting",
@@ -2532,40 +2815,8 @@
             "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_extract_panel_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_extract_panel_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts"
+            "plugin": "taskManager",
+            "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
           },
           {
             "plugin": "alerting",
@@ -2947,10 +3198,12 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObjectsBulkCreateObject.migrationVersion",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
             "description": [
-              "{@inheritDoc SavedObjectsMigrationVersion}"
+              "\n{@inheritDoc SavedObjectsMigrationVersion}"
             ],
             "signature": [
               {
@@ -2963,8 +3216,18 @@
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/bulk_create.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -2974,6 +3237,22 @@
             "label": "coreMigrationVersion",
             "description": [
               "\nA semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current\nKibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the\ncurrent Kibana version, it will result in an error.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsBulkCreateObject.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [
+              "A semver value that is used when migrating documents between Kibana versions."
             ],
             "signature": [
               "string | undefined"
@@ -3009,6 +3288,22 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsBulkCreateObject.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
@@ -3748,7 +4043,7 @@
         "tags": [],
         "label": "SavedObjectsClientContract",
         "description": [
-          "\nSaved Objects is Kibana's data persisentence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in {@link SavedObjectsErrorHelpers}\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistence and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee {@link SavedObjectsClient}\nSee {@link SavedObjectsErrorHelpers}\n"
+          "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in {@link SavedObjectsErrorHelpers}\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistence and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee {@link SavedObjectsClient}\nSee {@link SavedObjectsErrorHelpers}\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
         "deprecated": false,
@@ -4296,8 +4591,8 @@
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-common.SavedObjectsGetOptions",
+                "text": "SavedObjectsGetOptions"
               },
               " | undefined) => Promise<",
               {
@@ -4344,15 +4639,15 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the bulk get operation"
+                  "{@link SavedObjectsGetOptions } - options for the bulk get operation"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
+                    "section": "def-common.SavedObjectsGetOptions",
+                    "text": "SavedObjectsGetOptions"
                   },
                   " | undefined"
                 ],
@@ -4381,8 +4676,8 @@
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-common.SavedObjectsGetOptions",
+                "text": "SavedObjectsGetOptions"
               },
               " | undefined) => Promise<",
               {
@@ -4439,15 +4734,15 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the get operation"
+                  "{@link SavedObjectsGetOptions } - options for the get operation"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
+                    "section": "def-common.SavedObjectsGetOptions",
+                    "text": "SavedObjectsGetOptions"
                   },
                   " | undefined"
                 ],
@@ -4484,8 +4779,8 @@
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-common.SavedObjectsResolveOptions",
+                "text": "SavedObjectsResolveOptions"
               },
               " | undefined) => Promise<",
               {
@@ -4532,15 +4827,15 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the bulk resolve operation"
+                  "{@link SavedObjectsResolveOptions } - options for the bulk resolve operation"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
+                    "section": "def-common.SavedObjectsResolveOptions",
+                    "text": "SavedObjectsResolveOptions"
                   },
                   " | undefined"
                 ],
@@ -4569,8 +4864,8 @@
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
+                "section": "def-common.SavedObjectsResolveOptions",
+                "text": "SavedObjectsResolveOptions"
               },
               " | undefined) => Promise<",
               {
@@ -4627,15 +4922,15 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the resolve operation"
+                  "{@link SavedObjectsResolveOptions } - options for the resolve operation"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
+                    "section": "def-common.SavedObjectsResolveOptions",
+                    "text": "SavedObjectsResolveOptions"
                   },
                   " | undefined"
                 ],
@@ -4927,7 +5222,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsRemoveReferencesToOptions } - options for the remove references opertion"
+                  "{@link SavedObjectsRemoveReferencesToOptions } - options for the remove references operation"
                 ],
                 "signature": [
                   {
@@ -5175,7 +5470,7 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [
-                  "{@link SavedObjectsCreatePointInTimeFinderDependencies } - dependencies for the create PIT fimder operation"
+                  "{@link SavedObjectsCreatePointInTimeFinderDependencies } - dependencies for the create PIT finder operation"
                 ],
                 "signature": [
                   {
@@ -5416,6 +5711,24 @@
             "returnComment": [
               "the {@link SavedObjectsUpdateObjectsSpacesResponse }"
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsClientContract.getCurrentNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentNamespace",
+            "description": [
+              "\nReturns the namespace associated with the client. If the namespace is the default one, this method returns `undefined`."
+            ],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5544,7 +5857,8 @@
               "Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences'"
             ],
             "signature": [
-              "\"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | undefined"
+              "SavedObjectsCollectMultiNamespaceReferencesPurpose",
+              " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
@@ -5674,10 +5988,12 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObjectsCreateOptions.migrationVersion",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
             "description": [
-              "{@inheritDoc SavedObjectsMigrationVersion}"
+              "\n{@inheritDoc SavedObjectsMigrationVersion}"
             ],
             "signature": [
               {
@@ -5690,8 +6006,30 @@
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/create.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/workpad_route_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5701,6 +6039,22 @@
             "label": "coreMigrationVersion",
             "description": [
               "\nA semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current\nKibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the\ncurrent Kibana version, it will result in an error.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsCreateOptions.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [
+              "\nA semver value that is used when migrating documents between Kibana versions."
             ],
             "signature": [
               "string | undefined"
@@ -5782,6 +6136,38 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsCreateOptions.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsCreateOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
@@ -6098,7 +6484,7 @@
             "tags": [],
             "label": "fields",
             "description": [
-              "\nAn array of fields to include in the results"
+              "\nAn array of attributes to fetch and include in the results. If unspecified, all attributes will be fetched.\n\nThe main purpose of this option is to avoid fetching unnecessary heavy fields (e.g blobs) when searching for\nsavedObjects, for performance purposes.\n\nDefaults to `undefined` (fetching all fields).\n"
             ],
             "signature": [
               "string[] | undefined"
@@ -6388,6 +6774,22 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsFindOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6620,6 +7022,55 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-common.SavedObjectsGetOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsGetOptions",
+        "description": [
+          "\nOptions for the saved objects get operation\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsGetOptions",
+            "text": "SavedObjectsGetOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsBaseOptions",
+            "text": "SavedObjectsBaseOptions"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsGetOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
         "id": "def-common.SavedObjectsIncrementCounterField",
         "type": "Interface",
         "tags": [],
@@ -6713,10 +7164,12 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObjectsIncrementCounterOptions.migrationVersion",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
             "description": [
-              "{@link SavedObjectsMigrationVersion}"
+              "\n{@link SavedObjectsMigrationVersion}"
             ],
             "signature": [
               {
@@ -6727,6 +7180,32 @@
                 "text": "SavedObjectsMigrationVersion"
               },
               " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/internals/increment_counter_internal.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-api-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsIncrementCounterOptions.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [
+              "\nA semver value that is used when migrating documents between Kibana versions."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
             "deprecated": false,
@@ -6766,6 +7245,22 @@
             ],
             "signature": [
               "Attributes | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsIncrementCounterOptions.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nFlag indicating if a saved object is managed by Kibana (default=false).\nOnly used when upserting a saved object. If the saved object already\nexist this option has no effect.\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
             "deprecated": false,
@@ -7009,6 +7504,55 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-common.SavedObjectsResolveOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsResolveOptions",
+        "description": [
+          "\nOptions for the saved objects get operation\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsResolveOptions",
+            "text": "SavedObjectsResolveOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsBaseOptions",
+            "text": "SavedObjectsBaseOptions"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsResolveOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
         "id": "def-common.SavedObjectsResolveResponse",
         "type": "Interface",
         "tags": [],
@@ -7063,7 +7607,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
+              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
             "deprecated": false,
@@ -7359,7 +7903,7 @@
             "tags": [],
             "label": "version",
             "description": [
-              "\nAn opaque version number which changes on each successful write operation.\nCan be used for implementing optimistic concurrency control."
+              "\nAn opaque version number which changes on each successful write operation.\nCan be used for implementing optimistic concurrency control.\nUnused for multi-namespace objects"
             ],
             "signature": [
               "string | undefined"
@@ -7441,6 +7985,22 @@
             ],
             "signature": [
               "number | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsUpdateOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
             "deprecated": false,
@@ -7632,11 +8192,27 @@
           "\nOptions for the create point-in-time finder operation\n"
         ],
         "signature": [
-          "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
+          "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; sortField?: string | undefined; fields?: string[] | undefined; preference?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; sortOrder?: ",
+          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
+          "[] | undefined; sortField?: string | undefined; preference?: string | undefined; sortOrder?: ",
           "SortOrder",
-          " | undefined; hasReference?: ",
+          " | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -7652,23 +8228,7 @@
             "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindOptionsReference",
-            "text": "SavedObjectsFindOptionsReference"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindOptionsReference",
-            "text": "SavedObjectsFindOptionsReference"
-          },
-          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; }"
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; migrationVersionCompatibility?: \"raw\" | \"compatible\" | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create_point_in_time_finder.ts",
         "deprecated": false,

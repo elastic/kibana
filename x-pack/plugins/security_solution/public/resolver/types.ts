@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type ResizeObserver from 'resize-observer-polyfill';
+import type { ResizeObserver } from '@juggle/resize-observer';
 import type React from 'react';
-import type { Store, Middleware, Dispatch } from 'redux';
+import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
 import type { BBox } from 'rbush';
 import type { Provider } from 'react-redux';
-import type { ResolverAction } from './store/actions';
 import type {
   ResolverNode,
   ResolverRelatedEvents,
@@ -21,7 +20,15 @@ import type {
   ResolverSchema,
 } from '../../common/endpoint/types';
 import type { Tree } from '../../common/endpoint/generate_data';
+import type { State } from '../common/store/types';
 
+export interface AnalyzerState {
+  analyzer: AnalyzerById;
+}
+
+export interface AnalyzerById {
+  [id: string]: ResolverState;
+}
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
  */
@@ -380,7 +387,7 @@ export interface DataState {
 /**
  * Represents an ordered pair. Used for x-y coordinates and the like.
  */
-export type Vector2 = readonly [number, number];
+export type Vector2 = [number, number];
 
 /**
  * A rectangle with sides that align with the `x` and `y` axises.
@@ -646,7 +653,7 @@ export type ResolverProcessType =
   | 'processError'
   | 'unknownEvent';
 
-export type ResolverStore = Store<ResolverState, ResolverAction>;
+export type ResolverStore = Store<State, AnyAction>;
 
 /**
  * Describes the basic Resolver graph layout.
@@ -827,11 +834,11 @@ export interface ResolverProps {
 export interface SpyMiddlewareStateActionPair {
   /** An action dispatched, `state` is the state that the reducer returned when handling this action.
    */
-  action: ResolverAction;
+  action: AnyAction;
   /**
    * A resolver state that was returned by the reducer when handling `action`.
    */
-  state: ResolverState;
+  state: State;
 }
 
 /**
@@ -841,7 +848,7 @@ export interface SpyMiddleware {
   /**
    * A middleware to use with `applyMiddleware`.
    */
-  middleware: Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
+  middleware: Middleware<{}, State, Dispatch<AnyAction>>;
   /**
    * A generator that returns all state and action pairs that pass through the middleware.
    */
@@ -866,7 +873,7 @@ export interface ResolverPluginSetup {
    * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
    * All data acess (e.g. HTTP requests) are done through the store.
    */
-  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<AnalyzerById, AnyAction>;
 
   /**
    * The Resolver component without the required Providers.

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
+export interface VisualizationsServerSetup {
+  registerReadOnlyVisType: (visType: string) => void;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface VisualizationsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface VisualizationsPluginStart {}
+export interface VisualizationsServerStart {}

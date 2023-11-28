@@ -83,6 +83,19 @@ describe('KQL Custom Transform Generator', () => {
     expect(transform.source.index).toBe('my-own-index*');
   });
 
+  it('uses the provided timestampField', async () => {
+    const anSLO = createSLO({
+      indicator: createKQLCustomIndicator({
+        timestampField: 'my-date-field',
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.sync?.time?.field).toBe('my-date-field');
+    // @ts-ignore
+    expect(transform.pivot?.group_by['@timestamp'].date_histogram.field).toBe('my-date-field');
+  });
+
   it('aggregates using the numerator kql', async () => {
     const anSLO = createSLO({
       indicator: createKQLCustomIndicator({

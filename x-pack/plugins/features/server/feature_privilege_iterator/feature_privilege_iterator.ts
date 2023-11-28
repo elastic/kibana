@@ -92,10 +92,8 @@ function mergeWithSubFeatures(
     mergedConfig.management = [managementEntries, subFeatureManagementEntries]
       .flat()
       .reduce((acc, [sectionId, managementApps]) => {
-        return {
-          ...acc,
-          [sectionId]: mergeArrays(acc[sectionId], managementApps),
-        };
+        acc[sectionId] = mergeArrays(acc[sectionId], managementApps);
+        return acc;
       }, {} as Record<string, string[]>);
 
     mergedConfig.ui = mergeArrays(mergedConfig.ui, subFeaturePrivilege.ui);
@@ -149,6 +147,10 @@ function mergeWithSubFeatures(
         subFeaturePrivilege.cases?.delete ?? []
       ),
       push: mergeArrays(mergedConfig.cases?.push ?? [], subFeaturePrivilege.cases?.push ?? []),
+      settings: mergeArrays(
+        mergedConfig.cases?.settings ?? [],
+        subFeaturePrivilege.cases?.settings ?? []
+      ),
     };
   }
   return mergedConfig;

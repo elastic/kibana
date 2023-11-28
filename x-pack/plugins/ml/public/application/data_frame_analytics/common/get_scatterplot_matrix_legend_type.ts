@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ANALYSIS_CONFIG_TYPE } from './analytics';
+import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
 
 import { AnalyticsJobType } from '../pages/analytics_management/hooks/use_create_analytics_form/state';
 

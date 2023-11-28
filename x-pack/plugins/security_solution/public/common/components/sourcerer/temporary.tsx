@@ -20,7 +20,8 @@ import React, { useMemo } from 'react';
 import * as i18n from './translations';
 import { Blockquote, ResetButton } from './helpers';
 import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
-import { TimelineId, TimelineType } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types';
+import { TimelineType } from '../../../../common/api/timeline';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -106,12 +107,13 @@ export const TemporarySourcererComp = React.memo<Props>(
     const timelineType = useDeepEqualSelector(
       (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).timelineType
     );
+
     return (
       <>
         <EuiCallOut
           color="warning"
           data-test-subj="sourcerer-deprecated-callout"
-          iconType="alert"
+          iconType="warning"
           size="s"
           title={translations[isModified].title[timelineType]}
         />
@@ -138,14 +140,15 @@ export const TemporarySourcererComp = React.memo<Props>(
               )}
               {isModified === 'missingPatterns' && (
                 <>
-                  <FormattedMessage
-                    data-test-subj="sourcerer-missing-patterns-callout"
-                    id="xpack.securitySolution.indexPatterns.missingPatterns.callout"
-                    defaultMessage="Security Data View is missing the following index patterns: {callout}"
-                    values={{
-                      callout: <Blockquote>{missingPatterns.join(', ')}</Blockquote>,
-                    }}
-                  />
+                  <span data-test-subj="sourcerer-missing-patterns-callout">
+                    <FormattedMessage
+                      id="xpack.securitySolution.indexPatterns.missingPatterns.callout"
+                      defaultMessage="Security Data View is missing the following index patterns: {callout}"
+                      values={{
+                        callout: <Blockquote>{missingPatterns.join(', ')}</Blockquote>,
+                      }}
+                    />
+                  </span>
                   <MissingPatternsMessage timelineType={timelineType} onReset={onReset} />
                 </>
               )}

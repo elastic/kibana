@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Suspense, lazy, useCallback, useMemo } from 'react';
+import React, { Suspense, lazy, useCallback, useMemo, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiPagination,
   EuiProgress,
-  EuiFlyoutSize,
 } from '@elastic/eui';
 import type { Alert, AlertsTableConfigurationRegistry } from '../../../../types';
 
@@ -26,11 +25,20 @@ const PAGINATION_LABEL = i18n.translate(
   }
 );
 
+function usePrevious(alert: Alert) {
+  const ref = useRef<Alert | null>(null);
+  useEffect(() => {
+    if (alert) {
+      ref.current = alert;
+    }
+  });
+  return ref.current;
+}
+
 interface AlertsFlyoutProps {
   alert: Alert;
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   flyoutIndex: number;
-  flyoutSize?: EuiFlyoutSize;
   alertsCount: number;
   isLoading: boolean;
   onClose: () => void;
@@ -41,7 +49,6 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
   alertsTableConfiguration,
   flyoutIndex,
-  flyoutSize = 'm',
   alertsCount,
   isLoading,
   onClose,
@@ -57,13 +64,14 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     body: null,
     footer: null,
   };
-
+  const prevAlert = usePrevious(alert);
   const passedProps = useMemo(
     () => ({
-      alert,
+      alert: alert === undefined && prevAlert != null ? prevAlert : alert,
       id,
       isLoading,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [alert, id, isLoading]
   );
 
@@ -98,7 +106,7 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   );
 
   return (
-    <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout" ownFocus={false}>
+    <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={false}>
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <Suspense fallback={null}>

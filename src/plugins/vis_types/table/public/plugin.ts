@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { TablePublicConfig } from '../config';
 import { setDataViewsStart, setFormatService } from './services';
 import { registerTableVis } from './register_vis';
 
@@ -33,8 +33,15 @@ export interface TablePluginStartDependencies {
 export class TableVisPlugin
   implements Plugin<void, void, TablePluginSetupDependencies, TablePluginStartDependencies>
 {
+  initializerContext: PluginInitializerContext<TablePublicConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<TablePublicConfig>) {
+    this.initializerContext = initializerContext;
+  }
+
   public setup(core: CoreSetup<TablePluginStartDependencies>, deps: TablePluginSetupDependencies) {
-    registerTableVis(core, deps);
+    const { readOnly } = this.initializerContext.config.get<TablePublicConfig>();
+    registerTableVis(core, deps, Boolean(readOnly));
   }
 
   public start(core: CoreStart, { fieldFormats, dataViews }: TablePluginStartDependencies) {

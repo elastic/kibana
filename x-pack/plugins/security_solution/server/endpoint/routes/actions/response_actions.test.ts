@@ -13,23 +13,15 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { License } from '@kbn/licensing-plugin/common/license';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import type {
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '@kbn/core/server';
+import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { LicenseService } from '../../../../common/license';
 import {
   ISOLATE_HOST_ROUTE_V2,
@@ -42,39 +34,51 @@ import {
   UNISOLATE_HOST_ROUTE,
   GET_FILE_ROUTE,
   EXECUTE_ROUTE,
+  UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
-  EndpointAction,
   ResponseActionApiResponse,
   HostMetadata,
   LogsEndpointAction,
   ResponseActionRequestBody,
-  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type { HttpApiTestSetupMock } from '../../mocks';
 import {
+  createHttpApiTestSetupMock,
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
 import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { actionCreateService } from '../../services/actions';
+import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
+import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
+import { createHapiReadableStreamMock } from '../../services/actions/mocks';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { omit } from 'lodash';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
-  idxResponse?: any;
+  indexErrorResponse?: any;
   searchResponse?: HostMetadata;
   mockUser?: any;
   license?: License;
   authz?: Partial<EndpointAuthz>;
+  /** Api version if any */
+  version?: string;
 }
 
 const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -121,19 +125,20 @@ describe('Response actions', () => {
       licenseService = new LicenseService();
       licenseService.start(licenseEmitter);
 
+      const endpointContext = {
+        ...createMockEndpointAppContext(),
+        service: endpointAppContextService,
+      };
+
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
+        actionCreateService: actionCreateService(mockScopedClient.asInternalUser, endpointContext),
         licenseService,
       });
 
       // add the host isolation route handlers to routerMock
-      registerResponseActionRoutes(routerMock, {
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-      });
+      registerResponseActionRoutes(routerMock, endpointContext);
 
       getActionDetailsByIdSpy = jest
         .spyOn(ActionDetailsService, 'getActionDetailsById')
@@ -143,7 +148,15 @@ describe('Response actions', () => {
       // it returns the requestContext mock used in the call, to assert internal calls (e.g. the indexed document)
       callRoute = async (
         routePrefix: string,
-        { body, idxResponse, searchResponse, mockUser, license, authz = {} }: CallRouteInterface,
+        {
+          body,
+          indexErrorResponse,
+          searchResponse,
+          mockUser,
+          license,
+          authz = {},
+          version,
+        }: CallRouteInterface,
         indexExists?: { endpointDsExists: boolean }
       ): Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>> => {
         const asUser = mockUser ? mockUser : superUser;
@@ -172,14 +185,15 @@ describe('Response actions', () => {
             };
           }
         );
+        const metadataResponse = docGen.generateHostMetadata();
 
-        const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
+        const withErrorResponse = indexErrorResponse ? indexErrorResponse : { statusCode: 201 };
         ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
-          () => withIdxResp
+          () => withErrorResponse
         );
         ctx.core.elasticsearch.client.asInternalUser.search.mockResponseImplementation(() => {
           return {
-            body: legacyMetadataSearchResponseMock(searchResponse),
+            body: legacyMetadataSearchResponseMock(searchResponse ?? metadataResponse),
           };
         });
 
@@ -187,10 +201,9 @@ describe('Response actions', () => {
         licenseEmitter.next(withLicense);
 
         const mockRequest = httpServerMock.createKibanaRequest({ body });
-        const [, routeHandler]: [
-          RouteConfig<any, any, any, any>,
-          RequestHandler<any, any, any, any>
-        ] = routerMock.post.mock.calls.find(([{ path }]) => path.startsWith(routePrefix))!;
+        const routeHandler: RequestHandler<any, any, any, any> = version
+          ? getRegisteredVersionedRouteMock(routerMock, 'post', routePrefix, version).routeHandler
+          : routerMock.post.mock.calls.find(([{ path }]) => path.startsWith(routePrefix))![1];
 
         await routeHandler(ctx, mockRequest, mockResponse);
 
@@ -206,7 +219,10 @@ describe('Response actions', () => {
     });
 
     it('correctly redirects legacy isolate to new route', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      await callRoute(ISOLATE_HOST_ROUTE, {
+        body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
+      });
       expect(mockResponse.custom).toBeCalled();
       const response = mockResponse.custom.mock.calls[0][0];
       expect(response.statusCode).toEqual(308);
@@ -214,7 +230,10 @@ describe('Response actions', () => {
     });
 
     it('correctly redirects legacy release to new route', async () => {
-      await callRoute(UNISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      await callRoute(UNISOLATE_HOST_ROUTE, {
+        body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
+      });
       expect(mockResponse.custom).toBeCalled();
       const response = mockResponse.custom.mock.calls[0][0];
       expect(response.statusCode).toEqual(308);
@@ -222,71 +241,76 @@ describe('Response actions', () => {
     });
 
     it('succeeds when an endpoint ID is provided', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE_V2, { body: { endpoint_ids: ['XYZ'] } });
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
+        body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
+      });
       expect(mockResponse.ok).toBeCalled();
     });
 
-    it('reports elasticsearch errors creating an action', async () => {
-      const ErrMessage = 'something went wrong?';
-
-      await callRoute(ISOLATE_HOST_ROUTE_V2, {
-        body: { endpoint_ids: ['XYZ'] },
-        idxResponse: {
-          statusCode: 500,
-          body: {
-            result: ErrMessage,
-          },
-        },
-      });
-      expect(mockResponse.ok).not.toBeCalled();
-      const response = mockResponse.customError.mock.calls[0][0];
-      expect(response.statusCode).toEqual(500);
-      expect((response.body as Error).message).toEqual(ErrMessage);
-    });
-
     it('accepts a comment field', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE_V2, { body: { endpoint_ids: ['XYZ'], comment: 'XYZ' } });
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
+        body: { endpoint_ids: ['XYZ'], comment: 'XYZ' },
+        version: '2023-10-31',
+      });
       expect(mockResponse.ok).toBeCalled();
     });
 
     it('sends the action to the requested agent', async () => {
       const metadataResponse = docGen.generateHostMetadata();
       const AgentID = metadataResponse.elastic.agent.id;
-      const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['ABC-XYZ-000'] },
         searchResponse: metadataResponse,
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.agents).toContain(AgentID);
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agents: [AgentID],
+        })
+      );
     });
 
     it('records the user who performed the action to the action record', async () => {
-      const testU = { username: 'testuser', roles: ['superuser'] };
-      const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
+      const testUser = { username: 'testuser', roles: ['superuser'] };
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
-        mockUser: testU,
+        mockUser: testUser,
+        version: '2023-10-31',
       });
 
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.user_id).toEqual(testU.username);
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user_id: testUser.username,
+        })
+      );
     });
 
     it('records the comment in the action payload', async () => {
-      const CommentText = "I am isolating this because it's Friday";
-      const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
-        body: { endpoint_ids: ['XYZ'], comment: CommentText },
+      const comment = "I am isolating this because it's Friday";
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
+        body: { endpoint_ids: ['XYZ'], comment },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.data.comment).toEqual(CommentText);
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ comment }),
+        })
+      );
     });
 
     it('creates an action and returns its ID + ActionDetails', async () => {
@@ -294,125 +318,201 @@ describe('Response actions', () => {
       const actionDetails = { agents: endpointIds, command: 'isolate' } as ActionDetails;
       getActionDetailsByIdSpy.mockResolvedValue(actionDetails);
 
-      const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: endpointIds, comment: 'XYZ' },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      const actionID = actionDoc.action_id;
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action_id: expect.any(String),
+        })
+      );
+
       expect(mockResponse.ok).toBeCalled();
+
       expect((mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse).action).toEqual(
-        actionID
+        expect.any(String)
       );
       expect(getActionDetailsByIdSpy).toHaveBeenCalledTimes(1);
+
       expect((mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse).data).toEqual(
         actionDetails
       );
     });
 
     it('records the timeout in the action payload', async () => {
-      const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.timeout).toEqual(300);
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeout: 300,
+        })
+      );
     });
 
     it('sends the action to the correct agent when endpoint ID is given', async () => {
       const doc = docGen.generateHostMetadata();
-      const AgentID = doc.elastic.agent.id;
+      const agentId = doc.elastic.agent.id;
 
-      const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
         searchResponse: doc,
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.agents).toContain(AgentID);
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agents: [agentId],
+        })
+      );
     });
 
     it('sends the isolate command payload from the isolate route', async () => {
-      const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.data.command).toEqual('isolate');
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            command: 'isolate',
+          }),
+        })
+      );
     });
 
     it('sends the unisolate command payload from the unisolate route', async () => {
-      const ctx = await callRoute(UNISOLATE_HOST_ROUTE_V2, {
+      await callRoute(UNISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.data.command).toEqual('unisolate');
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            command: 'unisolate',
+          }),
+        })
+      );
     });
 
     it('sends the kill-process command payload from the kill process route', async () => {
-      const ctx = await callRoute(KILL_PROCESS_ROUTE, {
+      await callRoute(KILL_PROCESS_ROUTE, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.data.command).toEqual('kill-process');
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            command: 'kill-process',
+          }),
+        })
+      );
     });
 
     it('sends the suspend-process command payload from the suspend process route', async () => {
-      const ctx = await callRoute(SUSPEND_PROCESS_ROUTE, {
+      await callRoute(SUSPEND_PROCESS_ROUTE, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.data.command).toEqual('suspend-process');
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            command: 'suspend-process',
+          }),
+        })
+      );
     });
 
     it('sends the running-processes command payload from the running processes route', async () => {
-      const ctx = await callRoute(GET_PROCESSES_ROUTE, {
+      await callRoute(GET_PROCESSES_ROUTE, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.data.command).toEqual('running-processes');
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            command: 'running-processes',
+          }),
+        })
+      );
     });
 
     it('sends the get-file command payload from the get file route', async () => {
-      const ctx = await callRoute(GET_FILE_ROUTE, {
+      await callRoute(GET_FILE_ROUTE, {
         body: { endpoint_ids: ['XYZ'], parameters: { path: '/one/two/three' } },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.data.command).toEqual('get-file');
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            command: 'get-file',
+          }),
+        })
+      );
     });
 
     it('sends the `execute` command payload from the execute route', async () => {
-      const ctx = await callRoute(EXECUTE_ROUTE, {
+      await callRoute(EXECUTE_ROUTE, {
         body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
+        version: '2023-10-31',
       });
-      const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index.mock
-          .calls[0][0] as estypes.IndexRequest<EndpointAction>
-      ).body!;
-      expect(actionDoc.data.command).toEqual('execute');
+
+      await expect(
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            command: 'execute',
+          }),
+        })
+      );
     });
 
     describe('With endpoint data streams', () => {
@@ -421,23 +521,30 @@ describe('Response actions', () => {
           UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
 
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'unisolate',
+            }),
+          })
+        );
+
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('unisolate');
-        expect(actionDocs[1].body!.data.command).toEqual('unisolate');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('unisolate');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -449,22 +556,30 @@ describe('Response actions', () => {
           ISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
+
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'isolate',
+            }),
+          })
+        );
+
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('isolate');
-        expect(actionDocs[1].body!.data.command).toEqual('isolate');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('isolate');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -477,23 +592,32 @@ describe('Response actions', () => {
           KILL_PROCESS_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
+
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'kill-process',
+              comment: undefined,
+              parameters,
+            }),
+          })
+        );
+
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('kill-process');
-        expect(actionDocs[1].body!.data.command).toEqual('kill-process');
-        expect(actionDocs[1].body!.data.parameters).toEqual(parameters);
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('kill-process');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -506,23 +630,32 @@ describe('Response actions', () => {
           SUSPEND_PROCESS_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
+
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'suspend-process',
+              comment: undefined,
+              parameters,
+            }),
+          })
+        );
+
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('suspend-process');
-        expect(actionDocs[1].body!.data.command).toEqual('suspend-process');
-        expect(actionDocs[1].body!.data.parameters).toEqual(parameters);
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('suspend-process');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -534,22 +667,30 @@ describe('Response actions', () => {
           GET_PROCESSES_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
+
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'running-processes',
+            }),
+          })
+        );
+
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('running-processes');
-        expect(actionDocs[1].body!.data.command).toEqual('running-processes');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('running-processes');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -561,22 +702,32 @@ describe('Response actions', () => {
           GET_FILE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { path: '/one/two/three' } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
+
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'get-file',
+              comment: undefined,
+              parameters: { path: '/one/two/three' },
+            }),
+          })
+        );
+
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('get-file');
-        expect(actionDocs[1].body!.data.command).toEqual('get-file');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('get-file');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -588,25 +739,33 @@ describe('Response actions', () => {
           EXECUTE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al', timeout: 1000 } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
-        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
-          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
-        ];
 
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'execute',
+              parameters: expect.objectContaining({
+                command: 'ls -al',
+                timeout: 1000,
+              }),
+            }),
+          })
+        );
+
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+        ];
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
-        const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
-        expect(parameters.command).toEqual('ls -al');
-        expect(parameters.timeout).toEqual(1000);
-        expect(actionDocs[1].body!.data.command).toEqual('execute');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -618,25 +777,35 @@ describe('Response actions', () => {
           EXECUTE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
+
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'execute',
+              parameters: expect.objectContaining({
+                command: 'ls -al',
+                timeout: 14400,
+              }),
+            }),
+          })
+        );
+
+        // logs-endpoint indexed doc
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
-        const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
-        expect(parameters.command).toEqual('ls -al');
-        expect(parameters.timeout).toEqual(14400000); // 4hrs
-        expect(actionDocs[1].body!.data.command).toEqual('execute');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -644,54 +813,50 @@ describe('Response actions', () => {
       });
 
       it('signs the action', async () => {
-        const ctx = await callRoute(
+        await callRoute(
           ISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
 
-        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
-          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
-        ];
-
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[1].body?.signed).toEqual({
-          data: 'thisisthedata',
-          signature: 'thisisasignature',
-        });
-
-        expect(mockResponse.ok).toBeCalled();
-        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
-        expect(responseBody.action).toBeTruthy();
+        await expect(
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            signed: {
+              data: 'thisisthedata',
+              signature: 'thisisasignature',
+            },
+          })
+        );
       });
 
       it('handles errors', async () => {
-        const ErrMessage = 'Uh oh!';
-        await callRoute(
-          UNISOLATE_HOST_ROUTE_V2,
-          {
-            body: { endpoint_ids: ['XYZ'] },
-            idxResponse: {
-              statusCode: 500,
-              body: {
-                result: ErrMessage,
+        const expectedError = new Error('Uh oh!');
+
+        await expect(
+          callRoute(
+            UNISOLATE_HOST_ROUTE_V2,
+            {
+              body: { endpoint_ids: ['XYZ'] },
+              version: '2023-10-31',
+              indexErrorResponse: {
+                statusCode: 500,
+                body: {
+                  result: expectedError.message,
+                },
               },
             },
-          },
-          { endpointDsExists: true }
-        );
+            { endpointDsExists: true }
+          )
+        ).rejects.toEqual(expectedError);
 
         expect(mockResponse.ok).not.toBeCalled();
-        const response = mockResponse.customError.mock.calls[0][0];
-        expect(response.statusCode).toEqual(500);
-        expect((response.body as Error).message).toEqual(ErrMessage);
       });
     });
 
@@ -701,6 +866,7 @@ describe('Response actions', () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           license: Platinum,
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -710,6 +876,7 @@ describe('Response actions', () => {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canIsolateHost: false },
           license: Gold,
+          version: '2023-10-31',
         });
 
         expect(mockResponse.forbidden).toBeCalled();
@@ -719,6 +886,7 @@ describe('Response actions', () => {
         licenseEmitter.next(Gold);
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
           license: Gold,
         });
         expect(mockResponse.ok).toBeCalled();
@@ -729,6 +897,7 @@ describe('Response actions', () => {
       it('allows user to perform isolation when canIsolateHost is true', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -736,6 +905,7 @@ describe('Response actions', () => {
       it('allows user to perform unisolation when canUnIsolateHost is true', async () => {
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -744,6 +914,7 @@ describe('Response actions', () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canIsolateHost: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
@@ -752,6 +923,7 @@ describe('Response actions', () => {
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canUnIsolateHost: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
@@ -760,6 +932,7 @@ describe('Response actions', () => {
         await callRoute(EXECUTE_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canWriteExecuteOperations: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
@@ -769,13 +942,15 @@ describe('Response actions', () => {
       let casesClient: CasesClientMock;
 
       const getCaseIdsFromAttachmentAddService = () => {
-        return casesClient.attachments.add.mock.calls.map(([addArgs]) => addArgs.caseId);
+        return casesClient.attachments.bulkCreate.mock.calls.map(([addArgs]) => addArgs.caseId);
       };
 
       beforeEach(async () => {
         casesClient = (await endpointAppContextService.getCasesClient(
           {} as KibanaRequest
         )) as CasesClientMock;
+
+        casesClient.attachments.bulkCreate.mockClear();
 
         let counter = 1;
         casesClient.cases.getCasesByAlertID.mockImplementation(async () => {
@@ -798,9 +973,10 @@ describe('Response actions', () => {
       it('logs a comment to the provided cases', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'], case_ids: ['one', 'two'] },
+          version: '2023-10-31',
         });
 
-        expect(casesClient.attachments.add).toHaveBeenCalledTimes(2);
+        expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(2);
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
           expect.arrayContaining(['one', 'two'])
         );
@@ -809,6 +985,7 @@ describe('Response actions', () => {
       it('logs a comment to any cases associated with the given alerts', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'], alert_ids: ['one', 'two'] },
+          version: '2023-10-31',
         });
 
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
@@ -824,12 +1001,149 @@ describe('Response actions', () => {
             case_ids: ['ONE', 'TWO', 'case-1'],
             alert_ids: ['one', 'two'],
           },
+          version: '2023-10-31',
         });
 
-        expect(casesClient.attachments.add).toHaveBeenCalledTimes(4);
+        expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(4);
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
           expect.arrayContaining(['ONE', 'TWO', 'case-1', 'case-2'])
         );
+      });
+    });
+  });
+
+  describe('Upload response action handler', () => {
+    type UploadHttpApiTestSetupMock = HttpApiTestSetupMock<
+      never,
+      never,
+      UploadActionApiRequestBody
+    >;
+    type UploadRequestHandler = RequestHandler<
+      never,
+      never,
+      UploadActionApiRequestBody,
+      SecuritySolutionRequestHandlerContext
+    >;
+
+    let testSetup: UploadHttpApiTestSetupMock;
+    let httpRequestMock: ReturnType<UploadHttpApiTestSetupMock['createRequestMock']>;
+    let httpHandlerContextMock: UploadHttpApiTestSetupMock['httpHandlerContextMock'];
+    let httpResponseMock: UploadHttpApiTestSetupMock['httpResponseMock'];
+    let fleetFilesClientMock: jest.Mocked<FleetToHostFileClientInterface>;
+    let callHandler: () => ReturnType<UploadRequestHandler>;
+    let fileContent: HapiReadableStream;
+    let createdUploadAction: ActionDetails;
+
+    beforeEach(async () => {
+      testSetup = createHttpApiTestSetupMock<never, never, UploadActionApiRequestBody>();
+
+      ({ httpHandlerContextMock, httpResponseMock } = testSetup);
+      httpRequestMock = testSetup.createRequestMock();
+
+      fleetFilesClientMock =
+        (await testSetup.endpointAppContextMock.service.getFleetToHostFilesClient()) as jest.Mocked<FleetToHostFileClientInterface>;
+
+      fileContent = createHapiReadableStreamMock();
+
+      const reqBody: UploadActionApiRequestBody = {
+        file: fileContent,
+        endpoint_ids: ['123-456'],
+        parameters: {
+          overwrite: true,
+        },
+      };
+
+      httpRequestMock = testSetup.createRequestMock({ body: reqBody });
+      registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+
+      createdUploadAction = new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'upload',
+      });
+
+      (
+        testSetup.endpointAppContextMock.service.getActionCreateService().createAction as jest.Mock
+      ).mockResolvedValue(createdUploadAction);
+
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+            {
+              elastic: {
+                agent: {
+                  id: '123-456',
+                },
+              },
+            },
+          ]),
+        });
+
+      const handler = testSetup.getRegisteredVersionedRoute('post', UPLOAD_ROUTE, '2023-10-31')
+        .routeHandler as UploadRequestHandler;
+
+      callHandler = () => handler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
+    });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('should create a file', async () => {
+      await callHandler();
+
+      expect(fleetFilesClientMock.create).toHaveBeenCalledWith(fileContent, ['123-456']);
+    });
+
+    it('should create the action using parameters with stored file info', async () => {
+      await callHandler();
+
+      const createActionMock = testSetup.endpointAppContextMock.service.getActionCreateService()
+        .createAction as jest.Mock;
+
+      expect(createActionMock).toHaveBeenCalledWith(
+        {
+          command: 'upload',
+          endpoint_ids: ['123-456'],
+          parameters: {
+            file_id: '123-456-789',
+            file_name: 'foo.txt',
+            file_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            file_size: 45632,
+            overwrite: true,
+          },
+          user: { username: 'unknown' },
+        },
+        ['123-456']
+      );
+    });
+
+    it('should delete file if creation of Action fails', async () => {
+      const createActionMock = testSetup.endpointAppContextMock.service.getActionCreateService()
+        .createAction as jest.Mock;
+      createActionMock.mockImplementation(async () => {
+        throw new CustomHttpRequestError('oh oh');
+      });
+      await callHandler();
+
+      expect(fleetFilesClientMock.delete).toHaveBeenCalledWith('123-456-789');
+    });
+
+    it('should update file with action id', async () => {
+      await callHandler();
+
+      expect(fleetFilesClientMock.update).toHaveBeenCalledWith('123-456-789', {
+        actionId: '123',
+      });
+    });
+
+    it('should return expected response on success', async () => {
+      await callHandler();
+
+      expect(httpResponseMock.ok).toHaveBeenCalledWith({
+        body: {
+          action: createdUploadAction.action,
+          data: omit(createdUploadAction, 'action'),
+        },
       });
     });
   });

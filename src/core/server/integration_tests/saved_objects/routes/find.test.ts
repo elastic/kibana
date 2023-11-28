@@ -176,6 +176,7 @@ describe('GET /api/saved_objects/_find', () => {
       defaultSearchOperator: 'OR',
       hasReferenceOperator: 'OR',
       hasNoReferenceOperator: 'OR',
+      migrationVersionCompatibility: 'compatible',
     });
   });
 
@@ -186,7 +187,7 @@ describe('GET /api/saved_objects/_find', () => {
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.mock.calls[0][0];
+    const [[options]] = savedObjectsClient.find.mock.calls;
     expect(options).toEqual(expect.objectContaining({ perPage: 10, page: 50 }));
   });
 

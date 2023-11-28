@@ -165,6 +165,7 @@ export const CustomEquationEditor = ({
       {metricRows}
       <EuiFlexGroup>
         <EuiButtonEmpty
+          data-test-subj="infraCustomEquationEditorAddAggregationFieldButton"
           color={'primary'}
           flush={'left'}
           size="xs"
@@ -189,6 +190,7 @@ export const CustomEquationEditor = ({
             error={[errors.equation]}
           >
             <EuiFieldText
+              data-test-subj="infraCustomEquationEditorFieldText"
               isInvalid={errors.equation != null}
               compressed
               fullWidth
@@ -204,6 +206,7 @@ export const CustomEquationEditor = ({
         <EuiFlexItem>
           <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
             <EuiFieldText
+              data-test-subj="infraCustomEquationEditorFieldText"
               compressed
               fullWidth
               value={label}

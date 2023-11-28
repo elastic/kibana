@@ -29,6 +29,7 @@ export interface BaseTransformTestData {
   destinationIndex: string;
   destinationDataViewTimeField?: string;
   discoverAdjustSuperDatePicker: boolean;
+  continuousModeDateField?: string;
   numFailureRetries?: string;
   fieldStatsEntries?: Array<{
     fieldName: string;

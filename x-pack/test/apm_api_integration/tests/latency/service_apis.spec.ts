@@ -26,9 +26,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   async function getLatencyValues({
     processorEvent,
     latencyAggregationType = LatencyAggregationType.avg,
+    useDurationSummary = false,
   }: {
     processorEvent: 'transaction' | 'metric';
     latencyAggregationType?: LatencyAggregationType;
+    useDurationSummary?: boolean;
   }) {
     const commonQuery = {
       start: new Date(start).toISOString(),
@@ -52,10 +54,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ? {
                   documentType: ApmDocumentType.TransactionMetric,
                   rollupInterval: RollupInterval.OneMinute,
+                  useDurationSummary: true,
                 }
               : {
                   documentType: ApmDocumentType.TransactionEvent,
                   rollupInterval: RollupInterval.None,
+                  useDurationSummary: false,
                 }),
           },
         },
@@ -69,6 +73,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             latencyAggregationType,
             transactionType: 'request',
+            bucketSizeInSeconds: 60,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
+            useDurationSummary: latencyAggregationType === LatencyAggregationType.avg,
           },
         },
       }),
@@ -81,6 +96,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             transactionType: 'request',
             latencyAggregationType: 'avg' as LatencyAggregationType,
+            useDurationSummary,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),
@@ -170,7 +195,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           [latencyTransactionValues, latencyMetricValues] = await Promise.all([
             getLatencyValues({ processorEvent: 'transaction' }),
-            getLatencyValues({ processorEvent: 'metric' }),
+            getLatencyValues({ processorEvent: 'metric', useDurationSummary: true }),
           ]);
         });
 

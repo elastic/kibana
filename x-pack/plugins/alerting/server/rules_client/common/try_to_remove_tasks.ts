@@ -20,12 +20,12 @@ export const tryToRemoveTasks = async ({
 }) => {
   const taskIdsFailedToBeDeleted: string[] = [];
   const taskIdsSuccessfullyDeleted: string[] = [];
-  return await withSpan({ name: 'taskManager.bulkRemoveIfExist', type: 'rules' }, async () => {
+  return await withSpan({ name: 'taskManager.bulkRemove', type: 'rules' }, async () => {
     if (taskIdsToDelete.length > 0) {
       try {
-        const resultFromDeletingTasks = await taskManager.bulkRemoveIfExist(taskIdsToDelete);
+        const resultFromDeletingTasks = await taskManager.bulkRemove(taskIdsToDelete);
         resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (status.success) {
+          if (status.success || status.error?.statusCode === 404) {
             taskIdsSuccessfullyDeleted.push(status.id);
           } else {
             taskIdsFailedToBeDeleted.push(status.id);
@@ -49,7 +49,7 @@ export const tryToRemoveTasks = async ({
         logger.error(
           `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
             ', '
-          )}. TaskManager bulkRemoveIfExist failed with Error: ${error.message}`
+          )}. TaskManager bulkRemove failed with Error: ${error.message}`
         );
       }
     }

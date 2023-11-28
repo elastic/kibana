@@ -16,7 +16,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -48,7 +47,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
               defaultMessage="This documents all the inputs, streams, and variables available to use this integration programmatically via the Fleet Kibana API. {learnMore}"
               values={{
                 learnMore: (
-                  <EuiLink href={docLinks.links.fleet.guide}>
+                  <EuiLink href={docLinks.links.fleet.api}>
                     <FormattedMessage
                       id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
                       defaultMessage="Learn more"
@@ -58,9 +57,6 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
               }}
             />
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge label="beta" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

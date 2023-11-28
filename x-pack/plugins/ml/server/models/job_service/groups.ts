@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UpdateGroupsRequest } from '../../../common/types/job_service';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import type { Group } from '../../../common/types/groups';
@@ -68,7 +69,7 @@ export function groupsProvider(mlClient: MlClient) {
       .map((g) => groups[g]);
   }
 
-  async function updateGroups(jobs: Array<{ jobId: string; groups: string[] }>) {
+  async function updateGroups(jobs: UpdateGroupsRequest['jobs']) {
     const results: Results = {};
     for (const job of jobs) {
       const { jobId, groups } = job;

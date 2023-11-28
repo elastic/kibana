@@ -19,8 +19,4 @@ If you want, you can still manually install the pre-commit hook locally by runni
 node scripts/precommit_hook.js \
   --ref HEAD~1..HEAD \
   --max-files 200 \
-  --verbose \
-  --fix \
-  --no-stage # we have to disable staging or check_for_changed_files won't see the changes
-
-check_for_changed_files 'node scripts/precommit_hook.js --ref HEAD~1..HEAD --fix' true
+  --verbose

@@ -52,8 +52,10 @@ export class HorizontalLegend extends React.Component {
       return this.displayValue(row.tickFormatter(value));
     }
 
-    if (isFunction(this.props.tickFormatter)) {
-      return this.displayValue(this.props.tickFormatter(value));
+    const formatter = this.props.legendFormatter || this.props.tickFormatter;
+
+    if (isFunction(formatter)) {
+      return this.displayValue(formatter(value));
     }
     return this.displayValue(value);
   }

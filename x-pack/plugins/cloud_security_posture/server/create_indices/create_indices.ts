@@ -4,42 +4,89 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS } from '@kbn/fleet-plugin/server/constants';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  FINDINGS_INDEX_NAME,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_PATTERN,
-  LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
 } from '../../common/constants';
 import { createPipelineIfNotExists } from './create_processor';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsPipelineIngestConfig, scorePipelineIngestConfig } from './ingest_pipelines';
+import { latestIndexConfigs } from './latest_indices';
+import { IndexConfig, IndexTemplateParams } from './types';
+
+import { CloudSecurityPostureConfig } from '../config';
+
+interface IndexTemplateSettings {
+  index: {
+    default_pipeline: string;
+    codec?: string;
+    mapping?: {
+      ignore_malformed: boolean;
+    };
+  };
+  lifecycle?: { name: string };
+}
 
 // TODO: Add integration tests
-
-export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
-  await Promise.all([
+export const initializeCspIndices = async (
+  esClient: ElasticsearchClient,
+  cloudSecurityPostureConfig: CloudSecurityPostureConfig,
+  logger: Logger
+) => {
+  await Promise.allSettled([
     createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
     createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
   ]);
 
-  return Promise.all([
-    createLatestFindingsIndex(esClient, logger),
-    createBenchmarkScoreIndex(esClient, logger),
+  const [
+    createFindingsLatestIndexPromise,
+    createVulnerabilitiesLatestIndexPromise,
+    createBenchmarkScoreIndexPromise,
+  ] = await Promise.allSettled([
+    createLatestIndex(esClient, latestIndexConfigs.findings, cloudSecurityPostureConfig, logger),
+    createLatestIndex(
+      esClient,
+      latestIndexConfigs.vulnerabilities,
+      cloudSecurityPostureConfig,
+      logger
+    ),
+    createBenchmarkScoreIndex(esClient, cloudSecurityPostureConfig, logger),
   ]);
+
+  if (createFindingsLatestIndexPromise.status === 'rejected') {
+    logger.error(createFindingsLatestIndexPromise.reason);
+  }
+  if (createVulnerabilitiesLatestIndexPromise.status === 'rejected') {
+    logger.error(createVulnerabilitiesLatestIndexPromise.reason);
+  }
+  if (createBenchmarkScoreIndexPromise.status === 'rejected') {
+    logger.error(createBenchmarkScoreIndexPromise.reason);
+  }
 };
 
-const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
+export const createBenchmarkScoreIndex = async (
+  esClient: ElasticsearchClient,
+  cloudSecurityPostureConfig: CloudSecurityPostureConfig,
+  logger: Logger
+) => {
   try {
     // Deletes old assets from previous versions as part of upgrade process
     const INDEX_TEMPLATE_V830 = 'cloud_security_posture.scores';
     await deleteIndexTemplateSafe(esClient, logger, INDEX_TEMPLATE_V830);
+
+    const settings: IndexTemplateSettings = {
+      index: {
+        default_pipeline: scorePipelineIngestConfig.id,
+      },
+      lifecycle: { name: '' },
+    };
+    if (cloudSecurityPostureConfig.serverless.enabled) delete settings.lifecycle;
 
     // We always want to keep the index template updated
     await esClient.indices.putIndexTemplate({
@@ -47,13 +94,7 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
       index_patterns: BENCHMARK_SCORE_INDEX_PATTERN,
       template: {
         mappings: benchmarkScoreMapping,
-        settings: {
-          default_pipeline: scorePipelineIngestConfig.id,
-          // TODO: once we will convert the score index to datastream we will no longer override the ilm to be empty
-          lifecycle: {
-            name: '',
-          },
-        },
+        settings,
       },
       _meta: {
         package: {
@@ -76,67 +117,54 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
       );
     }
   } catch (e) {
-    logger.error(
+    logger.error(e);
+    throw Error(
       `Failed to upsert index template [Template: ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}]`
     );
-    logger.error(e);
   }
 };
 
-const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
+const createLatestIndex = async (
+  esClient: ElasticsearchClient,
+  indexConfig: IndexConfig,
+  cloudSecurityPostureConfig: CloudSecurityPostureConfig,
+  logger: Logger
+) => {
+  const { indexName, indexPattern, indexTemplateName, indexDefaultName } = indexConfig;
   try {
-    // Deletes old assets from previous versions as part of upgrade process
-    const INDEX_TEMPLATE_V830 = 'cloud_security_posture.findings_latest';
-    await deleteIndexTemplateSafe(esClient, logger, INDEX_TEMPLATE_V830);
-
     // We want that our latest findings index template would be identical to the findings index template
-    const findingsIndexTemplateResponse = await esClient.indices.getIndexTemplate({
-      name: FINDINGS_INDEX_NAME,
+    const indexTemplateResponse = await esClient.indices.getIndexTemplate({
+      name: indexName,
     });
+
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { template, composed_of, _meta } =
-      findingsIndexTemplateResponse.index_templates[0].index_template;
+      indexTemplateResponse.index_templates[0].index_template;
+
+    const indexTemplateParams = {
+      template,
+      composedOf: composed_of,
+      _meta,
+      indexTemplateName,
+      indexPattern,
+    };
 
     // We always want to keep the index template updated
-    await esClient.indices.putIndexTemplate({
-      name: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
-      index_patterns: LATEST_FINDINGS_INDEX_PATTERN,
-      priority: 500,
-      template: {
-        mappings: template?.mappings,
-        settings: {
-          ...template?.settings,
-          default_pipeline: latestFindingsPipelineIngestConfig.id,
-          lifecycle: {
-            name: '',
-          },
-        },
-        aliases: template?.aliases,
-      },
-      _meta,
-      composed_of,
-    });
+    await updateIndexTemplate(esClient, indexTemplateParams, cloudSecurityPostureConfig, logger);
 
-    const result = await createIndexSafe(esClient, logger, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+    const result = await createIndexSafe(esClient, logger, indexDefaultName);
 
     if (result === 'already-exists') {
       // Make sure mappings are up-to-date
       const simulateResponse = await esClient.indices.simulateTemplate({
-        name: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
+        name: indexTemplateName,
       });
 
-      await updateIndexSafe(
-        esClient,
-        logger,
-        LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        simulateResponse.template.mappings
-      );
+      await updateIndexSafe(esClient, logger, indexDefaultName, simulateResponse.template.mappings);
     }
   } catch (e) {
-    logger.error(
-      `Failed to upsert index template [Template: ${LATEST_FINDINGS_INDEX_TEMPLATE_NAME}]`
-    );
     logger.error(e);
+    throw Error(`Failed to upsert index template [Template: ${indexTemplateName}]`);
   }
 };
 
@@ -191,12 +219,61 @@ const createIndexSafe = async (esClient: ElasticsearchClient, logger: Logger, in
   }
 };
 
+const updateIndexTemplate = async (
+  esClient: ElasticsearchClient,
+  indexTemplateParams: IndexTemplateParams,
+  cloudSecurityPostureConfig: CloudSecurityPostureConfig,
+  logger: Logger
+) => {
+  const { indexTemplateName, indexPattern, template, composedOf, _meta } = indexTemplateParams;
+
+  const settings: IndexTemplateSettings = {
+    ...template?.settings, // nothing inside
+    index: {
+      default_pipeline: latestFindingsPipelineIngestConfig.id,
+      codec: 'best_compression',
+      mapping: {
+        ignore_malformed: true,
+      },
+    },
+    lifecycle: { name: '' },
+  };
+  if (cloudSecurityPostureConfig.serverless.enabled) delete settings.lifecycle;
+
+  try {
+    await esClient.indices.putIndexTemplate({
+      name: indexTemplateName,
+      index_patterns: indexPattern,
+      priority: 500,
+      template: {
+        mappings: template?.mappings,
+        settings,
+        aliases: template?.aliases,
+      },
+      _meta,
+      composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
+    });
+
+    logger.info(`Updated index template successfully [Name: ${indexTemplateName}]`);
+  } catch (e) {
+    logger.error(`Failed to update index template [Name: ${indexTemplateName}]`);
+    logger.error(e);
+  }
+};
+
 const updateIndexSafe = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   index: string,
   mappings: MappingTypeMapping
 ) => {
+  // for now, remove from object so as not to update stream or data stream properties of the index until type and name
+  // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
+  // to skip updating and assume the value in the index mapping is correct
+  if (mappings && mappings.properties) {
+    delete mappings.properties.stream;
+    delete mappings.properties.data_stream;
+  }
   try {
     await esClient.indices.putMapping({
       index,

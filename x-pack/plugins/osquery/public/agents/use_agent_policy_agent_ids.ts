@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import { AGENTS_PREFIX } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
@@ -34,6 +35,7 @@ export const useAgentPolicyAgentIds = ({
       const kuery = `${AGENTS_PREFIX}.policy_id:${agentPolicyId}`;
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {
+        version: API_VERSIONS.internal.v1,
         query: {
           kuery,
           perPage: 10000,

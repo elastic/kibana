@@ -41,18 +41,6 @@ export default class RowParser {
     }
     let line = (this.editor.getLineValue(lineNumber) || '').trim();
 
-    // Check if the line has variables, depending on the request type, (e.g. single line, multi doc requests) return the correct mode
-    if (line && /(\${\w+})/.test(line)) {
-      lineNumber++;
-      line = (this.editor.getLineValue(lineNumber) || '').trim();
-
-      if (line.startsWith('{')) {
-        return MODE.REQUEST_START;
-      }
-      // next line is another request
-      // eslint-disable-next-line no-bitwise
-      return MODE.REQUEST_START | MODE.REQUEST_END;
-    }
     if (!line || line.startsWith('#') || line.startsWith('//') || line.startsWith('/*')) {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start

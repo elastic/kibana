@@ -10,7 +10,7 @@ import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
-import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 export const ErrorConnecting: React.FC = () => {

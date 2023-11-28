@@ -18,15 +18,6 @@ export const TAKE_ACTION = i18n.translate('grouping.additionalActions.takeAction
   defaultMessage: 'Take actions',
 });
 
-export const BETA = i18n.translate('grouping.betaLabel', {
-  defaultMessage: 'Beta',
-});
-
-export const BETA_TOOL_TIP = i18n.translate('grouping.betaToolTip', {
-  defaultMessage:
-    'Grouping may show only a subset of alerts while in beta. To see all alerts, use the list view by selecting "None"',
-});
-
 export const GROUP_BY = i18n.translate('grouping.alerts.label', {
   defaultMessage: 'Group alerts by',
 });
@@ -35,8 +26,14 @@ export const GROUP_BY_CUSTOM_FIELD = i18n.translate('grouping.customGroupByPanel
   defaultMessage: 'Group By Custom Field',
 });
 
-export const SELECT_FIELD = i18n.translate('grouping.groupByPanelTitle', {
-  defaultMessage: 'Select Field',
+export const SELECT_FIELD = (groupingLevelsCount: number) =>
+  i18n.translate('grouping.groupByPanelTitle', {
+    values: { groupingLevelsCount },
+    defaultMessage: 'Select up to {groupingLevelsCount} groupings',
+  });
+
+export const SELECT_SINGLE_FIELD = i18n.translate('grouping.groupBySingleField', {
+  defaultMessage: 'Select grouping',
 });
 
 export const NONE = i18n.translate('grouping.noneGroupByOptionName', {
@@ -47,8 +44,15 @@ export const CUSTOM_FIELD = i18n.translate('grouping.customGroupByOptionName', {
   defaultMessage: 'Custom field',
 });
 
-export const ALERTS_UNIT = (totalCount: number) =>
+export const DEFAULT_UNIT = (totalCount: number) =>
   i18n.translate('grouping.eventsTab.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+    defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
+  });
+
+export const NULL_GROUP = (selectedGroup: string, unit: string) =>
+  i18n.translate('grouping.nullGroup.title', {
+    values: { selectedGroup, unit },
+    defaultMessage:
+      'The selected group by field, {selectedGroup}, is missing a value for this group of {unit}.',
   });

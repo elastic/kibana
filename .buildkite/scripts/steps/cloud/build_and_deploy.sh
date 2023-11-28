@@ -37,11 +37,13 @@ else
     --skip-generic-folders \
     --skip-platform-folders \
     --skip-archives \
+    --skip-cdn-assets \
     --docker-images \
     --docker-tag-qualifier="$GIT_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
     --skip-docker-ubuntu \
+    --skip-docker-serverless \
     --skip-docker-contexts
 fi
 

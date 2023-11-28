@@ -8,19 +8,28 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import { merge } from 'lodash';
+import { merge, set } from 'lodash';
 import type { Logger } from '@kbn/core/server';
+import { sha256 } from 'js-sha256';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { copyAllowlistedFields, filterList } from './filterlists';
-import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
+import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
+import type { ITelemetryReceiver } from './receiver';
 import type {
-  ExceptionListItem,
+  EnhancedAlertEvent,
   ESClusterInfo,
   ESLicense,
+  ExceptionListItem,
+  ExtraInfo,
   ListTemplate,
-  TelemetryEvent,
-  ValueListResponse,
   TaskMetric,
+  TelemetryEvent,
+  TimeFrame,
+  TimelineResult,
+  TimelineTelemetryEvent,
+  ValueListResponse,
 } from './types';
+import type { TaskExecutionPeriod } from './task';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
@@ -29,6 +38,7 @@ import {
   DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
+import { resolverEntity } from '../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -300,3 +310,158 @@ export const createTaskMetric = (
     error_message: errorMessage,
   };
 };
+
+function obfuscateString(clusterId: string, toHash: string): string {
+  const valueToObfuscate = toHash + clusterId;
+  return sha256.create().update(valueToObfuscate).hex();
+}
+
+function isAllowlistK8sUsername(username: string) {
+  return (
+    username === 'edit' ||
+    username === 'view' ||
+    username === 'admin' ||
+    username === 'elastic-agent' ||
+    username === 'cluster-admin' ||
+    username.startsWith('system')
+  );
+}
+
+export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): TelemetryEvent => {
+  // if there is no kubernetes key, return the event as is
+  if (event.kubernetes === undefined && event.kubernetes === null) {
+    return event;
+  }
+
+  const username = event?.kubernetes?.audit?.user?.username;
+  const impersonatedUser = event?.kubernetes?.audit?.impersonated_user?.username;
+
+  if (username !== undefined && username !== null && !isAllowlistK8sUsername(username)) {
+    set(event, 'kubernetes.audit.user.username', obfuscateString(clusterId, username));
+  }
+
+  if (
+    impersonatedUser !== undefined &&
+    impersonatedUser !== null &&
+    !isAllowlistK8sUsername(impersonatedUser)
+  ) {
+    set(
+      event,
+      'kubernetes.audit.impersonated_user.username',
+      obfuscateString(clusterId, impersonatedUser)
+    );
+  }
+
+  return event;
+};
+
+export const ranges = (
+  taskExecutionPeriod: TaskExecutionPeriod,
+  defaultIntervalInHours: number = 3
+) => {
+  const rangeFrom = taskExecutionPeriod.last ?? `now-${defaultIntervalInHours}h`;
+  const rangeTo = taskExecutionPeriod.current;
+
+  return { rangeFrom, rangeTo };
+};
+
+export class TelemetryTimelineFetcher {
+  startTime: number;
+  private receiver: ITelemetryReceiver;
+  private extraInfo: Promise<ExtraInfo>;
+  private timeFrame: TimeFrame;
+
+  constructor(receiver: ITelemetryReceiver) {
+    this.receiver = receiver;
+    this.startTime = Date.now();
+    this.extraInfo = this.lookupExtraInfo();
+    this.timeFrame = this.calculateTimeFrame();
+  }
+
+  async fetchTimeline(event: estypes.SearchHit<EnhancedAlertEvent>): Promise<TimelineResult> {
+    const eventId = event._source ? event._source['event.id'] : 'unknown';
+    const alertUUID = event._source ? event._source['kibana.alert.uuid'] : 'unknown';
+
+    const entities = resolverEntity([event]);
+
+    // Build Tree
+    const tree = await this.receiver.buildProcessTree(
+      entities[0].id,
+      entities[0].schema,
+      this.timeFrame.startOfDay,
+      this.timeFrame.endOfDay
+    );
+
+    const nodeIds = Array.isArray(tree) ? tree.map((node) => node?.id.toString()) : [];
+
+    const eventsStore = await this.fetchEventLineage(nodeIds);
+
+    const telemetryTimeline: TimelineTelemetryEvent[] = Array.isArray(tree)
+      ? tree.map((node) => {
+          return {
+            ...node,
+            event: eventsStore.get(node.id.toString()),
+          };
+        })
+      : [];
+
+    let record;
+    if (telemetryTimeline.length >= 1) {
+      const { clusterInfo, licenseInfo } = await this.extraInfo;
+      record = {
+        '@timestamp': moment().toISOString(),
+        version: clusterInfo.version?.number,
+        cluster_name: clusterInfo.cluster_name,
+        cluster_uuid: clusterInfo.cluster_uuid,
+        license_uuid: licenseInfo?.uid,
+        alert_id: alertUUID,
+        event_id: eventId,
+        timeline: telemetryTimeline,
+      };
+    }
+
+    const result: TimelineResult = {
+      nodes: nodeIds.length,
+      events: eventsStore.size,
+      timeline: record,
+    };
+
+    return result;
+  }
+
+  private async fetchEventLineage(nodeIds: string[]): Promise<Map<string, SafeEndpointEvent>> {
+    const timelineEvents = await this.receiver.fetchTimelineEvents(nodeIds);
+    const eventsStore = new Map<string, SafeEndpointEvent>();
+    for (const event of timelineEvents.hits.hits) {
+      const doc = event._source;
+
+      if (doc !== null && doc !== undefined) {
+        const entityId = doc?.process?.entity_id?.toString();
+        if (entityId !== null && entityId !== undefined) eventsStore.set(entityId, doc);
+      }
+    }
+    return eventsStore;
+  }
+
+  private async lookupExtraInfo(): Promise<ExtraInfo> {
+    const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
+      this.receiver.fetchClusterInfo(),
+      this.receiver.fetchLicenseInfo(),
+    ]);
+
+    const clusterInfo: ESClusterInfo =
+      clusterInfoPromise.status === 'fulfilled' ? clusterInfoPromise.value : ({} as ESClusterInfo);
+
+    const licenseInfo: ESLicense | undefined =
+      licenseInfoPromise.status === 'fulfilled' ? licenseInfoPromise.value : ({} as ESLicense);
+
+    return { clusterInfo, licenseInfo };
+  }
+
+  private calculateTimeFrame(): TimeFrame {
+    const now = moment();
+    const startOfDay = now.startOf('day').toISOString();
+    const endOfDay = now.endOf('day').toISOString();
+    return { startOfDay, endOfDay };
+  }
+}

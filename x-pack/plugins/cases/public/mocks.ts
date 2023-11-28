@@ -10,22 +10,29 @@ import type { CasesUiStart } from './types';
 
 const apiMock: jest.Mocked<CasesUiStart['api']> = {
   getRelatedCases: jest.fn(),
-  cases: { find: jest.fn(), getCasesMetrics: jest.fn(), getCasesStatus: jest.fn() },
+  cases: {
+    find: jest.fn(),
+    getCasesMetrics: jest.fn(),
+    getCasesStatus: jest.fn(),
+    bulkGet: jest.fn(),
+  },
 };
 
 const uiMock: jest.Mocked<CasesUiStart['ui']> = {
   getCases: jest.fn(),
   getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
   getAllCasesSelectorModal: jest.fn(),
-  getCreateCaseFlyout: jest.fn(),
   getRecentCases: jest.fn(),
 };
 
 export const openAddToExistingCaseModalMock = jest.fn();
+export const openAddToNewCaseFlyoutMock = jest.fn();
 
 const hooksMock: jest.Mocked<CasesUiStart['hooks']> = {
-  getUseCasesAddToNewCaseFlyout: jest.fn(),
-  getUseCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
+  useCasesAddToNewCaseFlyout: jest.fn().mockImplementation(() => ({
+    open: openAddToNewCaseFlyoutMock,
+  })),
+  useCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
     open: openAddToExistingCaseModalMock,
   })),
 };
@@ -39,6 +46,8 @@ const helpersMock: jest.Mocked<CasesUiStart['helpers']> = {
     update: false,
     delete: false,
     push: false,
+    connectors: false,
+    settings: false,
   }),
   getRuleIdFromEvent: jest.fn(),
   groupAlertsByRule: jest.fn(),

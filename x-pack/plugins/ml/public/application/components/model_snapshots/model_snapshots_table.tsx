@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useCallback, useState, useRef, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLoadingSpinner,
-  EuiBasicTableColumn,
 } from '@elastic/eui';
-
-import { checkPermission } from '../../capabilities/check_capabilities';
+import { timeFormatter } from '@kbn/ml-date-utils';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
 import { ml } from '../../services/ml_api_service';
-import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../common/constants/states';
 import { CloseJobConfirm } from './close_job_confirm';
 import {
-  ModelSnapshot,
   CombinedJobWithStats,
+  ModelSnapshot,
 } from '../../../../common/types/anomaly_detection_jobs';
-import { timeFormatter } from '../../../../common/util/date_utils';
 
 interface Props {
   job: CombinedJobWithStats;
@@ -41,8 +40,10 @@ export enum COMBINED_JOB_STATE {
 }
 
 export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
-  const canCreateJob = checkPermission('canCreateJob');
-  const canStartStopDatafeed = checkPermission('canStartStopDatafeed');
+  const [canCreateJob, canStartStopDatafeed] = usePermissionCheck([
+    'canCreateJob',
+    'canStartStopDatafeed',
+  ]);
 
   const [snapshots, setSnapshots] = useState<ModelSnapshot[]>([]);
   const [snapshotsLoaded, setSnapshotsLoaded] = useState<boolean>(false);

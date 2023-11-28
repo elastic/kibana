@@ -6,11 +6,7 @@
  */
 import React from 'react';
 import { MetricItem } from './metric_item';
-import {
-  useLast50DurationChart,
-  useLocationName,
-  useStatusByLocationOverview,
-} from '../../../../hooks';
+import { useLast50DurationChart, useStatusByLocationOverview } from '../../../../hooks';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 
 export interface FlyoutParamProps {
@@ -27,17 +23,26 @@ export const OverviewGridItem = ({
   monitor: MonitorOverviewItem;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
-  const locationName =
-    useLocationName({ locationId: monitor.location?.id })?.label || monitor.location?.id;
+  const { timestamp } = useStatusByLocationOverview({
+    configId: monitor.configId,
+    locationId: monitor.location.id,
+  });
 
-  const { timestamp } = useStatusByLocationOverview(monitor.configId, locationName);
-
-  const { data, averageDuration } = useLast50DurationChart({
+  const { data, medianDuration, maxDuration, avgDuration, minDuration } = useLast50DurationChart({
     locationId: monitor.location?.id,
     monitorId: monitor.id,
     timestamp,
+    schedule: monitor.schedule,
   });
   return (
-    <MetricItem data={data} monitor={monitor} averageDuration={averageDuration} onClick={onClick} />
+    <MetricItem
+      data={data}
+      monitor={monitor}
+      medianDuration={medianDuration}
+      maxDuration={maxDuration}
+      avgDuration={avgDuration}
+      minDuration={minDuration}
+      onClick={onClick}
+    />
   );
 };

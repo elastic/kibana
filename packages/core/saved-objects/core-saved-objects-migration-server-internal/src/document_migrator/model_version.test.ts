@@ -6,15 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { convertModelVersionBackwardConversionSchemaMock } from './model_version.test.mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsType,
   SavedObjectsModelVersion,
-  SavedObjectModelTransformationFn,
+  SavedObjectModelDataBackfillFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { Transform, TransformType } from './types';
-import { getModelVersionTransforms, convertModelVersionTransformFn } from './model_version';
+import {
+  getModelVersionTransforms,
+  convertModelVersionTransformFn,
+  getModelVersionSchemas,
+} from './model_version';
+
+const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'test',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+  ...parts,
+});
 
 describe('getModelVersionTransforms', () => {
   let log: MockedLogger;
@@ -25,39 +39,22 @@ describe('getModelVersionTransforms', () => {
     transform: expect.any(Function),
   });
 
-  const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
-    name: 'test',
-    hidden: false,
-    namespaceType: 'single',
-    mappings: { properties: {} },
-    ...parts,
-  });
-
   beforeEach(() => {
     log = loggerMock.create();
   });
 
-  it('generate transforms for model version having a transformation', () => {
+  it('generate transforms for all model versions', () => {
     const typeDefinition = createType({
       name: 'foo',
       modelVersions: {
         '1': {
-          modelChange: {
-            type: 'expansion',
-            transformation: { up: jest.fn(), down: jest.fn() },
-          },
+          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
         '2': {
-          modelChange: {
-            type: 'expansion',
-            addedMappings: { foo: { type: 'keyword' } },
-          },
+          changes: [{ type: 'mappings_deprecation', deprecatedMappings: [] }],
         },
         '3': {
-          modelChange: {
-            type: 'expansion',
-            transformation: { up: jest.fn(), down: jest.fn() },
-          },
+          changes: [{ type: 'mappings_addition', addedMappings: {} }],
         },
       },
     });
@@ -65,8 +62,9 @@ describe('getModelVersionTransforms', () => {
     const transforms = getModelVersionTransforms({ log, typeDefinition });
 
     expect(transforms).toEqual([
-      expectTransform(TransformType.Migrate, '10.1.0'),
-      expectTransform(TransformType.Migrate, '10.3.0'),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(1)),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(2)),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(3)),
     ]);
   });
 
@@ -75,22 +73,13 @@ describe('getModelVersionTransforms', () => {
       name: 'foo',
       modelVersions: () => ({
         '1': {
-          modelChange: {
-            type: 'expansion',
-            transformation: { up: jest.fn(), down: jest.fn() },
-          },
+          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
         '2': {
-          modelChange: {
-            type: 'expansion',
-            addedMappings: { foo: { type: 'keyword' } },
-          },
+          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
         '3': {
-          modelChange: {
-            type: 'expansion',
-            transformation: { up: jest.fn(), down: jest.fn() },
-          },
+          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
       }),
     });
@@ -98,8 +87,9 @@ describe('getModelVersionTransforms', () => {
     const transforms = getModelVersionTransforms({ log, typeDefinition });
 
     expect(transforms).toEqual([
-      expectTransform(TransformType.Migrate, '10.1.0'),
-      expectTransform(TransformType.Migrate, '10.3.0'),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(1)),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(2)),
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(3)),
     ]);
   });
 });
@@ -117,71 +107,150 @@ describe('convertModelVersionTransformFn', () => {
     return { type: 'foo', id: `foo-${i++}`, attributes: {} };
   };
 
-  const createModelTransformFn = (): jest.MockedFunction<SavedObjectModelTransformationFn> => {
-    return jest.fn().mockImplementation((doc: unknown) => ({
-      document: doc,
-    }));
+  const createModelTransformFn = (): jest.MockedFunction<SavedObjectModelDataBackfillFn> => {
+    return jest.fn().mockImplementation((doc: unknown) => ({}));
   };
 
   it('generates a transform function calling the model transform', () => {
+    const typeDefinition = createType({});
     const upTransform = createModelTransformFn();
-    const downTransform = createModelTransformFn();
 
     const definition: SavedObjectsModelVersion = {
-      modelChange: {
-        type: 'expansion',
-        transformation: { up: upTransform, down: downTransform },
-      },
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: upTransform,
+        },
+      ],
     };
 
     const transform = convertModelVersionTransformFn({
       log,
       modelVersion: 1,
       virtualVersion: '10.1.0',
-      definition,
+      modelVersionDefinition: definition,
+      typeDefinition,
     });
 
     expect(upTransform).not.toHaveBeenCalled();
-    expect(downTransform).not.toHaveBeenCalled();
 
     const doc = createDoc();
-    const context = { log, modelVersion: 1 };
+    const context = { log, modelVersion: 1, namespaceType: typeDefinition.namespaceType };
 
     transform(doc);
 
     expect(upTransform).toHaveBeenCalledTimes(1);
-    expect(downTransform).not.toHaveBeenCalled();
     expect(upTransform).toHaveBeenCalledWith(doc, context);
   });
 
-  it('returns the document from the model transform', () => {
-    const upTransform = createModelTransformFn();
-
-    const resultDoc = createDoc();
-    upTransform.mockImplementation((doc) => {
-      return { document: resultDoc };
-    });
+  it('generates a transform function calling all model transforms of the version', () => {
+    const typeDefinition = createType({});
+    const upTransform1 = createModelTransformFn();
+    const upTransform2 = createModelTransformFn();
 
     const definition: SavedObjectsModelVersion = {
-      modelChange: {
-        type: 'expansion',
-        transformation: { up: upTransform, down: jest.fn() },
-      },
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: upTransform1,
+        },
+        {
+          type: 'data_backfill',
+          backfillFn: upTransform2,
+        },
+      ],
     };
 
     const transform = convertModelVersionTransformFn({
       log,
       modelVersion: 1,
       virtualVersion: '10.1.0',
-      definition,
+      typeDefinition,
+      modelVersionDefinition: definition,
     });
 
     const doc = createDoc();
+    const context = { log, modelVersion: 1, namespaceType: typeDefinition.namespaceType };
 
-    const result = transform(doc);
-    expect(result).toEqual({
-      transformedDoc: resultDoc,
-      additionalDocs: [],
+    transform(doc);
+
+    expect(upTransform1).toHaveBeenCalledTimes(1);
+    expect(upTransform1).toHaveBeenCalledWith(doc, context);
+    expect(upTransform2).toHaveBeenCalledTimes(1);
+    expect(upTransform2).toHaveBeenCalledWith(doc, context);
+  });
+});
+
+describe('getModelVersionSchemas', () => {
+  beforeEach(() => {
+    convertModelVersionBackwardConversionSchemaMock.mockReset();
+    convertModelVersionBackwardConversionSchemaMock.mockImplementation(() => jest.fn());
+  });
+
+  it('calls convertModelVersionBackwardConversionSchema with the correct parameters', () => {
+    const schema1 = jest.fn();
+    const schema3 = jest.fn();
+
+    const typeDefinition = createType({
+      name: 'foo',
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: schema1,
+          },
+        },
+        2: {
+          changes: [],
+          schemas: {},
+        },
+        3: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: schema3,
+          },
+        },
+      },
+    });
+
+    getModelVersionSchemas({ typeDefinition });
+
+    expect(convertModelVersionBackwardConversionSchemaMock).toHaveBeenCalledTimes(2);
+    expect(convertModelVersionBackwardConversionSchemaMock).toHaveBeenCalledWith(schema1);
+    expect(convertModelVersionBackwardConversionSchemaMock).toHaveBeenCalledWith(schema3);
+  });
+
+  it('generate schemas for correct model versions', () => {
+    const schema1 = jest.fn();
+    const schema3 = jest.fn();
+
+    const typeDefinition = createType({
+      name: 'foo',
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: schema1,
+          },
+        },
+        2: {
+          changes: [],
+          schemas: {},
+        },
+        3: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: schema3,
+          },
+        },
+      },
+    });
+
+    const schemas = getModelVersionSchemas({ typeDefinition });
+
+    expect(schemas).toEqual({
+      [modelVersionToVirtualVersion(1)]: expect.any(Function),
+      [modelVersionToVirtualVersion(3)]: expect.any(Function),
     });
   });
 });

@@ -13,7 +13,7 @@ import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
-import QueryBarTopRow from './query_bar_top_row';
+import QueryBarTopRow, { SharingMetaFields } from './query_bar_top_row';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -115,6 +115,7 @@ describe('QueryBarTopRowTopRow', () => {
   const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
   const REFRESH_BUTTON_SELECTOR = 'EuiSuperUpdateButton';
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
+  const TEXT_BASED_EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -293,19 +294,133 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should NOT render query input bar if on text based languages mode', () => {
-    const component = shallow(
+    const component = mount(
       wrapQueryBarTopRowInContext({
         query: sqlQuery,
         isDirty: false,
         screenTitle: 'SQL Screen',
         timeHistory: mockTimeHistory,
         indexPatterns: [stubIndexPattern],
-        showDatePicker: false,
+        showDatePicker: true,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
       })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
+    expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(true);
+    expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toBe(false);
+  });
+
+  it('Should render disabled date picker if on text based languages mode and no timeFieldName', () => {
+    const dataView = {
+      ...stubIndexPattern,
+      timeFieldName: undefined,
+      isPersisted: () => false,
+    };
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        query: sqlQuery,
+        isDirty: false,
+        screenTitle: 'SQL Screen',
+        timeHistory: mockTimeHistory,
+        indexPatterns: [dataView],
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      })
+    );
+
+    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
+    expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(false);
+    expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toMatchInlineSnapshot(`
+      Object {
+        "display": <span
+          data-test-subj="kbnQueryBar-datePicker-disabled"
+        >
+          All time
+        </span>,
+      }
+    `);
+  });
+
+  it('should render query input bar with hideRunQueryText when configured', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        query: sqlQuery,
+        isDirty: false,
+        screenTitle: 'SQL Screen',
+        timeHistory: mockTimeHistory,
+        indexPatterns: [stubIndexPattern],
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        hideTextBasedRunQueryLabel: true,
+      })
+    );
+
+    expect(component.find(TEXT_BASED_EDITOR).prop('hideRunQueryText')).toBe(true);
+  });
+
+  it('should render query input bar with hideRunQueryText as undefined if not configured', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        query: sqlQuery,
+        isDirty: false,
+        screenTitle: 'SQL Screen',
+        timeHistory: mockTimeHistory,
+        indexPatterns: [stubIndexPattern],
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      })
+    );
+
+    expect(component.find(TEXT_BASED_EDITOR).prop('hideRunQueryText')).toBe(undefined);
+  });
+
+  it('Should render custom data view picker', () => {
+    const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
+    const { getByTestId } = render(
+      wrapQueryBarTopRowInContext({
+        query: kqlQuery,
+        screenTitle: 'Another Screen',
+        isDirty: false,
+        indexPatterns: [stubIndexPattern],
+        timeHistory: mockTimeHistory,
+        dataViewPickerOverride,
+      })
+    );
+
+    expect(getByTestId('dataViewPickerOverride')).toBeInTheDocument();
+  });
+});
+
+describe('SharingMetaFields', () => {
+  it('Should render the component with data-shared-timefilter-duration if time is set correctly', () => {
+    const from = '2023-04-07';
+    const to = '2023-04-08';
+    const component = <SharingMetaFields from={from} to={to} dateFormat="MMM D, YYYY" />;
+
+    expect(shallow(component)).toMatchInlineSnapshot(`
+      <div
+        data-shared-timefilter-duration="Apr 7, 2023 to Apr 8, 2023"
+        data-test-subj="dataSharedTimefilterDuration"
+      />
+    `);
+  });
+
+  it('Should render the component without data-shared-timefilter-duration if time is not set correctly', () => {
+    const component = (
+      <SharingMetaFields from="boom" to="now" dateFormat="MMM D, YYYY @ HH:mm:ss.SSS" />
+    );
+
+    expect(shallow(component)).toMatchInlineSnapshot(`
+      <div
+        data-test-subj="dataSharedTimefilterDuration"
+      />
+    `);
   });
 });

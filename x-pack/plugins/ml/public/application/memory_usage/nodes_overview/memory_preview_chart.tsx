@@ -17,6 +17,7 @@ import {
   Settings,
   LineAnnotation,
   AnnotationDomainType,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -108,15 +109,17 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
 
   return (
     <Chart size={['100%', 50]}>
+      <Tooltip
+        headerFormatter={({ value }) =>
+          i18n.translate('xpack.ml.trainedModels.nodesList.memoryBreakdown', {
+            defaultMessage: 'Approximate memory breakdown',
+          })
+        }
+      />
       <Settings
         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
         rotation={90}
-        tooltip={{
-          headerFormatter: ({ value }) =>
-            i18n.translate('xpack.ml.trainedModels.nodesList.memoryBreakdown', {
-              defaultMessage: 'Approximate memory breakdown',
-            }),
-        }}
+        locale={i18n.getLocale()}
       />
 
       <Axis
@@ -138,7 +141,15 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
             }),
           },
         ]}
-        marker={<EuiIcon type="arrowDown" />}
+        marker={
+          <EuiIcon
+            type="arrowDown"
+            aria-label={i18n.translate('xpack.ml.trainedModels.nodesList.mlMaxMemoryAriaLabel', {
+              defaultMessage: 'Maximum memory permitted for ML native processes {bytes}',
+              values: { bytes: bytesFormatter(memoryOverview.ml_max_in_bytes) },
+            })}
+          />
+        }
         markerPosition={Position.Top}
       />
 

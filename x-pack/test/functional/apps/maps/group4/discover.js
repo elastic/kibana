@@ -9,7 +9,14 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'maps', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'maps',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const security = getService('security');
   const from = 'Sep 22, 2015 @ 00:00:00.000';
   const to = 'Sep 22, 2015 @ 04:00:00.000';
@@ -34,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should link geo_shape fields to Maps application', async () => {
       await PageObjects.discover.selectIndexPattern('geo_shapes*');
-      await PageObjects.discover.clickFieldListItemVisualize('geometry');
+      await PageObjects.unifiedFieldList.clickFieldListItemVisualize('geometry');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();
       const doesLayerExist = await PageObjects.maps.doesLayerExist('geo_shapes*');
@@ -51,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.clickFieldListItemVisualize('geo.coordinates');
+      await PageObjects.unifiedFieldList.clickFieldListItemVisualize('geo.coordinates');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();
       const doesLayerExist = await PageObjects.maps.doesLayerExist('logstash-*');

@@ -6,7 +6,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+
+import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 
 import './result.scss';
 
@@ -34,7 +35,7 @@ interface Props {
   shouldLinkToDetailPage?: boolean;
   schemaForTypeHighlights?: Schema | AdvancedSchema;
   actions?: ResultAction[];
-  dragHandleProps?: DraggableProvidedDragHandleProps;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
   showClick?: boolean;
 }
 

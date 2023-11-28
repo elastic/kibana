@@ -9,20 +9,31 @@ import { pick } from 'lodash';
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+
+import { TRANSFORM_PLUGIN_ID } from '../../../common/constants/plugin';
+
 import type { FleetAuthz } from '../../../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../common';
 import {
   calculateAuthz,
+  calculateEndpointExceptionsPrivilegesFromKibanaPrivileges,
   calculatePackagePrivilegesFromKibanaPrivileges,
+  getAuthorizationFromPrivileges,
 } from '../../../common/authz';
 
 import { appContextService } from '..';
-import { ENDPOINT_PRIVILEGES, PLUGIN_ID } from '../../constants';
+import {
+  ENDPOINT_EXCEPTIONS_PRIVILEGES,
+  ENDPOINT_PRIVILEGES,
+  PLUGIN_ID,
+  type PrivilegeMapObject,
+} from '../../constants';
 
 import type {
   FleetAuthzRequirements,
-  FleetRouteRequiredAuthz,
   FleetAuthzRouteConfig,
+  FleetRouteRequiredAuthz,
 } from './types';
 
 export function checkSecurityEnabled() {
@@ -36,6 +47,7 @@ export function checkSuperuser(req: KibanaRequest) {
 
   const security = appContextService.getSecurity();
   const user = security.authc.getCurrentUser(req);
+
   if (!user) {
     return false;
   }
@@ -48,50 +60,61 @@ export function checkSuperuser(req: KibanaRequest) {
   return true;
 }
 
-function getAuthorizationFromPrivileges(
-  kibanaPrivileges: Array<{
-    resource?: string;
-    privilege: string;
-    authorized: boolean;
-  }>,
-  searchPrivilege: string
-) {
-  const privilege = kibanaPrivileges.find((p) => p.privilege.includes(searchPrivilege));
-  return privilege ? privilege.authorized : false;
-}
+const computeUiApiPrivileges = (
+  security: SecurityPluginStart,
+  privileges: Record<string, PrivilegeMapObject>
+): string[] => {
+  return Object.entries(privileges).map(
+    ([_, { appId, privilegeType, privilegeSplit, privilegeName }]) => {
+      if (privilegeType === 'ui') {
+        return security.authz.actions[privilegeType].get(`${appId}`, `${privilegeName}`);
+      }
+      return security.authz.actions[privilegeType].get(`${appId}${privilegeSplit}${privilegeName}`);
+    }
+  );
+};
 
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
   const security = appContextService.getSecurity();
 
   if (security.authz.mode.useRbacForRequest(req)) {
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
-    const endpointPrivileges = Object.entries(ENDPOINT_PRIVILEGES).map(
-      ([_, { appId, privilegeType, privilegeName }]) => {
-        if (privilegeType === 'ui') {
-          return security.authz.actions[privilegeType].get(`${appId}`, `${privilegeName}`);
-        }
-        return security.authz.actions[privilegeType].get(`${appId}-${privilegeName}`);
-      }
+    const endpointPrivileges = computeUiApiPrivileges(security, ENDPOINT_PRIVILEGES);
+    const endpointExceptionsPrivileges = computeUiApiPrivileges(
+      security,
+      ENDPOINT_EXCEPTIONS_PRIVILEGES
     );
+
     const { privileges } = await checkPrivileges({
       kibana: [
         security.authz.actions.api.get(`${PLUGIN_ID}-all`),
         security.authz.actions.api.get(`${PLUGIN_ID}-setup`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-all`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-read`),
+        security.authz.actions.api.get(`${TRANSFORM_PLUGIN_ID}-all`),
+        security.authz.actions.api.get(`${TRANSFORM_PLUGIN_ID}-admin`),
+        security.authz.actions.api.get(`${TRANSFORM_PLUGIN_ID}-read`),
+
         ...endpointPrivileges,
+        ...endpointExceptionsPrivileges,
       ],
     });
-    const fleetAllAuth = getAuthorizationFromPrivileges(privileges.kibana, `${PLUGIN_ID}-all`);
-    const intAllAuth = getAuthorizationFromPrivileges(
-      privileges.kibana,
-      `${INTEGRATIONS_PLUGIN_ID}-all`
-    );
-    const intReadAuth = getAuthorizationFromPrivileges(
-      privileges.kibana,
-      `${INTEGRATIONS_PLUGIN_ID}-read`
-    );
-    const fleetSetupAuth = getAuthorizationFromPrivileges(privileges.kibana, 'fleet-setup');
+    const fleetAllAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-all`,
+    });
+    const intAllAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${INTEGRATIONS_PLUGIN_ID}-all`,
+    });
+    const intReadAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${INTEGRATIONS_PLUGIN_ID}-read`,
+    });
+    const fleetSetupAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      searchPrivilege: 'fleet-setup',
+    });
 
     return {
       ...calculateAuthz({
@@ -103,6 +126,9 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
         isSuperuser: checkSuperuser(req),
       }),
       packagePrivileges: calculatePackagePrivilegesFromKibanaPrivileges(privileges.kibana),
+      endpointExceptionsPrivileges: calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
+        privileges.kibana
+      ),
     };
   }
 

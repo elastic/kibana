@@ -6,11 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { calculatePostureScore } from '../../common/utils/helpers';
 import { statusColors } from '../common/constants';
 
+/**
+ * This component will take 100% of the width set by the parent
+ * */
 export const ComplianceScoreBar = ({
   totalPassed,
   totalFailed,
@@ -22,22 +26,28 @@ export const ComplianceScoreBar = ({
   const complianceScore = calculatePostureScore(totalPassed, totalFailed);
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="flexEnd"
-      style={{ gap: euiTheme.size.s }}
+    <EuiToolTip
+      anchorProps={{
+        // ensures the compliance bar takes full width of its parent
+        css: css`
+          width: 100%;
+        `,
+      }}
+      content={i18n.translate('xpack.csp.complianceScoreBar.tooltipTitle', {
+        defaultMessage: '{failed} failed and {passed} passed findings',
+        values: {
+          passed: totalPassed,
+          failed: totalFailed,
+        },
+      })}
     >
-      <EuiFlexItem>
-        <EuiToolTip
-          content={i18n.translate('xpack.csp.complianceScoreBar.tooltipTitle', {
-            defaultMessage: '{failed} failed and {passed} passed findings',
-            values: {
-              passed: totalPassed,
-              failed: totalFailed,
-            },
-          })}
-        >
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="flexEnd"
+        style={{ gap: euiTheme.size.xs }}
+      >
+        <EuiFlexItem>
           <EuiFlexGroup
             gutterSize="none"
             style={{
@@ -47,14 +57,6 @@ export const ComplianceScoreBar = ({
               gap: 1,
             }}
           >
-            {!!totalFailed && (
-              <EuiFlexItem
-                style={{
-                  flex: totalFailed,
-                  background: statusColors.failed,
-                }}
-              />
-            )}
             {!!totalPassed && (
               <EuiFlexItem
                 style={{
@@ -63,15 +65,23 @@ export const ComplianceScoreBar = ({
                 }}
               />
             )}
+            {!!totalFailed && (
+              <EuiFlexItem
+                style={{
+                  flex: totalFailed,
+                  background: statusColors.failed,
+                }}
+              />
+            )}
           </EuiFlexGroup>
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText
-          size="xs"
-          style={{ fontWeight: euiTheme.font.weight.bold }}
-        >{`${complianceScore.toFixed(0)}%`}</EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: euiTheme.size.xxl, textAlign: 'right' }}>
+          <EuiText
+            size="xs"
+            style={{ fontWeight: euiTheme.font.weight.bold }}
+          >{`${complianceScore.toFixed(0)}%`}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 };

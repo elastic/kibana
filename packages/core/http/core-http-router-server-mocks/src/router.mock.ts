@@ -21,8 +21,9 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
 
-export type RouterMock = jest.Mocked<IRouter<any>>;
+export type RouterMock = jest.Mocked<IRouter<any>> & { versioned: MockedVersionedRouter };
 
 function createRouterMock({ routerPath = '' }: { routerPath?: string } = {}): RouterMock {
   return {
@@ -34,6 +35,7 @@ function createRouterMock({ routerPath = '' }: { routerPath?: string } = {}): Ro
     patch: jest.fn(),
     getRoutes: jest.fn(),
     handleLegacyErrors: jest.fn().mockImplementation((handler) => handler),
+    versioned: createVersionedRouterMock(),
   };
 }
 
@@ -71,7 +73,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   routeTags,
   routeAuthRequired,
   validation = {},
-  kibanaRouteOptions = { xsrfRequired: true, access: 'public' },
+  kibanaRouteOptions = { xsrfRequired: true, access: 'internal' },
   kibanaRequestState = {
     requestId: '123',
     requestUuid: '123e4567-e89b-12d3-a456-426614174000',

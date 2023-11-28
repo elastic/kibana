@@ -8,7 +8,7 @@ import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
@@ -133,17 +133,18 @@ export function MobileLocationStats({
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorDisabled,
+      color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.crashes', {
         defaultMessage: 'Most crashes',
       }),
-      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
-        defaultMessage: 'Coming Soon',
+      extra: getComparisonValueFormatter({
+        currentPeriodValue: currentPeriod?.mostCrashes.value,
+        previousPeriodValue: previousPeriod?.mostCrashes.value,
       }),
       icon: getIcon('bug'),
-      value: NOT_AVAILABLE_LABEL,
+      value: currentPeriod?.mostCrashes.location ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value) => `${value}`,
-      trend: [],
+      trend: currentPeriod?.mostCrashes.timeseries,
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -162,17 +163,18 @@ export function MobileLocationStats({
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorDisabled,
+      color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.launches', {
         defaultMessage: 'Most launches',
       }),
-      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
-        defaultMessage: 'Coming Soon',
+      extra: getComparisonValueFormatter({
+        currentPeriodValue: currentPeriod?.mostLaunches.value,
+        previousPeriodValue: previousPeriod?.mostLaunches.value,
       }),
       icon: getIcon('launch'),
-      value: NOT_AVAILABLE_LABEL,
+      value: currentPeriod?.mostLaunches.location ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value) => `${value}`,
-      trend: [],
+      trend: currentPeriod?.mostLaunches.timeseries,
       trendShape: MetricTrendShape.Area,
     },
   ];

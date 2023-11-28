@@ -5,57 +5,139 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect, Switch, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { NoFindingsStates } from '../../components/no_findings_states';
-import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
-import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
-import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY } from '../../common/constants';
+import { VULNERABILITIES_INDEX_NAME, FINDINGS_INDEX_NAME } from '../../../common/constants';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { getStatusForIndexName } from '../../../common/utils/helpers';
+import { Vulnerabilities } from '../vulnerabilities';
 
-export const Findings = () => {
+type FindingsTabKey = 'vuln_mgmt' | 'configurations';
+
+const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: FindingsTabKey }) => {
   const location = useLocation();
-  const dataViewQuery = useLatestFindingsDataView();
   const getSetupStatus = useCspSetupStatusApi();
 
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates />;
+  if (!getSetupStatus.data) {
+    return null;
+  }
+
+  const vulnStatus = getStatusForIndexName(VULNERABILITIES_INDEX_NAME, getSetupStatus.data);
+  const findingsStatus = getStatusForIndexName(FINDINGS_INDEX_NAME, getSetupStatus.data);
+  const hasVulnerabilities = vulnStatus === 'not-empty';
+  const hasFindings = findingsStatus === 'not-empty';
+
+  // if the user has not yet made a tab selection
+  // switch to misconfigurations page if there are misconfigurations, and no vulnerabilities
+  const redirectToMisconfigurationsTab =
+    lastTabSelected === 'configurations' ||
+    (!lastTabSelected && !hasVulnerabilities && hasFindings);
+
+  if (redirectToMisconfigurationsTab) {
+    return (
+      <Redirect
+        to={{ search: location.search, pathname: findingsNavigation.findings_default.path }}
+      />
+    );
+  }
+
+  // otherwise stay on the vulnerabilities tab, since it's the first one.
+  return (
+    <Redirect to={{ search: location.search, pathname: findingsNavigation.vulnerabilities.path }} />
+  );
+};
+
+export const Findings = () => {
+  const history = useHistory();
+  const location = useLocation();
+
+  // restore the users most recent tab selection
+  const [lastTabSelected, setLastTabSelected] = useLocalStorage<FindingsTabKey>(
+    LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY
+  );
+
+  const navigateToVulnerabilitiesTab = () => {
+    setLastTabSelected('vuln_mgmt');
+    history.push({ pathname: findingsNavigation.vulnerabilities.path });
+  };
+  const navigateToConfigurationsTab = () => {
+    setLastTabSelected('configurations');
+    history.push({ pathname: findingsNavigation.findings_default.path });
+  };
+
+  const isResourcesVulnerabilitiesPage = matchPath(location.pathname, {
+    path: findingsNavigation.resource_vulnerabilities.path,
+  })?.isExact;
+
+  const isResourcesFindingsPage = matchPath(location.pathname, {
+    path: findingsNavigation.resource_findings.path,
+  })?.isExact;
+
+  const showHeader = !isResourcesVulnerabilitiesPage && !isResourcesFindingsPage;
+
+  const isVulnerabilitiesTabSelected = (pathname: string) => {
+    return (
+      pathname === findingsNavigation.vulnerabilities.path ||
+      pathname === findingsNavigation.vulnerabilities_by_resource.path
+    );
+  };
 
   return (
-    <CloudPosturePage query={dataViewQuery}>
-      <Switch>
+    <>
+      {showHeader && (
+        <>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
+            </h1>
+          </EuiTitle>
+          <EuiSpacer />
+          <EuiTabs size="l">
+            <EuiTab
+              key="vuln_mgmt"
+              onClick={navigateToVulnerabilitiesTab}
+              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
+            >
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.vulnerabilities"
+                defaultMessage="Vulnerabilities"
+              />
+            </EuiTab>
+            <EuiTab
+              key="configurations"
+              onClick={navigateToConfigurationsTab}
+              isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
+            >
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.misconfigurations"
+                defaultMessage="Misconfigurations"
+              />
+            </EuiTab>
+          </EuiTabs>
+        </>
+      )}
+      <Routes>
         <Route
           exact
           path={cloudPosturePages.findings.path}
-          component={() => (
-            <Redirect
-              to={{
-                pathname: findingsNavigation.findings_default.path,
-                search: location.search,
-              }}
-            />
-          )}
+          render={() => <FindingsTabRedirecter lastTabSelected={lastTabSelected} />}
         />
+        <Route path={findingsNavigation.findings_default.path} component={Configurations} />
+        <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} />
+        <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
         <Route
-          path={findingsNavigation.findings_default.path}
-          render={() => (
-            <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
-              <LatestFindingsContainer dataView={dataViewQuery.data!} />
-            </TrackApplicationView>
-          )}
+          path={findingsNavigation.vulnerabilities_by_resource.path}
+          component={Vulnerabilities}
         />
-        <Route
-          path={findingsNavigation.findings_by_resource.path}
-          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
-        />
-        <Route
-          path={'*'}
-          component={() => <Redirect to={findingsNavigation.findings_default.path} />}
-        />
-      </Switch>
-    </CloudPosturePage>
+        {/* Redirect to default findings page if no match */}
+        <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
+      </Routes>
+    </>
   );
 };

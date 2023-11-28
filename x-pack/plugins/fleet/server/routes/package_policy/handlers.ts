@@ -13,6 +13,8 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
 import {
@@ -35,18 +37,19 @@ import type {
   BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
 import type {
-  BulkGetPackagePoliciesResponse,
-  CreatePackagePolicyResponse,
   PostDeletePackagePoliciesResponse,
   NewPackagePolicy,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
-import { installationStatuses } from '../../../common/constants';
+import { installationStatuses, inputsFormat } from '../../../common/constants';
 import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
-import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import {
+  simplifiedPackagePolicytoNewPackagePolicy,
+  packagePolicyToSimplifiedPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
@@ -76,7 +79,10 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
     // agnostic to package-level RBAC
     return response.ok({
       body: {
-        items,
+        items:
+          request.query.format === inputsFormat.Simplified
+            ? items.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
+            : items,
         total,
         page,
         perPage,
@@ -89,7 +95,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
 
 export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof BulkGetPackagePoliciesRequestSchema.query>,
   TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
@@ -101,13 +107,17 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
     const items = await packagePolicyService.getByIDs(soClient, ids, {
       ignoreMissing,
     });
+    const responseItems = items ?? [];
 
-    const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
-
-    checkAllowedPackages(body.items, limitedToPackages, 'package.name');
+    checkAllowedPackages(responseItems, limitedToPackages, 'package.name');
 
     return response.ok({
-      body,
+      body: {
+        items:
+          responseItems.length > 0 && request.query.format === inputsFormat.Simplified
+            ? responseItems.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
+            : responseItems,
+      },
     });
   } catch (error) {
     if (error instanceof PackagePolicyNotFoundError) {
@@ -121,7 +131,8 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 };
 
 export const getOnePackagePolicyHandler: FleetRequestHandler<
-  TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
+  TypeOf<typeof GetOnePackagePolicyRequestSchema.params>,
+  TypeOf<typeof GetOnePackagePolicyRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
@@ -138,7 +149,10 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
 
       return response.ok({
         body: {
-          item: packagePolicy,
+          item:
+            request.query.format === inputsFormat.Simplified
+              ? packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+              : packagePolicy,
         },
       });
     } else {
@@ -210,7 +224,7 @@ function isSimplifiedCreatePackagePolicyRequest(
 
 export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof CreatePackagePolicyRequestSchema.query>,
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -218,7 +232,9 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
-  const { force, package: pkg, ...newPolicy } = request.body;
+  const { force, id, package: pkg, ...newPolicy } = request.body;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
   if ('output_id' in newPolicy) {
     // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
     delete newPolicy.output_id;
@@ -253,18 +269,22 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       esClient,
       newPackagePolicy,
       {
-        user,
+        id,
         force,
         spaceId,
+        authorizationHeader,
       },
       context,
       request
     );
 
-    const body: CreatePackagePolicyResponse = { item: packagePolicy };
-
     return response.ok({
-      body,
+      body: {
+        item:
+          request.query.format === inputsFormat.Simplified
+            ? packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+            : packagePolicy,
+      },
     });
   } catch (error) {
     if (error.statusCode) {
@@ -279,7 +299,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
 
 export const updatePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.params>,
-  unknown,
+  TypeOf<typeof UpdatePackagePolicyRequestSchema.query>,
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -356,7 +376,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
-
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
@@ -366,9 +385,20 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       packagePolicy.package?.version
     );
     return response.ok({
-      body: { item: updatedPackagePolicy },
+      body: {
+        item:
+          request.query.format === inputsFormat.Simplified
+            ? packagePolicyToSimplifiedPackagePolicy(updatedPackagePolicy)
+            : updatedPackagePolicy,
+      },
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

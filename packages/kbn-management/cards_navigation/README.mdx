@@ -1,0 +1,62 @@
+---
+id: kbn-management/components/CardsNavigation
+slug: /kbn-management/components/cards_navigation
+title: Cards Navigation
+description: A component that allows the users to navigate to other management apps
+tags: ['management', 'component']
+date: 2023-04-23
+---
+
+This component is simply in charge of rendering a list of links to other management apps. It also
+makes sure that the apps are enabled before doing so and it also aggregates them into predefined
+categories.
+
+### Adding new items to the navigation
+
+There are two distinctive ways of adding items to the navigation;
+
+- to add navigation items that would be visible across all consumers of this package all you have to do is;
+
+  * edit the `cards_navigation/src/types.tsx` file and add the app id into the `appIds` enum (make sure that the app_id value matches the one from the plugin)
+  * edit the `cards_navigation/src/const.tsx`, add a new entry to the `appDefinitions` object. In here you can specify the category where you want it to be, icon and description.
+
+- To add a localized navigation item that would only exist within the context of usage for this component, an "extend card navigation" definition can be passed in like so; 
+
+  ```typescript
+  <CardsNavigation
+    sections={sections}
+    appBasePath={appBasePath}
+    extendedCardNavigationDefinitions={{
+      visualize: {
+        category: 'content',
+        description: 'create different visualizations based on your data.'
+        icon: 'visualizeApp',
+      },
+    }}
+  />
+  ```
+
+  In the example above assuming the key `visualize` is a valid registered management app ID, this definition would show up as a navigation card under the predefined category `content`. It's also worth pointing out that there's also 
+  an opt out functionality that allows one to provide definitions that don't map to management app, and requires that the property `skipValidation` be passed and set to true, in this case the responsibility is on the 
+  user passing the defintion to also provide the `href` that the card will link to, and it's `title`.
+
+### Removing an item from the navigation
+
+If an item needs to be hidden from the navigation you can specify that by using the `hideLinksTo` prop like so:
+
+```typescript
+<CardsNavigation
+  sections={sections}
+  appBasePath={appBasePath}
+  hideLinksTo={[ appIds.RULES, appIds.TAGS ]}
+/>
+
+```
+
+In case an app needs to be removed all together from all the solutions you can remove its
+definition from the `consts.tsx` file. The app might still be visible in the side nav, so if you
+want to remove all links to it from management but without disabling the plugin you will have
+to remove it from the side nav too.
+
+Bare in mind that if the app is disabled then it will be hidden anyway from the cards navigation
+and from the sidenav.

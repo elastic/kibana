@@ -11,8 +11,8 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 
-import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
+import type { RuleToImport } from '../../../../../common/api/detection_engine/rule_management';
+import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 import { requestContextMock } from '../../routes/__mocks__';
 import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
@@ -26,6 +26,7 @@ import {
   getInvalidConnectors,
   swapActionIds,
   migrateLegacyActionsIds,
+  migrateLegacyInvestigationFields,
 } from './utils';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import type { PartialFilter } from '../../types';
@@ -34,12 +35,6 @@ import { createBulkErrorObject } from '../../routes/utils';
 
 import type { RuleAlertType } from '../../rule_schema';
 import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../rule_schema/mocks';
-
-// eslint-disable-next-line no-restricted-imports
-import type {
-  LegacyRuleAlertAction,
-  LegacyRulesActionsSavedObject,
-} from '../../rule_actions_legacy';
 
 import { createRulesAndExceptionsStreamFromNdJson } from '../logic/import/create_rules_stream_from_ndjson';
 import type { RuleExceptionsPromiseFromStreams } from '../logic/import/import_rules_utils';
@@ -277,82 +272,18 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, {});
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 });
       expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformFindAlerts(
-        {
-          page: 1,
-          perPage: 0,
-          total: 0,
-          data: [getRuleMock(getQueryRuleParams())],
-        },
-        {}
-      );
-      const expected = getOutputRuleAlertForRest();
-      expect(output).toEqual({
+      const output = transformFindAlerts({
         page: 1,
         perPage: 0,
         total: 0,
-        data: [expected],
+        data: [getRuleMock(getQueryRuleParams())],
       });
-    });
-
-    test('outputs 200 if the data is of type siem alert and has undefined for the legacyRuleActions', () => {
-      const output = transformFindAlerts(
-        {
-          page: 1,
-          perPage: 0,
-          total: 0,
-          data: [getRuleMock(getQueryRuleParams())],
-        },
-        {
-          '123': undefined,
-        }
-      );
       const expected = getOutputRuleAlertForRest();
-      expect(output).toEqual({
-        page: 1,
-        perPage: 0,
-        total: 0,
-        data: [expected],
-      });
-    });
-
-    test('outputs 200 if the data is of type siem alert and has a legacy rule action', () => {
-      const actions: LegacyRuleAlertAction[] = [
-        {
-          id: '456',
-          params: {},
-          group: '',
-          action_type_id: 'action_123',
-        },
-      ];
-
-      const legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined> = {
-        [getRuleMock(getQueryRuleParams()).id]: {
-          id: '123',
-          actions,
-          alertThrottle: '1h',
-          ruleThrottle: '1h',
-        },
-      };
-      const output = transformFindAlerts(
-        {
-          page: 1,
-          perPage: 0,
-          total: 0,
-          data: [getRuleMock(getQueryRuleParams())],
-        },
-        legacyRuleActions
-      );
-      const expected = {
-        ...getOutputRuleAlertForRest(),
-        throttle: '1h',
-        actions,
-      };
       expect(output).toEqual({
         page: 1,
         perPage: 0,
@@ -364,14 +295,14 @@ describe('utils', () => {
 
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transform(getRuleMock(getQueryRuleParams()), undefined);
+      const output = transform(getRuleMock(getQueryRuleParams()));
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
       const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialRule;
-      const output = transform(unsafeCast, undefined);
+      const output = transform(unsafeCast);
       expect(output).toBeNull();
     });
   });
@@ -462,12 +393,12 @@ describe('utils', () => {
 
   describe('transformAlertsToRules', () => {
     test('given an empty array returns an empty array', () => {
-      expect(transformAlertsToRules([], {})).toEqual([]);
+      expect(transformAlertsToRules([])).toEqual([]);
     });
 
     test('given single alert will return the alert transformed', () => {
       const result1 = getRuleMock(getQueryRuleParams());
-      const transformed = transformAlertsToRules([result1], {});
+      const transformed = transformAlertsToRules([result1]);
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
@@ -478,7 +409,7 @@ describe('utils', () => {
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
-      const transformed = transformAlertsToRules([result1, result2], {});
+      const transformed = transformAlertsToRules([result1, result2]);
       const expected1 = getOutputRuleAlertForRest();
       const expected2 = getOutputRuleAlertForRest();
       expected2.id = 'some other id';
@@ -944,6 +875,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -988,6 +920,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -996,6 +929,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1046,6 +980,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -1054,6 +989,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1111,6 +1047,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -1119,6 +1056,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1178,6 +1116,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -1186,6 +1125,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1286,6 +1226,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -1294,6 +1235,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1316,6 +1258,28 @@ describe('utils', () => {
           rule_id: 'rule-1',
         },
       ]);
+    });
+  });
+
+  describe('migrateLegacyInvestigationFields', () => {
+    test('should return undefined if value not set', () => {
+      const result = migrateLegacyInvestigationFields(undefined);
+      expect(result).toEqual(undefined);
+    });
+
+    test('should migrate array to object', () => {
+      const result = migrateLegacyInvestigationFields(['foo']);
+      expect(result).toEqual({ field_names: ['foo'] });
+    });
+
+    test('should migrate empty array to undefined', () => {
+      const result = migrateLegacyInvestigationFields([]);
+      expect(result).toEqual(undefined);
+    });
+
+    test('should not migrate if already intended type', () => {
+      const result = migrateLegacyInvestigationFields({ field_names: ['foo'] });
+      expect(result).toEqual({ field_names: ['foo'] });
     });
   });
 });

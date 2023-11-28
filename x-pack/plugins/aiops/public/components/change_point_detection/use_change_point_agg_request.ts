@@ -5,20 +5,32 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { useRefresh } from '@kbn/ml-date-picker';
 import { isDefined } from '@kbn/ml-is-defined';
+import type {
+  MappingRuntimeFields,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { useReload } from '../../hooks/use_reload';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
-  ChangePointType,
+  FieldConfig,
+  useChangePointDetectionControlsContext,
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
-import { SPLIT_FIELD_CARDINALITY_LIMIT, COMPOSITE_AGG_SIZE } from './constants';
+import {
+  type ChangePointType,
+  COMPOSITE_AGG_SIZE,
+  EXCLUDED_CHANGE_POINT_TYPES,
+  SPLIT_FIELD_CARDINALITY_LIMIT,
+  CHANGE_POINT_DETECTION_EVENT,
+} from './constants';
 
 interface RequestOptions {
   index: string;
@@ -32,8 +44,9 @@ interface RequestOptions {
 
 function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
-  query: QueryDslQueryContainer
-) {
+  query: QueryDslQueryContainer,
+  runtimeMappings: MappingRuntimeFields
+): SearchRequest {
   const timeSeriesAgg = {
     over_time: {
       date_histogram: {
@@ -93,37 +106,39 @@ function getChangePointDetectionRequestBody(
     : timeSeriesAgg;
 
   return {
-    params: {
-      index,
-      size: 0,
-      body: {
-        query,
-        aggregations,
-      },
+    index,
+    size: 0,
+    body: {
+      ...(query ? { query } : {}),
+      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+      aggregations,
     },
-  };
+  } as SearchRequest;
 }
 
-const CHARTS_PER_PAGE = 6;
-
 export function useChangePointResults(
+  fieldConfig: FieldConfig,
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer,
   splitFieldCardinality: number | null
 ) {
   const {
     notifications: { toasts },
+    usageCollection,
+    embeddingOrigin,
   } = useAiopsAppContext();
 
   const { dataView } = useDataSource();
-
-  const refresh = useRefresh();
+  const { splitFieldsOptions, metricFieldOptions } = useChangePointDetectionControlsContext();
+  const { refreshTimestamp: refresh } = useReload();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
-  const [activePage, setActivePage] = useState<number>(0);
-  const [progress, setProgress] = useState<number>(0);
+  /**
+   * null also means the fetching has been complete
+   */
+  const [progress, setProgress] = useState<number | null>(null);
 
-  const isSingleMetric = !isDefined(requestParams.splitField);
+  const isSingleMetric = !isDefined(fieldConfig.splitField);
 
   const totalAggPages = useMemo<number>(() => {
     return Math.ceil(
@@ -131,12 +146,10 @@ export function useChangePointResults(
     );
   }, [splitFieldCardinality]);
 
-  const { runRequest, cancelRequest, isLoading } = useCancellableSearch();
+  const { runRequest, cancelRequest } = useCancellableSearch();
 
   const reset = useCallback(() => {
     cancelRequest();
-    setProgress(0);
-    setActivePage(0);
     setResults([]);
   }, [cancelRequest]);
 
@@ -144,31 +157,70 @@ export function useChangePointResults(
     async (pageNumber: number = 1, afterKey?: string) => {
       try {
         if (!isSingleMetric && !totalAggPages) {
-          setProgress(100);
+          setProgress(null);
           return;
         }
 
-        const requestPayload = getChangePointDetectionRequestBody(
+        const metricFieldDV = metricFieldOptions.find(
+          (option) => option.name === fieldConfig.metricField
+        );
+        const splitFieldDV = splitFieldsOptions.find(
+          (option) => option.name === fieldConfig.splitField
+        );
+
+        const runtimeMappings = {
+          ...(metricFieldDV?.isRuntimeField
+            ? { [metricFieldDV.name]: metricFieldDV.runtimeField! }
+            : {}),
+          ...(splitFieldDV?.isRuntimeField
+            ? { [splitFieldDV.name]: splitFieldDV.runtimeField! }
+            : {}),
+        } as MappingRuntimeFields;
+
+        const requestPayload: SearchRequest = getChangePointDetectionRequestBody(
           {
             index: dataView.getIndexPattern(),
-            fn: requestParams.fn,
+            fn: fieldConfig.fn,
             timeInterval: requestParams.interval,
-            metricField: requestParams.metricField,
+            metricField: fieldConfig.metricField,
             timeField: dataView.timeFieldName!,
-            splitField: requestParams.splitField,
+            splitField: fieldConfig.splitField,
             afterKey,
           },
-          query
+          query,
+          runtimeMappings
         );
+
+        if (usageCollection?.reportUiCounter && embeddingOrigin) {
+          usageCollection.reportUiCounter(
+            embeddingOrigin,
+            METRIC_TYPE.COUNT,
+            CHANGE_POINT_DETECTION_EVENT.RUN
+          );
+        }
+
         const result = await runRequest<
-          typeof requestPayload,
+          { params: SearchRequest },
           { rawResponse: ChangePointAggResponse }
-        >(requestPayload);
+        >({ params: requestPayload });
+
+        if (usageCollection?.reportUiCounter && embeddingOrigin) {
+          usageCollection.reportUiCounter(
+            embeddingOrigin,
+            METRIC_TYPE.COUNT,
+            CHANGE_POINT_DETECTION_EVENT.SUCCESS
+          );
+        }
 
         if (result === null) {
-          setProgress(100);
+          setProgress(null);
           return;
         }
+
+        const isFetchCompleted = !(
+          isDefined(result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm) &&
+          pageNumber < totalAggPages
+        );
 
         const buckets = (
           isSingleMetric
@@ -176,55 +228,62 @@ export function useChangePointResults(
             : result.rawResponse.aggregations.groupings.buckets
         ) as ChangePointAggResponse['aggregations']['groupings']['buckets'];
 
-        setProgress(Math.min(Math.round((pageNumber / totalAggPages) * 100), 100));
+        setProgress(
+          isFetchCompleted ? null : Math.min(Math.round((pageNumber / totalAggPages) * 100), 100)
+        );
 
-        let groups = buckets.map((v) => {
-          const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-          const timeAsString = v.change_point_request.bucket?.key;
-          const rawPValue = v.change_point_request.type[changePointType].p_value;
+        let groups = buckets
+          .map((v) => {
+            const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
+            const timeAsString = v.change_point_request.bucket?.key;
+            const rawPValue = v.change_point_request.type[changePointType].p_value;
 
-          return {
-            ...(isSingleMetric
-              ? {}
-              : {
-                  group: {
-                    name: requestParams.splitField,
-                    value: v.key.splitFieldTerm,
-                  },
-                }),
-            type: changePointType,
-            p_value: rawPValue,
-            timestamp: timeAsString,
-            label: changePointType,
-            reason: v.change_point_request.type[changePointType].reason,
-          } as ChangePointAnnotation;
-        });
+            return {
+              ...(isSingleMetric
+                ? {}
+                : {
+                    group: {
+                      name: fieldConfig.splitField,
+                      value: v.key.splitFieldTerm,
+                    },
+                  }),
+              type: changePointType,
+              p_value: rawPValue,
+              timestamp: timeAsString,
+              label: changePointType,
+              reason: v.change_point_request.type[changePointType].reason,
+              id: isSingleMetric
+                ? 'single_metric'
+                : `${fieldConfig.splitField}_${v.key?.splitFieldTerm}`,
+            } as ChangePointAnnotation;
+          })
+          .filter((v) => !EXCLUDED_CHANGE_POINT_TYPES.has(v.type));
 
         if (Array.isArray(requestParams.changePointType)) {
           groups = groups.filter((v) => requestParams.changePointType!.includes(v.type));
         }
 
         setResults((prev) => {
-          return (
-            (prev ?? [])
-              .concat(groups)
-              // Lower p_value indicates a bigger change point, hence the acs sorting
-              .sort((a, b) => a.p_value - b.p_value)
-          );
+          return (prev ?? []).concat(groups);
         });
 
         if (
-          result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm &&
-          pageNumber < totalAggPages
+          !isFetchCompleted &&
+          isDefined(result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm)
         ) {
           await fetchResults(
             pageNumber + 1,
-            result.rawResponse.aggregations.groupings.after_key.splitFieldTerm
+            result.rawResponse.aggregations.groupings.after_key!.splitFieldTerm
           );
-        } else {
-          setProgress(100);
         }
       } catch (e) {
+        if (usageCollection?.reportUiCounter && embeddingOrigin) {
+          usageCollection.reportUiCounter(
+            embeddingOrigin,
+            METRIC_TYPE.COUNT,
+            CHANGE_POINT_DETECTION_EVENT.ERROR
+          );
+        }
         toasts.addError(e, {
           title: i18n.translate('xpack.aiops.changePointDetection.fetchErrorTitle', {
             defaultMessage: 'Failed to fetch change points',
@@ -232,35 +291,57 @@ export function useChangePointResults(
         });
       }
     },
-    [runRequest, requestParams, query, dataView, totalAggPages, toasts, isSingleMetric]
+    [
+      embeddingOrigin,
+      isSingleMetric,
+      totalAggPages,
+      dataView,
+      fieldConfig.fn,
+      fieldConfig.metricField,
+      fieldConfig.splitField,
+      requestParams.interval,
+      requestParams.changePointType,
+      query,
+      metricFieldOptions,
+      splitFieldsOptions,
+      runRequest,
+      toasts,
+      usageCollection,
+    ]
   );
 
   useEffect(
     function fetchResultsOnInputChange() {
+      setProgress(0);
       reset();
+
+      if (fieldConfig.splitField && splitFieldCardinality === null) {
+        // wait for cardinality to be resolved
+        return;
+      }
+
       fetchResults();
 
       return () => {
         cancelRequest();
       };
     },
-    [requestParams, query, splitFieldCardinality, fetchResults, reset, cancelRequest, refresh]
+    [
+      requestParams.interval,
+      requestParams.changePointType,
+      fieldConfig.fn,
+      fieldConfig.metricField,
+      fieldConfig.splitField,
+      query,
+      splitFieldCardinality,
+      fetchResults,
+      reset,
+      cancelRequest,
+      refresh,
+    ]
   );
 
-  const pagination = useMemo(() => {
-    return {
-      activePage,
-      pageCount: Math.round((results.length ?? 0) / CHARTS_PER_PAGE),
-      updatePagination: setActivePage,
-    };
-  }, [activePage, results.length]);
-
-  const resultPerPage = useMemo(() => {
-    const start = activePage * CHARTS_PER_PAGE;
-    return results.slice(start, start + CHARTS_PER_PAGE);
-  }, [results, activePage]);
-
-  return { results: resultPerPage, isLoading, reset, progress, pagination };
+  return { results, isLoading: progress !== null, reset, progress };
 }
 
 /**

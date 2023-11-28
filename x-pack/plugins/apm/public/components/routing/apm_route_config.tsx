@@ -13,13 +13,16 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import { Breadcrumb } from '../app/breadcrumb';
 import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
-import { home } from './home';
-import { serviceDetail } from './service_detail';
-import { mobileServiceDetail } from './mobile_service_detail';
-import { settings } from './settings';
+import { homeRoute } from './home';
+import { serviceDetailRoute } from './service_detail';
+import { mobileServiceDetailRoute } from './mobile_service_detail';
+import { settingsRoute } from './settings';
+import { onboarding } from './onboarding';
+import { tutorialRedirectRoute } from './onboarding/redirect';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
+import { diagnosticsRoute } from '../app/diagnostics';
 
 const ServiceGroupsTitle = i18n.translate(
   'xpack.apm.views.serviceGroups.title',
@@ -104,10 +107,13 @@ const apmRoutes = {
           ]),
         }),
       },
-      ...settings,
-      ...serviceDetail,
-      ...mobileServiceDetail,
-      ...home,
+      ...tutorialRedirectRoute,
+      ...onboarding,
+      ...diagnosticsRoute,
+      ...settingsRoute,
+      ...serviceDetailRoute,
+      ...mobileServiceDetailRoute,
+      ...homeRoute,
     },
   },
 };

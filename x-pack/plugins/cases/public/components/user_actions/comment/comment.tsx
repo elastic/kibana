@@ -7,47 +7,129 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 
-import type { CommentUserAction } from '../../../../common/api';
-import { Actions, CommentType } from '../../../../common/api';
-import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
+import type { SnakeToCamelCase } from '../../../../common/types';
+import type { CommentUserAction } from '../../../../common/types/domain';
+import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
+import type { AttachmentTypeRegistry } from '../../../../common/registry';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
-import type { Comment } from '../../../containers/types';
+import type { AttachmentUI } from '../../../containers/types';
 import * as i18n from './translations';
 import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
 import { createActionAttachmentUserActionBuilder } from './actions';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
+import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
-const getDeleteLabelTitle = (userAction: UserActionResponse<CommentUserAction>) => {
+
+interface DeleteLabelTitle {
+  userAction: SnakeToCamelCase<CommentUserAction>;
+  caseData: UserActionBuilderArgs['caseData'];
+  externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
+  persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
+}
+
+const getDeleteLabelTitle = ({
+  userAction,
+  caseData,
+  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
+}: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
 
-  if (comment.type === CommentType.alert) {
+  if (comment.type === AttachmentType.alert) {
     const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
     const alertLabel = i18n.MULTIPLE_ALERTS(totalAlerts);
 
     return `${i18n.REMOVED_FIELD} ${alertLabel}`;
   }
 
-  if (
-    comment.type === CommentType.externalReference ||
-    comment.type === CommentType.persistableState
-  ) {
-    return `${i18n.REMOVED_FIELD} ${i18n.ATTACHMENT.toLowerCase()}`;
+  if (comment.type === AttachmentType.externalReference) {
+    return getDeleteLabelFromRegistry({
+      caseData,
+      registry: externalReferenceAttachmentTypeRegistry,
+      getId: () => comment.externalReferenceAttachmentTypeId,
+      getAttachmentProps: () => ({
+        externalReferenceId: comment.externalReferenceId,
+        externalReferenceMetadata: comment.externalReferenceMetadata,
+      }),
+    });
+  }
+
+  if (comment.type === AttachmentType.persistableState) {
+    return getDeleteLabelFromRegistry({
+      caseData,
+      registry: persistableStateAttachmentTypeRegistry,
+      getId: () => comment.persistableStateAttachmentTypeId,
+      getAttachmentProps: () => ({
+        persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
+        persistableStateAttachmentState: comment.persistableStateAttachmentState,
+      }),
+    });
   }
 
   return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 };
 
+interface GetDeleteLabelFromRegistryArgs<R> {
+  caseData: UserActionBuilderArgs['caseData'];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  registry: AttachmentTypeRegistry<AttachmentFrameworkAttachmentType<any>>;
+  getId: () => string;
+  getAttachmentProps: () => object;
+}
+
+const getDeleteLabelFromRegistry = <R,>({
+  caseData,
+  registry,
+  getId,
+  getAttachmentProps,
+}: GetDeleteLabelFromRegistryArgs<R>) => {
+  const registeredAttachmentCommonLabel = `${i18n.REMOVED_FIELD} ${i18n.ATTACHMENT.toLowerCase()}`;
+  const attachmentTypeId: string = getId();
+  const isTypeRegistered = registry.has(attachmentTypeId);
+
+  if (!isTypeRegistered) {
+    return registeredAttachmentCommonLabel;
+  }
+
+  const props = {
+    ...getAttachmentProps(),
+    caseData: { id: caseData.id, title: caseData.title },
+  };
+
+  const attachmentType = registry.get(attachmentTypeId);
+  const attachmentLabel = attachmentType.getAttachmentRemovalObject?.(props).event ?? null;
+
+  return attachmentLabel != null ? attachmentLabel : registeredAttachmentCommonLabel;
+};
+
 const getDeleteCommentUserAction = ({
   userAction,
   userProfiles,
+  caseData,
+  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
-  userAction: UserActionResponse<CommentUserAction>;
-} & Pick<UserActionBuilderArgs, 'handleOutlineComment' | 'userProfiles'>): EuiCommentProps[] => {
-  const label = getDeleteLabelTitle(userAction);
+  userAction: SnakeToCamelCase<CommentUserAction>;
+} & Pick<
+  UserActionBuilderArgs,
+  | 'handleOutlineComment'
+  | 'userProfiles'
+  | 'externalReferenceAttachmentTypeRegistry'
+  | 'persistableStateAttachmentTypeRegistry'
+  | 'caseData'
+>): EuiCommentProps[] => {
+  const label = getDeleteLabelTitle({
+    userAction,
+    caseData,
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+  });
+
   const commonBuilder = createCommonUpdateUserActionBuilder({
     userAction,
     userProfiles,
@@ -82,14 +164,14 @@ const getCreateCommentUserAction = ({
   onShowAlertDetails,
   actionsNavigation,
 }: {
-  userAction: UserActionResponse<CommentUserAction>;
-  comment: Comment;
+  userAction: SnakeToCamelCase<CommentUserAction>;
+  comment: AttachmentUI;
 } & Omit<
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
   switch (comment.type) {
-    case CommentType.user:
+    case AttachmentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
         appId,
         userProfiles,
@@ -107,7 +189,7 @@ const getCreateCommentUserAction = ({
 
       return userBuilder.build();
 
-    case CommentType.alert:
+    case AttachmentType.alert:
       const alertBuilder = createAlertAttachmentUserActionBuilder({
         userProfiles,
         alertData,
@@ -123,7 +205,7 @@ const getCreateCommentUserAction = ({
 
       return alertBuilder.build();
 
-    case CommentType.actions:
+    case AttachmentType.actions:
       const actionBuilder = createActionAttachmentUserActionBuilder({
         userProfiles,
         userAction,
@@ -133,7 +215,7 @@ const getCreateCommentUserAction = ({
 
       return actionBuilder.build();
 
-    case CommentType.externalReference:
+    case AttachmentType.externalReference:
       const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
         userAction,
         userProfiles,
@@ -146,7 +228,7 @@ const getCreateCommentUserAction = ({
 
       return externalReferenceBuilder.build();
 
-    case CommentType.persistableState:
+    case AttachmentType.persistableState:
       const persistableBuilder = createPersistableStateAttachmentUserActionBuilder({
         userAction,
         userProfiles,
@@ -166,6 +248,7 @@ const getCreateCommentUserAction = ({
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   appId,
   caseData,
+  casesConfiguration,
   userProfiles,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
@@ -188,13 +271,16 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseConnectors,
 }) => ({
   build: () => {
-    const commentUserAction = userAction as UserActionResponse<CommentUserAction>;
+    const commentUserAction = userAction as SnakeToCamelCase<CommentUserAction>;
 
-    if (commentUserAction.action === Actions.delete) {
+    if (commentUserAction.action === UserActionActions.delete) {
       return getDeleteCommentUserAction({
         userAction: commentUserAction,
+        caseData,
         handleOutlineComment,
         userProfiles,
+        externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
       });
     }
 
@@ -204,10 +290,11 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       return [];
     }
 
-    if (commentUserAction.action === Actions.create) {
+    if (commentUserAction.action === UserActionActions.create) {
       const commentAction = getCreateCommentUserAction({
         appId,
         caseData,
+        casesConfiguration,
         userProfiles,
         userAction: commentUserAction,
         externalReferenceAttachmentTypeRegistry,

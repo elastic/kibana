@@ -25,6 +25,7 @@ function FullTraceButton({
 }) {
   return (
     <EuiButton
+      data-test-subj="apmFullTraceButtonViewFullTraceButton"
       fill
       iconType="apmTrace"
       isLoading={isLoading}

@@ -31,7 +31,6 @@ A client API is available for other plugins to:
 - query the events
 - aggregate the events
 
-HTTP APIs are also available to query the events.
 
 Currently, events are written with references to Saved Objects, and queries
 against the event log must include the Saved Object references that the query
@@ -40,9 +39,16 @@ users from accessing events for Saved Objects that they do not have access to.
 The queries ensure that the user can read the referenced Saved Objects before
 returning the events relating to them.
 
-The default index name is `.kibana-event-log-${kibanaVersion}-${ILM-sequence}`.
+Starting in version 8.9.0, the event log is created as a data stream.  In
+prior releases, it was an alias with an initial index set up, with the
+alias used to deal with rolled over indices from ILM.  With the data stream,
+there's a little less set up, and the bulk writing is slightly different.
 
-The index written to is controlled by ILM.  The ILM policy is initially created
+The default data stream / alias name is `.kibana-event-log-ds`.
+To search across all versions' event logs, use `.kibana-event-log-*`; 
+it will search over data streams and aliases as expected.
+
+The event log indices are controlled by ILM.  The ILM policy is initially created
 by the plugin, but is otherwise never updated by the plugin.  This allows
 customers to customize it to their environment, without having to worry about
 their updates getting overwritten by newer versions of Kibana.
@@ -298,42 +304,9 @@ See `QueryEventsBySavedObjectResult` in the Plugin Client APIs below.
 
 ## Plugin Client APIs for querying
 
-```ts
-interface EventLogClient {
-  findEventsBySavedObjectIds(
-    type: string,
-    ids: string[],
-    options?: Partial<FindOptionsType>,
-    legacyIds?: string[]
-  ): Promise<QueryEventsBySavedObjectResult>;
-  aggregateEventsBySavedObjectIds(
-    type: string,
-    ids: string[],
-    options?: Partial<AggregateOptionsType>,
-    legacyIds?: string[]
-  ): Promise<AggregateEventsBySavedObjectResult>;
-}
-
-interface FindOptionsType { /* typed version of HTTP query parameters ^^^ */ }
-
-interface QueryEventsBySavedObjectResult {
-  page: number;
-  per_page: number;
-  total: number;
-  data: Event[];
-}
-
-interface AggregateOptionsType {
-  start?: Date,
-  end?: Date,
-  filter?: string;
-  aggs: Record<string, estypes.AggregationsAggregationContainer>;
-}
-
-interface AggregateEventsBySavedObjectResult {
-  aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
-}
-```
+All APIs available for querying the event log are described in
+[`x-pack/plugins/event_log/server/types.ts`](server/types.ts), via the 
+`IEventLogClient` interface, which is obtained at plugin start.
 
 ## Generating Events
 

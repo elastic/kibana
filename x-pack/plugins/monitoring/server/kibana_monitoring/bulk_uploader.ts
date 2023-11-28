@@ -67,7 +67,7 @@ export class BulkUploader implements IBulkUploader {
   private kibanaStatusSubscription?: Subscription;
   private readonly opsMetrics$: Observable<OpsMetrics>;
   private kibanaStatus: ServiceStatusLevel | null;
-  private _timer: NodeJS.Timer | null;
+  private _timer: NodeJS.Timeout | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
 
@@ -137,6 +137,7 @@ export class BulkUploader implements IBulkUploader {
   public handleNotEnabled() {
     this.stop('Monitoring status upload endpoint is not enabled in Elasticsearch');
   }
+
   public handleConnectionLost() {
     this.stop('Connection issue detected');
   }
@@ -258,14 +259,14 @@ export class BulkUploader implements IBulkUploader {
     // convert the raw data into a flat array, with each payload prefixed
     // with an 'index' instruction, for bulk upload
     return rawData.reduce((accum, { type, result }) => {
-      return [
-        ...accum,
+      accum.push(
         { index: { _type: type } },
         {
           kibana: this.getKibanaStats(type),
           ...result,
-        },
-      ];
+        }
+      );
+      return accum;
     }, [] as object[]);
   }
 }

@@ -23,6 +23,7 @@ jest.mock('./rule_actions', () => ({
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),
+  hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
   hasManageApiKeysCapability: jest.fn(() => true),
 }));
@@ -215,6 +216,7 @@ function mockRule(overwrite = {}): Rule {
     updatedAt: new Date(),
     consumer: 'alerts',
     notifyWhen: 'onActiveAlert',
+    revision: 0,
     executionStatus: {
       status: 'active',
       lastDuration: 500,

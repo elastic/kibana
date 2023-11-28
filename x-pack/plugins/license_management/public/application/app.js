@@ -8,15 +8,11 @@
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LicenseDashboard, UploadLicense } from './sections';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { APP_PERMISSION } from '../../common/constants';
 import { SectionLoading, useExecutionContext } from '../shared_imports';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageBody,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiPageSection, EuiPageBody, EuiEmptyPrompt } from '@elastic/eui';
+import { UPLOAD_LICENSE_ROUTE } from '../locator';
 
 export const App = ({
   hasPermission,
@@ -37,14 +33,14 @@ export const App = ({
 
   if (permissionsLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" grow={true}>
         <SectionLoading>
           <FormattedMessage
             id="xpack.licenseMgmt.app.loadingPermissionsDescription"
             defaultMessage="Checking permissions…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
@@ -52,9 +48,10 @@ export const App = ({
     const error = permissionsError?.data?.message;
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" grow={true}>
         <EuiEmptyPrompt
-          iconType="alert"
+          color="danger"
+          iconType="warning"
           title={
             <h1>
               <FormattedMessage
@@ -65,14 +62,15 @@ export const App = ({
           }
           body={error ? <p>{error}</p> : null}
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   if (!hasPermission) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" grow={true}>
         <EuiEmptyPrompt
+          color="subdued"
           iconType="securityApp"
           title={
             <h1>
@@ -94,17 +92,17 @@ export const App = ({
             </p>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   const withTelemetry = (Component) => (props) => <Component {...props} telemetry={telemetry} />;
   return (
     <EuiPageBody>
-      <Switch>
-        <Route path={`/upload_license`} component={withTelemetry(UploadLicense)} />
+      <Routes>
+        <Route path={`/${UPLOAD_LICENSE_ROUTE}`} component={withTelemetry(UploadLicense)} />
         <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
-      </Switch>
+      </Routes>
     </EuiPageBody>
   );
 };

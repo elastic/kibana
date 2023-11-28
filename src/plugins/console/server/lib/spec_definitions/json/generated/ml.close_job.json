@@ -1,9 +1,17 @@
 {
   "ml.close_job": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
       "force": "__flag__",
-      "timeout": ""
+      "timeout": [
+        "30m",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -11,6 +19,10 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/_close"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-close-job.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ml-close-job.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

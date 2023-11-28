@@ -6,10 +6,20 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { zipObject } from 'lodash';
-import { useMlKibana } from '../../../contexts/kibana';
+import { zipObject, groupBy } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useStorage } from '@kbn/ml-local-storage';
+import {
+  ML_OVERVIEW_PANELS,
+  MlStorageKey,
+  TMlStorageMapped,
+} from '../../../../../common/types/storage';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
+import { CollapsiblePanel } from '../../../components/collapsible_panel';
+import { useMlKibana, useMlLink } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
@@ -19,8 +29,9 @@ import { useRefresh } from '../../../routing/use_refresh';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';
 import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
-import { JobStatsBarStats } from '../../../components/stats_bar';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
+import { overviewPanelDefaultState } from '../../overview_page';
+import { useEnabledFeatures } from '../../../contexts/ml';
 
 export type GroupsDictionary = Dictionary<Group>;
 
@@ -38,27 +49,34 @@ export interface Group {
 
 interface Props {
   anomalyTimelineService: AnomalyTimelineService;
-  jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({
-  anomalyTimelineService,
-  jobCreationDisabled,
-  setLazyJobCount,
-}) => {
+export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLazyJobCount }) => {
   const {
     services: { charts: chartsService },
   } = useMlKibana();
 
   const { displayErrorToast } = useToastNotificationService();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const refresh = useRefresh();
+
+  const [panelsState, setPanelsState] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_OVERVIEW_PANELS>
+  >(ML_OVERVIEW_PANELS, overviewPanelDefaultState);
+
+  const manageJobsLink = useMlLink({
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+  });
 
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
-  const [statsBarData, setStatsBarData] = useState<JobStatsBarStats>();
+  const [statsBarData, setStatsBarData] = useState<Array<{ label: string; value: number }>>();
+  const [restStatsBarData, setRestStatsBarData] =
+    useState<Array<{ label: string; value: number }>>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const loadJobs = async () => {
@@ -75,10 +93,21 @@ export const AnomalyDetectionPanel: FC<Props> = ({
         return job;
       });
       const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
-      const stats = getStatsBarData(jobsSummaryList);
+      const stats = getStatsBarData(jobsSummaryList, showNodeInfo);
+
+      const statGroups = groupBy(
+        Object.entries(stats)
+          .filter(([k, v]) => v.show)
+          .map(([k, v]) => v),
+        'group'
+      );
+
       setIsLoading(false);
       setErrorMessage(undefined);
-      setStatsBarData(stats);
+
+      setStatsBarData(statGroups[0]);
+      setRestStatsBarData(statGroups[1]);
+
       setGroupsCount(count);
       setGroups(jobsGroups);
       loadOverallSwimLanes(jobsGroups);
@@ -136,14 +165,12 @@ export const AnomalyDetectionPanel: FC<Props> = ({
           defaultMessage: 'An error occurred getting the anomaly detection jobs list.',
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <pre>{errorMessage}</pre>
       </EuiCallOut>
     </Fragment>
   );
-
-  const panelClass = isLoading ? 'mlOverviewPanel__isLoading' : 'mlOverviewPanel';
 
   const noAdJobs =
     !errorMessage &&
@@ -151,22 +178,46 @@ export const AnomalyDetectionPanel: FC<Props> = ({
     typeof errorMessage === 'undefined' &&
     groupsCount === 0;
 
-  if (noAdJobs) {
-    return <AnomalyDetectionEmptyState />;
-  }
-
   return (
-    <EuiPanel className={panelClass} hasShadow={false} hasBorder>
+    <CollapsiblePanel
+      isOpen={panelsState.adJobs}
+      onToggle={(update) => {
+        setPanelsState({ ...panelsState, adJobs: update });
+      }}
+      header={
+        <FormattedMessage
+          id="xpack.ml.overview.adJobsPanel.header"
+          defaultMessage="Anomaly Detection Jobs"
+        />
+      }
+      headerItems={[
+        ...(statsBarData
+          ? [<OverviewStatsBar inputStats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />]
+          : []),
+        ...(restStatsBarData
+          ? [
+              <OverviewStatsBar
+                inputStats={restStatsBarData}
+                dataTestSub={'mlOverviewJobStatsBarExtra'}
+              />,
+            ]
+          : []),
+        <EuiLink href={manageJobsLink}>
+          {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
+            defaultMessage: 'Manage jobs',
+          })}
+        </EuiLink>,
+      ]}
+    >
+      {noAdJobs ? <AnomalyDetectionEmptyState /> : null}
+
       {typeof errorMessage !== 'undefined' && errorDisplay}
-      {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
+
+      {isLoading ? <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" /> : null}
 
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 ? (
-        <AnomalyDetectionTable
-          items={groups}
-          statsBarData={statsBarData!}
-          chartsService={chartsService}
-        />
+        <AnomalyDetectionTable items={groups} chartsService={chartsService} />
       ) : null}
-    </EuiPanel>
+    </CollapsiblePanel>
   );
 };

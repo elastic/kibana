@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common/api';
-import type { Case } from '../../containers/types';
+import { CaseStatuses } from '../../../common/types/domain';
+import type { CaseUI } from '../../containers/types';
 import { statuses } from '../status';
 
-export const getStatusDate = (theCase: Case): string | null => {
+export const getStatusDate = (theCase: CaseUI): string | null => {
   if (theCase.status === CaseStatuses.open) {
     return theCase.createdAt;
   } else if (theCase.status === CaseStatuses['in-progress']) {

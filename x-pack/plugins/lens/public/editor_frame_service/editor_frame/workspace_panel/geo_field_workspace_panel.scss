@@ -1,18 +1,5 @@
-@import '../../../mixins';
-
 .lnsVisualizeGeoFieldWorkspacePanel__dragDrop {
   padding: $euiSizeXXL ($euiSizeXL * 2);
   border: $euiBorderThin;
   border-radius: $euiBorderRadius;
-
-  &.lnsDragDrop-isDropTarget {
-    @include lnsDroppable;
-    @include lnsDroppableActive;
-
-  }
-
-  &.lnsDragDrop-isActiveDropTarget {
-    @include lnsDroppableActiveHover;
-
-  }
 }

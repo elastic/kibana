@@ -8,8 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { isJobStatusWithResults } from '../../../../common/log_analysis';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import {
+  isJobStatusWithResults,
+  logEntryCategoriesJobType,
+  logEntryRateJobType,
+} from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
@@ -24,10 +29,10 @@ import { SubscriptionSplashPage } from '../../../components/subscription_splash_
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../shared/page_template';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
+import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -89,6 +94,8 @@ export const LogEntryRatePageContent = memo(() => {
     }
   }, JOB_STATUS_POLLING_INTERVAL);
 
+  const { idFormats } = useLogMlJobIdFormatsShimContext();
+
   if (!hasLogAnalysisCapabilites) {
     return (
       <SubscriptionSplashPage
@@ -125,12 +132,12 @@ export const LogEntryRatePageContent = memo(() => {
       </AnomaliesPageTemplate>
     );
   } else if (
-    isJobStatusWithResults(logEntryCategoriesJobStatus['log-entry-categories-count']) ||
-    isJobStatusWithResults(logEntryRateJobStatus['log-entry-rate'])
+    isJobStatusWithResults(logEntryCategoriesJobStatus[logEntryCategoriesJobType]) ||
+    isJobStatusWithResults(logEntryRateJobStatus[logEntryRateJobType])
   ) {
     return (
       <>
-        <LogEntryRateResultsContent pageTitle={anomaliesTitle} />
+        <LogEntryRateResultsContent idFormats={idFormats} pageTitle={anomaliesTitle} />
         <LogAnalysisSetupFlyout />
       </>
     );

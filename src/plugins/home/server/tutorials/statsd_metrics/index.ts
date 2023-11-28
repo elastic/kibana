@@ -35,7 +35,7 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-statsd.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/statsd.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/statsd.svg'),
     artifacts: {
       dashboards: [],
       exportedFields: {
@@ -47,6 +47,6 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['message_queue', 'kubernetes'],
+    integrationBrowserCategories: ['observability'],
   };
 }

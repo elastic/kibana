@@ -12,7 +12,13 @@ export type { CoreApi } from './core';
 
 export type { ContentType } from './content_type';
 
-export type { ContentStorage, ContentTypeDefinition, StorageContext, RpcSchemas } from './types';
+export type {
+  ContentStorage,
+  ContentTypeDefinition,
+  StorageContext,
+  StorageContextGetTransformFn,
+  MSearchConfig,
+} from './types';
 
 export type { ContentRegistry } from './registry';
 

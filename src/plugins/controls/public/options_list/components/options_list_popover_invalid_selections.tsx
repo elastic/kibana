@@ -15,24 +15,21 @@ import {
   EuiTitle,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const OptionsListPopoverInvalidSelections = () => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { deselectOption },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const fieldName = select((state) => state.explicitInput.fieldName);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
+
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -40,7 +37,7 @@ export const OptionsListPopoverInvalidSelections = () => {
     const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
       return {
         key,
-        label: key,
+        label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
         'data-test-subj': `optionsList-control-ignored-selection-${key}`,
@@ -55,7 +52,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       };
     });
     setSelectableOptions(options);
-  }, [invalidSelections]);
+  }, [fieldFormatter, invalidSelections]);
 
   return (
     <>
@@ -80,7 +77,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
-          dispatch(deselectOption(changedOption.label));
+          optionsList.dispatch.deselectOption(changedOption.label);
         }}
       >
         {(list) => list}

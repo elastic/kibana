@@ -9,14 +9,15 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { CoreKibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-import { getRuleAttributes, getFakeKibanaRequest, loadRule } from './rule_loader';
+import { getRuleAttributes, getFakeKibanaRequest, validateRule } from './rule_loader';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
-import { getReasonFromError } from '../lib/error_with_reason';
+import { ErrorWithReason, getReasonFromError } from '../lib/error_with_reason';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import { mockedRawRuleSO, mockedRule } from './fixtures';
 
 // create mocks
 const rulesClient = rulesClientMock.create();
@@ -26,35 +27,57 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const mockBasePathService = { set: jest.fn() };
 
 // assign default parameters/data
-const apiKey = 'rule-apikey';
+const apiKey = mockedRawRuleSO.attributes.apiKey!;
 const ruleId = 'rule-id-1';
 const enabled = true;
 const spaceId = 'rule-spaceId';
-const ruleName = 'rule-name';
-const consumer = 'rule-consumer';
-const ruleTypeId = 'rule-type-id';
-const ruleParams = { paramA: 42 };
+const ruleName = mockedRule.name;
+const consumer = mockedRule.consumer;
+const ruleTypeId = mockedRule.alertTypeId;
+const ruleParams = mockedRule.params;
 
 describe('rule_loader', () => {
   let context: TaskRunnerContext;
   let contextMock: ReturnType<typeof getTaskRunnerContext>;
 
   const paramValidator = schema.object({
-    paramA: schema.number(),
+    bar: schema.boolean(),
   });
 
-  const DefaultLoadRuleParams = {
+  const getDefaultValidateRuleParams = ({
+    fakeRequest,
+    error,
+    enabled: ruleEnabled = true,
+    params = mockedRule.params,
+  }: {
+    fakeRequest: CoreKibanaRequest<unknown, unknown, unknown>;
+    error?: ErrorWithReason;
+    enabled?: boolean;
+    params?: typeof mockedRule.params;
+  }) => ({
     paramValidator,
     ruleId,
     spaceId,
     ruleTypeRegistry,
     alertingEventLogger,
-  };
+    ruleData: error
+      ? { error }
+      : {
+          data: {
+            indirectParams: { ...mockedRawRuleSO.attributes, enabled: ruleEnabled },
+            rule: { ...mockedRule, params },
+            rulesClient,
+            version: '1',
+            fakeRequest,
+          },
+        },
+  });
 
   beforeEach(() => {
     jest.resetAllMocks();
     encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
       mockGetDecrypted({
+        ...mockedRawRuleSO.attributes,
         apiKey,
         enabled,
         consumer,
@@ -68,10 +91,14 @@ describe('rule_loader', () => {
     jest.restoreAllMocks();
   });
 
-  describe('loadRule()', () => {
+  describe('validateRule()', () => {
     describe('succeeds', () => {
-      test('with API key, a full execution history, and validator', async () => {
-        const result = await loadRule({ ...DefaultLoadRuleParams, context });
+      test('validates and returns the results', () => {
+        const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
+        const result = validateRule({
+          ...getDefaultValidateRuleParams({ fakeRequest }),
+          context,
+        });
 
         expect(result.apiKey).toBe(apiKey);
         expect(result.validatedParams).toEqual(ruleParams);
@@ -79,57 +106,38 @@ describe('rule_loader', () => {
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
         expect(result.rule.params).toBe(ruleParams);
-        expect(result.rule.monitoring?.run.history.length).toBe(MONITORING_HISTORY_LIMIT - 1);
-      });
-
-      test('without API key, any execution history, or validator', async () => {
-        encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
-          mockGetDecrypted({ enabled, consumer })
-        );
-
-        contextMock = getTaskRunnerContext(ruleParams, 0);
-        context = contextMock as unknown as TaskRunnerContext;
-
-        const result = await loadRule({
-          ...DefaultLoadRuleParams,
-          context,
-          paramValidator: undefined,
-        });
-
-        expect(result.apiKey).toBe(undefined);
-        expect(result.validatedParams).toEqual(ruleParams);
-        expect(result.fakeRequest.headers.authorization).toBe(undefined);
-        expect(result.rule.alertTypeId).toBe(ruleTypeId);
-        expect(result.rule.name).toBe(ruleName);
-        expect(result.rule.params).toBe(ruleParams);
-        expect(result.rule.monitoring?.run.history.length).toBe(0);
+        expect(result.indirectParams).toEqual(mockedRawRuleSO.attributes);
+        expect(result.version).toBe('1');
+        expect(result.rulesClient).toBe(rulesClient);
       });
     });
 
-    test('throws when cannot decrypt attributes', async () => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(() => {
-        throw new Error('eso-error: 42');
-      });
-
+    test('throws when there is decrypt attributes error', () => {
+      const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
       let outcome = 'success';
       try {
-        await loadRule({ ...DefaultLoadRuleParams, context });
+        validateRule({
+          ...getDefaultValidateRuleParams({
+            fakeRequest,
+            error: new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, new Error('test')),
+          }),
+          context,
+        });
       } catch (err) {
         outcome = 'failure';
-        expect(err.message).toBe('eso-error: 42');
         expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.Decrypt);
       }
       expect(outcome).toBe('failure');
     });
 
     test('throws when rule is not enabled', async () => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
-        mockGetDecrypted({ apiKey, enabled: false, consumer })
-      );
-
+      const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
       let outcome = 'success';
       try {
-        await loadRule({ ...DefaultLoadRuleParams, context });
+        validateRule({
+          ...getDefaultValidateRuleParams({ fakeRequest, enabled: false }),
+          context,
+        });
       } catch (err) {
         outcome = 'failure';
         expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.Disabled);
@@ -138,13 +146,17 @@ describe('rule_loader', () => {
     });
 
     test('throws when rule type is not enabled', async () => {
+      const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
       ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementation(() => {
         throw new Error('rule-type-not-enabled: 2112');
       });
 
       let outcome = 'success';
       try {
-        await loadRule({ ...DefaultLoadRuleParams, context });
+        validateRule({
+          ...getDefaultValidateRuleParams({ fakeRequest }),
+          context,
+        });
       } catch (err) {
         outcome = 'failure';
         expect(err.message).toBe('rule-type-not-enabled: 2112');
@@ -154,20 +166,16 @@ describe('rule_loader', () => {
     });
 
     test('throws when rule params fail validation', async () => {
-      const parameterValidator = schema.object({
-        paramA: schema.string(),
-      });
-
+      const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
       let outcome = 'success';
       try {
-        await loadRule({
-          ...DefaultLoadRuleParams,
+        validateRule({
+          ...getDefaultValidateRuleParams({ fakeRequest, params: { bar: 'foo' } }),
           context,
-          paramValidator: parameterValidator,
         });
       } catch (err) {
         outcome = 'failure';
-        expect(err.message).toMatch('[paramA]: expected value of type [string] but got [number]');
+        expect(err.message).toMatch('[bar]: expected value of type [boolean] but got [string]');
         expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.Validate);
       }
       expect(outcome).toBe('failure');
@@ -179,11 +187,14 @@ describe('rule_loader', () => {
       contextMock.spaceIdToNamespace.mockReturnValue(undefined);
       const result = await getRuleAttributes(context, ruleId, 'default');
 
-      expect(result.apiKey).toBe(apiKey);
-      expect(result.consumer).toBe(consumer);
-      expect(result.enabled).toBe(true);
       expect(result.fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(result.rule.alertTypeId).toBe(ruleTypeId);
+      expect(result.indirectParams).toEqual({
+        ...mockedRawRuleSO.attributes,
+        apiKey,
+        enabled,
+        consumer,
+      });
       expect(result.rulesClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual(['default']);
 
@@ -195,13 +206,16 @@ describe('rule_loader', () => {
       contextMock.spaceIdToNamespace.mockReturnValue(spaceId);
       const result = await getRuleAttributes(context, ruleId, spaceId);
 
-      expect(result.apiKey).toBe(apiKey);
-      expect(result.consumer).toBe(consumer);
-      expect(result.enabled).toBe(true);
       expect(result.fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(result.rule.alertTypeId).toBe(ruleTypeId);
       expect(result.rulesClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual([spaceId]);
+      expect(result.indirectParams).toEqual({
+        ...mockedRawRuleSO.attributes,
+        apiKey,
+        enabled,
+        consumer,
+      });
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
       expect(esoArgs).toEqual(['alert', ruleId, { namespace: spaceId }]);
@@ -231,7 +245,7 @@ describe('rule_loader', () => {
         Array [
           Object {
             "headers": Object {
-              "authorization": "ApiKey rule-apikey",
+              "authorization": "ApiKey MTIzOmFiYw==",
             },
             "path": "/",
           },
@@ -250,7 +264,7 @@ describe('rule_loader', () => {
         Array [
           Object {
             "headers": Object {
-              "authorization": "ApiKey rule-apikey",
+              "authorization": "ApiKey MTIzOmFiYw==",
             },
             "path": "/",
           },

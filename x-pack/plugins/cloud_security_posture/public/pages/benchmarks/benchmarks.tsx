@@ -68,8 +68,8 @@ const BenchmarkEmptyState = ({ name }: { name: string }) => (
       <EuiText>
         <strong>
           <FormattedMessage
-            id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle"
-            defaultMessage="No benchmark integrations found"
+            id="xpack.csp.benchmarks.benchmarkEmptyState.rulesNotFoundTitle"
+            defaultMessage="No benchmark rules found"
           />
           {name && (
             <FormattedMessage
@@ -85,8 +85,8 @@ const BenchmarkEmptyState = ({ name }: { name: string }) => (
     <EuiText>
       <EuiTextColor color="subdued">
         <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundWithFiltersTitle"
-          defaultMessage="We weren't able to find any benchmark integrations with the above filters."
+          id="xpack.csp.benchmarks.benchmarkEmptyState.rulesNotFoundWithFiltersTitle"
+          defaultMessage="We weren't able to find any benchmark rules with the above filters."
         />
       </EuiTextColor>
     </EuiText>
@@ -154,10 +154,9 @@ export const Benchmarks = () => {
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={
           <CloudPosturePageTitle
-            title={i18n.translate(
-              'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
-              { defaultMessage: 'Benchmark Integrations' }
-            )}
+            title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarkRulesTitle', {
+              defaultMessage: 'Benchmark Rules',
+            })}
           />
         }
         rightSideItems={[<AddCisIntegrationButton />]}

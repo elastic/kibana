@@ -13,9 +13,9 @@ import {
   AGGREGATE_ROUTE,
   MULTI_TERMS_AGGREGATE_ROUTE,
   ORCHESTRATOR_CLUSTER_NAME,
+  CURRENT_API_VERSION,
 } from '../../../../common/constants';
-import { AggregateBucketPaginationResult } from '../../../../common/types/aggregate';
-import { Bucket } from '../../../../common/types/multi_terms_aggregate';
+import { AggregateBucketPaginationResult, MultiTermsBucket } from '../../../../common/types';
 import { KUBERNETES_COLLECTION_FIELDS } from '../helpers';
 
 export const useFetchDynamicTreeView = (
@@ -32,6 +32,7 @@ export const useFetchDynamicTreeView = (
     async ({ pageParam = 0 }) => {
       if (groupBy === KUBERNETES_COLLECTION_FIELDS.clusterId) {
         const { buckets } = await http.get<any>(MULTI_TERMS_AGGREGATE_ROUTE, {
+          version: '1',
           query: {
             query: JSON.stringify(query),
             groupBys: JSON.stringify([
@@ -50,7 +51,7 @@ export const useFetchDynamicTreeView = (
         });
 
         return {
-          buckets: buckets.map((bucket: Bucket) => ({
+          buckets: buckets.map((bucket: MultiTermsBucket) => ({
             ...bucket,
             key_as_string: bucket.key[1],
             key: bucket.key[0],
@@ -59,6 +60,7 @@ export const useFetchDynamicTreeView = (
       }
 
       return await http.get<any>(AGGREGATE_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           query: JSON.stringify(query),
           groupBy,

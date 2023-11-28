@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { PrivilegeType } from '../../../common/privilege_type';
+import {
+  PrivilegeType,
+  ClusterPrivilegeType,
+} from '../../../common/privilege_type';
 
 export enum ApmUsername {
   noAccessUser = 'no_access_user',
@@ -16,6 +19,7 @@ export enum ApmUsername {
   apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
   apmManageOwnAndCreateAgentKeys = 'apm_manage_own_and_create_agent_keys',
   apmMonitorClusterAndIndices = 'apm_monitor_cluster_and_indices',
+  apmManageServiceAccount = 'apm_manage_service_account',
 }
 
 export enum ApmCustomRolename {
@@ -24,6 +28,7 @@ export enum ApmCustomRolename {
   apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
   apmManageOwnAndCreateAgentKeys = 'apm_manage_own_and_create_agent_keys',
   apmMonitorClusterAndIndices = 'apm_monitor_cluster_and_indices',
+  apmManageServiceAccount = 'apm_manage_service_account',
 }
 
 export const customRoles = {
@@ -65,7 +70,7 @@ export const customRoles = {
   },
   [ApmCustomRolename.apmManageOwnAgentKeys]: {
     elasticsearch: {
-      cluster: ['manage_own_api_key'],
+      cluster: [ClusterPrivilegeType.MANAGE_OWN_API_KEY],
     },
   },
   [ApmCustomRolename.apmManageOwnAndCreateAgentKeys]: {
@@ -86,6 +91,11 @@ export const customRoles = {
         },
       ],
       cluster: ['monitor'],
+    },
+  },
+  [ApmCustomRolename.apmManageServiceAccount]: {
+    elasticsearch: {
+      cluster: ['manage_service_account'],
     },
   },
 };
@@ -123,6 +133,8 @@ export const users: Record<
     builtInRoleNames: ['viewer'],
     customRoleNames: [ApmCustomRolename.apmMonitorClusterAndIndices],
   },
+  [ApmUsername.apmManageServiceAccount]: {
+    builtInRoleNames: ['editor'],
+    customRoleNames: [ApmCustomRolename.apmManageServiceAccount],
+  },
 };
-
-export const APM_TEST_PASSWORD = 'changeme';

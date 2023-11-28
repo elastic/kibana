@@ -118,15 +118,9 @@ export interface VisualizationType {
   showExperimentalBadge?: boolean;
 }
 
-export interface AccessorConfig {
-  columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
-  color?: string;
-  palette?: string[] | Array<{ color: string; stop: number }>;
-}
-
 export interface CellValueAction {
   id: string;
+  type?: string;
   iconType: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;

@@ -6,7 +6,7 @@
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { filterIntegrations } from '../utils';
+import { filterIntegrations } from '../utils/filter_integrations';
 import { useKibana } from './use_kibana';
 
 type IntegrationInstallStatus = 'installed' | 'installing' | 'install_failed';

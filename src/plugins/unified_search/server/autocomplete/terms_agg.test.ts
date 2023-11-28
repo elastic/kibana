@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
 import { termsAggSuggestions } from './terms_agg';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { duration } from 'moment';
@@ -135,5 +135,24 @@ describe('terms agg suggestions', () => {
         "amazing",
       ]
     `);
+  });
+
+  it('does not call the _search API when the field is an IP', async () => {
+    const result = await termsAggSuggestions(
+      configMock,
+      savedObjectsClientMock,
+      esClientMock,
+      'index',
+      'fieldName',
+      'query',
+      [],
+      {
+        type: 'ip',
+        name: 'fieldName',
+      } as FieldSpec
+    );
+
+    expect(esClientMock.search).not.toHaveBeenCalled();
+    expect(result).toMatchInlineSnapshot(`Array []`);
   });
 });

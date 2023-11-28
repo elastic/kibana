@@ -12,7 +12,7 @@ import type { CaseTooltipContentProps } from '@kbn/cases-components';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { CellComponentProps } from '../types';
 import { useCaseViewNavigation } from './use_case_view_navigation';
-import { Case } from '../hooks/api';
+import { Case } from '../hooks/apis/bulk_get_cases';
 
 const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   title: theCase.title,
@@ -36,23 +36,21 @@ const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
     .map((id) => cases.get(id))
     .filter((theCase): theCase is Case => theCase != null);
 
-  if (validCases.length === 0) {
-    return <>{'--'}</>;
-  }
-
   return (
     <EuiSkeletonText lines={1} isLoading={isLoading} size="s" data-test-subj="cases-cell-loading">
-      {validCases.map((theCase, index) => [
-        index > 0 && index < validCases.length && ', ',
-        <CaseTooltip loading={false} content={formatCase(theCase)} key={theCase.id}>
-          <EuiLink
-            onClick={() => navigateToCaseView({ caseId: theCase.id })}
-            data-test-subj="cases-cell-link"
-          >
-            {theCase.title}
-          </EuiLink>
-        </CaseTooltip>,
-      ])}
+      {validCases.length !== 0
+        ? validCases.map((theCase, index) => [
+            index > 0 && index < validCases.length && ', ',
+            <CaseTooltip loading={false} content={formatCase(theCase)} key={theCase.id}>
+              <EuiLink
+                onClick={() => navigateToCaseView({ caseId: theCase.id })}
+                data-test-subj="cases-cell-link"
+              >
+                {theCase.title}
+              </EuiLink>
+            </CaseTooltip>,
+          ])
+        : '--'}
     </EuiSkeletonText>
   );
 };

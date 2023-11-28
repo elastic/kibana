@@ -33,7 +33,7 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
           >
             <button
               aria-label="More information about this metric"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
               data-test-subj="monitoringCellIcon-testCell2"
               title="More information about this metric"
               type="button"
@@ -87,7 +87,7 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
           >
             <button
               aria-label="More information about this metric"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
               data-test-subj="monitoringCellIcon-testCell"
               title="More information about this metric"
               type="button"

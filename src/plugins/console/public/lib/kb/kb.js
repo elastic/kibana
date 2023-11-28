@@ -7,13 +7,10 @@
  */
 
 import {
-  TypeAutocompleteComponent,
-  IdAutocompleteComponent,
   IndexAutocompleteComponent,
   FieldAutocompleteComponent,
   ListComponent,
   LegacyTemplateAutocompleteComponent,
-  UsernameAutocompleteComponent,
   IndexTemplateAutocompleteComponent,
   ComponentTemplateAutocompleteComponent,
   DataStreamAutocompleteComponent,
@@ -27,51 +24,17 @@ import Api from './api';
 let ACTIVE_API = new Api();
 const isNotAnIndexName = (name) => name[0] === '_' && name !== '_all';
 
-const idAutocompleteComponentFactory = (name, parent) => {
-  return new IdAutocompleteComponent(name, parent);
-};
 const parametrizedComponentFactories = {
   getComponent: function (name, parent, provideDefault) {
     if (this[name]) {
       return this[name];
     } else if (provideDefault) {
-      return idAutocompleteComponentFactory;
+      return new ListComponent(name, [], parent, false);
     }
   },
   index: function (name, parent) {
     if (isNotAnIndexName(name)) return;
-    return new IndexAutocompleteComponent(name, parent, false);
-  },
-  indices: function (name, parent) {
-    if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, true);
-  },
-  type: function (name, parent) {
-    return new TypeAutocompleteComponent(name, parent, false);
-  },
-  types: function (name, parent) {
-    return new TypeAutocompleteComponent(name, parent, true);
-  },
-  id: function (name, parent) {
-    return idAutocompleteComponentFactory(name, parent);
-  },
-  transform_id: function (name, parent) {
-    return idAutocompleteComponentFactory(name, parent);
-  },
-  username: function (name, parent) {
-    return new UsernameAutocompleteComponent(name, parent);
-  },
-  user: function (name, parent) {
-    return new UsernameAutocompleteComponent(name, parent);
-  },
-  template: function (name, parent) {
-    return new LegacyTemplateAutocompleteComponent(name, parent);
-  },
-  task_id: function (name, parent) {
-    return idAutocompleteComponentFactory(name, parent);
-  },
-  ids: function (name, parent) {
-    return idAutocompleteComponentFactory(name, parent, true);
   },
   fields: function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, true);
@@ -79,22 +42,20 @@ const parametrizedComponentFactories = {
   field: function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, false);
   },
-  nodes: function (name, parent) {
-    return new ListComponent(
-      name,
-      ['_local', '_master', 'data:true', 'data:false', 'master:true', 'master:false'],
-      parent
-    );
+  // legacy index templates
+  template: function (name, parent) {
+    return new LegacyTemplateAutocompleteComponent(name, parent);
   },
-  node: function (name, parent) {
-    return new ListComponent(name, [], parent, false);
-  },
+  // composable index templates
+  // currently seems to be unused, but that is a useful functionality
   index_template: function (name, parent) {
     return new IndexTemplateAutocompleteComponent(name, parent);
   },
+  // currently seems to be unused, but that is a useful functionality
   component_template: function (name, parent) {
     return new ComponentTemplateAutocompleteComponent(name, parent);
   },
+  // currently seems to be unused, but that is a useful functionality
   data_stream: function (name, parent) {
     return new DataStreamAutocompleteComponent(name, parent);
   },
@@ -129,23 +90,27 @@ function loadApisFromJson(
   urlParametrizedComponentFactories,
   bodyParametrizedComponentFactories
 ) {
-  urlParametrizedComponentFactories =
-    urlParametrizedComponentFactories || parametrizedComponentFactories;
-  bodyParametrizedComponentFactories =
-    bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
-  const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
-  const names = [];
-  _.each(json, function (apiJson, name) {
-    names.unshift(name);
-    _.each(apiJson.globals || {}, function (globalJson, globalName) {
-      api.addGlobalAutocompleteRules(globalName, globalJson);
+  try {
+    urlParametrizedComponentFactories =
+      urlParametrizedComponentFactories || parametrizedComponentFactories;
+    bodyParametrizedComponentFactories =
+      bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
+    const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
+    const names = [];
+    _.each(json, function (apiJson, name) {
+      names.unshift(name);
+      _.each(apiJson.globals || {}, function (globalJson, globalName) {
+        api.addGlobalAutocompleteRules(globalName, globalJson);
+      });
+      _.each(apiJson.endpoints || {}, function (endpointJson, endpointName) {
+        api.addEndpointDescription(endpointName, endpointJson);
+      });
     });
-    _.each(apiJson.endpoints || {}, function (endpointJson, endpointName) {
-      api.addEndpointDescription(endpointName, endpointJson);
-    });
-  });
-  api.name = names.join(',');
-  return api;
+    api.name = names.join(',');
+    return api;
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 // TODO: clean up setting up of active API and use of jQuery.
@@ -159,6 +124,8 @@ export function setActiveApi(api) {
       dataType: 'json', // disable automatic guessing
       headers: {
         'kbn-xsrf': 'kibana',
+        // workaround for serverless
+        'x-elastic-internal-origin': 'Kibana',
       },
     }).then(
       function (data) {

@@ -9,20 +9,17 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiSpacer,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { PageError, PageLoading, attemptToURIDecode, Error } from '../../../shared_imports';
-import { breadcrumbService } from '../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { TemplateForm } from '../../components';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
+import { useAppContext } from '../../app_context';
 
 interface MatchParams {
   name: string;
@@ -36,7 +33,12 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   history,
 }) => {
   const decodedTemplateName = attemptToURIDecode(name)!;
-  const isLegacy = getIsLegacyFromQueryParams(location);
+  const {
+    config: { enableLegacyTemplates },
+  } = useAppContext();
+
+  // We don't expect the `legacy` query to be used when legacy templates are disabled, however, we add the enableLegacyTemplates check as a safeguard
+  const isLegacy = enableLegacyTemplates && getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
@@ -44,7 +46,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   const { error, data: template, isLoading } = useLoadIndexTemplate(decodedTemplateName, isLegacy);
 
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('templateEdit');
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.templateEdit);
   }, []);
 
   const onSave = async (updatedTemplate: TemplateDeserialized) => {
@@ -125,7 +127,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   }
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       {isSystemTemplate && (
         <Fragment>
           <EuiCallOut
@@ -136,7 +138,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="systemTemplateEditCallout"
           >
             <FormattedMessage
@@ -165,6 +167,6 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
         isLegacy={isLegacy}
         history={history as ScopedHistory}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

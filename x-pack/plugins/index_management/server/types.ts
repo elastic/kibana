@@ -23,6 +23,9 @@ export interface RouteDependencies {
   router: IRouter;
   config: {
     isSecurityEnabled: () => boolean;
+    isLegacyTemplatesEnabled: boolean;
+    isIndexStatsEnabled: boolean;
+    isDataStreamsStorageColumnEnabled: boolean;
   };
   indexDataEnricher: IndexDataEnricher;
   lib: {

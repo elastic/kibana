@@ -15,7 +15,7 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPanel,
   EuiCallOut,
   EuiSpacer,
   EuiIcon,
@@ -421,7 +421,7 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
+        <EuiPanel>
           {hasStandaloneCluster ? (
             <StandaloneClusterCallout changeCluster={_changeCluster} storage={storage} />
           ) : null}
@@ -457,7 +457,7 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
               defaultFields: ['cluster_name'],
             }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
@@ -125,6 +125,7 @@ export const ProjectMonitorDisclaimer = () => {
       values={{
         docsLink: (
           <EuiLink
+            data-test-subj="syntheticsProjectMonitorDisclaimerLearnMoreLink"
             href="https://elastic.co/guide/en/observability/current/synthetics-manage-monitors.html#manage-monitors-delete"
             target="_blank"
           >

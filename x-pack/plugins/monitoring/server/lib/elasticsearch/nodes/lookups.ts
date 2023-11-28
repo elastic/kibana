@@ -13,7 +13,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const nodeTypeClass = {
-  invalid: 'alert',
+  invalid: 'warning',
   node: 'storage',
   master: 'starFilled',
   master_only: 'starEmpty',

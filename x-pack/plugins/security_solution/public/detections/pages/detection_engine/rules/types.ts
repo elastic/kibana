@@ -17,10 +17,9 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
@@ -33,13 +32,16 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
-} from '../../../../../common/detection_engine/rule_schema';
-import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
+  AlertSuppressionMissingFieldsStrategy,
+  InvestigationFields,
+  RuleAction,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import type {
   RuleResponseAction,
   ResponseAction,
-} from '../../../../../common/detection_engine/rule_response_actions/schemas';
+} from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -70,33 +72,11 @@ export type RuleStepsOrder = [
   RuleStep.ruleActions
 ];
 
-export interface RuleStepsData {
-  [RuleStep.defineRule]: DefineStepRule;
-  [RuleStep.aboutRule]: AboutStepRule;
-  [RuleStep.scheduleRule]: ScheduleStepRule;
-  [RuleStep.ruleActions]: ActionsStepRule;
-}
-
-export type RuleStepsFormData = {
-  [K in keyof RuleStepsData]: {
-    data: RuleStepsData[K] | undefined;
-    isValid: boolean;
-  };
-};
-
-export type RuleStepsFormHooks = {
-  [K in keyof RuleStepsData]: () => Promise<RuleStepsFormData[K] | undefined>;
-};
-
 export interface RuleStepProps {
-  addPadding?: boolean;
-  descriptionColumns?: 'multi' | 'single' | 'singleSplit';
-  isReadOnlyView: boolean;
   isUpdateView?: boolean;
   isLoading: boolean;
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
-  setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
   kibanaDataViews?: { [x: string]: DataViewListItem };
 }
 
@@ -110,6 +90,7 @@ export interface AboutStepRule {
   riskScore: AboutStepRiskScore;
   references: string[];
   falsePositives: string[];
+  investigationFields: string[];
   license: string;
   ruleNameOverride: string;
   tags: string[];
@@ -176,6 +157,19 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
+  suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
+}
+
+export interface QueryDefineStep {
+  ruleType: 'query' | 'saved_query';
+  index: string[];
+  indexPattern?: DataViewBase;
+  queryBar: FieldValueQueryBar;
+  dataViewId?: string;
+  dataViewTitle?: string;
+  timeline: FieldValueTimeline;
+  dataSourceType: DataSourceType;
+  shouldLoadQueryDynamically: boolean;
 }
 
 export interface Duration {
@@ -190,11 +184,10 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: RuleAction[];
+  actions: AlertingRuleAction[];
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
-  throttle?: string | null;
 }
 
 export interface DefineStepRuleJson {
@@ -247,6 +240,7 @@ export interface AboutStepRuleJson {
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
+  investigation_fields?: InvestigationFields;
 }
 
 export interface ScheduleStepRuleJson {
@@ -257,7 +251,7 @@ export interface ScheduleStepRuleJson {
 }
 
 export interface ActionsStepRuleJson {
-  actions: RuleAlertAction[];
+  actions: RuleAction[];
   response_actions?: ResponseAction[];
   enabled: boolean;
   throttle?: string | null;

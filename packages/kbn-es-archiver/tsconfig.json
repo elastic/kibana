@@ -8,9 +8,11 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "src/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/core-saved-objects-server",
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/tooling-log",

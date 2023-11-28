@@ -29,6 +29,7 @@ import { createInventoryMetricThresholdExecutor } from './inventory_metric_thres
 import { ConditionResult } from './evaluate_condition';
 import { InfraBackendLibs } from '../../infra_types';
 import { infraPluginMock } from '../../../mocks';
+import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
 
 jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
 
@@ -75,16 +76,23 @@ const mockOptions = {
     throttle: null,
     notifyWhen: null,
     producer: '',
+    revision: 0,
     ruleTypeId: '',
     ruleTypeName: '',
     muteAll: false,
   },
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+  getTimeRange: () => {
+    const date = new Date().toISOString();
+    return { dateStart: date, dateEnd: date };
+  },
 };
 
 const setEvaluationResults = (response: Record<string, ConditionResult>) => {
-  jest.requireMock('./evaluate_condition').evaluateCondition.mockImplementation(() => response);
+  return jest
+    .requireMock('./evaluate_condition')
+    .evaluateCondition.mockImplementation(() => response);
 };
 const createMockStaticConfiguration = (sources: any) => ({
   alerting: {
@@ -117,7 +125,7 @@ const mockLibs = {
   },
   getStartServices: () => [
     null,
-    infraPluginMock.createSetupContract(),
+    { logsShared: logsSharedPluginMock.createStartContract() },
     infraPluginMock.createStartContract(),
   ],
   configuration: createMockStaticConfiguration({}),
@@ -152,10 +160,12 @@ services.alertFactory.create.mockImplementation((instanceID: string) => {
     : newAlertInstance;
   alertInstances.set(instanceID, alertInstance);
 
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
+  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
+    (id: string, action: any) => {
+      alertInstance.actionQueue.push({ id, action });
+      return alertInstance.instance;
+    }
+  );
 
   return alertInstance.instance;
 });
@@ -184,7 +194,7 @@ const baseCriterion = {
 describe('The inventory threshold alert type', () => {
   describe('querying with Hosts and rule tags', () => {
     afterAll(() => clearInstances());
-    const execute = (comparator: Comparator, threshold: number[], state?: any) =>
+    const execute = (comparator: Comparator, threshold: number[], options?: any) =>
       executor({
         ...mockOptions,
         services,
@@ -198,11 +208,12 @@ describe('The inventory threshold alert type', () => {
             },
           ],
         },
-        state: state ?? {},
+        state: {},
         rule: {
           ...mockOptions.rule,
           tags: ['ruleTag1', 'ruleTag2'],
         },
+        ...options,
       });
 
     const instanceIdA = 'host-01';
@@ -296,6 +307,40 @@ describe('The inventory threshold alert type', () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceIdA).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
       expect(mostRecentAction(instanceIdB).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
+    });
+
+    test('should call evaluation query with delay', async () => {
+      const mockedStartDate = new Date('2023-11-06T10:04:26.465Z');
+      const mockedEndDate = new Date('2023-11-06T10:05:26.465Z');
+      const options = {
+        getTimeRange: () => {
+          return { dateStart: mockedStartDate, dateEnd: mockedEndDate };
+        },
+      };
+      const evaluateConditionFn = setEvaluationResults({
+        'host-01': {
+          ...baseCriterion,
+          metric: 'count',
+          timeSize: 1,
+          timeUnit: 'm',
+          threshold: [0.75],
+          comparator: Comparator.GT,
+          shouldFire: true,
+          shouldWarn: false,
+          currentValue: 1.0,
+          isNoData: false,
+          isError: false,
+          context: {
+            cloud: undefined,
+          },
+        },
+      });
+      await execute(Comparator.GT, [0.75], options);
+      expect(evaluateConditionFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executionTimestamp: mockedEndDate,
+        })
+      );
     });
   });
 });

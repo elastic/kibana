@@ -62,6 +62,7 @@ export interface Routing {
 export interface Content {
   subject: string;
   message: string;
+  messageHTML?: string | null;
 }
 
 export async function sendEmail(
@@ -70,13 +71,14 @@ export async function sendEmail(
   connectorTokenClient: ConnectorTokenClientContract
 ): Promise<unknown> {
   const { transport, content } = options;
-  const { message } = content;
-  const messageHTML = htmlFromMarkdown(logger, message);
+  const { message, messageHTML } = content;
+
+  const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
 
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
-    return await sendEmailWithExchange(logger, options, messageHTML, connectorTokenClient);
+    return await sendEmailWithExchange(logger, options, renderedMessage, connectorTokenClient);
   } else {
-    return await sendEmailWithNodemailer(logger, options, messageHTML);
+    return await sendEmailWithNodemailer(logger, options, renderedMessage);
   }
 }
 

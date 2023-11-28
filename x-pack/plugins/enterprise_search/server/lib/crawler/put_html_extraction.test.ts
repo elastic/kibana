@@ -7,8 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-import { Connector } from '../../../common/types/connectors';
+import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import { updateHtmlExtraction } from './put_html_extraction';
 
@@ -45,7 +44,6 @@ describe('updateHtmlExtraction lib function', () => {
       },
       id: 'connectorId',
       index: CONNECTORS_INDEX,
-      refresh: 'wait_for',
     });
   });
 });

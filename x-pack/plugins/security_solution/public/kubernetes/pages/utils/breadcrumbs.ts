@@ -6,15 +6,16 @@
  */
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import type { RouteSpyState } from '../../../common/utils/route/types';
 import { SecurityPageName } from '../../../app/types';
-import type { GetSecuritySolutionUrl } from '../../../common/components/link_to';
 import { getKubernetesDetailsUrl } from '../../../common/components/link_to';
+import type { GetTrailingBreadcrumbs } from '../../../common/components/navigation/breadcrumbs/types';
 
-export const getTrailingBreadcrumbs = (
-  params: RouteSpyState,
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
-): ChromeBreadcrumb[] => {
+/**
+ * This module should only export this function.
+ * All the `getTrailingBreadcrumbs` functions in Security are loaded into the main bundle.
+ * We should be careful to not import unnecessary modules in this file to avoid increasing the main app bundle size.
+ */
+export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (params, getSecuritySolutionUrl) => {
   let breadcrumb: ChromeBreadcrumb[] = [];
 
   if (params.detailName != null) {

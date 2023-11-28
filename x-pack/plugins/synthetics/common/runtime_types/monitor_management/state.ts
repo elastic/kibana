@@ -19,6 +19,7 @@ export const FetchMonitorManagementListQueryArgsCodec = t.partial({
   monitorTypes: t.array(t.string),
   projects: t.array(t.string),
   schedules: t.array(t.string),
+  monitorQueryIds: t.array(t.string),
 });
 
 export type FetchMonitorManagementListQueryArgs = t.TypeOf<

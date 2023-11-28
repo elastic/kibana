@@ -49,6 +49,13 @@ describe('updateRuleRoute', () => {
         params: {
           baz: true,
         },
+        alertsFilter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
+          },
+        },
       },
     ],
     notifyWhen: RuleNotifyWhen.CHANGE,
@@ -63,6 +70,7 @@ describe('updateRuleRoute', () => {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
+        alerts_filter: mockedAlert.actions[0].alertsFilter,
       },
     ],
   };
@@ -73,9 +81,10 @@ describe('updateRuleRoute', () => {
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
-    actions: mockedAlert.actions.map(({ actionTypeId, ...rest }) => ({
+    actions: mockedAlert.actions.map(({ actionTypeId, alertsFilter, ...rest }) => ({
       ...rest,
       connector_type_id: actionTypeId,
+      alerts_filter: alertsFilter,
     })),
   };
 
@@ -111,11 +120,19 @@ describe('updateRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
+                    "filters": Array [],
+                    "kql": "name:test",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
                   "baz": true,
                 },
+                "useAlertDataForTemplate": undefined,
                 "uuid": "1234-5678",
               },
             ],

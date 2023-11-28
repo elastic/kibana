@@ -19,10 +19,10 @@ import type { Query } from '@kbn/es-query';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
-import { DashboardContainer } from '../../dashboard_container';
+import { DashboardContainer, DashboardLocatorParams } from '../../dashboard_container';
 import { convertPanelMapToSavedPanels } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
-import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../locator/locator';
+import { DASHBOARD_APP_LOCATOR } from '../locator/locator';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -46,7 +46,7 @@ export const getSessionURLObservable = (history: History) =>
 
 export function createSessionRestorationDataProvider(
   container: DashboardContainer
-): SearchSessionInfoProvider<DashboardAppLocatorParams> {
+): SearchSessionInfoProvider<DashboardLocatorParams> {
   return {
     getName: async () => container.getTitle(),
     getLocatorData: async () => ({
@@ -67,7 +67,7 @@ function getLocatorParams({
 }: {
   container: DashboardContainer;
   shouldRestoreSearchSession: boolean;
-}): DashboardAppLocatorParams {
+}): DashboardLocatorParams {
   const {
     data: {
       query: {
@@ -77,13 +77,12 @@ function getLocatorParams({
       },
       search: { session },
     },
-    initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
 
   const {
     componentState: { lastSavedId },
     explicitInput: { panels, query, viewMode },
-  } = container.getReduxEmbeddableTools().getState();
+  } = container.getState();
 
   return {
     viewMode,
@@ -102,9 +101,6 @@ function getLocatorParams({
       : undefined,
     panels: lastSavedId
       ? undefined
-      : (convertPanelMapToSavedPanels(
-          panels,
-          kibanaVersion
-        ) as DashboardAppLocatorParams['panels']),
+      : (convertPanelMapToSavedPanels(panels) as DashboardLocatorParams['panels']),
   };
 }

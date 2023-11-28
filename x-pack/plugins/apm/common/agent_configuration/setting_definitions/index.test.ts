@@ -75,6 +75,7 @@ describe('filterByAgent', () => {
           'profiling_inferred_spans_min_duration',
           'profiling_inferred_spans_sampling_interval',
           'recording',
+          'context_propagation_only',
           'sanitize_field_names',
           'server_timeout',
           'span_frames_min_duration',
@@ -178,6 +179,20 @@ describe('filterByAgent', () => {
           'transaction_sample_rate',
         ])
       );
+    });
+
+    it('android/java', () => {
+      expect(getSettingKeysForAgent('android/java')).toEqual([
+        'recording',
+        'session_sample_rate',
+      ]);
+    });
+
+    it('iOS/swift', () => {
+      expect(getSettingKeysForAgent('iOS/swift')).toEqual([
+        'recording',
+        'session_sample_rate',
+      ]);
     });
 
     it('"All" services (no agent name)', () => {

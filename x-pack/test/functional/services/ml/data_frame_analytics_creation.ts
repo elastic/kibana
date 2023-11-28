@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
-
 import {
   isRegressionAnalysis,
   isClassificationAnalysis,
-} from '@kbn/ml-plugin/common/util/analytics_utils';
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
@@ -54,8 +54,40 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await headerPage.waitUntilLoadingHasFinished();
     },
 
+    async assertAdvancedEditorCodeEditorExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor', {
+        allowHidden: true,
+      });
+    },
+
+    async assertAdvancedEditorCodeEditorContent(expectedContent: string[]) {
+      await this.assertAdvancedEditorCodeEditorExists();
+      const wrapper = await testSubjects.find('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const editorContentString = await editor.getVisibleText();
+      const splicedAdvancedEditorValue = editorContentString.split('\n').splice(0, 3);
+      expect(splicedAdvancedEditorValue).to.eql(
+        expectedContent,
+        `Expected the first editor lines to be '${expectedContent}' (got '${splicedAdvancedEditorValue}')`
+      );
+    },
+
+    async openAdvancedEditor() {
+      this.assertAdvancedEditorSwitchExists();
+      await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
+      this.assertAdvancedEditorSwitchCheckState(true);
+      this.assertAdvancedEditorCodeEditorExists();
+    },
+
+    async closeAdvancedEditor() {
+      this.assertAdvancedEditorSwitchExists();
+      await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
+      this.assertAdvancedEditorSwitchCheckState(false);
+      await testSubjects.missingOrFail('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor');
+    },
+
     async assertAdvancedEditorSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardAdvancedEditorSwitch`, {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedEditorSwitch', {
         allowHidden: true,
       });
     },
@@ -283,12 +315,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
-    async assertFieldStatTopValuesContent(
-      fieldName: string,
-      fieldType: 'keyword' | 'date' | 'number',
-      expectedContent: string[]
-    ) {
-      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, fieldType, expectedContent);
+    async assertFieldStatTopValuesContent(fieldName: string, expectedContent: string[]) {
+      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, expectedContent);
     },
 
     async assertDependentVariableInputMissing() {
@@ -595,22 +623,22 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
     },
 
-    async assertCreateIndexPatternSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox`, {
+    async assertCreateDataViewSwitchExists() {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateDataViewCheckbox`, {
         allowHidden: true,
       });
     },
 
-    async getCreateIndexPatternSwitchCheckState(): Promise<boolean> {
+    async getCreateDataViewSwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox',
+        'mlAnalyticsCreateJobWizardCreateDataViewCheckbox',
         'checked'
       );
       return state === 'true';
     },
 
-    async assertCreateIndexPatternSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await this.getCreateIndexPatternSwitchCheckState();
+    async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getCreateDataViewSwitchCheckState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
@@ -646,11 +674,11 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDestIndexSameAsIdCheckState(checkState);
     },
 
-    async setCreateIndexPatternSwitchState(checkState: boolean) {
-      if ((await this.getCreateIndexPatternSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox');
+    async setCreateDataViewSwitchState(checkState: boolean) {
+      if ((await this.getCreateDataViewSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlAnalyticsCreateJobWizardCreateDataViewCheckbox');
       }
-      await this.assertCreateIndexPatternSwitchCheckState(checkState);
+      await this.assertCreateDataViewSwitchCheckState(checkState);
     },
 
     async assertStartJobCheckboxExists() {
@@ -720,13 +748,13 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async assertInitialCloneJobDetailsStep(job: DataFrameAnalyticsConfig) {
       await this.assertJobIdValue(''); // id should be empty
       await this.assertJobDescriptionValue(String(job.description));
-      await this.assertDestIndexValue(''); // destination index should be empty
+      // destination index same as id should be checked since dest index is reset to '' on clone
+      await this.assertDestIndexSameAsIdCheckState(true);
     },
 
     async assertCreationCalloutMessagesExist() {
       await testSubjects.existOrFail('analyticsWizardCreationCallout_0');
       await testSubjects.existOrFail('analyticsWizardCreationCallout_1');
-      await testSubjects.existOrFail('analyticsWizardCreationCallout_2');
     },
 
     async navigateToJobManagementPage() {

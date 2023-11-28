@@ -6,9 +6,9 @@
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
+import { blockedWindow } from './__mocks__/synchronization.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
-import { blockedWindow } from './__mocks__/synchronization.mock';
 
 import React from 'react';
 
@@ -21,6 +21,7 @@ import {
   EuiDatePickerRange,
   EuiSelect,
   EuiSuperSelect,
+  EuiFormControlLayoutDelimited,
 } from '@elastic/eui';
 
 import { BlockedWindowItem } from './blocked_window_item';
@@ -75,22 +76,27 @@ describe('BlockedWindowItem', () => {
   it('handles "start" time change', () => {
     const wrapper = shallow(<BlockedWindowItem {...props} />);
     const dayRange = wrapper.find(EuiDatePickerRange).dive();
-    dayRange
+    const rangeDelimiter = dayRange.find(EuiFormControlLayoutDelimited).dive();
+
+    rangeDelimiter
       .find(EuiDatePicker)
       .first()
       .simulate('change', moment().utc().set({ hour: 10, minute: 0, seconds: 0 }));
 
+    expect(rangeDelimiter.find(EuiDatePicker)).toHaveLength(2);
     expect(setBlockedTimeWindow).toHaveBeenCalledWith(0, 'start', '10:00:00Z');
   });
 
   it('handles "end" time change', () => {
     const wrapper = shallow(<BlockedWindowItem {...props} />);
     const dayRange = wrapper.find(EuiDatePickerRange).dive();
-    dayRange
+    const rangeDelimiter = dayRange.find(EuiFormControlLayoutDelimited).dive();
+    rangeDelimiter
       .find(EuiDatePicker)
       .last()
       .simulate('change', moment().utc().set({ hour: 12, minute: 0, seconds: 0 }));
 
+    expect(rangeDelimiter.find(EuiDatePicker)).toHaveLength(2);
     expect(setBlockedTimeWindow).toHaveBeenCalledWith(0, 'end', '12:00:00Z');
   });
 });

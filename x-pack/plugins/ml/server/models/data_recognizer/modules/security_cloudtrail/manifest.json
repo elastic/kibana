@@ -1,16 +1,14 @@
 {
   "id": "security_cloudtrail",
   "title": "Security: Cloudtrail",
-  "description": "Detect suspicious activity recorded in your cloudtrail logs.",
-  "type": "Filebeat data",
+  "description": "Detect suspicious activity recorded in Cloudtrail logs.",
+  "type": "Cloudtrail data",
   "logoFile": "logo.json",
-  "defaultIndexPattern": "filebeat-*",
+  "defaultIndexPattern": "logs-*,filebeat-*",
   "query": {
     "bool": {
-      "filter": [
-        {"term": {"event.dataset": "aws.cloudtrail"}}
-      ],
-      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
+      "filter": [{ "term": { "event.dataset": "aws.cloudtrail" } }],
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
     }
   },
   "jobs": [
@@ -61,5 +59,8 @@
       "file": "datafeed_rare_error_code.json",
       "job_id": "rare_error_code"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }

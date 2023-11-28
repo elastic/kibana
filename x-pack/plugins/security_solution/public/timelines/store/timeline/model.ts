@@ -13,18 +13,20 @@ import type {
   TimelineNonEcsData,
 } from '../../../../common/search_strategy/timeline';
 import type {
-  TimelineEventsType,
-  TimelineType,
-  TimelineStatus,
   TimelineTabs,
   ScrollToTopEvent,
   SortColumnTimeline,
   ColumnHeaderOptions,
   DataProvider,
-  RowRendererId,
   SerializedFilterQuery,
+  TimelineEventsType,
 } from '../../../../common/types/timeline';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type {
+  RowRendererId,
+  TimelineStatus,
+  TimelineType,
+  PinnedEvent,
+} from '../../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';
@@ -131,6 +133,12 @@ export interface TimelineModel {
   isSelectAllChecked: boolean;
   isLoading: boolean;
   selectAll: boolean;
+  /* discover saved search Id */
+  savedSearchId: string | null;
+  isDiscoverSavedSearchLoaded?: boolean;
+  isDataProviderVisible: boolean;
+  /** used to mark the timeline as unsaved in the UI */
+  changed?: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -184,12 +192,17 @@ export type SubsetTimelineModel = Readonly<
     | 'status'
     | 'filters'
     | 'filterManager'
+    | 'savedSearchId'
+    | 'isDiscoverSavedSearchLoaded'
+    | 'isDataProviderVisible'
+    | 'changed'
   >
 >;
 
 export interface TimelineUrl {
   activeTab?: TimelineTabs;
-  id: string;
+  id?: string;
   isOpen: boolean;
   graphEventId?: string;
+  savedSearchId?: string;
 }

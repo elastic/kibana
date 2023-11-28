@@ -11,7 +11,7 @@ import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react'
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -68,7 +68,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   }, [error, isLoading, data, setForceOnPremStep]);
 
   if (isInitialRequest && isLoading) {
-    return <EuiLoadingContent data-test-subj="cloudBackupLoading" lines={3} />;
+    return <EuiSkeletonText data-test-subj="cloudBackupLoading" lines={3} />;
   }
 
   if (error) {
@@ -78,7 +78,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
           defaultMessage: 'An error occurred while retrieving the latest snapshot status',
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="cloudBackupErrorCallout"
       >
         <p>
@@ -128,7 +128,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   ) : (
     <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="dataNotBackedUpStatus">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="alert" color="danger" />
+        <EuiIcon type="warning" color="danger" />
       </EuiFlexItem>
 
       <EuiFlexItem>

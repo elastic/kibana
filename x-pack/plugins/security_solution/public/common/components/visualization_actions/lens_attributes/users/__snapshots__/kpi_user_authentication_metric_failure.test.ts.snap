@@ -25,13 +25,14 @@ Object {
             ],
             "columns": Object {
               "0eb97c09-a351-4280-97da-944e4bd30dd7": Object {
+                "customLabel": true,
                 "dataType": "number",
                 "filter": Object {
                   "language": "kuery",
                   "query": "event.outcome : \\"failure\\" ",
                 },
                 "isBucketed": false,
-                "label": "",
+                "label": " ",
                 "operationType": "count",
                 "scale": "ratio",
                 "sourceField": "___records___",
@@ -82,6 +83,28 @@ Object {
         "query": Object {
           "match_phrase": Object {
             "user.name": "elastic",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"user.name\\"}}],\\"minimum_should_match\\": 1}}]}}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "user.name",
+                },
+              },
+            ],
           },
         },
       },

@@ -54,6 +54,6 @@ export function flattenSourceDoc(
   }
   return Object.keys(val).reduce((acc, key) => {
     const fieldMap = flattenSourceDoc(val[key], [...path, key]);
-    return { ...acc, ...fieldMap };
+    return Object.assign(acc, fieldMap);
   }, {});
 }

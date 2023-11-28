@@ -24,12 +24,12 @@ export const ProjectMonitorCodec = t.intersection([
     id: t.string,
     name: t.string,
     schedule: t.number,
-    locations: t.array(t.string),
   }),
   t.partial({
     content: t.string,
     timeout: t.string,
     privateLocations: t.array(t.string),
+    locations: t.array(t.string),
     throttling: ProjectMonitorThrottlingConfigCodec,
     screenshot: ScreenshotOptionCodec,
     tags: t.union([t.string, t.array(t.string)]),
@@ -43,10 +43,11 @@ export const ProjectMonitorCodec = t.intersection([
     alert: AlertConfigsCodec,
     urls: t.union([t.string, t.array(t.string)]),
     hosts: t.union([t.string, t.array(t.string)]),
-    max_redirects: t.string,
+    max_redirects: t.union([t.string, t.number]),
     wait: t.string,
     hash: t.string,
     namespace: t.string,
+    retestOnFailure: t.boolean,
   }),
 ]);
 

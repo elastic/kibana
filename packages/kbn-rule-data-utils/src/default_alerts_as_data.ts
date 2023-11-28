@@ -27,7 +27,7 @@ const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
 // kibana.alert.case_ids - array of cases associated with the alert
 const ALERT_CASE_IDS = `${ALERT_NAMESPACE}.case_ids` as const;
 
-// kibana.alert.duration.us - alert duration in nanoseconds - updated each execution
+// kibana.alert.duration.us - alert duration in microseconds - updated each execution
 // that the alert is active
 const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 
@@ -39,6 +39,9 @@ const ALERT_FLAPPING = `${ALERT_NAMESPACE}.flapping` as const;
 
 // kibana.alert.flapping_history - whether the alert is currently in a flapping state
 const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
+
+// kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
+const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
 
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
 const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
@@ -64,6 +67,9 @@ const ALERT_UUID = `${ALERT_NAMESPACE}.uuid` as const;
 // kibana.alert.workflow_status - open/closed status of alert
 const ALERT_WORKFLOW_STATUS = `${ALERT_NAMESPACE}.workflow_status` as const;
 
+// kibana.alert.workflow_tags - user workflow alert tags
+const ALERT_WORKFLOW_TAGS = `${ALERT_NAMESPACE}.workflow_tags` as const;
+
 // kibana.alert.rule.category - rule type name for rule that generated this alert
 const ALERT_RULE_CATEGORY = `${ALERT_RULE_NAMESPACE}.category` as const;
 
@@ -82,11 +88,17 @@ const ALERT_RULE_PARAMETERS = `${ALERT_RULE_NAMESPACE}.parameters` as const;
 // kibana.alert.rule.producer - rule type producer for rule that generated this alert
 const ALERT_RULE_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
 
+// kibana.alert.rule.revision - current revision of the rule that generated this alert
+const ALERT_RULE_REVISION = `${ALERT_RULE_NAMESPACE}.revision` as const;
+
 // kibana.alert.rule.tags - rule tags for rule that generated this alert
 const ALERT_RULE_TAGS = `${ALERT_RULE_NAMESPACE}.tags` as const;
 
 // kibana.alert.rule_type_id - rule type id for rule that generated this alert
 const ALERT_RULE_TYPE_ID = `${ALERT_RULE_NAMESPACE}.rule_type_id` as const;
+
+// kibana.alert.url - url which will redirect users to a page related to the given alert
+const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
 
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
@@ -104,6 +116,7 @@ const fields = {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -113,14 +126,17 @@ const fields = {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
@@ -139,6 +155,7 @@ export {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -148,14 +165,17 @@ export {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,

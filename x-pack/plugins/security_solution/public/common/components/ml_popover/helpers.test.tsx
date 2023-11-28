@@ -10,7 +10,7 @@ import { filterJobs, getStablePatternTitles, searchFilter } from './helpers';
 
 describe('helpers', () => {
   describe('filterJobs', () => {
-    test('returns all jobs when no filter is suplied', () => {
+    test('returns all jobs when no filter is supplied', () => {
       const filteredJobs = filterJobs({
         jobs: mockSecurityJobs,
         selectedGroups: [],
@@ -18,24 +18,24 @@ describe('helpers', () => {
         showElasticJobs: false,
         filterQuery: '',
       });
-      expect(filteredJobs.length).toEqual(3);
+      expect(filteredJobs.length).toEqual(mockSecurityJobs.length);
     });
   });
 
   describe('searchFilter', () => {
-    test('returns all jobs when nullfilterQuery is provided', () => {
+    test('returns all jobs when null filterQuery is provided', () => {
       const jobsToDisplay = searchFilter(mockSecurityJobs);
       expect(jobsToDisplay.length).toEqual(mockSecurityJobs.length);
     });
 
     test('returns correct DisplayJobs when filterQuery matches job.id', () => {
       const jobsToDisplay = searchFilter(mockSecurityJobs, 'rare_process');
-      expect(jobsToDisplay.length).toEqual(2);
+      expect(jobsToDisplay.length).toEqual(3);
     });
 
     test('returns correct DisplayJobs when filterQuery matches job.description', () => {
       const jobsToDisplay = searchFilter(mockSecurityJobs, 'Detect unusually');
-      expect(jobsToDisplay.length).toEqual(2);
+      expect(jobsToDisplay.length).toEqual(3);
     });
   });
 

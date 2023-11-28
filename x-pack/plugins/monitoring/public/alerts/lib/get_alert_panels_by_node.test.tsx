@@ -57,6 +57,7 @@ const mockAlert = {
     lastExecutionDate: new Date('2020-12-08'),
   },
   notifyWhen: null,
+  revision: 0,
 };
 
 describe('getAlertPanelsByNode', () => {

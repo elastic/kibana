@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '../../../common/api';
+import { CaseSeverity } from '../../../common/types/domain';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
@@ -34,8 +34,9 @@ describe('Severity form field', () => {
   // default to LOW in this test configuration
   it('defaults to the correct value', () => {
     const result = appMockRender.render(<SeverityFilter {...props} />);
-    // two items. one for the popover one for the selected field
-    expect(result.getAllByTestId('case-severity-filter-low').length).toBe(2);
+    // Popver span and ID was removed here:
+    // https://github.com/elastic/eui/pull/6630#discussion_r1123655995
+    expect(result.getAllByTestId('case-severity-filter-low').length).toBe(1);
   });
 
   it('selects the correct value when changed', async () => {

@@ -9,13 +9,13 @@ import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreStart } from '@kbn/core/public';
 import type { SearchSource } from '@kbn/data-plugin/common';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { LicenseCheckState } from '@kbn/licensing-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import type { ReportingPublicPluginStartDendencies } from '../plugin';
+import type { ReportingPublicPluginStartDependencies } from '../plugin';
 import type { ActionContext } from './get_csv_panel_action';
 import { ReportingCsvPanelAction } from './get_csv_panel_action';
 
@@ -26,7 +26,7 @@ describe('GetCsvReportPanelAction', () => {
   let context: ActionContext;
   let mockLicenseState: LicenseCheckState;
   let mockSearchSource: SearchSource;
-  let mockStartServicesPayload: [CoreStart, ReportingPublicPluginStartDendencies, unknown];
+  let mockStartServicesPayload: [CoreStart, ReportingPublicPluginStartDependencies, unknown];
   let mockStartServices$: Rx.Observable<typeof mockStartServicesPayload>;
 
   const mockLicense$ = () => {
@@ -64,7 +64,7 @@ describe('GetCsvReportPanelAction', () => {
       {
         data: dataPluginMock.createStartContract(),
         licensing: { ...licensingMock.createStart(), license$: mockLicense$() },
-      } as unknown as ReportingPublicPluginStartDendencies,
+      } as unknown as ReportingPublicPluginStartDependencies,
       null,
     ];
     mockStartServices$ = Rx.from(Promise.resolve(mockStartServicesPayload));
@@ -92,6 +92,7 @@ describe('GetCsvReportPanelAction', () => {
             from: 'now-7d',
           },
         }),
+        hasTimeRange: () => true,
       },
     } as unknown as ActionContext;
   });

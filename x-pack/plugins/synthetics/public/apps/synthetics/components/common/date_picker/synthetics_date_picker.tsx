@@ -7,7 +7,6 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
 import { useUrlParams } from '../../../hooks';
 import { CLIENT_DEFAULTS } from '../../../../../../common/constants';
 import {
@@ -15,12 +14,6 @@ import {
   SyntheticsStartupPluginsContext,
   SyntheticsRefreshContext,
 } from '../../../contexts';
-
-const isSyntheticsDefaultDateRange = (dateRangeStart: string, dateRangeEnd: string) => {
-  const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
-
-  return dateRangeStart === DATE_RANGE_START && dateRangeEnd === DATE_RANGE_END;
-};
 
 export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => {
   const [getUrlParams, updateUrl] = useUrlParams();
@@ -36,10 +29,7 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
 
   useEffect(() => {
     const { from, to } = sharedTimeState ?? {};
-    // if it's synthetics default range, and we have shared state from kibana, let's use that
-    if (isSyntheticsDefaultDateRange(start, end) && (from !== start || to !== end)) {
-      updateUrl({ dateRangeStart: from, dateRangeEnd: to });
-    } else if (from !== start || to !== end) {
+    if (from !== start || to !== end) {
       // if it's coming url. let's update shared state
       data?.query.timefilter.timefilter.setTime({ from: start, to: end });
     }

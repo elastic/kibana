@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
@@ -32,7 +33,8 @@ export default function ({ getService }) {
       });
       it('should return 200 without a query', () =>
         supertest
-          .post('/api/kibana/suggestions/values/basic_index')
+          .post('/internal/kibana/suggestions/values/basic_index')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'baz.keyword',
             query: '',
@@ -45,7 +47,8 @@ export default function ({ getService }) {
 
       it('should return 200 without a query and with method set to terms_agg', () =>
         supertest
-          .post('/api/kibana/suggestions/values/basic_index')
+          .post('/internal/kibana/suggestions/values/basic_index')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'baz.keyword',
             method: 'terms_agg',
@@ -59,7 +62,8 @@ export default function ({ getService }) {
 
       it('should return 200 without a query and with method set to terms_enum', () =>
         supertest
-          .post('/api/kibana/suggestions/values/basic_index')
+          .post('/internal/kibana/suggestions/values/basic_index')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'baz.keyword',
             method: 'terms_enum',
@@ -73,7 +77,8 @@ export default function ({ getService }) {
 
       it('should return 200 with special characters', () =>
         supertest
-          .post('/api/kibana/suggestions/values/basic_index')
+          .post('/internal/kibana/suggestions/values/basic_index')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'baz.keyword',
             query: '<something?with:lots&of^ bad characters',
@@ -85,7 +90,8 @@ export default function ({ getService }) {
 
       it('should support nested fields', () =>
         supertest
-          .post('/api/kibana/suggestions/values/basic_index')
+          .post('/internal/kibana/suggestions/values/basic_index')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'nestedField.child',
             query: 'nes',
@@ -94,7 +100,8 @@ export default function ({ getService }) {
 
       it('should return 404 if index is not found', () =>
         supertest
-          .post('/api/kibana/suggestions/values/not_found')
+          .post('/internal/kibana/suggestions/values/not_found')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'baz.keyword',
             query: '1',
@@ -103,7 +110,8 @@ export default function ({ getService }) {
 
       it('should return 400 without a query', () =>
         supertest
-          .post('/api/kibana/suggestions/values/basic_index')
+          .post('/internal/kibana/suggestions/values/basic_index')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'baz.keyword',
           })
@@ -111,7 +119,8 @@ export default function ({ getService }) {
 
       it('should return 400 with a bad method', () =>
         supertest
-          .post('/api/kibana/suggestions/values/basic_index')
+          .post('/internal/kibana/suggestions/values/basic_index')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'baz.keyword',
             query: '',
@@ -138,7 +147,8 @@ export default function ({ getService }) {
 
       it('filter is applied on a document level with terms_agg', () =>
         supertest
-          .post('/api/kibana/suggestions/values/logstash-*')
+          .post('/internal/kibana/suggestions/values/logstash-*')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'extension.raw',
             query: '',
@@ -163,7 +173,8 @@ export default function ({ getService }) {
 
       it('filter returns all results because it was applied on an index level with terms_enum', () =>
         supertest
-          .post('/api/kibana/suggestions/values/logstash-*')
+          .post('/internal/kibana/suggestions/values/logstash-*')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'extension.raw',
             query: '',
@@ -188,7 +199,8 @@ export default function ({ getService }) {
 
       it('filter is applied on an index level with terms_enum - find in range', () =>
         supertest
-          .post('/api/kibana/suggestions/values/logstash-*')
+          .post('/internal/kibana/suggestions/values/logstash-*')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'request.raw',
             query: '/uploads/anatoly-art',
@@ -212,7 +224,8 @@ export default function ({ getService }) {
 
       it('filter is applied on an index level with terms_enum - DONT find in range', () => {
         supertest
-          .post('/api/kibana/suggestions/values/logstash-*')
+          .post('/internal/kibana/suggestions/values/logstash-*')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             field: 'request.raw',
             query: '/uploads/anatoly-art',

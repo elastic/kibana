@@ -15,10 +15,11 @@ export class DashboardAddPanelService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
+  private readonly browser = this.ctx.getService('browser');
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
-    await this.testSubjects.click('dashboardAddPanelButton');
+    await this.testSubjects.click('dashboardAddFromLibraryButton');
     // Give some time for the animation to complete
     await this.common.sleep(500);
   }
@@ -26,6 +27,8 @@ export class DashboardAddPanelService extends FtrService {
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
     await this.retry.try(async () => {
+      // prevent query bar auto suggest from blocking button
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
       await this.testSubjects.click('dashboardAddNewPanelButton');
       await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
       await this.header.waitUntilLoadingHasFinished();
@@ -35,17 +38,14 @@ export class DashboardAddPanelService extends FtrService {
     });
   }
 
-  async clickQuickButton(visType: string) {
-    this.log.debug(`DashboardAddPanel.clickQuickButton${visType}`);
-    await this.testSubjects.click(`dashboardQuickButton${visType}`);
-  }
-
   async clickMarkdownQuickButton() {
-    await this.clickQuickButton('markdown');
+    await this.clickEditorMenuButton();
+    await this.clickVisType('markdown');
   }
 
   async clickMapQuickButton() {
-    await this.clickQuickButton('map');
+    await this.clickEditorMenuButton();
+    await this.clickVisType('map');
   }
 
   async clickEditorMenuButton() {
@@ -91,7 +91,7 @@ export class DashboardAddPanelService extends FtrService {
           continue;
         }
         await button.click();
-        await this.common.closeToast();
+        await this.common.closeToastIfExists();
         embeddableList.push(name);
       }
     });
@@ -128,7 +128,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async isAddPanelOpen() {
     this.log.debug('DashboardAddPanel.isAddPanelOpen');
-    return await this.testSubjects.exists('dashboardAddPanel');
+    return await this.testSubjects.exists('dashboardAddPanel', { timeout: 500 });
   }
 
   async ensureAddPanelIsShowing() {
@@ -145,8 +145,22 @@ export class DashboardAddPanelService extends FtrService {
     }
   }
 
+  async ensureAddPanelIsClosed() {
+    this.log.debug('DashboardAddPanel.ensureAddPanelIsClosed');
+    const isOpen = await this.isAddPanelOpen();
+    if (isOpen) {
+      await this.retry.try(async () => {
+        await this.closeAddPanel();
+        const isNowOpen = await this.isAddPanelOpen();
+        if (isNowOpen) {
+          throw new Error('Add panel still open, trying again.');
+        }
+      });
+    }
+  }
+
   async closeAddPanel() {
-    await this.flyout.ensureClosed('dashboardAddPanel');
+    await this.flyout.ensureAllClosed();
   }
 
   async filterEmbeddableNames(name: string) {
@@ -222,6 +236,9 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeAddPanel();
+
+    // close "Added successfully" toast
+    await this.common.clearAllToasts();
     return embeddableName;
   }
 

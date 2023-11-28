@@ -19,8 +19,7 @@ const findTestUtils = (
   supertest: SuperTest<Test>,
   supertestWithoutAuth: any
 ) => {
-  // FLAKY: https://github.com/elastic/kibana/issues/148660
-  describe.skip(describeType, () => {
+  describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -60,6 +59,8 @@ const findTestUtils = (
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
           const response = await supertestWithoutAuth
             .get(
               `${getUrlPrefix(space.id)}/${
@@ -105,6 +106,7 @@ const findTestUtils = (
                     id: createdAction.id,
                     connector_type_id: 'test.noop',
                     params: {},
+                    uuid: match.actions[0].uuid,
                     frequency: {
                       summary: false,
                       notify_when: 'onThrottleInterval',
@@ -121,8 +123,10 @@ const findTestUtils = (
                 notify_when: null,
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
+                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
+                revision: 0,
                 execution_status: match.execution_status,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
@@ -327,6 +331,7 @@ const findTestUtils = (
                 params: {},
                 created_by: 'elastic',
                 throttle: '1m',
+                api_key_created_by_user: null,
                 updated_by: 'elastic',
                 api_key_owner: null,
                 mute_all: false,
@@ -335,6 +340,7 @@ const findTestUtils = (
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 execution_status: match.execution_status,
+                revision: 0,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
                 ...(describeType === 'internal'

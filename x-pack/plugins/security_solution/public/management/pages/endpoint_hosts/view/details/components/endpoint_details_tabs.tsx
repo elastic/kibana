@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiTab, EuiTabs, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody, EuiTab, EuiTabs } from '@elastic/eui';
 import type { EndpointIndexUIQueryParams } from '../../../types';
 
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
@@ -45,16 +45,15 @@ const EndpointDetailsTab = memo(
 
 EndpointDetailsTab.displayName = 'EndpointDetailsTab';
 
-export const EndpointDetailsFlyoutTabs = memo(
-  ({
-    hostname,
-    show,
-    tabs,
-  }: {
-    hostname: string;
-    show: EndpointIndexUIQueryParams['show'];
-    tabs: EndpointDetailsTabs[];
-  }) => {
+interface EndpointDetailsTabsProps {
+  hostname: string;
+  isHostInfoLoading: boolean;
+  show: EndpointIndexUIQueryParams['show'];
+  tabs: EndpointDetailsTabs[];
+}
+
+export const EndpointDetailsFlyoutTabs = memo<EndpointDetailsTabsProps>(
+  ({ hostname, isHostInfoLoading, show, tabs }) => {
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
 
     const renderTabs = tabs.map((tab) => (
@@ -63,7 +62,11 @@ export const EndpointDetailsFlyoutTabs = memo(
 
     return (
       <>
-        <EndpointDetailsFlyoutHeader hostname={hostname} hasBorder>
+        <EndpointDetailsFlyoutHeader
+          hostname={hostname}
+          isHostInfoLoading={isHostInfoLoading}
+          hasBorder
+        >
           <EuiTabs bottomBorder={false} style={{ marginBottom: '-25px' }}>
             {renderTabs}
           </EuiTabs>

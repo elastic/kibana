@@ -16,6 +16,9 @@ import React from 'react';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   FILE_NO_LONGER_AVAILABLE_MESSAGE,
+  FILE_TRUNCATED_MESSAGE,
+  FILE_DELETED_MESSAGE,
+  FILE_PASSCODE_INFO_MESSAGE,
   ResponseActionFileDownloadLink,
   type ResponseActionFileDownloadLinkProps,
 } from './response_action_file_download_link';
@@ -42,6 +45,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
       >({ command: 'get-file' }),
       'data-test-subj': 'test',
       canAccessFileDownloadLink: true,
+      isTruncatedFile: false,
     };
 
     render = () => {
@@ -56,12 +60,16 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
     });
 
-    expect(renderResult.getByTestId('test-downloadButton')).not.toBeNull();
+    const downlaodButton = renderResult.getByTestId('test-downloadButton');
+
+    expect(downlaodButton.getAttribute('href')).toEqual(
+      '/api/endpoint/action/123/file/123.agent-a/download?apiVersion=2023-10-31'
+    );
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
-      '(ZIP file passcode: elastic)'
+      FILE_PASSCODE_INFO_MESSAGE
     );
     expect(renderResult.getByTestId('test-fileDeleteMessage')).toHaveTextContent(
-      'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      FILE_DELETED_MESSAGE
     );
   });
 
@@ -91,6 +99,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123/file/123.agent-a',
+        version: '2023-10-31',
       });
     });
 
@@ -110,6 +119,20 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('test-fileNoLongerAvailable')).toHaveTextContent(
         FILE_NO_LONGER_AVAILABLE_MESSAGE
+      );
+    });
+  });
+
+  it('should show file is truncated if execute file output is truncated', async () => {
+    renderProps.isTruncatedFile = true;
+    render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-fileTruncatedMessage')).toHaveTextContent(
+        FILE_TRUNCATED_MESSAGE
       );
     });
   });

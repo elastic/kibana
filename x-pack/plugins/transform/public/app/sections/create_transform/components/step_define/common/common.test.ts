@@ -8,7 +8,7 @@
 import { getPivotDropdownOptions } from '.';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterAggForm } from './filter_agg/components';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { PercentilesAggForm } from './percentiles_agg/percentiles_form_component';
 
 describe('Transform: Define Pivot Common', () => {
@@ -143,13 +143,13 @@ describe('Transform: Define Pivot Common', () => {
       },
     });
 
-    const runtimeMappings = {
+    const runtimeMappings: RuntimeMappings = {
       rt_bytes_bigger: {
         type: 'double',
         script: {
           source: "emit(doc['bytes'].value * 2.0)",
         },
-      } as RuntimeField,
+      },
     };
     const optionsWithRuntimeFields = getPivotDropdownOptions(dataView, runtimeMappings);
     expect(optionsWithRuntimeFields).toMatchObject({

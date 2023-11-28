@@ -19,8 +19,11 @@ properties:
     type: string
   status:
     type: string
+  installationInfo:
+    $ref: ./installation_info.yaml
   savedObject:
     type: object
+    deprecated: true
 required:
   - description
   - download

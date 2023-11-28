@@ -8,15 +8,15 @@
 import { useCallback } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
-import type { Case } from '../../../../common';
-import { CaseStatuses } from '../../../../common';
+import type { CasesUI } from '../../../../common';
+import { CaseStatuses } from '../../../../common/types/domain';
 
 import * as i18n from './translations';
 import type { UseActionProps } from '../types';
 import { statuses } from '../../status';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
-const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string => {
+const getStatusToasterMessage = (status: CaseStatuses, cases: CasesUI): string => {
   const totalCases = cases.length;
   const caseTitle = totalCases === 1 ? cases[0].title : '';
 
@@ -35,7 +35,7 @@ interface UseStatusActionProps extends UseActionProps {
   selectedStatus?: CaseStatuses;
 }
 
-const shouldDisableStatus = (cases: Case[], status: CaseStatuses) =>
+const shouldDisableStatus = (cases: CasesUI, status: CaseStatuses) =>
   cases.every((theCase) => theCase.status === status);
 
 export const useStatusAction = ({
@@ -50,7 +50,7 @@ export const useStatusAction = ({
   const isActionDisabled = isDisabled || !canUpdateStatus;
 
   const handleUpdateCaseStatus = useCallback(
-    (selectedCases: Case[], status: CaseStatuses) => {
+    (selectedCases: CasesUI, status: CaseStatuses) => {
       onAction();
       const casesToUpdate = selectedCases.map((theCase) => ({
         status,
@@ -72,7 +72,7 @@ export const useStatusAction = ({
   const getStatusIcon = (status: CaseStatuses): string =>
     selectedStatus && selectedStatus === status ? 'check' : 'empty';
 
-  const getActions = (selectedCases: Case[]): EuiContextMenuPanelItemDescriptor[] => {
+  const getActions = (selectedCases: CasesUI): EuiContextMenuPanelItemDescriptor[] => {
     return [
       {
         name: statuses[CaseStatuses.open].label,

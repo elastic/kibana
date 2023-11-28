@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { StageMocks } from './model.test.mocks';
+import './model.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { createContextMock, MockedMigratorContext } from '../test_helpers';
 import type { RetryableEsClientError } from '../../actions';
-import type { State, BaseState, FatalState } from '../state';
+import type { State, BaseState, FatalState, AllActionStates } from '../state';
 import type { StateActionResponse } from './types';
-import { model } from './model';
+import { model, modelStageMap } from './model';
 
 describe('model', () => {
   let context: MockedMigratorContext;
@@ -30,6 +30,7 @@ describe('model', () => {
     retryCount: 0,
     retryDelay: 0,
     logs: [],
+    skipDocumentMigration: false,
   };
 
   const retryableError: RetryableEsClientError = {
@@ -113,22 +114,30 @@ describe('model', () => {
   });
 
   describe('dispatching to correct stage', () => {
-    test('dispatching INIT state', () => {
-      const state: State = {
+    const createStubState = (controlState: AllActionStates): State =>
+      ({
         ...baseState,
-        controlState: 'INIT',
-      };
-      const res: StateActionResponse<'INIT'> = Either.right({
+        controlState,
+      } as unknown as State);
+
+    const createStubResponse = () =>
+      Either.right({
         '.kibana_7.11.0_001': {
           aliases: {},
           mappings: { properties: {} },
           settings: {},
         },
       });
-      model(state, res, context);
 
-      expect(StageMocks.init).toHaveBeenCalledTimes(1);
-      expect(StageMocks.init).toHaveBeenCalledWith(state, res, context);
+    Object.entries(modelStageMap).forEach(([stage, handler]) => {
+      test(`dispatch ${stage} state`, () => {
+        const state = createStubState(stage as AllActionStates);
+        const res = createStubResponse();
+        model(state, res, context);
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenCalledWith(state, res, context);
+      });
     });
   });
 });

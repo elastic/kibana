@@ -9,8 +9,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
-import { HashRouter as Router, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -183,7 +183,7 @@ export function renderApp(
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
         <Router>
-          <Switch>
+          <Routes>
             {devTools
               // Only create routes for devtools that are not disabled
               .filter((devTool) => !devTool.isDisabled())
@@ -207,7 +207,7 @@ export function renderApp(
             <Route path="/">
               <Redirect to={`/${devTools[0].id}`} />
             </Route>
-          </Switch>
+          </Routes>
         </Router>
       </KibanaThemeProvider>
     </I18nProvider>,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -41,12 +41,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('regression job', function () {
     before(async () => {
       await ml.api.createAndRunDFAJob(regressionJobConfig as DataFrameAnalyticsConfig);
-      await ml.testResources.createIndexPatternIfNeeded(regressionJobConfig.dest!.index!);
+      await ml.testResources.createDataViewIfNeeded(regressionJobConfig.dest!.index!);
     });
 
     after(async () => {
       await ml.api.deleteDataFrameAnalyticsJobES(regressionJobConfig.id as string);
-      await ml.testResources.deleteIndexPatternByTitle(regressionJobConfig.dest!.index!);
+      await ml.testResources.deleteDataViewByTitle(regressionJobConfig.dest!.index!);
       await ml.api.deleteIndices(regressionJobConfig.dest!.index!);
       await ml.api.cleanMlIndices();
     });

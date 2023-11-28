@@ -22,6 +22,7 @@ import apm from 'elastic-apm-node';
 import { isEqual } from 'lodash';
 import type { ElasticConfigType } from './elastic_config';
 import { Server } from '../server';
+import { MIGRATION_EXCEPTION_CODE } from '../constants';
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.
@@ -33,6 +34,7 @@ export class Root {
   private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
   private apmConfigSubscription?: Subscription;
+  private shuttingDown: boolean = false;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -80,7 +82,12 @@ export class Root {
   }
 
   public async shutdown(reason?: any) {
-    this.log.debug('shutting root down');
+    if (this.shuttingDown) {
+      return;
+    }
+    this.shuttingDown = true;
+
+    this.log.info('Kibana is shutting down');
 
     if (reason) {
       if (reason.code === 'EADDRINUSE' && Number.isInteger(reason.port)) {
@@ -89,7 +96,9 @@ export class Root {
         );
       }
 
-      this.log.fatal(reason);
+      if (reason.code !== MIGRATION_EXCEPTION_CODE) {
+        this.log.fatal(formatShutdownReason(reason));
+      }
     }
 
     await this.server.stop();
@@ -156,3 +165,11 @@ export class Root {
     this.loggingConfigSubscription.add(connectSubscription);
   }
 }
+
+const formatShutdownReason = (reason: any): string => {
+  let message = `Reason: ${reason.message ?? reason}`;
+  if (reason.stack) {
+    message = `${message}\n${reason.stack}`;
+  }
+  return message;
+};

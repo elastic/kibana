@@ -6,6 +6,7 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
+import { MostRecentPingsRequest } from './api';
 import {
   Ping,
   PingsResponse,
@@ -27,18 +28,14 @@ export const getMonitorLastRunAction = createAsyncAction<
   PingsResponse
 >('[MONITOR DETAILS] GET LAST RUN');
 
+export const resetMonitorLastRunAction = createAction('[MONITOR DETAILS] LAST RUN RESET');
+
 export const updateMonitorLastRunAction = createAction<{ data: Ping }>(
   '[MONITOR DETAILS] UPdATE LAST RUN'
 );
 
-export const getMonitorRecentPingsAction = createAsyncAction<
-  {
-    monitorId: string;
-    locationId: string;
-    size?: number;
-    pageIndex?: number;
-    from?: string;
-    to?: string;
-  },
-  PingsResponse
->('[MONITOR DETAILS] GET RECENT PINGS');
+export const getMonitorRecentPingsAction = createAsyncAction<MostRecentPingsRequest, PingsResponse>(
+  '[MONITOR DETAILS] GET RECENT PINGS'
+);
+
+export const setStatusFilter = createAction<'up' | 'down' | undefined>('SET STATUS FILTER');

@@ -50,6 +50,7 @@ describe('get_list_item', () => {
   test('it returns null if all the values underneath the source type is undefined', async () => {
     const data = getSearchListItemMock();
     data.hits.hits[0]._source = {
+      '@timestamp': DATE_NOW,
       binary: undefined,
       boolean: undefined,
       byte: undefined,

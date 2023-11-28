@@ -12,10 +12,12 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_SQL } from '../../common';
+import moment from 'moment';
+import { LENS_APP_LOCATOR } from '../../common/locator/locator';
+import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
@@ -23,7 +25,6 @@ import {
   useLensSelector,
   useLensDispatch,
   LensAppState,
-  DispatchSetState,
   switchAndCleanDatasource,
 } from '../state_management';
 import {
@@ -35,7 +36,7 @@ import {
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
 import { LensByReferenceInput } from '../embeddable';
-import { getShareURL } from './share_action';
+import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -312,7 +313,7 @@ export const LensTopNavMenu = ({
   } = useLensSelector((state) => state.lens);
 
   const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = React.useCallback(
+  const dispatchSetState = React.useCallback(
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
@@ -457,8 +458,9 @@ export const LensTopNavMenu = ({
     isSaveable && application.capabilities.dashboard?.showWriteControls
   );
 
-  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
-    defaultMessage: 'unsaved',
+  const defaultLensTitle = i18n.translate('xpack.lens.app.share.defaultDashboardTitle', {
+    defaultMessage: 'Lens Visualization [{date}]',
+    values: { date: moment().toISOString(true) },
   });
   const additionalMenuEntries = useMemo(() => {
     if (!visualization.activeId) return undefined;
@@ -574,13 +576,16 @@ export const LensTopNavMenu = ({
             if (!share) {
               return;
             }
-            const sharingData = {
-              activeData,
-              csvEnabled,
-              title: title || unsavedTitle,
-            };
 
-            const { shareableUrl, savedObjectURL } = await getShareURL(
+            if (visualization.activeId == null || !visualizationMap[visualization.activeId]) {
+              return;
+            }
+
+            const {
+              shareableUrl,
+              savedObjectURL,
+              reportingLocatorParams: locatorParams,
+            } = await getShareURL(
               shortUrlService,
               { application, data },
               {
@@ -593,8 +598,26 @@ export const LensTopNavMenu = ({
                 visualization,
                 currentDoc,
                 adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
-              }
+              },
+              shareUrlEnabled,
+              isCurrentStateDirty
             );
+            const sharingData = {
+              activeData,
+              csvEnabled,
+              reportingDisabled: !csvEnabled,
+              title: title || defaultLensTitle,
+              locatorParams: {
+                id: LENS_APP_LOCATOR,
+                params: locatorParams,
+              },
+              layout: {
+                dimensions:
+                  visualizationMap[visualization.activeId].getReportingLayout?.(
+                    visualization.state
+                  ) ?? DEFAULT_LENS_LAYOUT_DIMENSIONS,
+              },
+            };
 
             share.toggleShareContextMenu({
               anchorElement,
@@ -603,7 +626,7 @@ export const LensTopNavMenu = ({
               shareableUrl: shareableUrl || '',
               shareableUrlForSavedObject: savedObjectURL.href,
               objectId: currentDoc?.savedObjectId,
-              objectType: 'lens_visualization',
+              objectType: 'lens',
               objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
                 defaultMessage: 'visualization',
               }),
@@ -632,9 +655,7 @@ export const LensTopNavMenu = ({
                 {
                   newTitle:
                     title ||
-                    (initialContext &&
-                    'isEmbeddable' in initialContext &&
-                    initialContext.isEmbeddable
+                    (contextFromEmbeddable
                       ? i18n.translate('xpack.lens.app.convertedLabel', {
                           defaultMessage: '{title} (converted)',
                           values: {
@@ -647,6 +668,8 @@ export const LensTopNavMenu = ({
                   newCopyOnSave: false,
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
+                  newDescription: contextFromEmbeddable ? initialContext.description : '',
+                  panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
                   saveToLibrary:
@@ -735,7 +758,6 @@ export const LensTopNavMenu = ({
     initialContextIsEmbedded,
     activeData,
     isSaveable,
-    shortUrlService,
     application,
     getIsByValueMode,
     savingToLibraryPermitted,
@@ -746,7 +768,7 @@ export const LensTopNavMenu = ({
     lensInspector,
     title,
     share,
-    unsavedTitle,
+    shortUrlService,
     data,
     filters,
     query,
@@ -756,6 +778,8 @@ export const LensTopNavMenu = ({
     visualizationMap,
     visualization,
     currentDoc,
+    adHocDataViews,
+    defaultLensTitle,
     isCurrentStateDirty,
     onAppLeave,
     runSave,
@@ -770,7 +794,6 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
-    adHocDataViews,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
@@ -936,10 +959,8 @@ export const LensTopNavMenu = ({
   ]);
 
   const onCreateDefaultAdHocDataView = useCallback(
-    async (pattern: string) => {
-      const dataView = await dataViewsService.create({
-        title: pattern,
-      });
+    async (dataViewSpec: DataViewSpec) => {
+      const dataView = await dataViewsService.create(dataViewSpec);
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
       }
@@ -963,13 +984,6 @@ export const LensTopNavMenu = ({
       visualization?.activeId,
     ]
   );
-
-  // setting that enables/disables SQL
-  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
-  const supportedTextBasedLanguages = [];
-  if (isSQLModeEnabled) {
-    supportedTextBasedLanguages.push('SQL');
-  }
 
   const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
@@ -1030,7 +1044,6 @@ export const LensTopNavMenu = ({
         indexPatternService.replaceDataViewId(updatedDataViewStub);
       }
     },
-    textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
   const textBasedLanguageModeErrors = getUserMessages('textBasedLanguagesQueryInput', {
@@ -1041,7 +1054,11 @@ export const LensTopNavMenu = ({
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
       config={topNavConfig}
-      showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+      saveQueryMenuVisibility={
+        application.capabilities.visualize.saveQuery
+          ? 'allowed_by_app_privilege'
+          : 'globally_managed'
+      }
       savedQuery={savedQuery}
       onQuerySubmit={onQuerySubmitWrapped}
       onSaved={onSavedWrapped}
@@ -1056,6 +1073,8 @@ export const LensTopNavMenu = ({
       dataViewPickerComponentProps={dataViewPickerProps}
       showDatePicker={
         indexPatterns.some((ip) => ip.isTimeBased()) ||
+        // always show the timepicker for text based languages
+        isOnTextBasedMode ||
         Boolean(
           allLoaded &&
             activeDatasourceId &&
@@ -1070,8 +1089,9 @@ export const LensTopNavMenu = ({
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}
-      appName={'lens'}
+      appName={LENS_APP_NAME}
       displayStyle="detached"
+      className="hide-for-sharing"
     />
   );
 };

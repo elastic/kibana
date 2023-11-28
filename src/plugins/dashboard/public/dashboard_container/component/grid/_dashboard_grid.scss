@@ -36,35 +36,47 @@
 }
 
 /**
- * .dshLayout-withoutMargins only affects the panel styles themselves, see ../panel
- */
-
-/**
- * When a single panel is expanded, all the other panels are hidden in the grid.
+ * When a single panel is expanded, all the other panels moved offscreen.
+ * Shifting the rendered panels offscreen prevents a quick flash when redrawing the panels on minimize
  */
 .dshDashboardGrid__item--hidden {
-  display: none;
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+}
+
+/**
+ * turn off panel transforms initially so that the dashboard panels don't swoop in on first load.
+ */
+.dshLayout--noAnimation .react-grid-item.cssTransforms {
+  transition-property: none !important;
 }
 
 /**
  * 1. We need to mark this as important because react grid layout sets the width and height of the panels inline.
  */
 .dshDashboardGrid__item--expanded {
+  position: absolute;
   height: 100% !important; /* 1 */
   width: 100% !important; /* 1 */
   top: 0 !important; /* 1 */
   left: 0 !important; /* 1 */
+  transform: none !important;
+  padding: $euiSizeS;
 
   // Altered panel styles can be found in ../panel
+}
+
+// Remove padding in fullscreen mode
+.kbnAppWrapper--hiddenChrome {
+  .dshDashboardGrid__item--expanded {
+    padding: 0;
+  }
 }
 
 // REACT-GRID
 
 .react-grid-item {
-  /**
-   * Disable transitions from the library on each grid element.
-   */
-  transition: none;
   /**
     * Copy over and overwrite the fill color with EUI color mixin (for theming)
     */
@@ -102,24 +114,5 @@
   &.react-grid-placeholder {
     border-radius: $euiBorderRadius;
     background: $euiColorWarning;
-  }
-}
-
-// When in view-mode only, and on tiny mobile screens, just stack each of the grid-items
-
-@include euiBreakpoint('xs', 's') {
-  .dshLayout--viewing {
-    .react-grid-item {
-      position: static !important;
-      width: calc(100% - #{$euiSize}) !important;
-      margin: $euiSizeS;
-    }
-
-    &.dshLayout-withoutMargins {
-      .react-grid-item {
-        width: 100% !important;
-        margin: 0;
-      }
-    }
   }
 }

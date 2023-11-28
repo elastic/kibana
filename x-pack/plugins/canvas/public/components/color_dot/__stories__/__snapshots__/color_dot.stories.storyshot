@@ -172,7 +172,7 @@ Array [
     >
       <span
         color="#fff"
-        data-euiicon-type="alert"
+        data-euiicon-type="warning"
       >
         
       </span>

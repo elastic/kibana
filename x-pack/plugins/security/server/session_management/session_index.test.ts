@@ -16,18 +16,18 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 
-import type { AuditLogger } from '../audit';
-import { auditLoggerMock } from '../audit/mocks';
-import { AnonymousAuthenticationProvider } from '../authentication';
-import { ConfigSchema, createConfig } from '../config';
-import { securityMock } from '../mocks';
 import {
   getSessionIndexSettings,
   SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME,
   SessionIndex,
 } from './session_index';
 import { sessionIndexMock } from './session_index.mock';
+import { auditLoggerMock } from '../audit/mocks';
+import { AnonymousAuthenticationProvider } from '../authentication';
+import { ConfigSchema, createConfig } from '../config';
+import { securityMock } from '../mocks';
 
 describe('Session index', () => {
   let mockElasticsearchClient: ReturnType<
@@ -98,6 +98,54 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+    });
+
+    it('does not delete legacy index template if the legacy template API is not available (410)', async () => {
+      const goneError = new errors.ResponseError(
+        securityMock.createApiResponse(
+          securityMock.createApiResponse({ body: { type: 'And it is gone!' }, statusCode: 410 })
+        )
+      );
+      mockElasticsearchClient.indices.existsTemplate.mockRejectedValueOnce(goneError);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.getMapping).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings({ indexName, aliasName })
+      );
+    });
+
+    it('does not delete legacy index template if the legacy template API is not available (404)', async () => {
+      const goneError = new errors.ResponseError(
+        securityMock.createApiResponse(
+          securityMock.createApiResponse({ body: { type: 'And it is gone!' }, statusCode: 404 })
+        )
+      );
+      mockElasticsearchClient.indices.existsTemplate.mockRejectedValueOnce(goneError);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.getMapping).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings({ indexName, aliasName })
+      );
     });
 
     it('deletes legacy index template if needed and creates index if it does not exist', async () => {
@@ -1404,7 +1452,7 @@ describe('Session index', () => {
           id: sid,
           index: aliasName,
           body: sessionValue,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [404], meta: true }
@@ -1415,7 +1463,7 @@ describe('Session index', () => {
           id: sid,
           index: aliasName,
           body: sessionValue,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [], meta: true }
@@ -1460,7 +1508,7 @@ describe('Session index', () => {
           id: sid,
           index: aliasName,
           body: sessionValue,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { meta: true, ignore: [404] }
@@ -1533,7 +1581,7 @@ describe('Session index', () => {
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [404, 409], meta: true }
@@ -1575,7 +1623,7 @@ describe('Session index', () => {
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [404, 409], meta: true }
@@ -1630,7 +1678,7 @@ describe('Session index', () => {
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [404, 409], meta: true }
@@ -1643,7 +1691,7 @@ describe('Session index', () => {
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [409], meta: true }
@@ -1672,7 +1720,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.delete).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.delete).toHaveBeenCalledWith(
-        { id: 'some-long-sid', index: aliasName, refresh: 'wait_for' },
+        { id: 'some-long-sid', index: aliasName, refresh: false },
         { ignore: [404], meta: true }
       );
     });
@@ -1692,7 +1740,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: { query: { match_all: {} } },
       });
     });
@@ -1716,7 +1764,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: { query: { bool: { must: [{ term: { 'provider.type': 'basic' } }] } } },
       });
     });
@@ -1732,7 +1780,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: {
           query: {
             bool: {
@@ -1757,7 +1805,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: {
           query: {
             bool: {
@@ -1782,7 +1830,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: {
           query: {
             bool: {

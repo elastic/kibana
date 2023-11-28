@@ -27,10 +27,13 @@ interface CreateTestConfigOptions {
   testFiles?: string[];
   reportName?: string;
   useDedicatedTaskRunner: boolean;
+  enableFooterInEmail?: boolean;
+  maxScheduledPerMinute?: number;
 }
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.bedrock',
   '.cases-webhook',
   '.email',
   '.index',
@@ -43,7 +46,10 @@ const enabledActionTypes = [
   '.servicenow-itom',
   '.jira',
   '.resilient',
+  '.gen-ai',
+  '.d3security',
   '.slack',
+  '.slack_api',
   '.tines',
   '.webhook',
   '.xmatters',
@@ -60,6 +66,8 @@ const enabledActionTypes = [
   'test.throw',
   'test.excluded',
   'test.capped',
+  'test.system-action',
+  'test.system-action-kibana-privileges',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -75,6 +83,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     testFiles = undefined,
     reportName = undefined,
     useDedicatedTaskRunner,
+    enableFooterInEmail = true,
+    maxScheduledPerMinute,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -144,6 +154,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
       : [];
 
+    const maxScheduledPerMinuteSettings =
+      typeof maxScheduledPerMinute === 'number'
+        ? [`--xpack.alerting.rules.maxScheduledPerMinute=${maxScheduledPerMinute}`]
+        : [];
+
     return {
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
@@ -172,12 +187,15 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'localhost',
             'some.non.existent.com',
             'smtp.live.com',
+            'slack.com',
           ])}`,
+          `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           '--xpack.alerting.rules.run.alerts.max=20',
+          '--xpack.observability.unsafe.thresholdRule.enabled=true',
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
@@ -189,6 +207,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...actionsProxyUrl,
           ...customHostSettings,
           ...emailSettings,
+          ...maxScheduledPerMinuteSettings,
           '--xpack.eventLog.logEntries=true',
           '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
@@ -199,6 +218,18 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'my-test-email': {
               actionTypeId: '.email',
               name: 'TestEmail#xyz',
+              config: {
+                from: 'me@test.com',
+                service: '__json',
+              },
+              secrets: {
+                user: 'user',
+                password: 'password',
+              },
+            },
+            'notification-email': {
+              actionTypeId: '.email',
+              name: 'Notification Email Connector',
               config: {
                 from: 'me@test.com',
                 service: '__json',
@@ -310,6 +341,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
+          '--notifications.connectors.default.email=notification-email',
+          '--xpack.task_manager.allow_reading_invalid_state=false',
+          '--xpack.task_manager.requeue_invalid_tasks.enabled=true',
+          '--xpack.actions.queued.max=500',
         ],
       },
     };

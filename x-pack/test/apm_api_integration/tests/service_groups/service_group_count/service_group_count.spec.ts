@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { waitForActiveAlert } from '../../../common/utils/wait_for_active_alert';
-import { createApmRule } from '../../alerts/alerting_api_helper';
+import { createApmRule } from '../../alerts/helpers/alerting_api_helper';
+import { cleanupRuleAndAlertState } from '../../alerts/helpers/cleanup_rule_and_alert_state';
+import { waitForActiveApmAlert } from '../../alerts/helpers/wait_for_active_apm_alerts';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
@@ -21,8 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
-  const esClient = getService('es');
+  const es = getService('es');
   const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
@@ -33,9 +34,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       name: 'Latency threshold | synth-go',
       params: {
         serviceName: 'synth-go',
-        transactionType: '',
-        windowSize: 99,
-        windowUnit: 'y',
+        transactionType: undefined,
+        windowSize: 5,
+        windowUnit: 'h',
         threshold: 100,
         aggregationType: AggregationType.Avg,
         environment: 'testing',
@@ -85,12 +86,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        await waitForActiveAlert({ ruleId, esClient, log });
+        await waitForActiveApmAlert({ ruleId, esClient: es, log });
       });
 
       after(async () => {
-        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-        await esDeleteAllIndices('.alerts*');
+        await cleanupRuleAndAlertState({ es, supertest, logger: log });
       });
 
       it('returns the correct number of alerts', async () => {

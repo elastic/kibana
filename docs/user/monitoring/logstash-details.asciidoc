@@ -18,4 +18,4 @@ status of each Logstash node.
 . Click the name of a node to view its statistics over time.
 
 For more information, refer to
-{logstash-ref}/monitoring-logstash.html[Monitoring Logstash].
+{logstash-ref}/configuring-logstash.html[Monitoring Logstash].

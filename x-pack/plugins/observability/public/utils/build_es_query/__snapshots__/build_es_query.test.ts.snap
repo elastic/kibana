@@ -6,7 +6,7 @@ Object {
     "filter": Array [
       Object {
         "range": Object {
-          "@timestamp": Object {
+          "kibana.alert.time_range": Object {
             "format": "strict_date_optional_time",
             "gte": "2022-08-30T15:23:23.721Z",
             "lte": "2022-08-30T15:38:28.171Z",
@@ -39,7 +39,7 @@ Object {
       },
       Object {
         "range": Object {
-          "@timestamp": Object {
+          "kibana.alert.time_range": Object {
             "format": "strict_date_optional_time",
             "gte": "2022-08-30T15:23:23.721Z",
             "lte": "2022-08-30T15:38:28.171Z",
@@ -92,7 +92,7 @@ Object {
       },
       Object {
         "range": Object {
-          "@timestamp": Object {
+          "kibana.alert.time_range": Object {
             "format": "strict_date_optional_time",
             "gte": "2022-08-30T15:23:23.721Z",
             "lte": "2022-08-30T15:38:28.171Z",
@@ -131,7 +131,7 @@ Object {
       },
       Object {
         "range": Object {
-          "@timestamp": Object {
+          "kibana.alert.time_range": Object {
             "format": "strict_date_optional_time",
             "gte": "2022-08-30T15:23:23.721Z",
             "lte": "2022-08-30T15:38:28.171Z",
@@ -152,7 +152,7 @@ Object {
     "filter": Array [
       Object {
         "range": Object {
-          "@timestamp": Object {
+          "kibana.alert.time_range": Object {
             "format": "strict_date_optional_time",
             "gte": "2022-08-30T15:23:23.721Z",
             "lte": "2022-08-30T15:38:28.171Z",

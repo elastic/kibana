@@ -10,28 +10,31 @@ import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/op
 import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
+import { dataTableActions } from '@kbn/securitysolution-data-table';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { updateTotalCount } from '../../../timelines/store/timeline/actions';
-import type { TableIdLiteral } from '../../../../common/types';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
-import {
-  removeColumn,
-  upsertColumn,
-  applyDeltaToColumnWidth,
-  updateColumns,
-  updateColumnOrder,
-  updateColumnWidth,
-  updateItemsPerPage,
-  updateSort,
-  changeViewMode,
-  updateShowBuildingBlockAlertsFilter,
-  updateIsLoading,
-} from './actions';
 import type { TimelineEpicDependencies } from '../../../timelines/store/timeline/types';
+
+const {
+  applyDeltaToColumnWidth,
+  changeViewMode,
+  removeColumn,
+  toggleDetailPanel,
+  updateColumnOrder,
+  updateColumns,
+  updateColumnWidth,
+  updateIsLoading,
+  updateItemsPerPage,
+  updateShowBuildingBlockAlertsFilter,
+  updateSort,
+  upsertColumn,
+} = dataTableActions;
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
-const tableActionTypes = [
+const tableActionTypes = new Set([
   removeColumn.type,
   upsertColumn.type,
   applyDeltaToColumnWidth.type,
@@ -44,7 +47,8 @@ const tableActionTypes = [
   updateShowBuildingBlockAlertsFilter.type,
   updateTotalCount.type,
   updateIsLoading.type,
-];
+  toggleDetailPanel.type,
+]);
 
 export const createDataTableLocalStorageEpic =
   <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
@@ -54,7 +58,7 @@ export const createDataTableLocalStorageEpic =
       delay(500),
       withLatestFrom(table$),
       tap(([action, tableById]) => {
-        if (tableActionTypes.includes(action.type)) {
+        if (tableActionTypes.has(action.type)) {
           if (storage) {
             const tableId: TableIdLiteral = get('payload.id', action);
             addTableInStorage(storage, tableId, tableById[tableId]);

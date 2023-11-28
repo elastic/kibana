@@ -8,7 +8,6 @@
 import { getByTestId, fireEvent, getByText, act } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
@@ -21,6 +20,7 @@ import { renderWithTheme } from '../../../utils/test_helpers';
 import { fromQuery } from '../links/url_helpers';
 import { CoreStart } from '@kbn/core/public';
 import { SearchBar } from './search_bar';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 function setup({
   urlParams,
@@ -37,8 +37,28 @@ function setup({
   });
 
   const KibanaReactContext = createKibanaReactContext({
-    usageCollection: { reportUiCounter: () => {} },
-    dataViews: { get: async () => {} },
+    usageCollection: {
+      reportUiCounter: () => {},
+    },
+    dataViews: {
+      get: async () => {},
+    },
+    data: {
+      query: {
+        queryString: {
+          setQuery: () => {},
+          getQuery: () => {},
+          clearQuery: () => {},
+        },
+        timefilter: {
+          timefilter: {
+            setTime: () => {},
+            getRefreshInterval: () => {},
+            setRefreshInterval: () => {},
+          },
+        },
+      },
+    },
   } as Partial<CoreStart>);
 
   // mock transaction types
@@ -58,14 +78,14 @@ function setup({
 
   return renderWithTheme(
     <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper>
-        <Router history={history}>
-          <UrlParamsProvider>
+      <MockApmPluginContextWrapper history={history}>
+        <UrlParamsProvider>
+          <ApmTimeRangeMetadataContextProvider>
             <ApmServiceContextProvider>
               <SearchBar showTransactionTypeSelector />
             </ApmServiceContextProvider>
-          </UrlParamsProvider>
-        </Router>
+          </ApmTimeRangeMetadataContextProvider>
+        </UrlParamsProvider>
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );

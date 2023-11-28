@@ -24,6 +24,7 @@ const BASE_BREADCRUMB: Breadcrumb = {
   text: i18n.translate('xpack.fleet.breadcrumbs.appTitle', {
     defaultMessage: 'Fleet',
   }),
+  deepLinkId: 'fleet',
 };
 
 const INTEGRATIONS_BASE_BREADCRUMB: Breadcrumb = {
@@ -32,6 +33,7 @@ const INTEGRATIONS_BASE_BREADCRUMB: Breadcrumb = {
     defaultMessage: 'Integrations',
   }),
   useIntegrationsBasePath: true,
+  deepLinkId: 'integrations',
 };
 
 const breadcrumbGetters: {
@@ -136,6 +138,14 @@ const breadcrumbGetters: {
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.enrollmentTokensPageTitle', {
         defaultMessage: 'Enrollment tokens',
+      }),
+    },
+  ],
+  uninstall_tokens: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.uninstallTokensPageTitle', {
+        defaultMessage: 'Uninstall tokens',
       }),
     },
   ],

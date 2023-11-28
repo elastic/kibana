@@ -1,0 +1,6 @@
+steps:
+  - command: .buildkite/scripts/steps/artifacts/trigger.sh
+    label: Trigger artifacts build
+    agents:
+      queue: kibana-default
+    timeout_in_minutes: 10

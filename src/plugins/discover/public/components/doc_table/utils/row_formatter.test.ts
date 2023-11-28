@@ -12,7 +12,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DiscoverServices } from '../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 describe('Row formatter', () => {
   let services: DiscoverServices;
@@ -68,26 +68,32 @@ describe('Row formatter', () => {
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
               "foo",
               "bar",
+              "foo",
             ],
             Array [
               "hello",
               "<h1>World</h1>",
+              "hello",
             ],
             Array [
               "number",
               42,
+              "number",
             ],
             Array [
               "_id",
               "a",
+              "_id",
             ],
             Array [
               "_score",
               1,
+              "_score",
             ],
           ]
         }
@@ -112,26 +118,12 @@ describe('Row formatter', () => {
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
-              "foo",
-              "bar",
-            ],
-            Array [
-              "hello",
-              "<h1>World</h1>",
-            ],
-            Array [
-              "number",
-              42,
-            ],
-            Array [
-              "_id",
-              "a",
-            ],
-            Array [
-              "_score",
-              1,
+              "and 4 more fields",
+              "",
+              null,
             ],
           ]
         }
@@ -153,26 +145,32 @@ describe('Row formatter', () => {
             Array [
               "number",
               42,
+              "number",
             ],
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
               "foo",
               "bar",
+              "foo",
             ],
             Array [
               "hello",
               "<h1>World</h1>",
+              "hello",
             ],
             Array [
               "_id",
               "a",
+              "_id",
             ],
             Array [
               "_score",
               1,
+              "_score",
             ],
           ]
         }
@@ -208,6 +206,7 @@ describe('Row formatter', () => {
             Array [
               "object.value",
               "formatted, formatted",
+              "object.value",
             ],
           ]
         }
@@ -266,10 +265,12 @@ describe('Row formatter', () => {
             Array [
               "object.keys",
               "formatted, formatted",
+              "object.keys",
             ],
             Array [
               "object.value",
               "formatted, formatted",
+              "object.value",
             ],
           ]
         }
@@ -301,6 +302,7 @@ describe('Row formatter', () => {
             Array [
               "object.value",
               "5, 10",
+              "object.value",
             ],
           ]
         }

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiHideFor,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
-  EuiShowFor,
-  EuiSideNav,
-} from '@elastic/eui';
+import { EuiHideFor, EuiPageSidebar, EuiShowFor, EuiSideNav } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import { NavItem } from '../lib/side_nav_context';
 interface Props {
@@ -39,10 +34,10 @@ export const MetricsSideNav = ({ loading, name, items }: Props) => {
   return (
     <>
       <EuiHideFor sizes={['xs', 's', 'm']}>
-        <EuiPageSideBar sticky={true}>{content}</EuiPageSideBar>
+        <EuiPageSidebar sticky={true}>{content}</EuiPageSidebar>
       </EuiHideFor>
       <EuiShowFor sizes={['xs', 's', 'm']}>
-        <EuiPageSideBar>{mobileContent}</EuiPageSideBar>
+        <EuiPageSidebar>{mobileContent}</EuiPageSidebar>
       </EuiShowFor>
     </>
   );

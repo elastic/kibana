@@ -7,17 +7,37 @@
 
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
+import {
+  RiskScoreEntity,
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../risk_engine';
+export { RiskQueries } from '../../../../api/search_strategy';
 
 /**
  * Make sure this aligns with the index in step 6, 9 in
  * prebuilt_dev_tool_content/console_templates/enable_host_risk_score.console
  */
-export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
-  return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+export const getHostRiskIndex = (
+  spaceId: string,
+  onlyLatest: boolean = true,
+  isNewRiskScoreModuleInstalled: boolean
+): string => {
+  return isNewRiskScoreModuleInstalled
+    ? getRiskScoreLatestIndex(spaceId)
+    : `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 
-export const getUserRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
-  return `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+export const getUserRiskIndex = (
+  spaceId: string,
+  onlyLatest: boolean = true,
+  isNewRiskScoreModuleInstalled: boolean
+): string => {
+  return isNewRiskScoreModuleInstalled
+    ? onlyLatest
+      ? getRiskScoreLatestIndex(spaceId)
+      : getRiskScoreTimeSeriesIndex(spaceId)
+    : `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 
 export const buildHostNamesFilter = (hostNames: string[]) => {
@@ -37,13 +57,4 @@ export const buildEntityNameFilter = (
     : { terms: { 'user.name': entityNames } };
 };
 
-export enum RiskQueries {
-  hostsRiskScore = 'hostsRiskScore',
-  usersRiskScore = 'usersRiskScore',
-  kpiRiskScore = 'kpiRiskScore',
-}
-
-export enum RiskScoreEntity {
-  host = 'host',
-  user = 'user',
-}
+export { RiskScoreEntity };

@@ -123,7 +123,7 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
             />
           }
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage

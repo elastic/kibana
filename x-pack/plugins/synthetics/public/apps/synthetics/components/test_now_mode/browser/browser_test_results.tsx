@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import {
   CheckGroupResult,
@@ -34,17 +35,26 @@ interface Props {
 }
 export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const { summariesLoading, expectedSummariesLoaded, stepLoadingInProgress, checkGroupResults } =
-    useBrowserRunOnceMonitors({
-      testRunId,
-      expectSummaryDocs: expectPings,
-    });
+  const {
+    retriesExceeded,
+    summariesLoading,
+    expectedSummariesLoaded,
+    stepLoadingInProgress,
+    checkGroupResults,
+  } = useBrowserRunOnceMonitors({
+    testRunId,
+    expectSummaryDocs: expectPings,
+  });
 
   useEffect(() => {
     if (expectedSummariesLoaded) {
       onDone(testRunId);
     }
   }, [onDone, expectedSummariesLoaded, testRunId]);
+
+  if (retriesExceeded) {
+    return <EuiCallOut title={FAILED_TO_SCHEDULE} color="danger" iconType="alert" />;
+  }
 
   return (
     <>
@@ -62,8 +72,8 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
             key={'accordion-' + checkGroupId}
             id={'accordion-' + checkGroupId}
             element="fieldset"
-            className="euiAccordionForm"
-            buttonClassName="euiAccordionForm__button"
+            borders="horizontal"
+            buttonProps={{ paddingSize: 'm' }}
             buttonContent={getButtonContent(checkGroupResult)}
             paddingSize="s"
             data-test-subj="expandResults"
@@ -92,7 +102,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 title={ERROR_RUNNING_TEST}
                 size="s"
                 color="danger"
-                iconType="alert"
+                iconType="warning"
               >
                 <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
               </EuiCallOut>
@@ -174,7 +184,7 @@ export const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.
   defaultMessage: 'Failed to run steps',
 });
 
-export const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
+export const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.testErrorLabel', {
   defaultMessage: 'Error running test',
 });
 

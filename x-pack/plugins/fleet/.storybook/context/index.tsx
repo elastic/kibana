@@ -13,9 +13,11 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
+import type { PluginsServiceStart } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
@@ -77,6 +79,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
         languageClientsUiComponents: {},
       },
       customBranding: getCustomBranding(),
+      dashboard: {} as unknown as DashboardStart,
       docLinks: getDocLinks(),
       http: getHttp(),
       i18n: {
@@ -91,6 +94,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       theme: {
         theme$: EMPTY,
       },
+      plugins: {} as unknown as PluginsServiceStart,
       authz: {
         fleet: {
           all: true,
@@ -111,7 +115,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
           writeIntegrationPolicies: true,
         },
       },
-      guidedOnboarding: guidedOnboardingMock.createStart(),
+      guidedOnboarding: {},
     }),
     [isCloudEnabled]
   );

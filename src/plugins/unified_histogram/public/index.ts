@@ -9,11 +9,9 @@
 import { UnifiedHistogramPublicPlugin } from './plugin';
 
 export type {
-  UnifiedHistogramUninitializedApi,
-  UnifiedHistogramInitializedApi,
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps,
-  UnifiedHistogramInitializeOptions,
+  UnifiedHistogramCreationOptions,
   UnifiedHistogramState,
   UnifiedHistogramStateOptions,
 } from './container';

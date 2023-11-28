@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -31,9 +31,9 @@ export default ({ getService }: FtrProviderContext) => {
   ) {
     const datafeedId = datafeedConfig.datafeed_id;
     const { body, status } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/api/ml/datafeeds/${datafeedId}/_update`)
+      .post(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}/_update`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(datafeedConfig.body);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 

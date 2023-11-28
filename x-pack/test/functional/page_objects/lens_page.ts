@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
@@ -31,6 +32,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const comboBox = getService('comboBox');
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const queryBar = getService('queryBar');
 
   const PageObjects = getPageObjects([
     'common',
@@ -127,7 +129,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       extraFields?: string[];
     }) {
       // type * in the query editor
-      const queryInput = await testSubjects.find('lnsXY-annotation-query-based-query-input');
+      const queryInput = await testSubjects.find('annotation-query-based-query-input');
       await queryInput.type(opts.queryString);
       await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       await this.selectOptionFromComboBox(
@@ -177,7 +179,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       field?: string;
       isPreviousIncompatible?: boolean;
       keepOpen?: boolean;
-      palette?: string;
+      palette?: { mode: 'legacy' | 'colorMapping'; id: string };
       formula?: string;
       disableEmptyRows?: boolean;
     }) {
@@ -191,22 +193,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (opts.operation === 'formula') {
         await this.switchToFormula();
       } else {
-        const operationSelector = opts.isPreviousIncompatible
-          ? `lns-indexPatternDimension-${opts.operation} incompatible`
-          : `lns-indexPatternDimension-${opts.operation}`;
-        async function getAriaPressed() {
-          const operationSelectorContainer = await testSubjects.find(operationSelector);
-          await testSubjects.click(operationSelector);
-          const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
-          return ariaPressed;
-        }
-
-        // adding retry here as it seems that there is a flakiness of the operation click
-        // it seems that the aria-pressed attribute is updated to true when the button is clicked
-        await retry.waitFor('aria pressed to be true', async () => {
-          const ariaPressedStatus = await getAriaPressed();
-          return ariaPressedStatus === 'true';
-        });
+        await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
@@ -219,7 +206,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (opts.palette) {
-        await this.setPalette(opts.palette);
+        await this.setPalette(opts.palette.id, opts.palette.mode === 'legacy');
       }
 
       if (opts.disableEmptyRows) {
@@ -380,7 +367,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
         await find.existsByCssSelector(
-          `.lnsDragDrop__extraDrop > [data-test-subj="lnsDragDrop-${metaToAction[metaKey]}"].lnsDragDrop-isActiveDropTarget`
+          `.domDragDrop__extraDrop > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDragDrop-isActiveDropTarget`
         );
       });
     },
@@ -405,7 +392,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await field.focus();
       await retry.try(async () => {
         await browser.pressKeys(browser.keys.ENTER);
-        await testSubjects.exists('.lnsDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+        await testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
@@ -477,7 +464,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async waitForLensDragDropToFinish() {
       await retry.try(async () => {
-        const exists = await find.existsByCssSelector('.lnsDragDrop-isActiveGroup');
+        const exists = await find.existsByCssSelector('.domDragDrop-isActiveGroup');
         if (exists) {
           throw new Error('UI still in drag/drop mode');
         }
@@ -525,7 +512,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param endIndex - the index of drop starting from 1
      * */
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
-      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
+      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .domDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await find.existsByCssSelector(dragging);
       await browser.html5DragAndDrop(dragging, dropping);
@@ -533,13 +520,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async assertPalette(palette: string) {
+    async assertPalette(paletteId: string, isLegacy: boolean) {
       await retry.try(async () => {
-        await testSubjects.click('lns-palettePicker');
+        await testSubjects.click('lns_colorEditing_trigger');
+        // open the palette picker
+        if (isLegacy) {
+          await testSubjects.click('lns-palettePicker');
+        } else {
+          await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
+        }
         const currentPalette = await (
           await find.byCssSelector('[role=option][aria-selected=true]')
         ).getAttribute('id');
-        expect(currentPalette).to.equal(palette);
+        // close the palette picker
+        if (isLegacy) {
+          await testSubjects.click('lns-palettePicker');
+        } else {
+          await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
+        }
+        expect(currentPalette).to.equal(paletteId);
+        await this.closePaletteEditor();
       });
     },
 
@@ -562,6 +562,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    /**
+     * Perform the specified layer action
+     */
+    async performLayerAction(testSubject: string, layerIndex = 0) {
+      await retry.try(async () => {
+        await testSubjects.click(`lnsLayerSplitButton--${layerIndex}`);
+        await testSubjects.click(testSubject);
+      });
+    },
+
     async isDimensionEditorOpen() {
       return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
     },
@@ -571,6 +581,25 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lns-indexPattern-dimensionContainerClose');
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+    },
+
+    async selectOperation(operation: string, isPreviousIncompatible: boolean = false) {
+      const operationSelector = isPreviousIncompatible
+        ? `lns-indexPatternDimension-${operation} incompatible`
+        : `lns-indexPatternDimension-${operation}`;
+      async function getAriaPressed() {
+        const operationSelectorContainer = await testSubjects.find(operationSelector);
+        await testSubjects.click(operationSelector);
+        const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
+        return ariaPressed;
+      }
+
+      // adding retry here as it seems that there is a flakiness of the operation click
+      // it seems that the aria-pressed attribute is updated to true when the button is clicked
+      await retry.waitFor('aria pressed to be true', async () => {
+        const ariaPressedStatus = await getAriaPressed();
+        return ariaPressedStatus === 'true';
       });
     },
 
@@ -627,9 +656,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
     },
     /**
+     * Cen remove the dimension matching a specific test subject?
+     */
+    async canRemoveDimension(dimensionTestSubj: string) {
+      await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+      return await testSubjects.isDisplayed(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+    },
+    /**
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
+      await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
       await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
     /**
@@ -666,6 +703,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.selectOptionFromComboBox(`indexPattern-dimension-field-${lastIndex}`, field);
       });
     },
+    async getNumericFieldReady(testSubj: string) {
+      const numericInput = await find.byCssSelector(
+        `input[data-test-subj="${testSubj}"][type='number']`
+      );
+      await numericInput.click();
+      await numericInput.clearValue();
+      return numericInput;
+    },
+
+    async setTermsNumberOfValues(value: number) {
+      const valuesInput = await this.getNumericFieldReady('indexPattern-terms-values');
+      await valuesInput.type(`${value}`);
+      await PageObjects.common.sleep(500);
+    },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
       const lastIndex = (
@@ -686,6 +737,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.missingOrFail(`lns-fieldOption-${field}`);
       }
     },
+    async saveModal(
+      title: string,
+      saveAsNew?: boolean,
+      redirectToOrigin?: boolean,
+      saveToLibrary?: boolean,
+      addToDashboard?: 'new' | 'existing' | null,
+      dashboardId?: string
+    ) {
+      await PageObjects.timeToVisualize.setSaveModalValues(title, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard: addToDashboard ? addToDashboard : null,
+        dashboardId,
+        saveToLibrary,
+      });
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+        testSubjects
+          .missingOrFail('confirmSaveSavedObjectButton')
+          .then(() => true)
+          .catch(() => false)
+      );
+    },
 
     /**
      * Save the current Lens visualization.
@@ -701,20 +776,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
 
-      await PageObjects.timeToVisualize.setSaveModalValues(title, {
+      await this.saveModal(
+        title,
         saveAsNew,
         redirectToOrigin,
-        addToDashboard: addToDashboard ? addToDashboard : null,
-        dashboardId,
         saveToLibrary,
-      });
-
-      await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
+        addToDashboard,
+        dashboardId
       );
     },
 
@@ -733,10 +801,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
+      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
     },
-    async editDimensionFormat(format: string) {
+    async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
+      if (options?.decimals != null) {
+        await testSubjects.setValue('indexPattern-dimension-formatDecimals', `${options.decimals}`);
+        // press tab key to remove the range popover of the EUI field
+        await PageObjects.common.pressTabKey();
+      }
+      if (options?.prefix != null) {
+        await testSubjects.setValue('indexPattern-dimension-formatSuffix', options.prefix);
+      }
     },
     async editDimensionColor(color: string) {
       const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
@@ -765,10 +841,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         expect(await (await testSubjects.find(input)).getAttribute('value')).to.eql(value);
       });
     },
-    async useCurvedLines() {
-      await testSubjects.click('lnsCurveStyleToggle');
+    async setCurvedLines(option: XYCurveType) {
+      await testSubjects.click('lnsCurveStyleSelect');
+      const optionSelector = await find.byCssSelector(`#${option}`);
+      await optionSelector.click();
     },
-    async editMissingValues(option: string) {
+    async editMissingValues(option: FittingFunction) {
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);
       await optionSelector.click();
@@ -903,7 +981,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer(layerType: 'data' | 'referenceLine' | 'annotations' = 'data') {
+    async createLayer(
+      layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
+      annotationFromLibraryTitle?: string
+    ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
 
@@ -914,8 +995,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ]);
         return fasterChecks.filter(Boolean).length > 0;
       });
+
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+        if (layerType === 'annotations') {
+          if (!annotationFromLibraryTitle) {
+            await testSubjects.click('lnsAnnotationLayer_new');
+          } else {
+            await testSubjects.click('lnsAnnotationLayer_addFromLibrary');
+            await testSubjects.click(
+              `savedObjectTitle${annotationFromLibraryTitle.split(' ').join('-')}`
+            );
+          }
+        }
       }
     },
 
@@ -1014,6 +1106,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
+    async getCurrentChartDebugStateForVizType(visType: string) {
+      await this.waitForVisualization(visType);
+      return await elasticChart.getChartDebugData(visType);
+    },
+
     /**
      * Gets text of the specified datatable cell
      *
@@ -1027,6 +1124,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
+    async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
+      const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1119,9 +1228,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`${paletteName}-palette`);
     },
 
-    async setPalette(paletteName: string) {
-      await testSubjects.click('lns-palettePicker');
-      await find.clickByCssSelector(`#${paletteName}`);
+    async setPalette(paletteId: string, isLegacy: boolean) {
+      await testSubjects.click('lns_colorEditing_trigger');
+      await testSubjects.setEuiSwitch(
+        'lns_colorMappingOrLegacyPalette_switch',
+        isLegacy ? 'uncheck' : 'check'
+      );
+      if (isLegacy) {
+        await testSubjects.click('lns-palettePicker');
+        await find.clickByCssSelector(`#${paletteId}`);
+      } else {
+        await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
+        await testSubjects.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
+      }
+      await this.closePaletteEditor();
     },
 
     async closePaletteEditor() {
@@ -1257,13 +1377,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param title - title for the new lens. If left undefined, the panel will be created by value
      * @param redirectToOrigin - whether to redirect back to the dashboard after saving the panel
+     * @param ignoreTimeFilter - whether time range has to be changed
      */
     async createAndAddLensFromDashboard({
       title,
       redirectToOrigin,
+      ignoreTimeFilter,
     }: {
       title?: string;
       redirectToOrigin?: boolean;
+      ignoreTimeFilter?: boolean;
     }) {
       log.debug(`createAndAddLens${title}`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
@@ -1271,17 +1394,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
-      await this.goToTimeRange();
-      await this.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
+
+      if (!ignoreTimeFilter) {
+        await this.goToTimeRange();
+      }
 
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
+      });
+      await this.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
       });
 
       await this.configureDimension({
@@ -1362,7 +1488,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       dimension: string;
       field: string;
       keepOpen?: boolean;
-      palette?: string;
     }) {
       await retry.try(async () => {
         if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
@@ -1373,12 +1498,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await this.selectOptionFromComboBox('text-based-dimension-field', opts.field);
 
-      if (opts.palette) {
-        await this.setPalette(opts.palette);
-      }
-
       if (!opts.keepOpen) {
         await this.closeDimensionEditor();
+        await testSubjects.click('applyFlyoutButton');
       }
     },
 
@@ -1470,7 +1592,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+        testSubjects.getCssSelector(`${to} > domDragDrop-dropTarget-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
     },
@@ -1491,7 +1613,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+        testSubjects.getCssSelector(`${to} > domDragDrop-dropTarget-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
     },
@@ -1658,12 +1780,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async findFieldIdsByType(
-      type: 'string' | 'number' | 'date' | 'geo_point' | 'ip_range',
+      type: 'keyword' | 'number' | 'date' | 'geo_point' | 'ip_range',
       group: 'available' | 'empty' | 'meta' = 'available'
     ) {
       const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
       const allFieldsForType = await find.allByCssSelector(
-        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .lnsFieldItem--${type}`
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldListItemButton--${type}`
       );
       // map to testSubjId
       return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
@@ -1677,16 +1799,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks') {
+    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
       switch (action) {
         case 'csvDownload':
           return await testSubjects.isEnabled('sharePanel-CSVDownload');
         case 'permalinks':
           return await testSubjects.isEnabled('sharePanel-Permalinks');
+        default:
+          return await testSubjects.isEnabled(`sharePanel-${action}`);
       }
     },
 
-    async ensureShareMenuIsOpen(action: 'csvDownload' | 'permalinks') {
+    async ensureShareMenuIsOpen(
+      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports'
+    ) {
       await this.clickShareMenu();
 
       if (!(await testSubjects.exists('shareContextMenu'))) {
@@ -1739,12 +1865,69 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }, value);
     },
 
+    async openReportingShare(type: 'PNG' | 'PDF') {
+      await this.ensureShareMenuIsOpen(`${type}Reports`);
+      await testSubjects.click(`sharePanel-${type}Reports`);
+    },
+
     async getCSVContent() {
       await testSubjects.click('lnsApp_downloadCSVButton');
       return await browser.execute<
         [void],
         Record<string, { content: string; type: string }> | undefined
       >(() => window.ELASTIC_LENS_CSV_CONTENT);
+    },
+
+    async closeSuggestionPanel() {
+      const isSuggestionPanelOpen = await testSubjects.exists('lnsSuggestionsPanel');
+      if (isSuggestionPanelOpen) {
+        await testSubjects.click('lensSuggestionsPanelToggleButton');
+      }
+    },
+
+    /**
+     * Enables elastic charts debug state with *soft* refresh
+     */
+    async enableEchDebugState() {
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await queryBar.clickQuerySubmitButton();
+    },
+
+    async changeColorMappingPalette(selector: string, paletteId: string) {
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(selector);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+      await this.setPalette(paletteId, false);
+      await this.closeDimensionEditor();
+    },
+
+    async changeColorMappingCategoricalColors(
+      selector: string,
+      colorSwatchIndex: number,
+      paletteColorIndex: number
+    ) {
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(selector);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+      await testSubjects.click('lns_colorEditing_trigger');
+      // disable autoAssign
+      await testSubjects.setEuiSwitch('lns-colorMapping-autoAssignSwitch', 'uncheck');
+
+      await testSubjects.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
+
+      await testSubjects.click(`lns-colorMapping-colorPicker-staticColor-${paletteColorIndex}`);
+
+      await testSubjects.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
+
+      await this.closePaletteEditor();
+
+      await this.closeDimensionEditor();
     },
   });
 }

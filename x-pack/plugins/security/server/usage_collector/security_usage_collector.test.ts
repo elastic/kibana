@@ -12,10 +12,10 @@ import {
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 
-import type { SecurityLicenseFeatures } from '../../common/licensing';
+import { registerSecurityUsageCollector } from './security_usage_collector';
+import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ConfigSchema, createConfig } from '../config';
-import { registerSecurityUsageCollector } from './security_usage_collector';
 
 describe('Security UsageCollector', () => {
   const createSecurityConfig = (config: TypeOf<typeof ConfigSchema>) => {
@@ -46,7 +46,7 @@ describe('Security UsageCollector', () => {
     enabledAuthProviders: ['basic'],
     loginSelectorEnabled: false,
     httpAuthSchemes: ['apikey', 'bearer'],
-    sessionIdleTimeoutInMinutes: 480,
+    sessionIdleTimeoutInMinutes: 4320,
     sessionLifespanInMinutes: 43200,
     sessionCleanupInMinutes: 60,
     sessionConcurrentSessionsMaxSessions: 0,

@@ -21,9 +21,11 @@ jest.mock('../app_context', () => {
     appContextService: {
       getLogger: () => loggerMock.create(),
       getConfig: () => {},
+      getMessageSigningService: jest.fn(),
     },
   };
 });
+jest.mock('../audit_logging');
 
 jest.mock('../agent_policy', () => {
   return {

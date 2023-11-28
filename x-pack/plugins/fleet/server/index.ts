@@ -7,8 +7,6 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { FleetPlugin } from './plugin';
-
 export { buildAgentStatusRuntimeField } from './services/agents/build_status_runtime_field';
 export type {
   AgentService,
@@ -42,6 +40,15 @@ export type { PackagePolicyClient } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export type {
+  FleetFromHostFileClientInterface,
+  FleetToHostFileClientInterface,
+  FleetFile,
+  HapiReadableStream,
+  FleetFileUpdatableFields,
+} from './services/files/types';
+
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { FleetPlugin } = await import('./plugin');
   return new FleetPlugin(initializerContext);
 };

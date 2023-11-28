@@ -10,11 +10,6 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { parse, stringify } from 'query-string';
-
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
-import { parseUrlQueryParams } from './utils';
-import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 
 import type {
   FilterOptions,
@@ -24,7 +19,14 @@ import type {
   PartialQueryParams,
   ParsedUrlQueryParams,
 } from '../../../common/ui/types';
+
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
+import { parseUrlQueryParams } from './utils';
+import { stringifyToURL, parseURL } from '../utils';
+import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
+import { SORT_ORDER_VALUES } from '../../../common/ui/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { CASES_TABLE_PERPAGE_VALUES } from './types';
 
 export const getQueryParamsLocalStorageKey = (appId: string) => {
   const filteringKey = LOCAL_STORAGE_KEYS.casesQueryParams;
@@ -64,6 +66,18 @@ const getQueryParams = (
   result.page = params.page ?? urlParams.page ?? DEFAULT_QUERY_PARAMS.page;
 
   return result;
+};
+
+const validateQueryParams = (queryParams: QueryParams): QueryParams => {
+  const perPage = Math.min(
+    queryParams.perPage,
+    CASES_TABLE_PERPAGE_VALUES[CASES_TABLE_PERPAGE_VALUES.length - 1]
+  );
+  const sortOrder = !SORT_ORDER_VALUES.includes(queryParams.sortOrder)
+    ? DEFAULT_QUERY_PARAMS.sortOrder
+    : queryParams.sortOrder;
+
+  return { ...queryParams, perPage, sortOrder };
 };
 
 const getFilterOptions = (
@@ -126,13 +140,13 @@ export function useAllCasesState(
         return;
       }
 
-      const parsedUrlParams: ParsedUrlQueryParams = parse(location.search);
+      const parsedUrlParams: ParsedUrlQueryParams = parseURL(location.search);
       const urlParams: PartialQueryParams = parseUrlQueryParams(parsedUrlParams);
-      const newQueryParams: QueryParams = getQueryParams(
-        params,
-        urlParams,
-        localStorageQueryParams
-      );
+
+      let newQueryParams: QueryParams = getQueryParams(params, urlParams, localStorageQueryParams);
+
+      newQueryParams = validateQueryParams(newQueryParams);
+
       const newLocalStorageQueryParams = {
         perPage: newQueryParams.perPage,
         sortField: newQueryParams.sortField,
@@ -154,7 +168,7 @@ export function useAllCasesState(
       const newFilterOptions: FilterOptions = getFilterOptions(
         filterOptions,
         params,
-        parse(location.search),
+        parseURL(location.search),
         localStorageFilterOptions
       );
 
@@ -178,7 +192,7 @@ export function useAllCasesState(
   );
 
   const updateLocation = useCallback(() => {
-    const parsedUrlParams = parse(location.search);
+    const parsedUrlParams = parseURL(location.search);
     const stateUrlParams = {
       ...parsedUrlParams,
       ...queryParams,
@@ -191,7 +205,10 @@ export function useAllCasesState(
       try {
         const newHistory = {
           ...location,
-          search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
+          search: stringifyToURL({ ...parsedUrlParams, ...stateUrlParams } as unknown as Record<
+            string,
+            string
+          >),
         };
         history.replace(newHistory);
       } catch {

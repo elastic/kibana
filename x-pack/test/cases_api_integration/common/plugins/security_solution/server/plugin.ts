@@ -6,7 +6,7 @@
  */
 
 import { Plugin, CoreSetup } from '@kbn/core/server';
-
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -39,7 +39,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'casesGetConnectorsConfigure'],
           app: ['kibana'],
           cases: {
             create: ['securitySolutionFixture'],
@@ -48,41 +48,64 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             push: ['securitySolutionFixture'],
           },
           savedObject: {
-            all: [],
-            read: [],
+            all: [...filesSavedObjectTypes],
+            read: [...filesSavedObjectTypes],
           },
           ui: [],
         },
         read: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'casesGetConnectorsConfigure'],
           app: ['kibana'],
           cases: {
             read: ['securitySolutionFixture'],
           },
           savedObject: {
             all: [],
-            read: [],
+            read: [...filesSavedObjectTypes],
           },
           ui: [],
         },
       },
       subFeatures: [
         {
-          name: 'Custom privileges',
+          name: 'Delete',
           privilegeGroups: [
             {
               groupType: 'independent',
               privileges: [
                 {
-                  name: 'Delete',
+                  name: 'Delete cases and comments',
                   id: 'cases_delete',
                   includeIn: 'all',
                   cases: {
                     delete: ['securitySolutionFixture'],
                   },
                   savedObject: {
-                    all: [],
-                    read: [],
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Case Settings',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Edit Case Settings',
+                  id: 'cases_settings',
+                  includeIn: 'all',
+                  cases: {
+                    settings: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
                   },
                   ui: [],
                 },

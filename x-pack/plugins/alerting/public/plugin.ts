@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { Plugin, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
-import { loadRule, loadRuleType } from './alert_api';
-import { Rule } from '../common';
+import { loadRule, loadRuleType } from './services/alert_api';
+import { ENABLE_MAINTENANCE_WINDOWS, Rule, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -52,11 +56,27 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   getNavigation: (ruleId: Rule['id']) => Promise<string | undefined>;
 }
+export interface AlertingPluginSetup {
+  management: ManagementSetup;
+}
 
-export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
+export interface AlertingPluginStart {
+  licensing: LicensingPluginStart;
+  spaces: SpacesPluginStart;
+}
+
+export class AlertingPublicPlugin
+  implements
+    Plugin<PluginSetupContract, PluginStartContract, AlertingPluginSetup, AlertingPluginStart>
+{
   private alertNavigationRegistry?: AlertNavigationRegistry;
-  public setup() {
+
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, plugins: AlertingPluginSetup) {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
+
+    const kibanaVersion = this.initContext.env.packageInfo.version;
 
     const registerNavigation = async (
       applicationId: string,
@@ -70,6 +90,31 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       applicationId: string,
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
+
+    if (ENABLE_MAINTENANCE_WINDOWS) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: MAINTENANCE_WINDOWS_APP_ID,
+        title: i18n.translate('xpack.alerting.management.section.title', {
+          defaultMessage: 'Maintenance Windows',
+        }),
+        async mount(params: ManagementAppMountParams) {
+          const { renderApp } = await import('./application/maintenance_windows');
+
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            AlertingPluginStart,
+            unknown
+          ];
+
+          return renderApp({
+            core: coreStart,
+            plugins: pluginsStart,
+            mountParams: params,
+            kibanaVersion,
+          });
+        },
+      });
+    }
 
     return {
       registerNavigation,
@@ -93,7 +138,8 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
 
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
-          return navigationHandler(rule);
+          const navUrl = navigationHandler(rule);
+          if (navUrl) return navUrl;
         }
 
         if (rule.viewInAppRelativeUrl) {

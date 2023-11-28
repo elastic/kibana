@@ -15,7 +15,7 @@ import { ApmPluginStartDeps } from '../../plugin';
 
 function StepComponent() {
   const { http } = useKibana<ApmPluginStartDeps>().services;
-  const installApmAgentLink = http?.basePath.prepend('/app/home#/tutorial/apm');
+  const installApmAgentLink = http?.basePath.prepend('/app/apm/tutorial');
 
   return (
     <>
@@ -32,7 +32,11 @@ function StepComponent() {
       </EuiText>
       <EuiSpacer size="m" />
 
-      <EuiButton fill href={installApmAgentLink}>
+      <EuiButton
+        data-test-subj="apmStepComponentInstallApmAgentButton"
+        fill
+        href={installApmAgentLink}
+      >
         {i18n.translate(
           'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText',
           { defaultMessage: 'Install APM Agent' }

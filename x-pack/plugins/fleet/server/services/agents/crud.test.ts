@@ -6,18 +6,33 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { AGENTS_INDEX } from '../../constants';
+import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
+import { appContextService } from '../app_context';
 
-import { getAgentsByKuery, getAgentTags } from './crud';
+import { auditLoggingService } from '../audit_logging';
 
+import {
+  closePointInTime,
+  getAgentsByKuery,
+  getAgentTags,
+  openPointInTime,
+  updateAgent,
+} from './crud';
+
+jest.mock('../audit_logging');
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
 
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+
 describe('Agents CRUD test', () => {
   const soClientMock = savedObjectsClientMock.create();
+  let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
 
@@ -29,6 +44,9 @@ describe('Agents CRUD test', () => {
       openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
       closePointInTime: jest.fn(),
     } as unknown as ElasticsearchClient;
+
+    mockContract = createAppContextStartContractMock();
+    appContextService.start(mockContract);
   });
 
   function getEsResponse(ids: string[], total: number) {
@@ -306,6 +324,46 @@ describe('Agents CRUD test', () => {
         sortField: 'policy_id',
       });
       expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
+    });
+  });
+
+  describe('update', () => {
+    it('should write to audit log', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.update.mockResolvedValueOnce({} as any);
+
+      await updateAgent(esClient, 'test-agent-id', { tags: ['new-tag'] });
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: 'User updated agent [id=test-agent-id]',
+      });
+    });
+  });
+
+  describe('openPointInTime', () => {
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.openPointInTime.mockResolvedValueOnce({ id: 'test-pit' } as any);
+
+      await openPointInTime(esClient, AGENTS_INDEX);
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `User opened point in time query [index=${AGENTS_INDEX}] [pitId=test-pit]`,
+      });
+    });
+  });
+
+  describe('closePointInTime', () => {
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.closePointInTime.mockResolvedValueOnce({} as any);
+
+      await closePointInTime(esClient, 'test-pit');
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `User closing point in time query [pitId=test-pit]`,
+      });
     });
   });
 });

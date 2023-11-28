@@ -23,7 +23,7 @@ import {
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
-import { getSampleDashboardInput } from '../mocks';
+import { buildMockDashboard } from '../mocks';
 import { DashboardPanelState } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
@@ -38,8 +38,7 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
   .mockReturnValue(mockEmbeddableFactory);
 
 beforeEach(async () => {
-  container = new DashboardContainer(getSampleDashboardInput());
-  await container.untilInitialized();
+  container = buildMockDashboard();
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

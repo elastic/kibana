@@ -8,14 +8,13 @@
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { formatLocation } from '../../../../common/utils/location_formatter';
-import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   BrowserFields,
   ConfigKey,
   CommonFields,
-  DataStream,
-  PrivateLocation,
+  MonitorTypeEnum,
   Locations,
   ProjectMonitor,
   ScheduleUnit,
@@ -23,10 +22,11 @@ import {
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {
   locations: Locations;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   monitor: ProjectMonitor;
   projectId: string;
   namespace: string;
@@ -84,21 +84,51 @@ export const getNormalizeCommonFields = ({
       ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
     [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
+    [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(monitor),
+    [ConfigKey.PARAMS]: Object.keys(monitor.params || {}).length
+      ? JSON.stringify(monitor.params)
+      : defaultFields[ConfigKey.PARAMS],
     // picking out keys specifically, so users can't add arbitrary fields
-    [ConfigKey.ALERT_CONFIG]: monitor.alert
-      ? {
-          ...defaultFields[ConfigKey.ALERT_CONFIG],
-          status: {
-            ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
-            enabled:
-              monitor.alert?.status?.enabled ??
-              defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
-              true,
-          },
-        }
-      : defaultFields[ConfigKey.ALERT_CONFIG],
+    [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
   };
   return { normalizedFields, errors };
+};
+
+const getAlertConfig = (monitor: ProjectMonitor) => {
+  const defaultFields = DEFAULT_COMMON_FIELDS;
+
+  return monitor.alert
+    ? {
+        ...defaultFields[ConfigKey.ALERT_CONFIG],
+        status: {
+          ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
+          enabled:
+            monitor.alert?.status?.enabled ??
+            defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
+            true,
+        },
+        tls: {
+          ...defaultFields[ConfigKey.ALERT_CONFIG]?.tls,
+          enabled:
+            monitor.alert?.tls?.enabled ??
+            defaultFields[ConfigKey.ALERT_CONFIG]?.tls?.enabled ??
+            true,
+        },
+      }
+    : defaultFields[ConfigKey.ALERT_CONFIG];
+};
+
+const ONLY_ONE_ATTEMPT = 1;
+
+const getMaxAttempts = (monitor: ProjectMonitor) => {
+  const defaultFields = DEFAULT_COMMON_FIELDS;
+  const retestOnFailure = monitor.retestOnFailure;
+  if (retestOnFailure) {
+    return defaultFields[ConfigKey.MAX_ATTEMPTS];
+  } else if (monitor.retestOnFailure === false) {
+    return ONLY_ONE_ATTEMPT;
+  }
+  return defaultFields[ConfigKey.MAX_ATTEMPTS];
 };
 
 export const getCustomHeartbeatId = (
@@ -115,7 +145,7 @@ export const getMonitorLocations = ({
   monitor,
 }: {
   monitor: ProjectMonitor;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   publicLocations: Locations;
 }) => {
   const publicLocs =
@@ -268,7 +298,7 @@ export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = ''
   }, {});
 
 export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) => {
-  const defaultFields = DEFAULT_FIELDS[monitor.type as DataStream];
+  const defaultFields = DEFAULT_FIELDS[monitor.type as MonitorTypeEnum];
   const supportedKeys = Object.keys(defaultFields);
   const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);
   const {
@@ -276,6 +306,7 @@ export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) 
     privateLocations: _privateLocations,
     content: _content,
     id: _id,
+    retestOnFailure: _retestOnFailure,
     ...yamlConfig
   } = flattenedConfig;
   const unsupportedKeys = Object.keys(yamlConfig).filter((key) => !supportedKeys.includes(key));

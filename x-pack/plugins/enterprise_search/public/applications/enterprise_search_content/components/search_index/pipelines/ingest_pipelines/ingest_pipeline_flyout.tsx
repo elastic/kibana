@@ -10,6 +10,7 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -27,7 +28,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IngestPipelineParams } from '../../../../../../../common/types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { CurlRequest } from '../../components/curl_request/curl_request';
@@ -37,6 +39,7 @@ import { PipelineSettingsForm } from '../pipeline_settings_form';
 interface IngestPipelineFlyoutProps {
   closeFlyout: () => void;
   displayOnly: boolean;
+  extractionDisabled: boolean;
   indexName: string;
   ingestionMethod: string;
   isLoading: boolean;
@@ -48,6 +51,7 @@ interface IngestPipelineFlyoutProps {
 export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
   closeFlyout,
   displayOnly,
+  extractionDisabled,
   indexName,
   ingestionMethod,
   isLoading,
@@ -82,6 +86,44 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            {extractionDisabled ? (
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDisabledWarningTitle',
+                  {
+                    defaultMessage: 'Content extraction cannot be configured',
+                  }
+                )}
+                color="warning"
+                iconType="warning"
+              >
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDisabledWarningContent',
+                    {
+                      defaultMessage:
+                        'Because local content extraction is enabled for this connector, pipeline content extraction settings cannot be used.',
+                    }
+                  )}
+                </p>
+                <EuiLink
+                  href={`${docLinks.connectorsContentExtraction}#connectors-content-extraction-local`}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLocalExtractionLabel',
+                    {
+                      defaultMessage: 'Learn more about local content extraction.',
+                    }
+                  )}
+                </EuiLink>
+              </EuiCallOut>
+            ) : (
+              <></>
+            )}
+          </EuiFlexItem>
+          <EuiSpacer size="xl" />
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
@@ -119,7 +161,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                       'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalBodyConnectorText',
                       {
                         defaultMessage:
-                          'This pipeline runs automatically on all Crawler and Connector indices created through Enterprise Search.',
+                          'This pipeline runs automatically on all Crawler and Connector indices created through Search.',
                       }
                     )
                   )}
@@ -131,7 +173,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLabel',
                     {
-                      defaultMessage: 'Learn more about Enterprise Search ingest pipelines',
+                      defaultMessage: 'Learn more about Search ingest pipelines',
                     }
                   )}
                 </EuiLink>
@@ -155,6 +197,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
               </EuiFormRow>
               <EuiFormRow fullWidth>
                 <PipelineSettingsForm
+                  extractionDisabled={extractionDisabled}
                   ingestionMethod={ingestionMethod}
                   pipeline={pipeline}
                   setPipeline={setPipeline}

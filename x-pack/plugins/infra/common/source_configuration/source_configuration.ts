@@ -17,47 +17,7 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { omit } from 'lodash';
 import * as rt from 'io-ts';
-import moment from 'moment';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { chain } from 'fp-ts/lib/Either';
-
-export const TimestampFromString = new rt.Type<number, string>(
-  'TimestampFromString',
-  (input): input is number => typeof input === 'number',
-  (input, context) =>
-    pipe(
-      rt.string.validate(input, context),
-      chain((stringInput) => {
-        const momentValue = moment(stringInput);
-        return momentValue.isValid()
-          ? rt.success(momentValue.valueOf())
-          : rt.failure(stringInput, context);
-      })
-    ),
-  (output) => new Date(output).toISOString()
-);
-
-/**
- * Source configuration config file properties.
- * These are properties that can appear in the kibana.yml file.
- * This is a legacy method of providing properties, and will be deprecated in the future (v 8.0.0).
- */
-
-export const sourceConfigurationConfigFilePropertiesRT = rt.type({
-  sources: rt.type({
-    default: rt.partial({
-      fields: rt.partial({
-        message: rt.array(rt.string),
-      }),
-    }),
-  }),
-});
-
-export type SourceConfigurationConfigFileProperties = rt.TypeOf<
-  typeof sourceConfigurationConfigFilePropertiesRT
->;
 
 /**
  * Log columns
@@ -123,18 +83,6 @@ export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
 export const logIndexReferenceRT = rt.union([logIndexPatternReferenceRT, logIndexNameReferenceRT]);
 export type LogIndexReference = rt.TypeOf<typeof logIndexReferenceRT>;
 
-/**
- * Fields
- */
-
-const SourceConfigurationFieldsRT = rt.type({
-  message: rt.array(rt.string),
-});
-
-/**
- * Properties that represent a full source configuration, which is the result of merging static values with
- * saved values.
- */
 export const SourceConfigurationRT = rt.type({
   name: rt.string,
   description: rt.string,
@@ -142,7 +90,6 @@ export const SourceConfigurationRT = rt.type({
   logIndices: logIndexReferenceRT,
   inventoryDefaultView: rt.string,
   metricsExplorerDefaultView: rt.string,
-  fields: SourceConfigurationFieldsRT,
   logColumns: rt.array(SourceConfigurationColumnRuntimeType),
   anomalyThreshold: rt.number,
 });
@@ -150,20 +97,8 @@ export const SourceConfigurationRT = rt.type({
 /**
  * Stored source configuration as read from and written to saved objects
  */
-const SavedSourceConfigurationFieldsRuntimeType = rt.partial(
-  omit(SourceConfigurationFieldsRT.props, ['message'])
-);
 
-export type InfraSavedSourceConfigurationFields = rt.TypeOf<
-  typeof SavedSourceConfigurationFieldsRuntimeType
->;
-
-export const SavedSourceConfigurationRuntimeType = rt.intersection([
-  rt.partial(omit(SourceConfigurationRT.props, ['fields'])),
-  rt.partial({
-    fields: SavedSourceConfigurationFieldsRuntimeType,
-  }),
-]);
+export const SavedSourceConfigurationRuntimeType = rt.partial(SourceConfigurationRT.props);
 
 export interface InfraSavedSourceConfiguration
   extends rt.TypeOf<typeof SavedSourceConfigurationRuntimeType> {}
@@ -173,10 +108,8 @@ export interface InfraSavedSourceConfiguration
  * hardcoded defaults.
  */
 
-const StaticSourceConfigurationFieldsRuntimeType = rt.partial(SourceConfigurationFieldsRT.props);
 export const StaticSourceConfigurationRuntimeType = rt.partial({
   ...SourceConfigurationRT.props,
-  fields: StaticSourceConfigurationFieldsRuntimeType,
 });
 
 export interface InfraStaticSourceConfiguration
@@ -186,11 +119,8 @@ export interface InfraStaticSourceConfiguration
  * Full source configuration type after all cleanup has been done at the edges
  */
 
-export type InfraSourceConfigurationFields = rt.TypeOf<typeof SourceConfigurationFieldsRT>;
-
 export const SourceConfigurationRuntimeType = rt.type({
   ...SourceConfigurationRT.props,
-  fields: SourceConfigurationFieldsRT,
   logColumns: rt.array(SourceConfigurationColumnRuntimeType),
 });
 
@@ -213,6 +143,7 @@ export type InfraSourceIndexField = rt.TypeOf<typeof SourceStatusFieldRuntimeTyp
 export const SourceStatusRuntimeType = rt.type({
   logIndicesExist: rt.boolean,
   metricIndicesExist: rt.boolean,
+  remoteClustersExist: rt.boolean,
   indexFields: rt.array(SourceStatusFieldRuntimeType),
 });
 
@@ -245,21 +176,3 @@ export const SourceResponseRuntimeType = rt.type({
 });
 
 export type SourceResponse = rt.TypeOf<typeof SourceResponseRuntimeType>;
-
-/**
- * Saved object type with metadata
- */
-
-export const SourceConfigurationSavedObjectRuntimeType = rt.intersection([
-  rt.type({
-    id: rt.string,
-    attributes: SavedSourceConfigurationRuntimeType,
-  }),
-  rt.partial({
-    version: rt.string,
-    updated_at: TimestampFromString,
-  }),
-]);
-
-export interface SourceConfigurationSavedObject
-  extends rt.TypeOf<typeof SourceConfigurationSavedObjectRuntimeType> {}

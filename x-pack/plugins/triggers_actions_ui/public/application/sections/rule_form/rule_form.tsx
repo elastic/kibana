@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
+import React, {
+  Fragment,
+  useState,
+  useEffect,
+  useCallback,
+  Suspense,
+  useMemo,
+  useRef,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -48,8 +56,10 @@ import {
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
+  RuleActionAlertsFilterProperty,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -60,6 +70,7 @@ import {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
+  RuleCreationValidConsumer,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -70,9 +81,15 @@ import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
-import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
+import {
+  ruleTypeCompare,
+  ruleTypeGroupCompare,
+  ruleTypeUngroupedCompare,
+} from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { SectionLoading } from '../../components/section_loading';
+import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
 
@@ -80,9 +97,43 @@ const ENTER_KEY = 13;
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 
+const NOOP = () => {};
+
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
+
+const authorizedToDisplayRuleType = ({
+  rule,
+  ruleType,
+  validConsumers,
+}: {
+  rule: InitialRule;
+  ruleType: RuleType;
+  validConsumers?: RuleCreationValidConsumer[];
+}) => {
+  if (!ruleType) {
+    return false;
+  }
+  // If we have a generic threshold/ES query rule...
+  if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
+    // And an array of valid consumers are passed in, we will show it
+    // if the rule type has at least one of the consumers as authorized
+    if (Array.isArray(validConsumers)) {
+      return validConsumers.some((consumer) => hasAllPrivilege(consumer, ruleType));
+    }
+    // If no array was passed in, then we will show it if at least one of its
+    // authorized consumers allows it to be shown.
+    return Object.entries(ruleType.authorizedConsumers).some(([_, privilege]) => {
+      return privilege.all;
+    });
+  }
+  // For non-generic threshold/ES query rules, we will still do the check
+  // against `alerts` since we are still setting rule consumers to `alerts`
+  return hasAllPrivilege(rule.consumer, ruleType);
+};
+
+export type RuleTypeItems = Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>;
 
 interface RuleFormProps<MetaData = Record<string, any>> {
   rule: InitialRule;
@@ -93,29 +144,43 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   actionTypeRegistry: ActionTypeRegistryContract;
   operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button
+  canShowConsumerSelection?: boolean;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
+  setConsumer?: (consumer: RuleCreationValidConsumer | null) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
+  hideGrouping?: boolean;
+  hideInterval?: boolean;
   connectorFeatureId?: string;
+  selectedConsumer?: RuleCreationValidConsumer | null;
+  validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
+  useRuleProducer?: boolean;
 }
 
 export const RuleForm = ({
   rule,
   config,
   canChangeTrigger = true,
+  canShowConsumerSelection = false,
   dispatch,
   errors,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
+  setConsumer = NOOP,
   operation,
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
+  hideGrouping = false,
+  hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
+  selectedConsumer,
+  validConsumers,
   onChangeMetaData,
+  useRuleProducer,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -130,6 +195,7 @@ export const RuleForm = ({
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
+  const flyoutBodyOverflowRef = useRef<HTMLDivElement | HTMLSpanElement | null>(null);
 
   const defaultRuleInterval = getInitialInterval(config.minimumScheduleInterval?.value);
   const defaultScheduleInterval = getDurationNumberInItsUnit(defaultRuleInterval);
@@ -147,12 +213,8 @@ export const RuleForm = ({
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
-  const [availableRuleTypes, setAvailableRuleTypes] = useState<
-    Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>
-  >([]);
-  const [filteredRuleTypes, setFilteredRuleTypes] = useState<
-    Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>
-  >([]);
+  const [availableRuleTypes, setAvailableRuleTypes] = useState<RuleTypeItems>([]);
+  const [filteredRuleTypes, setFilteredRuleTypes] = useState<RuleTypeItems>([]);
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
@@ -174,28 +236,28 @@ export const RuleForm = ({
     const getAvailableRuleTypes = (ruleTypesResult: RuleType[]) =>
       ruleTypeRegistry
         .list()
-        .reduce(
-          (
-            arr: Array<{ ruleType: RuleType; ruleTypeModel: RuleTypeModel }>,
-            ruleTypeRegistryItem: RuleTypeModel
-          ) => {
-            const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
-            if (ruleType) {
-              arr.push({
-                ruleType,
-                ruleTypeModel: ruleTypeRegistryItem,
-              });
-            }
-            return arr;
-          },
-          []
+        .reduce((arr: RuleTypeItems, ruleTypeRegistryItem: RuleTypeModel) => {
+          const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
+          if (ruleType) {
+            arr.push({
+              ruleType,
+              ruleTypeModel: ruleTypeRegistryItem,
+            });
+          }
+          return arr;
+        }, [])
+        .filter(({ ruleType }) =>
+          authorizedToDisplayRuleType({
+            rule,
+            ruleType,
+            validConsumers,
+          })
         )
-        .filter((item) => item.ruleType && hasAllPrivilege(rule.consumer, item.ruleType))
-        .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+        .filter((item) => {
+          return rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer
-        );
+            : item.ruleType!.producer === rule.consumer;
+        });
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
@@ -215,10 +277,23 @@ export const RuleForm = ({
       },
       new Map()
     );
-    setSolutions(
-      new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
-    );
-  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry]);
+    const solutionsEntries = [...solutionsResult.entries()];
+    const isOnlyO11y =
+      availableRuleTypesResult.length === 1 &&
+      availableRuleTypesResult.every((rt) => rt.ruleType.producer === AlertConsumers.OBSERVABILITY);
+    if (!isOnlyO11y) {
+      setSolutions(new Map(solutionsEntries.sort(([, a], [, b]) => a.localeCompare(b))));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    ruleTypes,
+    ruleTypeIndex,
+    rule.ruleTypeId,
+    kibanaFeatures,
+    rule.consumer,
+    ruleTypeRegistry,
+    validConsumers,
+  ]);
 
   useEffect(() => {
     if (loadRuleTypesError) {
@@ -246,6 +321,22 @@ export const RuleForm = ({
       setRuleIntervalUnit(intervalUnit);
     }
   }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
+
+  useEffect(() => {
+    if (!flyoutBodyOverflowRef.current) {
+      // We're using this as a reliable way to reset the scroll position
+      // of the flyout independently of the selected rule type
+      flyoutBodyOverflowRef.current = document.querySelector('.euiFlyoutBody__overflow');
+    }
+  }, []);
+
+  const resetContentScroll = useCallback(() => flyoutBodyOverflowRef?.current?.scroll?.(0, 0), []);
+
+  useEffect(() => {
+    if (rule.ruleTypeId) {
+      resetContentScroll();
+    }
+  }, [rule.ruleTypeId, resetContentScroll]);
 
   const setRuleProperty = useCallback(
     <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
@@ -289,6 +380,13 @@ export const RuleForm = ({
     [dispatch]
   );
 
+  const setActionAlertsFilterProperty = useCallback(
+    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
+      dispatch({ command: { type: 'setRuleActionAlertsFilter' }, payload: { key, value, index } });
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     const searchValue = searchText ? searchText.trim().toLocaleLowerCase() : null;
     setFilteredRuleTypes(
@@ -308,6 +406,54 @@ export const RuleForm = ({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableRuleTypes, searchText, JSON.stringify(solutionsFilter)]);
+
+  useEffect(() => {
+    if (ruleTypeModel) {
+      const ruleType = ruleTypes.find((rt) => rt.id === ruleTypeModel.id);
+      if (ruleType && useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
+        setConsumer(ruleType.producer as RuleCreationValidConsumer);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ruleTypeModel, ruleTypes]);
+
+  const authorizedConsumers = useMemo(() => {
+    // If the app context provides a consumer, we assume that consumer is
+    // is what we set for all rules that is created in that context
+    if (rule.consumer !== ALERTS_FEATURE_ID) {
+      return [];
+    }
+
+    const selectedRuleType = availableRuleTypes.find(
+      ({ ruleType: availableRuleType }) => availableRuleType.id === rule.ruleTypeId
+    );
+    if (!selectedRuleType?.ruleType?.authorizedConsumers) {
+      return [];
+    }
+    return Object.entries(selectedRuleType.ruleType.authorizedConsumers).reduce<
+      RuleCreationValidConsumer[]
+    >((result, [authorizedConsumer, privilege]) => {
+      if (
+        privilege.all &&
+        (validConsumers || VALID_CONSUMERS).includes(
+          authorizedConsumer as RuleCreationValidConsumer
+        )
+      ) {
+        result.push(authorizedConsumer as RuleCreationValidConsumer);
+      }
+      return result;
+    }, []);
+  }, [availableRuleTypes, rule, validConsumers]);
+
+  const shouldShowConsumerSelect = useMemo(() => {
+    if (!canShowConsumerSelection) {
+      return false;
+    }
+    if (!authorizedConsumers.length) {
+      return false;
+    }
+    return !!rule.ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId);
+  }, [authorizedConsumers, rule, canShowConsumerSelection]);
 
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
@@ -359,81 +505,93 @@ export const RuleForm = ({
     {}
   );
 
-  const ruleTypeNodes = Object.entries(ruleTypesByProducer)
-    .sort((a, b) => ruleTypeGroupCompare(a, b, solutions))
-    .map(([solution, items], groupIndex) => (
-      <Fragment key={`group${groupIndex}`}>
-        <EuiFlexGroup
-          gutterSize="none"
-          alignItems="center"
-          className="triggersActionsUI__ruleTypeNodeHeading"
-        >
-          <EuiFlexItem>
-            <EuiTitle
-              data-test-subj={`ruleType${groupIndex}Group`}
-              size="xxxs"
-              textTransform="uppercase"
-            >
-              <EuiTextColor color="subdued">
-                {(kibanaFeatures
-                  ? getProducerFeatureName(solution, kibanaFeatures)
-                  : capitalize(solution)) ?? capitalize(solution)}
-              </EuiTextColor>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
-          {items
-            .sort((a, b) => ruleTypeCompare(a, b))
-            .map((item, index) => {
-              const ruleTypeListItemHtml = (
-                <span>
-                  <strong>{item.name}</strong>
-                  <EuiText color="subdued" size="s">
-                    <p>{item.ruleTypeItem.description}</p>
-                  </EuiText>
-                </span>
-              );
-              return (
-                <EuiListGroupItem
-                  wrapText
-                  key={index}
-                  data-test-subj={`${item.id}-SelectOption`}
-                  color="primary"
-                  label={
-                    item.checkEnabledResult.isEnabled ? (
-                      ruleTypeListItemHtml
-                    ) : (
-                      <EuiToolTip
-                        position="top"
-                        data-test-subj={`${item.id}-disabledTooltip`}
-                        content={item.checkEnabledResult.message}
-                      >
-                        {ruleTypeListItemHtml}
-                      </EuiToolTip>
-                    )
+  const sortedRuleTypeNodes = hideGrouping
+    ? Object.entries(ruleTypesByProducer).sort((a, b) =>
+        ruleTypeUngroupedCompare(a, b, ruleTypeToFilter)
+      )
+    : Object.entries(ruleTypesByProducer).sort((a, b) => ruleTypeGroupCompare(a, b, solutions));
+
+  const ruleTypeNodes = sortedRuleTypeNodes.map(([solution, items], groupIndex) => (
+    <Fragment key={`group${groupIndex}`}>
+      {!hideGrouping && (
+        <>
+          <EuiFlexGroup
+            gutterSize="none"
+            alignItems="center"
+            className="triggersActionsUI__ruleTypeNodeHeading"
+          >
+            <EuiFlexItem>
+              <EuiTitle
+                data-test-subj={`ruleType${groupIndex}Group`}
+                size="xxxs"
+                textTransform="uppercase"
+              >
+                <EuiTextColor color="subdued">
+                  {(kibanaFeatures
+                    ? getProducerFeatureName(solution, kibanaFeatures)
+                    : capitalize(solution)) ?? capitalize(solution)}
+                </EuiTextColor>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule size="full" margin="xs" />
+        </>
+      )}
+      <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
+        {items
+          .sort((a, b) => ruleTypeCompare(a, b))
+          .map((item, index) => {
+            const ruleTypeListItemHtml = (
+              <span>
+                <strong>{item.name}</strong>
+                <EuiText color="subdued" size="s">
+                  <p>{item.ruleTypeItem.description}</p>
+                </EuiText>
+              </span>
+            );
+            return (
+              <EuiListGroupItem
+                wrapText
+                key={index}
+                data-test-subj={`${item.id}-SelectOption`}
+                color="primary"
+                label={
+                  item.checkEnabledResult.isEnabled ? (
+                    ruleTypeListItemHtml
+                  ) : (
+                    <EuiToolTip
+                      position="top"
+                      data-test-subj={`${item.id}-disabledTooltip`}
+                      content={item.checkEnabledResult.message}
+                    >
+                      {ruleTypeListItemHtml}
+                    </EuiToolTip>
+                  )
+                }
+                isDisabled={!item.checkEnabledResult.isEnabled}
+                onClick={() => {
+                  setRuleProperty('ruleTypeId', item.id);
+                  setRuleTypeModel(item.ruleTypeItem);
+                  setActions([]);
+                  setRuleProperty('params', {});
+                  if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
+                    setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
                   }
-                  isDisabled={!item.checkEnabledResult.isEnabled}
-                  onClick={() => {
-                    setRuleProperty('ruleTypeId', item.id);
-                    setRuleTypeModel(item.ruleTypeItem);
-                    setActions([]);
-                    setRuleProperty('params', {});
-                    if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
-                      setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
-                    }
-                  }}
-                />
-              );
-            })}
-        </EuiListGroup>
-        <EuiSpacer />
-      </Fragment>
-    ));
+
+                  if (useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(item.id)) {
+                    setConsumer(solution as RuleCreationValidConsumer);
+                  }
+                }}
+              />
+            );
+          })}
+      </EuiListGroup>
+      <EuiSpacer size="m" />
+    </Fragment>
+  ));
 
   const labelForRuleChecked = [
     i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel', {
@@ -486,6 +644,23 @@ export const RuleForm = ({
       return '';
     }
   };
+
+  const hasFieldsForAAD = useMemo(() => {
+    const hasAlertHasData = selectedRuleType
+      ? selectedRuleType.hasFieldsForAAD ||
+        selectedRuleType.producer === AlertConsumers.SIEM ||
+        selectedRuleType.hasAlertsMappings
+      : false;
+
+    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
+      return (
+        (validConsumers || VALID_CONSUMERS).includes(
+          selectedConsumer as RuleCreationValidConsumer
+        ) && hasAlertHasData
+      );
+    }
+    return hasAlertHasData;
+  }, [rule?.ruleTypeId, selectedConsumer, selectedRuleType, validConsumers]);
 
   const ruleTypeDetails = (
     <>
@@ -563,6 +738,7 @@ export const RuleForm = ({
             }
           >
             <RuleParamsExpressionComponent
+              id={rule.id}
               ruleParams={rule.params}
               ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
               ruleThrottle={''}
@@ -582,50 +758,64 @@ export const RuleForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-      <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          data-test-subj="intervalFormRow"
-          display="rowCompressed"
-          helpText={getHelpTextForInterval()}
-          isInvalid={errors['schedule.interval'].length > 0}
-          error={errors['schedule.interval']}
-        >
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={2}>
-              <EuiFieldNumber
-                prepend={labelForRuleChecked}
-                fullWidth
-                min={1}
-                isInvalid={errors['schedule.interval'].length > 0}
-                value={ruleInterval || ''}
-                name="interval"
-                data-test-subj="intervalInput"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '' || INTEGER_REGEX.test(value)) {
-                    const parsedValue = value === '' ? '' : parseInt(value, 10);
-                    setRuleInterval(parsedValue || undefined);
-                    setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3}>
-              <EuiSelect
-                fullWidth
-                value={ruleIntervalUnit}
-                options={getTimeOptions(ruleInterval ?? 1)}
-                onChange={(e) => {
-                  setRuleIntervalUnit(e.target.value);
-                  setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
-                }}
-                data-test-subj="intervalInputUnit"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </EuiFlexItem>
+      {hideInterval !== true && (
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            data-test-subj="intervalFormRow"
+            display="rowCompressed"
+            helpText={getHelpTextForInterval()}
+            isInvalid={errors['schedule.interval'].length > 0}
+            error={errors['schedule.interval']}
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={2}>
+                <EuiFieldNumber
+                  prepend={labelForRuleChecked}
+                  fullWidth
+                  min={1}
+                  isInvalid={errors['schedule.interval'].length > 0}
+                  value={ruleInterval || ''}
+                  name="interval"
+                  data-test-subj="intervalInput"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || INTEGER_REGEX.test(value)) {
+                      const parsedValue = value === '' ? '' : parseInt(value, 10);
+                      setRuleInterval(parsedValue || undefined);
+                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                    }
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={3}>
+                <EuiSelect
+                  fullWidth
+                  value={ruleIntervalUnit}
+                  options={getTimeOptions(ruleInterval ?? 1)}
+                  onChange={(e) => {
+                    setRuleIntervalUnit(e.target.value);
+                    setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
+                  }}
+                  data-test-subj="intervalInputUnit"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexItem>
+      )}
+      {shouldShowConsumerSelect && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexItem>
+            <RuleFormConsumerSelection
+              consumers={authorizedConsumers}
+              onChange={setConsumer}
+              errors={errors}
+            />
+          </EuiFlexItem>
+        </>
+      )}
       <EuiSpacer size="l" />
       {canShowActions &&
       defaultActionGroupId &&
@@ -647,8 +837,15 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
-            hasSummary={selectedRuleType.hasGetSummarizedAlerts}
+            hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}
+            producerId={
+              MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId)
+                ? selectedConsumer ?? rule.consumer
+                : selectedRuleType.producer
+            }
+            hasFieldsForAAD={hasFieldsForAAD}
+            ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }
@@ -665,6 +862,9 @@ export const RuleForm = ({
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
             recoveryActionGroup={recoveryActionGroup}
+            setActionUseAlertDataForTemplate={(enabled: boolean, index: number) => {
+              setActionProperty('useAlertDataForTemplate', enabled, index);
+            }}
             setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
             setActionGroupIdByIndex={(group: string, index: number) =>
               setActionProperty('group', group, index)
@@ -673,6 +873,7 @@ export const RuleForm = ({
             setActionParamsProperty={setActionParamsProperty}
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
+            setActionAlertsFilterProperty={setActionAlertsFilterProperty}
             defaultSummaryMessage={ruleTypeModel?.defaultSummaryMessage || summaryMessage}
             minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />

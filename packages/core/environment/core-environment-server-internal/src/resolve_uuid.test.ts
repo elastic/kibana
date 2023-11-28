@@ -158,6 +158,15 @@ describe('resolveInstanceUuid', () => {
       });
     });
 
+    describe('when file exists but is empty', () => {
+      it('throws an explicit error for uuid formatting', async () => {
+        mockReadFile({ uuid: '' });
+        await expect(
+          resolveInstanceUuid({ pathConfig, serverConfig, logger })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"data-folder/uuid contains an invalid UUID"`);
+      });
+    });
+
     describe('when file contains a trailing new line', () => {
       it('returns the trimmed file uuid', async () => {
         mockReadFile({ uuid: DEFAULT_FILE_UUID + '\n' });

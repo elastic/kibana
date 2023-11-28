@@ -10,11 +10,12 @@ import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
+import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
-import { GroupTableItem } from './components/spike_analysis_table/types';
+import { GroupTableItem } from './components/log_rate_analysis_results_table/types';
 
 export interface DocumentCountStats {
   interval?: number;
@@ -33,12 +34,17 @@ export interface DocumentStatsSearchStrategyParams {
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
-  selectedChangePoint?: ChangePoint;
-  includeSelectedChangePoint?: boolean;
+  selectedSignificantItem?: SignificantItem;
+  includeSelectedSignificantItem?: boolean;
   selectedGroup?: GroupTableItem | null;
+  trackTotalHits?: boolean;
 }
 
-export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategyParams) => {
+export const getDocumentCountStatsRequest = (
+  params: DocumentStatsSearchStrategyParams,
+  randomSamplerWrapper?: RandomSamplerWrapper,
+  skipAggs = false
+) => {
   const {
     index,
     timeFieldName,
@@ -48,9 +54,10 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     searchQuery,
     intervalMs,
     fieldsToFetch,
-    selectedChangePoint,
-    includeSelectedChangePoint,
+    selectedSignificantItem,
+    includeSelectedSignificantItem,
     selectedGroup,
+    trackTotalHits,
   } = params;
 
   const size = 0;
@@ -59,26 +66,30 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     earliestMs,
     latestMs,
     searchQuery,
-    selectedChangePoint,
-    includeSelectedChangePoint,
+    selectedSignificantItem,
+    includeSelectedSignificantItem,
     selectedGroup
   );
 
-  // Don't use the sampler aggregation as this can lead to some potentially
-  // confusing date histogram results depending on the date range of data amongst shards.
-  const aggs = {
+  const rawAggs: Record<string, estypes.AggregationsAggregationContainer> = {
     eventRate: {
       date_histogram: {
         field: timeFieldName,
         fixed_interval: `${intervalMs}ms`,
         min_doc_count: 0,
-        extended_bounds: {
-          min: earliestMs,
-          max: latestMs,
-        },
+        ...(earliestMs !== undefined && latestMs !== undefined
+          ? {
+              extended_bounds: {
+                min: earliestMs,
+                max: latestMs,
+              },
+            }
+          : {}),
       },
     },
   };
+
+  const aggs = randomSamplerWrapper ? randomSamplerWrapper.wrap(rawAggs) : rawAggs;
 
   const searchBody = {
     query: {
@@ -86,11 +97,15 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
         filter: filterCriteria,
       },
     },
-    ...(!fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
+    ...(!fieldsToFetch &&
+    !skipAggs &&
+    timeFieldName !== undefined &&
+    intervalMs !== undefined &&
+    intervalMs > 0
       ? { aggs }
       : {}),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
-    track_total_hits: true,
+    track_total_hits: trackTotalHits === true,
     size,
   };
   return {
@@ -101,7 +116,8 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
 
 export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
-  params: DocumentStatsSearchStrategyParams
+  params: DocumentStatsSearchStrategyParams,
+  randomSamplerWrapper?: RandomSamplerWrapper
 ): DocumentCountStats | undefined => {
   if (!body) return undefined;
 
@@ -118,8 +134,10 @@ export const processDocumentCountStats = (
   }
   const buckets: { [key: string]: number } = {};
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
-    body,
-    ['aggregations', 'eventRate', 'buckets'],
+    randomSamplerWrapper && body.aggregations !== undefined
+      ? randomSamplerWrapper.unwrap(body.aggregations)
+      : body.aggregations,
+    ['eventRate', 'buckets'],
     []
   );
   each(dataByTimeBucket, (dataForTime) => {

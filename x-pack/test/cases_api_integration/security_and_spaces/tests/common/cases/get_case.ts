@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { AttributesTypeUser, getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
+import { getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -16,6 +17,7 @@ import {
   postCaseResp,
   postCommentUserReq,
   getPostCaseRequest,
+  postCommentAlertReq,
 } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
@@ -25,6 +27,7 @@ import {
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromSavedObject,
   extractWarningValueFromWarningHeader,
+  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -66,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(
-        theCase.comments![0] as AttributesTypeUser
+        theCase.comments![0] as UserCommentAttachmentAttributes
       );
 
       expect(theCase.comments?.length).to.eql(1);
@@ -79,6 +82,34 @@ export default ({ getService }: FtrProviderContext): void => {
         updated_by: null,
         owner: 'securitySolutionFixture',
       });
+    });
+
+    it('should set totalComment to 0 when all attachments are alerts', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+
+      await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [postCommentAlertReq, postCommentAlertReq],
+      });
+
+      const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
+
+      expect(theCase.totalComment).to.be(0);
+    });
+
+    it('should set totalComment to 1 when there is one user attachment and one alert', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+
+      await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [postCommentAlertReq, postCommentUserReq],
+      });
+
+      const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
+
+      expect(theCase.totalComment).to.be(1);
     });
 
     it('unhappy path - 404s when case is not there', async () => {
@@ -138,7 +169,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const comment = removeServerGeneratedPropertiesFromSavedObject(
-          theCase.comments![0] as AttributesTypeUser
+          theCase.comments![0] as UserCommentAttachmentAttributes
         );
 
         expect(theCase.comments?.length).to.eql(1);

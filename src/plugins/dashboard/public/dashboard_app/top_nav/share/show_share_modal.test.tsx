@@ -7,9 +7,9 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { convertPanelMapToSavedPanels, DashboardContainerByValueInput } from '../../../../common';
+import { DashboardLocatorParams } from '../../../dashboard_container';
+import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../../common';
 
-import { DashboardAppLocatorParams } from '../../..';
 import { pluginServices } from '../../../services/plugin_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 
@@ -56,7 +56,7 @@ describe('showPublicUrlSwitch', () => {
 
 describe('ShowShareModal', () => {
   const unsavedStateKeys = ['query', 'filters', 'options', 'savedQuery', 'panels'] as Array<
-    keyof DashboardAppLocatorParams
+    keyof DashboardLocatorParams
   >;
   const toggleShareMenuSpy = jest.spyOn(
     pluginServices.getServices().share,
@@ -68,11 +68,9 @@ describe('ShowShareModal', () => {
   });
 
   const getPropsAndShare = (
-    unsavedState?: Partial<DashboardContainerByValueInput>
+    unsavedState?: Partial<DashboardContainerInput>
   ): ShowShareModalProps => {
-    pluginServices.getServices().dashboardSessionStorage.getState = jest
-      .fn()
-      .mockReturnValue(unsavedState);
+    pluginServices.getServices().dashboardBackup.getState = jest.fn().mockReturnValue(unsavedState);
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
@@ -85,7 +83,7 @@ describe('ShowShareModal', () => {
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
       toggleShareMenuSpy.mock.calls[0][0].sharingData as {
-        locatorParams: { params: DashboardAppLocatorParams };
+        locatorParams: { params: DashboardLocatorParams };
       }
     ).locatorParams.params;
     unsavedStateKeys.forEach((key) => {
@@ -94,7 +92,7 @@ describe('ShowShareModal', () => {
   });
 
   it('locatorParams unsaved state is properly propagated to locator', () => {
-    const unsavedDashboardState: DashboardContainerByValueInput = {
+    const unsavedDashboardState: DashboardContainerInput = {
       panels: {
         panel_1: {
           type: 'panel_type',
@@ -121,25 +119,22 @@ describe('ShowShareModal', () => {
         },
       ],
       query: { query: 'bye', language: 'kuery' },
-    } as unknown as DashboardContainerByValueInput;
+    } as unknown as DashboardContainerInput;
     const showModalProps = getPropsAndShare(unsavedDashboardState);
     ShowShareModal(showModalProps);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
       toggleShareMenuSpy.mock.calls[0][0].sharingData as {
-        locatorParams: { params: DashboardAppLocatorParams };
+        locatorParams: { params: DashboardLocatorParams };
       }
     ).locatorParams.params;
-    const {
-      initializerContext: { kibanaVersion },
-    } = pluginServices.getServices();
     const rawDashboardState = {
       ...unsavedDashboardState,
-      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels, kibanaVersion),
+      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels),
     };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
-        (rawDashboardState as unknown as Partial<DashboardAppLocatorParams>)[key]
+        (rawDashboardState as unknown as Partial<DashboardLocatorParams>)[key]
       );
     });
   });

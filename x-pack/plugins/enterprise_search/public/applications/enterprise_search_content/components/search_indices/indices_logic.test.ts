@@ -7,24 +7,36 @@
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
-import { indices } from '../../__mocks__/search_indices.mock';
-
 import { connectorIndex, elasticsearchViewIndices } from '../../__mocks__/view_index.mock';
 
 import moment from 'moment';
 
+import { ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
-
-import { ConnectorStatus, SyncStatus } from '../../../../../common/types/connectors';
-import { DEFAULT_META } from '../../../shared/constants';
 
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 
 import { IngestionMethod, IngestionStatus } from '../../types';
 
 import { IndicesLogic } from './indices_logic';
+
+const DEFAULT_META = {
+  page: {
+    from: 0,
+    size: 20,
+    total: 20,
+  },
+};
+
+const EMPTY_META = {
+  page: {
+    from: 0,
+    size: 20,
+    total: 0,
+  },
+};
 
 const DEFAULT_VALUES = {
   data: undefined,
@@ -42,8 +54,13 @@ const DEFAULT_VALUES = {
   isFetchIndexDetailsLoading: true,
   isFirstRequest: true,
   isLoading: true,
-  meta: DEFAULT_META,
-  searchParams: { meta: DEFAULT_META, returnHiddenIndices: false },
+  meta: EMPTY_META,
+  searchParams: {
+    from: 0,
+    onlyShowSearchOptimizedIndices: false,
+    returnHiddenIndices: false,
+    size: 20,
+  },
   status: Status.IDLE,
 };
 
@@ -69,15 +86,9 @@ describe('IndicesLogic', () => {
         IndicesLogic.actions.onPaginate(3);
         expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          meta: {
-            page: {
-              ...DEFAULT_META.page,
-              current: 3,
-            },
-          },
           searchParams: {
             ...DEFAULT_VALUES.searchParams,
-            meta: { page: { ...DEFAULT_META.page, current: 3 } },
+            from: 40,
           },
         });
       });
@@ -132,7 +143,8 @@ describe('IndicesLogic', () => {
         IndicesLogic.actions.apiSuccess({
           indices: [],
           isInitialRequest: false,
-          meta: DEFAULT_VALUES.meta,
+          meta: DEFAULT_META,
+          onlyShowSearchOptimizedIndices: false,
           returnHiddenIndices: false,
         });
 
@@ -141,54 +153,15 @@ describe('IndicesLogic', () => {
           data: {
             indices: [],
             isInitialRequest: false,
-            meta: DEFAULT_VALUES.meta,
+            meta: DEFAULT_META,
+            onlyShowSearchOptimizedIndices: false,
             returnHiddenIndices: false,
           },
           hasNoIndices: false,
           indices: [],
           isFirstRequest: false,
           isLoading: false,
-          status: Status.SUCCESS,
-        });
-      });
-    });
-    describe('meta', () => {
-      it('updates when apiSuccess listener triggered', () => {
-        const newMeta = {
-          page: {
-            current: 2,
-            size: 5,
-            total_pages: 10,
-            total_results: 52,
-          },
-        };
-        expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
-        IndicesLogic.actions.apiSuccess({
-          indices,
-          isInitialRequest: true,
-          meta: newMeta,
-          returnHiddenIndices: true,
-          searchQuery: 'a',
-        });
-        expect(IndicesLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          data: {
-            indices,
-            isInitialRequest: true,
-            meta: newMeta,
-            returnHiddenIndices: true,
-            searchQuery: 'a',
-          },
-          hasNoIndices: false,
-          indices: elasticsearchViewIndices,
-          isFirstRequest: false,
-          isLoading: false,
-          meta: newMeta,
-          searchParams: {
-            meta: newMeta,
-            returnHiddenIndices: true,
-            searchQuery: 'a',
-          },
+          meta: DEFAULT_META,
           status: Status.SUCCESS,
         });
       });
@@ -197,10 +170,9 @@ describe('IndicesLogic', () => {
       it('updates to true when apiSuccess returns initialRequest: true with no indices', () => {
         const meta = {
           page: {
-            current: 1,
+            from: 0,
             size: 0,
-            total_pages: 1,
-            total_results: 0,
+            total: 0,
           },
         };
         expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
@@ -208,6 +180,7 @@ describe('IndicesLogic', () => {
           indices: [],
           isInitialRequest: true,
           meta,
+          onlyShowSearchOptimizedIndices: false,
           returnHiddenIndices: false,
         });
         expect(IndicesLogic.values).toEqual({
@@ -216,6 +189,7 @@ describe('IndicesLogic', () => {
             indices: [],
             isInitialRequest: true,
             meta,
+            onlyShowSearchOptimizedIndices: false,
             returnHiddenIndices: false,
           },
           hasNoIndices: true,
@@ -225,7 +199,8 @@ describe('IndicesLogic', () => {
           meta,
           searchParams: {
             ...DEFAULT_VALUES.searchParams,
-            meta,
+            from: 0,
+            size: 0,
           },
           status: Status.SUCCESS,
         });
@@ -233,10 +208,9 @@ describe('IndicesLogic', () => {
       it('updates to false when apiSuccess returns initialRequest: false with no indices', () => {
         const meta = {
           page: {
-            current: 1,
+            from: 0,
             size: 0,
-            total_pages: 1,
-            total_results: 0,
+            total: 0,
           },
         };
         expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
@@ -244,6 +218,7 @@ describe('IndicesLogic', () => {
           indices: [],
           isInitialRequest: false,
           meta,
+          onlyShowSearchOptimizedIndices: false,
           returnHiddenIndices: false,
         });
         expect(IndicesLogic.values).toEqual({
@@ -252,6 +227,7 @@ describe('IndicesLogic', () => {
             indices: [],
             isInitialRequest: false,
             meta,
+            onlyShowSearchOptimizedIndices: false,
             returnHiddenIndices: false,
           },
           hasNoIndices: false,
@@ -261,7 +237,8 @@ describe('IndicesLogic', () => {
           meta,
           searchParams: {
             ...DEFAULT_VALUES.searchParams,
-            meta,
+            from: 0,
+            size: 0,
           },
           status: Status.SUCCESS,
         });
@@ -301,7 +278,12 @@ describe('IndicesLogic', () => {
 
   describe('listeners', () => {
     it('calls clearFlashMessages on new makeRequest', () => {
-      IndicesLogic.actions.makeRequest({ meta: DEFAULT_META, returnHiddenIndices: false });
+      IndicesLogic.actions.makeRequest({
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
+        returnHiddenIndices: false,
+        size: 20,
+      });
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
     it('calls flashSuccessToast, closeDeleteModal and fetchIndices on deleteSuccess', () => {
@@ -317,41 +299,72 @@ describe('IndicesLogic', () => {
     it('calls makeRequest on fetchIndices', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       IndicesLogic.actions.makeRequest = jest.fn();
-      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      IndicesLogic.actions.fetchIndices({
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
+        returnHiddenIndices: false,
+        size: 20,
+      });
       jest.advanceTimersByTime(150);
       await nextTick();
       expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledWith({
-        meta: DEFAULT_META,
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
         returnHiddenIndices: false,
+        size: 20,
       });
     });
     it('calls makeRequest once on two fetchIndices calls within 150ms', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       IndicesLogic.actions.makeRequest = jest.fn();
-      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      IndicesLogic.actions.fetchIndices({
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
+        returnHiddenIndices: false,
+        size: 20,
+      });
       jest.advanceTimersByTime(130);
       await nextTick();
-      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      IndicesLogic.actions.fetchIndices({
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
+        returnHiddenIndices: false,
+        size: 20,
+      });
       jest.advanceTimersByTime(150);
       await nextTick();
       expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledWith({
-        meta: DEFAULT_META,
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
         returnHiddenIndices: false,
+        size: 20,
       });
       expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledTimes(1);
     });
     it('calls makeRequest twice on two fetchIndices calls outside 150ms', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       IndicesLogic.actions.makeRequest = jest.fn();
-      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      IndicesLogic.actions.fetchIndices({
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
+        returnHiddenIndices: false,
+        size: 20,
+      });
       jest.advanceTimersByTime(150);
       await nextTick();
-      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      IndicesLogic.actions.fetchIndices({
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
+        returnHiddenIndices: false,
+        size: 20,
+      });
       jest.advanceTimersByTime(150);
       await nextTick();
       expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledWith({
-        meta: DEFAULT_META,
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
         returnHiddenIndices: false,
+        size: 20,
       });
       expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledTimes(2);
     });
@@ -365,6 +378,7 @@ describe('IndicesLogic', () => {
           indices: elasticsearchViewIndices,
           isInitialRequest: true,
           meta: DEFAULT_META,
+          onlyShowSearchOptimizedIndices: false,
           returnHiddenIndices: false,
         });
 
@@ -374,6 +388,7 @@ describe('IndicesLogic', () => {
             indices: elasticsearchViewIndices,
             isInitialRequest: true,
             meta: DEFAULT_META,
+            onlyShowSearchOptimizedIndices: false,
             returnHiddenIndices: false,
           },
           hasNoIndices: false,
@@ -401,6 +416,7 @@ describe('IndicesLogic', () => {
           ],
           isInitialRequest: true,
           meta: DEFAULT_META,
+          onlyShowSearchOptimizedIndices: false,
           returnHiddenIndices: false,
         });
 
@@ -419,6 +435,7 @@ describe('IndicesLogic', () => {
             ],
             isInitialRequest: true,
             meta: DEFAULT_META,
+            onlyShowSearchOptimizedIndices: false,
             returnHiddenIndices: false,
           },
           hasNoIndices: false,
@@ -450,6 +467,7 @@ describe('IndicesLogic', () => {
           ],
           isInitialRequest: true,
           meta: DEFAULT_META,
+          onlyShowSearchOptimizedIndices: false,
           returnHiddenIndices: false,
         });
 
@@ -464,6 +482,7 @@ describe('IndicesLogic', () => {
             ],
             isInitialRequest: true,
             meta: DEFAULT_META,
+            onlyShowSearchOptimizedIndices: false,
             returnHiddenIndices: false,
           },
           hasNoIndices: false,
@@ -494,6 +513,7 @@ describe('IndicesLogic', () => {
           ],
           isInitialRequest: true,
           meta: DEFAULT_META,
+          onlyShowSearchOptimizedIndices: false,
           returnHiddenIndices: false,
         });
 
@@ -508,6 +528,7 @@ describe('IndicesLogic', () => {
             ],
             isInitialRequest: true,
             meta: DEFAULT_META,
+            onlyShowSearchOptimizedIndices: false,
             returnHiddenIndices: false,
           },
           hasNoIndices: false,
@@ -539,6 +560,7 @@ describe('IndicesLogic', () => {
           ],
           isInitialRequest: true,
           meta: DEFAULT_META,
+          onlyShowSearchOptimizedIndices: false,
           returnHiddenIndices: false,
         });
 
@@ -557,6 +579,7 @@ describe('IndicesLogic', () => {
             ],
             isInitialRequest: true,
             meta: DEFAULT_META,
+            onlyShowSearchOptimizedIndices: false,
             returnHiddenIndices: false,
           },
           hasNoIndices: false,

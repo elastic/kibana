@@ -402,6 +402,14 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
+    async ensureComboBoxClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const comboBoxOpen = await testSubjects.exists('~comboBoxOptionsList', { timeout: 50 });
+        expect(comboBoxOpen).to.eql(false, 'Combo box should be closed');
+      });
+    },
+
     async invokeTableRowAction(
       rowSelector: string,
       actionTestSubject: string,

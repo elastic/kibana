@@ -8,7 +8,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { NodeRoles } from '@kbn/core-node-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
@@ -22,7 +26,9 @@ import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
 
 export interface RunZeroDowntimeMigrationOpts {
-  /** The kibana system index prefix. e.g `.kibana` */
+  /** The current Kibana version */
+  kibanaVersion: string;
+  /** The Kibana system index prefix. e.g `.kibana` or `.kibana_task_manager` */
   kibanaIndexPrefix: string;
   /** The SO type registry to use for the migration */
   typeRegistry: ISavedObjectTypeRegistry;
@@ -38,6 +44,10 @@ export interface RunZeroDowntimeMigrationOpts {
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
   elasticsearchClient: ElasticsearchClient;
+  /** The node roles of the Kibana instance */
+  nodeRoles: NodeRoles;
+  /** Capabilities of the ES cluster we're using */
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 export const runZeroDowntimeMigration = async (

@@ -296,7 +296,7 @@ export class FeatureProperties extends Component<Props, State> {
             defaultMessage: 'Unable to load tooltip content',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           size="s"
         >
           <p>{this.state.loadPropertiesErrorMsg}</p>

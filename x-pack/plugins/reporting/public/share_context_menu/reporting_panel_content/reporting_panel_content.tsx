@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import React, { Component, ReactElement } from 'react';
+import url from 'url';
+
+import { CSV_REPORT_TYPE } from '@kbn/reporting-export-types-csv-common';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+
 import {
   EuiAccordion,
   EuiButton,
@@ -15,20 +22,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import React, { Component, ReactElement } from 'react';
-import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
-import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import {
-  CSV_REPORT_TYPE,
-  PDF_REPORT_TYPE,
-  PDF_REPORT_TYPE_V2,
-  PNG_REPORT_TYPE,
-  PNG_REPORT_TYPE_V2,
-} from '../../../common/constants';
-import { BaseParams } from '../../../common/types';
+import type { BaseParams } from '@kbn/reporting-common/types';
+
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
@@ -62,6 +61,7 @@ interface State {
   absoluteUrl: string;
   layoutId: string;
   objectType: string;
+  isCreatingReportJob: boolean;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -78,15 +78,16 @@ class ReportingPanelContentUi extends Component<Props, State> {
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
       objectType,
+      isCreatingReportJob: false,
     };
   }
 
   private getAbsoluteReportGenerationUrl = (props: Props) => {
-    const relativePath = this.props.apiClient.getReportingJobPath(
+    const relativePath = this.props.apiClient.getReportingPublicJobPath(
       props.reportType,
       this.props.apiClient.getDecoratedJobParams(this.props.getJobParams(true))
     );
-    return url.resolve(window.location.href, relativePath); // FIXME: '(from: string, to: string): string' is deprecated
+    return url.resolve(window.location.href, relativePath);
   };
 
   public componentDidUpdate(_prevProps: Props, prevState: State) {
@@ -135,7 +136,13 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return (
       <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
         {(copy) => (
-          <EuiButton color={isUnsaved ? 'warning' : 'primary'} fullWidth onClick={copy} size="s">
+          <EuiButton
+            color={isUnsaved ? 'warning' : 'primary'}
+            fullWidth
+            onClick={copy}
+            size="s"
+            data-test-subj="shareReportingCopyURL"
+          >
             <FormattedMessage
               id="xpack.reporting.panelContent.copyUrlButtonLabel"
               defaultMessage="Copy POST URL"
@@ -200,6 +207,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             defaultMessage: 'Advanced options',
           })}
           paddingSize="none"
+          data-test-subj="shareReportingAdvancedOptionsButton"
         >
           <EuiSpacer size="s" />
           <EuiText size="s">
@@ -220,12 +228,13 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private renderGenerateReportButton = (isDisabled: boolean) => {
     return (
       <EuiButton
-        disabled={isDisabled}
+        disabled={isDisabled || this.state.isCreatingReportJob}
         fullWidth
         fill
         onClick={this.createReportingJob}
         data-test-subj="generateReportButton"
         size="s"
+        isLoading={this.state.isCreatingReportJob}
       >
         <FormattedMessage
           id="xpack.reporting.panelContent.generateButtonLabel"
@@ -241,8 +250,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
       case PDF_REPORT_TYPE:
       case PDF_REPORT_TYPE_V2:
         return 'PDF';
-      case 'csv_searchsource':
-        return CSV_REPORT_TYPE;
+      case CSV_REPORT_TYPE:
+        return 'csv';
       case 'png':
       case PNG_REPORT_TYPE_V2:
         return PNG_REPORT_TYPE;
@@ -272,6 +281,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
     const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(
       this.props.getJobParams()
     );
+
+    this.setState({ isCreatingReportJob: true });
 
     return this.props.apiClient
       .createReportingJob(this.props.reportType, decoratedJobParams)
@@ -306,6 +317,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
         if (this.props.onClose) {
           this.props.onClose();
         }
+        if (this.mounted) {
+          this.setState({ isCreatingReportJob: false });
+        }
       })
       .catch((error) => {
         this.props.toasts.addError(error, {
@@ -318,6 +332,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
             <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
           ) as unknown as string,
         });
+        if (this.mounted) {
+          this.setState({ isCreatingReportJob: false });
+        }
       });
   };
 }

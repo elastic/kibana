@@ -26,41 +26,90 @@ export interface PackageSpecManifest {
   screenshots?: PackageSpecScreenshot[];
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
-  owner: { github: string };
+  owner: { github: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
     'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
   >;
+  agent?: {
+    privileges?: { root?: boolean };
+  };
+  asset_tags?: PackageSpecTags[];
+}
+export interface PackageSpecTags {
+  text: string;
+  asset_types?: string[];
+  asset_ids?: string[];
 }
 
 export type PackageSpecPackageType = 'integration' | 'input';
 
 export type PackageSpecCategory =
+  | 'advanced_analytics_ueba'
+  | 'analytics_engine'
+  | 'application_observability'
+  | 'app_search'
+  | 'auditd'
+  | 'authentication'
   | 'aws'
   | 'azure'
+  | 'big_data'
+  | 'cdn_security'
   | 'cloud'
   | 'config_management'
+  | 'connector'
+  | 'connector_client'
   | 'containers'
+  | 'crawler'
+  | 'credential_management'
   | 'crm'
   | 'custom'
+  | 'custom_logs'
+  | 'database_security'
   | 'datastore'
+  | 'dns_security'
+  | 'edr_xdr'
+  | 'elasticsearch_sdk'
   | 'elastic_stack'
+  | 'email_security'
+  | 'enterprise_search'
+  | 'firewall_security'
   | 'google_cloud'
+  | 'iam'
+  | 'ids_ips'
   | 'infrastructure'
+  | 'java_observability'
   | 'kubernetes'
+  | 'language_client'
   | 'languages'
+  | 'load_balancer'
   | 'message_queue'
   | 'monitoring'
+  | 'native_search'
   | 'network'
+  | 'network_security'
   | 'notification'
+  | 'observability'
   | 'os_system'
+  | 'process_manager'
   | 'productivity'
+  | 'productivity_security'
+  | 'proxy_security'
+  | 'sdk_search'
   | 'security'
+  | 'stream_processing'
   | 'support'
   | 'threat_intel'
   | 'ticketing'
   | 'version_control'
-  | 'web';
+  | 'virtualization'
+  | 'vpn_security'
+  | 'vulnerability_management'
+  | 'web'
+  | 'web_application_firewall'
+  | 'websphere'
+  | 'workplace_search'
+  | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
   kibana: {

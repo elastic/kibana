@@ -7,14 +7,11 @@
 
 import React, { FC, ReactNode } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-
 import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
-
-import { useCurrentEuiTheme } from '../../../../components/color_range_legend/use_color_range';
-
+import { useCurrentThemeVars } from '../../../../contexts/kibana';
 import type {
-  QuestionAnsweringInference,
   FormattedQuestionAnsweringResult,
+  QuestionAnsweringInference,
 } from './question_answering_inference';
 
 const ICON_PADDING = '2px';
@@ -61,7 +58,7 @@ function insertHighlighting(result: FormattedQuestionAnsweringResult, inputText:
 }
 
 const ResultBadge = ({ children }: { children: ReactNode }) => {
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
   return (
     <EuiBadge
       color={euiTheme.euiColorVis5_behindText}

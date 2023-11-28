@@ -8,9 +8,9 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { transformInput } from '../../../../detections/containers/detection_engine/rules/transforms';
-import type { Rule } from '../../logic';
 import { fetchRuleById } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
@@ -24,8 +24,8 @@ const FIND_ONE_RULE_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL];
  * @param options - react-query options
  * @returns useQuery result
  */
-export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<Rule>) => {
-  return useQuery<Rule>(
+export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<RuleResponse>) => {
+  return useQuery<RuleResponse>(
     [...FIND_ONE_RULE_QUERY_KEY, id],
     async ({ signal }) => {
       const response = await fetchRuleById({ signal, id });
@@ -58,4 +58,28 @@ export const useInvalidateFetchRuleByIdQuery = () => {
       refetchType: 'active',
     });
   }, [queryClient]);
+};
+
+/**
+ * We should use this hook to update the rules cache when modifying a rule.
+ * Use it with the new rule data after operations like rule edit.
+ *
+ * @returns A rules cache update callback
+ */
+export const useUpdateRuleByIdCache = () => {
+  const queryClient = useQueryClient();
+  /**
+   * Use this method to update rules data cached by react-query.
+   * It is useful when we receive new rules back from a mutation query (bulk edit, etc.);
+   * we can merge those rules with the existing cache to avoid an extra roundtrip to re-fetch updated rules.
+   */
+  return useCallback(
+    (updatedRuleResponse: RuleResponse) => {
+      queryClient.setQueryData<ReturnType<typeof useFetchRuleByIdQuery>['data']>(
+        [...FIND_ONE_RULE_QUERY_KEY, updatedRuleResponse.id],
+        transformInput(updatedRuleResponse)
+      );
+    },
+    [queryClient]
+  );
 };

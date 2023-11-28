@@ -14,10 +14,11 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('classification saved search creation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/147020
+  describe.skip('classification saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');
       // Need to use the saved searches with filters that match multiple airlines
@@ -35,10 +36,29 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote_small');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote_small');
     });
 
     const dateNow = Date.now();
+    const completedJobProgressEntries = [
+      'Phase 8/8',
+      'reindexing',
+      '100%',
+      'loading_data',
+      '100%',
+      'feature_selection',
+      '100%',
+      'coarse_parameter_search',
+      '100%',
+      'fine_tuning_parameters',
+      '100%',
+      'final_training',
+      '100%',
+      'writing_results',
+      '100%',
+      'inference',
+      '100%',
+    ];
     const fieldStatsEntries = [
       {
         fieldName: 'airline',
@@ -73,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
             string,
@@ -97,15 +117,59 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '20mb',
+                  'Version',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '320',
+                  'Test docs',
+                  '1284',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: `fq_saved_search_2_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":320,"test_docs_count":1284,"skipped_docs_count":0}',
-                  description: 'Classification job based on a saved search with lucene query',
+                  '': '',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
+                  max_optimization_rounds_per_hyperparameter: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
+                  soft_tree_depth_tolerance: '0.15',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '8/8' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -129,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
             string,
@@ -153,15 +217,59 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '20mb',
+                  'Version',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '320',
+                  'Test docs',
+                  '1283',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: `fq_saved_search_3_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":320,"test_docs_count":1283,"skipped_docs_count":0}',
-                  description: 'Classification job based on a saved search with kuery query',
+                  '': '',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
+                  max_optimization_rounds_per_hyperparameter: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
+                  soft_tree_depth_tolerance: '0.15',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '8/8' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -185,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           fieldStatsValues: {
             airline: ['AAL', 'ASA'],
@@ -208,16 +316,53 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '7mb', 'Version'],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '135',
+                  'Test docs',
+                  '544',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: `fq_saved_search_4_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":135,"test_docs_count":544,"skipped_docs_count":0}',
-                  description:
-                    'Classification job based on a saved search with filter and lucene query',
+                  '': '',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
+                  max_optimization_rounds_per_hyperparameter: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
+                  soft_tree_depth_tolerance: '0.15',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '8/8' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -240,7 +385,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           fieldStatsValues: { airline: ['ASA', 'FFT'] } as Record<string, string[]>,
           source: 'ft_farequote_small',
@@ -261,16 +406,53 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '6mb', 'Version'],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '109',
+                  'Test docs',
+                  '436',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: `fq_saved_search_5_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":109,"test_docs_count":436,"skipped_docs_count":0}',
-                  description:
-                    'Classification job based on a saved search with filter and kuery query',
+                  '': '',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
+                  max_optimization_rounds_per_hyperparameter: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
+                  soft_tree_depth_tolerance: '0.15',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '8/8' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -281,7 +463,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
-          await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await ml.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the data frame analytics wizard', async () => {
@@ -410,10 +592,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
 
           await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

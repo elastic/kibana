@@ -14,13 +14,6 @@ import type { AgentPolicy, Agent } from '../types';
 
 import { AgentPolicySummaryLine } from './link_and_revision';
 
-jest.mock('../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-  useFleetStatus: jest.fn().mockReturnValue({}),
-}));
-
 describe('AgentPolicySummaryLine', () => {
   let testRenderer: TestRenderer;
 

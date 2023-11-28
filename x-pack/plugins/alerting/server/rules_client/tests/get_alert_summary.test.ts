@@ -7,7 +7,11 @@
 
 import { omit, mean } from 'lodash';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -30,6 +34,7 @@ const eventLogClient = eventLogClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -40,14 +45,20 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -94,6 +105,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
       error: null,
       warning: null,
     },
+    revision: 0,
   },
   references: [],
 };
@@ -121,14 +133,14 @@ describe('getAlertSummary()', () => {
     const eventsFactory = new EventsFactory(mockedDateString);
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-currently-active')
-      .addNewAlert('alert-previously-active')
-      .addActiveAlert('alert-currently-active', 'action group A')
-      .addActiveAlert('alert-previously-active', 'action group B')
+      .addNewAlert('alert-currently-active', 'uuid-1')
+      .addNewAlert('alert-previously-active', 'uuid-2')
+      .addActiveAlert('alert-currently-active', 'action group A', 'uuid-1')
+      .addActiveAlert('alert-previously-active', 'action group B', 'uuid-2')
       .advanceTime(10000)
       .addExecute()
-      .addRecoveredAlert('alert-previously-active')
-      .addActiveAlert('alert-currently-active', 'action group A', true)
+      .addRecoveredAlert('alert-previously-active', 'uuid-2')
+      .addActiveAlert('alert-currently-active', 'action group A', 'uuid-1', true)
       .getEvents();
     const eventsResult = {
       ...AlertSummaryFindEventsResult,
@@ -160,6 +172,8 @@ describe('getAlertSummary()', () => {
             "flapping": true,
             "muted": false,
             "status": "Active",
+            "tracked": true,
+            "uuid": "uuid-1",
           },
           "alert-muted-no-activity": Object {
             "actionGroupId": undefined,
@@ -167,6 +181,8 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": true,
             "status": "OK",
+            "tracked": true,
+            "uuid": undefined,
           },
           "alert-previously-active": Object {
             "actionGroupId": undefined,
@@ -174,6 +190,8 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": false,
             "status": "OK",
+            "tracked": true,
+            "uuid": "uuid-2",
           },
         },
         "consumer": "rule-consumer",
@@ -183,6 +201,7 @@ describe('getAlertSummary()', () => {
         "lastRun": "2019-02-12T21:01:32.479Z",
         "muteAll": false,
         "name": "rule-name",
+        "revision": 0,
         "ruleTypeId": "123",
         "status": "Active",
         "statusEndDate": "2019-02-12T21:01:22.479Z",

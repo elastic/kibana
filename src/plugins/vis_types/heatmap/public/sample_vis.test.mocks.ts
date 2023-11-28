@@ -106,7 +106,7 @@ export const sampleHeatmapVis = {
             title: 'X-axis',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geotile_grid', '!filter'],
             editor: false,
             params: [],
           },
@@ -116,7 +116,7 @@ export const sampleHeatmapVis = {
             title: 'Split series',
             min: 0,
             max: 3,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geotile_grid', '!filter'],
             editor: false,
             params: [],
           },
@@ -126,7 +126,7 @@ export const sampleHeatmapVis = {
             title: 'Split chart',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geotile_grid', '!filter'],
             params: [
               {
                 name: 'row',

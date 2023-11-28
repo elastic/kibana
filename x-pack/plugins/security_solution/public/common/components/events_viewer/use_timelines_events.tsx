@@ -12,12 +12,13 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
   TimelineEdges,
-  TimelineEventsAllRequestOptions,
+  TimelineEqlRequestOptionsInput,
+  TimelineEventsAllOptionsInput,
   TimelineEventsAllStrategyResponse,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
@@ -27,14 +28,11 @@ import type {
   TimelineRequestSortField,
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { dataTableActions, Direction, TableId } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '../../store/sourcerer/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
-import { Direction, TableId } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { dataTableActions } from '../../store/data_table';
-import { ERROR_TIMELINE_EVENTS } from './translations';
 import type { AlertWorkflowStatus } from '../../types';
 import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
 export type InspectResponse = Inspect & { response: string[] };
@@ -61,7 +59,7 @@ type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => v
 
 type LoadPage = (newActivePage: number) => void;
 
-type TimelineRequest<T extends KueryFilterQueryKind> = TimelineEventsAllRequestOptions;
+type TimelineRequest = TimelineEventsAllOptionsInput | TimelineEqlRequestOptionsInput;
 
 type TimelineResponse<T extends KueryFilterQueryKind> = TimelineEventsAllStrategyResponse;
 
@@ -78,7 +76,7 @@ export interface UseTimelineEventsProps {
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate: string;
@@ -164,11 +162,9 @@ export const useTimelineEventsHandler = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState(0);
-  const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
-    null
-  );
+  const [timelineRequest, setTimelineRequest] = useState<TimelineRequest | null>(null);
   const [prevFilterStatus, setFilterStatus] = useState(filterStatus);
-  const prevTimelineRequest = useRef<TimelineRequest<typeof language> | null>(null);
+  const prevTimelineRequest = useRef<TimelineRequest | null>(null);
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -221,10 +217,9 @@ export const useTimelineEventsHandler = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
-    (request: TimelineRequest<typeof language> | null, onNextHandler?: OnNextResponseHandler) => {
+    (request: TimelineRequest | null, onNextHandler?: OnNextResponseHandler) => {
       if (request == null || skip) {
         return;
       }
@@ -234,10 +229,10 @@ export const useTimelineEventsHandler = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
-          const { endTracking } = startTracking();
+          startTracking();
           const abortSignal = abortCtrl.current.signal;
           searchSubscription$.current = data.search
-            .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
+            .search<TimelineRequest, TimelineResponse<typeof language>>(
               { ...request, entityType },
               {
                 strategy:
@@ -251,7 +246,7 @@ export const useTimelineEventsHandler = ({
             )
             .subscribe({
               next: (response) => {
-                if (isCompleteResponse(response)) {
+                if (!isRunningResponse(response)) {
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
@@ -262,8 +257,6 @@ export const useTimelineEventsHandler = ({
                       totalCount: response.totalCount,
                       updatedAt: Date.now(),
                     };
-                    setUpdated(newTimelineResponse.updatedAt);
-                    setTotalCount(newTimelineResponse.totalCount);
                     if (onNextHandler) onNextHandler(newTimelineResponse);
                     return newTimelineResponse;
                   });
@@ -273,11 +266,6 @@ export const useTimelineEventsHandler = ({
                   setFilterStatus(request.filterStatus);
                   setLoading(false);
 
-                  searchSubscription$.current.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  endTracking('invalid');
-                  addWarning(ERROR_TIMELINE_EVENTS);
                   searchSubscription$.current.unsubscribe();
                 }
               },
@@ -295,19 +283,7 @@ export const useTimelineEventsHandler = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [
-      skip,
-      data,
-      setTotalCount,
-      entityType,
-      dataViewId,
-      setUpdated,
-      addWarning,
-      startTracking,
-      dispatch,
-      id,
-      prevFilterStatus,
-    ]
+    [skip, data, entityType, dataViewId, startTracking, dispatch, id, prevFilterStatus]
   );
 
   useEffect(() => {
@@ -319,12 +295,12 @@ export const useTimelineEventsHandler = ({
       const prevSearchParameters = {
         defaultIndex: prevRequest?.defaultIndex ?? [],
         filterQuery: prevRequest?.filterQuery ?? '',
-        querySize: prevRequest?.pagination.querySize ?? 0,
+        querySize: prevRequest?.pagination?.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
-        runtimeMappings: prevRequest?.runtimeMappings ?? {},
+        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
         filterStatus: prevRequest?.filterStatus,
-      };
+      } as const;
 
       const currentSearchParameters = {
         defaultIndex: indexNames,
@@ -338,7 +314,7 @@ export const useTimelineEventsHandler = ({
           to: endDate,
         },
         filterStatus,
-      };
+      } as const;
 
       const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
         ? activePage
@@ -356,7 +332,7 @@ export const useTimelineEventsHandler = ({
           activePage: newActivePage,
           querySize: limit,
         },
-        language,
+        language: language as TimelineRequest['language'],
         runtimeMappings,
         sort,
         timerange: {
@@ -371,7 +347,7 @@ export const useTimelineEventsHandler = ({
         setActivePage(newActivePage);
       }
       if (!deepEqual(prevRequest, currentRequest)) {
-        return currentRequest;
+        return currentRequest as TimelineRequest;
       }
       return prevRequest;
     });
@@ -392,6 +368,13 @@ export const useTimelineEventsHandler = ({
     runtimeMappings,
     filterStatus,
   ]);
+
+  useEffect(() => {
+    if (timelineResponse.totalCount > -1) {
+      setUpdated(timelineResponse.updatedAt);
+      setTotalCount(timelineResponse.totalCount);
+    }
+  }, [setTotalCount, setUpdated, timelineResponse]);
 
   const timelineEventsSearchHandler = useCallback(
     (onNextHandler?: OnNextResponseHandler) => {

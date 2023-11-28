@@ -8,14 +8,13 @@
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import { from, Subscription, Observable } from 'rxjs';
 import { mergeMap, last, map, toArray } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from '@kbn/core/public';
 import { chunk } from 'lodash';
 import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/data-plugin/common';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
@@ -29,7 +28,6 @@ import {
 } from '../search_strategy/requests/overall_stats';
 import type { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
-import { extractErrorProperties } from '../utils/error_utils';
 import {
   DataStatsFetchProgress,
   isRandomSamplingOption,
@@ -38,6 +36,7 @@ import {
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import { displayError } from '../../common/util/display_error';
 
 /**
  * Helper function to run forkJoin
@@ -61,32 +60,6 @@ export function rateLimitingForkJoin<T>(
       indexedObservables.sort((l, r) => l.index - r.index).map((obs) => obs.value)
     )
   );
-}
-
-function displayError(toastNotifications: ToastsStart, index: string, err: any) {
-  if (err.statusCode === 500) {
-    toastNotifications.addError(err, {
-      title: i18n.translate('xpack.dataVisualizer.index.dataLoader.internalServerErrorMessage', {
-        defaultMessage:
-          'Error loading data in index {index}. {message}. ' +
-          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-        values: {
-          index,
-          message: err.error ?? err.message,
-        },
-      }),
-    });
-  } else {
-    toastNotifications.addError(err, {
-      title: i18n.translate('xpack.dataVisualizer.index.errorLoadingDataMessage', {
-        defaultMessage: 'Error loading data in index {index}. {message}.',
-        values: {
-          index,
-          message: err.error ?? err.message,
-        },
-      }),
-    });
-  }
 }
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
@@ -137,11 +110,14 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         latest,
         runtimeFieldMap,
         samplingOption,
+        sessionId,
+        embeddableExecutionContext,
       } = searchStrategyParams;
 
       const searchOptions: ISearchOptions = {
         abortSignal: abortCtrl.current.signal,
-        sessionId: searchStrategyParams?.sessionId,
+        sessionId,
+        ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };
 
       const documentCountStats = await getDocumentCountStats(

@@ -6,7 +6,8 @@
  */
 
 import { defineGetCloudDefendStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
   AgentClient,
@@ -52,12 +53,13 @@ const mockLatestCloudDefendPackageInfo: RegistryPackage = {
   download: '/epr/cloud_defend/cloud_defend-1.0.0.zip',
   path: '/package/cloud_defend/1.0.0',
   policy_templates: [],
-  owner: { github: 'elastic/sec-cloudnative-integrations' },
+  owner: { github: 'elastic/kibana-cloud-security-posture' },
   categories: ['containers', 'kubernetes'],
 };
 
 describe('CloudDefendSetupStatus route', () => {
-  const router = httpServiceMock.createRouter();
+  const router = mockRouter.create();
+
   let mockContext: ReturnType<typeof createCloudDefendRequestHandlerContextMock>;
   let mockPackagePolicyService: jest.Mocked<PackagePolicyClient>;
   let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
@@ -81,7 +83,8 @@ describe('CloudDefendSetupStatus route', () => {
 
   it('validate the API route path', async () => {
     defineGetCloudDefendStatusRoute(router);
-    const [config, _] = router.get.mock.calls[0];
+
+    const [config, _] = (router.versioned.get as jest.Mock).mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_defend/status');
   });
@@ -132,8 +135,8 @@ describe('CloudDefendSetupStatus route', () => {
         });
 
         // Act
-        defineGetCloudDefendStatusRoute(router);
-        const [_, handler] = router.get.mock.calls[0];
+        const route = defineGetCloudDefendStatusRoute(router);
+        const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
         const mockResponse = httpServerMock.createResponseFactory();
         const mockRequest = httpServerMock.createKibanaRequest();
@@ -169,8 +172,8 @@ describe('CloudDefendSetupStatus route', () => {
     });
 
     // Act
-    defineGetCloudDefendStatusRoute(router);
-    const [_, handler] = router.get.mock.calls[0];
+    const route = defineGetCloudDefendStatusRoute(router);
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -181,7 +184,7 @@ describe('CloudDefendSetupStatus route', () => {
     const body = call[0]?.body;
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toMatchObject({
+    expect(body).toMatchObject({
       status: 'indexed',
       latestPackageVersion: '1.0.0',
       installedPackagePolicies: 0,
@@ -210,8 +213,8 @@ describe('CloudDefendSetupStatus route', () => {
     });
 
     // Act
-    defineGetCloudDefendStatusRoute(router);
-    const [_, handler] = router.get.mock.calls[0];
+    const route = defineGetCloudDefendStatusRoute(router);
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -223,7 +226,7 @@ describe('CloudDefendSetupStatus route', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toMatchObject({
+    expect(body).toMatchObject({
       status: 'indexed',
       latestPackageVersion: '1.0.0',
       installedPackagePolicies: 3,
@@ -261,8 +264,8 @@ describe('CloudDefendSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCloudDefendStatusRoute(router);
-    const [_, handler] = router.get.mock.calls[0];
+    const route = defineGetCloudDefendStatusRoute(router);
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -299,8 +302,8 @@ describe('CloudDefendSetupStatus route', () => {
       page: 1,
       perPage: 100,
     });
-    defineGetCloudDefendStatusRoute(router);
-    const [_, handler] = router.get.mock.calls[0];
+    const route = defineGetCloudDefendStatusRoute(router);
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -351,9 +354,9 @@ describe('CloudDefendSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCloudDefendStatusRoute(router);
+    const route = defineGetCloudDefendStatusRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -408,9 +411,9 @@ describe('CloudDefendSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCloudDefendStatusRoute(router);
+    const route = defineGetCloudDefendStatusRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -467,9 +470,9 @@ describe('CloudDefendSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCloudDefendStatusRoute(router);
+    const route = defineGetCloudDefendStatusRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();

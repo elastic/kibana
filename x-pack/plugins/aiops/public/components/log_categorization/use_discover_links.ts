@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
 import moment from 'moment';
 
+import rison from '@kbn/rison';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
+
+import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
+import type { Category } from '../../../common/api/log_categorization/types';
+
+import type { AiOpsIndexBasedAppState } from '../../application/url_state/common';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import type { Category } from './use_categorize_request';
-import type { QueryMode } from './category_table';
-import type { AiOpsIndexBasedAppState } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+
+export const QUERY_MODE = {
+  INCLUDE: 'should',
+  EXCLUDE: 'must_not',
+} as const;
+export type QueryMode = typeof QUERY_MODE[keyof typeof QUERY_MODE];
 
 export function useDiscoverLinks() {
   const {
@@ -29,8 +38,6 @@ export function useDiscoverLinks() {
     mode: QueryMode,
     category?: Category
   ) => {
-    const selectedRows = category === undefined ? selection : [category];
-
     const _g = rison.encode({
       time: {
         from: moment(timefilterActiveBounds.min?.valueOf()).toISOString(),
@@ -39,35 +46,7 @@ export function useDiscoverLinks() {
     });
 
     const _a = rison.encode({
-      filters: [
-        ...aiopsListState.filters,
-        {
-          query: {
-            bool: {
-              [mode]: selectedRows.map(({ key: query }) => ({
-                match: {
-                  [field]: {
-                    auto_generate_synonyms_phrase_query: false,
-                    fuzziness: 0,
-                    operator: 'and',
-                    query,
-                  },
-                },
-              })),
-            },
-          },
-          meta: {
-            alias: i18n.translate('xpack.aiops.logCategorization.filterAliasLabel', {
-              defaultMessage: 'Categorization - {field}',
-              values: {
-                field,
-              },
-            }),
-            index,
-            disabled: false,
-          },
-        },
-      ],
+      filters: [...aiopsListState.filters, createFilter(index, field, selection, mode, category)],
       index,
       interval: 'auto',
       query: {
@@ -84,4 +63,27 @@ export function useDiscoverLinks() {
   };
 
   return { openInDiscoverWithFilter };
+}
+
+export function createFilter(
+  index: string,
+  field: string,
+  selection: Category[],
+  mode: QueryMode,
+  category?: Category
+): Filter {
+  const selectedRows = category === undefined ? selection : [category];
+  return {
+    query: getCategoryQuery(field, selectedRows, mode),
+    meta: {
+      alias: i18n.translate('xpack.aiops.logCategorization.filterAliasLabel', {
+        defaultMessage: 'Categorization - {field}',
+        values: {
+          field,
+        },
+      }),
+      index,
+      disabled: false,
+    },
+  };
 }

@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { createHash } from 'crypto';
-import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_ANCESTORS } from '../../../../../../common/field_maps/field_names';
 
 /**

@@ -9,11 +9,13 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
-import { MgetRequest, MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ProfilingESEvent } from '../../common/elasticsearch';
+import type {
+  BaseFlameGraph,
+  ProfilingStatusResponse,
+  StackTraceResponse,
+} from '@kbn/profiling-utils';
 import { withProfilingSpan } from './with_profiling_span';
-import { StackTraceResponse } from '../../common/stack_traces';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -32,15 +34,16 @@ export interface ProfilingESClient {
     operationName: string,
     searchRequest: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
-  mget<TDocument = ProfilingESEvent>(
-    operationName: string,
-    mgetRequest: MgetRequest
-  ): Promise<MgetResponse<TDocument>>;
   profilingStacktraces({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
   }): Promise<StackTraceResponse>;
+  profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
+  profilingFlamegraph({}: {
+    query: QueryDslQueryContainer;
+    sampleSize: number;
+  }): Promise<BaseFlameGraph>;
 }
 
 export function createProfilingEsClient({
@@ -65,25 +68,6 @@ export function createProfilingEsClient({
           }) as unknown as Promise<{
             body: InferSearchResponseOf<TDocument, TSearchRequest>;
           }>,
-          request,
-          controller
-        );
-      });
-
-      return unwrapEsResponse(promise);
-    },
-    mget<TDocument = ProfilingESEvent>(
-      operationName: string,
-      mgetRequest: MgetRequest
-    ): Promise<MgetResponse<TDocument>> {
-      const controller = new AbortController();
-
-      const promise = withProfilingSpan(operationName, () => {
-        return cancelEsRequestOnAbort(
-          esClient.mget<TDocument>(mgetRequest, {
-            signal: controller.signal,
-            meta: true,
-          }),
           request,
           controller
         );
@@ -117,8 +101,53 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
     },
+    profilingStatus({ waitForResourcesCreated = false } = {}) {
+      const controller = new AbortController();
+
+      const promise = withProfilingSpan('_profiling/status', () => {
+        return cancelEsRequestOnAbort(
+          esClient.transport.request(
+            {
+              method: 'GET',
+              path: encodeURI(
+                `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}`
+              ),
+            },
+            {
+              signal: controller.signal,
+              meta: true,
+            }
+          ),
+          request,
+          controller
+        );
+      });
+
+      return unwrapEsResponse(promise) as Promise<ProfilingStatusResponse>;
+    },
     getEsClient() {
       return esClient;
+    },
+    profilingFlamegraph({ query, sampleSize }) {
+      const controller = new AbortController();
+
+      const promise = withProfilingSpan('_profiling/flamegraph', () => {
+        return esClient.transport.request(
+          {
+            method: 'POST',
+            path: encodeURI('/_profiling/flamegraph'),
+            body: {
+              query,
+              sample_size: sampleSize,
+            },
+          },
+          {
+            signal: controller.signal,
+            meta: true,
+          }
+        );
+      });
+      return unwrapEsResponse(promise) as Promise<BaseFlameGraph>;
     },
   };
 }

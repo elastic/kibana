@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseConnector } from '../../../common/api';
+import type { CaseConnector } from '../../../common/types/domain';
 import type { IndexRefresh } from '../../services/types';
 
 export interface MappingsArgs {

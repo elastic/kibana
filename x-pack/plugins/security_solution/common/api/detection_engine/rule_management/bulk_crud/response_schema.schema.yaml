@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info:
+  title: Bulk Response Schema
+  version: 8.9.0
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    BulkCrudRulesResponse:
+      type: array
+      items:
+        oneOf:
+          - $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+          - $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'

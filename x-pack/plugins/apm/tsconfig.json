@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../typings/**/*",
@@ -13,7 +13,7 @@
     "jest.config.js",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
-    "server/**/*.json",
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -28,8 +28,8 @@
     "@kbn/alerting-plugin",
     "@kbn/cloud-plugin",
     "@kbn/features-plugin",
-    "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/license-management-plugin",
     "@kbn/maps-plugin",
     "@kbn/ml-plugin",
     "@kbn/observability-plugin",
@@ -60,9 +60,7 @@
     "@kbn/rule-data-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/es-ui-shared-plugin",
     "@kbn/es-types",
-    "@kbn/unified-field-list-plugin",
     "@kbn/analytics",
     "@kbn/rison",
     "@kbn/config-schema",
@@ -76,12 +74,38 @@
     "@kbn/babel-register",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-elasticsearch-server",
-    "@kbn/shared-ux-prompt-not-found",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/exploratory-view-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/chart-icons",
+    "@kbn/observability-shared-plugin",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/shared-ux-prompt-not-found",
+    "@kbn/ui-actions-plugin",
+    "@kbn/observability-alert-details",
+    "@kbn/custom-integrations-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/controls-plugin",
+    "@kbn/core-http-server",
+    "@kbn/profiling-plugin",
+    "@kbn/logs-shared-plugin",
+    "@kbn/unified-field-list",
+    "@kbn/discover-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/apm-data-access-plugin",
+    "@kbn/metrics-data-access-plugin",
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/profiling-utils",
+    "@kbn/core-analytics-server",
+    "@kbn/analytics-client",
+    "@kbn/monaco",
+    "@kbn/shared-svg",
+    "@kbn/deeplinks-observability",
+    "@kbn/custom-icons",
+    "@kbn/elastic-agent-utils",
+    "@kbn/shared-ux-link-redirect-app"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

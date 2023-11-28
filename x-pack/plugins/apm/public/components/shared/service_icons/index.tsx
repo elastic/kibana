@@ -7,30 +7,31 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  CloudProvider,
+  getAgentIcon,
+  getCloudProviderIcon,
+  getServerlessIcon,
+} from '@kbn/custom-icons';
 import React, { ReactChild, useState } from 'react';
 import { useTheme } from '../../../hooks/use_theme';
 import { ContainerType } from '../../../../common/service_metadata';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { getAgentIcon } from '../agent_icon/get_agent_icon';
-import { getServerlessIcon } from '../agent_icon/get_serverless_icon';
 import { CloudDetails } from './cloud_details';
 import { ServerlessDetails } from './serverless_details';
 import { ContainerDetails } from './container_details';
+import { OTelDetails } from './otel_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
 import { ServerlessType } from '../../../../common/serverless';
+import { isOpenTelemetryAgentName } from '../../../../common/agent_name';
 
 interface Props {
   serviceName: string;
+  environment: string;
   start: string;
   end: string;
 }
-
-const cloudIcons: Record<string, string> = {
-  gcp: 'logoGCP',
-  aws: 'logoAWS',
-  azure: 'logoAzure',
-};
 
 function getServerlessTitle(serverlessType?: ServerlessType): string {
   switch (serverlessType) {
@@ -52,12 +53,6 @@ function getServerlessTitle(serverlessType?: ServerlessType): string {
   }
 }
 
-export function getCloudIcon(provider?: string) {
-  if (provider) {
-    return cloudIcons[provider];
-  }
-}
-
 export function getContainerIcon(container?: ContainerType) {
   if (!container) {
     return;
@@ -70,7 +65,13 @@ export function getContainerIcon(container?: ContainerType) {
   }
 }
 
-type Icons = 'service' | 'container' | 'serverless' | 'cloud' | 'alerts';
+type Icons =
+  | 'service'
+  | 'opentelemetry'
+  | 'container'
+  | 'serverless'
+  | 'cloud'
+  | 'alerts';
 
 export interface PopoverItem {
   key: Icons;
@@ -83,7 +84,7 @@ export interface PopoverItem {
   component: ReactChild;
 }
 
-export function ServiceIcons({ start, end, serviceName }: Props) {
+export function ServiceIcons({ start, end, serviceName, environment }: Props) {
   const [selectedIconPopover, setSelectedIconPopover] =
     useState<Icons | null>();
 
@@ -108,20 +109,20 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
     (callApmApi) => {
-      if (selectedIconPopover && serviceName && start && end) {
+      if (selectedIconPopover && serviceName && start && end && environment) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/metadata/details',
           {
             isCachable: true,
             params: {
               path: { serviceName },
-              query: { start, end },
+              query: { start, end, environment },
             },
           }
         );
       }
     },
-    [selectedIconPopover, serviceName, start, end]
+    [selectedIconPopover, serviceName, start, end, environment]
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
@@ -141,6 +142,23 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
         defaultMessage: 'Service',
       }),
       component: <ServiceDetails service={details?.service} />,
+    },
+    {
+      key: 'opentelemetry',
+      icon: {
+        type: getAgentIcon('opentelemetry', theme.darkMode),
+      },
+      isVisible:
+        !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
+      title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {
+        defaultMessage: 'OpenTelemetry',
+      }),
+      component: (
+        <OTelDetails
+          opentelemetry={details?.opentelemetry}
+          agentName={icons?.agentName}
+        />
+      ),
     },
     {
       key: 'container',
@@ -170,7 +188,7 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
     {
       key: 'cloud',
       icon: {
-        type: getCloudIcon(icons?.cloudProvider),
+        type: getCloudProviderIcon(icons?.cloudProvider as CloudProvider),
       },
       isVisible: !!icons?.cloudProvider,
       title: i18n.translate('xpack.apm.serviceIcons.cloud', {

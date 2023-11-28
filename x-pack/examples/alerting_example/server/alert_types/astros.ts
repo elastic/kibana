@@ -7,6 +7,7 @@
 
 import axios from 'axios';
 import { RuleType } from '@kbn/alerting-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -80,8 +81,16 @@ export const alertType: RuleType<
       },
     };
   },
+  category: 'example',
   producer: ALERTING_EXAMPLE_APP_ID,
   getViewInAppRelativeUrl({ rule }) {
     return `/app/${ALERTING_EXAMPLE_APP_ID}/astros/${rule.id}`;
+  },
+  validate: {
+    params: schema.object({
+      outerSpaceCapacity: schema.number(),
+      craft: schema.string(),
+      op: schema.string(),
+    }),
   },
 };

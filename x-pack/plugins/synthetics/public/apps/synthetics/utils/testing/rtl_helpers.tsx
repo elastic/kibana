@@ -6,29 +6,29 @@
  */
 
 import React, { ReactElement, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import { of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
   render as reactTestLibRender,
   MatcherFunction,
   RenderOptions,
+  configure,
 } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 
-import { merge } from 'lodash';
+import { merge, mergeWith } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { configure } from '@testing-library/dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { mockState } from './__mocks__/synthetics_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
@@ -129,19 +129,45 @@ export const mockCore: () => Partial<CoreStart> = () => {
       get: getSetting,
       get$: setSetting$,
     },
+    settings: {
+      client: {
+        ...defaultCore.settings.client,
+        get: getSetting,
+        get$: setSetting$,
+      },
+      globalClient: defaultCore.settings.globalClient,
+    },
     usageCollection: {
       reportUiCounter: () => {},
     },
     triggersActionsUi: triggersActionsUiMock.createStart(),
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
+    // @ts-ignore
     observability: {
       useRulesLink: () => ({ href: 'newRuleLink' }),
+      observabilityRuleTypeRegistry: {
+        register: jest.fn(),
+        getFormatter: jest.fn(),
+        list: jest.fn(),
+      },
+    },
+    observabilityShared: {
       navigation: {
         // @ts-ignore
-        PageTemplate: EuiPageTemplate,
+        PageTemplate: KibanaPageTemplate,
       },
-      ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
+    },
+    exploratoryView: {
+      createExploratoryViewUrl: jest.fn(),
+      getAppDataView: jest.fn(),
+      ExploratoryViewEmbeddable: () => (
+        <div>
+          {i18n.translate('xpack.synthetics.core.div.embeddableExploratoryViewLabel', {
+            defaultMessage: 'Embeddable exploratory view',
+          })}
+        </div>
+      ),
     },
   };
 
@@ -164,6 +190,8 @@ export function MockKibanaProvider<ExtraCore>({
         <SyntheticsStartupPluginsContextProvider
           data={(coreOptions as any).data}
           observability={(coreOptions as any).observability}
+          observabilityShared={(coreOptions as any).observabilityShared}
+          exploratoryView={(coreOptions as any).exploratoryView}
         >
           <EuiThemeProvider darkMode={false}>
             <I18nProvider>{children}</I18nProvider>
@@ -227,7 +255,11 @@ export function WrappedHelper<ExtraCore>({
   path,
   history = createMemoryHistory(),
 }: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
-  const testState: AppState = merge({}, mockState, state);
+  const testState: AppState = mergeWith({}, mockState, state, (objValue, srcValue) => {
+    if (Array.isArray(objValue)) {
+      return srcValue;
+    }
+  });
 
   if (url) {
     history = getHistoryFromUrl(url);

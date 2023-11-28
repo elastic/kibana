@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
-
+import { HistoricalSummaryResponse } from '@kbn/slo-schema';
 import { ChartData } from '../../typings/slo';
 
 type DataType = 'error_budget_remaining' | 'error_budget_consumed' | 'sli_value';
 
 export function formatHistoricalData(
-  historicalSummary: FetchHistoricalSummaryResponse[string] | undefined,
+  historicalSummary: HistoricalSummaryResponse[] | undefined = [],
   dataType: DataType
 ): ChartData[] {
-  function getDataValue(data: FetchHistoricalSummaryResponse[string][number]) {
+  function getDataValue(data: HistoricalSummaryResponse) {
     switch (dataType) {
       case 'error_budget_consumed':
         return data.errorBudget.consumed;

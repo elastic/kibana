@@ -8,6 +8,7 @@
 import { InfraBackendLibs } from './lib/infra_types';
 import { initGetHostsAnomaliesRoute, initGetK8sAnomaliesRoute } from './routes/infra_ml';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
+import { initInventoryViewRoutes } from './routes/inventory_views';
 import { initIpToHostName } from './routes/ip_to_hostname';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 import {
@@ -20,21 +21,18 @@ import {
   initGetLogEntryExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
+  initGetLogAnalysisIdFormatsRoute,
 } from './routes/log_analysis';
-import {
-  initLogEntriesHighlightsRoute,
-  initLogEntriesSummaryHighlightsRoute,
-  initLogEntriesSummaryRoute,
-} from './routes/log_entries';
-import { initLogViewRoutes } from './routes/log_views';
 import { initMetadataRoute } from './routes/metadata';
 import { initMetricsAPIRoute } from './routes/metrics_api';
-import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
 import { initProcessListRoute } from './routes/process_list';
 import { initSnapshotRoute } from './routes/snapshot';
+import { initInfraMetricsRoute } from './routes/infra';
+import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
+import { initProfilingRoutes } from './routes/profiling';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
@@ -49,18 +47,18 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
   initMetricsSourceConfigurationRoutes(libs);
+  initGetLogAnalysisIdFormatsRoute(libs);
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
-  initLogEntriesHighlightsRoute(libs);
-  initLogEntriesSummaryRoute(libs);
-  initLogEntriesSummaryHighlightsRoute(libs);
-  initLogViewRoutes(libs);
-  initMetricExplorerRoute(libs);
+  initMetricsExplorerViewRoutes(libs);
   initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
+  initInventoryViewRoutes(libs);
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
   initOverviewRoute(libs);
+  initInfraMetricsRoute(libs);
+  initProfilingRoutes(libs);
 };

@@ -12,9 +12,44 @@ import type { ResponseType } from '../next';
 import { delayRetryState, resetRetryState } from '../../model/retry_state';
 import { throwBadControlState } from '../../model/helpers';
 import { isTypeof } from '../actions';
-import { MigratorContext } from '../context';
+import type { MigratorContext } from '../context';
+import type { ModelStage } from './types';
 import * as Stages from './stages';
-import { StateActionResponse } from './types';
+
+type ModelStageMap = {
+  [K in AllActionStates]: ModelStage<K, any>;
+};
+
+type AnyModelStageHandler = (
+  state: State,
+  response: Either.Either<unknown, unknown>,
+  ctx: MigratorContext
+) => State;
+
+export const modelStageMap: ModelStageMap = {
+  INIT: Stages.init,
+  CREATE_TARGET_INDEX: Stages.createTargetIndex,
+  UPDATE_ALIASES: Stages.updateAliases,
+  UPDATE_INDEX_MAPPINGS: Stages.updateIndexMappings,
+  UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: Stages.updateIndexMappingsWaitForTask,
+  UPDATE_MAPPING_MODEL_VERSIONS: Stages.updateMappingModelVersion,
+  INDEX_STATE_UPDATE_DONE: Stages.indexStateUpdateDone,
+  DOCUMENTS_UPDATE_INIT: Stages.documentsUpdateInit,
+  SET_DOC_MIGRATION_STARTED: Stages.setDocMigrationStarted,
+  SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: Stages.setDocMigrationStartedWaitForInstances,
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: Stages.cleanupUnknownAndExcludedDocs,
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: Stages.cleanupUnknownAndExcludedDocsWaitForTask,
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH: Stages.cleanupUnknownAndExcludedDocsRefresh,
+  OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: Stages.outdatedDocumentsSearchOpenPit,
+  OUTDATED_DOCUMENTS_SEARCH_READ: Stages.outdatedDocumentsSearchRead,
+  OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: Stages.outdatedDocumentsSearchTransform,
+  OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: Stages.outdatedDocumentsSearchBulkIndex,
+  OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: Stages.outdatedDocumentsSearchClosePit,
+  OUTDATED_DOCUMENTS_SEARCH_REFRESH: Stages.outdatedDocumentsSearchRefresh,
+  UPDATE_DOCUMENT_MODEL_VERSIONS: Stages.updateDocumentModelVersion,
+  UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES:
+    Stages.updateDocumentModelVersionWaitForInstances,
+};
 
 export const model = (
   current: State,
@@ -29,14 +64,14 @@ export const model = (
     current = resetRetryState(current);
   }
 
-  switch (current.controlState) {
-    case 'INIT':
-      return Stages.init(current, response as StateActionResponse<'INIT'>, context);
-    case 'DONE':
-    case 'FATAL':
-      // The state-action machine will never call the model in the terminating states
-      return throwBadControlState(current as never);
-    default:
-      return throwBadControlState(current);
+  if (current.controlState === 'DONE' || current.controlState === 'FATAL') {
+    return throwBadControlState(current as never);
   }
+
+  const stageHandler = modelStageMap[current.controlState] as AnyModelStageHandler;
+  if (!stageHandler) {
+    return throwBadControlState(current as never);
+  }
+
+  return stageHandler(current, response, context);
 };

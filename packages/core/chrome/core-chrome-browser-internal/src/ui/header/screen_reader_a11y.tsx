@@ -8,7 +8,8 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiScreenReaderLive } from '@elastic/eui';
+import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { HeaderProps } from './header';
@@ -44,15 +45,35 @@ export const ScreenReaderRouteAnnouncements: FC<{
 
   // 1. Canvas dynamically updates breadcrumbs *and* page title/history on every name onChange,
   // which leads to focus fighting if this is enabled
-  // 2. Discover has custom h1 focus behavior on route change, which should probably
-  // be removed in favor of this for a more consistent SR experience
   const appId = useObservable(appId$);
-  const disableFocusForApps = ['canvas', 'discover'];
+  const disableFocusForApps = ['canvas'];
   const focusRegionOnTextChange = !disableFocusForApps.includes(appId || '');
 
   return (
     <EuiScreenReaderLive focusRegionOnTextChange={focusRegionOnTextChange}>
       {routeTitle}
     </EuiScreenReaderLive>
+  );
+};
+
+const fallbackContentQueries = [
+  'main', // Ideal target for all plugins using KibanaPageTemplate
+  '[role="main"]', // Fallback for plugins using deprecated EuiPageContent
+  '.kbnAppWrapper', // Last-ditch fallback for all plugins regardless of page template
+];
+
+export const SkipToMainContent = () => {
+  return (
+    <EuiSkipLink
+      position="fixed"
+      destinationId="" // TODO: Potentially allow this to be customizable per-plugin
+      fallbackDestination={fallbackContentQueries}
+      overrideLinkBehavior
+      href="" // Render a button
+    >
+      {i18n.translate('core.ui.skipToMainButton', {
+        defaultMessage: 'Skip to main content',
+      })}
+    </EuiSkipLink>
   );
 };

@@ -18,7 +18,7 @@ import { getThreatMock } from '../../../../../../common/detection_engine/schemas
 import {
   getOutputDetailsSampleWithExceptions,
   getSampleDetailsAsNdjson,
-} from '../../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
@@ -27,16 +27,43 @@ import { requestContextMock } from '../../../routes/__mocks__/request_context';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { Readable } from 'stream';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 const exceptionsClient = getExceptionListClientMock();
 
+const connectors = [
+  {
+    id: '123',
+    actionTypeId: '.slack',
+    name: 'slack',
+    config: {},
+    isPreconfigured: false,
+    isDeprecated: false,
+    isSystemAction: false,
+    referencedByCount: 1,
+  },
+  {
+    id: '456',
+    actionTypeId: '.email',
+    name: 'Email (preconfigured)',
+    config: {},
+    isPreconfigured: true,
+    isSystemAction: false,
+    isDeprecated: false,
+    referencedByCount: 1,
+  },
+];
 describe('getExportAll', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const { clients } = requestContextMock.createTools();
   const exporterMock = savedObjectsExporterMock.create();
   const requestMock = mockRouter.createKibanaRequest();
+  const actionsClient = actionsClientMock.create();
   beforeEach(async () => {
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+    actionsClient.getAll.mockImplementation(async () => {
+      return connectors;
+    });
   });
 
   test('it exports everything from the alerts client', async () => {
@@ -61,7 +88,8 @@ describe('getExportAll', () => {
       clients.savedObjectsClient,
       logger,
       exporterMock,
-      requestMock
+      requestMock,
+      actionsClient
     );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
@@ -93,6 +121,7 @@ describe('getExportAll', () => {
       references: ['http://example.com', 'https://example.com'],
       related_integrations: [],
       required_fields: [],
+      revision: 0,
       setup: '',
       timeline_id: 'some-timeline-id',
       timeline_title: 'some-timeline-title',
@@ -104,10 +133,10 @@ describe('getExportAll', () => {
       to: 'now',
       type: 'query',
       threat: getThreatMock(),
-      throttle: 'no_actions',
       note: '# Investigative notes',
       version: 1,
       exceptions_list: getListArrayMock(),
+      investigation_fields: undefined,
     });
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,
@@ -146,7 +175,8 @@ describe('getExportAll', () => {
       clients.savedObjectsClient,
       logger,
       exporterMock,
-      requestMock
+      requestMock,
+      actionsClient
     );
     expect(exports).toEqual({
       rulesNdjson: '',
@@ -231,7 +261,8 @@ describe('getExportAll', () => {
       clients.savedObjectsClient,
       logger,
       exporterMockWithConnector as never,
-      requestMock
+      requestMock,
+      actionsClient
     );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
@@ -246,6 +277,7 @@ describe('getExportAll', () => {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           action_type_id: '.slack',
+          frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
         },
       ],
       building_block_type: 'default',
@@ -284,10 +316,11 @@ describe('getExportAll', () => {
       to: 'now',
       type: 'query',
       threat: getThreatMock(),
-      throttle: 'rule',
       note: '# Investigative notes',
       version: 1,
+      revision: 0,
       exceptions_list: getListArrayMock(),
+      investigation_fields: undefined,
     });
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,
@@ -324,6 +357,89 @@ describe('getExportAll', () => {
       type: 'action',
       updated_at: '2023-01-11T11:30:31.683Z',
       version: 'WzE2MDYsMV0=',
+    });
+  });
+  test('it will export rule without its action connectors as they are Preconfigured', async () => {
+    const rulesClient = rulesClientMock.create();
+    const result = getFindResultWithSingleHit();
+    const alert = {
+      ...getRuleMock(getQueryRuleParams()),
+      actions: [
+        {
+          group: 'default',
+          id: '456',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionTypeId: '.email',
+        },
+      ],
+    };
+
+    alert.params = {
+      ...alert.params,
+      filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
+      threat: getThreatMock(),
+      meta: { someMeta: 'someField' },
+      timelineId: 'some-timeline-id',
+      timelineTitle: 'some-timeline-title',
+    };
+    result.data = [alert];
+    rulesClient.find.mockResolvedValue(result);
+    const readable = new Readable({
+      objectMode: true,
+      read() {
+        return null;
+      },
+    });
+
+    const exporterMockWithConnector = {
+      exportByObjects: () => jest.fn().mockReturnValueOnce(readable),
+
+      exportByTypes: jest.fn(),
+    };
+    const exports = await getExportAll(
+      rulesClient,
+      exceptionsClient,
+      clients.savedObjectsClient,
+      logger,
+      exporterMockWithConnector as never,
+      requestMock,
+      actionsClient
+    );
+    const rulesJson = JSON.parse(exports.rulesNdjson);
+    const detailsJson = JSON.parse(exports.exportDetails);
+    expect(rulesJson).toEqual(
+      expect.objectContaining({
+        actions: [
+          {
+            group: 'default',
+            id: '456',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+            action_type_id: '.email',
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+          },
+        ],
+      })
+    );
+    expect(detailsJson).toEqual({
+      exported_exception_list_count: 1,
+      exported_exception_list_item_count: 1,
+      exported_count: 3,
+      exported_rules_count: 1,
+      missing_exception_list_item_count: 0,
+      missing_exception_list_items: [],
+      missing_exception_lists: [],
+      missing_exception_lists_count: 0,
+      missing_rules: [],
+      missing_rules_count: 0,
+      excluded_action_connection_count: 0,
+      excluded_action_connections: [],
+      exported_action_connector_count: 0,
+      missing_action_connection_count: 0,
+      missing_action_connections: [],
     });
   });
 });

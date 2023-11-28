@@ -11,15 +11,22 @@ import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
+import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 import { fetchAnalyticsCollectionDataViewId } from './fetch_analytics_collection_data_view_id';
 
 jest.mock('./fetch_analytics_collection', () => ({
-  fetchAnalyticsCollectionById: jest.fn(),
+  fetchAnalyticsCollections: jest.fn(),
 }));
 
 describe('fetch analytics collection data view id', () => {
-  const mockClient = {};
+  const mockClient = {
+    asCurrentUser: {
+      transport: {
+        request: jest.fn(),
+      },
+    },
+    asInternalUser: {},
+  };
   const dataViewService = { find: jest.fn() };
 
   beforeEach(() => {
@@ -29,8 +36,8 @@ describe('fetch analytics collection data view id', () => {
   it('should return data view id of analytics collection by Id', async () => {
     const mockCollectionId = 'collectionId';
     const mockDataViewId = 'dataViewId';
-    const mockCollection = { events_datastream: 'log-collection-data-stream' };
-    (fetchAnalyticsCollectionById as jest.Mock).mockImplementationOnce(() =>
+    const mockCollection = [{ name: 'example', events_datastream: 'log-collection-data-stream' }];
+    (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve(mockCollection)
     );
 
@@ -43,14 +50,14 @@ describe('fetch analytics collection data view id', () => {
         mockCollectionId
       )
     ).resolves.toEqual({ data_view_id: mockDataViewId });
-    expect(fetchAnalyticsCollectionById).toHaveBeenCalledWith(mockClient, mockCollectionId);
-    expect(dataViewService.find).toHaveBeenCalledWith(mockCollection.events_datastream, 1);
+    expect(fetchAnalyticsCollections).toHaveBeenCalledWith(mockClient, mockCollectionId);
+    expect(dataViewService.find).toHaveBeenCalledWith(mockCollection[0].events_datastream, 1);
   });
 
   it('should return null when data view not found', async () => {
     const mockCollectionId = 'collectionId';
-    const mockCollection = { events_datastream: 'log-collection-data-stream' };
-    (fetchAnalyticsCollectionById as jest.Mock).mockImplementationOnce(() =>
+    const mockCollection = [{ events_datastream: 'log-collection-data-stream' }];
+    (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve(mockCollection)
     );
 
@@ -63,13 +70,16 @@ describe('fetch analytics collection data view id', () => {
         mockCollectionId
       )
     ).resolves.toEqual({ data_view_id: null });
-    expect(fetchAnalyticsCollectionById).toHaveBeenCalledWith(mockClient, mockCollectionId);
-    expect(dataViewService.find).toHaveBeenCalledWith(mockCollection.events_datastream, 1);
+    expect(fetchAnalyticsCollections).toHaveBeenCalledWith(mockClient, mockCollectionId);
+    expect(dataViewService.find).toHaveBeenCalledWith(mockCollection[0].events_datastream, 1);
   });
 
   it('should throw an error when analytics collection not found', async () => {
     const mockCollectionId = 'collectionId';
-    (fetchAnalyticsCollectionById as jest.Mock).mockImplementationOnce(() => Promise.resolve(null));
+
+    (fetchAnalyticsCollections as jest.Mock).mockImplementation(() => {
+      throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
+    });
 
     await expect(
       fetchAnalyticsCollectionDataViewId(
@@ -78,7 +88,7 @@ describe('fetch analytics collection data view id', () => {
         mockCollectionId
       )
     ).rejects.toThrowError(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
-    expect(fetchAnalyticsCollectionById).toHaveBeenCalledWith(mockClient, mockCollectionId);
+    expect(fetchAnalyticsCollections).toHaveBeenCalledWith(mockClient, mockCollectionId);
     expect(dataViewService.find).not.toHaveBeenCalled();
   });
 });

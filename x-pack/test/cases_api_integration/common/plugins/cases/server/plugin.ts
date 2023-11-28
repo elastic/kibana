@@ -6,31 +6,30 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as CasesPluginStart } from '@kbn/cases-plugin/server';
-import { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
-import { PluginSetupContract as CasesSetup } from '@kbn/cases-plugin/server/types';
+import type { CasesStart, CasesSetup } from '@kbn/cases-plugin/server';
+import { FilesSetup } from '@kbn/files-plugin/server';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
+import { registerRoutes } from './routes';
+import { registerCaseFixtureFileKinds } from './files';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   cases: CasesSetup;
+  files: FilesSetup;
 }
 
 export interface FixtureStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  cases?: CasesPluginStart;
+  cases: CasesStart;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   private readonly log: Logger;
-  private casesPluginStart?: CasesPluginStart;
   constructor(initContext: PluginInitializerContext) {
     this.log = initContext.logger.get();
   }
@@ -39,37 +38,49 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     deps.cases.attachmentFramework.registerExternalReference(getExternalReferenceAttachment());
     deps.cases.attachmentFramework.registerPersistableState(getPersistableStateAttachment());
 
-    const router = core.http.createRouter();
+    registerRoutes(core, this.log);
+    registerCaseFixtureFileKinds(deps.files);
+
     /**
-     * This simply wraps the cases patch case api so that we can test updating the status of an alert using
-     * the cases client interface instead of going through the case plugin's RESTful interface
+     * Kibana features
      */
-    router.patch(
-      {
-        path: '/api/cases_user/cases',
-        validate: {
-          body: schema.object({}, { unknowns: 'allow' }),
+
+    deps.features.registerKibanaFeature({
+      id: 'testNoCasesConnectorFixture',
+      name: 'TestNoCasesConnectorFixture',
+      app: ['kibana'],
+      category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      cases: ['testNoCasesConnectorFixture'],
+      privileges: {
+        all: {
+          api: [],
+          app: ['kibana'],
+          cases: {
+            create: ['testNoCasesConnectorFixture'],
+            read: ['testNoCasesConnectorFixture'],
+            update: ['testNoCasesConnectorFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          app: ['kibana'],
+          cases: {
+            read: ['testNoCasesConnectorFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
         },
       },
-      async (context, request, response) => {
-        try {
-          const client = await this.casesPluginStart?.getCasesClientWithRequest(request);
-          if (!client) {
-            throw new Error('Cases client was undefined');
-          }
+    });
+  }
 
-          return response.ok({
-            body: await client.cases.update(request.body as CasesPatchRequest),
-          });
-        } catch (error) {
-          this.log.error(`CasesClientUser failure: ${error}`);
-          throw error;
-        }
-      }
-    );
-  }
-  public start(core: CoreStart, plugins: FixtureStartDeps) {
-    this.casesPluginStart = plugins.cases;
-  }
+  public start(core: CoreStart, plugins: FixtureStartDeps) {}
   public stop() {}
 }

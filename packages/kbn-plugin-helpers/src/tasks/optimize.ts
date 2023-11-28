@@ -12,37 +12,46 @@ import { fork } from 'child_process';
 
 import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { createFailError } from '@kbn/dev-cli-errors';
 import { OptimizerConfig } from '@kbn/optimizer';
 import { Bundle, BundleRemotes } from '@kbn/optimizer/src/common';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
-import { BuildContext } from '../build_context';
+import { TaskContext } from '../task_context';
 
 type WorkerMsg = { success: true; warnings: string } | { success: false; error: string };
 
-export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContext) {
+export async function optimize({
+  log,
+  dev,
+  dist,
+  watch,
+  plugin,
+  sourceDir,
+  buildDir,
+}: TaskContext) {
   if (!plugin.manifest.ui) {
     return;
   }
 
-  log.info('running @kbn/optimizer');
+  log.info(`running @kbn/optimizer${!!watch ? ' in watch mode (use CTRL+C to quit)' : ''}`);
   await log.indent(2, async () => {
     const optimizerConfig = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       examples: false,
       testPlugins: false,
       includeCoreBundle: true,
-      dist: true,
+      dist: !!dist,
+      watch: !!watch,
     });
 
     const bundle = new Bundle({
       id: plugin.manifest.id,
       contextDir: sourceDir,
       ignoreMetrics: true,
-      outputDir: Path.resolve(buildDir, 'target/public'),
+      outputDir: Path.resolve(dev ? sourceDir : buildDir, 'target/public'),
       sourceRoot: sourceDir,
       type: 'plugin',
+      manifestPath: Path.resolve(sourceDir, 'kibana.json'),
       remoteInfo: {
         pkgId: 'not-importable',
         targets: ['public', 'common'],
@@ -54,60 +63,95 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
 
     const proc = fork(require.resolve('./optimize_worker'), {
       cwd: REPO_ROOT,
-      execArgv: ['--require=@kbn/babel-register/install'],
+      execArgv: ['--require=@kbn/babel-register/install', '--openssl-legacy-provider'],
       stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
     });
 
-    const result = await Rx.lastValueFrom(
-      Rx.race(
-        observeLines(proc.stdout!).pipe(
-          Rx.tap((line) => log.debug(line)),
-          Rx.ignoreElements()
-        ),
-        observeLines(proc.stderr!).pipe(
-          Rx.tap((line) => log.error(line)),
-          Rx.ignoreElements()
-        ),
-        Rx.defer(() => {
-          proc.send({
-            workerConfig: worker,
-            bundles: JSON.stringify([bundle.toSpec()]),
-            bundleRemotes: remotes.toSpecJson(),
-          });
+    const rel = Path.relative(REPO_ROOT, bundle.outputDir);
 
-          return Rx.merge(
-            Rx.fromEvent<[WorkerMsg]>(proc, 'message').pipe(
-              Rx.map((msg) => {
-                return msg[0];
-              })
-            ),
-            Rx.fromEvent<Error>(proc, 'error').pipe(
-              Rx.map((error) => {
-                throw error;
-              })
-            )
-          ).pipe(
-            Rx.take(1),
-            Rx.tap({
-              complete() {
-                proc.kill('SIGKILL');
-              },
-            })
-          );
-        })
-      )
+    // Observe all events from child process
+    const eventObservable = Rx.merge(
+      observeLines(proc.stdout!).pipe(Rx.map((line) => ({ type: 'stdout', data: line }))),
+      observeLines(proc.stderr!).pipe(Rx.map((line) => ({ type: 'stderr', data: line }))),
+      Rx.fromEvent<[WorkerMsg]>(proc, 'message').pipe(
+        Rx.map((msg) => ({ type: 'message', data: msg[0] }))
+      ),
+      Rx.fromEvent<Error>(proc, 'error').pipe(Rx.map((error) => ({ type: 'error', data: error })))
     );
 
-    // cleanup unnecessary files
-    Fs.unlinkSync(Path.resolve(bundle.outputDir, '.kbn-optimizer-cache'));
+    const simpleOrWatchObservable = watch
+      ? eventObservable
+      : eventObservable.pipe(
+          Rx.take(1),
+          Rx.tap({
+            complete() {
+              proc.kill('SIGKILL');
+            },
+          })
+        );
 
-    const rel = Path.relative(REPO_ROOT, bundle.outputDir);
-    if (!result.success) {
-      throw createFailError(`Optimizer failure: ${result.error}`);
-    } else if (result.warnings) {
-      log.warning(`browser bundle created at ${rel}, but with warnings:\n${result.warnings}`);
-    } else {
-      log.success(`browser bundle created at ${rel}`);
+    // Subscribe to eventObservable to log events
+    const eventSubscription = simpleOrWatchObservable.subscribe((event) => {
+      if (event.type === 'stdout') {
+        log.debug(event.data as string);
+      } else if (event.type === 'stderr') {
+        log.error(event.data as Error);
+      } else if (event.type === 'message') {
+        const result = event.data as WorkerMsg;
+        // Handle message event
+        if (!result.success) {
+          log.error(`Optimizer failure: ${result.error}`);
+        } else if (result.warnings) {
+          log.warning(`browser bundle created at ${rel}, but with warnings:\n${result.warnings}`);
+        } else {
+          log.success(`browser bundle created at ${rel}`);
+        }
+      } else if (event.type === 'error') {
+        log.error(event.data as Error);
+      }
+    });
+
+    // Send message to child process
+    proc.send({
+      workerConfig: worker,
+      bundles: JSON.stringify([bundle.toSpec()]),
+      bundleRemotes: remotes.toSpecJson(),
+    });
+
+    // Cleanup fn definition
+    const cleanup = () => {
+      // Cleanup unnecessary files
+      try {
+        Fs.unlinkSync(Path.resolve(bundle.outputDir, '.kbn-optimizer-cache'));
+      } catch {
+        // no-op
+      }
+
+      // Unsubscribe from eventObservable
+      eventSubscription.unsubscribe();
+
+      log.info('stopping @kbn/optimizer');
+    };
+
+    // if watch mode just wait for the first event then cleanup and exit
+    if (!watch) {
+      // Wait for parent process to exit if not in watch mode
+      await new Promise<void>((resolve) => {
+        proc.once('exit', () => {
+          cleanup();
+          resolve();
+        });
+      });
+
+      return;
     }
+
+    // Wait for parent process to exit if not in watch mode
+    await new Promise<void>((resolve) => {
+      process.once('exit', () => {
+        cleanup();
+        resolve();
+      });
+    });
   });
 }

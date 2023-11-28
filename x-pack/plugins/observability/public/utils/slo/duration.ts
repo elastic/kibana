@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { assertNever } from '@kbn/std';
 import { Duration, DurationUnit } from '../../typings';
 
@@ -27,9 +28,17 @@ export function toMinutes(duration: Duration) {
       return duration.value * 7 * 24 * 60;
     case 'M':
       return duration.value * 30 * 24 * 60;
-    case 'Y':
-      return duration.value * 365 * 24 * 60;
+    default:
+      assertNever(duration.unit);
   }
+}
 
-  assertNever(duration.unit);
+export function toCalendarAlignedMomentUnitOfTime(unit: string): moment.unitOfTime.StartOf {
+  switch (unit) {
+    default:
+    case 'w':
+      return 'isoWeek';
+    case 'M':
+      return 'months';
+  }
 }

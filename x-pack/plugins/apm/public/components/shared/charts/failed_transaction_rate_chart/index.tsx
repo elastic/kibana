@@ -24,6 +24,8 @@ import { useEnvironmentsContext } from '../../../../context/environments_context
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../../common/document_type';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -71,6 +73,16 @@ export function FailedTransactionRateChart({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    numBuckets: 100,
+    kuery,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
+  });
+
   const { environment } = useEnvironmentsContext();
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
@@ -88,7 +100,7 @@ export function FailedTransactionRateChart({
         return Promise.resolve(INITIAL_STATE);
       }
 
-      if (transactionType && serviceName && start && end) {
+      if (transactionType && serviceName && start && end && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
           {
@@ -107,6 +119,9 @@ export function FailedTransactionRateChart({
                   comparisonEnabled && isTimeComparison(offset)
                     ? offset
                     : undefined,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
           }
@@ -124,6 +139,7 @@ export function FailedTransactionRateChart({
       transactionName,
       offset,
       comparisonEnabled,
+      preferred,
     ]
   );
 

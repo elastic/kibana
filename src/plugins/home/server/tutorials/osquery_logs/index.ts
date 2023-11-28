@@ -43,7 +43,7 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/osquery.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/osquery.svg'),
     artifacts: {
       dashboards: [
         {
@@ -62,6 +62,6 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['security', 'os_system'],
+    integrationBrowserCategories: ['security'],
   };
 }

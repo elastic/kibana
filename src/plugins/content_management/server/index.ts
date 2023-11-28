@@ -7,11 +7,10 @@
  */
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { ContentManagementPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ContentManagementPlugin } = await import('./plugin');
   return new ContentManagementPlugin(initializerContext);
 }
 
 export type { ContentManagementServerSetup, ContentManagementServerStart } from './types';
-export type { ContentStorage, StorageContext } from './core';
+export type { ContentStorage, StorageContext, MSearchConfig } from './core';

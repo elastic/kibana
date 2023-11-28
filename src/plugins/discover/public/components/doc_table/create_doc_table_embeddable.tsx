@@ -17,6 +17,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         columns={renderProps.columns}
         rows={renderProps.rows}
         rowsPerPageState={renderProps.rowsPerPageState}
+        sampleSizeState={renderProps.sampleSizeState}
         onUpdateRowsPerPage={renderProps.onUpdateRowsPerPage}
         totalHitCount={renderProps.totalHitCount}
         dataView={renderProps.dataView}
@@ -31,6 +32,8 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         searchDescription={renderProps.searchDescription}
         sharedItemTitle={renderProps.sharedItemTitle}
         isLoading={renderProps.isLoading}
+        isPlainRecord={renderProps.isPlainRecord}
+        interceptedWarnings={renderProps.interceptedWarnings}
         dataTestSubj="embeddedSavedSearchDocTable"
       />
     </I18nProvider>

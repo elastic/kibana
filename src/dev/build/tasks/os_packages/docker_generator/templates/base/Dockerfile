@@ -115,11 +115,24 @@ WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
 {{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
+{{! Kibana applications may depend on the ELASTIC_CONTAINER value. Screenshotting uses this to conditionally disable the Chromium sandbox when launching Puppeteer. }}
 ENV ELASTIC_CONTAINER true
 ENV PATH=/usr/share/kibana/bin:$PATH
 
 # Set some Kibana configuration defaults.
 COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
+{{#serverless}}
+COPY --chown=1000:0 config/serverless.yml /usr/share/kibana/config/serverless.yml
+COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless.es.yml
+COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
+COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
+# Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
+RUN echo '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
+RUN echo '--diagnostic-dir=./data' >> config/node.options
+{{/serverless}}
+{{^opensslLegacyProvider}}
+RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
+{{/opensslLegacyProvider}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
@@ -186,4 +199,4 @@ CMD ["/usr/local/bin/kibana-docker"]
 {{/cloud}}
 
 
-USER kibana
+USER 1000

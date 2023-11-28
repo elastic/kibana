@@ -15,6 +15,29 @@ export const ADD_TO_TIMELINE = i18n.translate(
     defaultMessage: 'Add to timeline',
   }
 );
+export const INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.actions.cellValue.addToNewTimeline.displayName',
+  {
+    defaultMessage: 'Investigate in timeline',
+  }
+);
+
+export const SEVERITY = (level: string) =>
+  i18n.translate('xpack.securitySolution.actions.addToTimeline.severityLevel', {
+    values: { level },
+    defaultMessage: `{level} severity`,
+  });
+
+export const ALERTS_COUNT = (entity: string, description: string) =>
+  description !== ''
+    ? i18n.translate('xpack.securitySolution.actions.addToTimeline.descriptiveAlertsCountMessage', {
+        values: { description, entity },
+        defaultMessage: '{description} alerts from {entity}',
+      })
+    : i18n.translate('xpack.securitySolution.actions.addToTimeline.alertsCountMessage', {
+        values: { entity },
+        defaultMessage: '{entity} alerts',
+      });
 
 export const ADD_TO_TIMELINE_SUCCESS_TITLE = (value: string) =>
   i18n.translate('xpack.securitySolution.actions.addToTimeline.addedFieldMessage', {

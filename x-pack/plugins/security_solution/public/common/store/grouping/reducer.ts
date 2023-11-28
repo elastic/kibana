@@ -6,70 +6,21 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import {
-  initGrouping,
-  updateActiveGroup,
-  updateGroupActivePage,
-  updateGroupItemsPerPage,
-  updateGroupOptions,
-} from './actions';
-import { EMPTY_GROUP_BY_ID } from './constants';
-import { defaultGroup } from './defaults';
-import type { GroupMap } from './types';
+import { getDefaultGroupingOptions } from '../../utils/alerts';
+import { updateGroups } from './actions';
+import type { Groups } from './types';
 
-const initialGroupState: GroupMap = {
-  groupById: EMPTY_GROUP_BY_ID,
-};
+export const initialGroupingState: Groups = {};
 
-export const groupsReducer = reducerWithInitialState(initialGroupState)
-  .case(updateActiveGroup, (state, { id, activeGroup }) => ({
+export const groupsReducer = reducerWithInitialState(initialGroupingState).case(
+  updateGroups,
+  (state, { tableId, ...rest }) => ({
     ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...state.groupById[id],
-        activeGroup,
-      },
+    [tableId]: {
+      activeGroups: [],
+      options: getDefaultGroupingOptions(tableId),
+      ...(state[tableId] ? state[tableId] : {}),
+      ...rest,
     },
-  }))
-  .case(updateGroupActivePage, (state, { id, activePage }) => ({
-    ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...state.groupById[id],
-        activePage,
-      },
-    },
-  }))
-
-  .case(updateGroupItemsPerPage, (state, { id, itemsPerPage }) => ({
-    ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...state.groupById[id],
-        itemsPerPage,
-      },
-    },
-  }))
-  .case(updateGroupOptions, (state, { id, newOptionList }) => ({
-    ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...state.groupById[id],
-        options: newOptionList,
-      },
-    },
-  }))
-  .case(initGrouping, (state, { id }) => ({
-    ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...defaultGroup,
-        ...state.groupById[id],
-      },
-    },
-  }));
+  })
+);

@@ -14,6 +14,7 @@ describe('UserProfileAPIClient', () => {
   let apiClient: UserProfileAPIClient;
   beforeEach(() => {
     coreStart = coreMock.createStart();
+    coreStart.http.get.mockResolvedValue(undefined);
     coreStart.http.post.mockResolvedValue(undefined);
 
     apiClient = new UserProfileAPIClient(coreStart.http);

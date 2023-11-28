@@ -11,8 +11,6 @@ import styled, { css } from 'styled-components';
 
 import { useAllCasesNavigation } from '../../common/navigation';
 import { LinkIcon } from '../link_icon';
-import type { SubtitleProps } from '../subtitle';
-import { Subtitle } from '../subtitle';
 import { Title } from './title';
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -59,8 +57,6 @@ LinkBack.displayName = 'LinkBack';
 export interface HeaderPageProps extends HeaderProps {
   showBackButton?: boolean;
   children?: React.ReactNode;
-  subtitle?: SubtitleProps['items'];
-  subtitle2?: SubtitleProps['items'];
   title: string | React.ReactNode;
   titleNode?: React.ReactElement;
   'data-test-subj'?: string;
@@ -71,8 +67,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   border,
   children,
   isLoading,
-  subtitle,
-  subtitle2,
   title,
   titleNode,
   'data-test-subj': dataTestSubj,
@@ -93,7 +87,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   return (
     <Header border={border} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center">
-        <FlexItem>
+        <FlexItem css={{ overflow: 'hidden' }}>
           {showBackButton && (
             <LinkBack>
               <LinkIcon
@@ -109,8 +103,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
 
           {titleNode || <Title title={title} releasePhase={releasePhase} />}
 
-          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
           {border && isLoading && <EuiProgress size="xs" color="accent" />}
         </FlexItem>
 

@@ -26,7 +26,7 @@ import {
   FieldsGroupNames,
   useExistingFieldsFetcher,
   useGroupedFields,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
@@ -34,10 +34,9 @@ import type {
   IndexPattern,
   IndexPatternField,
 } from '../../types';
-import { ChildDragDropProvider, DragContextState } from '../../drag_drop';
 import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
-import { FieldItem } from './field_item';
+import { FieldItem } from '../common/field_item';
 
 export type Props = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState>,
@@ -77,7 +76,6 @@ function onSupportedFieldFilter(field: IndexPatternField): boolean {
 
 export function FormBasedDataPanel({
   state,
-  dragDropContext,
   core,
   data,
   dataViews,
@@ -127,7 +125,7 @@ export function FormBasedDataPanel({
                 defaultMessage: 'No data views',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <p>
                 <FormattedMessage
@@ -144,7 +142,6 @@ export function FormBasedDataPanel({
           query={query}
           dateRange={dateRange}
           filters={filters}
-          dragDropContext={dragDropContext}
           core={core}
           data={data}
           dataViews={dataViews}
@@ -171,13 +168,10 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   query,
   dateRange,
   filters,
-  dragDropContext,
   core,
   data,
   dataViews,
-  fieldFormats,
   indexPatternFieldEditor,
-  charts,
   dropOntoWorkspace,
   hasSuggestionForField,
   uiActions,
@@ -196,7 +190,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
-  dragDropContext: DragContextState;
   charts: ChartsPluginSetup;
   frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -380,48 +373,38 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         hasSuggestionForField={hasSuggestionForField}
         editField={editField}
         removeField={removeField}
-        uiActions={uiActions}
-        core={core}
-        fieldFormats={fieldFormats}
         indexPattern={currentIndexPattern}
         highlight={fieldSearchHighlight}
         dateRange={dateRange}
         query={query}
         filters={filters}
-        chartsThemeService={charts.theme}
       />
     ),
     [
-      core,
-      fieldFormats,
       currentIndexPattern,
       dateRange,
       query,
       filters,
-      charts.theme,
       dropOntoWorkspace,
       hasSuggestionForField,
       editField,
       removeField,
-      uiActions,
     ]
   );
 
   return (
-    <ChildDragDropProvider {...dragDropContext}>
-      <FieldList
-        className="lnsInnerIndexPatternDataPanel"
-        isProcessing={isProcessing}
-        prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
-      >
-        <FieldListGrouped<IndexPatternField>
-          {...fieldListGroupedProps}
-          renderFieldItem={renderFieldItem}
-          data-test-subj="lnsIndexPattern"
-          localStorageKeyPrefix="lens"
-        />
-      </FieldList>
-    </ChildDragDropProvider>
+    <FieldList
+      className="lnsInnerIndexPatternDataPanel"
+      isProcessing={isProcessing}
+      prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
+    >
+      <FieldListGrouped<IndexPatternField>
+        {...fieldListGroupedProps}
+        renderFieldItem={renderFieldItem}
+        data-test-subj="lnsIndexPattern"
+        localStorageKeyPrefix="lens"
+      />
+    </FieldList>
   );
 };
 

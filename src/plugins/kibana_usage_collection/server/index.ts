@@ -7,11 +7,11 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { KibanaUsageCollectionPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { KibanaUsageCollectionPlugin } = await import('./plugin');
   return new KibanaUsageCollectionPlugin(initializerContext);
 }

@@ -16,9 +16,32 @@ import type {
 import {
   modelVersionToVirtualVersion,
   assertValidModelVersion,
+  buildModelVersionTransformFn,
+  convertModelVersionBackwardConversionSchema,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { TransformSavedObjectDocumentError } from '../core';
-import { type Transform, type TransformFn, TransformType } from './types';
+import { type Transform, type TransformFn, TransformType, type TypeVersionSchema } from './types';
+
+export const getModelVersionSchemas = ({
+  typeDefinition,
+}: {
+  typeDefinition: SavedObjectsType;
+}): Record<string, TypeVersionSchema> => {
+  const modelVersionMap =
+    typeof typeDefinition.modelVersions === 'function'
+      ? typeDefinition.modelVersions()
+      : typeDefinition.modelVersions ?? {};
+
+  return Object.entries(modelVersionMap).reduce((map, [rawModelVersion, versionDefinition]) => {
+    const schema = versionDefinition.schemas?.forwardCompatibility;
+    if (schema) {
+      const modelVersion = assertValidModelVersion(rawModelVersion);
+      const virtualVersion = modelVersionToVirtualVersion(modelVersion);
+      map[virtualVersion] = convertModelVersionBackwardConversionSchema(schema);
+    }
+    return map;
+  }, {} as Record<string, TypeVersionSchema>);
+};
 
 export const getModelVersionTransforms = ({
   typeDefinition,
@@ -32,45 +55,42 @@ export const getModelVersionTransforms = ({
       ? typeDefinition.modelVersions()
       : typeDefinition.modelVersions ?? {};
 
-  const transforms = Object.entries(modelVersionMap)
-    .filter(([_, definition]) => !!definition.modelChange.transformation)
-    .map<Transform>(([rawModelVersion, definition]) => {
-      const modelVersion = assertValidModelVersion(rawModelVersion);
-      const virtualVersion = modelVersionToVirtualVersion(modelVersion);
-      return {
-        version: virtualVersion,
-        transform: convertModelVersionTransformFn({
-          log,
-          modelVersion,
-          virtualVersion,
-          definition,
-        }),
-        transformType: TransformType.Migrate,
-      };
-    });
-
-  return transforms;
+  return Object.entries(modelVersionMap).map<Transform>(([rawModelVersion, definition]) => {
+    const modelVersion = assertValidModelVersion(rawModelVersion);
+    const virtualVersion = modelVersionToVirtualVersion(modelVersion);
+    return {
+      version: virtualVersion,
+      transform: convertModelVersionTransformFn({
+        typeDefinition,
+        log,
+        modelVersion,
+        virtualVersion,
+        modelVersionDefinition: definition,
+      }),
+      transformType: TransformType.Migrate,
+    };
+  });
 };
 
 export const convertModelVersionTransformFn = ({
+  typeDefinition,
   virtualVersion,
   modelVersion,
-  definition,
+  modelVersionDefinition,
   log,
 }: {
+  typeDefinition: SavedObjectsType;
   virtualVersion: string;
   modelVersion: number;
-  definition: SavedObjectsModelVersion;
+  modelVersionDefinition: SavedObjectsModelVersion;
   log: Logger;
 }): TransformFn => {
-  if (!definition.modelChange.transformation) {
-    throw new Error('cannot convert model change without a transform');
-  }
   const context: SavedObjectModelTransformationContext = {
     log,
     modelVersion,
+    namespaceType: typeDefinition.namespaceType,
   };
-  const modelTransformFn = definition.modelChange.transformation.up;
+  const modelTransformFn = buildModelVersionTransformFn(modelVersionDefinition.changes);
 
   return function convertedTransform(doc: SavedObjectUnsanitizedDoc) {
     try {

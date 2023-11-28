@@ -10,10 +10,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import {
   ConcreteTaskInstance,
+  SerializedConcreteTaskInstance,
   TaskInstanceWithDeprecatedFields,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server/task';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import type { RuleTaskState, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -189,6 +191,86 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         .forEach((task) => {
           expect(task._source?.task.enabled).to.be(undefined);
         });
+    });
+
+    describe('8.8.0', async () => {
+      it('adds UUIDs to all alerts', async () => {
+        const response = await es.search<{ task: SerializedConcreteTaskInstance }>(
+          {
+            index: '.kibana_task_manager',
+            size: 100,
+            body: { query: { match_all: {} } },
+          },
+          { meta: true }
+        );
+        expect(response.statusCode).to.eql(200);
+        const tasks = response.body.hits.hits;
+        tasks.forEach((task) => {
+          const stateString = task._source?.task.state;
+          expect(stateString).to.be.ok();
+          const state: RuleTaskState = JSON.parse(stateString!);
+          const uuids = new Set<string>();
+
+          for (const alert of Object.values(state.alertInstances || {})) {
+            const uuid = alert?.meta?.uuid || 'uuid-is-missing';
+            expect(uuid).to.match(/^.{8}-.{4}-.{4}-.{4}-.{12}$/);
+            expect(uuids.has(uuid)).to.be(false);
+            uuids.add(uuid);
+          }
+
+          for (const alert of Object.values(state.alertRecoveredInstances || {})) {
+            const uuid = alert?.meta?.uuid || 'uuid-is-missing';
+            expect(uuid).to.match(/^.{8}-.{4}-.{4}-.{4}-.{12}$/);
+            expect(uuids.has(uuid)).to.be(false);
+            uuids.add(uuid);
+          }
+        });
+      });
+
+      it('copies UUIDs from rule registry wrapper to alerting framework', async () => {
+        const response = await es.search<{ task: SerializedConcreteTaskInstance }>(
+          {
+            index: '.kibana_task_manager',
+            size: 100,
+            body: { query: { match_all: {} } },
+          },
+          { meta: true }
+        );
+        expect(response.statusCode).to.eql(200);
+        const tasks = response.body.hits.hits;
+        tasks.forEach((task) => {
+          const stateString = task._source?.task.state;
+          expect(stateString).to.be.ok();
+
+          const state: RuleTaskState = JSON.parse(stateString!);
+          if (!state?.alertTypeState?.wrapped) return;
+
+          const wrappedUUIDs = new Map<string, string>();
+          const wrappedState = state.alertTypeState as WrappedLifecycleRuleState<any>;
+
+          for (const alert of Object.values(wrappedState.trackedAlerts || {})) {
+            const id = alert.alertId;
+            const uuid = alert.alertUuid;
+            wrappedUUIDs.set(id, uuid);
+          }
+
+          for (const alert of Object.values(wrappedState.trackedAlertsRecovered || {})) {
+            const id = alert.alertId;
+            const uuid = alert.alertUuid;
+            wrappedUUIDs.set(id, uuid);
+          }
+
+          for (const [id, alert] of Object.entries(state.alertInstances || {})) {
+            const uuid = alert?.meta?.uuid || 'uuid-is-missing';
+            expect(uuid).to.be(wrappedUUIDs.get(id));
+          }
+
+          for (const [id, alert] of Object.entries(state.alertRecoveredInstances || {})) {
+            const uuid = alert?.meta?.uuid || 'uuid-is-missing';
+            expect(uuid).to.be(wrappedUUIDs.get(id));
+          }
+        });
+      });
     });
   });
 }

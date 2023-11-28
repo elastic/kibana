@@ -19,6 +19,8 @@ export interface ElasticsearchResponseError {
   name: 'ResponseError';
 }
 
+const MISSING_ALIAS_ERROR = new RegExp(/^alias \[.+\] missing/);
+
 export const isIndexNotFoundException = (error: ElasticsearchResponseError) =>
   error?.meta?.body?.error?.type === 'index_not_found_exception';
 
@@ -36,3 +38,21 @@ export const isPipelineIsInUseException = (error: Error) =>
 
 export const isNotFoundException = (error: ElasticsearchResponseError) =>
   error.meta?.statusCode === 404;
+
+export const isIllegalArgumentException = (error: ElasticsearchResponseError) =>
+  error.meta?.body?.error?.type === 'illegal_argument_exception';
+
+export const isVersionConflictEngineException = (error: ElasticsearchResponseError) =>
+  error.meta?.body?.error?.type === 'version_conflict_engine_exception';
+
+export const isInvalidSearchApplicationNameException = (error: ElasticsearchResponseError) =>
+  error.meta?.body?.error?.type === 'invalid_alias_name_exception';
+
+export const isMissingAliasException = (error: ElasticsearchResponseError) =>
+  error.meta?.statusCode === 404 &&
+  typeof error.meta?.body?.error === 'string' &&
+  MISSING_ALIAS_ERROR.test(error.meta?.body?.error);
+
+export const isAccessControlDisabledException = (error: Error) => {
+  return error.message === ErrorCode.ACCESS_CONTROL_DISABLED;
+};

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpHandler } from '@kbn/core/public';
-import { ToastInput } from '@kbn/core/public';
+import { HttpHandler, ToastInput } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useTrackedPromise, CanceledPromiseError } from '../utils/use_tracked_promise';
 import { InfraHttpError } from '../types';
 
@@ -19,18 +19,20 @@ export function useHTTPRequest<Response>(
   body?: string | null,
   decode: (response: any) => Response = (response) => response,
   fetch?: HttpHandler,
-  toastDanger?: (input: ToastInput) => void
+  toastDanger?: (input: ToastInput) => void,
+  abortable = false
 ) {
   const kibana = useKibana();
   const fetchService = fetch ? fetch : kibana.services.http?.fetch;
   const toast = toastDanger ? toastDanger : kibana.notifications.toasts.danger;
   const [response, setResponse] = useState<Response | null>(null);
   const [error, setError] = useState<InfraHttpError | null>(null);
+  const abortController = useRef(new AbortController());
 
   const onError = useCallback(
     (e: unknown) => {
       const err = e as InfraHttpError;
-      if (e && e instanceof CanceledPromiseError) {
+      if (e && (e instanceof CanceledPromiseError || (e as Error).name === AbortError.name)) {
         return;
       }
       setError(err);
@@ -72,14 +74,30 @@ export function useHTTPRequest<Response>(
     [toast]
   );
 
-  const [request, makeRequest] = useTrackedPromise<any, Response>(
+  useEffect(() => {
+    return () => {
+      if (abortable) {
+        abortController.current.abort();
+      }
+    };
+  }, [abortable]);
+
+  const [request, makeRequest, resetRequestState] = useTrackedPromise<any, Response>(
     {
       cancelPreviousOn: 'resolution',
       createPromise: () => {
         if (!fetchService) {
           throw new Error('HTTP service is unavailable');
         }
+
+        if (abortable) {
+          abortController.current.abort();
+        }
+
+        abortController.current = new AbortController();
+
         return fetchService(pathname, {
+          signal: abortController.current.signal,
           method,
           body,
         });
@@ -87,6 +105,7 @@ export function useHTTPRequest<Response>(
       onResolve: (resp) => {
         try {
           setResponse(decode(resp)); // Catch decoding errors
+          setError(null);
         } catch (e) {
           onError(e);
         }
@@ -98,17 +117,13 @@ export function useHTTPRequest<Response>(
     [pathname, body, method, fetch, toast, onError]
   );
 
-  const loading = useMemo(() => {
-    if (request.state === 'resolved' && response === null) {
-      return true;
-    }
-    return request.state === 'pending';
-  }, [request.state, response]);
+  const loading = request.state === 'uninitialized' || request.state === 'pending';
 
   return {
     response,
     error,
     loading,
     makeRequest,
+    resetRequestState,
   };
 }

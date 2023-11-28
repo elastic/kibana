@@ -29,6 +29,13 @@ export const DATA_QUALITY_TITLE = i18n.translate(
   }
 );
 
+export const DATE_PICKER_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.datePicker.tooltip',
+  {
+    defaultMessage: `Data quality checks are ran on data that was ingested during the Search Boost window. The default window range is 7 days.`,
+  }
+);
+
 export const ELASTIC_COMMON_SCHEMA = i18n.translate(
   'xpack.securitySolution.dataQualityDashboard.elasticCommonSchemaReferenceLink',
   {
@@ -101,13 +108,6 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.pageTitle',
   {
     defaultMessage: 'Detection & Response',
-  }
-);
-
-export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.pageDesc',
-  {
-    defaultMessage: 'Detect threats from users and hosts within your network with Entity Analytics',
   }
 );
 

@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
 
+import { StatusFilter } from './status_filter';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
 import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
 import { useGetUrlParams } from '../../../hooks';
@@ -34,7 +35,7 @@ export const TestRunsTableHeader = ({
   const { monitor } = useSelectedMonitor();
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="l" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h3>{paginable || pings?.length < 10 ? TEST_RUNS : LAST_10_TEST_RUNS}</h3>
@@ -42,8 +43,12 @@ export const TestRunsTableHeader = ({
       </EuiFlexItem>
       <EuiFlexItem grow={true} />
       <EuiFlexItem grow={false}>
+        <StatusFilter />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         {showViewHistoryButton ? (
           <EuiLink
+            data-test-subj="syntheticsTestRunsTableHeaderLink"
             href={
               monitor?.[ConfigKey.CONFIG_ID]
                 ? history.createHref({

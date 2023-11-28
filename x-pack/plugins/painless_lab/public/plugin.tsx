@@ -56,6 +56,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           notifications,
           docLinks,
           chrome,
+          settings,
         } = core;
 
         const license = await firstValueFrom(licensing.license$);
@@ -75,6 +76,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           links: getLinks(docLinks),
           chrome,
           theme$,
+          settings,
         });
 
         return () => {

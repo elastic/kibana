@@ -24,6 +24,8 @@ interface Props {
   setRuleProperty: (key: string, value: any) => void;
   defaultParams: Record<string, any>;
   fields: React.ReactNode[];
+  groupAlertsBy?: React.ReactNode;
+  kqlFilter?: React.ReactNode;
   chartPreview?: React.ReactNode;
   minimumWindowSize?: MinimumWindowSize;
 }
@@ -31,6 +33,8 @@ interface Props {
 export function ApmRuleParamsContainer(props: Props) {
   const {
     fields,
+    groupAlertsBy,
+    kqlFilter,
     setRuleParams,
     defaultParams,
     chartPreview,
@@ -60,8 +64,7 @@ export function ApmRuleParamsContainer(props: Props) {
       {showMinimumWindowSizeWarning && minimumWindowSize && (
         <MinimumWindowSizeWarning minimumWindowSize={minimumWindowSize} />
       )}
-
-      <EuiSpacer size="l" />
+      {kqlFilter}
       <EuiFlexGrid gutterSize="l" direction="row" columns={2}>
         {fields.map((field, index) => (
           <EuiFlexItem grow={false} key={index}>
@@ -69,9 +72,9 @@ export function ApmRuleParamsContainer(props: Props) {
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-
       {chartPreview}
       <EuiSpacer size="m" />
+      {groupAlertsBy}
     </>
   );
 }
@@ -99,7 +102,7 @@ function MinimumWindowSizeWarning({
         minimumWindowSize.value
       } ${getTimeUnitLabel(minimumWindowSize.unit)}`}
       color="warning"
-      iconType="alert"
+      iconType="warning"
     >
       <p>{description}</p>
     </EuiCallOut>

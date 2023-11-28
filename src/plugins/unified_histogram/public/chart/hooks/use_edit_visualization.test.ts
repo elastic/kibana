@@ -39,7 +39,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView: dataViewWithTimefieldMock,
-        getRelativeTimeRange: () => relativeTimeRange,
+        relativeTimeRange,
         lensAttributes,
       })
     );
@@ -59,7 +59,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView: { ...dataViewWithTimefieldMock, id: undefined } as DataView,
-        getRelativeTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
@@ -73,8 +73,23 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView: dataViewMock,
-        getRelativeTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
+      })
+    );
+    await act(() => setTimeout(0));
+    expect(hook.result.current).toBeUndefined();
+  });
+
+  it('should return undefined if is on text based mode', async () => {
+    getTriggerCompatibleActions.mockReturnValue(Promise.resolve([{ id: 'test' }]));
+    const hook = renderHook(() =>
+      useEditVisualization({
+        services: unifiedHistogramServicesMock,
+        dataView: dataViewWithTimefieldMock,
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
+        lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
+        isPlainRecord: true,
       })
     );
     await act(() => setTimeout(0));
@@ -93,7 +108,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView,
-        getRelativeTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
@@ -107,7 +122,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView: dataViewWithTimefieldMock,
-        getRelativeTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );

@@ -7,11 +7,16 @@
 
 import { navigateTo } from '../tasks/navigation';
 import { UPDATE_PACKAGE_BTN } from '../screens/integrations';
-import { LOADING_SPINNER, TOAST_CLOSE_BTN } from '../screens/navigation';
+import { LOADING_SPINNER } from '../screens/navigation';
 import { AGENT_POLICY_SAVE_INTEGRATION } from '../screens/fleet';
 import { INSTALLED_VERSION, INTEGRATION_POLICIES_UPGRADE_CHECKBOX } from '../screens/integrations';
+import { login } from '../tasks/login';
 
 describe('Add Integration - Mock API', () => {
+  beforeEach(() => {
+    login();
+  });
+
   describe('upgrade package and upgrade package policy', () => {
     const oldVersion = '0.3.3';
     const newVersion = '1.3.4';
@@ -22,7 +27,7 @@ describe('Add Integration - Mock API', () => {
             name: 'apache',
             id: 'apache',
             version: newVersion,
-            savedObject: { attributes: { version: oldVersion } },
+            installationInfo: { version: oldVersion },
             status: 'installed',
           },
         ],
@@ -35,7 +40,7 @@ describe('Add Integration - Mock API', () => {
           latestVersion: newVersion,
           status: 'installed',
           assets: [],
-          savedObject: { attributes: { version: oldVersion } },
+          installationInfo: { version: oldVersion },
         },
       });
       cy.intercept('/api/fleet/epm/packages/apache/stats', { response: { agent_policy_count: 1 } });
@@ -106,7 +111,7 @@ describe('Add Integration - Mock API', () => {
           latestVersion: newVersion,
           status: 'installed',
           assets: [],
-          savedObject: { attributes: { version: newVersion } },
+          installationInfo: { version: newVersion },
         },
       }).as('updatePackage');
       cy.getBySel(UPDATE_PACKAGE_BTN).click();
@@ -123,7 +128,7 @@ describe('Add Integration - Mock API', () => {
           latestVersion: newVersion,
           status: 'installed',
           assets: [],
-          savedObject: { attributes: { version: newVersion } },
+          installationInfo: { version: newVersion },
         },
       });
       cy.intercept('/api/fleet/epm/packages/apache/stats', { response: { agent_policy_count: 1 } });
@@ -143,7 +148,6 @@ describe('Add Integration - Mock API', () => {
         '/app/fleet/policies/package-1/upgrade-package-policy/apache-2?from=integrations-policy-list'
       );
 
-      cy.getBySel(TOAST_CLOSE_BTN).click();
       cy.getBySel(AGENT_POLICY_SAVE_INTEGRATION).click();
 
       cy.wait('@updateApachePolicy').then((interception) => {

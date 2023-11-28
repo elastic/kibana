@@ -16,8 +16,9 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  describe('ES deprecation logs page', function () {
-    this.tags('skipFirefox');
+  // Failing: See https://github.com/elastic/kibana/issues/167094
+  describe.skip('ES deprecation logs page', function () {
+    this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);

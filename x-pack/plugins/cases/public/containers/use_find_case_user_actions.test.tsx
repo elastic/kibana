@@ -29,19 +29,22 @@ describe('UseFindCaseUserActions', () => {
   const params = {
     type: filterActionType,
     sortOrder,
+    page: 1,
+    perPage: 10,
   };
+
+  const isEnabled = true;
 
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('returns proper state on findCaseUserActions', async () => {
     const { result, waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, params),
+      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
       { wrapper: appMockRender.AppWrapper }
     );
 
@@ -52,8 +55,8 @@ describe('UseFindCaseUserActions', () => {
         ...initialData,
         data: {
           userActions: [...findCaseUserActionsResponse.userActions],
-          total: 20,
-          perPage: 1000,
+          total: 30,
+          perPage: 10,
           page: 1,
         },
         isError: false,
@@ -67,7 +70,17 @@ describe('UseFindCaseUserActions', () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     const { waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, { type: 'user', sortOrder: 'desc' }),
+      () =>
+        useFindCaseUserActions(
+          basicCase.id,
+          {
+            type: 'user',
+            sortOrder: 'desc',
+            page: 1,
+            perPage: 5,
+          },
+          isEnabled
+        ),
       { wrapper: appMockRender.AppWrapper }
     );
 
@@ -75,9 +88,30 @@ describe('UseFindCaseUserActions', () => {
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
-      { type: 'user', sortOrder: 'desc' },
+      { type: 'user', sortOrder: 'desc', page: 1, perPage: 5 },
       expect.any(AbortSignal)
     );
+  });
+
+  it('does not call API when not enabled', async () => {
+    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+
+    renderHook(
+      () =>
+        useFindCaseUserActions(
+          basicCase.id,
+          {
+            type: 'user',
+            sortOrder: 'desc',
+            page: 1,
+            perPage: 5,
+          },
+          false
+        ),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it('shows a toast error when the API returns an error', async () => {
@@ -86,15 +120,18 @@ describe('UseFindCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook(() => useFindCaseUserActions(basicCase.id, params), {
-      wrapper: appMockRender.AppWrapper,
-    });
+    const { waitForNextUpdate } = renderHook(
+      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
 
     await waitForNextUpdate();
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
-      { type: filterActionType, sortOrder },
+      { type: filterActionType, sortOrder, page: 1, perPage: 10 },
       expect.any(AbortSignal)
     );
     expect(addError).toHaveBeenCalled();

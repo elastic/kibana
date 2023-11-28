@@ -6,7 +6,6 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
@@ -16,8 +15,15 @@ import {
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 
 const ERROR_SAMPLES_SIZE = 10000;
+
+export interface ErrorGroupSampleIdsResponse {
+  errorSampleIds: string[];
+  occurrencesCount: number;
+}
 
 export async function getErrorGroupSampleIds({
   environment,
@@ -35,10 +41,15 @@ export async function getErrorGroupSampleIds({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
-  const params = {
+}): Promise<ErrorGroupSampleIdsResponse> {
+  const resp = await apmEventClient.search('get_error_group_sample_ids', {
     apm: {
-      events: [ProcessorEvent.error as const],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: ERROR_SAMPLES_SIZE,
@@ -55,19 +66,17 @@ export async function getErrorGroupSampleIds({
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
         },
       },
-      _source: [ERROR_ID],
+      _source: [ERROR_ID, 'transaction'],
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
       ] as const),
     },
-  };
-
-  const resp = await apmEventClient.search(
-    'get_error_group_sample_ids',
-    params
-  );
-  const errorSampleIds = resp.hits.hits.map((item) => item._source.error.id);
+  });
+  const errorSampleIds = resp.hits.hits.map((item) => {
+    const source = item._source;
+    return source.error.id;
+  });
 
   return {
     errorSampleIds,

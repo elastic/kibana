@@ -80,7 +80,7 @@ export const DeleteIndexModal: React.FC = () => {
           'xpack.enterpriseSearch.content.searchIndices.deleteModal.delete.description',
           {
             defaultMessage:
-              'Deleting this index will also delete all of its data and its {ingestionMethod} configuration. Any associated search engines will no longer be able to access any data stored in this index.',
+              'Deleting this index will also delete all of its data and its {ingestionMethod} configuration. Any associated search applications will no longer be able to access any data stored in this index.',
             values: {
               ingestionMethod: ingestionMethodToText(ingestionMethod),
             },
@@ -91,7 +91,7 @@ export const DeleteIndexModal: React.FC = () => {
         <>
           <EuiCallOut
             color="warning"
-            iconType="alert"
+            iconType="warning"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.title',
               {

@@ -11,13 +11,15 @@ import { mappingFromFieldMap } from './mapping_from_field_map';
 
 export interface GetComponentTemplateFromFieldMapOpts {
   name: string;
-  fieldLimit?: number;
   fieldMap: FieldMap;
+  includeSettings?: boolean;
+  dynamic?: 'strict' | false;
 }
 export const getComponentTemplateFromFieldMap = ({
   name,
   fieldMap,
-  fieldLimit,
+  dynamic,
+  includeSettings,
 }: GetComponentTemplateFromFieldMapOpts): ClusterPutComponentTemplateRequest => {
   return {
     name,
@@ -26,10 +28,16 @@ export const getComponentTemplateFromFieldMap = ({
     },
     template: {
       settings: {
-        number_of_shards: 1,
-        'index.mapping.total_fields.limit': fieldLimit ?? 1000,
+        ...(includeSettings
+          ? {
+              number_of_shards: 1,
+              'index.mapping.total_fields.limit':
+                Math.ceil(Object.keys(fieldMap).length / 1000) * 1000 + 500,
+            }
+          : {}),
       },
-      mappings: mappingFromFieldMap(fieldMap, 'strict'),
+
+      mappings: mappingFromFieldMap(fieldMap, dynamic ?? 'strict'),
     },
   };
 };

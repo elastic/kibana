@@ -12,18 +12,11 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { EditDownloadSourceFlyout } from '.';
 
-jest.mock('../../../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-  useFleetStatus: jest.fn().mockReturnValue({}),
-}));
-
 function renderFlyout(downloadSource?: DownloadSource) {
   const renderer = createFleetTestRendererMock();
 
   const comp = renderer.render(
-    <EditDownloadSourceFlyout downloadSource={downloadSource} onClose={() => {}} />
+    <EditDownloadSourceFlyout downloadSource={downloadSource} onClose={() => {}} proxies={[]} />
   );
 
   return { comp };

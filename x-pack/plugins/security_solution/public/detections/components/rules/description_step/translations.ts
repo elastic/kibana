@@ -15,9 +15,23 @@ export const FILTERS_LABEL = i18n.translate(
 );
 
 export const QUERY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.QueryLabel',
+  'xpack.securitySolution.detectionEngine.createRule.queryLabel',
   {
     defaultMessage: 'Custom query',
+  }
+);
+
+export const EQL_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.eqlQueryLabel',
+  {
+    defaultMessage: 'EQL query',
+  }
+);
+
+export const ESQL_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.esqlQueryLabel',
+  {
+    defaultMessage: 'ES|QL query',
   }
 );
 
@@ -91,6 +105,13 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ESQL_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.esqlRuleTypeDescription',
+  {
+    defaultMessage: 'ES|QL',
+  }
+);
+
 export const THRESHOLD_RESULTS_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
   {
@@ -134,16 +155,37 @@ export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSE = i18n.translate(
   }
 );
 
-export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionTechnicalPreview',
-  {
-    defaultMessage: 'Technical Preview',
-  }
-);
-
 export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution',
   {
     defaultMessage: 'One rule execution',
+  }
+);
+
+export const ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionSuppressOnMissingFieldsDescription',
+  {
+    defaultMessage: 'Suppress and group alerts for events with missing fields',
+  }
+);
+
+export const ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionDoNotSuppressOnMissingFieldsDescription',
+  {
+    defaultMessage: 'Do not suppress alerts for events with missing fields',
+  }
+);
+
+export const BUILDING_BLOCK_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.buildingBlockLabel',
+  {
+    defaultMessage: 'Building block',
+  }
+);
+
+export const BUILDING_BLOCK_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.buildingBlockDescription',
+  {
+    defaultMessage: 'All generated alerts will be marked as "building block" alerts',
   }
 );

@@ -74,10 +74,18 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._source = args.source as IMvtVectorSource;
   }
 
-  isInitialDataLoadComplete(): boolean {
-    return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
-      ? false
-      : super.isInitialDataLoadComplete();
+  isLayerLoading(zoom: number) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+
+    const isSourceLoading = super.isLayerLoading(zoom);
+    return isSourceLoading ? true : this._isLoadingJoins();
+  }
+
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
   }
 
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
@@ -135,7 +143,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // TODO ES MVT specific - move to es_tiled_vector_layer implementation
     //
     if (this.getSource().getType() === SOURCE_TYPES.ES_GEO_GRID) {
-      const { docCount } = getAggsMeta(this._getMetaFromTiles());
+      const { docCount } = getAggsMeta(this._getTileMetaFeatures());
       return docCount === 0
         ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT
         : {
@@ -155,7 +163,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
 
     const { totalFeaturesCount, tilesWithFeatures, tilesWithTrimmedResults } = getHitsMeta(
-      this._getMetaFromTiles(),
+      this._getTileMetaFeatures(),
       maxResultWindow
     );
 
@@ -332,7 +340,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // When there are no join results, return a filter that hides all features
     // work around for 'match' with empty array not filtering out features
     // This filter always returns false because features will never have `__kbn_never_prop__` property
-    const hideAllFilter = ['has', '__kbn_never_prop__'];
+    const hideAllFilter = ['has', '__kbn_never_prop__'] as FilterSpecification;
 
     if (!joinPropertiesMap) {
       return hideAllFilter;
@@ -536,7 +544,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
     const { joinPropertiesMap } = this._getJoinResults();
     return await pluckStyleMeta(
-      this._getMetaFromTiles(),
+      this._getTileMetaFeatures(),
       joinPropertiesMap,
       await this.getSource().getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()

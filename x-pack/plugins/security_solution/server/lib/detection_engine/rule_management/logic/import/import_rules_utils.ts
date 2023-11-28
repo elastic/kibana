@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
@@ -13,11 +13,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
-import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../rule_actions/legacy_action_migration';
+import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { createRules } from '../crud/create_rules';
@@ -44,9 +41,6 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param rulesClient {object}
- * @param savedObjectsClient {object}
- * @param exceptionsClient {object}
- * @param spaceId {string} - space being used during import
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -57,9 +51,6 @@ export const importRules = async ({
   mlAuthz,
   overwriteRules,
   rulesClient,
-  savedObjectsClient,
-  exceptionsClient,
-  spaceId,
   existingLists,
   allowMissingConnectorSecrets,
 }: {
@@ -68,9 +59,6 @@ export const importRules = async ({
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
   rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  exceptionsClient: ExceptionListClient | undefined;
-  spaceId: string;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }) => {
@@ -128,19 +116,15 @@ export const importRules = async ({
                     status_code: 200,
                   });
                 } else if (rule != null && overwriteRules) {
-                  const migratedRule = await legacyMigrate({
-                    rulesClient,
-                    savedObjectsClient,
-                    rule,
-                  });
                   await patchRules({
                     rulesClient,
-                    existingRule: migratedRule,
+                    existingRule: rule,
                     nextParams: {
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },
                     allowMissingConnectorSecrets,
+                    shouldIncrementRevision: false,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,

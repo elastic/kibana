@@ -9,7 +9,12 @@ import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { AlertConsumers, ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -18,9 +23,9 @@ import {
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
   FetchAlertData,
+  RenderCustomActionsRowArgs,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
-import { TypeRegistry } from '../../type_registry';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
@@ -29,19 +34,26 @@ import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
+import { createCasesServiceMock } from './index.mock';
+import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
+import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
 jest.mock('./hooks/use_bulk_get_cases');
+jest.mock('./hooks/use_bulk_get_maintenance_windows');
 
 jest.mock('@kbn/kibana-utils-plugin/public');
 
 const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
+const mockCaseService = createCasesServiceMock();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
       application: {
+        getUrlForApp: jest.fn(() => ''),
         capabilities: {
           fakeCases: {
             create_cases: true,
@@ -53,21 +65,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
         },
         currentAppId$: mockCurrentAppId$,
       },
-      cases: {
-        ui: {
-          getCasesContext: () => null,
-        },
-        helpers: {
-          getUICapabilities: () => ({
-            all: true,
-            read: true,
-            create: true,
-            update: true,
-            delete: true,
-            push: true,
-          }),
-        },
-      },
+      cases: mockCaseService,
       notifications: {
         toasts: {
           addDanger: () => {},
@@ -76,6 +74,43 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     },
   }),
 }));
+
+const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+beforeAll(() => {
+  // The JSDOM implementation is too slow
+  // Especially for dropdowns that try to position themselves
+  // perf issue - https://github.com/jsdom/jsdom/issues/3234
+  Object.defineProperty(window, 'getComputedStyle', {
+    value: (el: HTMLElement) => {
+      /**
+       * This is based on the jsdom implementation of getComputedStyle
+       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+       *
+       * It is missing global style parsing and will only return styles applied directly to an element.
+       * Will not return styles that are global or from emotion
+       */
+      const declaration = new CSSStyleDeclaration();
+      const { style } = el;
+
+      Array.prototype.forEach.call(style, (property: string) => {
+        declaration.setProperty(
+          property,
+          style.getPropertyValue(property),
+          style.getPropertyPriority(property)
+        );
+      });
+
+      return declaration;
+    },
+    configurable: true,
+    writable: true,
+  });
+});
+
+afterAll(() => {
+  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+});
 
 const columns = [
   {
@@ -90,6 +125,10 @@ const columns = [
     id: ALERT_CASE_IDS,
     displayAsText: 'Cases',
   },
+  {
+    id: ALERT_MAINTENANCE_WINDOW_IDS,
+    displayAsText: 'Maintenance Windows',
+  },
 ];
 
 const alerts = [
@@ -97,13 +136,21 @@ const alerts = [
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
     [AlertsField.uuid]: ['1047d115-670d-469e-af7a-86fdd2b2f814'],
+    [ALERT_UUID]: ['alert-id-1'],
     [ALERT_CASE_IDS]: ['test-id'],
+    [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1'],
   },
   {
     [AlertsField.name]: ['three'],
     [AlertsField.reason]: ['four'],
     [AlertsField.uuid]: ['bf5f6d63-5afd-48e0-baf6-f28c2b68db46'],
     [ALERT_CASE_IDS]: ['test-id-2'],
+    [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-2'],
+  },
+  {
+    [AlertsField.name]: ['five'],
+    [AlertsField.reason]: ['six'],
+    [AlertsField.uuid]: ['1047d115-5afd-469e-baf6-f28c2b68db46'],
   },
 ] as unknown as Alerts;
 
@@ -126,6 +173,16 @@ const oldAlertsData = [
     {
       field: AlertsField.reason,
       value: ['four'],
+    },
+  ],
+  [
+    {
+      field: AlertsField.name,
+      value: ['five'],
+    },
+    {
+      field: AlertsField.reason,
+      value: ['six'],
     },
   ],
 ] as FetchAlertData['oldAlertsData'];
@@ -161,6 +218,21 @@ const ecsAlertsData = [
       },
     },
   ],
+  [
+    {
+      '@timestamp': ['2023-01-26T10:48:49.559Z'],
+      _id: 'SomeId3',
+      _index: 'SomeIndex',
+      kibana: {
+        alert: {
+          rule: {
+            name: ['five'],
+          },
+          reason: ['six'],
+        },
+      },
+    },
+  ],
 ] as FetchAlertData['ecsAlertsData'];
 
 const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
@@ -192,14 +264,35 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
         jest.fn().mockImplementation((props) => {
           return `${props.colIndex}:${props.rowIndex}`;
         }),
+      useActionsColumn: () => ({
+        renderCustomActionsRow: ({ setFlyoutAlert }: RenderCustomActionsRowArgs) => {
+          return (
+            <button
+              data-test-subj="expandColumnCellOpenFlyoutButton-0"
+              onClick={() => {
+                setFlyoutAlert({
+                  fields: {
+                    [ALERT_UUID]: 'alert-id-1',
+                  },
+                });
+              }}
+            />
+          );
+        },
+      }),
     };
   }
   return {};
 });
+
+const updateMock = jest.fn();
+const getActionsMock = jest.fn();
 const alertsTableConfigurationRegistryMock = {
   has: hasMock,
   get: getMock,
-} as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+  getActions: getActionsMock,
+  update: updateMock,
+} as unknown as AlertTableConfigRegistry;
 
 const storageMock = Storage as jest.Mock;
 
@@ -227,6 +320,9 @@ hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
 const casesMap = getCasesMockMap();
 const useBulkGetCasesMock = useBulkGetCases as jest.Mock;
 
+const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
+
 const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
   <IntlProvider locale="en">
     <AlertsTableState {...props} />
@@ -240,7 +336,6 @@ describe('AlertsTableState', () => {
     id: `test-alerts`,
     featureIds: [AlertConsumers.LOGS],
     query: {},
-    showExpandToDetails: true,
   };
 
   const mockCustomProps = (customProps: Partial<AlertsTableConfigurationRegistry>) => {
@@ -257,7 +352,8 @@ describe('AlertsTableState', () => {
     const alertsTableConfigurationRegistryWithPersistentControlsMock = {
       has: hasMock,
       get: getMockWithUsePersistentControls,
-    } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+      update: updateMock,
+    } as unknown as AlertTableConfigRegistry;
 
     return {
       ...tableProps,
@@ -267,11 +363,23 @@ describe('AlertsTableState', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    useBulkGetCasesMock.mockReturnValue({ data: casesMap, isLoading: false });
+    useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: false });
+    useBulkGetMaintenanceWindowsMock.mockReturnValue({
+      data: maintenanceWindowsMap,
+      isFetching: false,
+    });
   });
 
-  describe('cases column', () => {
+  describe('Cases', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+    });
+
+    afterAll(() => {
+      mockCaseService.ui.getCasesContext = jest.fn().mockImplementation(() => null);
+    });
+
     it('should show the cases column', async () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       expect(await screen.findByText('Cases')).toBeInTheDocument();
@@ -283,11 +391,18 @@ describe('AlertsTableState', () => {
       expect(await screen.findByText('Test case 2')).toBeInTheDocument();
     });
 
+    it('should show the loading skeleton when fetching cases', async () => {
+      useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: true });
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(3);
+    });
+
     it('should pass the correct case ids to useBulkGetCases', async () => {
       render(<AlertsTableWithLocale {...tableProps} />);
 
       await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2']);
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2'], true);
       });
     });
 
@@ -303,7 +418,7 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
 
       await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2']);
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2'], true);
       });
     });
 
@@ -322,7 +437,225 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
 
       await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2']);
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], true);
+      });
+    });
+
+    it('should not fetch cases if the user does not have permissions', async () => {
+      mockCaseService.helpers.canUseCases = jest
+        .fn()
+        .mockReturnValue({ create: false, read: false });
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+
+      await waitFor(() => {
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], false);
+      });
+    });
+
+    it('should not fetch cases if the column is not visible', async () => {
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+
+      const props = mockCustomProps({
+        cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
+        columns: [
+          {
+            id: AlertsField.name,
+            displayAsText: 'Name',
+          },
+        ],
+      });
+
+      render(<AlertsTableWithLocale {...props} />);
+      await waitFor(() => {
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], false);
+      });
+    });
+
+    it('calls canUseCases with an empty array if the case configuration is not defined', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith([]);
+    });
+
+    it('calls canUseCases with the case owner if defined', async () => {
+      const props = mockCustomProps({
+        cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
+      });
+
+      render(<AlertsTableWithLocale {...props} />);
+      expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith(['test-owner']);
+    });
+
+    it('should call the cases context with the correct props', async () => {
+      const props = mockCustomProps({
+        cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
+      });
+
+      const CasesContextMock = jest.fn().mockReturnValue(null);
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
+
+      render(<AlertsTableWithLocale {...props} />);
+
+      expect(CasesContextMock).toHaveBeenCalledWith(
+        {
+          children: expect.anything(),
+          owner: ['test-owner'],
+          permissions: { create: true, read: true },
+          features: { alerts: { sync: false } },
+        },
+        {}
+      );
+    });
+
+    it('should call the cases context with the empty owner if the case config is not defined', async () => {
+      const CasesContextMock = jest.fn().mockReturnValue(null);
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(CasesContextMock).toHaveBeenCalledWith(
+        {
+          children: expect.anything(),
+          owner: [],
+          permissions: { create: true, read: true },
+          features: { alerts: { sync: false } },
+        },
+        {}
+      );
+    });
+
+    it('should call the cases context with correct permissions', async () => {
+      const CasesContextMock = jest.fn().mockReturnValue(null);
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
+      mockCaseService.helpers.canUseCases = jest
+        .fn()
+        .mockReturnValue({ create: false, read: false });
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(CasesContextMock).toHaveBeenCalledWith(
+        {
+          children: expect.anything(),
+          owner: [],
+          permissions: { create: false, read: false },
+          features: { alerts: { sync: false } },
+        },
+        {}
+      );
+    });
+
+    it('should call the cases context with sync alerts turned on if defined in the cases config', async () => {
+      const props = mockCustomProps({
+        cases: { featureId: 'test-feature-id', owner: ['test-owner'], syncAlerts: true },
+      });
+
+      const CasesContextMock = jest.fn().mockReturnValue(null);
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
+
+      render(<AlertsTableWithLocale {...props} />);
+      expect(CasesContextMock).toHaveBeenCalledWith(
+        {
+          children: expect.anything(),
+          owner: ['test-owner'],
+          permissions: { create: true, read: true },
+          features: { alerts: { sync: true } },
+        },
+        {}
+      );
+    });
+  });
+
+  describe('Maintenance windows', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should show maintenance windows column', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(await screen.findByText('Maintenance Windows')).toBeInTheDocument();
+    });
+
+    it('should show maintenance windows titles correctly', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(await screen.findByText('test-title')).toBeInTheDocument();
+      expect(await screen.findByText('test-title-2')).toBeInTheDocument();
+    });
+
+    it('should pass the correct maintenance window ids to useBulkGetMaintenanceWindows', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      await waitFor(() => {
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
+          ids: ['test-mw-id-1', 'test-mw-id-2'],
+          canFetchMaintenanceWindows: true,
+        });
+      });
+    });
+
+    it('should remove duplicated maintenance window ids', async () => {
+      hookUseFetchAlerts.mockReturnValue([
+        false,
+        {
+          ...fetchAlertsResponse,
+          alerts: [...fetchAlertsResponse.alerts, ...fetchAlertsResponse.alerts],
+        },
+      ]);
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      await waitFor(() => {
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
+          ids: ['test-mw-id-1', 'test-mw-id-2'],
+          canFetchMaintenanceWindows: true,
+        });
+      });
+    });
+
+    it('should skip alerts with empty maintenance window ids', async () => {
+      hookUseFetchAlerts.mockReturnValue([
+        false,
+        {
+          ...fetchAlertsResponse,
+          alerts: [
+            { ...fetchAlertsResponse.alerts[0], 'kibana.alert.maintenance_window_ids': [] },
+            fetchAlertsResponse.alerts[1],
+          ],
+        },
+      ]);
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      await waitFor(() => {
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
+          ids: ['test-mw-id-2'],
+          canFetchMaintenanceWindows: true,
+        });
+      });
+    });
+
+    it('should show loading skeleton when fetching maintenance windows', async () => {
+      useBulkGetMaintenanceWindowsMock.mockReturnValue({
+        data: maintenanceWindowsMap,
+        isFetching: true,
+      });
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect((await screen.findAllByTestId('maintenance-window-cell-loading')).length).toBe(1);
+    });
+
+    it('should not fetch maintenance windows if the user does not have permission', async () => {});
+
+    it('should not fetch maintenance windows if the column is not visible', async () => {
+      const props = mockCustomProps({
+        columns: [
+          {
+            id: AlertsField.name,
+            displayAsText: 'Name',
+          },
+        ],
+      });
+
+      render(<AlertsTableWithLocale {...props} />);
+      await waitFor(() => {
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
+          ids: ['test-mw-id-2'],
+          canFetchMaintenanceWindows: false,
+        });
       });
     });
   });
@@ -332,6 +665,7 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       expect(hasMock).toHaveBeenCalledWith(PLUGIN_ID);
       expect(getMock).toHaveBeenCalledWith(PLUGIN_ID);
+      expect(updateMock).toBeCalledTimes(2);
     });
 
     it('should render an empty error state when the plugin id owner is not registered', async () => {
@@ -344,7 +678,7 @@ describe('AlertsTableState', () => {
   describe('flyout', () => {
     it('should show a flyout when selecting an alert', async () => {
       const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
 
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
@@ -372,7 +706,7 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
@@ -395,6 +729,44 @@ describe('AlertsTableState', () => {
           pagination: {
             pageIndex: 0,
             pageSize: 1,
+          },
+        })
+      );
+    });
+
+    it('Should be able to go back from last page to n - 1', async () => {
+      const wrapper = render(
+        <AlertsTableWithLocale
+          {...{
+            ...tableProps,
+            pageSize: 2,
+          }}
+        />
+      );
+
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      const result = await wrapper.findAllByTestId('alertsFlyout');
+      expect(result.length).toBe(1);
+
+      hookUseFetchAlerts.mockClear();
+
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 1,
+            pageSize: 2,
+          },
+        })
+      );
+
+      hookUseFetchAlerts.mockClear();
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 0,
+            pageSize: 2,
           },
         })
       );
@@ -424,6 +796,11 @@ describe('AlertsTableState', () => {
     beforeEach(() => {
       hookUseFetchBrowserFieldCapabilities.mockClear();
       hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
+      useBulkGetCasesMock.mockReturnValue({ data: new Map(), isFetching: false });
+      useBulkGetMaintenanceWindowsMock.mockReturnValue({
+        data: new Map(),
+        isFetching: false,
+      });
     });
 
     it('should show field browser', () => {
@@ -450,9 +827,15 @@ describe('AlertsTableState', () => {
       storageMock.mockImplementation(() => ({
         get: () => {
           return {
-            columns: [{ displayAsText: 'Reason', id: 'kibana.alert.reason', schema: undefined }],
-            sort: [],
-            visibleColumns: ['kibana.alert.reason'],
+            columns: [{ displayAsText: 'Reason', id: AlertsField.reason, schema: undefined }],
+            sort: [
+              {
+                [AlertsField.reason]: {
+                  order: 'asc',
+                },
+              },
+            ],
+            visibleColumns: [AlertsField.reason],
           };
         },
         set: jest.fn(),
@@ -468,11 +851,11 @@ describe('AlertsTableState', () => {
 
       await waitFor(() => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
-        expect(
-          getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[1]
-            .getAttribute('title')
-        ).toBe('Name');
+        const titles: string[] = [];
+        getByTestId('dataGridHeader')
+          .querySelectorAll('.euiDataGridHeaderCell__content')
+          .forEach((n) => titles.push(n?.getAttribute('title') ?? ''));
+        expect(titles).toContain('Name');
       });
     });
 

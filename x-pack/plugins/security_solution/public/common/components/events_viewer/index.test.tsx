@@ -22,8 +22,7 @@ import { useTimelineEvents } from './use_timelines_events';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { mount } from 'enzyme';
 
 jest.mock('../../lib/kibana');
@@ -37,13 +36,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-
-const originalKibanaLib = jest.requireActual('../../lib/kibana');
-
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('./use_timelines_events');
 
@@ -65,7 +57,7 @@ const ACTION_BUTTON_COUNT = 4;
 const testProps: EventsViewerProps = {
   defaultModel: eventsDefaultModel,
   end: to,
-  entityType: EntityType.ALERTS,
+  entityType: EntityType.EVENTS,
   indexNames: [],
   tableId: TableId.test,
   leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),

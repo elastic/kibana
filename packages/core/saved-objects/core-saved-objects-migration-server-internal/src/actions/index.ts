@@ -12,7 +12,6 @@ import type { RetryableEsClientError } from './catch_retryable_es_client_errors'
 import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
 export {
-  BATCH_SIZE,
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
   INDEX_NUMBER_OF_SHARDS,
@@ -37,7 +36,11 @@ export { removeWriteBlock } from './remove_write_block';
 export type { CloneIndexResponse, CloneIndexParams } from './clone_index';
 export { cloneIndex } from './clone_index';
 
-export type { WaitForIndexStatusParams, IndexNotYellowTimeout } from './wait_for_index_status';
+export type {
+  WaitForIndexStatusParams,
+  IndexNotYellowTimeout,
+  IndexNotGreenTimeout,
+} from './wait_for_index_status';
 import type { IndexNotGreenTimeout, IndexNotYellowTimeout } from './wait_for_index_status';
 import { waitForIndexStatus } from './wait_for_index_status';
 
@@ -78,7 +81,10 @@ export { cleanupUnknownAndExcluded } from './cleanup_unknown_and_excluded';
 
 export { waitForDeleteByQueryTask } from './wait_for_delete_by_query_task';
 
-export type { CreateIndexParams } from './create_index';
+export type { CreateIndexParams, ClusterShardLimitExceeded } from './create_index';
+
+export { synchronizeMigrators } from './synchronize_migrators';
+
 export { createIndex } from './create_index';
 
 export { checkTargetMappings } from './check_target_mappings';
@@ -91,11 +97,18 @@ export type {
 } from './update_and_pickup_mappings';
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
-export { updateMappings } from './update_mappings';
+export { updateMappings, type IncompatibleMappingException } from './update_mappings';
+
+export {
+  type UpdateSourceMappingsPropertiesParams,
+  updateSourceMappingsProperties,
+} from './update_source_mappings_properties';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
-import { ClusterShardLimitExceeded } from './create_index';
+import type { ClusterShardLimitExceeded } from './create_index';
+import type { SynchronizationFailed } from './synchronize_migrators';
+import type { ActualMappingsIncomplete, ComparedMappingsChanged } from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,
@@ -105,12 +118,6 @@ export type {
 export { checkForUnknownDocs } from './check_for_unknown_docs';
 
 export { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
-
-export type {
-  SearchResponse,
-  SearchForOutdatedDocumentsOptions,
-} from './search_for_outdated_documents';
-export { searchForOutdatedDocuments } from './search_for_outdated_documents';
 
 export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
 export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
@@ -129,6 +136,11 @@ export interface IndexNotFound {
   index: string;
 }
 
+export interface OperationNotSupported {
+  type: 'operation_not_supported';
+  operationName: string;
+}
+
 export interface WaitForReindexTaskFailure {
   readonly cause: { type: string; reason: string };
 }
@@ -139,6 +151,11 @@ export interface TargetIndexHadWriteBlock {
 
 export interface RequestEntityTooLargeException {
   type: 'request_entity_too_large_exception';
+}
+
+export interface EsResponseTooLargeError {
+  type: 'es_response_too_large';
+  contentLength: number;
 }
 
 /** @internal */
@@ -163,6 +180,11 @@ export interface ActionErrorTypeMap {
   index_not_green_timeout: IndexNotGreenTimeout;
   index_not_yellow_timeout: IndexNotYellowTimeout;
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
+  es_response_too_large: EsResponseTooLargeError;
+  synchronization_failed: SynchronizationFailed;
+  actual_mappings_incomplete: ActualMappingsIncomplete;
+  compared_mappings_changed: ComparedMappingsChanged;
+  operation_not_supported: OperationNotSupported;
 }
 
 /**

@@ -14,6 +14,7 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import type { Capabilities } from '@kbn/core/public';
 
+import type { LocatorPublic } from '../../common';
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
@@ -26,6 +27,10 @@ export interface ShareContextMenuProps {
   objectType: string;
   shareableUrl?: string;
   shareableUrlForSavedObject?: string;
+  shareableUrlLocatorParams?: {
+    locator: LocatorPublic<any>;
+    params: any;
+  };
   shareMenuItems: ShareMenuItem[];
   sharingData: any;
   onClose: () => void;
@@ -68,6 +73,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
           objectType={this.props.objectType}
           shareableUrl={this.props.shareableUrl}
           shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
+          shareableUrlLocatorParams={this.props.shareableUrlLocatorParams}
           anonymousAccess={this.props.anonymousAccess}
           showPublicUrlSwitch={this.props.showPublicUrlSwitch}
           urlService={this.props.urlService}
@@ -102,6 +108,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
             objectType={this.props.objectType}
             shareableUrl={this.props.shareableUrl}
             shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
+            shareableUrlLocatorParams={this.props.shareableUrlLocatorParams}
             urlParamExtensions={this.props.embedUrlParamExtensions}
             anonymousAccess={this.props.anonymousAccess}
             showPublicUrlSwitch={this.props.showPublicUrlSwitch}

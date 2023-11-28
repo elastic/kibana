@@ -6,7 +6,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { safeParseResult } from '@kbn/zod-helpers';
 import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -57,8 +57,8 @@ function validateState(
   urlState: RulesTableUrlSavedState | null,
   storageState: RulesTableStorageSavedState | null
 ): [RulesTableSavedFilter, RulesTableSavedSorting, RulesTableUrlSavedPagination] {
-  const [filterFromUrl] = validateNonExact(urlState, RulesTableSavedFilter);
-  const [filterFromStorage] = validateNonExact(storageState, RulesTableSavedFilter);
+  const filterFromUrl = safeParseResult(urlState, RulesTableSavedFilter);
+  const filterFromStorage = safeParseResult(storageState, RulesTableSavedFilter);
   // We have to expose filter, sorting and pagination objects by explicitly specifying each field
   // since urlState and/or storageState may contain unnecessary fields (e.g. outdated or explicitly added by user)
   // and validateNonExact doesn't truncate fields not included in the type RulesTableSavedFilter and etc.
@@ -67,17 +67,19 @@ function validateState(
     source: filterFromUrl?.source ?? filterFromStorage?.source,
     tags: filterFromUrl?.tags ?? filterFromStorage?.tags,
     enabled: filterFromUrl?.enabled ?? filterFromStorage?.enabled,
+    ruleExecutionStatus:
+      filterFromUrl?.ruleExecutionStatus ?? filterFromStorage?.ruleExecutionStatus,
   };
 
-  const [sortingFromUrl] = validateNonExact(urlState, RulesTableSavedSorting);
-  const [sortingFromStorage] = validateNonExact(storageState, RulesTableSavedSorting);
+  const sortingFromUrl = safeParseResult(urlState, RulesTableSavedSorting);
+  const sortingFromStorage = safeParseResult(storageState, RulesTableSavedSorting);
   const sorting = {
     field: sortingFromUrl?.field ?? sortingFromStorage?.field,
     order: sortingFromUrl?.order ?? sortingFromStorage?.order,
-  };
+  } as const;
 
-  const [paginationFromUrl] = validateNonExact(urlState, RulesTableUrlSavedPagination);
-  const [paginationFromStorage] = validateNonExact(storageState, RulesTableStorageSavedPagination);
+  const paginationFromUrl = safeParseResult(urlState, RulesTableUrlSavedPagination);
+  const paginationFromStorage = safeParseResult(storageState, RulesTableStorageSavedPagination);
   const pagination = {
     page: paginationFromUrl?.page, // We don't persist page number in the session storage since it may be outdated when restored
     perPage: paginationFromUrl?.perPage ?? paginationFromStorage?.perPage,

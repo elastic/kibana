@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n-react';
 
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import {
   ACTIVE_TIMELINE_BUTTON_CLASS_NAME,
@@ -22,20 +21,18 @@ import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/
 import { timelineActions } from '../../../store/timeline';
 import * as i18n from './translations';
 
-const EuiHealthStyled = styled(EuiHealth)`
-  display: block;
-`;
-
-interface ActiveTimelinesProps {
+export interface ActiveTimelinesProps {
   timelineId: string;
-  timelineStatus: TimelineStatus;
   timelineTitle: string;
   timelineType: TimelineType;
   isOpen: boolean;
-  updated?: number;
 }
 
 const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
+  &:active,
+  &:focus {
+    background: transparent;
+  }
   > span {
     padding: 0;
   }
@@ -45,17 +42,17 @@ const TitleConatiner = styled(EuiFlexItem)`
   overflow: hidden;
   display: inline-block;
   text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   timelineId,
-  timelineStatus,
   timelineType,
   timelineTitle,
-  updated,
   isOpen,
 }) => {
   const dispatch = useDispatch();
+
   const handleToggleOpen = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: !isOpen }));
     focusActiveTimelineButton();
@@ -67,22 +64,35 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     ? UNTITLED_TEMPLATE
     : UNTITLED_TIMELINE;
 
-  const tooltipContent = useMemo(() => {
-    if (timelineStatus === TimelineStatus.draft) {
-      return <>{i18n.UNSAVED}</>;
-    }
+  const titleContent = useMemo(() => {
     return (
-      <>
-        {i18n.AUTOSAVED}{' '}
-        <FormattedRelative
-          data-test-subj="timeline-status"
-          key="timeline-status-autosaved"
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          value={new Date(updated!)}
-        />
-      </>
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="flexStart"
+        responsive={false}
+      >
+        <TitleConatiner data-test-subj="timeline-title" grow={false}>
+          {isOpen ? (
+            <EuiText grow={false}>
+              <h3>{title}</h3>
+            </EuiText>
+          ) : (
+            <>{title}</>
+          )}
+        </TitleConatiner>
+        {!isOpen && (
+          <EuiFlexItem grow={false}>
+            <TimelineEventsCountBadge />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     );
-  }, [timelineStatus, updated]);
+  }, [isOpen, title]);
+
+  if (isOpen) {
+    return <>{titleContent}</>;
+  }
 
   return (
     <StyledEuiButtonEmpty
@@ -94,26 +104,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
       isSelected={isOpen}
       onClick={handleToggleOpen}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        justifyContent="flexStart"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={tooltipContent}>
-            <EuiHealthStyled
-              color={timelineStatus === TimelineStatus.draft ? 'warning' : 'success'}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <TitleConatiner grow={false}>{title}</TitleConatiner>
-        {!isOpen && (
-          <EuiFlexItem grow={false}>
-            <TimelineEventsCountBadge />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      {titleContent}
     </StyledEuiButtonEmpty>
   );
 };

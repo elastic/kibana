@@ -118,7 +118,7 @@ export const TemplatesForm = React.memo(({ value }: Props) => {
           path="dynamicTemplates"
           component={JsonEditorField}
           componentProps={{
-            euiCodeEditorProps: {
+            codeEditorProps: {
               ['data-test-subj']: 'dynamicTemplatesEditor',
               height: '600px',
               'aria-label': i18n.translate(

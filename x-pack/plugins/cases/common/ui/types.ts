@@ -13,29 +13,37 @@ import type {
   UPDATE_CASES_CAPABILITY,
 } from '..';
 import type {
-  CasePatchRequest,
+  CASES_CONNECTORS_CAPABILITY,
+  CASES_SETTINGS_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+} from '../constants';
+import type { SnakeToCamelCase } from '../types';
+import type {
+  CaseSeverity,
   CaseStatuses,
+  UserAction,
+  Case as CaseSnakeCase,
   User,
   ActionConnector,
-  CaseUserActionResponse,
-  SingleCaseMetricsResponse,
-  CommentResponse,
-  CaseResponse,
-  UserActionFindResponse,
-  FindTypeField as UserActionFindTypeField,
-  CommentResponseAlertsType,
+  AlertAttachment,
+  Attachment,
+  ExternalReferenceAttachment,
+  PersistableStateAttachment,
+  Configuration,
+} from '../types/domain';
+import type {
+  CasePatchRequest,
   CasesFindResponse,
   CasesStatusResponse,
-  CasesMetricsResponse,
-  CaseSeverity,
-  CommentResponseExternalReferenceType,
-  CommentResponseTypePersistableState,
+  CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
-  CaseUserActionStatsResponse,
-} from '../api';
-import type { PUSH_CASES_CAPABILITY } from '../constants';
-import type { SnakeToCamelCase } from '../types';
+  UserActionFindRequestTypes,
+  UserActionFindResponse,
+  CaseMetricsFeature,
+  CasesMetricsResponse,
+  SingleCaseMetricsResponse,
+} from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
@@ -52,6 +60,13 @@ export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;
   };
+  files: {
+    maxSize?: number;
+    allowedMimeTypes: string[];
+  };
+  stack: {
+    enabled: boolean;
+  };
 }
 
 export const StatusAll = 'all' as const;
@@ -63,7 +78,7 @@ export const SeverityAll = 'all' as const;
 export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 export const UserActionTypeAll = 'all' as const;
-export type CaseUserActionTypeWithAll = UserActionFindTypeField | typeof UserActionTypeAll;
+export type CaseUserActionTypeWithAll = UserActionFindRequestTypes | typeof UserActionTypeAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
@@ -79,33 +94,50 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type Comment = SnakeToCamelCase<CommentResponse>;
-export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
-export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
-export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
-export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
+export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
+export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
+export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
+export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
-  userActions: CaseUserActions[];
+  userActions: UserActionUI[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
-export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
-export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
+export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
+  comments: AttachmentUI[];
+};
+export type CasesUI = CaseUI[];
+export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
+  cases: CasesUI;
+};
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
 export type CaseUsers = GetCaseUsersResponse;
+export type CaseUICustomField = CaseUI['customFields'][number];
 
 export interface ResolvedCase {
-  case: Case;
+  case: CaseUI;
   outcome: ResolvedSimpleSavedObject['outcome'];
   aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
+export type CasesConfigurationUI = Pick<
+  SnakeToCamelCase<Configuration>,
+  'closureType' | 'connector' | 'mappings' | 'customFields' | 'id' | 'version'
+>;
+
+export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
+
+export type SortOrder = 'asc' | 'desc';
+
+export const SORT_ORDER_VALUES: SortOrder[] = ['asc', 'desc'];
+
 export interface SortingParams {
   sortField: SortFieldCase;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: SortOrder;
 }
 
 export interface QueryParams extends SortingParams {
@@ -134,17 +166,12 @@ export interface FilterOptions {
   assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
+  category: string[];
 }
 export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
-export type SingleCaseMetricsFeature =
-  | 'alerts.count'
-  | 'alerts.users'
-  | 'alerts.hosts'
-  | 'actions.isolateHost'
-  | 'connectors'
-  | 'lifespan';
+export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
 
 export enum SortFieldCase {
   closedAt = 'closedAt',
@@ -153,6 +180,7 @@ export enum SortFieldCase {
   severity = 'severity',
   status = 'status',
   title = 'title',
+  category = 'category',
 }
 
 export type CaseUser = SnakeToCamelCase<User>;
@@ -163,7 +191,7 @@ export interface FetchCasesProps extends ApiProps {
 }
 
 export interface ApiProps {
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface ActionLicense {
@@ -181,13 +209,22 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity' | 'assignees'
+  | 'connector'
+  | 'description'
+  | 'status'
+  | 'tags'
+  | 'title'
+  | 'settings'
+  | 'severity'
+  | 'assignees'
+  | 'category'
+  | 'customFields'
 >;
 
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  caseData: Case;
+  caseData: CaseUI;
   onSuccess?: () => void;
   onError?: () => void;
 }
@@ -265,6 +302,8 @@ export interface CasesPermissions {
   update: boolean;
   delete: boolean;
   push: boolean;
+  connectors: boolean;
+  settings: boolean;
 }
 
 export interface CasesCapabilities {
@@ -273,4 +312,6 @@ export interface CasesCapabilities {
   [UPDATE_CASES_CAPABILITY]: boolean;
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
+  [CASES_CONNECTORS_CAPABILITY]: boolean;
+  [CASES_SETTINGS_CAPABILITY]: boolean;
 }

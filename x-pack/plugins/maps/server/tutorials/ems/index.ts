@@ -65,7 +65,8 @@ export function emsBoundariesSpecProvider({
     }),
     category: TutorialsCategory.OTHER,
     shortDescription: i18n.translate('xpack.maps.tutorials.ems.shortDescription', {
-      defaultMessage: 'Add administrative boundaries to your data with Elastic Maps Service.',
+      defaultMessage:
+        'Add administrative boundaries to your data with Elastic Maps Service. [file upload, geo]',
     }),
     longDescription: i18n.translate('xpack.maps.tutorials.ems.longDescription', {
       defaultMessage:
@@ -78,6 +79,6 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
     previewImagePath: `/plugins/${APP_ID}/assets/boundaries_screenshot.png`,
     onPrem: instructions,
     elasticCloud: instructions,
-    integrationBrowserCategories: ['upload_file', 'geo'],
+    integrationBrowserCategories: ['custom'],
   });
 }

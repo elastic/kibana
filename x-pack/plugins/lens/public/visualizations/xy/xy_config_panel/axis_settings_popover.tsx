@@ -10,19 +10,20 @@ import { EuiSwitch, IconType, EuiFormRow, EuiButtonGroup, EuiSelect } from '@ela
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
-import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import {
   EuiIconAxisBottom,
   EuiIconAxisLeft,
   EuiIconAxisRight,
   EuiIconAxisTop,
 } from '@kbn/chart-icons';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,
-  useDebouncedValue,
   AxisTitleSettings,
   AxisBoundsControl,
+  AxisTicksSettings,
 } from '../../../shared_components';
 import { XYLayerConfig, AxesSettingsConfig } from '../types';
 import { validateExtent } from '../axes_configuration';
@@ -130,7 +131,7 @@ const popoverConfig = (
   isHorizontal: boolean
 ): {
   icon: IconType;
-  groupPosition: ToolbarButtonProps['groupPosition'];
+  groupPosition: ToolbarButtonProps<'iconButton'>['groupPosition'];
   popoverTitle: string;
   buttonDataTestSubj: string;
 } => {
@@ -292,24 +293,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        display="columnCompressedSwitch"
-        label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-          defaultMessage: 'Tick labels',
-        })}
-        fullWidth
-      >
-        <EuiSwitch
-          compressed
-          data-test-subj={`lnsshow${axis}AxisTickLabels`}
-          label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-            defaultMessage: 'Tick labels',
-          })}
-          onChange={() => toggleTickLabelsVisibility(axis)}
-          checked={areTickLabelsVisible}
-          showLabel={false}
-        />
-      </EuiFormRow>
+      <AxisTicksSettings
+        axis={axis}
+        updateTicksVisibilityState={(visible) => {
+          toggleTickLabelsVisibility(axis);
+        }}
+        isAxisLabelVisible={areTickLabelsVisible}
+      />
       {!useMultilayerTimeAxis && areTickLabelsVisible && (
         <EuiFormRow
           display="columnCompressed"

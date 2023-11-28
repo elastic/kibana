@@ -5,87 +5,96 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiInMemoryTable } from '@elastic/eui';
+import React from 'react';
+import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
-import { NoData } from '../../../../components/empty_states';
-import { InfraLoadingPanel } from '../../../../components/loading';
-import { useHostsTable } from '../hooks/use_hosts_table';
-import { useTableProperties } from '../hooks/use_table_properties_url_state';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { HostNodeRow, useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
-import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
+import { DEFAULT_PAGE_SIZE } from '../constants';
+import { FilterAction } from './table/filter_action';
+
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 export const HostsTable = () => {
-  const { hostNodes, loading } = useHostsViewContext();
-  const { onSubmit, unifiedSearchDateRange } = useUnifiedSearchContext();
-  const [properties, setProperties] = useTableProperties();
+  const { loading } = useHostsViewContext();
 
-  const { columns, items } = useHostsTable(hostNodes, { time: unifiedSearchDateRange });
-
-  const noData = items.length === 0;
-
-  const onTableChange = useCallback(
-    ({ page = {}, sort = {} }) => {
-      const { index: pageIndex, size: pageSize } = page;
-      const { field, direction } = sort;
-
-      const sorting = field && direction ? { field, direction } : true;
-      const pagination = pageIndex >= 0 && pageSize !== 0 ? { pageIndex, pageSize } : true;
-
-      if (!isEqual(properties.sorting, sorting)) {
-        setProperties({ sorting });
-      }
-      if (!isEqual(properties.pagination, pagination)) {
-        setProperties({ pagination });
-      }
-    },
-    [setProperties, properties.pagination, properties.sorting]
-  );
-
-  if (loading) {
-    return (
-      <InfraLoadingPanel
-        height="185px"
-        width="auto"
-        text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-          defaultMessage: 'Loading data',
-        })}
-      />
-    );
-  }
-
-  if (noData) {
-    return (
-      <NoData
-        titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
-          defaultMessage: 'There is no data to display.',
-        })}
-        bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
-          defaultMessage: 'Try adjusting your time or filter.',
-        })}
-        refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
-          defaultMessage: 'Check for new data',
-        })}
-        onRefetch={() => onSubmit()}
-        testString="noMetricsDataPrompt"
-      />
-    );
-  }
+  const {
+    columns,
+    items,
+    currentPage,
+    isFlyoutOpen,
+    closeFlyout,
+    clickedItem,
+    onTableChange,
+    pagination,
+    sorting,
+    selection,
+    selectedItemsCount,
+    filterSelectedHosts,
+    refs,
+  } = useHostsTableContext();
 
   return (
-    <EuiInMemoryTable
-      data-test-subj="hostsView-table"
-      pagination={properties.pagination}
-      sorting={
-        typeof properties.sorting === 'boolean' ? properties.sorting : { sort: properties.sorting }
-      }
-      rowProps={{
-        'data-test-subj': 'hostsView-tableRow',
-      }}
-      items={items}
-      columns={columns}
-      onTableChange={onTableChange}
-    />
+    <>
+      <FilterAction
+        selectedItemsCount={selectedItemsCount}
+        filterSelectedHosts={filterSelectedHosts}
+      />
+      <EuiBasicTable
+        ref={refs.tableRef}
+        data-test-subj="hostsView-table"
+        itemId="id"
+        isSelectable
+        selection={selection}
+        pagination={{
+          pageIndex: pagination.pageIndex ?? 0,
+          pageSize: pagination.pageSize ?? DEFAULT_PAGE_SIZE,
+          totalItemCount: items.length,
+          pageSizeOptions: PAGE_SIZE_OPTIONS,
+        }}
+        sorting={{
+          sort: {
+            field: sorting.field as keyof HostNodeRow,
+            direction: sorting.direction ?? 'asc',
+          },
+        }}
+        rowProps={{
+          'data-test-subj': 'hostsView-tableRow',
+        }}
+        items={currentPage}
+        columns={columns}
+        loading={loading}
+        onChange={onTableChange}
+        noItemsMessage={
+          loading ? (
+            i18n.translate('xpack.infra.waffle.loadingDataText', {
+              defaultMessage: 'Loading data',
+            })
+          ) : (
+            <EuiEmptyPrompt
+              body={i18n.translate('xpack.infra.waffle.noDataDescription', {
+                defaultMessage: 'Try adjusting your time or filter.',
+              })}
+              data-test-subj="hostsViewTableNoData"
+              layout="vertical"
+              title={
+                <h2>
+                  {i18n.translate('xpack.infra.waffle.noDataTitle', {
+                    defaultMessage: 'There is no data to display.',
+                  })}
+                </h2>
+              }
+              hasBorder={false}
+              titleSize="m"
+            />
+          )
+        }
+      />
+      {isFlyoutOpen && clickedItem && (
+        <FlyoutWrapper node={clickedItem} closeFlyout={closeFlyout} />
+      )}
+    </>
   );
 };

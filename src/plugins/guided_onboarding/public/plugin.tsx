@@ -17,10 +17,11 @@ import {
   CoreTheme,
   ApplicationStart,
   NotificationsStart,
-  IUiSettingsClient,
 } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { PLUGIN_FEATURE } from '../common/constants';
 import type {
   AppPluginStartDependencies,
   GuidedOnboardingPluginSetup,
@@ -41,13 +42,14 @@ export class GuidedOnboardingPlugin
     core: CoreStart,
     { cloud }: AppPluginStartDependencies
   ): GuidedOnboardingPluginStart {
-    const { chrome, http, theme, application, notifications, uiSettings } = core;
+    const { chrome, http, theme, application, notifications } = core;
 
+    // Guided onboarding UI is only available on cloud and if the access to the Kibana feature is granted
+    const isEnabled = !!(cloud?.isCloudEnabled && application.capabilities[PLUGIN_FEATURE].enabled);
     // Initialize services
-    apiService.setup(http, !!cloud?.isCloudEnabled);
+    apiService.setup(http, isEnabled);
 
-    // Guided onboarding UI is only available on cloud
-    if (cloud?.isCloudEnabled) {
+    if (isEnabled) {
       chrome.navControls.registerExtension({
         order: 1000,
         mount: (target) =>
@@ -57,7 +59,6 @@ export class GuidedOnboardingPlugin
             api: apiService,
             application,
             notifications,
-            uiSettings,
           }),
       });
     }
@@ -76,14 +77,12 @@ export class GuidedOnboardingPlugin
     api,
     application,
     notifications,
-    uiSettings,
   }: {
     targetDomElement: HTMLElement;
     theme$: Rx.Observable<CoreTheme>;
     api: ApiService;
     application: ApplicationStart;
     notifications: NotificationsStart;
-    uiSettings: IUiSettingsClient;
   }) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
@@ -92,7 +91,7 @@ export class GuidedOnboardingPlugin
             api={api}
             application={application}
             notifications={notifications}
-            uiSettings={uiSettings}
+            theme$={theme$}
           />
         </I18nProvider>
       </KibanaThemeProvider>,

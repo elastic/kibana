@@ -80,10 +80,16 @@ export const cardinalityOperation: OperationDefinition<
   }),
   allowAsReference: true,
   input: 'field',
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type,
+    timeSeriesMetric,
+  }) => {
     if (
       supportedTypes.has(type) &&
       aggregatable &&
+      timeSeriesMetric !== 'counter' &&
       (!aggregationRestrictions || aggregationRestrictions.cardinality)
     ) {
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
@@ -107,7 +113,7 @@ export const cardinalityOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   canReduceTimeRange: true,
-  getDefaultLabel: (column, indexPattern) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.timeShift,

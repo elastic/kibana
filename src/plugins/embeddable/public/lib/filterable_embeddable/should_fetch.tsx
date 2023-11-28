@@ -27,18 +27,24 @@ export function shouldFetch$<
   return updated$.pipe(map(() => getInput())).pipe(
     // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial input value.
     startWith(getInput()),
-    distinctUntilChanged((a: TFilterableEmbeddableInput, b: TFilterableEmbeddableInput) => {
-      if (
-        !fastIsEqual(
-          [a.searchSessionId, a.query, a.timeRange, a.timeslice],
-          [b.searchSessionId, b.query, b.timeRange, b.timeslice]
-        )
-      ) {
-        return false;
-      }
+    distinctUntilChanged(
+      (previous: TFilterableEmbeddableInput, current: TFilterableEmbeddableInput) => {
+        if (
+          !fastIsEqual(
+            [previous.searchSessionId, previous.query, previous.timeRange, previous.timeslice],
+            [current.searchSessionId, current.query, current.timeRange, current.timeslice]
+          )
+        ) {
+          return false;
+        }
 
-      return onlyDisabledFiltersChanged(a.filters, b.filters, shouldRefreshFilterCompareOptions);
-    }),
+        return onlyDisabledFiltersChanged(
+          previous.filters,
+          current.filters,
+          shouldRefreshFilterCompareOptions
+        );
+      }
+    ),
     skip(1)
   );
 }

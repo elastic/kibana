@@ -17,7 +17,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'dashboard',
     'canvas',
   ]);
-
+  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
+  const dashboardBadgeActions = getService('dashboardBadgeActions');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
@@ -29,9 +31,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by value TSVB viz to a Lens viz', async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
       await testSubjects.click('visualizeSaveButton');
 
@@ -42,10 +41,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
+      await dashboardCustomizePanel.clickSaveButton();
+      await dashboard.waitForRenderComplete();
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -57,10 +63,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
+      const titles = await dashboard.getPanelTitles();
+      expect(titles[0]).to.be('My TSVB to Lens viz 1 (converted)');
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
 
     it('should convert a by reference TSVB viz to a Lens viz', async () => {
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickVisType('metrics');
       await testSubjects.click('visualizesaveAndReturnButton');
@@ -70,11 +81,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
+      await dashboardCustomizePanel.clickSaveButton();
+      await dashboard.waitForRenderComplete();
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
-      await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('legacyMtrVis');
+      await visualize.navigateToLensFromAnotherVisualization();
+
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
@@ -85,14 +104,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
-
-      const panel = await testSubjects.find(`embeddablePanelHeading-`);
+      const panel = await testSubjects.find(`embeddablePanelHeading-MyTSVBtoLensviz2(converted)`);
       const descendants = await testSubjects.findAllDescendant(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
         panel
       );
       expect(descendants.length).to.equal(0);
-
+      const titles = await dashboard.getPanelTitles();
+      expect(titles[0]).to.be('My TSVB to Lens viz 2 (converted)');
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
   });

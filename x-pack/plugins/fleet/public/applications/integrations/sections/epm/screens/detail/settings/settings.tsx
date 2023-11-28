@@ -26,6 +26,11 @@ import { i18n } from '@kbn/i18n';
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 
+import {
+  getNumTransformAssets,
+  TransformInstallWithCurrentUserPermissionCallout,
+} from '../../../../../../../components/transform_install_as_current_user_callout';
+
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
@@ -73,7 +78,7 @@ const UpdatesAvailableMsg = ({
 }) => (
   <EuiCallOut
     color="warning"
-    iconType="alert"
+    iconType="warning"
     title={i18n.translate('xpack.fleet.integrations.settings.versionInfo.updatesAvailable', {
       defaultMessage: 'New version available',
     })}
@@ -133,6 +138,11 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
 
   const packagePolicyIds = useMemo(
     () => packagePoliciesData?.items.map(({ id }) => id),
+    [packagePoliciesData]
+  );
+
+  const agentPolicyIds = useMemo(
+    () => packagePoliciesData?.items.map(({ policy_id: agentPolicyId }) => agentPolicyId) ?? [],
     [packagePoliciesData]
   );
 
@@ -227,9 +237,10 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
 
   const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
 
-  const numOfAssets = useMemo(
-    () =>
-      Object.entries(packageInfo.assets).reduce(
+  const { numOfAssets, numTransformAssets } = useMemo(
+    () => ({
+      numTransformAssets: getNumTransformAssets(packageInfo.assets),
+      numOfAssets: Object.entries(packageInfo.assets).reduce(
         (acc, [serviceName, serviceNameValue]) =>
           acc +
           Object.entries(serviceNameValue).reduce(
@@ -238,6 +249,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
           ),
         0
       ),
+    }),
     [packageInfo.assets]
   );
 
@@ -322,6 +334,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       <UpdateButton
                         {...packageInfo}
                         version={latestVersion}
+                        agentPolicyIds={agentPolicyIds}
                         packagePolicyIds={packagePolicyIds}
                         dryRunData={dryRunData}
                         isUpgradingPackagePolicies={isUpgradingPackagePolicies}
@@ -351,6 +364,15 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       </h4>
                     </EuiTitle>
                     <EuiSpacer size="s" />
+
+                    {numTransformAssets > 0 ? (
+                      <>
+                        <TransformInstallWithCurrentUserPermissionCallout
+                          count={numTransformAssets}
+                        />
+                        <EuiSpacer size="s" />
+                      </>
+                    ) : null}
                     <p>
                       <FormattedMessage
                         id="xpack.fleet.integrations.settings.packageInstallDescription"
@@ -439,8 +461,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                           <ReinstallButton
                             {...packageInfo}
                             installSource={
-                              'savedObject' in packageInfo
-                                ? packageInfo.savedObject.attributes.install_source
+                              'installationInfo' in packageInfo &&
+                              packageInfo.installationInfo?.install_source
+                                ? packageInfo.installationInfo.install_source
                                 : ''
                             }
                           />

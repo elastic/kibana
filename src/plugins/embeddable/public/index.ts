@@ -19,10 +19,7 @@ export type {
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
-  EmbeddableChildPanelProps,
   EmbeddableContext,
-  EmbeddablePhaseEvent,
-  EmbeddablePhase,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
@@ -41,28 +38,20 @@ export type {
   EmbeddableEditorState,
   EmbeddablePackageState,
   EmbeddableRendererProps,
-  EmbeddableContainerContext,
   EmbeddableContainerSettings,
 } from './lib';
 export {
-  ACTION_ADD_PANEL,
-  ACTION_EDIT_PANEL,
-  AddPanelAction,
   isReferenceOrValueEmbeddable,
   Container,
   CONTEXT_MENU_TRIGGER,
   contextMenuTrigger,
   defaultEmbeddableFactoryProvider,
-  EditPanelAction,
   Embeddable,
-  EmbeddableChildPanel,
   EmbeddableFactoryNotFoundError,
-  EmbeddablePanel,
   EmbeddableRoot,
   ErrorEmbeddable,
   isEmbeddable,
   isErrorEmbeddable,
-  openAddPanelFlyout,
   PANEL_BADGE_TRIGGER,
   panelBadgeTrigger,
   PANEL_NOTIFICATION_TRIGGER,
@@ -87,9 +76,32 @@ export {
   EmbeddableRenderer,
   useEmbeddableFactory,
   isFilterableEmbeddable,
+  isExplicitInputWithAttributes,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
+  PANEL_HOVER_TRIGGER,
+  panelHoverTrigger,
+  runEmbeddableFactoryMigrations,
 } from './lib';
+
+export { EmbeddablePanel } from './embeddable_panel';
+export {
+  InspectPanelAction,
+  ACTION_INSPECT_PANEL,
+  CustomizePanelAction,
+  ACTION_CUSTOMIZE_PANEL,
+  EditPanelAction,
+  ACTION_EDIT_PANEL,
+  RemovePanelAction,
+  REMOVE_PANEL_ACTION,
+  tracksOverlays,
+} from './embeddable_panel/panel_actions';
+
+export type {
+  EmbeddablePhase,
+  EmbeddablePhaseEvent,
+  EmbeddableAppContext,
+} from './embeddable_panel/types';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 
@@ -99,10 +111,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
+export { openAddPanelFlyout } from './add_panel_flyout/open_add_panel_flyout';
+
 export type {
   EmbeddableSetup,
   EmbeddableStart,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
-  EmbeddablePanelHOC,
 } from './plugin';

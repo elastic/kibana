@@ -100,6 +100,8 @@ export class RuleRegistryPlugin
 
     this.security = plugins.security;
 
+    const dataStreamAdapter = plugins.alerting.getDataStreamAdapter();
+
     this.ruleDataService = new RuleDataService({
       logger,
       kibanaVersion,
@@ -110,8 +112,9 @@ export class RuleRegistryPlugin
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
       },
-      areFrameworkAlertsEnabled: plugins.alerting.getFrameworkAlertsEnabled(),
+      frameworkAlerts: plugins.alerting.frameworkAlerts,
       pluginStop$: this.pluginStop$,
+      dataStreamAdapter,
     });
 
     this.ruleDataService.initializeService();
@@ -119,7 +122,6 @@ export class RuleRegistryPlugin
     core.getStartServices().then(([_, depsStart]) => {
       const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
         depsStart.data,
-        this.ruleDataService!,
         depsStart.alerting,
         logger,
         plugins.security,
@@ -163,6 +165,9 @@ export class RuleRegistryPlugin
       },
       securityPluginSetup: security,
       ruleDataService,
+      getRuleType: plugins.alerting.getType,
+      getRuleList: plugins.alerting.listTypes,
+      getAlertIndicesAlias: plugins.alerting.getAlertIndicesAlias,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

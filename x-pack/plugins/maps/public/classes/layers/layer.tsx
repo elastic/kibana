@@ -7,14 +7,21 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
+import {
+  getWarningsTitle,
+  type SearchResponseWarning,
+  ViewDetailsPopover,
+} from '@kbn/search-response-warnings';
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
+import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import {
   LAYER_TYPE,
   MAX_ZOOM,
@@ -33,11 +40,24 @@ import {
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
+import { TileErrorsList } from './tile_errors_list';
+
+export const INCOMPLETE_RESULTS_WARNING = i18n.translate(
+  'xpack.maps.layer.incompleteResultsWarning',
+  {
+    defaultMessage: `Layer had issues returning data and results might be incomplete.`,
+  }
+);
+
+export interface LayerMessage {
+  title: string;
+  body: ReactNode;
+}
 
 export interface ILayer {
   getBounds(
@@ -66,12 +86,13 @@ export interface ILayer {
   getStyle(): IStyle;
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
-  getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
-  isLayerLoading(): boolean;
+  isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
-  getErrors(): string;
+  getErrors(): LayerMessage[];
+  hasWarnings(): boolean;
+  getWarnings(): LayerMessage[];
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
@@ -87,7 +108,6 @@ export interface ILayer {
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
-  isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE;
@@ -127,7 +147,7 @@ export type LayerIcon = {
 };
 
 export interface ILayerArguments {
-  layerDescriptor: LayerDescriptor;
+  layerDescriptor: Partial<LayerDescriptor>;
   source: ISource;
 }
 
@@ -339,11 +359,6 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.query ? this._descriptor.query : null;
   }
 
-  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
-    const source = this.getSource();
-    return await source.getImmutableProperties();
-  }
-
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
     return this.getSourceForEditing().renderSourceSettingsEditor(sourceEditorArgs);
   }
@@ -376,22 +391,102 @@ export class AbstractLayer implements ILayer {
     return this._dataRequests.find((dataRequest) => dataRequest.getDataId() === id);
   }
 
-  isLayerLoading(): boolean {
-    const areTilesLoading =
-      typeof this._descriptor.__areTilesLoaded !== 'undefined'
-        ? !this._descriptor.__areTilesLoaded
-        : false;
-    return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+  isLayerLoading(zoom: number): boolean {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+    const hasOpenDataRequests = this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+
+    if (this._isTiled()) {
+      return (
+        hasOpenDataRequests ||
+        this._descriptor.__areTilesLoaded === undefined ||
+        !this._descriptor.__areTilesLoaded
+      );
+    }
+
+    return !this.getSourceDataRequest()
+      ? true // layer is loading until source data request has been created
+      : hasOpenDataRequests;
   }
 
   hasErrors(): boolean {
-    return _.get(this._descriptor, '__isInErrorState', false);
+    return this.getErrors().length > 0;
   }
 
-  getErrors(): string {
-    return this.hasErrors() && this._descriptor.__errorMessage
-      ? this._descriptor.__errorMessage
-      : '';
+  _getSourceErrorTitle() {
+    return i18n.translate('xpack.maps.layer.sourceErrorTitle', {
+      defaultMessage: `An error occurred when loading layer data`,
+    });
+  }
+
+  getErrors(): LayerMessage[] {
+    const errors: LayerMessage[] = [];
+
+    const sourceError = this.getSourceDataRequest()?.renderError();
+    if (sourceError) {
+      errors.push({
+        title: this._getSourceErrorTitle(),
+        body: sourceError,
+      });
+    }
+
+    if (this._descriptor.__tileErrors?.length) {
+      errors.push({
+        title: i18n.translate('xpack.maps.layer.tileErrorTitle', {
+          defaultMessage: `An error occurred when loading layer tiles`,
+        }),
+        body: <TileErrorsList tileErrors={this._descriptor.__tileErrors} />,
+      });
+    }
+
+    return errors;
+  }
+
+  hasWarnings(): boolean {
+    const hasDataRequestWarnings = this._dataRequests.some((dataRequest) => {
+      const dataRequestMeta = dataRequest.getMeta();
+      return dataRequestMeta?.warnings?.length;
+    });
+
+    if (hasDataRequestWarnings) {
+      return true;
+    }
+
+    return this._isTiled() ? this._getTileMetaFeatures().some(hasIncompleteResults) : false;
+  }
+
+  getWarnings(): LayerMessage[] {
+    const warningMessages: LayerMessage[] = [];
+
+    const dataRequestWarnings: SearchResponseWarning[] = [];
+    this._dataRequests.forEach((dataRequest) => {
+      const dataRequestMeta = dataRequest.getMeta();
+      if (dataRequestMeta?.warnings?.length) {
+        dataRequestWarnings.push(...dataRequestMeta.warnings);
+      }
+    });
+
+    if (dataRequestWarnings.length) {
+      warningMessages.push({
+        title: getWarningsTitle(dataRequestWarnings),
+        body: (
+          <>
+            {INCOMPLETE_RESULTS_WARNING}{' '}
+            <ViewDetailsPopover displayAsLink={true} warnings={dataRequestWarnings} />
+          </>
+        ),
+      });
+    }
+
+    if (this._isTiled() && this._getTileMetaFeatures().some(hasIncompleteResults)) {
+      warningMessages.push({
+        title: '',
+        body: INCOMPLETE_RESULTS_WARNING,
+      });
+    }
+
+    return warningMessages;
   }
 
   async syncData(syncContext: DataRequestContext) {
@@ -416,11 +511,6 @@ export class AbstractLayer implements ILayer {
 
   getLayerTypeIconName(): string {
     throw new Error('should implement Layer#getLayerTypeIconName');
-  }
-
-  isInitialDataLoadComplete(): boolean {
-    const sourceDataRequest = this.getSourceDataRequest();
-    return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
   async getBounds(
@@ -490,7 +580,11 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.parent;
   }
 
-  _getMetaFromTiles(): TileMetaFeature[] {
-    return this._descriptor.__metaFromTiles || [];
+  _getTileMetaFeatures(): TileMetaFeature[] {
+    return this._descriptor.__tileMetaFeatures ?? [];
+  }
+
+  _isTiled(): boolean {
+    throw new Error('Must implement AbstractLayer#_isTiled');
   }
 }

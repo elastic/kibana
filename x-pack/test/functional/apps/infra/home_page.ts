@@ -6,19 +6,37 @@
  */
 
 import expect from '@kbn/expect';
+import { parse } from 'url';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
+import { DATES, INVENTORY_PATH } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
+const DATE_WITH_POD_WITH_DATA = DATES.metricsAndLogs.pods.withData;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'header', 'infraHome', 'infraSavedViews']);
+  const pageObjects = getPageObjects([
+    'common',
+    'header',
+    'infraHome',
+    'timePicker',
+    'assetDetails',
+    'infraSavedViews',
+  ]);
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
+
+  const returnTo = async (path: string, timeout = 2000) =>
+    retry.waitForWithTimeout('returned to inventory', timeout, async () => {
+      await browser.goBack();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      const currentUrl = await browser.getCurrentUrl();
+      return !!currentUrl.match(path);
+    });
 
   describe('Home page', function () {
     this.tags('includeFirefox');
@@ -37,7 +55,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
 
-      it('renders the correct error page title', async () => {
+      // Unskip once asset details error handling has been implemented
+      it.skip('renders the correct error page title', async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
           '/detail/host/test',
@@ -48,20 +67,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         await pageObjects.infraHome.waitForLoading();
         await pageObjects.header.waitUntilLoadingHasFinished();
-
-        const documentTitle = await browser.getTitle();
-        expect(documentTitle).to.contain('Uh oh - Observability - Elastic');
       });
     });
 
     describe('with metrics present', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
         await browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY);
       });
 
@@ -70,6 +88,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+      });
+
+      it('renders the inventory survey link', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.infraHome.waitForLoading();
+
+        await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
       });
 
       it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
@@ -89,7 +114,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.infraHome.clickDismissKubernetesTourButton();
 
-        await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        });
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
@@ -101,6 +128,101 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
         // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
+
+      describe('Asset Details flyout', () => {
+        before(async () => {
+          await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+          await pageObjects.infraHome.getWaffleMap();
+          await pageObjects.infraHome.inputAddHostNameFilter('demo-stack-nginx-01');
+          await pageObjects.infraHome.clickOnNode();
+        });
+
+        describe('Overview Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickOverviewTab();
+          });
+
+          [
+            { metric: 'cpuUsage', value: '0.8%' },
+            { metric: 'normalizedLoad1m', value: '1.4%' },
+            { metric: 'memoryUsage', value: '18.0%' },
+            { metric: 'diskSpaceUsage', value: '17.5%' },
+          ].forEach(({ metric, value }) => {
+            it(`${metric} tile should show ${value}`, async () => {
+              await retry.tryForTime(3 * 1000, async () => {
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
+                expect(tileValue).to.eql(value);
+              });
+            });
+          });
+
+          it('should render 9 charts in the Metrics section', async () => {
+            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
+            expect(hosts.length).to.equal(9);
+          });
+
+          it('should show alerts', async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
+        });
+
+        describe('Metadata Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetadataTab();
+          });
+
+          it('should show metadata table', async () => {
+            await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
+
+          after(async () => {
+            await retry.try(async () => {
+              await pageObjects.infraHome.closeFlyout();
+            });
+          });
+
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
+          });
+        });
+
+        describe('APM Link Tab', () => {
+          before(async () => {
+            await pageObjects.infraHome.clickOnNode();
+            await pageObjects.assetDetails.clickApmTabLink();
+            await pageObjects.infraHome.waitForLoading();
+          });
+
+          it('should navigate to APM traces', async () => {
+            const url = parse(await browser.getCurrentUrl());
+            const query = decodeURIComponent(url.query ?? '');
+            const kuery = 'kuery=host.hostname:"demo-stack-nginx-01"';
+
+            await retry.try(async () => {
+              expect(url.pathname).to.eql('/app/apm/traces');
+              expect(query).to.contain(kuery);
+            });
+            await returnTo(INVENTORY_PATH);
+          });
+        });
+
+        it('Should show auto-refresh option', async () => {
+          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
+          expect(kibanaRefreshConfig.interval).to.equal('5');
+          expect(kibanaRefreshConfig.units).to.equal('Seconds');
+          expect(kibanaRefreshConfig.isPaused).to.equal(true);
+        });
+      });
+
       it('shows query suggestions', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.clickQueryBar();
@@ -116,12 +238,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#93b1d3' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#b2c7df' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#b2c7df' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#f0f4f9' },
           ]);
         });
       });
@@ -134,12 +256,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#f0f4f9' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#b2c7df' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#b2c7df' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#93b1d3' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
           ]);
         });
       });
@@ -160,7 +282,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
           ]);
         });
         await pageObjects.infraHome.clearSearchTerm();
@@ -173,12 +295,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-client-01', value: 0.6, color: '#6092c0' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#6092c0' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#b5c9df' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#f1d9b9' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#eec096' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#eba47a' },
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#e7664c' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#d0dcea' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#d0dcea' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#eec096' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#e7664c' },
           ]);
         });
       });
@@ -188,6 +310,47 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.openTimeline();
         await pageObjects.infraHome.closeTimeline();
+      });
+
+      it('toggles the inventory switcher', async () => {
+        await pageObjects.infraHome.toggleInventorySwitcher();
+      });
+
+      describe('Redirect to Node Details page', () => {
+        before(async () => {
+          await pageObjects.common.navigateToApp('infraOps');
+          await pageObjects.infraHome.waitForLoading();
+        });
+
+        it('Should redirect to Host Details page', async () => {
+          await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+          await pageObjects.infraHome.goToHost();
+          await pageObjects.infraHome.clickOnFirstNode();
+          await pageObjects.infraHome.clickOnNodeDetailsFlyoutOpenAsPage();
+
+          await retry.try(async () => {
+            const documentTitle = await browser.getTitle();
+            expect(documentTitle).to.contain(
+              'demo-stack-redis-01 - Infrastructure - Observability - Elastic'
+            );
+          });
+
+          await returnTo(INVENTORY_PATH);
+        });
+
+        it('Should redirect to Node Details page', async () => {
+          await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
+          await pageObjects.infraHome.goToPods();
+          await pageObjects.infraHome.clickOnFirstNode();
+          await pageObjects.infraHome.clickOnGoToNodeDetails();
+
+          await retry.try(async () => {
+            const documentTitle = await browser.getTitle();
+            expect(documentTitle).to.contain('pod-0 - Infrastructure - Observability - Elastic');
+          });
+
+          await returnTo(INVENTORY_PATH);
+        });
       });
     });
 
@@ -208,7 +371,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('should open and close inventory alert flyout', async () => {
+      it('should open and close metrics threshold alert flyout', async () => {
         await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
         await pageObjects.infraHome.closeAlertFlyout();
       });
@@ -217,39 +380,77 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clickAlertsAndRules();
         await pageObjects.infraHome.ensurePopoverOpened();
         await pageObjects.infraHome.clickAlertsAndRules();
-        await pageObjects.infraHome.ensurePopoverClosed();
-      });
-    });
-    // Failing: See https://github.com/elastic/kibana/issues/106650
-    describe.skip('Saved Views', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-      it('should have save and load controls', async () => {
-        await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.waitForLoading();
-        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraSavedViews.getSavedViewsButton();
-        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensurePopoverClosed();
+        });
       });
 
-      it('should open popover', async () => {
+      it('should not have an option to create custom threshold alert', async () => {
+        await pageObjects.infraHome.clickAlertsAndRules();
+        await pageObjects.infraHome.ensurePopoverOpened();
+        await pageObjects.infraHome.ensureCustomThresholdAlertMenuItemIsMissing();
+        await pageObjects.infraHome.clickAlertsAndRules();
+      });
+    });
+
+    describe('Saved Views', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.infraHome.goToMetricExplorer();
+      });
+
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+
+      beforeEach(async () => {
         await pageObjects.infraSavedViews.clickSavedViewsButton();
+      });
+      afterEach(async () => {
         await pageObjects.infraSavedViews.closeSavedViewsPopover();
       });
 
-      it('should create new saved view and load it', async () => {
+      it('should render a button with the view name', async () => {
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
+      });
+
+      it('should open/close the views popover menu on button click', async () => {
         await pageObjects.infraSavedViews.clickSavedViewsButton();
-        await pageObjects.infraSavedViews.clickSaveNewViewButton();
-        await pageObjects.infraSavedViews.getCreateSavedViewModal();
-        await pageObjects.infraSavedViews.createNewSavedView('view1');
+        await testSubjects.existOrFail('savedViews-popover');
+        await pageObjects.infraSavedViews.closeSavedViewsPopover();
+      });
+
+      it('should create a new saved view and load it', async () => {
+        await pageObjects.infraSavedViews.createView('view1');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
       });
 
-      it('should new views should be listed in the load views list', async () => {
+      it('should load a clicked view from the manage views section', async () => {
+        const views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        await views[0].click();
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
+      });
+
+      it('should update the current saved view and load it', async () => {
+        let views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(2);
+        await pageObjects.infraSavedViews.pressEsc();
+
         await pageObjects.infraSavedViews.clickSavedViewsButton();
-        await pageObjects.infraSavedViews.clickLoadViewButton();
-        await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
-        await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
+        await pageObjects.infraSavedViews.createView('view2');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
+
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(3);
+        await pageObjects.infraSavedViews.pressEsc();
+
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        await pageObjects.infraSavedViews.updateView('view3');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
+
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(3);
+        await pageObjects.infraSavedViews.pressEsc();
       });
     });
   });

@@ -125,6 +125,7 @@ function mockRule(overloads: Partial<Rule> = {}): Rule {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    revision: 0,
     ...overloads,
   };
 }
@@ -161,6 +162,7 @@ function mockRuleSummary(overloads: Partial<any> = {}): any {
     throttle: null,
     enabled: true,
     errorMessages: [],
+    revision: 0,
     statusStartDate: fake2MinutesAgo.toISOString(),
     statusEndDate: fakeNow.toISOString(),
     alerts: {
@@ -168,6 +170,7 @@ function mockRuleSummary(overloads: Partial<any> = {}): any {
         status: 'OK',
         muted: false,
         flapping: false,
+        tracked: true,
       },
     },
     executionDuration: {

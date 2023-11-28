@@ -5,27 +5,36 @@
  * 2.0.
  */
 
-import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
-import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type {
+  SavedObjectsUpdateResponse,
+  SavedObject,
+  SavedObjectReference,
+} from '@kbn/core/server';
 import { isEqual, uniqWith } from 'lodash';
 import type {
-  CommentAttributesNoSO,
-  CommentRequest,
-  CommentAttributes,
-  CommentPatchAttributes,
-  CommentAttributesWithoutRefs,
-} from '../../common/api';
+  AttachmentAttributes,
+  AttachmentAttributesNoSO,
+  AttachmentPatchAttributes,
+} from '../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
   injectPersistableReferencesToSO,
   extractPersistableStateReferencesFromSO,
 } from '../attachment_framework/so_references';
 import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
-import { isCommentRequestTypeExternalReferenceSO } from '../common/utils';
-import type { PartialField } from '../types';
+import type {
+  AttachmentPersistedAttributes,
+  AttachmentRequestAttributes,
+  AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
+} from '../common/types/attachments';
+import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
 import { SOReferenceExtractor } from './so_reference_extractor';
+import type { OptionalAttributes } from './types';
 
-export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) => {
+export const getAttachmentSOExtractor = (
+  attachment: Partial<AttachmentRequestAttributes>
+): SOReferenceExtractor => {
   const fieldsToExtract = [];
 
   if (isCommentRequestTypeExternalReferenceSO(attachment)) {
@@ -39,21 +48,19 @@ export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) =>
   return new SOReferenceExtractor(fieldsToExtract);
 };
 
-type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
-
 /**
  * This function should be used when the attributes field could be undefined. Specifically when
  * performing a bulkGet within the core saved object library. If one of the requested ids does not exist in elasticsearch
  * then the error field will be set and attributes will be undefined.
  */
 export const injectAttachmentAttributesAndHandleErrors = (
-  savedObject: OptionalAttributes<CommentAttributesWithoutRefs>,
+  savedObject: OptionalAttributes<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): OptionalAttributes<CommentAttributes> => {
+): OptionalAttributes<AttachmentTransformedAttributes> => {
   if (!hasAttributes(savedObject)) {
     // we don't actually have an attributes field here so the type doesn't matter, this cast is to get the types to stop
     // complaining though
-    return savedObject as OptionalAttributes<CommentAttributes>;
+    return savedObject as OptionalAttributes<AttachmentTransformedAttributes>;
   }
 
   return injectAttachmentSOAttributesFromRefs(savedObject, persistableStateAttachmentTypeRegistry);
@@ -64,11 +71,11 @@ const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is Sa
 };
 
 export const injectAttachmentSOAttributesFromRefs = (
-  savedObject: SavedObject<CommentAttributesWithoutRefs>,
+  savedObject: SavedObject<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-) => {
+): AttachmentSavedObjectTransformed => {
   const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
-  const so = soExtractor.populateFieldsFromReferences<CommentAttributes>(savedObject);
+  const so = soExtractor.populateFieldsFromReferences<AttachmentTransformedAttributes>(savedObject);
   const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
     persistableStateAttachmentTypeRegistry,
   });
@@ -77,12 +84,12 @@ export const injectAttachmentSOAttributesFromRefs = (
 };
 
 export const injectAttachmentSOAttributesFromRefsForPatch = (
-  updatedAttributes: CommentPatchAttributes,
-  savedObject: SavedObjectsUpdateResponse<CommentAttributesWithoutRefs>,
+  updatedAttributes: AttachmentPatchAttributes,
+  savedObject: SavedObjectsUpdateResponse<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-) => {
+): SavedObjectsUpdateResponse<AttachmentTransformedAttributes> => {
   const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
-  const so = soExtractor.populateFieldsFromReferencesForPatch<CommentAttributes>({
+  const so = soExtractor.populateFieldsFromReferencesForPatch<AttachmentTransformedAttributes>({
     dataBeforeRequest: updatedAttributes,
     dataReturnedFromRequest: savedObject,
   });
@@ -98,21 +105,27 @@ export const injectAttachmentSOAttributesFromRefsForPatch = (
   return {
     ...so,
     attributes: { ...so.attributes, ...injectedAttributes },
-  } as SavedObjectsUpdateResponse<CommentAttributes>;
+  } as SavedObjectsUpdateResponse<AttachmentTransformedAttributes>;
 };
 
+interface ExtractionResults {
+  attributes: AttachmentPersistedAttributes;
+  references: SavedObjectReference[];
+  didDeleteOperation: boolean;
+}
+
 export const extractAttachmentSORefsFromAttributes = (
-  attributes: CommentAttributes | CommentPatchAttributes,
+  attributes: AttachmentAttributes | AttachmentPatchAttributes,
   references: SavedObjectReference[],
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-) => {
+): ExtractionResults => {
   const soExtractor = getAttachmentSOExtractor(attributes);
 
   const {
     transformedFields,
     references: refsWithExternalRefId,
     didDeleteOperation,
-  } = soExtractor.extractFieldsToReferences<CommentAttributesNoSO>({
+  } = soExtractor.extractFieldsToReferences<AttachmentAttributesNoSO>({
     data: attributes,
     existingReferences: references,
   });
@@ -129,5 +142,5 @@ export const extractAttachmentSORefsFromAttributes = (
   };
 };
 
-export const getUniqueReferences = (references: SavedObjectReference[]) =>
+export const getUniqueReferences = (references: SavedObjectReference[]): SavedObjectReference[] =>
   uniqWith(references, isEqual);

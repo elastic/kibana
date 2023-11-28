@@ -151,8 +151,6 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
       getRowItemsWithActions({
         values: node.process.name,
         fieldName: 'process.name',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `uncommon-process-table-${node._id}-processName`,
       }),
   },
@@ -181,8 +179,6 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
       getRowItemsWithActions({
         values: getHostNames(node.hosts),
         fieldName: 'host.name',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
         render: (item) => <HostDetailsLink hostName={item} />,
       }),
@@ -196,8 +192,6 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
       getRowItemsWithActions({
         values: node.process != null ? node.process.args : null,
         fieldName: 'process.args',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `uncommon-process-table-${node._id}-processArgs`,
         render: (item) => <HostDetailsLink hostName={item} />,
         displayCount: 1,
@@ -211,8 +205,6 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
       getRowItemsWithActions({
         values: node.user != null ? node.user.name : null,
         fieldName: 'user.name',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `uncommon-process-table-${node._id}-processUser`,
       }),
   },

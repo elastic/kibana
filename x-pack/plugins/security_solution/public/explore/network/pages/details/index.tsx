@@ -43,7 +43,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LandingPageComponent } from '../../../../common/components/landing_page';
-import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { getNetworkDetailsPageFilter } from '../../../../common/components/visualization_actions/utils';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
@@ -57,8 +57,6 @@ import {
   CellActionsMode,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
-
-export { getTrailingBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 
@@ -105,7 +103,8 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
 
   const ip = decodeIpv6(detailName);
   const networkDetailsFilter = useMemo(() => getNetworkDetailsPageFilter(ip), [ip]);
@@ -166,7 +165,7 @@ const NetworkDetailsComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -182,8 +181,11 @@ const NetworkDetailsComponent: React.FC = () => {
               }
               title={
                 <SecurityCellActions
-                  field={{ type: 'ip', value: ip, name: `${flowTarget}.ip` }}
-                  mode={CellActionsMode.HOVER}
+                  data={{
+                    value: ip,
+                    field: `${flowTarget}.ip`,
+                  }}
+                  mode={CellActionsMode.HOVER_DOWN}
                   visibleCellActions={5}
                   triggerId={SecurityCellActionsTrigger.DEFAULT}
                 >
@@ -239,7 +241,7 @@ const NetworkDetailsComponent: React.FC = () => {
               </>
             )}
 
-            <TabNavigationWithBreadcrumbs
+            <TabNavigation
               navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities), flowTarget)}
             />
             <EuiSpacer />

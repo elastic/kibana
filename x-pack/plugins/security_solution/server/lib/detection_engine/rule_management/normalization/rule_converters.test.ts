@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertPatchAPIToInternalSchema, patchTypeSpecificSnakeToCamel } from './rule_converters';
+import { patchTypeSpecificSnakeToCamel } from './rule_converters';
 import {
   getEqlRuleParams,
   getMlRuleParams,
@@ -15,7 +15,7 @@ import {
   getThreatRuleParams,
   getThresholdRuleParams,
 } from '../../rule_schema/mocks';
-import { getRuleMock } from '../../routes/__mocks__/request_responses';
+import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine';
 
 describe('rule_converters', () => {
   describe('patchTypeSpecificSnakeToCamel', () => {
@@ -41,10 +41,10 @@ describe('rule_converters', () => {
         timestamp_field: 1,
         event_category_override: 1,
         tiebreaker_field: 1,
-      };
+      } as PatchRuleRequestBody;
       const rule = getEqlRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "1" supplied to "timestamp_field",Invalid value "1" supplied to "event_category_override",Invalid value "1" supplied to "tiebreaker_field"'
+        'event_category_override: Expected string, received number, tiebreaker_field: Expected string, received number, timestamp_field: Expected string, received number'
       );
     });
 
@@ -67,10 +67,10 @@ describe('rule_converters', () => {
       const patchParams = {
         threat_indicator_path: 1,
         threat_query: 1,
-      };
+      } as PatchRuleRequestBody;
       const rule = getThreatRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "1" supplied to "threat_query",Invalid value "1" supplied to "threat_indicator_path"'
+        'threat_query: Expected string, received number, threat_indicator_path: Expected string, received number'
       );
     });
 
@@ -78,7 +78,7 @@ describe('rule_converters', () => {
       const patchParams = {
         index: ['new-test-index'],
         language: 'lucene',
-      };
+      } as PatchRuleRequestBody;
       const rule = getQueryRuleParams();
       const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
       expect(patchedParams).toEqual(
@@ -93,10 +93,10 @@ describe('rule_converters', () => {
       const patchParams = {
         index: [1],
         language: 'non-language',
-      };
+      } as PatchRuleRequestBody;
       const rule = getQueryRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "1" supplied to "index",Invalid value "non-language" supplied to "language"'
+        "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
       );
     });
 
@@ -104,7 +104,7 @@ describe('rule_converters', () => {
       const patchParams = {
         index: ['new-test-index'],
         language: 'lucene',
-      };
+      } as PatchRuleRequestBody;
       const rule = getSavedQueryRuleParams();
       const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
       expect(patchedParams).toEqual(
@@ -119,10 +119,10 @@ describe('rule_converters', () => {
       const patchParams = {
         index: [1],
         language: 'non-language',
-      };
+      } as PatchRuleRequestBody;
       const rule = getSavedQueryRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "1" supplied to "index",Invalid value "non-language" supplied to "language"'
+        "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
       );
     });
 
@@ -151,10 +151,10 @@ describe('rule_converters', () => {
           field: ['host.name'],
           value: 'invalid',
         },
-      };
+      } as PatchRuleRequestBody;
       const rule = getThresholdRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "invalid" supplied to "threshold,value"'
+        'threshold.value: Expected number, received string'
       );
     });
 
@@ -174,10 +174,10 @@ describe('rule_converters', () => {
     test('should reject invalid machine learning params when existing rule type is machine learning', () => {
       const patchParams = {
         anomaly_threshold: 'invalid',
-      };
+      } as PatchRuleRequestBody;
       const rule = getMlRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "invalid" supplied to "anomaly_threshold"'
+        'anomaly_threshold: Expected number, received string'
       );
     });
 
@@ -197,85 +197,10 @@ describe('rule_converters', () => {
     test('should reject invalid new terms params when existing rule type is new terms', () => {
       const patchParams = {
         new_terms_fields: 'invalid',
-      };
+      } as PatchRuleRequestBody;
       const rule = getNewTermsRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "invalid" supplied to "new_terms_fields"'
-      );
-    });
-  });
-
-  describe('convertPatchAPIToInternalSchema', () => {
-    test('should set version to one specified in next params for custom rules', () => {
-      const nextParams = {
-        index: ['new-test-index'],
-        language: 'lucene',
-        version: 3,
-      };
-      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
-      expect(patchedParams).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({ version: 3 }),
-        })
-      );
-    });
-
-    test('should set version to one specified in next params for immutable rules', () => {
-      const nextParams = {
-        index: ['new-test-index'],
-        language: 'lucene',
-        version: 3,
-      };
-      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1, immutable: true });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
-      expect(patchedParams).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({ version: 3 }),
-        })
-      );
-    });
-
-    test('should not increment version for immutable rules if it is not specified in next params', () => {
-      const nextParams = {
-        index: ['new-test-index'],
-        language: 'lucene',
-      };
-      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1, immutable: true });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
-      expect(patchedParams).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({ version: 1 }),
-        })
-      );
-    });
-
-    test('should increment version for custom rules if it is not specified in next params', () => {
-      const nextParams = {
-        index: ['new-test-index'],
-        language: 'lucene',
-      };
-      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
-      expect(patchedParams).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({ version: 2 }),
-        })
-      );
-    });
-
-    test('should not increment version due to enabled, id, or rule_id, ', () => {
-      const nextParams = {
-        enabled: false,
-        id: 'some-id',
-        rule_id: 'some-rule-id',
-      };
-      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
-      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
-      expect(patchedParams).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({ version: 1 }),
-        })
+        'new_terms_fields: Expected array, received string'
       );
     });
   });

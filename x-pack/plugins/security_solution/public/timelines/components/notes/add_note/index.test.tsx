@@ -41,6 +41,7 @@ describe('AddNote', () => {
     newNote: note,
     onCancelAddNote: jest.fn(),
     updateNewNote: jest.fn(),
+    setIsMarkdownInvalid: jest.fn(),
   };
 
   test('renders correctly', () => {

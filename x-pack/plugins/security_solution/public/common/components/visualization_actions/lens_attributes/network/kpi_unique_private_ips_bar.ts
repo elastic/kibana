@@ -111,10 +111,7 @@ export const kpiUniquePrivateIpsBarLensAttributes: LensAttributes = {
                 params: {
                   filters: [
                     {
-                      input: {
-                        query: '',
-                        language: 'kuery',
-                      },
+                      input: { language: 'kuery', query: 'source.ip: *' },
                       label: SOURCE_CHART_LABEL,
                     },
                   ],
@@ -151,10 +148,7 @@ export const kpiUniquePrivateIpsBarLensAttributes: LensAttributes = {
                 params: {
                   filters: [
                     {
-                      input: {
-                        query: '',
-                        language: 'kuery',
-                      },
+                      input: { language: 'kuery', query: 'destination.ip: *' },
                       label: DESTINATION_CHART_LABEL,
                     },
                   ],

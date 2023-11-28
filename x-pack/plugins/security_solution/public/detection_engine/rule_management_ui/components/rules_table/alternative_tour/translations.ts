@@ -15,8 +15,9 @@ export const CREATE_RULE_TOUR_TITLE = i18n.translate(
 );
 
 export const CREATE_RULE_TOUR_CONTENT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.createRuleTourContent',
+  'xpack.securitySolution.detectionEngine.rules.tour.createRuleTourContent.eql',
   {
-    defaultMessage: `Alert suppression options are now available for Custom Query rules and multiple fields can be selected in New Terms rules`,
+    defaultMessage:
+      'Use the Elasticsearch Query Language (ES|QL) rule to find events and aggregate search results.',
   }
 );

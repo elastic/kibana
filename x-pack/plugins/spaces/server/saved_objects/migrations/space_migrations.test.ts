@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Space } from '../../../common';
 import { migrateTo660 } from './space_migrations';
+import type { Space } from '../../../common';
 
 describe('migrateTo660', () => {
   it('adds a "disabledFeatures" attribute initialized as an empty array', () => {

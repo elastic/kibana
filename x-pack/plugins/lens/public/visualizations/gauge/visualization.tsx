@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
@@ -27,6 +25,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   DatasourceLayers,
+  FramePublicAPI,
   OperationMetadata,
   Suggestion,
   UserMessage,
@@ -225,7 +224,7 @@ export const getGaugeVisualization = ({
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
-        palette: mainPalette,
+        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
         ticksPosition: 'auto',
         labelMajorMode: 'auto',
       }
@@ -234,23 +233,12 @@ export const getGaugeVisualization = ({
   getSuggestions,
 
   getConfiguration({ state, frame }) {
-    const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
-
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
-    const { metricAccessor } = state ?? {};
-
-    const accessors = getAccessorsFromState(state);
-
-    let palette;
-    if (!(row == null || metricAccessor == null || state?.palette == null || !hasColoring)) {
-      const currentMinMax = {
-        min: getMinValue(row, accessors),
-        max: getMaxValue(row, accessors),
-      };
-
-      const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
-      palette = displayStops.map(({ color }) => color);
-    }
+    const { palette, metricAccessor, accessors } = getConfigurationAccessorsAndPalette(
+      state,
+      paletteService,
+      frame.activeData
+    );
 
     return {
       groups: [
@@ -410,26 +398,12 @@ export const getGaugeVisualization = ({
     return update;
   },
 
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <GaugeDimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <GaugeDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <GaugeToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <GaugeToolbar {...props} />;
   },
 
   getSupportedLayers(state, frame) {
@@ -602,11 +576,16 @@ export const getGaugeVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: GaugeVisualizationState) {
+  getVisualizationInfo(state, frame) {
+    const { palette, accessors } = getConfigurationAccessorsAndPalette(
+      state,
+      paletteService,
+      frame?.activeData
+    );
     const dimensions = [];
-    if (state.metricAccessor) {
+    if (accessors?.metric) {
       dimensions.push({
-        id: state.metricAccessor,
+        id: accessors.metric,
         name: i18n.translate('xpack.lens.gauge.metricLabel', {
           defaultMessage: 'Metric',
         }),
@@ -614,9 +593,9 @@ export const getGaugeVisualization = ({
       });
     }
 
-    if (state.maxAccessor) {
+    if (accessors?.max) {
       dimensions.push({
-        id: state.maxAccessor,
+        id: accessors.max,
         name: i18n.translate('xpack.lens.gauge.maxValueLabel', {
           defaultMessage: 'Maximum value',
         }),
@@ -624,9 +603,9 @@ export const getGaugeVisualization = ({
       });
     }
 
-    if (state.minAccessor) {
+    if (accessors?.min) {
       dimensions.push({
-        id: state.minAccessor,
+        id: accessors.min,
         name: i18n.translate('xpack.lens.gauge.minValueLabel', {
           defaultMessage: 'Minimum value',
         }),
@@ -634,9 +613,9 @@ export const getGaugeVisualization = ({
       });
     }
 
-    if (state.goalAccessor) {
+    if (accessors?.goal) {
       dimensions.push({
-        id: state.goalAccessor,
+        id: accessors.goal,
         name: i18n.translate('xpack.lens.gauge.goalValueLabel', {
           defaultMessage: 'Goal value',
         }),
@@ -651,8 +630,44 @@ export const getGaugeVisualization = ({
           chartType: state.shape,
           ...this.getDescription(state),
           dimensions,
+          palette,
         },
       ],
     };
   },
 });
+
+// When the active data comes from the embeddable side it might not have been indexed by layerId
+// rather using a "default" key
+function getActiveDataForLayer(
+  layerId: string | undefined,
+  activeData: FramePublicAPI['activeData'] | undefined
+) {
+  if (activeData && layerId) {
+    return activeData[layerId] || activeData.default;
+  }
+}
+
+function getConfigurationAccessorsAndPalette(
+  state: GaugeVisualizationState,
+  paletteService: PaletteRegistry,
+  activeData?: FramePublicAPI['activeData']
+) {
+  const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
+
+  const row = getActiveDataForLayer(state?.layerId, activeData)?.rows?.[0];
+  const { metricAccessor } = state ?? {};
+
+  const accessors = getAccessorsFromState(state);
+
+  let palette;
+  if (row != null && metricAccessor != null && state?.palette != null && hasColoring) {
+    const currentMinMax = {
+      min: getMinValue(row, accessors),
+      max: getMaxValue(row, accessors),
+    };
+    const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
+    palette = displayStops.map(({ color }) => color);
+  }
+  return { metricAccessor, accessors, palette };
+}

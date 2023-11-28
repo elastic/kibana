@@ -10,31 +10,44 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuProps,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../../common/types/api';
+import { HttpLogic } from '../../../../../shared/http';
+import { KibanaLogic } from '../../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
 import { IngestionStatus } from '../../../../types';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncsContextMenu: React.FC = () => {
-  const { ingestionMethod, ingestionStatus, isCanceling, isSyncing, isWaitingForSync } =
-    useValues(IndexViewLogic);
+  const { config, productFeatures } = useValues(KibanaLogic);
+  const {
+    connector,
+    hasDocumentLevelSecurityFeature,
+    hasIncrementalSyncFeature,
+    ingestionMethod,
+    ingestionStatus,
+    isCanceling,
+    isSyncing,
+    isWaitingForSync,
+  } = useValues(IndexViewLogic);
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
-  const { startSync } = useActions(IndexViewLogic);
+  const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
-
   const togglePopover = () => setPopover(!isPopoverOpen);
   const closePopover = () => setPopover(false);
 
@@ -59,6 +72,107 @@ export const SyncsContextMenu: React.FC = () => {
 
   const syncLoading = (isSyncing || isWaitingForSync) && ingestionStatus !== IngestionStatus.ERROR;
 
+  const shouldShowDocumentLevelSecurity =
+    productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
+  const shouldShowIncrementalSync =
+    productFeatures.hasIncrementalSyncEnabled && hasIncrementalSyncFeature;
+
+  const isEnterpriseSearchNotAvailable = Boolean(
+    config.host && config.canDeployEntSearch && errorConnectingMessage
+  );
+  const isSyncsDisabled =
+    (connector?.is_native && isEnterpriseSearchNotAvailable) ||
+    ingestionStatus === IngestionStatus.INCOMPLETE;
+
+  const panels: EuiContextMenuProps['panels'] = [
+    {
+      id: 0,
+      items: [
+        ...(syncLoading
+          ? []
+          : [
+              {
+                // @ts-ignore - data-* attributes are applied but doesn't exist on types
+                'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
+                'data-test-subj': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
+                disabled: isSyncsDisabled,
+                icon: 'play',
+                name: i18n.translate('xpack.enterpriseSearch.index.header.more.fullSync', {
+                  defaultMessage: 'Full Content',
+                }),
+                onClick: () => {
+                  closePopover();
+                  startSync();
+                },
+              },
+            ]),
+        ...(shouldShowIncrementalSync
+          ? [
+              {
+                // @ts-ignore - data-* attributes are applied but doesn't exist on types
+                'data-telemetry-id':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+                'data-test-subj':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+                disabled: isSyncsDisabled,
+                icon: 'play',
+                name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
+                  defaultMessage: 'Incremental Content',
+                }),
+                onClick: () => {
+                  closePopover();
+                  startIncrementalSync();
+                },
+              },
+            ]
+          : []),
+        ...(shouldShowDocumentLevelSecurity
+          ? [
+              {
+                // @ts-ignore - data-* attributes are applied but doesn't exist on types
+                'data-telemetry-id':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+                'data-test-subj':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+                disabled: Boolean(
+                  isSyncsDisabled || !connector?.configuration.use_document_level_security?.value
+                ),
+                icon: 'play',
+                name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
+                  defaultMessage: 'Access Control',
+                }),
+                onClick: () => {
+                  closePopover();
+                  startAccessControlSync();
+                },
+              },
+            ]
+          : []),
+        {
+          // @ts-ignore - data-* attributes are applied but doesn't exist on types
+          'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-cancelSync`,
+          disabled:
+            (isCanceling && ingestionStatus !== IngestionStatus.ERROR) || status === Status.LOADING,
+          icon: <EuiIcon type="cross" size="m" color="danger" />,
+          name: (
+            <EuiText color="danger" size="s">
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.index.header.cancelSyncsTitle', {
+                  defaultMessage: 'Cancel Syncs',
+                })}
+              </p>
+            </EuiText>
+          ),
+          onClick: () => {
+            closePopover();
+            cancelSyncs();
+          },
+        },
+      ],
+      title: 'Sync',
+    },
+  ];
+
   return (
     <EuiPopover
       button={
@@ -75,52 +189,18 @@ export const SyncsContextMenu: React.FC = () => {
                 <EuiLoadingSpinner size="m" />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>{getSyncButtonText()}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={`entSearchContent-${ingestionMethod}-header-sync-menu`}>
+              {getSyncButtonText()}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiButton>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
     >
-      <EuiContextMenuPanel
-        items={[
-          ...(syncLoading
-            ? []
-            : [
-                <EuiContextMenuItem
-                  data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-startSync`}
-                  disabled={ingestionStatus === IngestionStatus.INCOMPLETE}
-                  key="Sync"
-                  onClick={() => {
-                    closePopover();
-                    startSync();
-                  }}
-                  icon="play"
-                >
-                  {getSyncButtonText()}
-                </EuiContextMenuItem>,
-              ]),
-          <EuiContextMenuItem
-            data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-cancelSync`}
-            disabled={
-              (isCanceling && ingestionStatus !== IngestionStatus.ERROR) ||
-              status === Status.LOADING
-            }
-            key="Cancel sync"
-            onClick={() => {
-              closePopover();
-              cancelSyncs();
-            }}
-            icon="trash"
-          >
-            {i18n.translate('xpack.enterpriseSearch.index.header.cancelSyncsTitle', {
-              defaultMessage: 'Cancel Syncs',
-            })}
-          </EuiContextMenuItem>,
-        ]}
-      />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };

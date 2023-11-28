@@ -9,18 +9,17 @@ import React, { FC } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { getJobTypeLabel } from '../../util/field_types_utils';
-import type { SupportedFieldType } from '../../../../../common/types';
+import { getFieldTypeName } from '@kbn/field-utils';
 import './_index.scss';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
-  type: SupportedFieldType;
+  type: string;
 }
 
 export const FieldTypeIcon: FC<FieldTypeIconProps> = ({ tooltipEnabled = false, type }) => {
   const label =
-    getJobTypeLabel(type) ??
+    getFieldTypeName(type) ??
     i18n.translate('xpack.dataVisualizer.fieldTypeIcon.fieldTypeTooltip', {
       defaultMessage: '{type} type',
       values: { type },

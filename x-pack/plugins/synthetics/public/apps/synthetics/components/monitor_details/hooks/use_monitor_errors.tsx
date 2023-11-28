@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useTimeZone } from '@kbn/observability-plugin/public';
+import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useSelectedLocation } from './use_selected_location';
-import { PingState } from '../../../../../../common/runtime_types';
+import { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -51,11 +50,6 @@ export function useMonitorErrors(monitorIdArg?: string) {
               },
               {
                 term: {
-                  'state.up': 0,
-                },
-              },
-              {
-                term: {
                   config_id: monitorIdArg ?? monitorId,
                 },
               },
@@ -69,7 +63,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
         sort: [{ 'state.started_at': 'desc' }],
         aggs: {
-          errorStates: {
+          states: {
             terms: {
               field: 'state.id',
               size: 10000,
@@ -84,6 +78,13 @@ export function useMonitorErrors(monitorIdArg?: string) {
               },
             },
           },
+          latest: {
+            top_hits: {
+              size: 1,
+              _source: ['monitor.status'],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
         },
       },
     },
@@ -95,14 +96,40 @@ export function useMonitorErrors(monitorIdArg?: string) {
   );
 
   return useMemo(() => {
-    const errorStates = data?.aggregations?.errorStates.buckets?.map((loc) => {
-      return loc.summary.hits.hits?.[0]._source as PingState;
-    });
+    const defaultValues = { upStates: [], errorStates: [] };
+    // re-bucket states into error/up
+    // including the `up` states is useful for determining error duration
+    const { errorStates, upStates } =
+      data?.aggregations?.states.buckets.reduce<{
+        upStates: PingState[];
+        errorStates: PingState[];
+      }>((prev, cur) => {
+        const source = cur.summary.hits.hits?.[0]._source as PingState | undefined;
+        if (source?.state.up === 0) {
+          prev.errorStates.push(source as PingState);
+        } else if (!!source?.state.up && source.state.up >= 1) {
+          prev.upStates.push(source as PingState);
+        }
+        return prev;
+      }, defaultValues) ?? defaultValues;
+
+    const hits = data?.aggregations?.latest.hits.hits ?? [];
+
+    const hasActiveError: boolean =
+      hits.length === 1 &&
+      (hits[0]?._source as Ping).monitor?.status === 'down' &&
+      !!errorStates?.length;
+
+    const upStatesSortedAsc = upStates.sort(
+      (a, b) => Number(new Date(a.state.started_at)) - Number(new Date(b.state.started_at))
+    );
 
     return {
       errorStates,
+      upStates: upStatesSortedAsc,
       loading,
       data,
+      hasActiveError,
     };
   }, [data, loading]);
 }

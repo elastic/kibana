@@ -1,0 +1,38 @@
+type: object
+description: The parameters for an index threshold rule.
+required:
+  - index 
+  - threshold
+  - thresholdComparator
+  - timeField
+  - timeWindowSize
+  - timeWindowUnit
+properties:
+  aggField:
+    $ref: 'aggfield.yaml'
+  aggType:
+    $ref: 'aggtype.yaml'
+  filterKuery:
+    description: A KQL expression thats limits the scope of alerts.
+    type: string
+  groupBy:
+    $ref: 'groupby.yaml'
+  index:
+    description: The indices to query.
+    type: array
+    items:
+      type: string
+  termField:
+    $ref: 'termfield.yaml'
+  termSize:
+    $ref: 'termsize.yaml'
+  threshold:
+    $ref: 'threshold.yaml'
+  thresholdComparator:
+    $ref: 'thresholdcomparator.yaml'
+  timeField:
+    $ref: 'timefield.yaml'
+  timeWindowSize:
+    $ref: 'timewindowsize.yaml'
+  timeWindowUnit:
+    $ref: 'timewindowunit.yaml'

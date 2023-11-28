@@ -8,8 +8,8 @@
 import { EuiCode, EuiDescribedFormGroup, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { LogIndexNameReference } from '../../../../common/log_views';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { LogIndexNameReference } from '@kbn/logs-shared-plugin/common';
 import { FormElement } from './form_elements';
 import { getFormRowProps, getInputFieldProps } from './form_field_props';
 import { FormValidationError } from './validation_errors';

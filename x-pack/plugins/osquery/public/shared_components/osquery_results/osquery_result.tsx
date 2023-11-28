@@ -6,7 +6,7 @@
  */
 
 import { EuiComment, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import type { OsqueryActionResultsProps } from './types';
@@ -21,28 +21,34 @@ interface OsqueryResultProps extends OsqueryActionResultsProps {
   startDate: string;
 }
 
+// eslint-disable-next-line react/display-name
 export const OsqueryResult = React.memo<OsqueryResultProps>(
-  ({ actionId, ruleName, agentIds, startDate, ecsData }) => {
+  ({ actionId, ruleName, startDate, ecsData }) => {
+    const [isLive, setIsLive] = useState(false);
     const { data } = useLiveQueryDetails({
       actionId,
+      isLive,
     });
+
+    useLayoutEffect(() => {
+      setIsLive(() => !(data?.status === 'completed'));
+    }, [data?.status]);
 
     return (
       <AlertAttachmentContext.Provider value={ecsData}>
         <EuiSpacer size="s" />
         <EuiComment
-          username={ruleName && ruleName[0]}
+          username={ruleName}
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}
           data-test-subj={'osquery-results-comment'}
         >
           <PackQueriesStatusTable
             actionId={actionId}
-            // queryId={queryId}
             data={data?.queries}
             startDate={data?.['@timestamp']}
             expirationDate={data?.expiration}
-            agentIds={agentIds}
+            agentIds={data?.agents}
           />
         </EuiComment>
         <EuiSpacer size="s" />

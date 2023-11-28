@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CoreSetup } from '@kbn/core/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { getEditPath } from '../common';
+import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import { CustomVisualizationMigrations } from './migrations/types';
 
@@ -19,6 +20,7 @@ export function setupSavedObjects(
 ) {
   core.savedObjects.registerType({
     name: 'lens',
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -50,12 +52,8 @@ export function setupSavedObjects(
           type: 'keyword',
         },
         state: {
-          type: 'flattened',
-        },
-        expression: {
-          index: false,
-          doc_values: false,
-          type: 'keyword',
+          dynamic: false,
+          properties: {},
         },
       },
     },
@@ -63,6 +61,7 @@ export function setupSavedObjects(
 
   core.savedObjects.registerType({
     name: 'lens-ui-telemetry',
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'single',
     mappings: {

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { v4 as uuidV4 } from 'uuid';
+import { AADAlert } from '@kbn/alerts-as-data-utils';
+import { get, isEmpty } from 'lodash';
+import { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
   RawAlertInstance,
-  rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
   LastScheduledActions,
@@ -33,27 +37,37 @@ export type PublicAlert<
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
-  Alert<State, Context, ActionGroupIds>,
-  'getState' | 'replaceState' | 'scheduleActions' | 'setContext' | 'getContext' | 'hasContext'
+  Alert<State, Context, ActionGroupIds, AADAlert>,
+  | 'getContext'
+  | 'getState'
+  | 'getUuid'
+  | 'getStart'
+  | 'hasContext'
+  | 'replaceState'
+  | 'scheduleActions'
+  | 'setContext'
 >;
 
 export class Alert<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertAsData extends AADAlert = AADAlert
 > {
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
-  private meta: AlertInstanceMeta;
+  private meta: MutableAlertInstanceMeta;
   private state: State;
   private context: Context;
   private readonly id: string;
+  private alertAsData: AlertAsData | undefined;
 
   constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
     this.id = id;
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
-
+    this.meta.uuid = meta.uuid ?? uuidV4();
+    this.meta.maintenanceWindowIds = meta.maintenanceWindowIds ?? [];
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
     }
@@ -63,11 +77,39 @@ export class Alert<
     return this.id;
   }
 
+  getUuid() {
+    return this.meta.uuid!;
+  }
+
+  isAlertAsData() {
+    return this.alertAsData !== undefined;
+  }
+
+  setAlertAsData(alertAsData: AlertAsData) {
+    this.alertAsData = alertAsData;
+  }
+
+  getAlertAsData() {
+    return this.alertAsData;
+  }
+
+  getStart(): string | null {
+    return this.state.start ? `${this.state.start}` : null;
+  }
+
   hasScheduledActions() {
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled({ throttle, actionHash }: { throttle: string | null; actionHash?: string }) {
+  isThrottled({
+    throttle,
+    actionHash,
+    uuid,
+  }: {
+    throttle: string | null;
+    actionHash?: string;
+    uuid?: string;
+  }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -79,14 +121,19 @@ export class Alert<
         this.scheduledExecutionOptions
       )
     ) {
-      if (actionHash) {
+      if (uuid && actionHash) {
         if (this.meta.lastScheduledActions.actions) {
-          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionHash]?.date;
-          return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
+          const actionInState =
+            this.meta.lastScheduledActions.actions[uuid] ||
+            this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
+          const lastTriggerDate = actionInState?.date;
+          return !!(
+            lastTriggerDate && new Date(lastTriggerDate).getTime() + throttleMills > Date.now()
+          );
         }
         return false;
       } else {
-        return this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now();
+        return new Date(this.meta.lastScheduledActions.date).getTime() + throttleMills > Date.now();
       }
     }
     return false;
@@ -169,21 +216,25 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null) {
+  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
     }
-    const date = new Date();
+    const date = new Date().toISOString();
     this.meta.lastScheduledActions.group = group;
     this.meta.lastScheduledActions.date = date;
 
     if (this.meta.lastScheduledActions.group !== group) {
       this.meta.lastScheduledActions.actions = {};
-    } else if (actionHash) {
+    } else if (uuid) {
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions.actions = {};
       }
-      this.meta.lastScheduledActions.actions[actionHash] = { date };
+      // remove deprecated actionHash
+      if (!!actionHash && this.meta.lastScheduledActions.actions[actionHash]) {
+        delete this.meta.lastScheduledActions.actions[actionHash];
+      }
+      this.meta.lastScheduledActions.actions[uuid] = { date };
     }
   }
 
@@ -191,17 +242,19 @@ export class Alert<
    * Used to serialize alert instance state
    */
   toJSON() {
-    return rawAlertInstance.encode(this.toRaw());
+    return this.toRaw();
   }
 
   toRaw(recovered: boolean = false): RawAlertInstance {
     return recovered
       ? {
-          // for a recovered alert, we only care to track the flappingHistory
-          // and the flapping flag
+          // for a recovered alert, we only care to track the flappingHistory,
+          // the flapping flag, and the UUID
           meta: {
+            maintenanceWindowIds: this.meta.maintenanceWindowIds,
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
+            uuid: this.meta.uuid,
           },
         }
       : {
@@ -239,5 +292,39 @@ export class Alert<
 
   resetPendingRecoveredCount() {
     this.meta.pendingRecoveredCount = 0;
+  }
+
+  /**
+   * Checks whether this alert exists in the given alert summary
+   */
+  isFilteredOut(summarizedAlerts: CombinedSummarizedAlerts | null) {
+    if (summarizedAlerts === null) {
+      return false;
+    }
+
+    // We check the alert UUID against both the alert ID and the UUID here
+    // The framework generates a UUID for each new reported alert.
+    // For lifecycle rule types, this UUID is written out in the ALERT_UUID field
+    // so we can compare ALERT_UUID to getUuid()
+    // For persistence rule types, the executor generates its own UUID which is a SHA
+    // of the alert data and stores it in the ALERT_UUID and uses it as the alert ID
+    // before reporting the alert back to the framework. The framework then generates
+    // another UUID that is never persisted. For these alerts, we want to compare
+    // ALERT_UUID to getId()
+    //
+    // Related issue: https://github.com/elastic/kibana/issues/144862
+
+    return !summarizedAlerts.all.data.some((alert: AlertHit) => {
+      const alertUuid = get(alert, ALERT_UUID);
+      return alertUuid === this.getId() || alertUuid === this.getUuid();
+    });
+  }
+
+  setMaintenanceWindowIds(maintenanceWindowIds: string[] = []) {
+    this.meta.maintenanceWindowIds = maintenanceWindowIds;
+  }
+
+  getMaintenanceWindowIds() {
+    return this.meta.maintenanceWindowIds ?? [];
   }
 }

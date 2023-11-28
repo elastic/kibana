@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { HttpService } from '../http_service';
-import { basePath } from '.';
 import { useMlKibana } from '../../contexts/kibana';
 import type { TrainedModelStat } from '../../../../common/types/trained_models';
 import type { ManagementListResponse } from '../../../../common/types/management';
@@ -47,8 +47,6 @@ export interface InferenceStatsResponse {
  * @param httpService
  */
 export function managementApiProvider(httpService: HttpService) {
-  const apiBasePath = basePath();
-
   return {
     /**
      * Fetches lists of anomaly detection jobs, data frame analytics jobs or trained models
@@ -58,8 +56,9 @@ export function managementApiProvider(httpService: HttpService) {
      */
     getList(mlSavedObjectType: MlSavedObjectType) {
       return httpService.http<ManagementListResponse>({
-        path: `${apiBasePath}/management/list/${mlSavedObjectType}`,
+        path: `${ML_INTERNAL_BASE_PATH}/management/list/${mlSavedObjectType}`,
         method: 'GET',
+        version: '1',
       });
     },
   };

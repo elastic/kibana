@@ -11,6 +11,8 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 
 export interface AppContext {
   filesClient: FilesClient;
+  getFileKindDefinition: FilesStart['getFileKindDefinition'];
+  getAllFindKindDefinitions: FilesStart['getAllFindKindDefinitions'];
 }
 
 export interface SetupDependencies {

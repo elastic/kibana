@@ -13,7 +13,8 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/io-ts-utils"
+    "@kbn/io-ts-utils",
+    "@kbn/shared-ux-router"
   ],
   "exclude": [
     "target/**/*",

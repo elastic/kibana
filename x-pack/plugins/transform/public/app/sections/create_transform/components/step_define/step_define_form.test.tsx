@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -66,6 +67,7 @@ const createMockStorage = () => ({
 describe('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', async () => {
     // Arrange
+    const queryClient = new QueryClient();
     const mlSharedImports = await getMlSharedImports();
 
     const searchItems = {
@@ -83,15 +85,19 @@ describe('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
+    const mockOnChange = jest.fn();
+
     const { getByText } = render(
       <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <MlSharedContext.Provider value={mlSharedImports}>
-            <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
-              <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
-            </DatePickerContextProvider>
-          </MlSharedContext.Provider>
-        </KibanaContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={services}>
+            <MlSharedContext.Provider value={mlSharedImports}>
+              <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
+                <StepDefineForm onChange={mockOnChange} searchItems={searchItems as SearchItems} />
+              </DatePickerContextProvider>
+            </MlSharedContext.Provider>
+          </KibanaContextProvider>
+        </QueryClientProvider>
       </I18nProvider>
     );
 
@@ -102,8 +108,9 @@ describe('Transform: <DefinePivotForm />', () => {
     await waitFor(() => {
       expect(getByText('Data view')).toBeInTheDocument();
       expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
+      expect(mockOnChange).toBeCalled();
     });
-  });
+  }, 10000);
 });
 
 describe('Transform: isAggNameConflict()', () => {

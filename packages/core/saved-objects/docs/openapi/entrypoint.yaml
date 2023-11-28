@@ -1,0 +1,56 @@
+openapi: 3.1.0
+info:
+  title: Saved objects
+  description: OpenAPI schema for saved object endpoints
+  version: '0.1'
+  contact:
+    name: Kibana Core Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: saved objects
+    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
+servers:
+  - url: /
+paths:
+# Paths in the default space
+  '/api/encrypted_saved_objects/_rotate_key':
+    $ref: 'paths/api@encrypted_saved_objects@_rotate_key.yaml'
+  '/api/saved_objects/_bulk_create':
+    $ref: 'paths/api@saved_objects@_bulk_create.yaml'
+  '/api/saved_objects/_bulk_delete':
+    $ref: 'paths/api@saved_objects@_bulk_delete.yaml'
+  '/api/saved_objects/_bulk_get':
+    $ref: 'paths/api@saved_objects@_bulk_get.yaml'
+  '/api/saved_objects/_bulk_resolve':
+    $ref: 'paths/api@saved_objects@_bulk_resolve.yaml'
+  '/api/saved_objects/_bulk_update':
+    $ref: 'paths/api@saved_objects@_bulk_update.yaml'
+  '/api/saved_objects/_export':
+    $ref: 'paths/api@saved_objects@_export.yaml'
+  '/api/saved_objects/_find':
+    $ref: 'paths/api@saved_objects@_find.yaml'
+  '/api/saved_objects/_import':
+    $ref: 'paths/api@saved_objects@_import.yaml'
+  '/api/saved_objects/_resolve_import_errors':
+    $ref: 'paths/api@saved_objects@_resolve_import_errors.yaml'
+  '/api/saved_objects/{type}':
+    $ref: 'paths/api@saved_objects@{type}.yaml'
+  '/api/saved_objects/{type}/{id}':
+    $ref: 'paths/api@saved_objects@{type}@{id}.yaml'
+  '/api/saved_objects/resolve/{type}/{id}':
+    $ref: 'paths/api@saved_objects@resolve@{type}@{id}.yaml'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+security:
+  - basicAuth: []
+  - apiKeyAuth: []

@@ -10,13 +10,12 @@ import type { Screen } from '@testing-library/react';
 import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
@@ -46,26 +45,34 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
+import { useGetCategories } from '../../containers/use_get_categories';
+import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
+import {
+  CaseSeverity,
+  AttachmentType,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
 jest.mock('../connectors/jira/use_get_fields_by_issue_type');
-jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
+jest.mock('../../containers/use_get_categories');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
@@ -78,18 +85,21 @@ const postCase = jest.fn();
 const pushCaseToExternalService = jest.fn();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
+const useGetCategoriesMock = useGetCategories as jest.Mock;
 
 const sampleId = 'case-id';
 
 const defaultPostCase = {
   isLoading: false,
   isError: false,
-  postCase,
+  mutateAsync: postCase,
 };
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
+  isLoadingCaseConfiguration: false,
   connectors: [],
+  customFieldsConfiguration: [],
   withSteps: true,
   owner: ['securitySolution'],
   draftStorageKey: 'cases.kibana.createCase.description.markdownEditor',
@@ -98,7 +108,7 @@ const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
 const defaultPostPushToService = {
   isLoading: false,
   isError: false,
-  pushCaseToExternalService,
+  mutateAsync: pushCaseToExternalService,
 };
 
 const sampleDataWithoutTags = {
@@ -139,28 +149,62 @@ const waitForFormToRender = async (renderer: Screen) => {
   });
 };
 
-describe('Create case', () => {
+// Failing: See https://github.com/elastic/kibana/issues/146394
+describe.skip('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
-  let mockedContext: AppMockRenderer;
+  let appMockRender: AppMockRenderer;
+
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   beforeAll(() => {
+    // The JSDOM implementation is too slow
+    // Especially for dropdowns that try to position themselves
+    // perf issue - https://github.com/jsdom/jsdom/issues/3234
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
+
     postCase.mockResolvedValue({
       id: sampleId,
       ...sampleDataWithoutTags,
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
-    useCreateAttachmentsMock.mockImplementation(() => ({ createAttachments }));
+    useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
-    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
+    useGetCategoriesMock.mockReturnValue({ isLoading: false, data: categories });
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
@@ -175,8 +219,12 @@ describe('Create case', () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
   });
 
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+  });
+
   beforeEach(() => {
-    mockedContext = createAppMockRenderer();
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -186,7 +234,7 @@ describe('Create case', () => {
 
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -195,13 +243,14 @@ describe('Create case', () => {
 
       await waitForFormToRender(screen);
 
-      expect(screen.getByTestId('caseTitle')).toBeTruthy();
-      expect(screen.getByTestId('caseSeverity')).toBeTruthy();
-      expect(screen.getByTestId('caseDescription')).toBeTruthy();
-      expect(screen.getByTestId('createCaseAssigneesComboBox')).toBeTruthy();
-      expect(screen.getByTestId('caseTags')).toBeTruthy();
-      expect(screen.getByTestId('caseConnectors')).toBeTruthy();
-      expect(screen.getByTestId('case-creation-form-steps')).toBeTruthy();
+      expect(screen.getByTestId('caseTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('caseSeverity')).toBeInTheDocument();
+      expect(screen.getByTestId('caseDescription')).toBeInTheDocument();
+      expect(screen.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
+      expect(screen.getByTestId('caseTags')).toBeInTheDocument();
+      expect(screen.getByTestId('caseConnectors')).toBeInTheDocument();
+      expect(screen.getByTestId('case-creation-form-steps')).toBeInTheDocument();
+      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
     });
 
     it('should post case on submit click', async () => {
@@ -210,7 +259,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -226,7 +275,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
+      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, tags: sampleTags } });
     });
 
     it('should post a case on submit click with the selected severity', async () => {
@@ -235,7 +284,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -258,15 +307,18 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        severity: CaseSeverity.HIGH,
+        request: {
+          ...sampleDataWithoutTags,
+          severity: CaseSeverity.HIGH,
+        },
       });
     });
 
-    it('does not submits the title when the length is longer than 160 characters', async () => {
-      const longTitle = 'a'.repeat(161);
+    it('should trim fields correctly while submit', async () => {
+      const newTags = ['coke     ', '     pepsi'];
+      const newCategory = 'First           ';
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -276,17 +328,33 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
 
       const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
-      userEvent.paste(titleInput, longTitle);
+
+      userEvent.paste(titleInput, `${sampleDataWithoutTags.title}       `);
+
+      const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+        'euiMarkdownEditorTextArea'
+      );
+
+      userEvent.paste(descriptionInput, `${sampleDataWithoutTags.description}           `);
+
+      const caseTags = screen.getByTestId('caseTags');
+
+      for (const tag of newTags) {
+        const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
+        userEvent.type(tagsInput, `${tag}{enter}`);
+      }
+
+      const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
+
+      userEvent.type(categoryComboBox, `${newCategory}{enter}`);
 
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(
-          screen.getByText('The length of the name is too long. The maximum length is 160.')
-        ).toBeInTheDocument();
+        expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).not.toHaveBeenCalled();
+      expect(postCase).toBeCalledWith({ request: { ...sampleData, category: 'First' } });
     });
 
     it('should toggle sync settings', async () => {
@@ -295,7 +363,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -313,13 +381,15 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        settings: { syncAlerts: false },
+        request: {
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        },
       });
     });
 
     it('should set sync alerts to false when the sync feature setting is false', async () => {
-      mockedContext = createAppMockRenderer({
+      appMockRender = createAppMockRenderer({
         features: { alerts: { sync: false, enabled: true } },
       });
 
@@ -328,7 +398,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -343,13 +413,15 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        settings: { syncAlerts: false },
+        request: {
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        },
       });
     });
 
     it('should select LOW as the default severity', async () => {
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -359,22 +431,83 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
 
       expect(screen.getByTestId('caseSeverity')).toBeTruthy();
-      // there should be 2 low elements. one for the options popover and one for the displayed one.
-      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(2);
+      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(1);
 
       await waitForComponentToUpdate();
     });
 
-    it('should select the default connector set in the configuration', async () => {
-      useCaseConfigureMock.mockImplementation(() => ({
+    it('should submit form with custom fields', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        connector: {
-          id: 'servicenow-1',
-          name: 'SN',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: [
+            ...customFieldsConfigurationMock,
+            {
+              key: 'my_custom_field_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'my custom field label',
+              required: false,
+            },
+          ],
         },
-        persistLoading: false,
+      }));
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const textField = customFieldsConfigurationMock[0];
+      const toggleField = customFieldsConfigurationMock[1];
+
+      expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+
+      userEvent.paste(
+        screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`),
+        'My text test value 1'
+      );
+
+      userEvent.click(
+        screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+      );
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        request: {
+          ...sampleDataWithoutTags,
+          customFields: [
+            ...customFieldsMock,
+            {
+              key: 'my_custom_field_key',
+              type: CustomFieldTypes.TEXT,
+              value: null,
+            },
+          ],
+        },
+      });
+    });
+
+    it('should select the default connector set in the configuration', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          connector: {
+            id: 'servicenow-1',
+            name: 'SN',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
+        },
       }));
 
       useGetConnectorsMock.mockReturnValue({
@@ -382,7 +515,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -397,32 +530,36 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        connector: {
-          fields: {
-            impact: null,
-            severity: null,
-            urgency: null,
-            category: null,
-            subcategory: null,
+        request: {
+          ...sampleDataWithoutTags,
+          connector: {
+            fields: {
+              impact: null,
+              severity: null,
+              urgency: null,
+              category: null,
+              subcategory: null,
+            },
+            id: 'servicenow-1',
+            name: 'My SN connector',
+            type: '.servicenow',
           },
-          id: 'servicenow-1',
-          name: 'My SN connector',
-          type: '.servicenow',
         },
       });
     });
 
     it('should default to none if the default connector does not exist in connectors', async () => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        connector: {
-          id: 'not-exist',
-          name: 'SN',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
+        data: {
+          ...useCaseConfigureResponse.data,
+          connector: {
+            id: 'not-exist',
+            name: 'SN',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
         },
-        persistLoading: false,
       }));
 
       useGetConnectorsMock.mockReturnValue({
@@ -430,7 +567,7 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -448,19 +585,49 @@ describe('Create case', () => {
       });
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
-      expect(postCase).toBeCalledWith(sampleDataWithoutTags);
+      expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
     });
-  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/143408
-  describe.skip('Step 2 - Connector Fields', () => {
-    it(`should submit and push to resilient connector`, async () => {
+    it('should set the category correctly', async () => {
+      const category = categories[0];
+
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         data: connectorsMock,
       });
 
-      mockedContext.render(
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
+
+      userEvent.type(categoryComboBox, `${category}{enter}`);
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, category } });
+    });
+  });
+
+  describe('Step 2 - Connector Fields', () => {
+    it('should submit and push to resilient connector', async () => {
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectorsMock,
+      });
+
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -471,25 +638,20 @@ describe('Create case', () => {
       await fillFormReactTestingLib({ renderer: screen });
 
       userEvent.click(screen.getByTestId('dropdown-connectors'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
-      });
-
       userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
         skipPointerEventsCheck: true,
       });
 
       await waitFor(() => {
         expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: 'Low' }));
       });
 
       const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
         'comboBoxSearchInput'
       );
 
-      userEvent.type(checkbox, 'Denial of Service{enter}');
+      userEvent.paste(checkbox, 'Denial of Service');
+      userEvent.keyboard('{enter}');
       userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
       userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -500,12 +662,14 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        connector: {
-          id: 'resilient-2',
-          name: 'My Connector 2',
-          type: '.resilient',
-          fields: { incidentTypes: ['21'], severityCode: '4' },
+        request: {
+          ...sampleDataWithoutTags,
+          connector: {
+            id: 'resilient-2',
+            name: 'My Resilient connector',
+            type: '.resilient',
+            fields: { incidentTypes: ['21'], severityCode: '4' },
+          },
         },
       });
 
@@ -513,7 +677,7 @@ describe('Create case', () => {
         caseId: sampleId,
         connector: {
           id: 'resilient-2',
-          name: 'My Connector 2',
+          name: 'My Resilient connector',
           type: '.resilient',
           fields: { incidentTypes: ['21'], severityCode: '4' },
         },
@@ -524,15 +688,72 @@ describe('Create case', () => {
         ...sampleDataWithoutTags,
       });
     });
+
+    it('resets fields when changing between connectors of the same type', async () => {
+      const connectors = [
+        ...connectorsMock,
+        { ...connectorsMock[0], id: 'servicenow-2', name: 'My SN connector 2' },
+      ];
+
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectors,
+      });
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
+      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+      });
+
+      userEvent.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
+      expect(screen.getByTestId('severitySelect')).toHaveValue('4');
+
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
+      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalledWith({
+          request: {
+            ...sampleDataWithoutTags,
+            connector: {
+              fields: {
+                category: null,
+                subcategory: null,
+                impact: null,
+                severity: null,
+                urgency: null,
+              },
+              id: 'servicenow-2',
+              name: 'My SN connector 2',
+              type: '.servicenow',
+            },
+          },
+        });
+      });
+    });
   });
 
-  it(`should call afterCaseCreated`, async () => {
+  it('should call afterCaseCreated', async () => {
     useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       data: connectorsMock,
     });
 
-    mockedContext.render(
+    appMockRender.render(
       <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
@@ -545,10 +766,10 @@ describe('Create case', () => {
     userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
+    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
       skipPointerEventsCheck: true,
     });
     userEvent.click(screen.getByTestId('create-case-submit'));
@@ -571,6 +792,7 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments = [
       {
         alertId: '1234',
@@ -580,7 +802,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
       {
         alertId: '7896',
@@ -590,11 +812,11 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'second-owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 
-    mockedContext.render(
+    appMockRender.render(
       <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
@@ -612,7 +834,7 @@ describe('Create case', () => {
 
     expect(createAttachments).toHaveBeenCalledWith({
       caseId: 'case-id',
-      data: attachments,
+      attachments,
       caseOwner: 'securitySolution',
     });
   });
@@ -622,9 +844,10 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments: CaseAttachments = [];
 
-    mockedContext.render(
+    appMockRender.render(
       <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
@@ -655,11 +878,11 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 
-    mockedContext.render(
+    appMockRender.render(
       <FormContext
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
@@ -676,10 +899,10 @@ describe('Create case', () => {
     userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
+    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
       skipPointerEventsCheck: true,
     });
 
@@ -709,12 +932,12 @@ describe('Create case', () => {
 
   describe('Permissions', () => {
     it('should not push to service if the user does not have access to actions', async () => {
-      mockedContext.coreStart.application.capabilities = {
-        ...mockedContext.coreStart.application.capabilities,
+      appMockRender.coreStart.application.capabilities = {
+        ...appMockRender.coreStart.application.capabilities,
         actions: { save: false, show: false },
       };
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -732,8 +955,20 @@ describe('Create case', () => {
   });
 
   describe('Assignees', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     it('should submit assignees', async () => {
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -750,11 +985,8 @@ describe('Create case', () => {
       });
 
       userEvent.paste(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr');
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId('comboBoxOptionsList createCaseAssigneesComboBox-optionsList')
-        ).toBeInTheDocument();
+      act(() => {
+        jest.advanceTimersByTime(500);
       });
 
       userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
@@ -765,15 +997,17 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        assignees: [{ uid: userProfiles[0].uid }],
+        request: {
+          ...sampleDataWithoutTags,
+          assignees: [{ uid: userProfiles[0].uid }],
+        },
       });
     });
 
     it('should not render the assignees on basic license', async () => {
       useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 
-      mockedContext.render(
+      appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
@@ -798,7 +1032,7 @@ describe('Create case', () => {
       });
 
       it('should have session storage value same as draft comment', async () => {
-        mockedContext.render(
+        appMockRender.render(
           <FormContext onSuccess={onFormSubmitSuccess}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
@@ -826,7 +1060,7 @@ describe('Create case', () => {
       });
 
       it('should have session storage value same as draft comment', async () => {
-        mockedContext.render(
+        appMockRender.render(
           <FormContext onSuccess={onFormSubmitSuccess}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />

@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Tags } from './tags';
 import type { FormProps } from './schema';
 import { schema } from './schema';
-import { TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
+import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
@@ -26,6 +26,7 @@ const useGetTagsMock = useGetTags as jest.Mock;
 
 describe('Tags', () => {
   let globalForm: FormHook;
+  let appMockRender: AppMockRenderer;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
@@ -47,45 +48,64 @@ describe('Tags', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useGetTagsMock.mockReturnValue({ data: ['test'] });
+    appMockRender = createAppMockRenderer();
   });
 
   it('it renders', async () => {
-    const wrapper = mount(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Tags isLoading={false} />
       </MockHookWrapperComponent>
     );
 
     await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="caseTags"]`).exists()).toBeTruthy();
+      expect(screen.getByTestId('caseTags')).toBeInTheDocument();
     });
-  });
-
-  it('it disables the input when loading', async () => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
-        <Tags isLoading={true} />
-      </MockHookWrapperComponent>
-    );
-
-    expect(wrapper.find(EuiComboBox).prop('disabled')).toBeTruthy();
   });
 
   it('it changes the tags', async () => {
-    const wrapper = mount(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Tags isLoading={false} />
       </MockHookWrapperComponent>
     );
 
-    await waitFor(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }
-      ).onChange(['test', 'case'].map((tag) => ({ label: tag })));
-    });
+    userEvent.type(screen.getByRole('combobox'), 'test{enter}');
+    userEvent.type(screen.getByRole('combobox'), 'case{enter}');
 
     expect(globalForm.getFormData()).toEqual({ tags: ['test', 'case'] });
+  });
+
+  it('it shows error when tag is empty', async () => {
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Tags isLoading={false} />
+      </MockHookWrapperComponent>
+    );
+
+    userEvent.type(screen.getByRole('combobox'), ' {enter}');
+
+    await waitFor(() => {
+      expect(screen.getByText('A tag must contain at least one non-space character.'));
+    });
+  });
+
+  it('it shows error when tag is too long', async () => {
+    const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
+
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Tags isLoading={false} />
+      </MockHookWrapperComponent>
+    );
+
+    userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
+    userEvent.keyboard('{enter}');
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('The length of the tag is too long. The maximum length is 256 characters.')
+      );
+    });
   });
 });

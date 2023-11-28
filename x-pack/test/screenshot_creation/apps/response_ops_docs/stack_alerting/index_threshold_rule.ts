@@ -16,13 +16,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
+  const ruleName = 'kibana sites - high egress';
 
   describe('index threshold rule', function () {
     it('create rule screenshot', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', 'kibana sites - high egress');
+      await testSubjects.setValue('ruleNameInput', ruleName);
       await testSubjects.click('tagsComboBox');
       await testSubjects.setValue('tagsComboBox', 'sample-data');
       await testSubjects.click('solutionsFilterButton');
@@ -45,11 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
-      const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-      await indexComboBox.click();
-      await indexComboBox.type('kibana_sample_data_logs ');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
+      await comboBox.set('thresholdIndexesComboBox', 'kibana_sample_data_logs ');
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       await testSubjects.setValue('thresholdAlertTimeFieldSelect', '@timestamp');
       await commonScreenshots.takeScreenshot(
@@ -82,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('overExpressionSelect');
       await testSubjects.setValue('overExpressionSelect', 'top');
       await testSubjects.setValue('fieldsNumberSelect', '4');
-      await testSubjects.setValue('fieldsExpressionSelect', 'host.keyword');
+      await comboBox.set('fieldsExpressionSelect', 'host.keyword');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-grouping',
         screenshotDirectories,
@@ -130,12 +127,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
-      /*
-       * const saveButton = await testSubjects.find('saveRuleButton');
-       * await saveButton.click();
-       */
+
+      const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
+      await actionFrequency.click();
+      const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
+      await actionSummary.click();
+      const notifyWhen = await testSubjects.find('notifyWhenSelect');
+      await notifyWhen.click();
+      const customInterval = await testSubjects.find('onThrottleInterval');
+      await customInterval.click();
+      await testSubjects.setValue('throttleInput', '24');
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-action-summary',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+
+      const saveButton = await testSubjects.find('saveRuleButton');
+      await saveButton.click();
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('ruleSearchField', ruleName);
+      const rulesList = await testSubjects.find('rulesList');
+      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      await alertRule.click();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-alerts',
+        screenshotDirectories,
+        1400,
+        1024
+      );
     });
   });
 }

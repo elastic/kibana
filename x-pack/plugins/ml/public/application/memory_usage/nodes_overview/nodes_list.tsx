@@ -200,15 +200,20 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
 
   return (
     <div data-test-subj={'mlNodesOverviewPanel'}>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        {nodesStats && (
-          <EuiFlexItem grow={false}>
-            <StatsBar stats={nodesStats} dataTestSub={'mlTrainedModelsNodesStatsBar'} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      {nodesStats && !compactView ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            {nodesStats && (
+              <EuiFlexItem grow={false}>
+                <StatsBar stats={nodesStats} dataTestSub={'mlTrainedModelsNodesStatsBar'} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
       <div data-test-subj="mlNodesTableContainer">
         <EuiInMemoryTable<NodeItem>
           allowNeutralSort={false}

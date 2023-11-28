@@ -69,7 +69,7 @@ export function getFormatByAccessor(
   dimension: string | ExpressionValueVisDimension,
   columns: DatatableColumn[],
   defaultColumnFormat?: SerializedFieldFormat
-) {
+): SerializedFieldFormat | undefined {
   return typeof dimension === 'string'
     ? getColumnByAccessor(dimension, columns)?.meta.params || defaultColumnFormat
     : dimension.format || defaultColumnFormat;

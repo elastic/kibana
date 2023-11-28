@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { type FleetServerAgent } from '../../common/types';
+
 export const createAgentDoc = (
   id: string,
   policy: string,
   status = 'online',
-  version: string = '8.1.0'
+  version: string = '8.1.0',
+  data?: Partial<FleetServerAgent>
 ) => ({
   access_api_key_id: 'abcdefghijklmn',
   action_seq_no: [-1],
@@ -60,4 +63,5 @@ export const createAgentDoc = (
   policy_revision: 1,
   status,
   packages: [],
+  ...data,
 });

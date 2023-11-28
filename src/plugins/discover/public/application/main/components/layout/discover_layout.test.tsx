@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
+import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
-import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
-import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { DiscoverLayout } from './discover_layout';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import {
   createSearchSourceMock,
@@ -31,16 +31,22 @@ import {
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { DiscoverSidebar } from '../sidebar/discover_sidebar';
-import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DiscoverServices } from '../../../../build_services';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { act } from 'react-dom/test-utils';
+import { ErrorCallout } from '../../../../components/common/error_callout';
+import * as localStorageModule from 'react-use/lib/useLocalStorage';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
+}));
+
+jest.spyOn(localStorageModule, 'default');
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -49,15 +55,15 @@ async function mountComponent(
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
   query?: Query | AggregateQuery,
-  isPlainRecord?: boolean
+  isPlainRecord?: boolean,
+  main$: DataMain$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
+    foundDocuments: true,
+  }) as DataMain$
 ) {
   const searchSourceMock = createSearchSourceMock({});
-  const services = {
-    ...createDiscoverServicesMock(),
-    storage: new LocalStorageMock({
-      [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
-    }) as unknown as Storage,
-  } as unknown as DiscoverServices;
+  const services = createDiscoverServicesMock();
   const time = { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   services.data.query.timefilter.timefilter.getTime = () => time;
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
@@ -72,18 +78,15 @@ async function mountComponent(
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
   );
+  (localStorageModule.default as jest.Mock).mockImplementation(
+    jest.fn(() => [prevSidebarClosed, jest.fn()])
+  );
 
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
-  const main$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
-    foundDocuments: true,
-  }) as DataMain$;
-
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits.map((esHit) => buildDataTableRecord(esHit, dataView)),
+    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({
@@ -93,7 +96,7 @@ async function mountComponent(
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
+    result: Number(esHitsMock.length),
   }) as DataTotalHits$;
 
   stateContainer.dataState.data$ = {
@@ -116,14 +119,11 @@ async function mountComponent(
     navigateTo: jest.fn(),
     onChangeDataView: jest.fn(),
     onUpdateQuery: jest.fn(),
-    resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },
     stateContainer,
     setExpandedDoc: jest.fn(),
-    persistDataView: jest.fn(),
-    updateAdHocDataViewId: jest.fn(),
     updateDataViewList: jest.fn(),
   };
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
@@ -163,45 +163,37 @@ describe('Discover component', () => {
     ).not.toBeNull();
   }, 10000);
 
-  test('sql query displays no chart toggle', async () => {
-    const container = document.createElement('div');
-    await mountComponent(
-      dataViewWithTimefieldMock,
-      false,
-      { attachTo: container },
-      { sql: 'SELECT * FROM test' },
-      true
-    );
-    expect(
-      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
-    ).toBeNull();
-  });
-
-  test('the saved search title h1 gains focus on navigate', async () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const component = await mountComponent(dataViewWithTimefieldMock, undefined, {
-      attachTo: container,
-    });
-    expect(
-      component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
-    ).toHaveFocus();
-  }, 10000);
-
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, undefined);
-      expect(component.find(DiscoverSidebar).length).toBe(1);
+      expect(component.find(EuiPageSidebar).length).toBe(1);
     }, 10000);
 
     test('should be opened if discover:sidebarClosed is false', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, false);
-      expect(component.find(DiscoverSidebar).length).toBe(1);
+      expect(component.find(EuiPageSidebar).length).toBe(1);
     }, 10000);
 
     test('should be closed if discover:sidebarClosed is true', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, true);
-      expect(component.find(DiscoverSidebar).length).toBe(0);
+      expect(component.find(EuiPageSidebar).length).toBe(0);
     }, 10000);
   });
+
+  it('shows the no results error display', async () => {
+    const component = await mountComponent(
+      dataViewWithTimefieldMock,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      new BehaviorSubject({
+        fetchStatus: FetchStatus.ERROR,
+        recordRawType: RecordRawType.DOCUMENT,
+        foundDocuments: false,
+        error: new Error('No results'),
+      }) as DataMain$
+    );
+    expect(component.find(ErrorCallout)).toHaveLength(1);
+  }, 10000);
 });

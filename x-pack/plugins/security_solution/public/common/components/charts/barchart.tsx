@@ -7,6 +7,8 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { SettingsProps } from '@elastic/charts';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
@@ -28,7 +30,7 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  useThemes,
   Wrapper,
   BarChartWrapper,
 } from './common';
@@ -75,16 +77,16 @@ export const BarChartBaseComponent = ({
   configs?: ChartSeriesConfigs | undefined;
   forceHiddenLegend?: boolean;
 }) => {
-  const theme = useTheme();
+  const themes = useThemes();
   const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
   const xAxisId = `stat-items-barchart-${data[0].key}-x`;
   const yAxisId = `stat-items-barchart-${data[0].key}-y`;
-  const settings = {
+  const settings: SettingsProps = {
     ...chartDefaultSettings,
-    ...deepmerge(get('configs.settings', chartConfigs), { theme }),
+    ...deepmerge(get('configs.settings', chartConfigs), themes),
   };
 
   const xAxisStyle = useMemo(
@@ -117,7 +119,11 @@ export const BarChartBaseComponent = ({
 
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
+      <Settings
+        {...settings}
+        showLegend={settings.showLegend && !forceHiddenLegend}
+        locale={i18n.getLocale()}
+      />
       {data.map((series) => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid(series) ? (

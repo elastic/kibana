@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
-import type { UnifiedHistogramServices } from '../../types';
+import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
   getBreakdownField,
   getChartHidden,
@@ -30,41 +29,29 @@ export interface UnifiedHistogramState {
    */
   breakdownField: string | undefined;
   /**
+   * The current Lens suggestion
+   */
+  currentSuggestion: Suggestion | undefined;
+  /**
    * Whether or not the chart is hidden
    */
   chartHidden: boolean;
-  /**
-   * The current data view
-   */
-  dataView: DataView;
-  /**
-   * The current filters
-   */
-  filters: Filter[];
   /**
    * The current Lens request adapter
    */
   lensRequestAdapter: RequestAdapter | undefined;
   /**
-   * The current query
+   * The current Lens adapters
    */
-  query: Query | AggregateQuery;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   /**
-   * The current request adapter used for non-Lens requests
+   * Lens embeddable output observable
    */
-  requestAdapter: RequestAdapter | undefined;
-  /**
-   * The current search session ID
-   */
-  searchSessionId: string | undefined;
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   /**
    * The current time interval of the chart
    */
   timeInterval: string;
-  /**
-   * The current time range
-   */
-  timeRange: TimeRange;
   /**
    * The current top panel height
    */
@@ -94,7 +81,7 @@ export interface UnifiedHistogramStateOptions {
   /**
    * The initial state of the container
    */
-  initialState: Partial<UnifiedHistogramState> & Pick<UnifiedHistogramState, 'dataView'>;
+  initialState?: Partial<UnifiedHistogramState>;
 }
 
 /**
@@ -110,6 +97,10 @@ export interface UnifiedHistogramStateService {
    */
   setChartHidden: (chartHidden: boolean) => void;
   /**
+   * Sets current Lens suggestion
+   */
+  setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
+  /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
@@ -122,20 +113,16 @@ export interface UnifiedHistogramStateService {
    */
   setTimeInterval: (timeInterval: string) => void;
   /**
-   * Sets the current request parameters
-   */
-  setRequestParams: (requestParams: {
-    dataView?: DataView;
-    filters?: Filter[];
-    query?: Query | AggregateQuery;
-    requestAdapter?: RequestAdapter | undefined;
-    searchSessionId?: string | undefined;
-    timeRange?: TimeRange;
-  }) => void;
-  /**
    * Sets the current Lens request adapter
    */
   setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
+  /**
+   * Sets the current Lens adapters
+   */
+  setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
+  setLensEmbeddableOutput$: (
+    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+  ) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -160,16 +147,12 @@ export const createStateService = (
     initialBreakdownField = getBreakdownField(services.storage, localStorageKeyPrefix);
   }
 
-  const state$ = new BehaviorSubject({
+  const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
-    filters: [],
+    currentSuggestion: undefined,
     lensRequestAdapter: undefined,
-    query: services.data.query.queryString.getDefaultQuery(),
-    requestAdapter: undefined,
-    searchSessionId: undefined,
     timeInterval: 'auto',
-    timeRange: services.data.query.timefilter.timefilter.getTimeDefaults(),
     topPanelHeight: initialTopPanelHeight,
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
@@ -210,23 +193,24 @@ export const createStateService = (
       updateState({ breakdownField });
     },
 
+    setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
+      updateState({ currentSuggestion: suggestion });
+    },
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
     },
 
-    setRequestParams: (requestParams: {
-      dataView?: DataView;
-      filters?: Filter[];
-      query?: Query | AggregateQuery;
-      requestAdapter?: RequestAdapter | undefined;
-      searchSessionId?: string | undefined;
-      timeRange?: TimeRange;
-    }) => {
-      updateState(requestParams);
-    },
-
     setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => {
       updateState({ lensRequestAdapter });
+    },
+
+    setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
+      updateState({ lensAdapters });
+    },
+    setLensEmbeddableOutput$: (
+      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+    ) => {
+      updateState({ lensEmbeddableOutput$ });
     },
 
     setTotalHits: (totalHits: {

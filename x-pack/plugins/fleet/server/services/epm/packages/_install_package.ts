@@ -16,6 +16,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
+
 import { getNormalizedDataStreams } from '../../../../common/services';
 
 import {
@@ -35,7 +37,6 @@ import type {
   PackageVerificationResult,
   IndexTemplateEntry,
 } from '../../../types';
-import { ensureFileUploadWriteIndices } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import { isTopLevelPipeline, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
@@ -47,6 +48,8 @@ import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
+
+import { auditLoggingService } from '../../audit_logging';
 
 import {
   createInstallation,
@@ -71,7 +74,11 @@ export async function _installPackage({
   installType,
   installSource,
   spaceId,
+  force,
   verificationResult,
+  authorizationHeader,
+  ignoreMappingUpdateErrors,
+  skipDataStreamRollover,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -85,25 +92,41 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
   spaceId: string;
+  force?: boolean;
   verificationResult?: PackageVerificationResult;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
   try {
     // if some installation already exists
     if (installedPkg) {
+      const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
+      const hasExceededTimeout =
+        Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
+        MAX_TIME_COMPLETE_INSTALL;
+
       // if the installation is currently running, don't try to install
       // instead, only return already installed assets
-      if (
-        installedPkg.attributes.install_status === 'installing' &&
-        Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
-          MAX_TIME_COMPLETE_INSTALL
-      ) {
-        throw new ConcurrentInstallOperationError(
-          `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
-            pkgVersion || 'unknown'
-          } detected, aborting.`
-        );
+      if (isStatusInstalling && hasExceededTimeout) {
+        // If this is a forced installation, ignore the timeout and restart the installation anyway
+        if (force) {
+          await restartInstallation({
+            savedObjectsClient,
+            pkgName,
+            pkgVersion,
+            installSource,
+            verificationResult,
+          });
+        } else {
+          throw new ConcurrentInstallOperationError(
+            `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
+              pkgVersion || 'unknown'
+            } detected, aborting.`
+          );
+        }
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed
@@ -137,6 +160,7 @@ export async function _installPackage({
         installedPkg,
         logger,
         spaceId,
+        assetTags: packageInfo?.asset_tags,
       })
     );
     // Necessary to avoid async promise rejection warning
@@ -151,20 +175,24 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    esReferences = await withPackageSpan('Install ILM policies', () =>
-      installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
-    );
+    const isILMPoliciesDisabled =
+      appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+    if (!isILMPoliciesDisabled) {
+      esReferences = await withPackageSpan('Install ILM policies', () =>
+        installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      );
 
-    ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
-      installIlmForDataStream(
-        packageInfo,
-        paths,
-        esClient,
-        savedObjectsClient,
-        logger,
-        esReferences
-      )
-    ));
+      ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
+        installIlmForDataStream(
+          packageInfo,
+          paths,
+          esClient,
+          savedObjectsClient,
+          logger,
+          esReferences
+        )
+      ));
+    }
 
     // installs ml models
     esReferences = await withPackageSpan('Install ML models', () =>
@@ -224,22 +252,25 @@ export async function _installPackage({
       logger.warn(`Error removing legacy templates: ${e.message}`);
     }
 
-    const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
-    if (diagnosticFileUploadEnabled) {
-      await ensureFileUploadWriteIndices({
-        integrationNames: [packageInfo.name],
-        esClient,
-        logger,
-      });
-    }
-
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
-      updateCurrentWriteIndices(esClient, logger, indexTemplates)
+      updateCurrentWriteIndices(esClient, logger, indexTemplates, {
+        ignoreMappingUpdateErrors,
+        skipDataStreamRollover,
+      })
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
-      installTransforms(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      installTransforms({
+        installablePackage: packageInfo,
+        paths,
+        esClient,
+        savedObjectsClient,
+        logger,
+        esReferences,
+        force,
+        authorizationHeader,
+      })
     ));
 
     // If this is an update or retrying an update, delete the previous version's pipelines
@@ -288,6 +319,12 @@ export async function _installPackage({
         type: ASSETS_SAVED_OBJECT_TYPE,
       })
     );
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
 
     const updatedPackage = await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {

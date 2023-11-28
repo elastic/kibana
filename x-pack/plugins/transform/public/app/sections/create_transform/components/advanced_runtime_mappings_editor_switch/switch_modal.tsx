@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

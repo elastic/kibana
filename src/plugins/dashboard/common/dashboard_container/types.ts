@@ -17,7 +17,8 @@ import { RefreshInterval } from '@kbn/data-plugin/common';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-import { DashboardOptions, GridData } from '../types';
+import { DashboardOptions } from '../types';
+import { GridData } from '../content_management';
 
 export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;
@@ -28,15 +29,18 @@ export interface DashboardPanelState<
 > extends PanelState<TEmbeddableInput> {
   readonly gridData: GridData;
   panelRefName?: string;
+
+  /**
+   * This version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.
+   * As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the
+   * embeddable's input. This key is needed for BWC, but its value will be removed on Dashboard save.
+   */
+  version?: string;
 }
 
-export type DashboardContainerInput =
-  | DashboardContainerByReferenceInput
-  | DashboardContainerByValueInput;
+export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;
 
-export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput & { panels: never };
-
-export interface DashboardContainerByValueInput extends EmbeddableInput {
+export interface DashboardContainerInput extends EmbeddableInput {
   // filter context to be passed to children
   query: Query;
   filters: Filter[];

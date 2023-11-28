@@ -17,10 +17,7 @@ export const useGetCase = (caseId: string) => {
   const toasts = useToasts();
   return useQuery<ResolvedCase, ServerError>(
     casesQueriesKeys.case(caseId),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return resolveCase(caseId, true, abortCtrlRef.signal);
-    },
+    ({ signal }) => resolveCase({ caseId, includeComments: true, signal }),
     {
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {

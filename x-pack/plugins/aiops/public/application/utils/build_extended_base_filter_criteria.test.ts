@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
-import type { GroupTableItem } from '../../components/spike_analysis_table/types';
+import type { GroupTableItem } from '../../components/log_rate_analysis_results_table/types';
 
 import { buildExtendedBaseFilterCriteria } from './build_extended_base_filter_criteria';
 
-const selectedChangePointMock: ChangePoint = {
+const selectedSignificantItemMock: SignificantItem = {
+  key: 'meta.cloud.instance_id.keyword:1234',
+  type: 'keyword',
   doc_count: 53408,
   bg_count: 1154,
   fieldName: 'meta.cloud.instance_id.keyword',
@@ -27,15 +29,56 @@ const selectedGroupMock: GroupTableItem = {
   id: '21289599',
   docCount: 20468,
   pValue: 2.2250738585072626e-308,
-  group: [
-    { fieldName: 'error.message', fieldValue: 'rate limit exceeded' },
-    { fieldName: 'message', fieldValue: 'too many requests' },
-    { fieldName: 'user_agent.original.keyword', fieldValue: 'Mozilla/5.0' },
-  ],
-  repeatedValues: [
-    { fieldName: 'beat.hostname.keyword', fieldValue: 'ip-192-168-1-1' },
-    { fieldName: 'beat.name.keyword', fieldValue: 'i-1234' },
-    { fieldName: 'docker.container.id.keyword', fieldValue: 'asdf' },
+  uniqueItemsCount: 3,
+  groupItemsSortedByUniqueness: [
+    {
+      key: 'error.message:rate limit exceeded',
+      type: 'keyword',
+      fieldName: 'error.message',
+      fieldValue: 'rate limit exceeded',
+      docCount: 10,
+      pValue: 0.05,
+    },
+    {
+      key: 'message:too many requests',
+      type: 'keyword',
+      fieldName: 'message',
+      fieldValue: 'too many requests',
+      docCount: 10,
+      pValue: 0.05,
+    },
+    {
+      key: 'user_agent.original.keyword:Mozilla/5.0',
+      type: 'keyword',
+      fieldName: 'user_agent.original.keyword',
+      fieldValue: 'Mozilla/5.0',
+      docCount: 10,
+      pValue: 0.05,
+    },
+    {
+      key: 'beat.hostname.keyword:ip-192-168-1-1',
+      type: 'keyword',
+      fieldName: 'beat.hostname.keyword',
+      fieldValue: 'ip-192-168-1-1',
+      docCount: 10,
+      pValue: 0.05,
+    },
+    {
+      key: 'beat.name.keyword:i-1234',
+      type: 'keyword',
+      fieldName: 'beat.name.keyword',
+      fieldValue: 'i-1234',
+      docCount: 10,
+      pValue: 0.05,
+    },
+    {
+      key: 'docker.container.id.keyword:asdf',
+      type: 'keyword',
+      fieldName: 'docker.container.id.keyword',
+      fieldValue: 'asdf',
+      docCount: 10,
+      pValue: 0.05,
+    },
   ],
   histogram: [],
 };
@@ -80,13 +123,13 @@ describe('query_utils', () => {
       ]);
     });
 
-    it('includes a term filter when including a selectedChangePoint', () => {
+    it('includes a term filter when including a selectedSignificantItem', () => {
       const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
         { match_all: {} },
-        selectedChangePointMock
+        selectedSignificantItemMock
       );
 
       expect(baseFilterCriteria).toEqual([
@@ -104,13 +147,13 @@ describe('query_utils', () => {
       ]);
     });
 
-    it('includes a term filter with must_not when excluding a selectedChangePoint', () => {
+    it('includes a term filter with must_not when excluding a selectedSignificantItem', () => {
       const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
         { match_all: {} },
-        selectedChangePointMock,
+        selectedSignificantItemMock,
         false
       );
 

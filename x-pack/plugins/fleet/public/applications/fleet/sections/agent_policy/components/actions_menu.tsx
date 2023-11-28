@@ -11,11 +11,18 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
 import { useAuthz } from '../../../hooks';
-import { AgentEnrollmentFlyout, ContextMenuActions } from '../../../components';
+import {
+  AgentEnrollmentFlyout,
+  ContextMenuActions,
+  UninstallCommandFlyout,
+} from '../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
+
+import { policyHasFleetServer, ExperimentalFeaturesService } from '../../../services';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
+import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
 export const AgentPolicyActionMenu = memo<{
   agentPolicy: AgentPolicy;
@@ -36,6 +43,10 @@ export const AgentPolicyActionMenu = memo<{
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault
     );
+    const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] =
+      useState<boolean>(false);
+
+    const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
 
     const isFleetServerPolicy = useMemo(
       () =>
@@ -44,6 +55,10 @@ export const AgentPolicyActionMenu = memo<{
         ),
       [agentPolicy]
     );
+
+    const hasManagedPackagePolicy =
+      'package_policies' in agentPolicy &&
+      agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -119,21 +134,77 @@ export const AgentPolicyActionMenu = memo<{
                     defaultMessage="Duplicate policy"
                   />
                 </EuiContextMenuItem>,
+                <AgentPolicyDeleteProvider
+                  hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
+                  key="deletePolicy"
+                >
+                  {(deleteAgentPolicyPrompt) => (
+                    <EuiContextMenuItem
+                      data-test-subj="agentPolicyActionMenuDeleteButton"
+                      disabled={hasManagedPackagePolicy}
+                      toolTipContent={
+                        hasManagedPackagePolicy ? (
+                          <FormattedMessage
+                            id="xpack.fleet.policyForm.deletePolicyActionText.disabled"
+                            defaultMessage="Agent policy with managed package policies cannot be deleted."
+                            data-test-subj="agentPolicyActionMenuDeleteButtonDisabledTooltip"
+                          />
+                        ) : undefined
+                      }
+                      icon="trash"
+                      onClick={() => {
+                        deleteAgentPolicyPrompt(agentPolicy.id);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyActionMenu.deletePolicyActionText"
+                        defaultMessage="Delete policy"
+                      />
+                    </EuiContextMenuItem>
+                  )}
+                </AgentPolicyDeleteProvider>,
               ];
+
+          if (agentTamperProtectionEnabled && !agentPolicy?.is_managed) {
+            menuItems.push(
+              <EuiContextMenuItem
+                icon="minusInCircle"
+                onClick={() => {
+                  setIsContextMenuOpen(false);
+                  setIsUninstallCommandFlyoutOpen(true);
+                }}
+                key="getUninstallCommand"
+                data-test-subj="uninstall-agents-command-menu-item"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyActionMenu.getUninstallCommand"
+                  defaultMessage="Uninstall agents on this policy"
+                />
+              </EuiContextMenuItem>
+            );
+          }
+
           return (
             <>
-              {isYamlFlyoutOpen ? (
+              {isYamlFlyoutOpen && (
                 <EuiPortal>
                   <AgentPolicyYamlFlyout
                     policyId={agentPolicy.id}
                     onClose={() => setIsYamlFlyoutOpen(false)}
                   />
                 </EuiPortal>
-              ) : null}
+              )}
               {isEnrollmentFlyoutOpen && (
                 <EuiPortal>
                   <AgentEnrollmentFlyout agentPolicy={agentPolicy} onClose={onClose} />
                 </EuiPortal>
+              )}
+              {isUninstallCommandFlyoutOpen && (
+                <UninstallCommandFlyout
+                  target="agent"
+                  policyId={agentPolicy.id}
+                  onClose={() => setIsUninstallCommandFlyoutOpen(false)}
+                />
               )}
               <ContextMenuActions
                 isOpen={isContextMenuOpen}

@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
+  // TODO: the whole suite doesn't run on ci https://github.com/elastic/kibana/issues/159401
   describe('Cloud Chat integration', function () {
-    before(async () => {
-      // Create role mapping so user gets superuser access
-      await getService('esSupertest')
-        .post('/_security/role_mapping/saml1')
-        .send({ roles: ['superuser'], enabled: true, rules: { field: { 'realm.name': 'saml1' } } })
-        .expect(200);
-    });
+    it('chat widget is present in header', async () => {
+      await PageObjects.common.navigateToUrl('home');
 
-    it('chat widget is present when enabled', async () => {
-      PageObjects.common.navigateToUrl('integrations', 'browse', { useActualUrl: true });
-      const chat = await find.byCssSelector('[data-test-subj="floatingChatTrigger"]', 20000);
-      expect(chat).to.not.be(null);
+      // button is visible
+      await testSubjects.existOrFail('cloud-chat');
+
+      // the chat widget is not visible (but in DOM)
+      await testSubjects.missingOrFail('cloud-chat-frame', {
+        allowHidden: true,
+      });
+
+      await testSubjects.click('cloud-chat');
+      await testSubjects.existOrFail('cloud-chat-frame');
     });
   });
 }

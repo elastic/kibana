@@ -7,13 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
 
 import type { ElasticsearchRole } from '../../../../authorization';
-import {
-  elasticsearchRoleSchema,
-  getKibanaRoleSchema,
-  transformPrivilegesToElasticsearchPrivileges,
-} from '../../../../lib';
+import { transformPrivilegesToElasticsearchPrivileges } from '../../../../lib';
 
 export const transformPutPayloadToElasticsearchRole = (
   rolePayload: RolePayloadSchemaType,
@@ -21,7 +18,12 @@ export const transformPutPayloadToElasticsearchRole = (
   allExistingApplications: ElasticsearchRole['applications'] = []
 ) => {
   const {
-    elasticsearch = { cluster: undefined, indices: undefined, run_as: undefined },
+    elasticsearch = {
+      cluster: undefined,
+      indices: undefined,
+      remote_indices: undefined,
+      run_as: undefined,
+    },
     kibana = [],
   } = rolePayload;
   const otherApplications = allExistingApplications.filter(
@@ -32,6 +34,7 @@ export const transformPutPayloadToElasticsearchRole = (
     metadata: rolePayload.metadata,
     cluster: elasticsearch.cluster || [],
     indices: elasticsearch.indices || [],
+    remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],
     applications: [
       ...transformPrivilegesToElasticsearchPrivileges(application, kibana),

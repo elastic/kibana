@@ -7,7 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/localhost_services';
+import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -48,10 +48,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,
-        // always install Endpoint package by default when Fleet sets up
-        `--xpack.fleet.packages.0.name=endpoint`,
-        `--xpack.fleet.packages.0.version=latest`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'endpointResponseActionsEnabled',
+        ])}`,
       ],
     },
   };

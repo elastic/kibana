@@ -15,7 +15,7 @@ import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomp
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
-} from '../../../../common/endpoint/schema/suggestions';
+} from '../../../../common/api/endpoint';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -34,17 +34,25 @@ export function registerEndpointSuggestionsRoutes(
   config$: Observable<ConfigSchema>,
   endpointContext: EndpointAppContext
 ) {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: SUGGESTIONS_ROUTE,
-      validate: EndpointSuggestionsSchema,
-    },
-    withEndpointAuthz(
-      { any: ['canWriteEventFilters'] },
-      endpointContext.logFactory.get('endpointSuggestions'),
-      getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
-    )
-  );
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointSuggestionsSchema,
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canWriteEventFilters'] },
+        endpointContext.logFactory.get('endpointSuggestions'),
+        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
+      )
+    );
 }
 
 export const getEndpointSuggestionsRequestHandler = (

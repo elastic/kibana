@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import Boom from '@hapi/boom';
 import datemath from '@kbn/datemath';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
@@ -15,7 +16,7 @@ import { getServiceGroups } from './get_service_groups';
 import { getServiceGroup } from './get_service_group';
 import { saveServiceGroup } from './save_service_group';
 import { deleteServiceGroup } from './delete_service_group';
-import { lookupServices } from './lookup_services';
+import { lookupServices, LookupServicesResponse } from './lookup_services';
 import {
   validateServiceGroupKuery,
   SavedServiceGroup,
@@ -84,7 +85,7 @@ const serviceGroupSaveRoute = createApmServerRoute({
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources): ReturnType<typeof saveServiceGroup> => {
+  handler: async (resources): Promise<SavedServiceGroup> => {
     const { context, params } = resources;
     const { serviceGroupId } = params.query;
     const {
@@ -132,9 +133,7 @@ const serviceGroupServicesRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{ items: Awaited<ReturnType<typeof lookupServices>> }> => {
+  handler: async (resources): Promise<{ items: LookupServicesResponse }> => {
     const { params, context } = resources;
     const { kuery = '', start, end } = params.query;
     const {
@@ -188,17 +187,17 @@ const serviceGroupCountsRoute = createApmServerRoute({
         apmAlertsClient,
         context,
         logger,
-        spaceId: activeSpace?.id,
+        spaceId: activeSpace?.id ?? DEFAULT_SPACE_ID,
       }),
     ]);
-    const serviceGroupCounts: ServiceGroupCounts = serviceGroups.reduce(
-      (acc, { id }): ServiceGroupCounts => ({
-        ...acc,
-        [id]: {
+    const serviceGroupCounts = serviceGroups.reduce<ServiceGroupCounts>(
+      (acc, { id }): ServiceGroupCounts => {
+        acc[id] = {
           services: servicesCounts[id],
           alerts: serviceGroupAlertsCount[id],
-        },
-      }),
+        };
+        return acc;
+      },
       {}
     );
     return serviceGroupCounts;

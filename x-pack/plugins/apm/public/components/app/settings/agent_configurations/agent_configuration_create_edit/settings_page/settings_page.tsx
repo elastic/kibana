@@ -17,7 +17,7 @@ import {
   EuiStat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
@@ -105,7 +105,7 @@ export function SettingsPage({
           { defaultMessage: 'Sorry, there was an error' }
         )}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           {i18n.translate(
@@ -160,7 +160,11 @@ export function SettingsPage({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {!isEditMode && (
-                <EuiButton onClick={onClickEdit} iconType="pencil">
+                <EuiButton
+                  data-test-subj="apmSettingsPageEditButton"
+                  onClick={onClickEdit}
+                  iconType="pencil"
+                >
                   {i18n.translate(
                     'xpack.apm.agentConfig.chooseService.editButton',
                     { defaultMessage: 'Edit' }

@@ -8,6 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import { type DragDropAction, DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import {
   DatasourceMap,
@@ -23,7 +24,6 @@ import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanelWrapper } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
-import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { EditorFrameStartPlugins } from '../service';
 import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
 import {
@@ -81,7 +81,8 @@ export function EditorFrame(props: EditorFrameProps) {
       visualizationMap,
       datasourceMap[activeDatasourceId],
       field,
-      framePublicAPI.dataViews
+      framePublicAPI.dataViews,
+      true
     );
   };
 
@@ -107,8 +108,14 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const bannerMessages = props.getUserMessages('banner', { severity: 'warning' });
 
+  const telemetryMiddleware = useCallback((action: DragDropAction) => {
+    if (action.type === 'dropToTarget') {
+      trackUiCounterEvents('drop_total');
+    }
+  }, []);
+
   return (
-    <RootDragDropProvider>
+    <RootDragDropProvider dataTestSubj="lnsDragDrop" customMiddleware={telemetryMiddleware}>
       <FrameLayout
         bannerMessages={
           bannerMessages.length ? (
@@ -141,6 +148,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
+                dataViews={props.plugins.dataViews}
                 indexPatternService={props.indexPatternService}
                 getUserMessages={props.getUserMessages}
               />
@@ -176,6 +184,9 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
+                nowProvider={props.plugins.data.nowProvider}
+                core={props.core}
+                showOnlyIcons
               />
             </ErrorBoundary>
           )

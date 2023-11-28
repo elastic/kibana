@@ -7,7 +7,7 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import type { DashboardContainerByValueInput } from '../common';
+import type { DashboardContainerInput } from '../common';
 
 // ------------------------------------------------------------------
 // URL Constants
@@ -53,12 +53,12 @@ export const DASHBOARD_UI_METRIC_ID = 'dashboard';
 export const DASHBOARD_APP_ID = 'dashboards';
 export const LEGACY_DASHBOARD_APP_ID = 'dashboard';
 export const SEARCH_SESSION_ID = 'searchSessionId';
-export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 // ------------------------------------------------------------------
 // Grid
 // ------------------------------------------------------------------
 export const DEFAULT_PANEL_HEIGHT = 15;
+export const DASHBOARD_MARGIN_SIZE = 8;
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
@@ -66,10 +66,18 @@ export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const CHANGE_CHECK_DEBOUNCE = 100;
 
 // ------------------------------------------------------------------
+// Content Management
+// ------------------------------------------------------------------
+export { CONTENT_ID as DASHBOARD_CONTENT_ID } from '../common/content_management/constants';
+
+export const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
+export const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
+
+// ------------------------------------------------------------------
 // Default State
 // ------------------------------------------------------------------
-export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerByValueInput, 'id'> = {
-  viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
+export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
+  viewMode: ViewMode.VIEW,
   timeRestore: false,
   query: { query: '', language: 'kuery' },
   description: '',

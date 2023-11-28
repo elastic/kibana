@@ -11,22 +11,17 @@ import {
   apmTransactionErrorRateIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-
-import { InvalidTransformError } from '../../../errors';
-import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  getSLOTransformId,
 } from '../../../assets/constants';
+import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
-import { DEFAULT_APM_INDEX } from './constants';
-import { Query } from './types';
+import { InvalidTransformError } from '../../../errors';
 import { parseIndex } from './common';
-
-const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
-const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
+import { Query } from './types';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -39,8 +34,8 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo, slo.indicator),
+      this.buildGroupBy(slo, slo.indicator),
+      this.buildAggregations(slo),
       this.buildSettings(slo)
     );
   }
@@ -49,12 +44,35 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     return getSLOTransformId(slo.id, slo.revision);
   }
 
+  private buildGroupBy(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
+    // These groupBy fields must match the fields from the source query, otherwise
+    // the transform will create permutations for each value present in the source.
+    // E.g. if environment is not specified in the source query, but we include it in the groupBy,
+    // we'll output documents for each environment value
+    const extraGroupByFields = {
+      ...(indicator.params.service !== ALL_VALUE && {
+        'service.name': { terms: { field: 'service.name' } },
+      }),
+      ...(indicator.params.environment !== ALL_VALUE && {
+        'service.environment': { terms: { field: 'service.environment' } },
+      }),
+      ...(indicator.params.transactionName !== ALL_VALUE && {
+        'transaction.name': { terms: { field: 'transaction.name' } },
+      }),
+      ...(indicator.params.transactionType !== ALL_VALUE && {
+        'transaction.type': { terms: { field: 'transaction.type' } },
+      }),
+    };
+
+    return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
+  }
+
   private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
     const queryFilter: Query[] = [
       {
         range: {
-          [slo.settings.timestampField]: {
-            gte: `now-${slo.timeWindow.duration.format()}`,
+          '@timestamp': {
+            gte: `now-${slo.timeWindow.duration.format()}/d`,
           },
         },
       },
@@ -97,15 +115,13 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     }
 
     return {
-      index: parseIndex(indicator.params.index ?? DEFAULT_APM_INDEX),
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
-            { terms: { 'processor.event': ['metric'] } },
             { term: { 'metricset.name': 'transaction' } },
-            { exists: { field: 'transaction.duration.histogram' } },
-            { exists: { field: 'transaction.result' } },
+            { terms: { 'event.outcome': ['success', 'failure'] } },
             ...queryFilter,
           ],
         },
@@ -120,20 +136,22 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(indicator.params.goodStatusCodes);
-
+  private buildAggregations(slo: SLO) {
     return {
       'slo.numerator': {
         filter: {
           bool: {
-            should: goodStatusCodesFilter,
+            should: {
+              match: {
+                'event.outcome': 'success',
+              },
+            },
           },
         },
       },
       'slo.denominator': {
-        value_count: {
-          field: 'transaction.duration.histogram',
+        filter: {
+          match_all: {},
         },
       },
       ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
@@ -141,25 +159,12 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           bucket_script: {
             buckets_path: {
               goodEvents: 'slo.numerator>_count',
-              totalEvents: 'slo.denominator.value',
+              totalEvents: 'slo.denominator>_count',
             },
             script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),
     };
-  }
-
-  private getGoodStatusCodesFilter(goodStatusCodes: string[] | undefined) {
-    let statusCodes = goodStatusCodes?.filter((code) => ALLOWED_STATUS_CODES.includes(code));
-    if (statusCodes === undefined || statusCodes.length === 0) {
-      statusCodes = DEFAULT_GOOD_STATUS_CODES;
-    }
-
-    return statusCodes.map((code) => ({
-      match: {
-        'transaction.result': `HTTP ${code}`,
-      },
-    }));
   }
 }

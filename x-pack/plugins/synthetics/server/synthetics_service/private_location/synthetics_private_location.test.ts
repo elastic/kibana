@@ -4,34 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
-import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import {
-  DataStream,
+  MonitorTypeEnum,
   MonitorFields,
   ScheduleUnit,
   SourceType,
   HeartbeatConfig,
-  PrivateLocation,
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { SyntheticsServerSetup } from '../../types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('SyntheticsPrivateLocation', () => {
-  const mockPrivateLocation: PrivateLocation = {
+  const mockPrivateLocation: PrivateLocationAttributes = {
     id: 'policyId',
     label: 'Test Location',
-    concurrentMonitors: 1,
     agentPolicyId: 'policyId',
+    isServiceManaged: false,
   };
   const testConfig = {
     id: 'testId',
     type: 'http',
     enabled: true,
     schedule: '@every 3m',
-    'service.name': '',
+    'service.name': 'test service',
     locations: [mockPrivateLocation],
     tags: [],
     timeout: '16',
@@ -52,16 +54,7 @@ describe('SyntheticsPrivateLocation', () => {
     username: '',
   } as unknown as HeartbeatConfig;
 
-  const savedObjectsClientMock = {
-    bulkUpdate: jest.fn(),
-    get: jest.fn().mockReturnValue({
-      attributes: {
-        locations: [mockPrivateLocation],
-      },
-    }),
-  } as unknown as SavedObjectsClientContract;
-
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     uptimeEsClient: { search: jest.fn() },
     logger: loggerMock.create(),
     config: {
@@ -72,11 +65,6 @@ describe('SyntheticsPrivateLocation', () => {
       },
     },
     fleet: {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
         buildPackagePolicyFromPackage: jest.fn(),
@@ -87,101 +75,95 @@ describe('SyntheticsPrivateLocation', () => {
         getSpaceId: jest.fn().mockReturnValue('nonDefaultSpace'),
       },
     },
-  } as unknown as UptimeServerSetup;
+    coreStart: {
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
+    },
+  } as unknown as SyntheticsServerSetup;
 
-  it.each([
-    [true, 'Unable to create Synthetics package policy for private location'],
-    [
-      false,
-      'Unable to create Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
-    ],
-  ])('throws errors for create monitor', async (writeIntegrationPolicies, error) => {
-    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
-      ...serverMock,
-      fleet: {
-        ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+  it.each([['Unable to create Synthetics package policy template for private location']])(
+    'throws errors for create monitor',
+    async (error) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
         },
-      },
-    });
+      });
 
-    try {
-      await syntheticsPrivateLocation.createMonitors(
-        [testConfig],
-        {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
-        [mockPrivateLocation],
-        'test-space'
-      );
-    } catch (e) {
-      expect(e).toEqual(new Error(error));
+      try {
+        await syntheticsPrivateLocation.createPackagePolicies(
+          [{ config: testConfig, globalParams: {} }],
+          [mockPrivateLocation],
+          'test-space'
+        );
+      } catch (e) {
+        expect(e).toEqual(new Error(error));
+      }
     }
-  });
+  );
 
-  it.each([
-    [true, 'Unable to create Synthetics package policy for private location'],
-    [
-      false,
-      'Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
-    ],
-  ])('throws errors for edit monitor', async (writeIntegrationPolicies, error) => {
-    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
-      ...serverMock,
-      fleet: {
-        ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+  it.each([['Unable to create Synthetics package policy template for private location']])(
+    'throws errors for edit monitor',
+    async (error) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
         },
-      },
-    });
+      });
 
-    try {
-      await syntheticsPrivateLocation.editMonitors(
-        [testConfig],
-        {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
-        [mockPrivateLocation],
-        'test-space'
-      );
-    } catch (e) {
-      expect(e).toEqual(new Error(error));
+      try {
+        await syntheticsPrivateLocation.editMonitors(
+          [{ config: testConfig, globalParams: {} }],
+          [mockPrivateLocation],
+          'test-space'
+        );
+      } catch (e) {
+        expect(e).toEqual(new Error(error));
+      }
     }
-  });
+  );
 
   it.each([
     [
-      true,
       'Unable to delete Synthetics package policy for monitor Test Monitor with private location Test Location',
     ],
     [
-      false,
       'Unable to delete Synthetics package policy for monitor Test Monitor. Fleet write permissions are needed to use Synthetics private locations.',
     ],
-  ])('throws errors for delete monitor', async (writeIntegrationPolicies, error) => {
+  ])('throws errors for delete monitor', async (error) => {
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
       ...serverMock,
       fleet: {
         ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          delete(
+            soClient: SavedObjectsClientContract,
+            esClient: any,
+            ids: string[],
+            options?: any
+          ): any {
+            throw new Error(error);
+          },
         },
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitors(
-        [testConfig],
-        {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
-        'test-space'
-      );
+      await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
     } catch (e) {
       expect(e).toEqual(new Error(error));
     }
   });
 
   it('formats monitors stream properly', () => {
-    const test = formatSyntheticsPolicy(testMonitorPolicy, DataStream.BROWSER, dummyBrowserConfig);
+    const test = formatSyntheticsPolicy(
+      testMonitorPolicy,
+      MonitorTypeEnum.BROWSER,
+      dummyBrowserConfig,
+      {}
+    );
 
     expect(test.formattedPolicy.inputs[3].streams[1]).toStrictEqual({
       data_stream: {
@@ -193,7 +175,7 @@ describe('SyntheticsPrivateLocation', () => {
         __ui: {
           type: 'yaml',
           value:
-            '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false,"is_tls_enabled":true}',
+            '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":true}',
         },
         config_id: {
           type: 'text',
@@ -221,7 +203,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         name: {
           type: 'text',
-          value: 'Browser monitor',
+          value: '"Browser monitor"',
         },
         params: {
           type: 'yaml',
@@ -241,50 +223,12 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'service.name': {
           type: 'text',
-          value: '',
+          value: '"test service"',
         },
         'source.inline.script': {
           type: 'yaml',
           value:
             "\"step('Go to https://www.elastic.co/', async () => {\\n  await page.goto('https://www.elastic.co/');\\n});\"",
-        },
-        'source.zip_url.folder': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.password': {
-          type: 'password',
-          value: '',
-        },
-        'source.zip_url.proxy_url': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.ssl.certificate': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.certificate_authorities': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.key': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.key_passphrase': {
-          type: 'text',
-        },
-        'source.zip_url.ssl.supported_protocols': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.verification_mode': {
-          type: 'text',
-        },
-        'source.zip_url.url': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.username': {
-          type: 'text',
-          value: '',
         },
         synthetics_args: {
           type: 'text',
@@ -296,7 +240,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'throttling.config': {
           type: 'text',
-          value: '5d/3u/20l',
+          value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
         },
         timeout: {
           type: 'text',
@@ -316,10 +260,10 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   fields: Record<string, string | boolean>;
   fields_under_root: boolean;
 } = {
-  type: DataStream.BROWSER,
+  type: MonitorTypeEnum.BROWSER,
   enabled: true,
   schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
-  'service.name': '',
+  'service.name': 'test service',
   tags: [],
   timeout: null,
   name: 'Browser monitor',
@@ -331,7 +275,6 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   playwright_options: '',
   __ui: {
     script_source: { is_generated_script: false, file_name: '' },
-    is_zip_url_tls_enabled: false,
     is_tls_enabled: true,
   },
   params: '',
@@ -339,22 +282,13 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   'source.inline.script':
     "step('Go to https://www.elastic.co/', async () => {\n  await page.goto('https://www.elastic.co/');\n});",
   'source.project.content': '',
-  'source.zip_url.url': '',
-  'source.zip_url.username': '',
-  'source.zip_url.password': '',
-  'source.zip_url.folder': '',
-  'source.zip_url.proxy_url': '',
   urls: 'https://www.elastic.co/',
   screenshots: 'on',
   synthetics_args: [],
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
-  'throttling.is_enabled': true,
-  'throttling.download_speed': '5',
-  'throttling.upload_speed': '3',
-  'throttling.latency': '20',
-  'throttling.config': '5d/3u/20l',
+  throttling: { value: { download: '5', upload: '3', latency: '20' }, label: 'test', id: 'test' },
   id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   config_id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   fields: { config_id: '75cdd125-5b62-4459-870c-46f59bf37e89', run_once: true },

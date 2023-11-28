@@ -8,9 +8,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
+import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
-import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
+import { LayerActions } from './layer_actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import {
@@ -19,8 +20,10 @@ import {
   createMockDatasource,
   DatasourceMock,
   mountWithProvider,
+  createMockedDragDropContext,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
+import { DimensionButton } from '@kbn/visualization-ui-components';
 
 jest.mock('../../../id_generator');
 
@@ -50,18 +53,6 @@ afterEach(() => {
   container = undefined;
 });
 
-const defaultContext = {
-  dragging: undefined,
-  setDragging: jest.fn(),
-  setActiveDropTarget: () => {},
-  activeDropTarget: undefined,
-  dropTargetsByOrder: undefined,
-  keyboardMode: false,
-  setKeyboardMode: () => {},
-  setA11yMessage: jest.fn(),
-  registerDropTarget: jest.fn(),
-};
-
 const draggingField = {
   field: { name: 'dragged' },
   indexPatternId: 'a',
@@ -72,6 +63,8 @@ const draggingField = {
     style: {},
   },
 };
+
+const onDropToDimension = jest.fn();
 
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -112,8 +105,11 @@ describe('LayerPanel', () => {
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
       onChangeIndexPattern: jest.fn(),
+      registerLibraryAnnotationGroup: jest.fn(),
       indexPatternService: createIndexPatternServiceMock(),
       getUserMessages: () => [],
+      displayLayerSettings: true,
+      onDropToDimension,
     };
   }
 
@@ -147,6 +143,8 @@ describe('LayerPanel', () => {
     mockVisualization.getLayerIds.mockReturnValue(['first']);
     mockDatasource = createMockDatasource('testDatasource');
   });
+
+  afterEach(() => onDropToDimension.mockClear());
 
   describe('layer reset and remove', () => {
     it('should show the reset button when single layer', async () => {
@@ -201,6 +199,13 @@ describe('LayerPanel', () => {
       expect(optionalLabel.text()).toEqual('Optional');
     });
 
+    it('should hide the layer actions if displayLayerSettings is set to false', async () => {
+      const { instance } = await mountWithProvider(
+        <LayerPanel {...getDefaultProps()} displayLayerSettings={false} />
+      );
+      expect(instance.find(LayerActions).exists()).toBe(false);
+    });
+
     it('should render the group with a way to add a new column', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
@@ -209,6 +214,33 @@ describe('LayerPanel', () => {
             groupId: 'a',
             accessors: [],
             filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+      const group = instance.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
+      expect(group).toHaveLength(1);
+    });
+    it('does not render a hidden group', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [],
+            filterOperations: () => true,
+            isHidden: true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
           },
@@ -265,8 +297,8 @@ describe('LayerPanel', () => {
             dimensionsTooMany: 1,
           },
           {
-            groupLabel: 'A',
-            groupId: 'a',
+            groupLabel: 'C',
+            groupId: 'c',
             accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
@@ -390,7 +422,7 @@ describe('LayerPanel', () => {
           },
         ],
       });
-      mockVisualization.renderDimensionEditor = jest.fn();
+      mockVisualization.DimensionEditorComponent = jest.fn().mockImplementation(() => <div />);
 
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       act(() => {
@@ -434,14 +466,13 @@ describe('LayerPanel', () => {
       });
       instance.update();
 
-      expect(mockDatasource.renderDimensionEditor).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'newid' })
       );
       const stateFn =
-        mockDatasource.renderDimensionEditor.mock.calls[
-          mockDatasource.renderDimensionEditor.mock.calls.length - 1
-        ][1].setState;
+        mockDatasource.DimensionEditorComponent.mock.calls[
+          mockDatasource.DimensionEditorComponent.mock.calls.length - 1
+        ][0].setState;
 
       act(() => {
         stateFn(
@@ -512,14 +543,13 @@ describe('LayerPanel', () => {
       });
       instance.update();
 
-      expect(mockDatasource.renderDimensionEditor).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'y' })
       );
       const stateFn =
-        mockDatasource.renderDimensionEditor.mock.calls[
-          mockDatasource.renderDimensionEditor.mock.calls.length - 1
-        ][1].setState;
+        mockDatasource.DimensionEditorComponent.mock.calls[
+          mockDatasource.DimensionEditorComponent.mock.calls.length - 1
+        ][0].setState;
 
       act(() => {
         stateFn(
@@ -586,9 +616,9 @@ describe('LayerPanel', () => {
       expect(instance.find('EuiFlyoutHeader').exists()).toBe(true);
 
       const lastArgs =
-        mockDatasource.renderDimensionEditor.mock.calls[
-          mockDatasource.renderDimensionEditor.mock.calls.length - 1
-        ][1];
+        mockDatasource.DimensionEditorComponent.mock.calls[
+          mockDatasource.DimensionEditorComponent.mock.calls.length - 1
+        ][0];
 
       // Simulate what is called by the dimension editor
       act(() => {
@@ -597,7 +627,7 @@ describe('LayerPanel', () => {
         });
       });
 
-      expect(mockVisualization.renderDimensionEditor).toHaveBeenCalled();
+      expect(mockVisualization.DimensionEditorComponent).toHaveBeenCalled();
     });
 
     it('should close the DimensionContainer when the active visualization changes', async () => {
@@ -713,9 +743,7 @@ describe('LayerPanel', () => {
 
       expect(instance.exists('[data-test-subj="lns-fakeDimension"]')).toBeTruthy();
       expect(
-        instance
-          .find('[data-test-subj="lns-fakeDimension"] .lnsLayerPanel__triggerTextLabel')
-          .text()
+        instance.find('[data-test-subj="lns-fakeDimension"] .dimensionTrigger__textLabel').text()
       ).toBe(fakeAccessorLabel);
     });
 
@@ -763,7 +791,7 @@ describe('LayerPanel', () => {
       });
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingField })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -775,13 +803,13 @@ describe('LayerPanel', () => {
       );
 
       const dragDropElement = instance
-        .find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroup"] DragDrop .domDragDrop')
         .first();
 
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
 
-      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           source: draggingField,
         })
@@ -807,7 +835,7 @@ describe('LayerPanel', () => {
       );
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingField })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -825,12 +853,13 @@ describe('LayerPanel', () => {
       const dragDropElement = instance
         .find('[data-test-subj="lnsGroup"] DragDrop')
         .first()
-        .find('.lnsLayerPanel__dimension');
+        .find(DimensionButton)
+        .first();
 
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
 
-      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
+      expect(onDropToDimension).not.toHaveBeenCalled();
     });
 
     it('should allow drag to move between groups', async () => {
@@ -875,7 +904,7 @@ describe('LayerPanel', () => {
       };
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -889,28 +918,30 @@ describe('LayerPanel', () => {
       // Simulate drop on the pre-populated dimension
 
       const dragDropElement = instance
-        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
         .at(0);
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
 
-      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           target: expect.objectContaining({ columnId: 'b' }),
           source: draggingOperation,
         })
       );
 
+      onDropToDimension.mockClear();
+
       // Simulate drop on the empty dimension
 
       const updatedDragDropElement = instance
-        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
-        .at(2);
+        .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
+        .last();
 
       updatedDragDropElement.simulate('dragOver');
       updatedDragDropElement.simulate('drop');
 
-      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           target: expect.objectContaining({ columnId: 'newid' }),
           source: draggingOperation,
@@ -945,7 +976,7 @@ describe('LayerPanel', () => {
       };
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>,
         undefined,
@@ -954,7 +985,7 @@ describe('LayerPanel', () => {
       act(() => {
         instance.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
       });
-      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'reorder',
           source: draggingOperation,
@@ -998,14 +1029,14 @@ describe('LayerPanel', () => {
       };
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
       act(() => {
         instance.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_compatible');
       });
-      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           target: expect.objectContaining({ columnId: 'newid' }),
           dropType: 'duplicate_compatible',
@@ -1048,43 +1079,20 @@ describe('LayerPanel', () => {
         humanData: { label: 'Label' },
       };
 
-      mockDatasource.onDrop.mockReturnValue(true);
-      const updateVisualization = jest.fn();
-      const mockOnRemoveDimension = jest.fn();
-
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
-          <LayerPanel
-            {...getDefaultProps()}
-            onRemoveDimension={mockOnRemoveDimension}
-            updateVisualization={updateVisualization}
-            activeVisualization={mockVis}
-          />
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
+          <LayerPanel {...getDefaultProps()} activeVisualization={mockVis} />
         </ChildDragDropProvider>
       );
       act(() => {
         instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
-      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'replace_compatible',
           source: draggingOperation,
         })
       );
-      // testing default onDropForVisualization path
-      expect(mockVis.setDimension).toHaveBeenCalledWith(
-        expect.objectContaining({
-          columnId: 'c',
-          groupId: 'b',
-          layerId: 'first',
-          prevState: 'state',
-        })
-      );
-      expect(mockOnRemoveDimension).toHaveBeenCalledWith({
-        columnId: 'a',
-        layerId: 'first',
-      });
-      expect(updateVisualization).toHaveBeenCalledTimes(1);
     });
     it('should call onDrop and update visualization when replacing between compatible groups2', async () => {
       const mockVis = {
@@ -1125,13 +1133,11 @@ describe('LayerPanel', () => {
 
       mockDatasource.onDrop.mockReturnValue(true);
       const updateVisualization = jest.fn();
-      const mockOnRemoveDimension = jest.fn();
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel
             {...getDefaultProps()}
-            onRemoveDimension={mockOnRemoveDimension}
             updateVisualization={updateVisualization}
             activeVisualization={mockVis}
           />
@@ -1141,17 +1147,9 @@ describe('LayerPanel', () => {
         instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
 
-      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'replace_compatible',
-          source: draggingOperation,
-        })
-      );
-
-      expect(mockVis.onDrop).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dropType: 'replace_compatible',
-          prevState: 'state',
           source: draggingOperation,
           target: expect.objectContaining({
             columnId: 'c',
@@ -1159,15 +1157,8 @@ describe('LayerPanel', () => {
             id: 'c',
             layerId: 'first',
           }),
-        }),
-        mockVis
+        })
       );
-      expect(mockVis.setDimension).not.toHaveBeenCalled();
-      expect(mockOnRemoveDimension).toHaveBeenCalledWith({
-        columnId: 'a',
-        layerId: 'first',
-      });
-      expect(updateVisualization).toHaveBeenCalledTimes(1);
     });
 
     it('should not change visualization state if datasource drop failed', async () => {
@@ -1207,13 +1198,11 @@ describe('LayerPanel', () => {
 
       mockDatasource.onDrop.mockReturnValue(false);
       const updateVisualization = jest.fn();
-      const mockOnRemoveDimension = jest.fn();
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel
             {...getDefaultProps()}
-            onRemoveDimension={mockOnRemoveDimension}
             updateVisualization={updateVisualization}
             activeVisualization={mockVis}
           />
@@ -1223,14 +1212,13 @@ describe('LayerPanel', () => {
         instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
 
-      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'replace_compatible',
           source: draggingOperation,
         })
       );
       expect(updateVisualization).not.toHaveBeenCalled();
-      expect(mockOnRemoveDimension).not.toHaveBeenCalled();
     });
 
     it("should not remove source if drop type doesn't require it", async () => {
@@ -1270,22 +1258,14 @@ describe('LayerPanel', () => {
 
       mockDatasource.onDrop.mockReturnValue(true);
 
-      const mockOnRemoveDimension = jest.fn();
-
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
-          <LayerPanel
-            {...getDefaultProps()}
-            onRemoveDimension={mockOnRemoveDimension}
-            activeVisualization={mockVis}
-          />
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
+          <LayerPanel {...getDefaultProps()} activeVisualization={mockVis} />
         </ChildDragDropProvider>
       );
       act(() => {
         instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'duplicate_compatible');
       });
-
-      expect(mockOnRemoveDimension).not.toHaveBeenCalled();
     });
   });
 
@@ -1332,7 +1312,7 @@ describe('LayerPanel', () => {
         ],
       });
       await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
-      expect(mockDatasource.renderDimensionTrigger).toHaveBeenCalled();
+      expect(mockDatasource.DimensionTriggerComponent).toHaveBeenCalled();
     });
 
     it('should render visualization dimension trigger if there is no layer datasource', async () => {
@@ -1355,14 +1335,14 @@ describe('LayerPanel', () => {
         framePublicAPI: { ...props.framePublicAPI, datasourceLayers: {} },
       };
 
-      mockVisualization.renderDimensionTrigger = jest.fn();
+      mockVisualization.DimensionTriggerComponent = jest.fn().mockImplementation(() => <div />);
       mockVisualization.getUniqueLabels = jest.fn(() => ({
         x: 'A',
       }));
 
       await mountWithProvider(<LayerPanel {...propsWithVisOnlyLayer} />);
-      expect(mockDatasource.renderDimensionTrigger).not.toHaveBeenCalled();
-      expect(mockVisualization.renderDimensionTrigger).toHaveBeenCalled();
+      expect(mockDatasource.DimensionTriggerComponent).not.toHaveBeenCalled();
+      expect(mockVisualization.DimensionTriggerComponent).toHaveBeenCalled();
     });
 
     // TODO - test user message display

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { Feature } from 'geojson';
-import { BrowserFileSystem, DBFLoader, loadInBatches, ShapefileLoader } from '../loaders';
+import { _BrowserFileSystem as BrowserFileSystem, loadInBatches } from '@loaders.gl/core';
+import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
 import type { ImportFailure } from '../../../../common/types';
 import { ShapefileEditor } from './shapefile_editor';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
@@ -51,10 +52,12 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     }
 
     // read header from dbf file to get number of records in data file
-    const dbfIterator = (await loadInBatches(this._dbfFile, DBFLoader, {
-      metadata: false,
-      dbf: { encoding: 'latin1' },
-    })) as unknown as Iterator<{ nRecords: number }>;
+    const dbfIterator = (
+      await loadInBatches(this._dbfFile, DBFLoader, {
+        metadata: false,
+        dbf: { encoding: 'latin1' },
+      })
+    )[Symbol.asyncIterator]() as AsyncIterator<{ nRecords: number }>;
     const { value } = await dbfIterator.next();
     if (value.nRecords && typeof value.nRecords === 'number') {
       this._tableRowCount = value.nRecords;

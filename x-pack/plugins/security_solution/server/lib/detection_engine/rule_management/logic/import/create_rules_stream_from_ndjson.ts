@@ -6,9 +6,6 @@
  */
 
 import { has } from 'lodash/fp';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import type * as t from 'io-ts';
 import type { Transform } from 'stream';
 import {
   createSplitStream,
@@ -18,17 +15,19 @@ import {
 } from '@kbn/utils';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import type {
   ImportExceptionListItemSchema,
   ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { stringifyZodError } from '@kbn/zod-helpers';
+import type { RuleToImportInput } from '../../../../../../common/api/detection_engine/rule_management';
 import {
   RuleToImport,
   validateRuleToImport,
-} from '../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../common/api/detection_engine/rule_management';
+import type { RulesObjectsExportResultDetails } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 import {
   parseNdjsonStrings,
   createRulesLimitStream,
@@ -41,7 +40,7 @@ import {
 export const validateRulesStream = (): Transform => {
   return createMapStream<{
     exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
-    rules: Array<RuleToImport | Error>;
+    rules: Array<RuleToImportInput | Error>;
     actionConnectors: SavedObject[];
   }>((items) => ({
     actionConnectors: items.actionConnectors,
@@ -50,26 +49,25 @@ export const validateRulesStream = (): Transform => {
   }));
 };
 
-export const validateRules = (rules: Array<RuleToImport | Error>): Array<RuleToImport | Error> => {
-  return rules.map((obj: RuleToImport | Error) => {
-    if (!(obj instanceof Error)) {
-      const decoded = RuleToImport.decode(obj);
-      const checked = exactCheck(obj, decoded);
-      const onLeft = (errors: t.Errors): BadRequestError | RuleToImport => {
-        return new BadRequestError(formatErrors(errors).join());
-      };
-      const onRight = (schema: RuleToImport): BadRequestError | RuleToImport => {
-        const validationErrors = validateRuleToImport(schema);
-        if (validationErrors.length) {
-          return new BadRequestError(validationErrors.join());
-        } else {
-          return schema;
-        }
-      };
-      return pipe(checked, fold(onLeft, onRight));
-    } else {
+export const validateRules = (
+  rules: Array<RuleToImportInput | Error>
+): Array<RuleToImport | Error> => {
+  return rules.map((obj: RuleToImportInput | Error) => {
+    if (obj instanceof Error) {
       return obj;
     }
+
+    const result = RuleToImport.safeParse(obj);
+    if (!result.success) {
+      return new BadRequestError(stringifyZodError(result.error));
+    }
+
+    const validationErrors = validateRuleToImport(result.data);
+    if (validationErrors.length) {
+      return new BadRequestError(validationErrors.join());
+    }
+
+    return result.data;
   });
 };
 
@@ -82,7 +80,7 @@ export const validateRules = (rules: Array<RuleToImport | Error>): Array<RuleToI
 export const sortImports = (): Transform => {
   return createReduceStream<{
     exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
-    rules: Array<RuleToImport | Error>;
+    rules: Array<RuleToImportInput | Error>;
     actionConnectors: SavedObject[];
   }>(
     (acc, importItem) => {
@@ -103,6 +101,25 @@ export const sortImports = (): Transform => {
   );
 };
 
+export const migrateLegacyInvestigationFields = (): Transform => {
+  return createMapStream<RuleToImportInput | RulesObjectsExportResultDetails>((obj) => {
+    if (obj != null && 'investigation_fields' in obj && Array.isArray(obj.investigation_fields)) {
+      if (obj.investigation_fields.length) {
+        return {
+          ...obj,
+          investigation_fields: {
+            field_names: obj.investigation_fields,
+          },
+        };
+      } else {
+        const { investigation_fields: _, ...rest } = obj;
+        return rest;
+      }
+    }
+    return obj;
+  });
+};
+
 // TODO: Capture both the line number and the rule_id if you have that information for the error message
 // eventually and then pass it down so we can give error messages on the line number
 
@@ -111,6 +128,7 @@ export const createRulesAndExceptionsStreamFromNdJson = (ruleLimit: number) => {
     createSplitStream('\n'),
     parseNdjsonStrings(),
     filterExportedCounts(),
+    migrateLegacyInvestigationFields(),
     sortImports(),
     validateRulesStream(),
     createRulesLimitStream(ruleLimit),

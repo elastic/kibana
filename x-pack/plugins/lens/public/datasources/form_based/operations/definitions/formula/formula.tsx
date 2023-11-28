@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
+import { nonNullable } from '../../../../../utils';
 import type {
   BaseIndexPatternColumn,
   FieldBasedOperationErrorMessage,
@@ -18,7 +19,7 @@ import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
-import { filterByVisibleOperation, nonNullable } from './util';
+import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
 import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
 
@@ -51,7 +52,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
   {
     type: 'formula',
     displayName: defaultLabel,
-    getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
+    getDefaultLabel: (column) => column.params.formula ?? defaultLabel,
     input: 'managedReference',
     hidden: true,
     filterable: {
@@ -67,7 +68,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
-    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap) {
+    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap, targetBars) {
       const column = layer.columns[columnId] as FormulaIndexPatternColumn;
       if (!column.params.formula || !operationDefinitionMap) {
         return;
@@ -109,7 +110,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
                 id,
                 indexPattern,
                 dateRange,
-                visibleOperationsMap
+                visibleOperationsMap,
+                targetBars
               );
               return messages || [];
             }

@@ -15,6 +15,8 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CloudDefendRouterProps } from './application/router';
 import type { CloudDefendPageId } from './common/navigation/types';
+import * as i18n from './components/control_general_view/translations';
+import { SelectorType, SelectorCondition, Selector, Response } from '../common';
 
 /**
  * cloud_defend plugin types
@@ -51,90 +53,111 @@ export interface CloudDefendSecuritySolutionContext {
 /**
  * cloud_defend/control types
  */
-export enum ControlResponseAction {
-  alert = 'alert',
-  block = 'block',
+
+/*
+ * 'stringArray' uses a EuiComboBox
+ * 'flag' is a boolean value which is always 'true'
+ * 'boolean' can be true or false
+ */
+export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
+
+export interface SelectorConditionOptions {
+  type: SelectorConditionType;
+  pattern?: string;
+  patternError?: string;
+  selectorType?: SelectorType;
+  maxValueBytes?: number; // defaults to const MAX_FILE_PATH_VALUE_LENGTH_BYTES
+  not?: SelectorCondition[];
+  values?:
+    | {
+        file?: string[];
+        process?: string[];
+      }
+    | string[];
 }
 
-export enum ControlSelectorCondition {
-  operation = 'operation',
-  containerImageName = 'containerImageName',
-  containerImageTag = 'containerImageTag',
-  targetFilePath = 'targetFilePath',
-  ignoreVolumeFiles = 'ignoreVolumeFiles',
-  ignoreVolumeMounts = 'ignoreVolumeMounts',
-  orchestratorClusterId = 'orchestratorClusterId',
-  orchestratorClusterName = 'orchestratorClusterName',
-  orchestratorNamespace = 'orchestratorNamespace',
-  orchestratorResourceLabel = 'orchestratorResourceLabel',
-  orchestratorResourceName = 'orchestratorResourceName',
-  orchestratorResourceType = 'orchestratorResourceType',
-  orchestratorType = 'orchestratorType',
-}
-
-export enum ControlSelectorBooleanConditions {
-  ignoreVolumeFiles = 'ignoreVolumeFiles',
-  ignoreVolumeMounts = 'ignoreVolumeMounts',
-}
-
-export enum ControlSelectorOperation {
-  createExecutable = 'createExecutable',
-  modifyExecutable = 'modifyExecutable',
-  execMemFd = 'execMemFd',
-}
-
-export enum ControlSelectorOrchestratorType {
-  kubernetes = 'kubernetes',
-}
-
-export interface ControlSelectorConditionUIOptions {
-  [key: string]: {
-    values: string[];
-  };
-}
-
-export const ControlSelectorConditionUIOptionsMap: ControlSelectorConditionUIOptions = {
-  operation: { values: Object.values(ControlSelectorOperation) },
-  orchestratorType: { values: Object.values(ControlSelectorOrchestratorType) },
+export type SelectorConditionsMapProps = {
+  [key in SelectorCondition]: SelectorConditionOptions;
 };
 
-export interface ControlSelector {
-  name: string;
-  operation?: string[];
-  containerImageName?: string[];
-  containerImageTag?: string[];
-  targetFilePath?: string[];
-  ignoreVolumeFiles?: boolean;
-  ignoreVolumeMounts?: boolean;
-  orchestratorClusterId?: string[];
-  orchestratorClusterName?: string[];
-  orchestratorNamespace?: string[];
-  orchestratorResourceLabel?: string[];
-  orchestratorResourceName?: string[];
-  orchestratorResourceType?: string[];
-  orchestratorType?: string[];
+// used to determine UX control and allowed values for each condition
+export const SelectorConditionsMap: SelectorConditionsMapProps = {
+  containerImageFullName: {
+    type: 'stringArray',
+    pattern:
+      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$',
+    patternError: i18n.errorInvalidFullContainerImageName,
+    not: ['containerImageName'],
+  },
+  containerImageName: {
+    type: 'stringArray',
+    pattern: '^([a-z0-9]+(?:[._-][a-z0-9]+)*)$',
+    not: ['containerImageFullName'],
+  },
+  containerImageTag: { type: 'stringArray' },
+  kubernetesClusterId: { type: 'stringArray' },
+  kubernetesClusterName: { type: 'stringArray' },
+  kubernetesNamespace: { type: 'stringArray' },
+  kubernetesPodName: { type: 'stringArray' },
+  kubernetesPodLabel: {
+    type: 'stringArray',
+    pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
+    patternError: i18n.errorInvalidPodLabel,
+  },
+  operation: {
+    type: 'stringArray',
+    values: {
+      file: ['createExecutable', 'modifyExecutable', 'createFile', 'modifyFile', 'deleteFile'],
+      process: ['fork', 'exec'],
+    },
+  },
+  targetFilePath: {
+    selectorType: 'file',
+    type: 'stringArray',
+    maxValueBytes: 255,
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidTargetFilePath,
+  },
+  ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
+  ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
+  processExecutable: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processName'],
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidProcessExecutable,
+  },
+  processName: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processExecutable'],
+    maxValueBytes: 15,
+  },
+  sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
+};
 
-  // ephemeral, used to track selector error state in UI
-  hasErrors?: boolean;
-}
-
-export interface ControlResponse {
-  match: string[];
-  exclude?: string[];
-  actions: ControlResponseAction[];
-
-  // ephemeral, used to track response error state in UI
-  hasErrors?: boolean;
-}
-
-export const DefaultSelector: ControlSelector = {
+export const DefaultFileSelector: Selector = {
+  type: 'file',
   name: 'Untitled',
-  operation: ControlSelectorConditionUIOptionsMap.operation.values,
+  operation: ['createExecutable', 'modifyExecutable'],
 };
 
-export const DefaultResponse: ControlResponse = {
+export const DefaultProcessSelector: Selector = {
+  type: 'process',
+  name: 'Untitled',
+  operation: ['fork', 'exec'],
+};
+
+export const DefaultFileResponse: Response = {
+  type: 'file',
   match: [],
-  actions: [ControlResponseAction.alert],
+  actions: ['alert'],
+};
+
+export const DefaultProcessResponse: Response = {
+  type: 'process',
+  match: [],
+  actions: ['alert'],
 };
 
 export interface OnChangeDeps {
@@ -152,22 +175,23 @@ export interface ViewDeps extends SettingsDeps {
 }
 
 export interface ControlGeneralViewSelectorDeps {
-  selector: ControlSelector;
-  selectors: ControlSelector[];
+  selector: Selector;
+  selectors: Selector[];
+  usedByResponse: boolean;
   index: number;
-  onChange(selector: ControlSelector, index: number): void;
+  onChange(selector: Selector, index: number): void;
   onRemove(index: number): void;
-  onDuplicate(selector: ControlSelector): void;
+  onDuplicate(selector: Selector): void;
 }
 
 export interface ControlGeneralViewResponseDeps {
-  response: ControlResponse;
-  selectors: ControlSelector[];
-  responses: ControlResponse[];
+  response: Response;
+  selectors: Selector[];
+  responses: Response[];
   index: number;
-  onChange(response: ControlResponse, index: number): void;
+  onChange(response: Response, index: number): void;
   onRemove(index: number): void;
-  onDuplicate(response: ControlResponse): void;
+  onDuplicate(response: Response): void;
 }
 
 export interface ControlFormErrorMap {

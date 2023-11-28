@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -33,7 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
+      await transform.securityUI.logout();
     });
 
     const fieldStatsEntries = [
@@ -508,7 +509,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the wizard for the source data', async () => {

@@ -9,18 +9,23 @@ import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { AuditLogger } from '..';
+import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
+import { getPrintableSessionId, Session, type SessionValueContentToEncrypt } from './session';
+import type { SessionCookie } from './session_cookie';
+import {
+  SessionConcurrencyLimitError,
+  SessionExpiredError,
+  SessionMissingError,
+  SessionUnexpectedError,
+} from './session_errors';
+import type { SessionIndex } from './session_index';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userSessionConcurrentLimitLogoutEvent } from '../audit';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
-import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
-import { getPrintableSessionId, Session, type SessionValueContentToEncrypt } from './session';
-import type { SessionCookie } from './session_cookie';
-import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
-import type { SessionIndex } from './session_index';
 
 describe('Session', () => {
   const now = 123456;
@@ -233,7 +238,7 @@ describe('Session', () => {
       mockSessionIndex.isWithinConcurrentSessionLimit.mockResolvedValue(false);
 
       await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toEqual({
-        error: expect.any(SessionUnexpectedError),
+        error: expect.any(SessionConcurrencyLimitError),
         value: null,
       });
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);

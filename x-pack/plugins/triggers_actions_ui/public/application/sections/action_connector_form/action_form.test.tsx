@@ -314,6 +314,7 @@ describe('action_form', () => {
           context: [{ name: 'contextVar', description: 'context var1' }],
         }}
         featureId="alerting"
+        producerId="alerting"
         defaultActionGroupId={'default'}
         isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
           const recoveryActionGroupId = customRecoveredActionGroup
@@ -345,6 +346,15 @@ describe('action_form', () => {
           (initialAlert.actions[index] = {
             ...initialAlert.actions[index],
             frequency: { ...initialAlert.actions[index].frequency!, [key]: value },
+          })
+        }
+        setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
+          (initialAlert.actions[index] = {
+            ...initialAlert.actions[index],
+            alertsFilter: {
+              ...initialAlert.actions[index].alertsFilter,
+              [key]: value,
+            },
           })
         }
         actionTypeRegistry={actionTypeRegistry}

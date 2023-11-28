@@ -9,7 +9,11 @@
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
+import {
+  LegendDisplay,
+  type PartitionChartProps,
+  type PartitionVisParams,
+} from '../types/expression_renderers';
 import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -106,6 +110,10 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       help: strings.getAriaLabelHelp(),
       required: false,
     },
+    colorMapping: {
+      types: ['string'],
+      help: strings.getColorMappingHelp(),
+    },
   },
   fn(context, args, handlers) {
     const maxSupportedBuckets = 2;
@@ -142,6 +150,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
+      colorMapping: args.colorMapping,
     };
 
     if (handlers?.inspectorAdapters?.tables) {
@@ -172,6 +181,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
         params: {
           listenOnChange: true,
         },
+        overrides: handlers.variables?.overrides as PartitionChartProps['overrides'],
       },
     };
   },

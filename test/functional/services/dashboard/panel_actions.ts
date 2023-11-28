@@ -11,6 +11,8 @@ import { FtrService } from '../../ftr_provider_context';
 
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
+const INLINE_EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CONFIGURE_IN_LENS';
+const EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ = 'navigateToLensEditorLink';
 const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
 const CLONE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-clonePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
@@ -22,10 +24,15 @@ const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
+const DASHBOARD_TOP_OFFSET = 96 + 105; // 96 for Kibana navigation bar + 105 for dashboard top nav bar (in edit mode)
+
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
-  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
   private readonly inspector = this.ctx.getService('inspector');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
@@ -43,9 +50,14 @@ export class DashboardPanelActionsService extends FtrService {
 
   async toggleContextMenu(parent?: WebElementWrapper) {
     this.log.debug(`toggleContextMenu(${parent})`);
-    await (parent ? parent.moveMouseTo() : this.testSubjects.moveMouseTo('dashboardPanelTitle'));
+    if (parent) {
+      await parent.scrollIntoViewIfNecessary(DASHBOARD_TOP_OFFSET);
+      await this.browser.getActions().move({ x: 0, y: 0, origin: parent._webElement }).perform();
+    } else {
+      await this.testSubjects.moveMouseTo('dashboardPanelTitle');
+    }
     const toggleMenuItem = await this.findContextMenu(parent);
-    await toggleMenuItem.click();
+    await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
   }
 
   async expectContextMenuToBeOpen() {
@@ -77,16 +89,53 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickContextMenuMoreItem();
   }
 
-  async clickEdit() {
-    this.log.debug('clickEdit');
+  private async navigateToEditorFromFlyout() {
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
+    const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
+    if (isConfirmModalVisible) {
+      await this.testSubjects.click('confirmModalConfirmButton', 20000);
+    }
+  }
+
+  async clickInlineEdit() {
+    this.log.debug('clickInlineEditAction');
     await this.expectContextMenuToBeOpen();
-    const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
-    if (!isActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
+    const isInlineEditingActionVisible = await this.testSubjects.exists(
+      INLINE_EDIT_PANEL_DATA_TEST_SUBJ
+    );
+    if (!isInlineEditingActionVisible) await this.clickContextMenuMoreItem();
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
 
+  /** The dashboard/canvas panels can be either edited on their editor or inline.
+   * The inline editing panels allow the navigation to the editor after the flyout opens
+   */
+  async clickEdit() {
+    this.log.debug('clickEdit');
+    await this.expectContextMenuToBeOpen();
+    const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
+    const isInlineEditingActionVisible = await this.testSubjects.exists(
+      INLINE_EDIT_PANEL_DATA_TEST_SUBJ
+    );
+    if (!isActionVisible && !isInlineEditingActionVisible) await this.clickContextMenuMoreItem();
+    // navigate to the editor
+    if (await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ)) {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
+      // open the flyout and then navigate to the editor
+    } else {
+      await this.navigateToEditorFromFlyout();
+    }
+    await this.header.waitUntilLoadingHasFinished();
+    await this.common.waitForTopNavToBeVisible();
+  }
+
+  /** The dashboard/canvas panels can be either edited on their editor or inline.
+   * The inline editing panels allow the navigation to the editor after the flyout opens
+   */
   async editPanelByTitle(title?: string) {
     this.log.debug(`editPanelByTitle(${title})`);
     if (title) {
@@ -95,7 +144,11 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.openContextMenu();
     }
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
+    if (await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ)) {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
+    } else {
+      await this.navigateToEditorFromFlyout();
+    }
   }
 
   async clickExpandPanelToggle() {
@@ -212,6 +265,9 @@ export class DashboardPanelActionsService extends FtrService {
       await this.clickContextMenuMoreItem();
     }
     await this.testSubjects.click(UNLINK_FROM_LIBRARY_TEST_SUBJ);
+    await this.testSubjects.waitForDeleted(
+      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+    );
   }
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
@@ -226,6 +282,11 @@ export class DashboardPanelActionsService extends FtrService {
       clearWithKeyboard: true,
     });
     await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+      );
+    });
   }
 
   async expectExistsPanelAction(testSubject: string, title?: string) {
@@ -248,9 +309,13 @@ export class DashboardPanelActionsService extends FtrService {
     await this.expectExistsPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ);
   }
 
-  async expectExistsEditPanelAction(title?: string) {
+  async expectExistsEditPanelAction(title?: string, allowsInlineEditing?: boolean) {
     this.log.debug('expectExistsEditPanelAction');
-    await this.expectExistsPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, title);
+    let testSubj = EDIT_PANEL_DATA_TEST_SUBJ;
+    if (allowsInlineEditing) {
+      testSubj = INLINE_EDIT_PANEL_DATA_TEST_SUBJ;
+    }
+    await this.expectExistsPanelAction(testSubj, title);
   }
 
   async expectExistsReplacePanelAction() {
@@ -317,13 +382,25 @@ export class DashboardPanelActionsService extends FtrService {
     throw new Error(`No action matching text "${text}"`);
   }
 
-  async convertToLens(parent?: WebElementWrapper) {
-    this.log.debug('convertToLens');
+  async canConvertToLens(parent?: WebElementWrapper) {
+    this.log.debug('canConvertToLens');
     await this.openContextMenu(parent);
     const isActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
     const isPanelActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
     if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
+  }
+
+  async convertToLens(parent?: WebElementWrapper) {
+    this.log.debug('convertToLens');
+
+    await this.retry.try(async () => {
+      if (!(await this.canConvertToLens(parent))) {
+        throw new Error('Convert to Lens option not found');
+      }
+
+      await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);
+    });
   }
 }

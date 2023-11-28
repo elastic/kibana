@@ -51,3 +51,24 @@ export const SOURCE_LABEL = i18n.translate(
     defaultMessage: 'source',
   }
 );
+
+export const DATA_STATISTICS_TITLE = (percent: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.dataStatsTitle', {
+    values: { percent },
+    defaultMessage: `This field exists in {percent} of alerts.`,
+  });
+
+export const DATA_STATISTICS_MESSAGE = (groupbySelection: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.dataStatsMessage',
+    {
+      values: { groupbySelection },
+      defaultMessage: `To see alerts without {groupbySelection} you can filter in by `,
+    }
+  );
+
+export const NON_EMPTY_FILTER = (groupBySelection: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.nonEmptyFilter', {
+    values: { groupBySelection },
+    defaultMessage: `NOT {groupBySelection}: exists`,
+  });

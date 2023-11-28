@@ -57,7 +57,7 @@ export const InformationText: FC<Props> = ({
             <h2>
               <FormattedMessage
                 id="xpack.aiops.logCategorization.emptyPromptTitle"
-                defaultMessage="Select a text field and click run categorization to start analysis"
+                defaultMessage="Select a text field and click run pattern analysis to start analysis"
               />
             </h2>
           }
@@ -66,7 +66,7 @@ export const InformationText: FC<Props> = ({
             <p>
               <FormattedMessage
                 id="xpack.aiops.logCategorization.emptyPromptBody"
-                defaultMessage="Log pattern analysis groups messages into common categories."
+                defaultMessage="Log pattern analysis groups messages into common patterns."
               />
             </p>
           }
@@ -80,7 +80,7 @@ export const InformationText: FC<Props> = ({
             <h2>
               <FormattedMessage
                 id="xpack.aiops.logCategorization.noCategoriesTitle"
-                defaultMessage="No categories found"
+                defaultMessage="No patterns found"
               />
             </h2>
           }

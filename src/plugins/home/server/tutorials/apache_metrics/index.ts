@@ -54,10 +54,10 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/apache_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/apache_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['web'],
+    integrationBrowserCategories: ['observabilty', 'web'],
   };
 }

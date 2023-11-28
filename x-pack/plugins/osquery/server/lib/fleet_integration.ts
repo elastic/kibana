@@ -34,11 +34,20 @@ export const getPackagePolicyDeleteCallback =
           await Promise.all(
             map(
               foundPacks.saved_objects,
-              (pack: { id: string; references: SavedObjectReference[] }) =>
+              (pack: {
+                id: string;
+                references: SavedObjectReference[];
+                attributes: { shards: Array<{ key: string; value: string }> };
+              }) =>
                 packsClient.update(
                   packSavedObjectType,
                   pack.id,
-                  {},
+                  {
+                    shards: filter(
+                      pack.attributes.shards,
+                      (shard) => shard.key !== deletedOsqueryManagerPolicy.policy_id
+                    ),
+                  },
                   {
                     references: filter(
                       pack.references,

@@ -60,6 +60,7 @@ const HiddenUseField = styled(UseField)`
   display: none;
 `;
 
+// eslint-disable-next-line react/display-name
 export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string }) => {
   const dispatch = useDispatch();
   const isInit = useRef(true);
@@ -106,6 +107,8 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     form,
     watch: ['eqlQueryBar'],
   });
+
+  const prevEqlQuery = useRef<TimelineEqlQueryBar['eqlQueryBar']['query']['query']>('');
 
   const optionsData = useMemo(
     () =>
@@ -156,10 +159,11 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   useEffect(() => {
     if (
       formEqlQueryBar != null &&
-      !isEmpty(formEqlQueryBar.query.query) &&
+      prevEqlQuery.current !== formEqlQueryBar.query.query &&
       isQueryBarValid &&
       !isQueryBarValidating
     ) {
+      prevEqlQuery.current = formEqlQueryBar.query.query;
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,

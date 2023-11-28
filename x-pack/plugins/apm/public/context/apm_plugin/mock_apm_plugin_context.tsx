@@ -16,6 +16,8 @@ import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plug
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -55,6 +57,7 @@ const mockCore = merge({}, coreStart, {
           value: 100000,
         },
         [enableComparisonByDefault]: true,
+        [apmEnableProfilingIntegration]: true,
       };
       return uiSettings[key];
     },
@@ -66,6 +69,19 @@ const mockConfig: ConfigSchema = {
   ui: {
     enabled: false,
   },
+  latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+    infrastructureTabAvailable: true,
+    infraUiAvailable: true,
+    migrationToFleetAvailable: true,
+    sourcemapApiAvailable: true,
+    storageExplorerAvailable: true,
+  },
+  serverless: { enabled: false },
 };
 
 const urlService = new UrlService({
@@ -86,6 +102,38 @@ const mockPlugin = {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
   },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
+    },
+  },
+  observabilityShared: {
+    locators: {
+      profiling: {
+        flamegraphLocator: {
+          getRedirectUrl: () => '/profiling/flamegraphs/flamegraph',
+        },
+        topNFunctionsLocator: {
+          getRedirectUrl: () => '/profiling/functions/topn',
+        },
+        stacktracesLocator: {
+          getRedirectUrl: () => '/profiling/stacktraces/threads',
+        },
+      },
+    },
+  },
+};
+
+export const observabilityLogExplorerLocatorsMock = {
+  allDatasetsLocator: sharePluginMock.createLocator(),
+  singleDatasetLocator: sharePluginMock.createLocator(),
+};
+
+export const infraLocatorsMock = {
+  nodeLogsLocator: sharePluginMock.createLocator(),
+  logsLocator: sharePluginMock.createLocator(),
 };
 
 const mockCorePlugins = {
@@ -93,7 +141,14 @@ const mockCorePlugins = {
   inspector: {},
   maps: {},
   observability: {},
+  observabilityShared: {},
   data: {},
+};
+
+const mockUnifiedSearch = {
+  ui: {
+    SearchBar: () => <div className="searchBar" />,
+  },
 };
 
 export const mockApmPluginContextValue = {
@@ -104,6 +159,11 @@ export const mockApmPluginContextValue = {
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   corePlugins: mockCorePlugins,
   deps: {},
+  share: sharePluginMock.createSetupContract(),
+  unifiedSearch: mockUnifiedSearch,
+  uiActions: {
+    getTriggerCompatibleActions: () => Promise.resolve([]),
+  },
 };
 
 export function MockApmPluginContextWrapper({

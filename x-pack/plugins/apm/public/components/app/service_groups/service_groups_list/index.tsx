@@ -106,6 +106,7 @@ export function ServiceGroupsList() {
                 }
               >
                 <EuiFieldText
+                  data-test-subj="apmServiceGroupsListFieldText"
                   icon="search"
                   fullWidth
                   value={filter}
@@ -176,6 +177,7 @@ export function ServiceGroupsList() {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiLink
+                    data-test-subj="apmServiceGroupsListGiveFeedbackLink"
                     href="https://ela.st/feedback-service-groups"
                     target="_blank"
                   >

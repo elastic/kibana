@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
@@ -22,6 +23,8 @@ export const REMOVED_TYPES: string[] = [
   'search_sessions_monitor',
   'search_sessions_cleanup',
   'search_sessions_expire',
+
+  'cleanup_failed_action_executions',
 ];
 
 /**
@@ -44,14 +47,6 @@ export interface TaskRegisterDefinition {
    * An optional more detailed description of what this task does.
    */
   description?: string;
-  /**
-   * Function that customizes how the task should behave when the task fails. This
-   * function can return `true`, `false` or a Date. True will tell task manager
-   * to retry using default delay logic. False will tell task manager to stop retrying
-   * this task. Date will suggest when to the task manager the task should retry.
-   * This function isn't used for recurring tasks, those retry as per their configured recurring schedule.
-   */
-  getRetry?: (attempts: number, error: object) => boolean | Date;
 
   /**
    * Creates an object that has a run function which performs the task's work,
@@ -71,6 +66,16 @@ export interface TaskRegisterDefinition {
    * The default value, if not given, is 0.
    */
   maxConcurrency?: number;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }
+  >;
+
+  paramsSchema?: ObjectType;
+  indirectParamsSchema?: ObjectType;
 }
 
 /**

@@ -36,6 +36,10 @@ function displayOutputType(type: string) {
       return i18n.translate('xpack.fleet.settings.outputsTable.elasticsearchTypeLabel', {
         defaultMessage: 'Elasticsearch',
       });
+    case 'remote_elasticsearch':
+      return i18n.translate('xpack.fleet.settings.outputsTable.remoteElasticsearchTypeLabel', {
+        defaultMessage: 'Remote Elasticsearch',
+      });
     default:
       return type;
   }
@@ -61,7 +65,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiIconTip
                   content={i18n.translate('xpack.fleet.settings.outputsTable.managedTooltip', {
-                    defaultMessage: 'This outputs is managed outside of Fleet.',
+                    defaultMessage: 'This output is managed outside of Fleet.',
                   })}
                   type="lock"
                   size="m"

@@ -71,6 +71,27 @@ describe('stripNonEcsFields', () => {
     ]);
   });
 
+  // https://github.com/elastic/sdh-security-team/issues/736
+  describe('fields that exists in the alerts mapping but not in local ECS(ruleRegistry) definition', () => {
+    it('should strip object type "device" field if it is supplied as a keyword', () => {
+      const { result, removed } = stripNonEcsFields({
+        device: 'test',
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        message: 'test message',
+      });
+
+      expect(removed).toEqual([
+        {
+          key: 'device',
+          value: 'test',
+        },
+      ]);
+    });
+  });
+
   describe('array fields', () => {
     it('should not strip arrays of objects when an object is expected', () => {
       const { result, removed } = stripNonEcsFields({
@@ -120,7 +141,6 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(result).toEqual({
-        agent: [],
         message: 'test message',
       });
       expect(removed).toEqual([
@@ -142,7 +162,7 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(result).toEqual({
-        agent: { type: 'filebeat', name: [] },
+        agent: { type: 'filebeat' },
         message: 'test message',
       });
       expect(removed).toEqual([
@@ -173,6 +193,42 @@ describe('stripNonEcsFields', () => {
         {
           key: 'agent.name.conflict',
           value: 'some-value',
+        },
+      ]);
+    });
+
+    it('should strip conflicting fields that use dot notation and is an array', () => {
+      const { result, removed } = stripNonEcsFields({
+        'agent.name.text': ['1'],
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        message: 'test message',
+      });
+
+      expect(removed).toEqual([
+        {
+          key: 'agent.name.text',
+          value: '1',
+        },
+      ]);
+    });
+
+    it('should strip conflicting fields that use dot notation and is an empty array', () => {
+      const { result, removed } = stripNonEcsFields({
+        'agent.name.text': [],
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        message: 'test message',
+      });
+
+      expect(removed).toEqual([
+        {
+          key: 'agent.name.text',
+          value: [],
         },
       ]);
     });
@@ -289,7 +345,6 @@ describe('stripNonEcsFields', () => {
 
       expect(result).toEqual({
         threat: {
-          enrichments: [],
           'indicator.port': 443,
         },
       });
@@ -549,6 +604,74 @@ describe('stripNonEcsFields', () => {
         'dll.code_signature.trusted': [[true, false], ''],
       });
       expect(removed).toEqual([]);
+    });
+  });
+
+  // geo_point is too complex so we going to skip its validation
+  describe('geo_point field', () => {
+    it('should not strip invalid geo_point field', () => {
+      const { result, removed } = stripNonEcsFields({
+        'client.location.geo': 'invalid geo_point',
+      });
+
+      expect(result).toEqual({
+        'client.location.geo': 'invalid geo_point',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should not strip valid geo_point fields', () => {
+      expect(
+        stripNonEcsFields({
+          'client.geo.location': [0, 90],
+        }).result
+      ).toEqual({
+        'client.geo.location': [0, 90],
+      });
+
+      expect(
+        stripNonEcsFields({
+          'client.geo.location': {
+            type: 'Point',
+            coordinates: [-88.34, 20.12],
+          },
+        }).result
+      ).toEqual({
+        'client.geo.location': {
+          type: 'Point',
+          coordinates: [-88.34, 20.12],
+        },
+      });
+
+      expect(
+        stripNonEcsFields({
+          'client.geo.location': 'POINT (-71.34 41.12)',
+        }).result
+      ).toEqual({
+        'client.geo.location': 'POINT (-71.34 41.12)',
+      });
+
+      expect(
+        stripNonEcsFields({
+          client: {
+            geo: {
+              location: {
+                lat: 41.12,
+                lon: -71.34,
+              },
+            },
+          },
+        }).result
+      ).toEqual({
+        client: {
+          geo: {
+            location: {
+              lat: 41.12,
+              lon: -71.34,
+            },
+          },
+        },
+      });
     });
   });
 });

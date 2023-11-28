@@ -33,6 +33,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -71,6 +72,7 @@ describe('searchAfterAndBulkCreate', () => {
     [ALERT_RULE_EXECUTION_UUID]: '97e8f53a-4971-4935-bb54-9b8f86930cc7',
     [ALERT_RULE_NAME]: 'rule-name',
     [ALERT_RULE_PRODUCER]: 'siem',
+    [ALERT_RULE_REVISION]: 0,
     [ALERT_RULE_TYPE_ID]: 'siem.queryRule',
     [ALERT_RULE_UUID]: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
     [SPACE_IDS]: ['default'],
@@ -110,6 +112,7 @@ describe('searchAfterAndBulkCreate', () => {
       indicesToQuery: inputIndexPattern,
       alertTimestampOverride: undefined,
       ruleExecutionLogger,
+      publicBaseUrl: 'http://testkibanabaseurl.com',
     });
   });
 

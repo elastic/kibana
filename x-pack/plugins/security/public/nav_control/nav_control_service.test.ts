@@ -12,12 +12,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
 
+import { SecurityNavControlService } from './nav_control_service';
 import { SecurityLicenseService } from '../../common/licensing';
 import { UserProfileAPIClient } from '../account_management';
 import { authenticationMock } from '../authentication/index.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
 import { UserAPIClient } from '../management';
-import { SecurityNavControlService } from './nav_control_service';
 
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
@@ -55,7 +55,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -77,6 +77,7 @@ describe('SecurityNavControlService', () => {
       <div>
         <div
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          data-test-subj="kbnRedirectAppLink"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -90,19 +91,19 @@ describe('SecurityNavControlService', () => {
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Account menu"
-                class="euiButtonEmpty euiHeaderSectionItemButton css-wvaqcf-empty-text"
+                class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
                 data-test-subj="userMenuButton"
                 style="line-height: normal;"
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     <span
-                      class="euiHeaderSectionItemButton__content"
+                      class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                     >
                       <span
                         aria-label="Loading"
@@ -128,7 +129,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>({} as ILicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -148,7 +149,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -165,7 +166,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -187,7 +188,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -210,7 +211,7 @@ describe('SecurityNavControlService', () => {
       const coreSetup = coreMock.createSetup();
       const license$ = new BehaviorSubject<ILicense>({} as ILicense);
 
-      navControlService = new SecurityNavControlService();
+      navControlService = new SecurityNavControlService('traditional');
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
         logoutUrl: '/some/logout/url',

@@ -45,6 +45,7 @@ describe('Get endpoint policy response hook', () => {
     expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
     expect(fakeHttpServices.get).toHaveBeenCalledWith(BASE_POLICY_RESPONSE_ROUTE, {
       query: { agentId: 'fakeId' },
+      version: '2023-10-31',
     });
     expect(onSuccessMock).toHaveBeenCalledTimes(1);
   });

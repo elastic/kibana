@@ -27,16 +27,18 @@
       "notifications",
       "ruleRegistry",
       "files",
+      "savedObjectsFinder",
+      "contentManagement",
+      "uiActions",
     ],
     "optionalPlugins": [
       "home",
       "taskManager",
       "usageCollection",
-      "spaces"
+      "spaces",
+      "serverless",
     ],
-    "requiredBundles": [
-      "savedObjects"
-    ],
+    "requiredBundles": [],
     "extraPublicDirs": [
       "common"
     ]

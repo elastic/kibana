@@ -6,103 +6,98 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Query } from '@kbn/es-query';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { SavedSearchSavedObject } from '../../../common/types/kibana';
-import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
-
-let savedSearchesCache: SavedSearchSavedObject[] = [];
-let dataViewsContract: DataViewsContract | null = null;
-
-export async function cacheDataViewsContract(dvc: DataViewsContract) {
-  dataViewsContract = dvc;
-}
-
-export function loadSavedSearches() {
-  const savedObjectsClient = getSavedObjectsClient();
-  return savedObjectsClient
-    .find({
-      type: 'search',
-      perPage: 10000,
-    })
-    .then((response) => {
-      savedSearchesCache = response.savedObjects;
-      return savedSearchesCache;
-    });
-}
-
-export async function loadSavedSearchById(id: string) {
-  const savedObjectsClient = getSavedObjectsClient();
-  const ss = await savedObjectsClient.get('search', id);
-  return ss.error === undefined ? ss : null;
-}
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { Query, Filter } from '@kbn/es-query';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
+import { getToastNotifications, getDataViews } from './dependency_cache';
 
 export async function getDataViewNames() {
-  if (dataViewsContract === null) {
+  const dataViewsService = getDataViews();
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
-  return (await dataViewsContract.getIdsWithTitle()).map(({ title }) => title);
+  return (await dataViewsService.getIdsWithTitle()).map(({ title }) => title);
 }
 
-export async function getDataViewIdFromName(name: string): Promise<string | null> {
-  if (dataViewsContract === null) {
+/**
+ * Retrieves the data view ID from the given name.
+ * If a job is passed in, a temporary data view will be created if the requested data view doesn't exist.
+ * @param name - The name or index pattern of the data view.
+ * @param job - Optional job object.
+ * @returns The data view ID or null if it doesn't exist.
+ */
+export async function getDataViewIdFromName(name: string, job?: Job): Promise<string | null> {
+  const dataViewsService = getDataViews();
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
-  const dataViews = await dataViewsContract.find(name);
+  const dataViews = await dataViewsService.find(name);
   const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
   if (!dataView) {
+    if (job !== undefined) {
+      const tempDataView = await dataViewsService.create({
+        id: undefined,
+        name,
+        title: name,
+        timeFieldName: job.data_description.time_field!,
+      });
+      return tempDataView.id ?? null;
+    }
     return null;
   }
   return dataView.id ?? dataView.getIndexPattern();
 }
 
 export function getDataViewById(id: string): Promise<DataView> {
-  if (dataViewsContract === null) {
+  const dataViewsService = getDataViews();
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
 
   if (id) {
-    return dataViewsContract.get(id);
+    return dataViewsService.get(id);
   } else {
-    return dataViewsContract.create({});
+    return dataViewsService.create({});
   }
 }
 
 export interface DataViewAndSavedSearch {
-  savedSearch: SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
   dataView: DataView | null;
 }
 
-export async function getDataViewAndSavedSearch(savedSearchId: string) {
-  const resp: DataViewAndSavedSearch = {
-    savedSearch: null,
-    dataView: null,
+export const getDataViewAndSavedSearchCallback =
+  (deps: {
+    savedSearchService: SavedSearchPublicPluginStart;
+    dataViewsService: DataViewsContract;
+  }) =>
+  async (savedSearchId: string) => {
+    const resp: DataViewAndSavedSearch = {
+      savedSearch: null,
+      dataView: null,
+    };
+
+    if (savedSearchId === undefined) {
+      return resp;
+    }
+
+    const ss = await deps.savedSearchService.get(savedSearchId);
+    if (ss === null) {
+      return resp;
+    }
+    const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
+    resp.dataView = await deps.dataViewsService.get(dataViewId!);
+    resp.savedSearch = ss;
+    return resp;
   };
 
-  if (savedSearchId === undefined) {
-    return resp;
-  }
-
-  const ss = await loadSavedSearchById(savedSearchId);
-  if (ss === null) {
-    return resp;
-  }
-  const dataViewId = ss.references.find((r) => r.type === 'index-pattern')?.id;
-  resp.dataView = await getDataViewById(dataViewId!);
-  resp.savedSearch = ss;
-  return resp;
-}
-
-export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject) {
-  const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-  return JSON.parse(search.searchSourceJSON) as {
-    query: Query;
-    filter: any[];
+export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
+  return {
+    query: savedSearch.searchSource.getField('query')! as Query,
+    filter: savedSearch.searchSource.getField('filter') as Filter[],
   };
-}
-
-export function getSavedSearchById(id: string): SavedSearchSavedObject | undefined {
-  return savedSearchesCache.find((s) => s.id === id);
 }
 
 /**
@@ -134,6 +129,6 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
  * Returns true if the data view index pattern contains a :
  * which means it is cross-cluster
  */
-export function isCcsIndexPattern(dataViewIndexPattern: string) {
-  return dataViewIndexPattern.includes(':');
+export function isCcsIndexPattern(indexPattern: string) {
+  return indexPattern.includes(':');
 }

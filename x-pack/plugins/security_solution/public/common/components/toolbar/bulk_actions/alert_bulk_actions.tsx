@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import numeral from '@elastic/numeral';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import {
+  dataTableSelectors,
+  dataTableActions,
+  tableEntity,
+} from '@kbn/securitysolution-data-table';
+import type { DataTableModel, DataTableState, TableId } from '@kbn/securitysolution-data-table';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import type {
   CustomBulkActionProp,
   SetEventsDeleted,
@@ -15,21 +25,18 @@ import type {
 } from '../../../../../common/types';
 import { BulkActions } from '.';
 import { useBulkActionItems } from './use_bulk_action_items';
-import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
-import type { DataTableModel } from '../../../store/data_table/model';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
-import type { DataTableState } from '../../../store/data_table/types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
 import type { inputsModel } from '../../../store';
 import { inputsSelectors } from '../../../store';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import * as i18n from './translations';
 
 interface OwnProps {
-  id: string;
+  id: TableId;
   totalItems: number;
   filterStatus?: AlertWorkflowStatus;
   query?: string;
-  indexName: string;
   showAlertStatusActions?: boolean;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
@@ -51,7 +58,6 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     selectedEventIds,
     isSelectAllChecked,
     clearSelected,
-    indexName,
     showAlertStatusActions,
     onActionSuccess,
     onActionFailure,
@@ -66,6 +72,41 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     const refetchQuery = useCallback(() => {
       globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
     }, [globalQueries]);
+
+    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+    const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
+
+    const formattedTotalCount = useMemo(
+      () => numeral(totalItems).format(defaultNumberFormat),
+      [defaultNumberFormat, totalItems]
+    );
+    const formattedSelectedCount = useMemo(
+      () => numeral(selectedCount).format(defaultNumberFormat),
+      [defaultNumberFormat, selectedCount]
+    );
+
+    const selectText = useMemo(
+      () =>
+        showClearSelection
+          ? i18n.SELECTED_ENTITIES(tableEntity[id], formattedTotalCount, totalItems)
+          : i18n.SELECTED_ENTITIES(tableEntity[id], formattedSelectedCount, selectedCount),
+      [
+        id,
+        showClearSelection,
+        formattedTotalCount,
+        formattedSelectedCount,
+        totalItems,
+        selectedCount,
+      ]
+    );
+
+    const selectClearAllText = useMemo(
+      () =>
+        showClearSelection
+          ? i18n.CLEAR_SELECTION
+          : i18n.SELECT_ALL_ENTITIES(tableEntity[id], formattedTotalCount, totalItems),
+      [id, showClearSelection, formattedTotalCount, totalItems]
+    );
 
     // Catches state change isSelectAllChecked->false (page checkbox) upon user selection change to reset toolbar select all
     useEffect(() => {
@@ -134,7 +175,6 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     );
 
     const bulkActionItems = useBulkActionItems({
-      indexName,
       eventIds: Object.keys(selectedEventIds),
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),
@@ -148,9 +188,9 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
 
     return (
       <BulkActions
+        selectText={selectText}
+        selectClearAllText={selectClearAllText}
         data-test-subj="bulk-actions"
-        selectedCount={Object.keys(selectedEventIds).length}
-        totalItems={totalItems}
         showClearSelection={showClearSelection}
         onSelectAll={onSelectAll}
         onClearSelection={onClearSelection}

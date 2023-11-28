@@ -8,11 +8,22 @@ import { EphemeralTask } from '../task';
 
 // Unrecoverable
 const CODE_UNRECOVERABLE = 'TaskManager/unrecoverable';
+const CODE_RETRYABLE = 'TaskManager/retryable';
+const CODE_SKIP = 'TaskManager/skip';
 
 const code = Symbol('TaskManagerErrorCode');
+const retry = Symbol('TaskManagerErrorRetry');
+const source = Symbol('TaskManagerErrorSource');
+
+export enum TaskErrorSource {
+  FRAMEWORK = 'framework',
+  USER = 'user',
+}
 
 export interface DecoratedError extends Error {
   [code]?: string;
+  [retry]?: Date | boolean;
+  [source]?: TaskErrorSource;
 }
 
 export class EphemeralTaskRejectedDueToCapacityError extends Error {
@@ -36,9 +47,43 @@ export function isUnrecoverableError(error: Error | DecoratedError) {
   return isTaskManagerError(error) && error[code] === CODE_UNRECOVERABLE;
 }
 
-export function throwUnrecoverableError(error: Error) {
+export function throwUnrecoverableError(error: Error, errorSource = TaskErrorSource.FRAMEWORK) {
   (error as DecoratedError)[code] = CODE_UNRECOVERABLE;
+  (error as DecoratedError)[source] = errorSource;
   throw error;
+}
+
+export function isRetryableError(error: Error | DecoratedError) {
+  if (isTaskManagerError(error) && error[code] === CODE_RETRYABLE) {
+    return error[retry];
+  }
+  return null;
+}
+
+export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
+  (error as DecoratedError)[code] = CODE_RETRYABLE;
+  (error as DecoratedError)[retry] = shouldRetry;
+  throw error;
+}
+
+export function isSkipError(error: Error | DecoratedError) {
+  if (isTaskManagerError(error) && error[code] === CODE_SKIP) {
+    return true;
+  }
+  return false;
+}
+
+export function createSkipError(error: Error): DecoratedError {
+  (error as DecoratedError)[code] = CODE_SKIP;
+  return error;
+}
+
+export function createTaskRunError(
+  error: Error,
+  errorSource = TaskErrorSource.FRAMEWORK
+): DecoratedError {
+  (error as DecoratedError)[source] = errorSource;
+  return error;
 }
 
 export function isEphemeralTaskRejectedDueToCapacityError(

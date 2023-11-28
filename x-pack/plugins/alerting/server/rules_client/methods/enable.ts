@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import Boom from '@hapi/boom';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { updateMeta, createNewAPIKeySet, scheduleTask } from '../lib';
+import { updateMeta, createNewAPIKeySet, scheduleTask, migrateLegacyActions } from '../lib';
+import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
+import { getRuleCircuitBreakerErrorMessage } from '../../../common';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -25,6 +29,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   let existingApiKey: string | null = null;
   let attributes: RawRule;
   let version: string | undefined;
+  let references: SavedObjectReference[];
 
   try {
     const decryptedAlert =
@@ -34,12 +39,30 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     existingApiKey = decryptedAlert.attributes.apiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
+    references = decryptedAlert.references;
   } catch (e) {
     context.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
     const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     attributes = alert.attributes;
     version = alert.version;
+    references = alert.references;
+  }
+
+  const validationPayload = await validateScheduleLimit({
+    context,
+    updatedInterval: attributes.schedule.interval,
+  });
+
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name: attributes.name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'enable',
+      })
+    );
   }
 
   try {
@@ -51,7 +74,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     });
 
     if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized('execute');
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
     }
   } catch (error) {
     context.auditLogger?.log(
@@ -75,6 +98,13 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: id,
+      actions: attributes.actions,
+      references,
+      attributes,
+    });
+
     const username = await context.getUserName();
     const now = new Date();
 
@@ -82,7 +112,13 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
 
     const updateAttributes = updateMeta(context, {
       ...attributes,
-      ...(!existingApiKey && (await createNewAPIKeySet(context, { attributes, username }))),
+      ...(!existingApiKey &&
+        (await createNewAPIKeySet(context, {
+          id: attributes.alertTypeId,
+          ruleName: attributes.name,
+          username,
+          shouldUpdateApiKey: true,
+        }))),
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
@@ -100,7 +136,29 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     });
 
     try {
-      await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+      // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
+      // we call create with overwrite=true
+      if (migratedActions.hasLegacyActions) {
+        await context.unsecuredSavedObjectsClient.create<RawRule>(
+          'alert',
+          {
+            ...updateAttributes,
+            actions: migratedActions.resultedActions,
+            throttle: undefined,
+            notifyWhen: undefined,
+          },
+          {
+            id,
+            overwrite: true,
+            version,
+            references: migratedActions.resultedReferences,
+          }
+        );
+      } else {
+        await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
+          version,
+        });
+      }
     } catch (e) {
       throw e;
     }
@@ -110,7 +168,14 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   if (attributes.scheduledTaskId) {
     // If scheduledTaskId defined in rule SO, make sure it exists
     try {
-      await context.taskManager.get(attributes.scheduledTaskId);
+      const task = await context.taskManager.get(attributes.scheduledTaskId);
+
+      // Check whether task status is unrecognized. If so, we want to delete
+      // this task and create a fresh one
+      if (task.status === TaskStatus.Unrecognized) {
+        await context.taskManager.removeIfExists(attributes.scheduledTaskId);
+        scheduledTaskIdToCreate = id;
+      }
     } catch (err) {
       scheduledTaskIdToCreate = id;
     }

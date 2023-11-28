@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getRuleForSignalTesting } from './get_rule_for_signal_testing';
 
 /**

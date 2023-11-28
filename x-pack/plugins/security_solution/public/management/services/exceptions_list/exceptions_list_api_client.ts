@@ -43,9 +43,11 @@ export class ExceptionsListApiClient {
       T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema
     >(
       item: T
-    ) => T
+    ) => T,
+    public readonly version?: string
   ) {
     this.ensureListExists = this.createExceptionList();
+    this.version = version ?? '2023-10-31';
   }
 
   /**
@@ -62,6 +64,7 @@ export class ExceptionsListApiClient {
         const asyncFunction = async () => {
           try {
             await this.http.post<ExceptionListSchema>(INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL, {
+              version: '1',
               body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
             });
 
@@ -183,6 +186,7 @@ export class ExceptionsListApiClient {
     const result = await this.http.get<FoundExceptionListItemSchema>(
       `${EXCEPTION_LIST_ITEM_URL}/_find`,
       {
+        version: this.version,
         query: {
           page,
           per_page: perPage,
@@ -213,6 +217,7 @@ export class ExceptionsListApiClient {
 
     await this.ensureListExists;
     let result = await this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      version: this.version,
       query: {
         id,
         item_id: itemId,
@@ -242,6 +247,7 @@ export class ExceptionsListApiClient {
     }
 
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      version: this.version,
       body: JSON.stringify(transformedException),
     });
   }
@@ -259,6 +265,7 @@ export class ExceptionsListApiClient {
     }
 
     return this.http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      version: this.version,
       body: JSON.stringify(
         ExceptionsListApiClient.cleanExceptionsBeforeUpdate(transformedException)
       ),
@@ -276,6 +283,7 @@ export class ExceptionsListApiClient {
 
     await this.ensureListExists;
     return this.http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      version: this.version,
       query: {
         id,
         item_id: itemId,
@@ -291,6 +299,7 @@ export class ExceptionsListApiClient {
   async summary(filter?: string): Promise<ExceptionListSummarySchema> {
     await this.ensureListExists;
     return this.http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
+      version: this.version,
       query: {
         filter,
         list_id: this.listId,

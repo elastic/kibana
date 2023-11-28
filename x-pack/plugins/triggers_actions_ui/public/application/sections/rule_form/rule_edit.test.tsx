@@ -174,6 +174,7 @@ describe('rule_edit', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      revision: 0,
       ...initialRuleFields,
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
@@ -218,9 +219,9 @@ describe('rule_edit', () => {
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedRuleButton"]').last().simulate('click');
     });
-    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Fail message'
-    );
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+      title: 'Fail message',
+    });
   });
 
   it('should pass in the config into `getRuleErrors`', async () => {

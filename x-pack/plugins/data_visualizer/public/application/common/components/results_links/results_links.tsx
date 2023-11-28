@@ -112,6 +112,7 @@ export const ResultsLinks: FC<Props> = ({
         getAdditionalLinks.map(async (asyncCardGetter) => {
           const results = await asyncCardGetter({
             dataViewId,
+            globalState,
           });
           if (Array.isArray(results)) {
             return await Promise.all(

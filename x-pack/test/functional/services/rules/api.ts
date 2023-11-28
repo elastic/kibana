@@ -19,13 +19,15 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       params,
       ruleTypeId,
       schedule,
+      actions = [],
     }: {
       consumer: string;
       name: string;
-      notifyWhen: string;
+      notifyWhen?: string;
       params: Record<string, unknown>;
       ruleTypeId: string;
       schedule: Record<string, unknown>;
+      actions?: any[];
     }) {
       log.debug(`Create basic rule...`);
       const { body: createdRule } = await kbnSupertest
@@ -38,6 +40,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
           params,
           rule_type_id: ruleTypeId,
           schedule,
+          actions,
         })
         .expect(200);
       return createdRule;
@@ -53,11 +56,11 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       return rsp;
     },
 
-    async deleteAllRules() {
+    async deleteAllRules(additionalRequestHeaders?: object) {
       log.debug(`Deleting all rules...`);
       const { body } = await kbnSupertest
         .get(`/api/alerting/rules/_find`)
-        .set('kbn-xsrf', 'foo')
+        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
         .expect(200);
 
       for (const rule of body.data) {

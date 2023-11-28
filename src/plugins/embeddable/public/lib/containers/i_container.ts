@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-
 import {
   Embeddable,
   EmbeddableInput,
@@ -30,7 +28,7 @@ export interface ContainerInput<PanelExplicitInput = {}> extends EmbeddableInput
   };
 }
 
-export interface EmbeddableContainerSettings<TContainerInput> {
+export interface EmbeddableContainerSettings {
   /**
    * If true, the container will wait for each embeddable to load after creation before loading the next embeddable.
    */
@@ -39,10 +37,6 @@ export interface EmbeddableContainerSettings<TContainerInput> {
    * Initialise children in the order specified. If an ID does not match it will be skipped and if a child is not included it will be initialized in the default order after the list of provided IDs.
    */
   childIdInitializeOrder?: string[];
-  /**
-   *
-   */
-  readyToInitializeChildren$?: Observable<TContainerInput>;
 }
 
 export interface IContainer<
@@ -102,7 +96,8 @@ export interface IContainer<
     E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>
   >(
     type: string,
-    explicitInput: Partial<EEI>
+    explicitInput: Partial<EEI>,
+    attributes?: unknown
   ): Promise<E | ErrorEmbeddable>;
 
   replaceEmbeddable<
@@ -112,6 +107,7 @@ export interface IContainer<
   >(
     id: string,
     newExplicitInput: Partial<EEI>,
-    newType?: string
-  ): void;
+    newType?: string,
+    generateNewId?: boolean
+  ): Promise<string>;
 }

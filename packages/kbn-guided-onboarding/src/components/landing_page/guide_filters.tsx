@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ApplicationStart } from '@kbn/core-application-browser';
 import { GuideCardSolutions } from './guide_cards';
 
 const filterButtonCss = css`
@@ -27,22 +28,34 @@ const filterButtonCss = css`
   }
 `;
 export type GuideFilterValues = GuideCardSolutions | 'all';
-interface GuideFiltersProps {
+export interface GuideFiltersProps {
   activeFilter: GuideFilterValues;
   setActiveFilter: React.Dispatch<React.SetStateAction<GuideFilterValues>>;
+  application: ApplicationStart;
 }
-export const GuideFilters = ({ activeFilter, setActiveFilter }: GuideFiltersProps) => {
+export const GuideFilters = ({ activeFilter, setActiveFilter, application }: GuideFiltersProps) => {
   const { euiTheme } = useEuiTheme();
   const activeFilterFill = css`
     background: ${euiTheme.colors.darkestShade};
     color: ${euiTheme.colors.lightestShade};
   `;
+  const setQuerystringParams = ({ useCase }: { useCase: string }) => {
+    application.navigateToApp('home', { path: `#/getting_started?useCase=${useCase}` });
+  };
+  const onSelectFilter = (e: React.BaseSyntheticEvent) => {
+    const {
+      currentTarget: { dataset },
+    } = e;
+    setQuerystringParams({ useCase: dataset.filterId });
+    setActiveFilter(dataset.filterId);
+  };
 
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiButton
-          onClick={() => setActiveFilter('all')}
+          onClick={onSelectFilter}
+          data-filter-id="all"
           color="text"
           css={[filterButtonCss, activeFilter === 'all' && activeFilterFill]}
         >
@@ -54,7 +67,8 @@ export const GuideFilters = ({ activeFilter, setActiveFilter }: GuideFiltersProp
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          onClick={() => setActiveFilter('search')}
+          onClick={onSelectFilter}
+          data-filter-id="search"
           color="text"
           css={[filterButtonCss, activeFilter === 'search' && activeFilterFill]}
         >
@@ -66,7 +80,8 @@ export const GuideFilters = ({ activeFilter, setActiveFilter }: GuideFiltersProp
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          onClick={() => setActiveFilter('observability')}
+          onClick={onSelectFilter}
+          data-filter-id="observability"
           color="text"
           css={[filterButtonCss, activeFilter === 'observability' && activeFilterFill]}
         >
@@ -78,7 +93,8 @@ export const GuideFilters = ({ activeFilter, setActiveFilter }: GuideFiltersProp
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          onClick={() => setActiveFilter('security')}
+          onClick={onSelectFilter}
+          data-filter-id="security"
           color="text"
           css={[filterButtonCss, activeFilter === 'security' && activeFilterFill]}
         >

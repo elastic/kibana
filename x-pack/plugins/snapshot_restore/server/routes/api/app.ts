@@ -52,7 +52,6 @@ export function registerAppRoutes({
         const { has_all_requested: hasAllPrivileges, cluster } =
           await clusterClient.asCurrentUser.security.hasPrivileges({
             body: {
-              // @ts-expect-error @elastic/elasticsearch doesn't declare all possible values in SecurityClusterPrivilege
               cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
             },
           });
@@ -71,7 +70,6 @@ export function registerAppRoutes({
           }
 
           const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every((privilege) =>
-            // @ts-expect-error SecurityClusterPrivilege doesn’t list all the possible privileges.
             privileges.includes(privilege)
           );
 

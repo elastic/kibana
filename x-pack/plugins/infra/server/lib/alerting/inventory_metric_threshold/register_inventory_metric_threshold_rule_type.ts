@@ -7,8 +7,16 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import {
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeKeys,
+} from '@kbn/metrics-data-access-plugin/common';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
   Comparator,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -17,11 +25,6 @@ import {
   SnapshotCustomAggregation,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeKeys,
-} from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
@@ -41,17 +44,15 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
-import {
-  getAlertDetailsPageEnabledForApp,
-  oneOfLiterals,
-  validateIsStringElasticsearchJSONFilter,
-} from '../common/utils';
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
   FIRED_ACTIONS_ID,
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
+import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
@@ -81,11 +82,14 @@ const groupActionVariableDescription = i18n.translate(
   }
 );
 
-export async function registerMetricInventoryThresholdRuleType(
+export async function registerInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
-  libs: InfraBackendLibs
+  libs: InfraBackendLibs,
+  { featureFlags }: InfraConfig
 ) {
-  const config = libs.getAlertDetailsConfig();
+  if (!featureFlags.inventoryThresholdAlertRuleEnabled) {
+    return;
+  }
 
   alertingPlugin.registerType({
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -109,6 +113,7 @@ export async function registerMetricInventoryThresholdRuleType(
     defaultActionGroupId: FIRED_ACTIONS_ID,
     doesSetRecoveryContext: true,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -117,15 +122,11 @@ export async function registerMetricInventoryThresholdRuleType(
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
-        ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? [
-              {
-                name: 'alertDetailsUrl',
-                description: alertDetailUrlActionVariableDescription,
-                usesPublicBaseUrl: true,
-              },
-            ]
-          : []),
+        {
+          name: 'alertDetailsUrl',
+          description: alertDetailUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
@@ -153,6 +154,9 @@ export async function registerMetricInventoryThresholdRuleType(
         },
       ],
     },
-    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
+    alerts: MetricsRulesTypeAlertDefinition,
+    fieldsForAAD: O11Y_AAD_FIELDS,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 }

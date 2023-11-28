@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/serverless-storybook-config",
+  "owner": "@elastic/appex-sharedux",
+  "devOnly": true
+}

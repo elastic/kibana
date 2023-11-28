@@ -8,7 +8,13 @@
 
 import { Observable } from 'rxjs';
 import { HttpSetup } from '@kbn/core/public';
-import type { GuideState, GuideId, GuideStepIds, GuideConfig } from '@kbn/guided-onboarding';
+import type {
+  GuideState,
+  GuideId,
+  GuideStepIds,
+  GuideConfig,
+  GuideParams,
+} from '@kbn/guided-onboarding';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { PluginStatus, PluginState } from '../common';
 
@@ -45,7 +51,8 @@ export interface GuidedOnboardingApi {
   ) => Promise<{ pluginState: PluginState } | undefined>;
   completeGuideStep: (
     guideId: GuideId,
-    stepId: GuideStepIds
+    stepId: GuideStepIds,
+    params?: GuideParams
   ) => Promise<{ pluginState: PluginState } | undefined>;
   isGuidedOnboardingActiveForIntegration$: (integration?: string) => Observable<boolean>;
   completeGuidedOnboardingForIntegration: (
@@ -55,4 +62,5 @@ export interface GuidedOnboardingApi {
   isGuidePanelOpen$: Observable<boolean>;
   isLoading$: Observable<boolean>;
   getGuideConfig: (guideId: GuideId) => Promise<GuideConfig | undefined>;
+  readonly isEnabled: boolean;
 }

@@ -10,10 +10,20 @@ import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../../common/api/detection_engine/rule_management';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 
-export const useBulkEditFormFlyout = () => {
+interface UseBulkEditFormFlyout {
+  bulkEditActionType: BulkActionEditType | undefined;
+  isBulkEditFlyoutVisible: boolean;
+  handleBulkEditFormConfirm: (data: BulkActionEditPayload) => void;
+  handleBulkEditFormCancel: () => void;
+  completeBulkEditForm: (
+    editActionType: BulkActionEditType
+  ) => Promise<BulkActionEditPayload | null>;
+}
+
+export const useBulkEditFormFlyout = (): UseBulkEditFormFlyout => {
   const dataFormRef = useRef<BulkActionEditPayload | null>(null);
   const [actionType, setActionType] = useState<BulkActionEditType>();
   const [isBulkEditFlyoutVisible, showBulkEditFlyout, hideBulkEditFlyout] = useBoolState();

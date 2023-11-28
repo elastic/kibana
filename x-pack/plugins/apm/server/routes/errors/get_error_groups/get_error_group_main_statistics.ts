@@ -11,7 +11,6 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -26,6 +25,18 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
+
+export type ErrorGroupMainStatisticsResponse = Array<{
+  groupId: string;
+  name: string;
+  lastSeen: number;
+  occurrences: number;
+  culprit: string | undefined;
+  handled: boolean | undefined;
+  type: string | undefined;
+}>;
 
 export async function getErrorGroupMainStatistics({
   kuery,
@@ -51,7 +62,7 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups?: number;
   transactionName?: string;
   transactionType?: string;
-}) {
+}): Promise<ErrorGroupMainStatisticsResponse> {
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'lastSeen';
 
@@ -65,7 +76,12 @@ export async function getErrorGroupMainStatistics({
     'get_error_group_main_statistics',
     {
       apm: {
-        events: [ProcessorEvent.error],
+        sources: [
+          {
+            documentType: ApmDocumentType.ErrorEvent,
+            rollupInterval: RollupInterval.None,
+          },
+        ],
       },
       body: {
         track_total_hits: false,
@@ -118,16 +134,19 @@ export async function getErrorGroupMainStatistics({
   );
 
   return (
-    response.aggregations?.error_groups.buckets.map((bucket) => ({
-      groupId: bucket.key as string,
-      name: getErrorName(bucket.sample.hits.hits[0]._source),
-      lastSeen: new Date(
-        bucket.sample.hits.hits[0]?._source['@timestamp']
-      ).getTime(),
-      occurrences: bucket.doc_count,
-      culprit: bucket.sample.hits.hits[0]?._source.error.culprit,
-      handled: bucket.sample.hits.hits[0]?._source.error.exception?.[0].handled,
-      type: bucket.sample.hits.hits[0]?._source.error.exception?.[0].type,
-    })) ?? []
+    response.aggregations?.error_groups.buckets.map((bucket) => {
+      return {
+        groupId: bucket.key as string,
+        name: getErrorName(bucket.sample.hits.hits[0]._source),
+        lastSeen: new Date(
+          bucket.sample.hits.hits[0]._source['@timestamp']
+        ).getTime(),
+        occurrences: bucket.doc_count,
+        culprit: bucket.sample.hits.hits[0]._source.error.culprit,
+        handled:
+          bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
+        type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
+      };
+    }) ?? []
   );
 }

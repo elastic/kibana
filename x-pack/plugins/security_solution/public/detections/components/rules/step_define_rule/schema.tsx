@@ -17,7 +17,7 @@ import {
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
-  isEqlRule,
+  isEsqlRule,
   isNewTermsRule,
   isQueryRule,
   isThreatMatchRule,
@@ -31,16 +31,16 @@ import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
+import { esqlValidator } from '../../../../detection_engine/rule_creation/logic/esql_validator';
 import {
   CUSTOM_QUERY_REQUIRED,
-  EQL_QUERY_REQUIRED,
   INVALID_CUSTOM_QUERY,
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
-  SAVED_QUERY_REQUIRED,
 } from './translations';
+import { getQueryRequiredMessage } from './utils';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -61,7 +61,9 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
           const skipValidation =
-            isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.IndexPatterns;
+            isMlRule(formData.ruleType) ||
+            isEsqlRule(formData.ruleType) ||
+            formData.dataSourceType !== DataSourceType.IndexPatterns;
 
           if (skipValidation) {
             return;
@@ -79,16 +81,13 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  dataViewTitle: {
+  dataViewId: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
       {
-        defaultMessage: 'Data View',
+        defaultMessage: 'Data view',
       }
     ),
-    validations: [],
-  },
-  dataViewId: {
     fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
@@ -122,8 +121,18 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  dataViewTitle: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewTitleSelector',
+      {
+        defaultMessage: 'Data view index pattern',
+      }
+    ),
+    validations: [],
+  },
   eqlOptions: {},
   queryBar: {
+    fieldsToValidateOnChange: ['queryBar'],
     validations: [
       {
         validator: (
@@ -140,9 +149,12 @@ export const schema: FormSchema<DefineStepRule> = {
             return undefined;
           }
           if (savedId) {
-            return { code: 'ERR_FIELD_MISSING', path, message: SAVED_QUERY_REQUIRED };
+            // Ignore field validation error in this case.
+            // Instead, we show the error toast when saved query object does not exist.
+            // https://github.com/elastic/kibana/issues/159060
+            return undefined;
           }
-          const message = isEqlRule(formData.ruleType) ? EQL_QUERY_REQUIRED : CUSTOM_QUERY_REQUIRED;
+          const message = getQueryRequiredMessage(formData.ruleType);
           return { code: 'ERR_FIELD_MISSING', path, message };
         },
       },
@@ -172,6 +184,9 @@ export const schema: FormSchema<DefineStepRule> = {
       },
       {
         validator: debounceAsync(eqlValidator, 300),
+      },
+      {
+        validator: debounceAsync(esqlValidator, 300),
       },
     ],
   },
@@ -621,6 +636,14 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     value: {},
     unit: {},
+  },
+  suppressionMissingFields: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
+      {
+        defaultMessage: 'If a suppression field is missing',
+      }
+    ),
   },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,

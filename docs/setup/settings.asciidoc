@@ -229,9 +229,6 @@ If your {es} is protected with basic authentication, this token provides the cre
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
-`interpreter.enableInVisualize`::
-Enables use of interpreter in Visualize. *Default: `true`*
-
 `unifiedSearch.autocomplete.valueSuggestions.timeout` {ess-icon}::
 Time in milliseconds to wait for autocomplete suggestions from {es}.
 This value must be a whole number greater than zero. *Default: `"1000"`*
@@ -412,9 +409,11 @@ responses to the client from the {kib} server, and specifies what value is used.
 `unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
 
 [[server-securityResponseHeaders-permissionsPolicy]] `server.securityResponseHeaders.permissionsPolicy`::
-experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header
+experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy`] header
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
-To disable, set to `null`. *Default:* `null`
+Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
+directives, values, and text format. To disable, set to `null`.
+*Default:* `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`
 
 [[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
@@ -559,14 +558,13 @@ setting this to `true` enables unauthenticated users to access the {kib}
 server status API and status page. *Default: `false`*
 
 [[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`::
-When `true`, users are able to change the telemetry setting at a later time in
-<<advanced-options, Advanced Settings>>.  When `false`, users cannot change the opt-in status through *Advanced Settings*, and
+When `false`, users cannot change the opt-in status through <<advanced-options, Advanced Settings>>, and
 {kib} only looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send telemetry data or not. *Default: `true`*.
 
 [[settings-telemetry-optIn]] `telemetry.optIn`::
+Set to `false` to stop sending any telemetry data to Elastic.
 Reporting your cluster statistics helps
 us improve your user experience.
-Set to `true` to allow telemetry data to be sent to Elastic.
 When `false`, the telemetry data is never sent to Elastic. +
 +
 This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
@@ -608,6 +606,8 @@ Set this value to false to disable the Remote Clusters UI.
 
 `xpack.rollup.ui.enabled`::
 Set this value to false to disable the Rollup Jobs UI. *Default: true*
++
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
 
 `xpack.snapshot_restore.ui.enabled`::
 Set this value to false to disable the Snapshot and Restore UI. *Default: true*
@@ -617,11 +617,12 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 `i18n.locale` {ess-icon}::
 Set this value to change the {kib} interface language.
-Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
+Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. *Default: `en`*
 
-include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
+include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[leveloffset=+1]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
+include::{kib-repo-dir}/settings/cases-settings.asciidoc[leveloffset=+1]
 include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]
 include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
 include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]

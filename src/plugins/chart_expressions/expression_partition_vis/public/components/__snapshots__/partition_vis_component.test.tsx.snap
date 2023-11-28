@@ -222,16 +222,30 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
-          flatLegend={false}
+          flatLegend={true}
           legendAction={[Function]}
           legendColorPicker={[Function]}
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          legendSort={[Function]}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="donut"
@@ -280,12 +294,8 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   },
                 },
               },
+              Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -609,6 +619,18 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -618,6 +640,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
           legendColorPicker={[Function]}
           legendPosition="right"
           legendSize={130}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="mosaic"
@@ -666,12 +689,8 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   },
                 },
               },
+              Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -1057,16 +1076,30 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
-          flatLegend={false}
+          flatLegend={true}
           legendAction={[Function]}
           legendColorPicker={[Function]}
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          legendSort={[Function]}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="pie"
@@ -1115,12 +1148,8 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   },
                 },
               },
+              Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -1506,16 +1535,30 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
-          flatLegend={false}
+          flatLegend={true}
           legendAction={[Function]}
           legendColorPicker={[Function]}
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          legendSort={[Function]}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="pie"
@@ -1564,12 +1607,8 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   },
                 },
               },
+              Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -1893,6 +1932,18 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -1902,6 +1953,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
           legendColorPicker={[Function]}
           legendPosition="right"
           legendSize={130}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="treemap"
@@ -1950,12 +2002,8 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   },
                 },
               },
+              Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -2236,6 +2284,18 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -2246,6 +2306,8 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          legendSort={[Function]}
+          locale="en"
           noResults={
             <VisualizationNoResults
               chartType="waffle"
@@ -2295,12 +2357,8 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                 },
               },
+              Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition

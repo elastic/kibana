@@ -18,7 +18,10 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import styled from 'styled-components';
 
-import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
+import { useCheckEndpointPermissions } from './endpoint/check_permissions';
+import { EndpointResponseAction } from './endpoint/endpoint_response_action';
+import type { RuleResponseAction } from '../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../../../common/api/detection_engine/model/rule_response_actions';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
 import { getActionDetails } from './constants';
 import { useFormData } from '../../shared_imports';
@@ -41,15 +44,19 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
   const [_isOpen, setIsOpen] = useState(true);
 
   const [data] = useFormData();
-  const action = get(data, item.path);
+  const action: RuleResponseAction = get(data, item.path);
+  const editDisabled = useCheckEndpointPermissions(action) ?? false;
 
-  const getResponseActionTypeForm = useCallback(() => {
-    if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+  const getResponseActionTypeForm = useMemo(() => {
+    if (action?.actionTypeId === ResponseActionTypesEnum['.osquery']) {
       return <OsqueryResponseAction item={item} />;
+    }
+    if (action?.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
+      return <EndpointResponseAction item={item} editDisabled={editDisabled} />;
     }
     // Place for other ResponseActionTypes
     return null;
-  }, [action?.actionTypeId, item]);
+  }, [action?.actionTypeId, editDisabled, item]);
 
   const handleDelete = useCallback(() => {
     onDeleteAction(item.id);
@@ -82,10 +89,11 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
             defaultMessage: 'Delete',
           }
         )}
+        disabled={editDisabled}
         onClick={handleDelete}
       />
     );
-  }, [handleDelete]);
+  }, [editDisabled, handleDelete]);
 
   return (
     <StyledEuiAccordion
@@ -98,7 +106,7 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
       buttonContent={renderButtonContent}
       extraAction={renderExtraContent}
     >
-      {getResponseActionTypeForm()}
+      {getResponseActionTypeForm}
     </StyledEuiAccordion>
   );
 };

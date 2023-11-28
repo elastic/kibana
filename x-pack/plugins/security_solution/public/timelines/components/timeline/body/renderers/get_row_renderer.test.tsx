@@ -20,7 +20,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { defaultRowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
-import { TimelineId } from '../../../../../../common/types';
+import { TimelineId } from '../../../../../../common/types/timeline';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality

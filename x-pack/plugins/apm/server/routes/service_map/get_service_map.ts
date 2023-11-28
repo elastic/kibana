@@ -7,19 +7,21 @@
 
 import { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
-
-import { withApmSpan } from '../../utils/with_apm_span';
+import { APMConfig } from '../..';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { MlClient } from '../../lib/helpers/get_ml_client';
+import { withApmSpan } from '../../utils/with_apm_span';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
 } from './get_service_anomalies';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
-import { getTraceSampleIds } from './get_trace_sample_ids';
-import { transformServiceMapResponses } from './transform_service_map_responses';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMConfig } from '../..';
 import { getServiceStats } from './get_service_stats';
+import { getTraceSampleIds } from './get_trace_sample_ids';
+import {
+  TransformServiceMapResponse,
+  transformServiceMapResponses,
+} from './transform_service_map_responses';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -44,8 +46,10 @@ async function getConnectionData({
   end,
   serviceGroupKuery,
   kuery,
+  logger,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
+    logger.debug('Getting trace sample IDs');
     const { traceIds } = await getTraceSampleIds({
       config,
       apmEventClient,
@@ -56,6 +60,8 @@ async function getConnectionData({
       serviceGroupKuery,
       kuery,
     });
+
+    logger.debug(`Found ${traceIds.length} traces to inspect`);
 
     const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
 
@@ -68,6 +74,8 @@ async function getConnectionData({
       return init;
     }
 
+    logger.debug(`Executing scripted metric agg (${chunks.length} chunks)`);
+
     const chunkedResponses = await withApmSpan(
       'get_service_paths_from_all_trace_ids',
       () =>
@@ -78,12 +86,16 @@ async function getConnectionData({
               traceIds: traceIdsChunk,
               start,
               end,
+              terminateAfter: config.serviceMapTerminateAfter,
+              logger,
             })
           )
         )
     );
 
-    return chunkedResponses.reduce((prev, current) => {
+    logger.debug('Received chunk responses');
+
+    const mergedResponses = chunkedResponses.reduce((prev, current) => {
       return {
         connections: prev.connections.concat(current.connections),
         discoveredServices: prev.discoveredServices.concat(
@@ -91,6 +103,10 @@ async function getConnectionData({
         ),
       };
     });
+
+    logger.debug('Merged responses');
+
+    return mergedResponses;
   });
 }
 
@@ -99,7 +115,7 @@ export type ServicesResponse = Awaited<ReturnType<typeof getServiceStats>>;
 
 export function getServiceMap(
   options: IEnvOptions & { maxNumberOfServices: number }
-) {
+): Promise<TransformServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {
     const { logger } = options;
     const anomaliesPromise = getServiceAnomalies(
@@ -117,10 +133,19 @@ export function getServiceMap(
       getServiceStats(options),
       anomaliesPromise,
     ]);
-    return transformServiceMapResponses({
-      ...connectionData,
-      services: servicesData,
-      anomalies,
+
+    logger.debug('Received and parsed all responses');
+
+    const transformedResponse = transformServiceMapResponses({
+      response: {
+        ...connectionData,
+        services: servicesData,
+        anomalies,
+      },
     });
+
+    logger.debug('Transformed service map response');
+
+    return transformedResponse;
   });
 }

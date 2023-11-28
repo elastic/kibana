@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/content-management-plugin",
+    "@kbn/config-schema",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/config-schema",
+    "@kbn/object-versioning",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core",
+  ]
+}

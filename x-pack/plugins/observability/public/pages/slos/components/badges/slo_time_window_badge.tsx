@@ -5,51 +5,48 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiBadgeProps, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { euiLightVars } from '@kbn/ui-theme';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duration';
+import { toDurationLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
+  color?: EuiBadgeProps['color'];
   slo: SLOWithSummaryResponse;
 }
 
-export function SloTimeWindowBadge({ slo }: Props) {
-  const duration = Number(slo.timeWindow.duration.slice(0, -1));
+export function SloTimeWindowBadge({ slo, color }: Props) {
   const unit = slo.timeWindow.duration.slice(-1);
-  if ('isRolling' in slo.timeWindow) {
-    const label = toDurationLabel(duration, unit);
+  if (rollingTimeWindowTypeSchema.is(slo.timeWindow.type)) {
     return (
-      <div>
+      <EuiFlexItem grow={false}>
         <EuiBadge
-          color={euiLightVars.euiColorDisabled}
+          color={color ?? euiLightVars.euiColorDisabled}
           iconType="editorItemAlignRight"
           iconSide="left"
         >
-          {label}
+          {toDurationLabel(slo.timeWindow.duration)}
         </EuiBadge>
-      </div>
+      </EuiFlexItem>
     );
   }
 
-  const unitMoment = toMomentUnitOfTime(unit);
+  const unitMoment = toCalendarAlignedMomentUnitOfTime(unit);
   const now = moment.utc();
-  const startTime = moment.utc(slo.timeWindow.calendar.startTime);
-  const differenceInUnit = now.diff(startTime, unitMoment);
 
-  const periodStart = startTime
-    .clone()
-    .add(Math.floor(differenceInUnit / duration) * duration, unitMoment);
-  const periodEnd = periodStart.clone().add(duration, unitMoment);
+  const periodStart = now.clone().startOf(unitMoment);
+  const periodEnd = now.clone().endOf(unitMoment);
 
-  const totalDurationInDays = periodEnd.diff(periodStart, 'days');
+  const totalDurationInDays = periodEnd.diff(periodStart, 'days') + 1;
   const elapsedDurationInDays = now.diff(periodStart, 'days') + 1;
 
   return (
-    <div>
-      <EuiBadge color={euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
+    <EuiFlexItem grow={false}>
+      <EuiBadge color={color ?? euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
         {i18n.translate('xpack.observability.slo.slo.timeWindow.calendar', {
           defaultMessage: '{elapsed}/{total} days',
           values: {
@@ -58,51 +55,6 @@ export function SloTimeWindowBadge({ slo }: Props) {
           },
         })}
       </EuiBadge>
-    </div>
+    </EuiFlexItem>
   );
 }
-
-function toDurationLabel(duration: number, durationUnit: string) {
-  switch (durationUnit) {
-    case 'd':
-      return i18n.translate('xpack.observability.slo.slo.timeWindow.days', {
-        defaultMessage: '{duration} days',
-        values: { duration },
-      });
-    case 'w':
-      return i18n.translate('xpack.observability.slo.slo.timeWindow.weeks', {
-        defaultMessage: '{duration} weeks',
-        values: { duration },
-      });
-    case 'M':
-      return i18n.translate('xpack.observability.slo.slo.timeWindow.months', {
-        defaultMessage: '{duration} months',
-        values: { duration },
-      });
-    case 'Q':
-      return i18n.translate('xpack.observability.slo.slo.timeWindow.quarterss', {
-        defaultMessage: '{duration} quarters',
-        values: { duration },
-      });
-    case 'Y':
-      return i18n.translate('xpack.observability.slo.slo.timeWindow.years', {
-        defaultMessage: '{duration} years',
-        values: { duration },
-      });
-  }
-}
-
-const toMomentUnitOfTime = (unit: string): moment.unitOfTime.Diff | undefined => {
-  switch (unit) {
-    case 'd':
-      return 'days';
-    case 'w':
-      return 'weeks';
-    case 'M':
-      return 'months';
-    case 'Q':
-      return 'quarters';
-    case 'Y':
-      return 'years';
-  }
-};

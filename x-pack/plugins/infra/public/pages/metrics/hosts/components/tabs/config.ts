@@ -13,8 +13,3 @@ export const ALERTS_TABLE_ID = 'xpack.infra.hosts.alerts.table';
 
 export const INFRA_ALERT_FEATURE_ID = 'infrastructure';
 export const infraAlertFeatureIds: ValidFeatureId[] = [AlertConsumers.INFRASTRUCTURE];
-export const casesFeatures = { alerts: { sync: false } };
-export const casesOwner = [INFRA_ALERT_FEATURE_ID];
-
-export const DEFAULT_INTERVAL = '60s';
-export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';

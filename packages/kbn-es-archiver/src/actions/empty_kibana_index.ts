@@ -8,23 +8,15 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { KbnClient } from '@kbn/test';
 
-import { migrateKibanaIndex, createStats, cleanKibanaIndices } from '../lib';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { createStats, cleanSavedObjectIndices } from '../lib';
 
-export async function emptyKibanaIndexAction({
-  client,
-  log,
-  kbnClient,
-}: {
-  client: Client;
-  log: ToolingLog;
-  kbnClient: KbnClient;
-}) {
+export async function emptyKibanaIndexAction({ client, log }: { client: Client; log: ToolingLog }) {
   const stats = createStats('emptyKibanaIndex', log);
 
-  await cleanKibanaIndices({ client, stats, log });
-  await migrateKibanaIndex(kbnClient);
-  stats.createdIndex('.kibana');
+  await cleanSavedObjectIndices({ client, stats, log });
+  await client.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+
   return stats.toJSON();
 }

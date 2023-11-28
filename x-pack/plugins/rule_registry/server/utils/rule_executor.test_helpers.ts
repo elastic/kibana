@@ -39,6 +39,7 @@ export const createDefaultAlertExecutorOptions = <
   startedAt = new Date(),
   updatedAt = new Date(),
   shouldWriteAlerts = true,
+  maintenanceWindowIds,
 }: {
   alertId?: string;
   ruleName?: string;
@@ -49,12 +50,13 @@ export const createDefaultAlertExecutorOptions = <
   startedAt?: Date;
   updatedAt?: Date;
   shouldWriteAlerts?: boolean;
+  maintenanceWindowIds?: string[];
 }): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   startedAt,
   rule: {
     id: alertId,
     updatedBy: null,
-    tags: [],
+    tags: ['rule-tag1', 'rule-tag2'],
     name: ruleName,
     createdBy: 'CREATED_BY',
     actions: [],
@@ -66,6 +68,7 @@ export const createDefaultAlertExecutorOptions = <
     createdAt,
     updatedAt,
     notifyWhen: null,
+    revision: 0,
     ruleTypeId: 'RULE_TYPE_ID',
     ruleTypeName: 'RULE_TYPE_NAME',
     muteAll: false,
@@ -74,6 +77,7 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
+    alertsClient: null,
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,
     savedObjectsClient: savedObjectsClientMock.create(),
@@ -91,4 +95,9 @@ export const createDefaultAlertExecutorOptions = <
   executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+  ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
+  getTimeRange: () => {
+    const date = new Date(Date.now()).toISOString();
+    return { dateStart: date, dateEnd: date };
+  },
 });

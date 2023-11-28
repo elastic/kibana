@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useKibanaVersion } from '../../../../hooks';
+import { useAgentVersion, useAuthz } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -24,6 +25,8 @@ import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
+
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
@@ -31,13 +34,23 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-  const kibanaVersion = useKibanaVersion();
+  const latestAgentVersion = useAgentVersion();
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
+  const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState<boolean>(false);
   const isUnenrolling = agent.status === 'unenrolling';
+  const isAgentUpdating = isStuckInUpdating(agent);
+
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const onContextMenuChange = useCallback(
+    (open: boolean) => {
+      setIsContextMenuOpen(open);
+    },
+    [setIsContextMenuOpen]
+  );
 
   const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
   const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
@@ -50,52 +63,94 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     }
   }, [onCancelReassign, setIsReassignFlyoutOpen]);
 
-  const menuItems = [
+  const menuItems = [];
+
+  if (!agentPolicy?.is_managed) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="pencil"
+        onClick={() => {
+          setIsReassignFlyoutOpen(true);
+        }}
+        disabled={!agent.active && !agentPolicy}
+        key="reassignPolicy"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.reassignActionText"
+          defaultMessage="Assign to new policy"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="trash"
+        disabled={!hasFleetAllPrivileges || !agent.active}
+        onClick={() => {
+          setIsUnenrollModalOpen(true);
+        }}
+        key="unenrollAgent"
+      >
+        {isUnenrolling ? (
+          <FormattedMessage
+            id="xpack.fleet.agentList.forceUnenrollOneButton"
+            defaultMessage="Force unenroll"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentList.unenrollOneButton"
+            defaultMessage="Unenroll agent"
+          />
+        )}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="refresh"
+        disabled={!!latestAgentVersion && !isAgentUpgradeable(agent, latestAgentVersion)}
+        onClick={() => {
+          setIsUpgradeModalOpen(true);
+        }}
+        key="upgradeAgent"
+        data-test-subj="upgradeBtn"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.upgradeOneButton"
+          defaultMessage="Upgrade agent"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
+  if (isAgentUpdating) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="refresh"
+        onClick={() => {
+          setIsUpgradeModalOpen(true);
+        }}
+        key="restartUpgradeAgent"
+        data-test-subj="restartUpgradeBtn"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.restartUpgradeOneButton"
+          defaultMessage="Restart upgrade"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
+  menuItems.push(
     <EuiContextMenuItem
-      icon="pencil"
+      icon="inspect"
       onClick={() => {
-        setIsReassignFlyoutOpen(true);
+        setIsContextMenuOpen(false);
+        setIsAgentDetailsJsonFlyoutOpen(!isAgentDetailsJsonFlyoutOpen);
       }}
-      disabled={!agent.active}
-      key="reassignPolicy"
+      key="agentDetailsJson"
+      data-test-subj="viewAgentDetailsJsonBtn"
     >
       <FormattedMessage
-        id="xpack.fleet.agentList.reassignActionText"
-        defaultMessage="Assign to new policy"
+        id="xpack.fleet.agentList.viewAgentDetailsJsonText"
+        defaultMessage="View agent JSON"
       />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="trash"
-      disabled={!hasFleetAllPrivileges || !agent.active}
-      onClick={() => {
-        setIsUnenrollModalOpen(true);
-      }}
-    >
-      {isUnenrolling ? (
-        <FormattedMessage
-          id="xpack.fleet.agentList.forceUnenrollOneButton"
-          defaultMessage="Force unenroll"
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.fleet.agentList.unenrollOneButton"
-          defaultMessage="Unenroll agent"
-        />
-      )}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="refresh"
-      disabled={!isAgentUpgradeable(agent, kibanaVersion)}
-      onClick={() => {
-        setIsUpgradeModalOpen(true);
-      }}
-    >
-      <FormattedMessage
-        id="xpack.fleet.agentList.upgradeOneButton"
-        defaultMessage="Upgrade agent"
-      />
-    </EuiContextMenuItem>,
-  ];
+    </EuiContextMenuItem>
+  );
 
   if (diagnosticFileUploadEnabled) {
     menuItems.push(
@@ -105,6 +160,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onClick={() => {
           setIsRequestDiagnosticsModalOpen(true);
         }}
+        data-test-subj="requestAgentDiagnosticsBtn"
+        key="requestDiagnostics"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.diagnosticsOneButton"
@@ -144,6 +201,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               setIsUpgradeModalOpen(false);
               refreshAgent();
             }}
+            isUpdating={isAgentUpdating}
           />
         </EuiPortal>
       )}
@@ -158,7 +216,17 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
+      {isAgentDetailsJsonFlyoutOpen && (
+        <EuiPortal>
+          <AgentDetailsJsonFlyout
+            agent={agent}
+            onClose={() => setIsAgentDetailsJsonFlyoutOpen(false)}
+          />
+        </EuiPortal>
+      )}
       <ContextMenuActions
+        isOpen={isContextMenuOpen}
+        onChange={onContextMenuChange}
         button={{
           props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary' },
           children: (

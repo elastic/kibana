@@ -17,7 +17,6 @@ import {
   kqlQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { keyBy } from 'lodash';
 import {
   ERROR_GROUP_ID,
@@ -28,6 +27,8 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function getTopErroneousTransactions({
@@ -65,7 +66,12 @@ async function getTopErroneousTransactions({
 
   const res = await apmEventClient.search('get_top_erroneous_transactions', {
     apm: {
-      events: [ProcessorEvent.error],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,
@@ -112,19 +118,31 @@ async function getTopErroneousTransactions({
 
   return (
     res.aggregations?.top_five_transactions.buckets.map(
-      ({ key, doc_count: docCount, sample, timeseries }) => ({
-        transactionName: key as string,
-        transactionType: sample.hits.hits[0]._source.transaction?.type,
-        occurrences: docCount,
-        timeseries: timeseries.buckets.map((timeseriesBucket) => {
-          return {
-            x: timeseriesBucket.key + offsetInMs,
-            y: timeseriesBucket.doc_count,
-          };
-        }),
-      })
+      ({ key, doc_count: docCount, sample, timeseries }) => {
+        return {
+          transactionName: key as string,
+          transactionType: sample.hits.hits[0]._source.transaction?.type,
+          occurrences: docCount,
+          timeseries: timeseries.buckets.map((timeseriesBucket) => {
+            return {
+              x: timeseriesBucket.key + offsetInMs,
+              y: timeseriesBucket.doc_count,
+            };
+          }),
+        };
+      }
     ) ?? []
   );
+}
+
+export interface TopErroneousTransactionsResponse {
+  topErroneousTransactions: Array<{
+    transactionName: string;
+    currentPeriodTimeseries: Array<{ x: number; y: number }>;
+    previousPeriodTimeseries: Array<{ x: number; y: number }>;
+    transactionType: string | undefined;
+    occurrences: number;
+  }>;
 }
 
 export async function getTopErroneousTransactionsPeriods({
@@ -147,7 +165,7 @@ export async function getTopErroneousTransactionsPeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<TopErroneousTransactionsResponse> {
   const [currentPeriod, previousPeriod] = await Promise.all([
     getTopErroneousTransactions({
       environment,

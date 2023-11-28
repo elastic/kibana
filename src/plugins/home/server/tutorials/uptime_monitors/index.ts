@@ -53,10 +53,10 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/uptime_monitors/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/uptime_monitors/screenshot.webp'),
     onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(context),
     onPremElasticCloud: onPremCloudInstructions(context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['observability'],
   };
 }

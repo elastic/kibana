@@ -16,6 +16,7 @@ import { useActionResultsPrivileges } from './use_action_privileges';
 
 interface ActionResultsSummaryProps {
   actionId: string;
+  startDate?: string;
   expirationDate?: string;
   agentIds?: string[];
   error?: string;
@@ -32,6 +33,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   expirationDate,
   agentIds,
   error,
+  startDate,
 }) => {
   const [pageIndex] = useState(0);
   const [pageSize] = useState(50);
@@ -46,6 +48,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     data: { aggregations, edges },
   } = useActionResults({
     actionId,
+    startDate,
     activePage: pageIndex,
     agentIds,
     limit: pageSize,
@@ -59,12 +62,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     if (error) {
       edges.forEach((edge) => {
         if (edge.fields) {
-          edge.fields['error.skipped'] = edge.fields.error = [
-            i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedErrorText', {
-              defaultMessage:
-                "This query hasn't been called due to parameter used and its value not found in the alert.",
-            }),
-          ];
+          edge.fields['error.skipped'] = edge.fields.error = [error];
         }
       });
     } else if (expired) {
@@ -163,7 +161,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     setIsLive(() => {
       if (!agentIds?.length || expired || error) return false;
 
-      return !!(aggregations.totalResponded !== agentIds?.length);
+      return aggregations.totalResponded !== agentIds?.length;
     });
   }, [agentIds?.length, aggregations.totalResponded, error, expired]);
 

@@ -16,7 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,8 +24,11 @@ import {
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import {
+  useEditableSettings,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmEditableSettings } from '../../../../../hooks/use_apm_editable_settings';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 
 interface Props {
@@ -33,6 +36,7 @@ interface Props {
 }
 
 export function LabsFlyout({ onClose }: Props) {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
 
   const { data, status } = useFetcher(
@@ -48,7 +52,7 @@ export function LabsFlyout({ onClose }: Props) {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useApmEditableSettings(labsItems);
+  } = useEditableSettings('apm', labsItems);
 
   async function handleSave() {
     try {
@@ -56,7 +60,8 @@ export function LabsFlyout({ onClose }: Props) {
         return settingsEditableConfig[key].requiresPageReload;
       });
 
-      await saveAll({ trackMetricName: 'labs_save' });
+      await saveAll();
+      trackApmEvent({ metric: 'labs_save' });
 
       if (reloadPage) {
         window.location.reload();
@@ -99,16 +104,37 @@ export function LabsFlyout({ onClose }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiText>
-          {i18n.translate('xpack.apm.labs.description', {
-            defaultMessage:
-              'Try out the APM features that are under technical preview and in progress.',
-          })}
-        </EuiText>
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              {i18n.translate('xpack.apm.labs.description', {
+                defaultMessage:
+                  'Try out the APM features that are under technical preview and in progress.',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="labsFeedbackButton"
+              href="https://ela.st/feedback-apm-labs"
+              target="_blank"
+              color="warning"
+              iconType="editorComment"
+            >
+              {i18n.translate('xpack.apm.labs.feedbackButtonLabel', {
+                defaultMessage: 'Tell us what you think!',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       {isLoading ? (
-        <EuiLoadingContent lines={3} />
+        <EuiSkeletonText lines={3} />
       ) : (
         <>
           <EuiFlyoutBody>
@@ -133,14 +159,22 @@ export function LabsFlyout({ onClose }: Props) {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handelCancel}>
+                <EuiButtonEmpty
+                  data-test-subj="apmLabsFlyoutCancelButton"
+                  onClick={handelCancel}
+                >
                   {i18n.translate('xpack.apm.labs.cancel', {
                     defaultMessage: 'Cancel',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill isLoading={isSaving} onClick={handleSave}>
+                <EuiButton
+                  data-test-subj="apmLabsFlyoutReloadToApplyChangesButton"
+                  fill
+                  isLoading={isSaving}
+                  onClick={handleSave}
+                >
                   {i18n.translate('xpack.apm.labs.reload', {
                     defaultMessage: 'Reload to apply changes',
                   })}

@@ -10,6 +10,7 @@ import {
   kqlQuery,
   rangeQuery,
 } from '@kbn/observability-plugin/server';
+import { ApmDocumentType } from '../../../../common/document_type';
 import {
   FAAS_BILLED_DURATION,
   FAAS_DURATION,
@@ -20,6 +21,7 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { computeUsageAvgScript } from './get_compute_usage_chart';
@@ -52,7 +54,12 @@ async function getServerlessTransactionThroughput({
 }) {
   const params = {
     apm: {
-      events: [ProcessorEvent.transaction],
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: true,
@@ -79,6 +86,14 @@ async function getServerlessTransactionThroughput({
   return response.hits.total.value;
 }
 
+export interface ServerlessSummaryResponse {
+  memoryUsageAvgRate: number | undefined;
+  serverlessFunctionsTotal: number | undefined;
+  serverlessDurationAvg: number | null | undefined;
+  billedDurationAvg: number | null | undefined;
+  estimatedCost: number | undefined;
+}
+
 export async function getServerlessSummary({
   end,
   environment,
@@ -99,7 +114,7 @@ export async function getServerlessSummary({
   apmEventClient: APMEventClient;
   awsLambdaPriceFactor?: AWSLambdaPriceFactor;
   awsLambdaRequestCostPerMillion?: number;
-}) {
+}): Promise<ServerlessSummaryResponse> {
   const params = {
     apm: {
       events: [ProcessorEvent.metric],

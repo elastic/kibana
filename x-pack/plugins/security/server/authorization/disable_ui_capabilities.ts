@@ -14,11 +14,13 @@ import type {
   FeatureElasticsearchPrivileges,
   KibanaFeature,
 } from '@kbn/features-plugin/server';
+import type {
+  AuthorizationServiceSetup,
+  CheckPrivilegesResponse,
+} from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
 
-import type { AuthenticatedUser } from '../../common/model';
-import type { AuthorizationServiceSetup } from './authorization_service';
-import type { CheckPrivilegesResponse } from './types';
+import type { AuthenticatedUser } from '../../common';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,
@@ -37,10 +39,8 @@ export function disableUICapabilitiesFactory(
   const elasticsearchFeatureMap = elasticsearchFeatures.reduce<
     Record<string, RecursiveReadonlyArray<FeatureElasticsearchPrivileges>>
   >((acc, esFeature) => {
-    return {
-      ...acc,
-      [esFeature.id]: esFeature.privileges,
-    };
+    acc[esFeature.id] = esFeature.privileges;
+    return acc;
   }, {});
 
   const allRequiredClusterPrivileges = Array.from(
@@ -59,28 +59,64 @@ export function disableUICapabilitiesFactory(
       return {
         ...acc,
         ...Object.entries(p.requiredIndexPrivileges!).reduce((acc2, [indexName, privileges]) => {
-          return {
-            ...acc2,
-            [indexName]: [...(acc[indexName] ?? []), ...privileges],
-          };
-        }, {}),
+          acc2[indexName] = [...(acc[indexName] ?? []), ...privileges];
+          return acc2;
+        }, {} as Record<string, string[]>),
       };
     }, {});
 
-  const shouldDisableFeatureUICapability = (
-    featureId: keyof UICapabilities,
-    uiCapability: string
+  const isCatalogueItemReferencedByFeatureSet = (
+    catalogueEntry: string,
+    featureSet: Array<Partial<{ catalogue: RecursiveReadonlyArray<string> | undefined }>>
   ) => {
-    // if the navLink isn't for a feature that we have registered, we don't wish to
-    // disable it based on privileges
-    return featureId !== 'navLinks' || featureNavLinkIds.includes(uiCapability);
+    return featureSet.some((feature) => (feature.catalogue ?? []).includes(catalogueEntry));
+  };
+
+  const shouldAffectCapability = (featureId: keyof UICapabilities, uiCapability: string) => {
+    // This method answers: 'Should we affect a capability based on privileges?'
+
+    // 'spaces' and 'fileUpload' feature ID's are handled independently
+    // The spaces and file_upload plugins have their own capabilites switchers
+
+    // Always affect global settings
+    if (featureId === 'globalSettings') {
+      return true;
+    }
+
+    // If the feature is 'catalogue', return true if it is the 'spaces' capability
+    // (we always want to affect that) or if we have a feature that references it
+    // (i.e. found in the 'catalogue' property of a registered Kibana or ES feature)
+    if (featureId === 'catalogue') {
+      return (
+        uiCapability === 'spaces' ||
+        isCatalogueItemReferencedByFeatureSet(uiCapability, features) ||
+        isCatalogueItemReferencedByFeatureSet(uiCapability, elasticsearchFeatures)
+      );
+    }
+
+    // if the feature is 'navLinks', return true if the nav link was registered
+    // (i.e. found in the 'app' property of a registered Kibana feature)
+    if (featureId === 'navLinks') {
+      return featureNavLinkIds.includes(uiCapability);
+    }
+
+    // if the feature is a Kibana feature, return true if it defines privileges
+    // (i.e. it adheres to the Kibana security model)
+    // Kibana features with no privileges opt out of the Kibana security model and
+    // are not subject to our control(e.g.Enterprise Search features)
+    const kibanaFeature = features.find((f) => f.id === featureId);
+    if (!!kibanaFeature) return !!kibanaFeature.privileges;
+
+    // Lastly return true if the feature is a registered es feature (we always want to affect these),
+    // otherwise false(we don't know what this feature is so we don't touch it)
+    return !!elasticsearchFeatureMap[featureId];
   };
 
   const disableAll = (uiCapabilities: UICapabilities) => {
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) =>
       mapValues(featureUICapabilities, (value, uiCapability) => {
         if (typeof value === 'boolean') {
-          if (shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+          if (shouldAffectCapability(featureId!, uiCapability!)) {
             return false;
           }
           return value;
@@ -119,14 +155,16 @@ export function disableUICapabilitiesFactory(
     }
 
     const uiActions = Object.entries(uiCapabilities).reduce<string[]>(
-      (acc, [featureId, featureUICapabilities]) => [
-        ...acc,
-        ...flatten(
-          Object.entries(featureUICapabilities).map(([uiCapability, value]) => {
-            return getActionsForFeatureCapability(featureId, uiCapability, value);
-          })
-        ),
-      ],
+      (acc, [featureId, featureUICapabilities]) => {
+        acc.push(
+          ...flatten(
+            Object.entries(featureUICapabilities).map(([uiCapability, value]) => {
+              return getActionsForFeatureCapability(featureId, uiCapability, value);
+            })
+          )
+        );
+        return acc;
+      },
       []
     );
 
@@ -175,7 +213,7 @@ export function disableUICapabilitiesFactory(
         );
 
         // Catalogue and management capbility buckets can also be influenced by ES privileges,
-        // so the early return is not possible for these.
+        // so the early return is not possible for these *unless we have the required Kibana privileges.
         if ((!isCatalogueFeature && !isManagementFeature) || hasRequiredKibanaPrivileges) {
           return hasRequiredKibanaPrivileges;
         }
@@ -230,7 +268,7 @@ export function disableUICapabilitiesFactory(
         featureUICapabilities,
         (value: boolean | Record<string, boolean>, uiCapability) => {
           if (typeof value === 'boolean') {
-            if (!shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+            if (!shouldAffectCapability(featureId!, uiCapability!)) {
               return value;
             }
             return checkPrivilegesForCapability(value, featureId!, uiCapability!);

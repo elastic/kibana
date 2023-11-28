@@ -11,7 +11,6 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
     >
       <MoreContainer
         fieldName="attrName"
-        fieldType="keyword"
         idPrefix="idPrefix"
         moreMaxHeight="none"
         overflowIndexStart={1}

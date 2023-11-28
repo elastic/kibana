@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { expectFixtureEql } from './helper/expect_fixture_eql';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus, getChecksDateRange } from './helper/make_checks';
 
@@ -24,7 +24,11 @@ export default function ({ getService }: FtrProviderContext) {
           dateRangeEnd,
         });
 
-        expectFixtureEql(apiResponse.body, 'snapshot_empty');
+        expect(apiResponse.body).to.eql({
+          total: 0,
+          up: 0,
+          down: 0,
+        });
       });
     });
 
@@ -82,7 +86,11 @@ export default function ({ getService }: FtrProviderContext) {
                 dateRangeEnd: dateRange.end,
               });
 
-              expectFixtureEql(apiResponse.body, 'snapshot');
+              expect(apiResponse.body).to.eql({
+                total: 17,
+                up: 10,
+                down: 7,
+              });
             });
           });
         });

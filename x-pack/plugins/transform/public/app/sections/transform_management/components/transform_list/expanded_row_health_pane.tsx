@@ -12,14 +12,15 @@ import { formatDate, EuiPanel, EuiSpacer, EuiInMemoryTable } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 
 import { TIME_FORMAT } from '../../../../../../common/constants';
-import type { TransformHealthIssue } from '../../../../../../common/types/transform_stats';
-
-import { TransformListRow } from '../../../../common';
+import type {
+  TransformHealthIssue,
+  TransformStats,
+} from '../../../../../../common/types/transform_stats';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 interface ExpandedRowHealthPaneProps {
-  health: TransformListRow['stats']['health'];
+  health: TransformStats['health'];
 }
 
 export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }) => {

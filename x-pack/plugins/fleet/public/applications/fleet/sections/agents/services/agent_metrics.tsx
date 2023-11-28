@@ -6,14 +6,17 @@
  */
 
 import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
 
 import type { AgentMetrics, AgentPolicy } from '../../../../../../common/types';
 
 import { MetricNonAvailable } from '../components';
 
 export function formatAgentCPU(metrics?: AgentMetrics, agentPolicy?: AgentPolicy) {
-  return metrics?.cpu_avg && metrics?.cpu_avg !== 0 ? (
-    `${(metrics.cpu_avg * 100).toFixed(2)} %`
+  return typeof metrics?.cpu_avg !== 'undefined' ? (
+    <EuiToolTip content={`${(metrics.cpu_avg * 100).toFixed(4)} %`}>
+      <>{(metrics.cpu_avg * 100).toFixed(2)} %</>
+    </EuiToolTip>
   ) : (
     <MetricNonAvailable agentPolicy={agentPolicy} />
   );

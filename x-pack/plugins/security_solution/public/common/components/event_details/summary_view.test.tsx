@@ -53,6 +53,7 @@ const enrichedHostIpData: AlertSummaryRow['description'] = {
 };
 
 const mockCount = 90019001;
+
 jest.mock('../../containers/alerts/use_alert_prevalence', () => ({
   useAlertPrevalence: () => ({
     loading: false,

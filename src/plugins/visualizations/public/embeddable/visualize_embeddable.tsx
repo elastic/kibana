@@ -7,7 +7,7 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription, ReplaySubject } from 'rxjs';
+import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
@@ -19,6 +19,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import {
   Adapters,
   AttributeService,
@@ -62,7 +63,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: DataView[];
   editPath: string;
   editUrl: string;
-  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
+  capabilities: { visualizeSave: boolean; dashboardSave: boolean; visualizeOpen: boolean };
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -170,8 +171,12 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
 
     if (this.attributeService) {
+      const readOnly = Boolean(vis.type.disableEdit);
       const isByValue = !this.inputIsRefType(initialInput);
-      const editable = capabilities.visualizeSave || (isByValue && capabilities.dashboardSave);
+      const editable = readOnly
+        ? false
+        : capabilities.visualizeSave ||
+          (isByValue && capabilities.dashboardSave && capabilities.visualizeOpen);
       this.updateOutput({ ...this.getOutput(), editable });
     }
 
@@ -347,11 +352,13 @@ export class VisualizeEmbeddable
       this.deps
         .start()
         .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
-          if (
-            warning.type === 'shard_failure' &&
-            warning.reason.type === 'unsupported_aggregation_on_downsampled_index'
-          ) {
-            warnings.push(warning.reason.reason || warning.message);
+          if (hasUnsupportedDownsampledAggregationFailure(warning)) {
+            warnings.push(
+              i18n.translate('visualizations.embeddable.tsdbRollupWarning', {
+                defaultMessage:
+                  'Visualization uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+              })
+            );
             return true;
           }
           if (this.vis.type.suppressWarnings?.()) {
@@ -467,43 +474,34 @@ export class VisualizeEmbeddable
     });
 
     this.subscriptions.push(
-      this.handler.events$.subscribe(async (event) => {
-        // maps hack, remove once esaggs function is cleaned up and ready to accept variables
-        if (event.name === 'bounds') {
-          const agg = this.vis.data.aggs!.aggs.find((a: any) => {
-            return get(a, 'type.dslName') === 'geohash_grid';
-          });
-          if (
-            (agg && agg.params.precision !== event.data.precision) ||
-            (agg && !_.isEqual(agg.params.boundingBox, event.data.boundingBox))
-          ) {
-            agg.params.boundingBox = event.data.boundingBox;
-            agg.params.precision = event.data.precision;
-            this.reload();
-          }
-          return;
-        }
+      this.handler.events$
+        .pipe(
+          mergeMap(async (event) => {
+            if (!this.input.disableTriggers) {
+              const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+              let context;
 
-        if (!this.input.disableTriggers) {
-          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
-          let context;
+              if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+                context = {
+                  embeddable: this,
+                  timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+                  ...event.data,
+                };
+              } else {
+                context = {
+                  embeddable: this,
+                  data: {
+                    timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+                    ...event.data,
+                  },
+                };
+              }
 
-          if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-            context = {
-              embeddable: this,
-              timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
-              ...event.data,
-            };
-          } else {
-            context = {
-              embeddable: this,
-              data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
-            };
-          }
-
-          getUiActions().getTrigger(triggerId).exec(context);
-        }
-      })
+              await getUiActions().getTrigger(triggerId).exec(context);
+            }
+          })
+        )
+        .subscribe()
     );
 
     if (this.vis.description) {
@@ -594,7 +592,7 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
-        disableShardWarnings: true,
+        disableWarningToasts: true,
       },
       variables: {
         embeddableTitle: this.getTitle(),
@@ -672,10 +670,8 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const { savedObjectsClient, data, spaces, savedObjectsTaggingOss } = await this.deps.start()
-      .plugins;
+    const { data, spaces, savedObjectsTaggingOss } = await this.deps.start().plugins;
     const savedVis = await getSavedVisualization({
-      savedObjectsClient,
       search: data.search,
       dataViews: data.dataViews,
       spaces,

@@ -7,11 +7,8 @@
 
 import { get } from 'lodash';
 import { IScopedClusterClient } from '@kbn/core/server';
-import {
-  AggFieldNamePair,
-  EVENT_RATE_FIELD_ID,
-  RuntimeMappings,
-} from '../../../../common/types/fields';
+import { type AggFieldNamePair, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 

@@ -11,6 +11,8 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
@@ -19,9 +21,12 @@ import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
 
+import { auditLoggingService } from '../audit_logging';
+
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { getLatestAvailableVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
@@ -105,10 +110,19 @@ export async function openPointInTime(
     index,
     keep_alive: pitKeepAlive,
   });
+
+  auditLoggingService.writeCustomAuditLog({
+    message: `User opened point in time query [index=${index}] [pitId=${pitRes.id}]`,
+  });
+
   return pitRes.id;
 }
 
 export async function closePointInTime(esClient: ElasticsearchClient, pitId: string) {
+  auditLoggingService.writeCustomAuditLog({
+    message: `User closing point in time query [pitId=${pitId}]`,
+  });
+
   try {
     await esClient.closePointInTime({ id: pitId });
   } catch (error) {
@@ -199,6 +213,7 @@ export async function getAgentsByKuery(
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
     searchAfter?: SortResults;
+    aggregations?: Record<string, AggregationsAggregationContainer>;
   }
 ): Promise<{
   agents: Agent[];
@@ -206,6 +221,7 @@ export async function getAgentsByKuery(
   page: number;
   perPage: number;
   statusSummary?: Record<AgentStatus, number>;
+  aggregations?: Record<string, estypes.AggregationsAggregate>;
 }> {
   const {
     page = 1,
@@ -218,6 +234,7 @@ export async function getAgentsByKuery(
     showUpgradeable,
     searchAfter,
     pitId,
+    aggregations,
   } = options;
   const filters = [];
 
@@ -251,8 +268,27 @@ export async function getAgentsByKuery(
     unenrolling: 0,
   };
 
-  const queryAgents = async (from: number, size: number) =>
-    esClient.search<
+  const queryAgents = async (from: number, size: number) => {
+    const aggs = {
+      ...(aggregations || getStatusSummary
+        ? {
+            aggs: {
+              ...(aggregations ? aggregations : {}),
+              ...(getStatusSummary
+                ? {
+                    status: {
+                      terms: {
+                        field: 'status',
+                      },
+                    },
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    };
+
+    return esClient.search<
       FleetServerAgent,
       { status: { buckets: Array<{ key: AgentStatus; doc_count: number }> } }
     >({
@@ -276,8 +312,9 @@ export async function getAgentsByKuery(
             ignore_unavailable: true,
           }),
       ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
-      ...(getStatusSummary && { aggs: { status: { terms: { field: 'status' } } } }),
+      ...aggs,
     });
+  };
   let res;
   try {
     res = await queryAgents((page - 1) * perPage, perPage);
@@ -291,6 +328,7 @@ export async function getAgentsByKuery(
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
+    const latestAgentVersion = await getLatestAvailableVersion();
     // fixing a bug where upgradeable filter was not returning right results https://github.com/elastic/kibana/issues/117329
     // query all agents, then filter upgradeable, and return the requested page and correct total
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
@@ -298,14 +336,12 @@ export async function getAgentsByKuery(
       const response = await queryAgents(0, SO_SEARCH_LIMIT);
       agents = response.hits.hits
         .map(searchHitToAgent)
-        .filter((agent) => isAgentUpgradeable(agent, appContextService.getKibanaVersion()));
+        .filter((agent) => isAgentUpgradeable(agent, latestAgentVersion));
       total = agents.length;
       const start = (page - 1) * perPage;
       agents = agents.slice(start, start + perPage);
     } else {
-      agents = agents.filter((agent) =>
-        isAgentUpgradeable(agent, appContextService.getKibanaVersion())
-      );
+      agents = agents.filter((agent) => isAgentUpgradeable(agent, latestAgentVersion));
     }
   }
 
@@ -320,6 +356,7 @@ export async function getAgentsByKuery(
     total,
     page,
     perPage,
+    ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };
 }
@@ -433,6 +470,66 @@ export async function getAgentsById(
   );
 }
 
+// given a list of agentPolicyIds, return a map of agent version => count of agents
+// this is used to get all fleet server versions
+export async function getAgentVersionsForAgentPolicyIds(
+  esClient: ElasticsearchClient,
+  agentPolicyIds: string[]
+): Promise<Record<string, number>> {
+  const versionCount: Record<string, number> = {};
+
+  if (!agentPolicyIds.length) {
+    return versionCount;
+  }
+
+  try {
+    const res = esClient.search<
+      FleetServerAgent,
+      Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
+    >({
+      size: 0,
+      track_total_hits: false,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  policy_id: agentPolicyIds,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          agent_versions: {
+            terms: {
+              field: 'local_metadata.elastic.agent.version.keyword',
+              size: 1000,
+            },
+          },
+        },
+      },
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+    });
+
+    const { aggregations } = await res;
+
+    if (aggregations && aggregations.agent_versions) {
+      aggregations.agent_versions.buckets.forEach((bucket) => {
+        versionCount[bucket.key] = bucket.doc_count;
+      });
+    }
+  } catch (error) {
+    if (error.statusCode !== 404) {
+      throw error;
+    }
+  }
+
+  return versionCount;
+}
+
 export async function getAgentByAccessAPIKeyId(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
@@ -465,6 +562,10 @@ export async function updateAgent(
   agentId: string,
   data: Partial<AgentSOAttributes>
 ) {
+  auditLoggingService.writeCustomAuditLog({
+    message: `User updated agent [id=${agentId}]`,
+  });
+
   await esClient.update({
     id: agentId,
     index: AGENTS_INDEX,

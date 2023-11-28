@@ -6,9 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual, omit } from 'lodash';
+import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   PartialRule,
   RawRule,
@@ -18,7 +17,7 @@ import {
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { parseDuration } from '../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -29,9 +28,17 @@ import {
   extractReferences,
   updateMeta,
   getPartialRuleFromRaw,
-  addUuid,
+  addGeneratedActionValues,
+  incrementRevision,
+  createNewAPIKeySet,
+  migrateLegacyActions,
 } from '../lib';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
+import {
+  validateScheduleLimit,
+  ValidateScheduleLimitResult,
+} from '../../application/rule/methods/get_schedule_frequency';
+
+type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
@@ -45,22 +52,29 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     notifyWhen?: RuleNotifyWhenType | null;
   };
   allowMissingConnectorSecrets?: boolean;
+  shouldIncrementRevision?: ShouldIncrementRevision;
 }
 
 export async function update<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
+  { id, data, allowMissingConnectorSecrets, shouldIncrementRevision }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.update('${id}')`,
-    async () => await updateWithOCC<Params>(context, { id, data, allowMissingConnectorSecrets })
+    async () =>
+      await updateWithOCC<Params>(context, {
+        id,
+        data,
+        allowMissingConnectorSecrets,
+        shouldIncrementRevision,
+      })
   );
 }
 
 async function updateWithOCC<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
+  { id, data, allowMissingConnectorSecrets, shouldIncrementRevision }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   let alertSavedObject: SavedObject<RawRule>;
 
@@ -76,6 +90,30 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     );
     // Still attempt to load the object using SOC
     alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+  }
+
+  const {
+    attributes: { enabled, schedule, name },
+  } = alertSavedObject;
+
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (enabled && schedule.interval !== data.schedule.interval) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      prevInterval: alertSavedObject.attributes.schedule?.interval,
+      updatedInterval: data.schedule.interval,
+    });
+  }
+
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'update',
+      })
+    );
   }
 
   try {
@@ -106,14 +144,28 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
+  const migratedActions = await migrateLegacyActions(context, {
+    ruleId: id,
+    attributes: alertSavedObject.attributes,
+  });
+
   const updateResult = await updateAlert<Params>(
     context,
-    { id, data, allowMissingConnectorSecrets },
-    alertSavedObject
+    { id, data, allowMissingConnectorSecrets, shouldIncrementRevision },
+    migratedActions.hasLegacyActions
+      ? {
+          ...alertSavedObject,
+          attributes: {
+            ...alertSavedObject.attributes,
+            notifyWhen: undefined,
+            throttle: undefined,
+          },
+        }
+      : alertSavedObject
   );
 
   await Promise.all([
-    alertSavedObject.attributes.apiKey
+    alertSavedObject.attributes.apiKey && !alertSavedObject.attributes.apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
           { apiKeys: [alertSavedObject.attributes.apiKey] },
           context.logger,
@@ -149,26 +201,21 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data: initialData, allowMissingConnectorSecrets }: UpdateOptions<Params>,
-  { attributes, version }: SavedObject<RawRule>
+  {
+    id,
+    data: initialData,
+    allowMissingConnectorSecrets,
+    shouldIncrementRevision = () => true,
+  }: UpdateOptions<Params>,
+  currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
-  const data = { ...initialData, actions: addUuid(initialData.actions) };
+  const { attributes, version } = currentRule;
+  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
-  // TODO https://github.com/elastic/kibana/issues/148414
-  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-  const firstFrequency = data.actions[0]?.frequency;
-  if (attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
-    data.actions = data.actions.map((action) => omit(action, 'frequency'));
-    if (!attributes.notifyWhen) {
-      attributes.notifyWhen = firstFrequency.notifyWhen;
-      attributes.throttle = firstFrequency.throttle;
-    }
-  }
-
   // Validate
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
+  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
@@ -191,17 +238,23 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   const username = await context.getUserName();
 
-  let createdAPIKey = null;
-  try {
-    createdAPIKey = attributes.enabled
-      ? await context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
-      : null;
-  } catch (error) {
-    throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
-  }
-
-  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username);
+  const apiKeyAttributes = await createNewAPIKeySet(context, {
+    id: ruleType.id,
+    ruleName: data.name,
+    username,
+    shouldUpdateApiKey: attributes.enabled,
+    errorMessage: 'Error updating rule: could not create API key',
+  });
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
+
+  // Increment revision if applicable field has changed
+  const revision = shouldIncrementRevision(updatedParams)
+    ? incrementRevision<Params>(
+        currentRule,
+        { id, data, allowMissingConnectorSecrets },
+        updatedParams
+      )
+    : currentRule.attributes.revision;
 
   let updatedObject: SavedObject<RawRule>;
   const createAttributes = updateMeta(context, {
@@ -211,6 +264,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     params: updatedParams as RawRule['params'],
     actions,
     notifyWhen,
+    revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
   });
@@ -235,7 +289,12 @@ async function updateAlert<Params extends RuleTypeParams>(
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: createAttributes.apiKey ? [createAttributes.apiKey] : [] },
+      {
+        apiKeys:
+          createAttributes.apiKey && !createAttributes.apiKeyCreatedByUser
+            ? [createAttributes.apiKey]
+            : [],
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

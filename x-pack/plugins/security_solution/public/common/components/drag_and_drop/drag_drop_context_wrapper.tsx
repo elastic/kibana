@@ -7,14 +7,13 @@
 
 import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import type { DropResult } from 'react-beautiful-dnd';
-import { DragDropContext } from 'react-beautiful-dnd';
+import type { DragStart, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import type { BeforeCapture } from './drag_drop_context';
 import type { BrowserFields } from '../../containers/source';
 import { dragAndDropSelectors } from '../../store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -26,7 +25,8 @@ import {
   ADDED_TO_TIMELINE_TEMPLATE_MESSAGE,
 } from '../../hooks/translations';
 import { displaySuccessToast, useStateToaster } from '../toasters';
-import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
 import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
@@ -43,7 +43,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultAlertsHeaders } from '../events_viewer/default_alert_headers';
 
 // @ts-expect-error
-window['__react-beautiful-dnd-disable-dev-warnings'] = true;
+window['__@hello-pangea/dnd-disable-dev-warnings'] = true;
 
 interface Props {
   browserFields: BrowserFields;
@@ -150,8 +150,9 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
     },
     [activeTimelineDataProviders, browserFields, dataProviders, dispatch, onAddedToTimeline]
   );
+
   return (
-    <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture} sensors={sensors}>
+    <DragDropContext onBeforeDragStart={onBeforeDragStart} onDragEnd={onDragEnd} sensors={sensors}>
       {children}
     </DragDropContext>
   );
@@ -167,12 +168,12 @@ export const DragDropContextWrapper = React.memo(
 
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 
-const onBeforeCapture = (before: BeforeCapture) => {
-  if (!draggableIsField(before)) {
+const onBeforeDragStart = (start: DragStart) => {
+  if (!draggableIsField(start)) {
     document.body.classList.add(IS_DRAGGING_CLASS_NAME);
   }
 
-  if (draggableIsField(before)) {
+  if (draggableIsField(start)) {
     document.body.classList.add(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
   }
 };

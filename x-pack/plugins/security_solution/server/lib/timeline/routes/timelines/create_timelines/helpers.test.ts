@@ -9,7 +9,7 @@ import * as module from './helpers';
 import { savePinnedEvents } from '../../../saved_object/pinned_events';
 import { getNote } from '../../../saved_object/notes';
 import type { FrameworkRequest } from '../../../../framework';
-import type { SavedTimeline } from '../../../../../../common/types';
+import type { SavedTimeline, Note } from '../../../../../../common/api/timeline';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -26,8 +26,15 @@ const timeline = { ...mockTimeline } as SavedTimeline;
 const timelineSavedObjectId = null;
 const timelineVersion = null;
 const pinnedEventIds = ['123'];
-const notes = [
-  { noteId: 'abc', note: 'new note', timelineId: '', created: 1603885051655, createdBy: 'elastic' },
+const notes: Note[] = [
+  {
+    noteId: 'abc',
+    note: 'new note',
+    timelineId: '',
+    created: 1603885051655,
+    createdBy: 'elastic',
+    version: 'testVersion',
+  },
 ];
 const existingNoteIds = undefined;
 const isImmutable = true;
@@ -119,6 +126,7 @@ describe('createTimelines', () => {
           note: 'new note',
           noteId: 'abc',
           timelineId: '',
+          version: 'testVersion',
         },
       ]);
     });

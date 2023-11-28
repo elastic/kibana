@@ -6,32 +6,18 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { EditTagsProps } from './edit_tags';
 import { EditTags } from './edit_tags';
-import { getFormMock } from '../../__mock__/form';
-import { readCasesPermissions, TestProviders } from '../../../common/mock';
-import { waitFor } from '@testing-library/react';
-import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form';
+import { readCasesPermissions, TestProviders, createAppMockRenderer } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
 import { useGetTags } from '../../../containers/use_get_tags';
+import { MAX_LENGTH_PER_TAG } from '../../../../common/constants';
 
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
 jest.mock('../../../containers/use_get_tags');
-jest.mock(
-  '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/components/form_data_provider',
-  () => ({
-    FormDataProvider: ({ children }: { children: ({ tags }: { tags: string[] }) => void }) =>
-      children({ tags: ['rad', 'dude'] }),
-  })
-);
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    EuiFieldText: () => <input />,
-  };
-});
+
 const onSubmit = jest.fn();
 const defaultProps: EditTagsProps = {
   isLoading: false,
@@ -40,80 +26,141 @@ const defaultProps: EditTagsProps = {
 };
 
 describe('EditTags ', () => {
+  let appMockRender: AppMockRenderer;
+
   const sampleTags = ['coke', 'pepsi'];
   const fetchTags = jest.fn();
-  const formHookMock = getFormMock({ tags: sampleTags });
+
   beforeEach(() => {
     jest.resetAllMocks();
-    (useForm as jest.Mock).mockImplementation(() => ({ form: formHookMock }));
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
       refetch: fetchTags,
     }));
+    appMockRender = createAppMockRenderer();
   });
 
-  it('Renders no tags, and then edit', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditTags {...defaultProps} />
-      </TestProviders>
-    );
-    expect(wrapper.find(`[data-test-subj="no-tags"]`).last().exists()).toBeTruthy();
-    wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
-    expect(wrapper.find(`[data-test-subj="no-tags"]`).last().exists()).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="edit-tags"]`).last().exists()).toBeTruthy();
+  it('renders no tags, and then edit', async () => {
+    appMockRender.render(<EditTags {...defaultProps} />);
+
+    expect(screen.getByTestId('no-tags')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('no-tags')).not.toBeInTheDocument();
+      expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
+    });
   });
 
-  it('Edit tag on submit', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditTags {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
-    wrapper.find(`[data-test-subj="edit-tags-submit"]`).last().simulate('click');
-    await waitFor(() => expect(onSubmit).toBeCalledWith(sampleTags));
+  it('edit tag from options on submit', async () => {
+    appMockRender.render(<EditTags {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+
+    userEvent.type(screen.getByRole('combobox'), `${sampleTags[0]}{enter}`);
+
+    userEvent.click(screen.getByTestId('edit-tags-submit'));
+
+    await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
   });
 
-  it('Tag options render with new tags added', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditTags {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
-    expect(
-      wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
-    ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
+  it('add new tags on submit', async () => {
+    appMockRender.render(<EditTags {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
+    });
+
+    userEvent.type(screen.getByRole('combobox'), 'dude{enter}');
+
+    userEvent.click(screen.getByTestId('edit-tags-submit'));
+
+    await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
 
-  it('Cancels on cancel', () => {
-    const props = {
-      ...defaultProps,
-      tags: ['pepsi'],
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <EditTags {...props} />
-      </TestProviders>
-    );
+  it('trims the tags on submit', async () => {
+    appMockRender.render(<EditTags {...defaultProps} />);
 
-    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
-    wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
+    userEvent.click(screen.getByTestId('tag-list-edit-button'));
 
-    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeFalsy();
-    wrapper.find(`[data-test-subj="edit-tags-cancel"]`).last().simulate('click');
-    wrapper.update();
-    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
+    });
+
+    userEvent.type(screen.getByRole('combobox'), 'dude      {enter}');
+
+    userEvent.click(screen.getByTestId('edit-tags-submit'));
+
+    await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
+  });
+
+  it('cancels on cancel', async () => {
+    appMockRender.render(<EditTags {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+
+    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('new');
+    });
+
+    userEvent.click(screen.getByTestId('edit-tags-cancel'));
+
+    await waitFor(() => {
+      expect(onSubmit).not.toBeCalled();
+      expect(screen.getByTestId('no-tags')).toBeInTheDocument();
+    });
+  });
+
+  it('shows error when tag is empty', async () => {
+    appMockRender.render(<EditTags {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
+    });
+
+    userEvent.type(screen.getByRole('combobox'), ' {enter}');
+
+    await waitFor(() => {
+      expect(screen.getByText('A tag must contain at least one non-space character.'));
+    });
+  });
+
+  it('shows error when tag is too long', async () => {
+    const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
+
+    appMockRender.render(<EditTags {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
+    });
+
+    userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
+    userEvent.keyboard('{enter}');
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('The length of the tag is too long. The maximum length is 256 characters.')
+      );
+    });
   });
 
   it('does not render when the user does not have update permissions', () => {
-    const wrapper = mount(
+    appMockRender.render(
       <TestProviders permissions={readCasesPermissions()}>
         <EditTags {...defaultProps} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="tag-list-edit"]`).exists()).toBeFalsy();
+
+    expect(screen.queryByTestId('tag-list-edit')).not.toBeInTheDocument();
   });
 });

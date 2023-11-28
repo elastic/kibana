@@ -51,7 +51,7 @@
                 "section": "def-common.GetIn",
                 "text": "GetIn"
               },
-              "<string, object>, O = unknown>(input: I) => { queryKey: readonly [string, string]; queryFn: () => Promise<O>; }; search: <I extends ",
+              "<string, object>, O = unknown>(_input: I) => { queryKey: readonly [string, string]; queryFn: () => Promise<O>; }; search: <I extends ",
               {
                 "pluginId": "contentManagement",
                 "scope": "common",
@@ -59,7 +59,7 @@
                 "section": "def-common.SearchIn",
                 "text": "SearchIn"
               },
-              "<string, object, object> = ",
+              "<string, object> = ",
               {
                 "pluginId": "contentManagement",
                 "scope": "common",
@@ -67,7 +67,7 @@
                 "section": "def-common.SearchIn",
                 "text": "SearchIn"
               },
-              "<string, object, object>, O = unknown>(input: I) => { queryKey: readonly [string, \"search\", unknown]; queryFn: () => Promise<O>; }; }"
+              "<string, object>, O = unknown>(_input: I) => { queryKey: readonly [string, \"search\", unknown, object | undefined]; queryFn: () => Promise<O>; }; }"
             ],
             "path": "src/plugins/content_management/public/content_client/content_client.tsx",
             "deprecated": false,
@@ -95,7 +95,7 @@
                 "label": "crudClientProvider",
                 "description": [],
                 "signature": [
-                  "(contentType: string) => ",
+                  "(contentType?: string | undefined) => ",
                   {
                     "pluginId": "contentManagement",
                     "scope": "public",
@@ -103,6 +103,21 @@
                     "section": "def-public.CrudClient",
                     "text": "CrudClient"
                   }
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "contentTypeRegistry",
+                "description": [],
+                "signature": [
+                  "ContentTypeRegistry"
                 ],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
@@ -348,7 +363,7 @@
                 "section": "def-common.SearchIn",
                 "text": "SearchIn"
               },
-              "<string, object, object>, O = unknown>(input: I) => Promise<O>"
+              "<string, object>, O = unknown>(input: I) => Promise<O>"
             ],
             "path": "src/plugins/content_management/public/content_client/content_client.tsx",
             "deprecated": false,
@@ -388,7 +403,7 @@
                 "section": "def-common.SearchIn",
                 "text": "SearchIn"
               },
-              "<string, object, object>, O = unknown>(input: I) => ",
+              "<string, object>, O = unknown>(input: I) => ",
               "Observable",
               "<",
               "QueryObserverResult",
@@ -407,6 +422,52 @@
                 "description": [],
                 "signature": [
                   "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.mSearch",
+            "type": "Function",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "<T = unknown>(input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.MSearchIn",
+                "text": "MSearchIn"
+              },
+              ") => Promise<{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.mSearch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.MSearchIn",
+                    "text": "MSearchIn"
+                  }
                 ],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
@@ -669,7 +730,7 @@
             "section": "def-common.SearchIn",
             "text": "SearchIn"
           },
-          "<string, object, object> = ",
+          "<string, object> = ",
           {
             "pluginId": "contentManagement",
             "scope": "common",
@@ -677,7 +738,7 @@
             "section": "def-common.SearchIn",
             "text": "SearchIn"
           },
-          "<string, object, object>, O = unknown>(input: I, queryOptions?: ",
+          "<string, object>, O = unknown>(input: I, queryOptions?: ",
           {
             "pluginId": "contentManagement",
             "scope": "public",
@@ -990,7 +1051,7 @@
                 "section": "def-common.SearchIn",
                 "text": "SearchIn"
               },
-              "<string, object, object>) => Promise<unknown>"
+              "<string, object>) => Promise<unknown>"
             ],
             "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
             "deprecated": false,
@@ -1011,7 +1072,53 @@
                     "section": "def-common.SearchIn",
                     "text": "SearchIn"
                   },
-                  "<string, object, object>"
+                  "<string, object>"
+                ],
+                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.CrudClient.mSearch",
+            "type": "Function",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "((input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.MSearchIn",
+                "text": "MSearchIn"
+              },
+              ") => Promise<unknown>) | undefined"
+            ],
+            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.CrudClient.mSearch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.MSearchIn",
+                    "text": "MSearchIn"
+                  }
                 ],
                 "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
                 "deprecated": false,
@@ -1144,6 +1251,16 @@
         "tags": [],
         "label": "ContentStorage",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "server",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-server.ContentStorage",
+            "text": "ContentStorage"
+          },
+          "<T, U, TMSearchConfig>"
+        ],
         "path": "src/plugins/content_management/server/core/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1166,7 +1283,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, options: unknown) => Promise<any>"
+              ", id: string, options?: object | undefined) => Promise<{ item: T; } | { item: T; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1211,17 +1328,17 @@
               {
                 "parentPluginId": "contentManagement",
                 "id": "def-server.ContentStorage.get.$3",
-                "type": "Unknown",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "unknown"
+                  "object | undefined"
                 ],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1244,7 +1361,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", ids: string[], options: unknown) => Promise<any>"
+              ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; } | { item: T; meta: any; })[]; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1289,17 +1406,17 @@
               {
                 "parentPluginId": "contentManagement",
                 "id": "def-server.ContentStorage.bulkGet.$3",
-                "type": "Unknown",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "unknown"
+                  "object | undefined"
                 ],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1322,7 +1439,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", data: object, options: unknown) => Promise<any>"
+              ", data: object, options?: object | undefined) => Promise<{ item: T; } | { item: T; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1367,17 +1484,17 @@
               {
                 "parentPluginId": "contentManagement",
                 "id": "def-server.ContentStorage.create.$3",
-                "type": "Unknown",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "unknown"
+                  "object | undefined"
                 ],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1400,7 +1517,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, data: object, options: unknown) => Promise<any>"
+              ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; } | { item: U; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1460,17 +1577,17 @@
               {
                 "parentPluginId": "contentManagement",
                 "id": "def-server.ContentStorage.update.$4",
-                "type": "Unknown",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "unknown"
+                  "object | undefined"
                 ],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1493,7 +1610,15 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, options: unknown) => Promise<any>"
+              ", id: string, options?: object | undefined) => Promise<",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteResult",
+                "text": "DeleteResult"
+              },
+              ">"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1538,17 +1663,17 @@
               {
                 "parentPluginId": "contentManagement",
                 "id": "def-server.ContentStorage.delete.$3",
-                "type": "Unknown",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "unknown"
+                  "object | undefined"
                 ],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1571,7 +1696,15 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", query: object, options: unknown) => Promise<any>"
+              ", query: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchQuery",
+                "text": "SearchQuery"
+              },
+              ", options?: object | undefined) => Promise<{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1601,12 +1734,18 @@
               {
                 "parentPluginId": "contentManagement",
                 "id": "def-server.ContentStorage.search.$2",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "object"
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.SearchQuery",
+                    "text": "SearchQuery"
+                  }
                 ],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
@@ -1616,12 +1755,145 @@
               {
                 "parentPluginId": "contentManagement",
                 "id": "def-server.ContentStorage.search.$3",
-                "type": "Unknown",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "unknown"
+                  "object | undefined"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.ContentStorage.mSearch",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "mSearch",
+            "description": [
+              "\nOpt-in to multi-type search.\nCan only be supported if the content type is backed by a saved object since `mSearch` is using the `savedObjects.find` API."
+            ],
+            "signature": [
+              "TMSearchConfig | undefined"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-server.MSearchConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MSearchConfig",
+        "description": [
+          "\nA configuration for multi-type search.\nBy configuring a content type with a `MSearchConfig`, it can be searched in the multi-type search.\nUnderneath content management is using the `savedObjects.find` API to search the saved objects."
+        ],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "server",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-server.MSearchConfig",
+            "text": "MSearchConfig"
+          },
+          "<T, TSavedObjectAttributes>"
+        ],
+        "path": "src/plugins/content_management/server/core/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.MSearchConfig.savedObjectType",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [
+              "\nThe saved object type that corresponds to this content type."
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.MSearchConfig.toItemResult",
+            "type": "Function",
+            "tags": [],
+            "label": "toItemResult",
+            "description": [
+              "\nMapper function that transforms the saved object into the content item result."
+            ],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", savedObject: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindResult",
+                "text": "SavedObjectsFindResult"
+              },
+              "<TSavedObjectAttributes>) => T"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.MSearchConfig.toItemResult.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.MSearchConfig.toItemResult.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsFindResult",
+                    "text": "SavedObjectsFindResult"
+                  },
+                  "<TSavedObjectAttributes>"
                 ],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
@@ -1630,6 +1902,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.MSearchConfig.additionalSearchFields",
+            "type": "Array",
+            "tags": [],
+            "label": "additionalSearchFields",
+            "description": [
+              "\nAdditional fields to search on. These fields will be added to the search query.\nBy default, only `title` and `description` are searched."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1662,6 +1950,36 @@
                 "section": "def-common.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               }
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.version",
+            "type": "Object",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "{ request: number; latest: number; }"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.utils",
+            "type": "Object",
+            "tags": [],
+            "label": "utils",
+            "description": [],
+            "signature": [
+              "{ getTransforms: ",
+              "StorageContextGetTransformFn",
+              "; }"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1769,6 +2087,20 @@
           },
           {
             "parentPluginId": "contentManagement",
+            "id": "def-common.BulkGetIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
             "id": "def-common.BulkGetIn.options",
             "type": "Uncategorized",
             "tags": [],
@@ -1828,6 +2160,20 @@
             "description": [],
             "signature": [
               "Data"
+            ],
+            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.CreateIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/create.ts",
             "deprecated": false,
@@ -1898,6 +2244,20 @@
           },
           {
             "parentPluginId": "contentManagement",
+            "id": "def-common.DeleteIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
             "id": "def-common.DeleteIn.options",
             "type": "Uncategorized",
             "tags": [],
@@ -1906,6 +2266,31 @@
             "signature": [
               "Options | undefined"
             ],
+            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.DeleteResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteResult",
+        "description": [],
+        "path": "src/plugins/content_management/common/rpc/delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.DeleteResult.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
             "path": "src/plugins/content_management/common/rpc/delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1961,6 +2346,20 @@
           },
           {
             "parentPluginId": "contentManagement",
+            "id": "def-common.GetIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
             "id": "def-common.GetIn.options",
             "type": "Uncategorized",
             "tags": [],
@@ -1970,6 +2369,106 @@
               "Options | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.MSearchIn",
+        "type": "Interface",
+        "tags": [],
+        "label": "MSearchIn",
+        "description": [],
+        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.MSearchIn.contentTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "contentTypes",
+            "description": [],
+            "signature": [
+              "{ contentTypeId: string; version?: number | undefined; }[]"
+            ],
+            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.MSearchIn.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchQuery",
+                "text": "SearchQuery"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.MSearchOut",
+        "type": "Interface",
+        "tags": [],
+        "label": "MSearchOut",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.MSearchOut",
+            "text": "MSearchOut"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.MSearchOut.contentTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "contentTypes",
+            "description": [],
+            "signature": [
+              "{ contentTypeId: string; version?: number | undefined; }[]"
+            ],
+            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.MSearchOut.result",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
+            ],
+            "path": "src/plugins/content_management/common/rpc/msearch.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2025,7 +2524,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<any>"
+              "<any> | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/types.ts",
             "deprecated": false,
@@ -2049,7 +2548,7 @@
             "section": "def-common.SearchIn",
             "text": "SearchIn"
           },
-          "<T, Query, Options>"
+          "<T, Options>"
         ],
         "path": "src/plugins/content_management/common/rpc/search.ts",
         "deprecated": false,
@@ -2072,12 +2571,32 @@
           {
             "parentPluginId": "contentManagement",
             "id": "def-common.SearchIn.query",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "Query"
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchQuery",
+                "text": "SearchQuery"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
@@ -2092,6 +2611,84 @@
             "description": [],
             "signature": [
               "Options | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.SearchQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchQuery",
+        "description": [],
+        "path": "src/plugins/content_management/common/rpc/search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchQuery.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [
+              "The text to search for"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchQuery.tags",
+            "type": "Object",
+            "tags": [],
+            "label": "tags",
+            "description": [
+              "List of tags id to include and exclude"
+            ],
+            "signature": [
+              "{ included?: string[] | undefined; excluded?: string[] | undefined; } | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchQuery.limit",
+            "type": "number",
+            "tags": [],
+            "label": "limit",
+            "description": [
+              "The number of result to return"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchQuery.cursor",
+            "type": "string",
+            "tags": [],
+            "label": "cursor",
+            "description": [
+              "The cursor for this query. Can be a page number or a cursor"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
@@ -2162,6 +2759,20 @@
           },
           {
             "parentPluginId": "contentManagement",
+            "id": "def-common.UpdateIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
             "id": "def-common.UpdateIn.options",
             "type": "Uncategorized",
             "tags": [],
@@ -2197,6 +2808,91 @@
       },
       {
         "parentPluginId": "contentManagement",
+        "id": "def-common.BulkGetResult",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkGetResult",
+        "description": [],
+        "signature": [
+          "ResultMeta extends void ? { hits: ",
+          "ItemResult",
+          "<T, ItemMeta>[]; } : { hits: ",
+          "ItemResult",
+          "<T, ItemMeta>[]; meta: ResultMeta; }"
+        ],
+        "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.CreateResult",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateResult",
+        "description": [],
+        "signature": [
+          "M extends void ? { item: T; } : { item: T; meta: M; }"
+        ],
+        "path": "src/plugins/content_management/common/rpc/create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.GetResult",
+        "type": "Type",
+        "tags": [],
+        "label": "GetResult",
+        "description": [],
+        "signature": [
+          "M extends void ? { item: T; } : { item: T; meta: M; }"
+        ],
+        "path": "src/plugins/content_management/common/rpc/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.MSearchQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "MSearchQuery",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.SearchQuery",
+            "text": "SearchQuery"
+          }
+        ],
+        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.MSearchResult",
+        "type": "Type",
+        "tags": [],
+        "label": "MSearchResult",
+        "description": [],
+        "signature": [
+          "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
+        ],
+        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -2218,30 +2914,44 @@
         "label": "ProcedureName",
         "description": [],
         "signature": [
-          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\""
+          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\" | \"mSearch\""
         ],
         "path": "src/plugins/content_management/common/rpc/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.SearchResult",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchResult",
+        "description": [],
+        "signature": [
+          "M extends void ? { hits: T[]; pagination: { total: number; cursor?: string | undefined; }; } : { hits: T[]; pagination: { total: number; cursor?: string | undefined; }; meta: M; }"
+        ],
+        "path": "src/plugins/content_management/common/rpc/search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.UpdateResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateResult",
+        "description": [],
+        "signature": [
+          "M extends void ? { item: T; } : { item: T; meta: M; }"
+        ],
+        "path": "src/plugins/content_management/common/rpc/update.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "contentManagement",
-        "id": "def-common.procedureNames",
-        "type": "Object",
-        "tags": [],
-        "label": "procedureNames",
-        "description": [],
-        "signature": [
-          "readonly [\"get\", \"bulkGet\", \"create\", \"update\", \"delete\", \"search\"]"
-        ],
-        "path": "src/plugins/content_management/common/rpc/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

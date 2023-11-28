@@ -15,7 +15,6 @@ import { useSelectedMonitor } from './use_selected_monitor';
 
 interface UseMonitorLatestPingParams {
   monitorId?: string;
-  locationLabel?: string;
 }
 
 export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
@@ -26,9 +25,9 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const location = useSelectedLocation();
 
   const monitorId = params?.monitorId ?? monitor?.id;
-  const locationLabel = params?.locationLabel ?? location?.label;
+  const locationLabel = location?.label;
 
-  const { data: latestPing, loading } = useSelector(selectLastRunMetadata);
+  const { data: latestPing, loading, loaded } = useSelector(selectLastRunMetadata);
 
   const latestPingId = latestPing?.monitor.id;
 
@@ -46,16 +45,16 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   }, [dispatch, monitorId, locationLabel, isUpToDate, lastRefresh]);
 
   if (!monitorId || !locationLabel) {
-    return { loading, latestPing: undefined };
+    return { loading, latestPing: undefined, loaded };
   }
 
   if (!latestPing) {
-    return { loading, latestPing: undefined };
+    return { loading, latestPing: undefined, loaded };
   }
 
   if (!isIdSame || !isLocationSame) {
-    return { loading, latestPing: undefined };
+    return { loading, latestPing: undefined, loaded };
   }
 
-  return { loading, latestPing };
+  return { loading, latestPing, loaded };
 };

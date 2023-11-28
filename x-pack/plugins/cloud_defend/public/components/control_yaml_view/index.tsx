@@ -8,36 +8,89 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import yaml from 'js-yaml';
+import { uniq } from 'lodash';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
-import { getInputFromPolicy } from '../../common/utils';
+import {
+  validateStringValuesForCondition,
+  validateMaxSelectorsAndResponses,
+  validateBlockRestrictions,
+} from '../../common/utils';
+import {
+  getInputFromPolicy,
+  getSelectorsAndResponsesFromYaml,
+} from '../../../common/utils/helpers';
 import * as i18n from './translations';
-import { ControlResponseAction, ViewDeps } from '../../types';
+import { ViewDeps, SelectorConditionsMap } from '../../types';
+import { SelectorCondition } from '../../../common';
 
 const { editor } = monaco;
 
 const TEXT_EDITOR_PADDING = 10;
 
-interface ConfigError {
+interface EditorError {
   line: number;
   message: string;
 }
 
 export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   const styles = useStyles();
-  const [errors, setErrors] = useState<ConfigError[]>([]);
-  const [actionsValid, setActionsValid] = useState(true);
+  const [editorErrors, setEditorErrors] = useState<EditorError[]>([]);
+  const [additionalErrors, setAdditionalErrors] = useState<string[]>([]);
   const input = getInputFromPolicy(policy, INPUT_CONTROL);
   const configuration = input?.vars?.configuration?.value || '';
   const currentModel = useConfigModel(configuration);
 
+  // not all validations can be done via json-schema
+  const validateAdditional = useCallback((value) => {
+    const errors: string[] = [];
+
+    const { selectors, responses } = getSelectorsAndResponsesFromYaml(value);
+
+    errors.push(...validateMaxSelectorsAndResponses(selectors, responses));
+    errors.push(...validateBlockRestrictions(selectors, responses));
+
+    // validate selectors
+    selectors.forEach((selector) => {
+      Object.keys(selector).map((prop) => {
+        const condition = prop as SelectorCondition;
+
+        if (SelectorConditionsMap[condition]?.type === 'stringArray') {
+          const values = selector[condition] as string[];
+          errors.push(...validateStringValuesForCondition(condition, values));
+        }
+      });
+    });
+
+    // validate responses
+    responses.forEach((response) => {
+      // for now we force 'alert' action if 'block' action added.
+      if (
+        response.actions &&
+        response.actions.includes('block') &&
+        !response.actions.includes('alert')
+      ) {
+        errors.push(i18n.errorAlertActionRequired);
+      }
+    });
+
+    return uniq(errors);
+  }, []);
+
   useEffect(() => {
+    if (!show) return;
+
+    // for on mount
+    const otherErrors = validateAdditional(configuration);
+    if (otherErrors.length !== additionalErrors.length) {
+      setAdditionalErrors(otherErrors);
+    }
+
     const listener = editor.onDidChangeMarkers(([resource]) => {
       const markers = editor.getModelMarkers({ resource });
       const errs = markers.map((marker) => {
-        const error: ConfigError = {
+        const error: EditorError = {
           line: marker.startLineNumber,
           message: marker.message,
         };
@@ -45,47 +98,47 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         return error;
       });
 
-      onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
-      setErrors(errs);
+      // prevents infinite loop
+      if (
+        otherErrors.length !== additionalErrors.length ||
+        JSON.stringify(errs) !== JSON.stringify(editorErrors)
+      ) {
+        onChange({
+          isValid: otherErrors.length === 0 && errs.length === 0,
+          updatedPolicy: policy,
+        });
+        setEditorErrors(errs);
+      }
     });
 
     return () => {
       listener.dispose();
     };
-  }, [actionsValid, onChange, policy]);
-
-  // for now we force 'alert' action on all responses. This restriction may be removed in future when we have a plan to record all responses. e.g. audit
-  const validateActions = useCallback((value) => {
-    try {
-      const json = yaml.load(value);
-
-      for (let i = 0; i < json.responses.length; i++) {
-        const response = json.responses[i];
-
-        if (!response.actions.includes(ControlResponseAction.alert)) {
-          return false;
-        }
-      }
-    } catch {
-      // noop
-    }
-
-    return true;
-  }, []);
+  }, [
+    editorErrors,
+    onChange,
+    policy,
+    additionalErrors.length,
+    validateAdditional,
+    configuration,
+    show,
+  ]);
 
   const onYamlChange = useCallback(
     (value) => {
-      if (input?.vars) {
+      if (show && input?.vars) {
         input.vars.configuration.value = value;
 
-        const areActionsValid = validateActions(value);
+        const errs = validateAdditional(value);
+        setAdditionalErrors(errs);
 
-        setActionsValid(areActionsValid);
-
-        onChange({ isValid: areActionsValid && errors.length === 0, updatedPolicy: policy });
+        onChange({
+          isValid: errs.length === 0 && editorErrors.length === 0,
+          updatedPolicy: policy,
+        });
       }
     },
-    [errors.length, input?.vars, onChange, policy, validateActions]
+    [editorErrors.length, input?.vars, onChange, policy, show, validateAdditional]
   );
 
   return (
@@ -95,7 +148,13 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
           {i18n.controlYamlHelp}
         </EuiText>
         <EuiSpacer size="s" />
-        {!actionsValid && <EuiForm isInvalid={true} error={i18n.errorAlertActionRequired} />}
+        {additionalErrors.length > 0 && (
+          <EuiForm
+            data-test-subj="cloudDefendAdditionalErrors"
+            isInvalid={true}
+            error={additionalErrors}
+          />
+        )}
         <div css={styles.yamlEditor}>
           <CodeEditor
             width="100%"

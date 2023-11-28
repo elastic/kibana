@@ -8,14 +8,10 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
+import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewResponse } from '.';
-import {
-  ControlResponse,
-  ControlResponseAction,
-  ControlSelector,
-  ControlSelectorOperation,
-} from '../../types';
+import { Response, Selector } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
@@ -26,45 +22,75 @@ describe('<ControlGeneralViewSelector />', () => {
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
   const params = coreMock.createAppMountParameters();
 
-  const mockSelector: ControlSelector = {
+  const mockSelector: Selector = {
+    type: 'file',
     name: 'mock',
-    operation: [ControlSelectorOperation.createExecutable],
+    operation: ['createFile'],
   };
 
-  const mockSelector2: ControlSelector = {
+  const mockSelector2: Selector = {
+    type: 'file',
     name: 'mock2',
-    operation: [ControlSelectorOperation.modifyExecutable],
+    operation: ['modifyExecutable'],
   };
 
-  const mockExclude: ControlSelector = {
+  const mockSelector3: Selector = {
+    type: 'file',
+    name: 'mock3',
+    operation: ['createFile'],
+    targetFilePath: ['/**'],
+  };
+
+  const mockExclude: Selector = {
+    type: 'file',
     name: 'mockExclude',
     containerImageName: ['nginx'],
   };
 
-  const mockResponse: ControlResponse = {
-    match: [mockSelector.name],
-    actions: [ControlResponseAction.alert],
+  const mockProcessSelector: Selector = {
+    type: 'process',
+    name: 'mockProcess',
+    operation: ['exec'],
   };
 
-  const mockResponse2: ControlResponse = {
+  const mockResponse: Response = {
+    type: 'file',
     match: [mockSelector.name],
-    actions: [ControlResponseAction.alert, ControlResponseAction.block],
+    actions: ['alert'],
+  };
+
+  const mockResponse2: Response = {
+    type: 'file',
+    match: [mockSelector.name],
+    actions: ['alert', 'block'],
+  };
+
+  const mockResponse3: Response = {
+    type: 'file',
+    match: [mockSelector3.name],
+    actions: ['alert', 'block'],
+  };
+
+  const mockProcessResponse: Response = {
+    type: 'process',
+    match: [mockProcessSelector.name],
+    actions: ['alert', 'block'],
   };
 
   const WrappedComponent = ({
     response = { ...mockResponse },
     responses,
   }: {
-    response?: ControlResponse;
-    responses?: ControlResponse[];
+    response?: Response;
+    responses?: Response[];
   }) => {
     return (
       <TestProvider params={params}>
         <ControlGeneralViewResponse
           index={0}
-          selectors={[mockSelector, mockSelector2, mockExclude]}
+          selectors={[mockSelector, mockSelector2, mockSelector3, mockExclude]}
           response={response}
-          responses={responses || [response, mockResponse2]}
+          responses={responses || [response, mockResponse2, mockResponse3]}
           onChange={onChange}
           onRemove={onRemove}
           onDuplicate={onDuplicate}
@@ -83,27 +109,23 @@ describe('<ControlGeneralViewSelector />', () => {
     const { getByTestId, queryByTestId } = render(<WrappedComponent />);
     expect(getByTestId('cloud-defend-responsematch').querySelector('.euiBadge__text')).toBeTruthy();
     expect(queryByTestId('cloud-defend-responseexclude')).toBeFalsy();
-    expect(
-      getByTestId('cloud-defend-chkalertaction').querySelector('.euiRadio__input')
-    ).toBeChecked();
-    expect(
-      getByTestId('cloud-defend-chkblockaction').querySelector('.euiRadio__input')
-    ).not.toBeChecked();
+    expect(getByTestId('cloud-defend-chkalertaction')).toBeChecked();
+    expect(getByTestId('cloud-defend-chkblockaction')).not.toBeChecked();
   });
 
-  it('allows the user to add more selectors to match on', () => {
+  it('allows the user to add more selectors to match on', async () => {
     const { getByTestId, rerender } = render(<WrappedComponent />);
-    getByTestId('comboBoxSearchInput').focus();
+    await showEuiComboBoxOptions();
 
     const options = getByTestId(
       'comboBoxOptionsList cloud-defend-responsematch-optionsList'
     ).querySelectorAll('.euiComboBoxOption__content');
-    expect(options).toHaveLength(2);
+    expect(options).toHaveLength(3);
     expect(options[0].textContent).toBe('mock2');
 
     userEvent.click(options[0]);
 
-    const updatedResponse: ControlResponse = onChange.mock.calls[0][0];
+    const updatedResponse: Response = onChange.mock.calls[0][0];
 
     rerender(<WrappedComponent response={updatedResponse} />);
 
@@ -114,8 +136,9 @@ describe('<ControlGeneralViewSelector />', () => {
     const updatedOptions = getByTestId(
       'comboBoxOptionsList cloud-defend-responsematch-optionsList'
     ).querySelectorAll('.euiComboBoxOption__content');
-    expect(updatedOptions).toHaveLength(1);
-    expect(updatedOptions[0].textContent).toContain('mockExclude');
+    expect(updatedOptions).toHaveLength(2);
+    expect(updatedOptions[0].textContent).toContain('mock3');
+    expect(updatedOptions[1].textContent).toContain('mockExclude');
   });
 
   it('ensures there is at least 1 selector to match', () => {
@@ -123,7 +146,7 @@ describe('<ControlGeneralViewSelector />', () => {
 
     userEvent.click(getByTitle('Remove mock from selection in this group'));
 
-    const updatedResponse: ControlResponse = onChange.mock.calls[0][0];
+    const updatedResponse: Response = onChange.mock.calls[0][0];
     rerender(<WrappedComponent response={updatedResponse} />);
 
     expect(getByText(i18n.errorValueRequired)).toBeTruthy();
@@ -135,7 +158,7 @@ describe('<ControlGeneralViewSelector />', () => {
     // first must click button to show combobox
     userEvent.click(getByTestId('cloud-defend-btnshowexclude'));
 
-    let updatedResponse: ControlResponse = onChange.mock.calls[0][0];
+    let updatedResponse: Response = onChange.mock.calls[0][0];
     rerender(<WrappedComponent response={updatedResponse} />);
 
     getAllByTestId('comboBoxSearchInput')[1].focus();
@@ -145,11 +168,12 @@ describe('<ControlGeneralViewSelector />', () => {
         '.euiComboBoxOption__content'
       )
     );
-    expect(options).toHaveLength(2);
+    expect(options).toHaveLength(3);
     expect(options[0].textContent).toBe('mock2');
-    expect(options[1].textContent).toBe('mockExclude');
+    expect(options[1].textContent).toBe('mock3');
+    expect(options[2].textContent).toBe('mockExclude');
 
-    userEvent.click(options[1]);
+    userEvent.click(options[2]);
 
     updatedResponse = onChange.mock.calls[0][0];
     rerender(<WrappedComponent response={updatedResponse} />);
@@ -159,23 +183,45 @@ describe('<ControlGeneralViewSelector />', () => {
     // focus 'match' input box, lets ensure selectors can't be re-used across 'match' and 'exclude' fields
     getAllByTestId('comboBoxSearchInput')[0].focus();
 
-    options = getByTestId(
-      'comboBoxOptionsList cloud-defend-responsematch-optionsList'
-    ).querySelectorAll('.euiComboBoxOption__content');
-    expect(options).toHaveLength(1);
+    options = await waitFor(() =>
+      getByTestId('comboBoxOptionsList cloud-defend-responsematch-optionsList').querySelectorAll(
+        '.euiComboBoxOption__content'
+      )
+    );
+    expect(options).toHaveLength(2);
     expect(options[0].textContent).toBe('mock2');
   });
 
   it('allows the user to enable block action (which should force alert action on)', () => {
     const { getByTestId } = render(<WrappedComponent />);
-    const radioBtn = getByTestId('cloud-defend-chkblockaction').querySelector('.euiRadio__input');
-    if (radioBtn) {
-      userEvent.click(radioBtn);
+    const checkBox = getByTestId('cloud-defend-chkblockaction');
+
+    if (checkBox) {
+      userEvent.click(checkBox);
     }
 
-    const response: ControlResponse = onChange.mock.calls[0][0];
-    expect(response.actions).toContain(ControlResponseAction.alert);
-    expect(response.actions).toContain(ControlResponseAction.block);
+    const response: Response = onChange.mock.calls[0][0];
+    expect(response.actions).toContain('alert');
+    expect(response.actions).toContain('block');
+  });
+
+  it('doesnt show block action for process responses', () => {
+    const { findByTestId } = render(<WrappedComponent response={mockProcessResponse} />);
+    const checkBox = findByTestId('cloud-defend-chkblockaction');
+
+    expect(checkBox).toMatchObject({});
+  });
+
+  it('shows an error if user is using block w/o targetFilePath', () => {
+    const { getByText } = render(<WrappedComponent response={mockResponse2} />);
+
+    expect(getByText(i18n.errorBlockActionRequiresTargetFilePath)).toBeTruthy();
+  });
+
+  it('shows a warning if user is using block w targetFilePath /**', () => {
+    const { getByText } = render(<WrappedComponent response={mockResponse3} />);
+
+    expect(getByText(i18n.warningFIMUsingSlashStarStarTitle)).toBeTruthy();
   });
 
   it('allows the user to remove the response', async () => {
@@ -208,5 +254,20 @@ describe('<ControlGeneralViewSelector />', () => {
 
     expect(onDuplicate.mock.calls).toHaveLength(1);
     expect(onDuplicate.mock.calls[0][0]).toEqual(mockResponse);
+  });
+
+  it('shows an error if no actions specified', async () => {
+    const { getByTestId, getByText, rerender } = render(<WrappedComponent />);
+
+    const checkBox = getByTestId('cloud-defend-chkalertaction');
+    if (checkBox) {
+      userEvent.click(checkBox);
+    }
+
+    const updatedResponse = onChange.mock.calls[0][0];
+    rerender(<WrappedComponent response={updatedResponse} />);
+
+    expect(getByText(i18n.errorActionRequired)).toBeTruthy();
+    expect(updatedResponse.hasErrors).toBeTruthy();
   });
 });

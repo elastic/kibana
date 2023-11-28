@@ -22,8 +22,8 @@ export { buildContextMenuForActions } from './context_menu';
 export type {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
-} from '@kbn/ui-actions-browser';
-export type { Trigger, RowClickContext } from './triggers';
+} from '@kbn/ui-actions-browser/src/types';
+export type { Trigger, RowClickContext } from '@kbn/ui-actions-browser/src/triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
@@ -31,7 +31,7 @@ export {
   visualizeGeoFieldTrigger,
   ROW_CLICK_TRIGGER,
   rowClickTrigger,
-} from './triggers';
+} from '@kbn/ui-actions-browser/src/triggers';
 export type { VisualizeFieldContext } from './types';
 export {
   ACTION_VISUALIZE_FIELD,

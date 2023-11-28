@@ -13,6 +13,9 @@ import {
   Heatmap,
   GeometryValue,
   XYChartSeriesIdentifier,
+  Tooltip,
+  TooltipAction,
+  TooltipValue,
 } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -120,6 +123,7 @@ describe('HeatmapComponent', function () {
       uiState,
       onClickValue: jest.fn(),
       onSelectRange: jest.fn(),
+      onClickMultiValue: jest.fn(),
       datatableUtilities: createDatatableUtilitiesMock(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
@@ -250,7 +254,125 @@ describe('HeatmapComponent', function () {
       expect(component.find(Heatmap).prop('colorScale')).toEqual({
         bands: [
           { color: 'rgb(0, 0, 0)', end: 0, start: 0 },
-          { color: 'rgb(112, 38, 231)', end: Infinity, start: 571.806 },
+          { color: 'rgb(112, 38, 231)', end: Infinity, start: 0 },
+        ],
+        type: 'bands',
+      });
+    });
+  });
+
+  it('computes should recompute the bands when range is relative (percent)', async () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': 3 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      data: newData,
+      args: {
+        ...wrapperProps.args,
+        palette: {
+          params: {
+            colors: ['#6092c0', '#a8bfda', '#ebeff5', '#ecb385', '#e7664c'],
+            stops: [19.98, 39.88, 60, 80, 100],
+            range: 'percent',
+            gradient: true,
+            continuity: 'above',
+            rangeMin: 0,
+            rangeMax: null,
+          },
+        },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    await act(async () => {
+      expect(component.find(Heatmap).prop('colorScale')).toEqual({
+        bands: [
+          {
+            start: 3,
+            end: 3,
+            color: '#6092c0',
+          },
+          {
+            start: 3,
+            end: 3,
+            color: '#a8bfda',
+          },
+          {
+            start: 3,
+            end: 3,
+            color: '#ebeff5',
+          },
+          {
+            start: 3,
+            end: 3,
+            color: '#ecb385',
+          },
+          {
+            start: 3,
+            end: Infinity,
+            color: '#e7664c',
+          },
+        ],
+        type: 'bands',
+      });
+    });
+  });
+
+  it('computed the bands correctly for number range palettes when a single value is provided', () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': 2 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      data: newData,
+      args: {
+        ...wrapperProps.args,
+        palette: {
+          params: {
+            colors: ['#6092c0', '#a8bfda', '#ebeff5', '#ecb385', '#e7664c'],
+            stops: [323.39, 362.8, 402.2, 500, 501],
+            range: 'number',
+            gradient: true,
+            continuity: 'above',
+            rangeMin: 284,
+            rangeMax: null,
+          },
+        },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    act(() => {
+      expect(component.find(Heatmap).prop('colorScale')).toEqual({
+        bands: [
+          {
+            start: 284,
+            end: 323.39,
+            color: '#6092c0',
+          },
+          {
+            start: 323.39,
+            end: 362.8,
+            color: '#a8bfda',
+          },
+          {
+            start: 362.8,
+            end: 402.2,
+            color: '#ebeff5',
+          },
+          {
+            start: 402.2,
+            end: 500,
+            color: '#ecb385',
+          },
+          {
+            start: 500,
+            end: Infinity,
+            color: '#e7664c',
+          },
         ],
         type: 'bands',
       });
@@ -287,7 +409,7 @@ describe('HeatmapComponent', function () {
 
   it('defaults on displaying the tooltip', () => {
     const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.Follow });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.Follow);
   });
 
   it('hides the legend if the showTooltip is false', async () => {
@@ -296,7 +418,7 @@ describe('HeatmapComponent', function () {
       args: { ...wrapperProps.args, showTooltip: false },
     } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.None });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
   });
 
   it('not renders the component if no value accessor is given', () => {
@@ -427,5 +549,83 @@ describe('HeatmapComponent', function () {
     const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} interactive={false} />);
     expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
     expect(component.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallowWithIntl(
+        <HeatmapComponent
+          {...wrapperProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+  });
+
+  describe('tooltip', () => {
+    it('should not have actions if chart is not interactive', () => {
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} interactive={false} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions');
+      expect(actions).toBeUndefined();
+    });
+    it('should have tooltip actions when the chart is fully configured and interactive', () => {
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions');
+      expect(actions?.length).toBe(1);
+      expect(actions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            onSelect: expect.any(Function),
+            disabled: expect.any(Function),
+          }),
+        ])
+      );
+    });
+
+    it('selecting correct actions calls a callback with correct filter data', () => {
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions') as TooltipAction[];
+      actions[0].onSelect!(
+        [
+          {
+            label: 'Dest',
+            datum: {
+              x: 'a',
+              y: 'd',
+              value: 0,
+              originalIndex: 0,
+            },
+          } as TooltipValue,
+          {
+            label: 'Test',
+            datum: {
+              x: 'a',
+              y: 'd',
+              value: 0,
+              originalIndex: 0,
+            },
+          } as TooltipValue,
+        ],
+        []
+      );
+      expect(wrapperProps.onClickMultiValue).toHaveBeenCalledWith({
+        data: [
+          {
+            cells: [
+              { column: 1, row: 0 },
+              { column: 2, row: 0 },
+            ],
+            table: wrapperProps.data,
+          },
+        ],
+      });
+    });
   });
 });
