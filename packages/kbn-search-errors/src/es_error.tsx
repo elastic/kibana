@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { IEsError } from './types';
 import { getRootCause } from './utils';
 
