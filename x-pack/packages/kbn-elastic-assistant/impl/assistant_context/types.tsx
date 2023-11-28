@@ -20,6 +20,10 @@ export interface Message {
   timestamp: string;
   isError?: boolean;
   presentation?: MessagePresentation;
+  traceData?: {
+    transactionId: string;
+    traceId: string;
+  };
 }
 
 export interface ConversationTheme {
