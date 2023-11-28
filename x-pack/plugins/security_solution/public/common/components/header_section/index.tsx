@@ -108,7 +108,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   stackHeader,
   subtitle,
   title,
-  titleSize = 'm',
+  titleSize = 'l',
   toggleQuery,
   toggleStatus = true,
   tooltip,
@@ -173,7 +173,6 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                           <span className="eui-textBreakNormal">{title}</span>
                           {tooltip && (
                             <>
-                              {' '}
                               <EuiIconTip
                                 color="subdued"
                                 title={tooltipTitle}

@@ -23,9 +23,6 @@ export const useStyles = () => {
       border-bottom: none;
       margin-bottom: ${euiTheme.size.s};
       border-top: none;
-      & .euiButtonEmpty {
-        font-weight: ${euiTheme.font.weight.bold};
-      }
     }
     & .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
       border-bottom: ${euiTheme.border.width.thick} solid ${euiTheme.colors.fullShade};

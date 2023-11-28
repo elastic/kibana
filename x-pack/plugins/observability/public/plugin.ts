@@ -64,6 +64,8 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { firstValueFrom } from 'rxjs';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -85,7 +87,6 @@ import {
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
-
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
