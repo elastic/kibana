@@ -20,8 +20,8 @@ import { ShowInfoContext } from "./esql_parser";
 import { ShowFunctionsContext } from "./esql_parser";
 import { ConstantDefaultContext } from "./esql_parser";
 import { DereferenceContext } from "./esql_parser";
+import { FunctionContext } from "./esql_parser";
 import { ParenthesizedExpressionContext } from "./esql_parser";
-import { FunctionExpressionContext } from "./esql_parser";
 import { SingleCommandQueryContext } from "./esql_parser";
 import { CompositeQueryContext } from "./esql_parser";
 import { LogicalNotContext } from "./esql_parser";
@@ -43,6 +43,7 @@ import { RegexBooleanExpressionContext } from "./esql_parser";
 import { ValueExpressionContext } from "./esql_parser";
 import { OperatorExpressionContext } from "./esql_parser";
 import { PrimaryExpressionContext } from "./esql_parser";
+import { FunctionExpressionContext } from "./esql_parser";
 import { RowCommandContext } from "./esql_parser";
 import { FieldsContext } from "./esql_parser";
 import { FieldContext } from "./esql_parser";
@@ -292,6 +293,19 @@ export interface esql_parserListener extends ParseTreeListener {
 	exitDereference?: (ctx: DereferenceContext) => void;
 
 	/**
+	 * Enter a parse tree produced by the `function`
+	 * labeled alternative in `esql_parser.primaryExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterFunction?: (ctx: FunctionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `function`
+	 * labeled alternative in `esql_parser.primaryExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitFunction?: (ctx: FunctionContext) => void;
+
+	/**
 	 * Enter a parse tree produced by the `parenthesizedExpression`
 	 * labeled alternative in `esql_parser.primaryExpression`.
 	 * @param ctx the parse tree
@@ -303,19 +317,6 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitParenthesizedExpression?: (ctx: ParenthesizedExpressionContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `functionExpression`
-	 * labeled alternative in `esql_parser.primaryExpression`.
-	 * @param ctx the parse tree
-	 */
-	enterFunctionExpression?: (ctx: FunctionExpressionContext) => void;
-	/**
-	 * Exit a parse tree produced by the `functionExpression`
-	 * labeled alternative in `esql_parser.primaryExpression`.
-	 * @param ctx the parse tree
-	 */
-	exitFunctionExpression?: (ctx: FunctionExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `singleCommandQuery`
@@ -569,6 +570,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPrimaryExpression?: (ctx: PrimaryExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.functionExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionExpression?: (ctx: FunctionExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.functionExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionExpression?: (ctx: FunctionExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.rowCommand`.

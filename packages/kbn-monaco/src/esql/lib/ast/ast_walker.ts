@@ -28,7 +28,7 @@ import {
   type FieldContext,
   type FieldsContext,
   type FromCommandContext,
-  FunctionExpressionContext,
+  FunctionContext,
   type GrokCommandContext,
   IntegerLiteralContext,
   IsNullContext,
@@ -70,6 +70,7 @@ import {
   createNumericLiteral,
   sanifyIdentifierString,
   computeLocationExtends,
+  createColumnStar,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -338,12 +339,18 @@ export function visitPrimaryExpression(
   if (ctx instanceof ParenthesizedExpressionContext) {
     return collectBooleanExpression(ctx.booleanExpression());
   }
-  if (ctx instanceof FunctionExpressionContext) {
-    const fn = createFunction(ctx.identifier().text.toLowerCase(), ctx);
-    const functionArgs = ctx
+  if (ctx instanceof FunctionContext) {
+    const functionExpressionCtx = ctx.functionExpression();
+    const fn = createFunction(functionExpressionCtx.identifier().text.toLowerCase(), ctx);
+    const functionArgs = functionExpressionCtx
       .booleanExpression()
       .flatMap(collectBooleanExpression)
-      .filter(nonNullable);
+      .filter(nonNullable)
+      .concat(
+        functionExpressionCtx.ASTERISK()
+          ? [createColumnStar(functionExpressionCtx.ASTERISK()!)]
+          : []
+      );
     if (functionArgs.length) {
       fn.args.push(...functionArgs);
     }

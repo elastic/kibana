@@ -198,6 +198,17 @@ export function createSource(
   };
 }
 
+export function createColumnStar(ctx: TerminalNode): ESQLColumn {
+  return {
+    type: 'column',
+    name: ctx.text,
+    text: ctx.text,
+    location: getPosition(ctx.symbol),
+    incomplete: ctx.text === '',
+    quoted: Boolean(getQuotedText(ctx)),
+  };
+}
+
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   const text = sanifyIdentifierString(ctx);
   return {
