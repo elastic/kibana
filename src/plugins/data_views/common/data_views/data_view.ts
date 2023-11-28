@@ -11,7 +11,7 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
+import { cloneDeep, each, mapValues, omit, pickBy } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -95,6 +95,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
     // Date value returned in "_source" could be in a number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
     // dataView.flattenHit will override "_source" values when the same field is also defined in "fields"
+    /*
     const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map((dateField) => {
       return {
         field: dateField.name,
@@ -104,6 +105,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
             : 'date_time',
       };
     });
+    */
 
     each(this.getScriptedFields(), function (field) {
       scriptFields[field.name] = {
@@ -119,7 +121,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
     return {
       storedFields: ['*'],
       scriptFields,
-      docvalueFields,
+      docvalueFields: [],
       runtimeFields,
     };
   }
