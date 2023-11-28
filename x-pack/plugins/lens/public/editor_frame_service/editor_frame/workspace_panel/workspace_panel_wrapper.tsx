@@ -13,6 +13,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartDimensionOptions } from '@kbn/chart-expressions-common';
 import { ChartDimensionUnit } from '@kbn/chart-expressions-common/types';
+import { Interpolation, Theme } from '@emotion/react';
 import {
   DatasourceMap,
   FramePublicAPI,
@@ -50,6 +51,26 @@ export interface WorkspacePanelWrapperProps {
   getUserMessages: UserMessagesGetter;
   displayOptions: ChartDimensionOptions | undefined;
 }
+
+const unitToCSSUnit: Record<ChartDimensionUnit, string> = {
+  pixels: 'px',
+  percentage: '%',
+};
+
+const computeAspectRatioAndMaxDimensions = ({ x, y }: { x: number; y: number }) => {
+  return {
+    aspectRatio: `${x}/${y}`,
+    ...(y > x
+      ? {
+          height: '100%',
+          width: 'auto',
+        }
+      : {
+          height: 'auto',
+          width: '100%',
+        }),
+  };
+};
 
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
@@ -117,31 +138,17 @@ export function WorkspacePanelWrapper({
   const aspectRatio = displayOptions?.aspectRatio;
   const maxDimensions = displayOptions?.maxDimensions;
 
-  const unitToCSSUnit: Record<ChartDimensionUnit, string> = {
-    pixels: 'px',
-    percentage: '%',
-  };
+  let visDimensionsCSS: Interpolation<Theme> = {};
 
-  const visDimensionsCSS = aspectRatio
-    ? {
-        aspectRatio: `${aspectRatio.x}/${aspectRatio.y}`,
-        ...(aspectRatio.y > aspectRatio.x
-          ? {
-              height: '100%',
-              width: 'auto',
-            }
-          : {
-              height: 'auto',
-              width: '100%',
-            }),
-      }
-    : maxDimensions
-    ? {
-        maxWidth: maxDimensions && `${maxDimensions.x}${unitToCSSUnit[maxDimensions.unit]}`,
-        maxHeight: maxDimensions && `${maxDimensions.y}${unitToCSSUnit[maxDimensions.unit]}`,
-        aspectRatio: maxDimensions.x && maxDimensions.y && `${maxDimensions.x}/${maxDimensions.y}`,
-      }
-    : {};
+  if (aspectRatio) {
+    visDimensionsCSS = computeAspectRatioAndMaxDimensions(aspectRatio ?? maxDimensions);
+  }
+
+  if (maxDimensions) {
+    visDimensionsCSS = computeAspectRatioAndMaxDimensions(aspectRatio ?? maxDimensions);
+    visDimensionsCSS.maxWidth = `${maxDimensions.x}${unitToCSSUnit[maxDimensions.unit]}`;
+    visDimensionsCSS.maxHeight = `${maxDimensions.y}${unitToCSSUnit[maxDimensions.unit]}`;
+  }
 
   return (
     <EuiPageTemplate
