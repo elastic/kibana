@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { hostLensFormulas, METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -13,17 +14,18 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
 import { TooltipContent } from '../../../../../components/lens';
 
-const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
-  id: 'hostsViewKPI-hostsCount',
-  color: '#6DCCB1',
-  title: i18n.translate('xpack.infra.hostsViewPage.kpi.hostCount.title', {
-    defaultMessage: 'Hosts',
-  }),
-};
-
 export const HostCountKpi = ({ height }: { height: number }) => {
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
+  const euiTheme = useTheme();
+
+  const hostsCountChart: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
+    id: 'hostsViewKPI-hostsCount',
+    color: euiTheme.eui.euiColorLightestShade,
+    title: i18n.translate('xpack.infra.hostsViewPage.kpi.hostCount.title', {
+      defaultMessage: 'Hosts',
+    }),
+  };
 
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
@@ -38,7 +40,7 @@ export const HostCountKpi = ({ height }: { height: number }) => {
 
   return (
     <MetricChartWrapper
-      {...HOSTS_CHART}
+      {...hostsCountChart}
       style={{ height }}
       value={hostCountData?.count.value ?? 0}
       subtitle={getSubtitle()}

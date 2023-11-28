@@ -67,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {
         await transform.api.createAndRunTransform(
@@ -82,11 +82,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       for (const testData of testDataList) {
-        await transform.testResources.deleteIndexPatternByTitle(testData.originalConfig.dest.index);
+        await transform.testResources.deleteDataViewByTitle(testData.originalConfig.dest.index);
         await transform.api.deleteIndices(testData.originalConfig.dest.index);
       }
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     for (const testData of testDataList) {

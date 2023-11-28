@@ -29,11 +29,8 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  DETECTION_ENTITY_DASHBOARD,
-  RISKY_HOSTS_DOC_LINK,
-  RISKY_USERS_DOC_LINK,
-} from '../../../common/constants';
+import { LinkAnchor } from '@kbn/security-solution-navigation/links';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import * as i18n from '../translations';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
@@ -41,20 +38,8 @@ import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
 import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/risk_engine';
 
-const docsLinks = [
-  {
-    link: DETECTION_ENTITY_DASHBOARD,
-    label: i18n.EA_DOCS_DASHBOARD,
-  },
-  {
-    link: RISKY_HOSTS_DOC_LINK,
-    label: i18n.EA_DOCS_RISK_HOSTS,
-  },
-  {
-    link: RISKY_USERS_DOC_LINK,
-    label: i18n.EA_DOCS_RISK_USERS,
-  },
-];
+import { RiskInformationFlyout } from '../../explore/components/risk_score/risk_information';
+import { useOnOpenCloseHandler } from '../../helper_hooks';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 
@@ -209,6 +194,8 @@ export const RiskScoreEnableSection = () => {
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
 
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
+
   const isLoading =
     initRiskEngineMutation.isLoading ||
     enableRiskEngineMutation.isLoading ||
@@ -345,14 +332,17 @@ export const RiskScoreEnableSection = () => {
         </EuiTitle>
         <EuiSpacer />
         <ul>
-          {docsLinks.map(({ link, label }) => (
-            <li key={link}>
-              <EuiLink href={link} target="_blank" external>
-                {label}
-              </EuiLink>
-              <EuiSpacer size="s" />
-            </li>
-          ))}
+          <li>
+            <LinkAnchor id={SecurityPageName.entityAnalytics}>{i18n.EA_DASHBOARD_LINK}</LinkAnchor>
+            <EuiSpacer size="s" />
+          </li>
+          <li>
+            <EuiLink onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
+              {i18n.EA_DOCS_ENTITY_RISK_SCORE}
+            </EuiLink>
+            {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
+            <EuiSpacer size="s" />
+          </li>
         </ul>
       </>
     </>

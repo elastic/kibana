@@ -8,9 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { SlosView } from './slos_view';
+import { SLO_CARD_VIEW_PER_ROW_SIZE } from './card_view/cards_per_row';
+import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
-import { SloListItems } from './slo_list_items';
 import { SloListSearchBar, SortField } from './slo_list_search_bar';
 
 export interface Props {
@@ -23,6 +26,8 @@ export function SloList({ autoRefresh }: Props) {
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
   const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
+
+  const [sloView, setSLOView] = useState<SLOViewType>('cardView');
 
   const {
     isLoading,
@@ -43,6 +48,7 @@ export function SloList({ autoRefresh }: Props) {
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
+  const [cardsPerRow, setCardsPerRow] = useLocalStorage(SLO_CARD_VIEW_PER_ROW_SIZE, '4');
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
@@ -71,9 +77,16 @@ export function SloList({ autoRefresh }: Props) {
           initialState={state}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
+      <EuiFlexItem grow={false}>
+        <ToggleSLOView sloView={sloView} setSLOView={setSLOView} setCardsPerRow={setCardsPerRow} />
       </EuiFlexItem>
+      <SlosView
+        sloList={results}
+        loading={isLoading || isRefetching}
+        error={isError}
+        cardsPerRow={cardsPerRow}
+        sloView={sloView}
+      />
 
       {total > 0 ? (
         <EuiFlexItem>

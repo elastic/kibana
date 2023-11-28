@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CUSTOM_AGGREGATOR } from '@kbn/observability-plugin/common/custom_threshold_rule/constants';
 import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
 import {
@@ -92,7 +91,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: CUSTOM_AGGREGATOR,
                 comparator: Comparator.GT,
                 threshold: [2],
                 timeSize: 1,
@@ -188,7 +186,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
                 comparator: '>',
                 threshold: [2],
                 timeSize: 1,

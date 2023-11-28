@@ -17,7 +17,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 
 import { getDetails } from '../../../tasks/rule_details';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';

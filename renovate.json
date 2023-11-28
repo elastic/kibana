@@ -462,7 +462,8 @@
         "Team:Operations",
         "release_note:skip"
       ],
-      "enabled": true
+      "enabled": true,
+      "allowedVersions": "<7.0"
     },
     {
       "groupName": "react-query",

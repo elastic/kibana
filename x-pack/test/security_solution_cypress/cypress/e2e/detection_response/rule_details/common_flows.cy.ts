@@ -45,7 +45,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
