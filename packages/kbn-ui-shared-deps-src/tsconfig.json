@@ -27,6 +27,7 @@
     "@kbn/std",
     "@kbn/safer-lodash-set",
     "@kbn/repo-info",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/search-errors"
   ]
 }
