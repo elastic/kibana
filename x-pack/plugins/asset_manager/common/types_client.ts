@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AssetFilters, SingleKindAssetFilters } from './types_api';
+import { AssetFilters, SingleKindAssetFilters, MultipleKindAssetFilters } from './types_api';
 
 export interface SharedAssetsOptionsPublic<F = AssetFilters> {
   from: string;
@@ -21,3 +21,4 @@ export type GetHostsOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFil
 export type GetContainersOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
 export type GetPodsOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
 export type GetServicesOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
+export type GetAssetsOptionsPublic = SharedAssetsOptionsPublic<MultipleKindAssetFilters>;

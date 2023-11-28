@@ -178,6 +178,7 @@ export const assetFiltersSingleKindRT = rt.exact(
 );
 
 export type SingleKindAssetFilters = rt.TypeOf<typeof assetFiltersSingleKindRT>;
+export type MultipleKindAssetFilters = Omit<SingleKindAssetFilters, 'id'>;
 
 export const assetFiltersRT = rt.intersection([
   assetFiltersSingleKindRT,
