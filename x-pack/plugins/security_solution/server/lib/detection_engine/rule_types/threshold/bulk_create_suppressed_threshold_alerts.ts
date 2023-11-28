@@ -35,6 +35,10 @@ interface BulkCreateSuppressedThresholdAlertsParams {
   runOpts: RunOpts<ThresholdRuleParams>;
 }
 
+/**
+ * wraps threshold alerts and creates them using bulkCreateWithSuppression utility
+ * returns {@link GenericBulkCreateResponse}
+ */
 export const bulkCreateSuppressedThresholdAlerts = async ({
   buckets,
   completeRule,

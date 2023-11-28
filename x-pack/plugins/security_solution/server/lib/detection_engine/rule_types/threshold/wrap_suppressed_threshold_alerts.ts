@@ -30,6 +30,12 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { transformBucketIntoHit } from './bulk_create_threshold_signals';
 import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
 
+/**
+ * wraps suppressed threshold alerts
+ * first, transforms aggregation threshold buckets to hits
+ * creates instanceId hash, which is used to search suppressed on time interval alerts
+ * populates alert's suppression fields
+ */
 export const wrapSuppressedThresholdALerts = ({
   buckets,
   spaceId,
