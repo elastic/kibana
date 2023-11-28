@@ -541,7 +541,11 @@ export const UnifiedDataTable = ({
   /**
    * Sorting
    */
-  const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
+  const sortingColumns = useMemo(
+    () =>
+      sort.map(([id, direction]) => ({ id, direction })).filter(({ id }) => columns.includes(id)),
+    [sort, columns]
+  );
 
   const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
   const onTableSort = useCallback(
