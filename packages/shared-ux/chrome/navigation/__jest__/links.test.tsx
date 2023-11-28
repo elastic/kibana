@@ -8,12 +8,11 @@
 import './setup_jest_mocks';
 import React from 'react';
 import { type RenderResult } from '@testing-library/react';
-import { type Observable, of } from 'rxjs';
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import { of } from 'rxjs';
 
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-
+import { NavigationServices } from '../types';
 import {
   getMockFn,
   renderNavigation,
@@ -27,15 +26,15 @@ describe('Links', () => {
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
     const unknownLinkId = 'unknown';
 
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      {
+    const deepLinks$: NavigationServices['deepLinks$'] = of({
+      item1: {
         id: 'item1',
         title: 'Title from deeplink',
         baseUrl: '',
         url: '',
         href: '',
       },
-    ]);
+    });
 
     const runTests = async (type: TestType, { findByTestId, queryByTestId }: RenderResult) => {
       try {
@@ -84,7 +83,7 @@ describe('Links', () => {
       const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
         onProjectNavigationChange,
-        services: { navLinks$ },
+        services: { deepLinks$ },
       });
 
       await runTests('treeDef', renderResult);
@@ -108,7 +107,7 @@ describe('Links', () => {
           </Navigation>
         ),
         onProjectNavigationChange,
-        services: { navLinks$ },
+        services: { deepLinks$ },
       });
 
       await runTests('uiComponents', renderResult);

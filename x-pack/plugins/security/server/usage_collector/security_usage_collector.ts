@@ -7,7 +7,7 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import type { SecurityLicense } from '../../common/licensing';
+import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 
 interface Usage {
