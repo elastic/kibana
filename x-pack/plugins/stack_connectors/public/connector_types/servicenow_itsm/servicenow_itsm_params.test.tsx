@@ -297,5 +297,48 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(wrapper.find('input[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
       expect(wrapper.find('input[data-test-subj="short_descriptionInput"]').exists()).toBeFalsy();
     });
+
+    test('A short description change triggers editAction', () => {
+      const wrapper = mountWithIntl(
+        <ServiceNowITSMParamsFields
+          actionParams={{}}
+          errors={{ ['subActionParams.incident.short_description']: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      );
+
+      const shortDescriptionField = wrapper.find('input[data-test-subj="short_descriptionInput"]');
+      shortDescriptionField.simulate('change', {
+        target: { value: 'new updated short description' },
+      });
+
+      expect(editAction.mock.calls[0][1]).toEqual({
+        incident: { short_description: 'new updated short description' },
+        comments: [],
+      });
+    });
+
+    test('A correlation_id field change triggers edit action correctly when actionGroup is recovered', () => {
+      const wrapper = mountWithIntl(
+        <ServiceNowITSMParamsFields
+          selectedActionGroupId={'recovered'}
+          actionParams={{}}
+          errors={{ ['subActionParams.incident.short_description']: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      );
+      const correlationIdField = wrapper.find('input[data-test-subj="correlation_idInput"]');
+
+      correlationIdField.simulate('change', {
+        target: { value: 'updated correlation id' },
+      });
+
+      expect(editAction.mock.calls[0][1]).toEqual({
+        incident: { correlation_id: 'updated correlation id' },
+        comments: [],
+      });
+    });
   });
 });

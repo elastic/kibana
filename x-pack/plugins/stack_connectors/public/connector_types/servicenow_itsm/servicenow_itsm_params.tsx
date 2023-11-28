@@ -43,19 +43,50 @@ const defaultFields: Fields = {
   priority: [],
 };
 
+const CorrelationIdField: React.FunctionComponent<
+  Pick<ActionParamsProps<ServiceNowITSMActionParams>, 'index' | 'messageVariables'> & {
+    correlationId: string | null;
+    editSubActionProperty: (key: string, value: any) => void;
+  }
+> = ({ index, messageVariables, correlationId, editSubActionProperty }) => {
+  const { docLinks } = useKibana().services;
+  return (
+    <EuiFormRow
+      fullWidth
+      label={i18n.CORRELATION_ID}
+      helpText={
+        <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
+          <FormattedMessage
+            id="xpack.stackConnectors.components.serviceNow.correlationIDHelpLabel"
+            defaultMessage="Identifier for updating incidents"
+          />
+        </EuiLink>
+      }
+    >
+      <TextFieldWithMessageVariables
+        index={index}
+        editAction={editSubActionProperty}
+        messageVariables={messageVariables}
+        paramsProperty={'correlation_id'}
+        inputTargetValue={correlationId ?? undefined}
+      />
+    </EuiFormRow>
+  );
+};
+
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITSMActionParams>
-> = ({
-  actionConnector,
-  actionParams,
-  editAction,
-  index,
-  errors,
-  messageVariables,
-  selectedActionGroupId,
-}) => {
+> = (props) => {
   const {
-    docLinks,
+    actionConnector,
+    actionParams,
+    editAction,
+    index,
+    errors,
+    messageVariables,
+    selectedActionGroupId,
+  } = props;
+  const {
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -156,29 +187,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
 
-  const renderCorrelationId = () => (
-    <EuiFormRow
-      fullWidth
-      label={i18n.CORRELATION_ID}
-      helpText={
-        <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
-          <FormattedMessage
-            id="xpack.stackConnectors.components.serviceNow.correlationIDHelpLabel"
-            defaultMessage="Identifier for updating incidents"
-          />
-        </EuiLink>
-      }
-    >
-      <TextFieldWithMessageVariables
-        index={index}
-        editAction={editSubActionProperty}
-        messageVariables={messageVariables}
-        paramsProperty={'correlation_id'}
-        inputTargetValue={incident?.correlation_id ?? undefined}
-      />
-    </EuiFormRow>
-  );
-
   return (
     <>
       <EuiTitle size="s">
@@ -277,7 +285,14 @@ const ServiceNowParamsFields: React.FunctionComponent<
           {!isDeprecatedActionConnector && (
             <>
               <EuiFlexGroup>
-                <EuiFlexItem>{renderCorrelationId()}</EuiFlexItem>
+                <EuiFlexItem>
+                  <CorrelationIdField
+                    index={index}
+                    messageVariables={messageVariables}
+                    correlationId={incident.correlation_id}
+                    editSubActionProperty={editSubActionProperty}
+                  />
+                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFormRow fullWidth label={i18n.CORRELATION_DISPLAY}>
                     <TextFieldWithMessageVariables
@@ -335,7 +350,12 @@ const ServiceNowParamsFields: React.FunctionComponent<
           />
         </>
       ) : (
-        renderCorrelationId()
+        <CorrelationIdField
+          index={index}
+          messageVariables={messageVariables}
+          correlationId={incident.correlation_id}
+          editSubActionProperty={editSubActionProperty}
+        />
       )}
     </>
   );

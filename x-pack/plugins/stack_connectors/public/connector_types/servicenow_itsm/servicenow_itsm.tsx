@@ -50,6 +50,7 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
       const translations = await import('../lib/servicenow/translations');
       const errors = {
         'subActionParams.incident.short_description': new Array<string>(),
+        'subActionParams.incident.correlation_id': new Array<string>(),
       };
       const validationResult = {
         errors,
@@ -62,6 +63,15 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
       ) {
         errors['subActionParams.incident.short_description'].push(translations.TITLE_REQUIRED);
       }
+
+      if (
+        actionParams.subAction === 'closeIncident' &&
+        !actionParams?.subActionParams?.incident?.correlation_id?.length
+      ) {
+        errors['subActionParams.incident.correlation_id'].push(
+          translations.CORRELATION_ID_REQUIRED
+        );
+      }
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_itsm_params')),
@@ -72,7 +82,7 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
     defaultActionParams: {
       subAction: 'pushToService',
       subActionParams: {
-        incident: { correlation_id: DEFAULT_CORRELATION_ID, short_description: '' },
+        incident: { correlation_id: DEFAULT_CORRELATION_ID },
         comments: [],
       },
     },
