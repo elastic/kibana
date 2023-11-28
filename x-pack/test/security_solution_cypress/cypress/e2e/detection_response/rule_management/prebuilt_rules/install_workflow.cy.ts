@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { resetRulesTableState } from '../../../tasks/common';
-import { createRuleAssetSavedObject } from '../../../helpers/rules';
+import { resetRulesTableState } from '../../../../tasks/common';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   getInstallSingleRuleButtonByRuleId,
   GO_BACK_TO_RULES_TABLE_BUTTON,
@@ -16,19 +16,19 @@ import {
   RULE_CHECKBOX,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
-} from '../../../screens/alerts_detection_rules';
-import { selectRulesByName } from '../../../tasks/alerts_detection_rules';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../screens/breadcrumbs';
-import { installPrebuiltRuleAssets } from '../../../tasks/api_calls/prebuilt_rules';
-import { login } from '../../../tasks/login';
+} from '../../../../screens/alerts_detection_rules';
+import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../screens/breadcrumbs';
+import { installPrebuiltRuleAssets } from '../../../../tasks/api_calls/prebuilt_rules';
+import { login } from '../../../../tasks/login';
 import {
   assertInstallationRequestIsComplete,
   assertRuleInstallationSuccessToastShown,
   assertRulesPresentInInstalledRulesTable,
   clickAddElasticRulesButton,
-} from '../../../tasks/prebuilt_rules';
-import { visitRulesManagementTable } from '../../../tasks/rules_management';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+} from '../../../../tasks/prebuilt_rules';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',

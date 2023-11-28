@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
@@ -15,7 +15,7 @@ import {
   RULE_SWITCH,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   INSTALL_ALL_RULES_BUTTON,
-} from '../../../screens/alerts_detection_rules';
+} from '../../../../screens/alerts_detection_rules';
 import {
   deleteFirstRule,
   disableAutoRefresh,
@@ -24,21 +24,24 @@ import {
   selectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
-} from '../../../tasks/alerts_detection_rules';
+} from '../../../../tasks/alerts_detection_rules';
 import {
   deleteSelectedRules,
   disableSelectedRules,
   enableSelectedRules,
-} from '../../../tasks/rules_bulk_actions';
+} from '../../../../tasks/rules_bulk_actions';
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
   preventPrebuiltRulesPackageInstallation,
-} from '../../../tasks/api_calls/prebuilt_rules';
-import { deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../../tasks/api_calls/common';
-import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
-import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import {
+  deleteAlertsAndRules,
+  deletePrebuiltRulesAssets,
+} from '../../../../tasks/api_calls/common';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 const rules = Array.from(Array(5)).map((_, i) => {
   return createRuleAssetSavedObject({

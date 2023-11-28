@@ -8,13 +8,13 @@
 import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
 import type { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 
-import { resetRulesTableState } from '../../../tasks/common';
-import { INSTALL_ALL_RULES_BUTTON, TOASTER } from '../../../screens/alerts_detection_rules';
-import { getRuleAssets } from '../../../tasks/api_calls/prebuilt_rules';
-import { login } from '../../../tasks/login';
-import { clickAddElasticRulesButton } from '../../../tasks/prebuilt_rules';
-import { visitRulesManagementTable } from '../../../tasks/rules_management';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { resetRulesTableState } from '../../../../tasks/common';
+import { INSTALL_ALL_RULES_BUTTON, TOASTER } from '../../../../screens/alerts_detection_rules';
+import { getRuleAssets } from '../../../../tasks/api_calls/prebuilt_rules';
+import { login } from '../../../../tasks/login';
+import { clickAddElasticRulesButton } from '../../../../tasks/prebuilt_rules';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',

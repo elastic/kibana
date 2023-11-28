@@ -12,14 +12,14 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { createRuleAssetSavedObject } from '../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   createAndInstallMockedPrebuiltRules,
   installPrebuiltRuleAssets,
   preventPrebuiltRulesPackageInstallation,
-} from '../../../tasks/api_calls/prebuilt_rules';
-import { visit } from '../../../tasks/navigation';
-import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { visit } from '../../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import {
   ADD_ELASTIC_RULES_BTN,
   getInstallSingleRuleButtonByRuleId,
@@ -31,8 +31,8 @@ import {
   RULES_UPDATES_TAB,
   RULE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
-} from '../../../screens/alerts_detection_rules';
-import { login } from '../../../tasks/login';
+} from '../../../../screens/alerts_detection_rules';
+import { login } from '../../../../tasks/login';
 
 // Rule to test update
 const RULE_1_ID = 'rule_1';
