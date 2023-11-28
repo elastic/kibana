@@ -25,6 +25,7 @@ import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plug
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,
@@ -68,6 +69,7 @@ export interface EmbeddableStartDependencies {
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface EmbeddableSetup {

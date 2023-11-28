@@ -21,13 +21,16 @@ export const spacesServiceFactory: SpacesServiceFactory = ({ startPlugins }) => 
   const {
     getActiveSpace$,
     ui: {
-      components: { getLegacyUrlConflict },
+      components: { getLegacyUrlConflict, getSpacesContextProvider },
       redirectLegacyUrl,
+      useSpaces,
     },
   } = spaces;
   return {
     getActiveSpace$,
     getLegacyUrlConflict,
+    getSpacesContextProvider,
     redirectLegacyUrl,
+    useSpaces,
   };
 };

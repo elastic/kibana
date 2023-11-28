@@ -105,6 +105,7 @@ export const createDashboard = async (
     hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
     managed: savedObjectResult.managed,
     lastSavedId: savedObjectId,
+    namespaces: savedObjectResult.namespaces,
   };
 
   const dashboardContainer = new DashboardContainer(

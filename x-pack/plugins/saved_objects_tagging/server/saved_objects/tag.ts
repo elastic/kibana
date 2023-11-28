@@ -11,7 +11,7 @@ import { tagSavedObjectTypeName, TagAttributes } from '../../common';
 export const tagType: SavedObjectsType = {
   name: tagSavedObjectTypeName,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {

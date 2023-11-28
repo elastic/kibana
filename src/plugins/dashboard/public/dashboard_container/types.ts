@@ -48,6 +48,7 @@ export interface DashboardPublicState {
   scrollToPanelId?: string;
   highlightPanelId?: string;
   focusedPanelId?: string;
+  namespaces?: string[];
 }
 
 export interface DashboardRenderPerformanceStats {

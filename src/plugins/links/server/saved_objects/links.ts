@@ -14,7 +14,7 @@ export const linksSavedObjectType: SavedObjectsType = {
   name: CONTENT_ID,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'multiple',
   management: {
     icon: APP_ICON,
     defaultSearchField: 'title',
