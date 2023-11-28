@@ -8,15 +8,10 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
-import {
-  FieldListMap,
-  getFieldListMapFromMappingDefinitions,
-  SavedObjectsTypeMappingDefinitions,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { getTypeRegistry } from './get_type_registry';
+import { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
 import { compareFieldLists, type CompareResult } from './compare_type_field_lists';
 import { readCurrentFields, writeCurrentFields } from './current_fields';
-import { getFieldListMapFromModelVersions } from './get_field_list_from_model_version';
+import { extractFieldListsFromPlugins } from './extract_field_lists_from_plugins';
 
 export const runModelVersionMappingAdditionsChecks = async ({
   fix,
@@ -27,22 +22,11 @@ export const runModelVersionMappingAdditionsChecks = async ({
   verify: boolean;
   log: ToolingLog;
 }) => {
-  log.info('Loading core to retrieve the populated type registry...');
-  const typeRegistry = await getTypeRegistry();
-
-  const registeredTypes = typeRegistry.getAllTypes();
-  const registeredMappings = registeredTypes.reduce<SavedObjectsTypeMappingDefinitions>(
-    (memo, type) => {
-      memo[type.name] = type.mappings;
-      return memo;
-    },
-    {}
-  );
-
   log.info('Generating field lists from registry and file');
-  const fieldsFromRegisteredTypes = getFieldListMapFromMappingDefinitions(registeredMappings);
+  const { fieldsFromRegisteredTypes, fieldsFromModelVersions } = await extractFieldListsFromPlugins(
+    log
+  );
   const fieldsFromFile = await readCurrentFields();
-  const fieldsFromModelVersions = getFieldListMapFromModelVersions(registeredTypes);
 
   const allTypeNames = [
     ...new Set([
