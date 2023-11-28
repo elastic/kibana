@@ -397,12 +397,12 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
     return (
       <Fragment>
         {this.state.selectedJobs.length > 0 && (
-          <Fragment>
+          <div>
             <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
               <EuiFlexItem grow={false}>{this.renderDeleteButton()}</EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-          </Fragment>
+          </div>
         )}
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
