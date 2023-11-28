@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useAppContext } from '../context/app_context';
-import { KnowledgeBaseEntry } from '../../common/types';
 
 export function useGetKnowledgeBaseEntries(query: string) {
   const { http } = useAppContext();

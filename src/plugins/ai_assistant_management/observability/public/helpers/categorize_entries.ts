@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KnowledgeBaseEntry } from '../../common/types';
+import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 
 export interface KnowledgeBaseEntryCategory {
   categoryName: string;

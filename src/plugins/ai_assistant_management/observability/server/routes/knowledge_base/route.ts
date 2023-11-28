@@ -9,7 +9,7 @@
 import * as t from 'io-ts';
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt } from '@kbn/io-ts-utils';
-import { KnowledgeBaseEntry } from '../../../common/types';
+import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { createAIAssistantManagementObservabilityServerRoute } from '../create_ai_assistant_management_observability_server_route';
 
 const getKnowledgeBaseStatus = createAIAssistantManagementObservabilityServerRoute({

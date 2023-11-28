@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { Message, Conversation } from './types';
+export type { Message, Conversation, KnowledgeBaseEntry } from './types';
 export { MessageRole } from './types';

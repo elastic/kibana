@@ -25,7 +25,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import moment from 'moment';
-import type { KnowledgeBaseEntry } from '../../../common/types';
+import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 

@@ -28,10 +28,15 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KnowledgeBaseEntry } from '../../../common/types';
+import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
+import { useAppContext } from '../../context/app_context';
 
 export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void }) {
+  const {
+    notifications: { toasts },
+  } = useAppContext();
+
   const { mutateAsync, isLoading } = useImportKnowledgeBaseEntries();
 
   const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
@@ -53,7 +58,24 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
         Omit<KnowledgeBaseEntry, '@timestamp'>
       >;
     } catch (_) {
-      /* empty */
+      toasts.addError(
+        new Error(
+          i18n.translate(
+            'aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.errorParsingEntries.description',
+            {
+              defaultMessage: 'Error parsing JSON entries',
+            }
+          )
+        ),
+        {
+          title: i18n.translate(
+            'aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.errorParsingEntries.title',
+            {
+              defaultMessage: 'Something went wrong',
+            }
+          ),
+        }
+      );
     }
 
     try {
