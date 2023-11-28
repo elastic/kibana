@@ -23,14 +23,7 @@ export function isEsError(e: any): e is IEsError {
   return !!e.attributes;
 }
 
-export class KbnError extends Error {
-  constructor(message: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
-
-export class EsError extends KbnError {
+export class EsError extends Error {
   readonly attributes: IEsError['attributes'];
 
   constructor(protected readonly err: IEsError, private readonly openInInspector: () => void) {
@@ -41,6 +34,7 @@ export class EsError extends KbnError {
       }`
     );
     this.attributes = err.attributes;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 
   public getErrorMessage() {
