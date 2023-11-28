@@ -12,6 +12,7 @@ import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 import { CspRuleTemplate } from './schemas';
 import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
 import { getComplianceDashboardSchema } from './schemas/stats';
+import { cspRuleBulkActionRequest } from './schemas/csp_rule_template_api/bulk_action';
 
 export type AwsCredentialsType =
   | 'assume_role'
@@ -143,6 +144,8 @@ export interface GetBenchmarkResponse {
 }
 
 export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
+
+export type CspRuleBulkActionRequest = TypeOf<typeof cspRuleBulkActionRequest>;
 
 export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;
 

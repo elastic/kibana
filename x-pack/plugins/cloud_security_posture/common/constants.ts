@@ -27,6 +27,10 @@ export const BENCHMARKS_API_CURRENT_VERSION = '1';
 export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
 export const FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION = '1';
 
+export const UPDATE_CSP_RULE_STATE_ROUTE_PATH =
+  '/internal/cloud_security_posture/rules/_bulk_action';
+export const UPDATE_CSP_RULE_STATE_API_CURRENT_VERSION = '1';
+
 export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
@@ -87,6 +91,8 @@ export const INTERNAL_FEATURE_FLAGS = {
 } as const;
 
 export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
+export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE = 'cloud-security-posture-settings';
+export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID = 'csp-internal-settings';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s';
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks';

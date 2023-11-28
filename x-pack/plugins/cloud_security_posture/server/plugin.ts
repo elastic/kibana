@@ -50,6 +50,7 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
+import { getCspSettingObjectSafe } from './routes/csp_rule_template/update_csp_rule_state';
 
 export class CspPlugin
   implements
@@ -97,7 +98,12 @@ export class CspPlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
+  public async start(
+    core: CoreStart,
+    plugins: CspServerPluginStartDeps
+  ): Promise<CspServerPluginStart> {
+    const soClient = core.savedObjects.createInternalRepository();
+
     plugins.fleet.fleetSetupCompleted().then(async () => {
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
         CLOUD_SECURITY_POSTURE_PACKAGE_NAME
@@ -179,7 +185,6 @@ export class CspPlugin
         async (deletedPackagePolicies: DeepReadonly<PostDeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
-              const soClient = core.savedObjects.createInternalRepository();
               const packagePolicyService = plugins.fleet.packagePolicyService;
               const isPackageExists = await isCspPackagePolicyInstalled(
                 packagePolicyService,
@@ -194,6 +199,8 @@ export class CspPlugin
         }
       );
     });
+
+    await getCspSettingObjectSafe(soClient, this.logger);
 
     return {};
   }
