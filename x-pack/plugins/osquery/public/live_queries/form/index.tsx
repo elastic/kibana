@@ -309,14 +309,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               <AgentsTableField />
             </EuiFlexItem>
           )}
-          {queryType === 'pack' && (
+          {queryType === 'pack' ? (
             <PackFieldWrapper
               liveQueryDetails={liveQueryDetails}
               submitButtonContent={submitButtonContent}
               showResultsHeader
             />
-          )}
-          {queryType === 'query' && (
+          ) : (
             <>
               <EuiFlexItem>
                 <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
