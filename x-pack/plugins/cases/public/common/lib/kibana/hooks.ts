@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';

@@ -6,8 +6,9 @@
  */
 
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
+import { EuiSpacer, EuiFlyoutBody, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import deepEqual from 'fast-deep-equal';
 import type { EntityType } from '@kbn/timelines-plugin/common';
@@ -40,6 +41,12 @@ import {
   PROMPT_CONTEXT_EVENT_CATEGORY,
   PROMPT_CONTEXTS,
 } from '../../../../assistant/content/prompt_contexts';
+
+const FlyoutFooterContainerPanel = styled(EuiPanel)`
+  .side-panel-flyout-footer {
+    background-color: transparent;
+  }
+`;
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -254,17 +261,19 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     <>
       {header}
       {body}
-      <FlyoutFooter
-        detailsData={detailsData}
-        detailsEcsData={ecsData}
-        refetchFlyoutData={refetchFlyoutData}
-        handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        isReadOnly={isReadOnly}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
-        scopeId={scopeId}
-      />
+      <FlyoutFooterContainerPanel hasShadow={false} borderRadius="none">
+        <FlyoutFooter
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          refetchFlyoutData={refetchFlyoutData}
+          handleOnEventClosed={handleOnEventClosed}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          isReadOnly={isReadOnly}
+          loadingEventDetails={loading}
+          onAddIsolationStatusClick={showHostIsolationPanel}
+          scopeId={scopeId}
+        />
+      </FlyoutFooterContainerPanel>
     </>
   );
 };
