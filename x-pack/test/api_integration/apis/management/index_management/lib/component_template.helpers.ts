@@ -27,10 +27,7 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
       componentTemplatesCreated.push(componentTemplate.name);
     }
 
-    return es.cluster.putComponentTemplate(
-      componentTemplate,
-      { meta: true }
-    );
+    return es.cluster.putComponentTemplate(componentTemplate, { meta: true });
   };
 
   const addIndexTemplate = (indexTemplate: any, shouldCacheTemplate: boolean) => {
