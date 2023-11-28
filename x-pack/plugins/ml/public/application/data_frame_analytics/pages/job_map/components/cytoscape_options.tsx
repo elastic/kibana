@@ -68,7 +68,7 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
 
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
-      return 'black';
+      return theme.euiColorFullShade;
     case JOB_MAP_NODE_TYPES.ANALYTICS:
       return theme.euiColorSuccess;
     case JOB_MAP_NODE_TYPES.TRANSFORM:

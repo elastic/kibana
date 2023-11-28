@@ -263,7 +263,7 @@ export class AnalyticsManager {
           : {
               data: {
                 id: previousNodeId,
-                label: data?.id,
+                label: data.id,
                 type: JOB_MAP_NODE_TYPES.ANALYTICS,
                 analysisType: getAnalysisType(data?.analysis),
               },
