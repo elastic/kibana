@@ -92,9 +92,10 @@
     "@kbn/core-plugins-server",
     "@kbn/text-based-languages",
     "@kbn/field-utils",
-    "@kbn/discover-utils",
+    "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
-    "@kbn/shared-ux-button-toolbar"
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/discover-utils"
   ],
   "exclude": [
     "target/**/*",
