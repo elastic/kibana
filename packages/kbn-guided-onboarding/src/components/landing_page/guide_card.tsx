@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { DeploymentDetailsModal } from '@kbn/cloud/deployment_details';
+import { DeploymentDetailsModal, DeploymentDetailsProvider } from '@kbn/cloud/deployment_details';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
@@ -53,10 +53,11 @@ export const GuideCard = ({
   openModal,
   i18nStart,
   theme,
-}: // core,
-// docLinks,
-// shareStart,
-GuideCardsProps & { card: GuideCardConstants }) => {
+  share,
+  cloud,
+  docLinks,
+  navigateToUrl,
+}: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
   let guideState: GuideState | undefined;
@@ -64,18 +65,34 @@ GuideCardsProps & { card: GuideCardConstants }) => {
     guideState = guidesState.find((state) => state.guideId === card.guideId);
   }
 
+  const managementUrl = share.url.locators
+    .get('MANAGEMENT_APP_LOCATOR')
+    ?.useUrl({ sectionId: 'security', appId: 'api_keys' });
+
   const openESApiModal = useCallback(() => {
     const modal = openModal(
-      toMountPoint(<DeploymentDetailsModal closeModal={() => modal.close} />, {
-        theme,
-        i18n: i18nStart,
-      }),
+      toMountPoint(
+        <DeploymentDetailsProvider
+          cloudId={cloud.isCloudEnabled ? cloud.cloudId : ''}
+          elasticsearchUrl={cloud.elasticsearchUrl}
+          managementUrl={managementUrl}
+          apiKeysLearnMoreUrl={docLinks.links.fleet.apiKeysLearnMore}
+          cloudIdLearnMoreUrl={docLinks.links.cloud.beatsAndLogstashConfiguration}
+          navigateToUrl={navigateToUrl}
+        >
+          <DeploymentDetailsModal closeModal={() => modal.close()} />
+        </DeploymentDetailsProvider>,
+        {
+          theme,
+          i18n: i18nStart,
+        }
+      ),
       {
         maxWidth: 400,
         'data-test-subj': 'guideModalESApi',
       }
     );
-  }, [openModal, i18nStart, theme]);
+  }, [openModal, i18nStart, theme, cloud, docLinks, managementUrl, navigateToUrl]);
 
   const onClick = useCallback(async () => {
     setIsLoading(true);
@@ -141,7 +158,7 @@ GuideCardsProps & { card: GuideCardConstants }) => {
             </EuiTextColor>
           )}
           {isComplete && (
-            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
               </EuiFlexItem>

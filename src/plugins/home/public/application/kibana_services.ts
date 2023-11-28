@@ -17,12 +17,11 @@ import {
   ApplicationStart,
   ThemeServiceStart,
   I18nStart,
-  CoreStart,
 } from '@kbn/core/public';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { TutorialService } from '../services/tutorials';
@@ -59,7 +58,8 @@ export interface HomeKibanaServices {
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
-  // getEsEndpointModal: (core: CoreStart, Share: SharePluginStart, cloud: CloudStart, docLinks: CoreStart['docLinks'] ) => JSX.Element;
+  cloudStart: CloudStart;
+  shareStart: SharePluginStart;
 }
 
 let services: HomeKibanaServices | null = null;

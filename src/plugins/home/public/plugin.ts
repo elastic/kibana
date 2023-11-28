@@ -92,6 +92,7 @@ export class HomePublicPlugin
             shareStart,
           },
         ] = await core.getStartServices();
+
         setServices({
           share,
           trackUiMetric,
@@ -119,7 +120,6 @@ export class HomePublicPlugin
           openModal: coreStart.overlays.openModal,
           theme: core.theme,
           i18nStart: coreStart.i18n,
-          core: coreStart,
           cloudStart,
           shareStart,
         });
@@ -151,6 +151,7 @@ export class HomePublicPlugin
 
     const environment = { ...this.environmentService.setup() };
     const tutorials = { ...this.tutorialService.setup() };
+
     if (cloud) {
       environment.update({ cloud: cloud.isCloudEnabled });
       if (cloud.isCloudEnabled) {

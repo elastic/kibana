@@ -10,11 +10,14 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 
-import { OverlayStart } from '@kbn/core-overlays-browser';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { I18nStart } from '@kbn/core-i18n-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { GuideId, GuideState } from '../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
@@ -31,10 +34,10 @@ export interface GuideCardsProps {
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
-  // core: CoreStart;
-  // docLinks: DocLinksStart;
-  // cloudStart: CloudStart;
-  // shareStart: SharePluginStart;
+  share: SharePluginSetup;
+  cloud: CloudSetup;
+  docLinks: CoreStart['docLinks'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;

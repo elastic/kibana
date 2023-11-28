@@ -56,10 +56,8 @@ export const GettingStarted = () => {
     openModal,
     theme,
     i18nStart,
-    core,
     docLinks,
-    cloudStart,
-    shareStart,
+    share,
   } = getServices();
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
@@ -229,10 +227,10 @@ export const GettingStarted = () => {
           openModal={openModal}
           i18nStart={i18nStart}
           theme={theme}
-          core={core}
           docLinks={docLinks}
-          cloudStart={cloudStart}
-          shareStart={shareStart}
+          cloud={cloud!}
+          share={share}
+          navigateToUrl={application.navigateToUrl}
         />
         <EuiSpacer />
         <div className="eui-textCenter">
