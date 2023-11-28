@@ -11,7 +11,10 @@ import {
   AllDatasetsLocatorParams,
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../constants';
+import {
+  OBSERVABILITY_LOG_EXPLORER_APP_ID,
+  OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
+} from '../constants';
 import { AllDatasetsLocatorDefinition } from './all_datasets/all_datasets_locator';
 import { SingleDatasetLocatorDefinition } from './single_dataset';
 import { DatasetLocatorDependencies } from './types';
@@ -39,7 +42,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: '/?_a=(index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA)',
+        path: '/?pageState=(datasetSelection:(selectionType:all),v:1)',
         state: {},
       });
     });
@@ -54,7 +57,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: '/?_g=(time:(from:now-30m,to:now))&_a=(index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA)',
+        path: '/?pageState=(datasetSelection:(selectionType:all),time:(from:now-30m,to:now),v:1)',
         state: {},
       });
     });
@@ -71,7 +74,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: '/?_a=(index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA,query:(language:kuery,query:foo))',
+        path: '/?pageState=(datasetSelection:(selectionType:all),query:(language:kuery,query:foo),v:1)',
         state: {},
       });
     });
@@ -89,15 +92,14 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: '/?_g=(refreshInterval:(pause:!f,value:666))&_a=(index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA)',
+        path: '/?pageState=(datasetSelection:(selectionType:all),refreshInterval:(pause:!f,value:666),v:1)',
         state: {},
       });
     });
 
-    it('should allow specifiying columns and sort', async () => {
+    it('should allow specifiying columns', async () => {
       const params: AllDatasetsLocatorParams = {
         columns: ['_source'],
-        sort: [['timestamp, asc']] as string[][],
       };
 
       const { allDatasetsLocator } = await setup();
@@ -105,7 +107,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(columns:!(_source),index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA,sort:!(!('timestamp,%20asc')))`,
+        path: `/?pageState=(columns:!((field:_source)),datasetSelection:(selectionType:all),v:1)`,
         state: {},
       });
     });
@@ -139,9 +141,11 @@ describe('Observability Logs Explorer Locators', () => {
       const { allDatasetsLocator } = await setup();
       const { path } = await allDatasetsLocator.getLocation(params);
 
-      const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g'], { getFromHashQuery: false });
+      const { pageState } = getStatesFromKbnUrl(path, [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY], {
+        getFromHashQuery: false,
+      });
 
-      expect(_a).toEqual({
+      expect(pageState).toEqual({
         filters: [
           {
             $state: {
@@ -156,7 +160,7 @@ describe('Observability Logs Explorer Locators', () => {
         ],
         index: 'BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA',
       });
-      expect(_g).toEqual({
+      expect(pageState).toEqual({
         filters: [
           {
             $state: {
@@ -185,7 +189,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA)`,
+        path: `/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),v:1)`,
         state: {},
       });
     });
@@ -202,7 +206,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_g=(time:(from:now-30m,to:now))&_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA)`,
+        path: `/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),time:(from:now-30m,to:now),v:1)`,
         state: {},
       });
     });
@@ -222,7 +226,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA,query:(language:kuery,query:foo))`,
+        path: `/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),query:(language:kuery,query:foo),v:1)`,
         state: {},
       });
     });
@@ -242,17 +246,16 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_g=(refreshInterval:(pause:!f,value:666))&_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA)`,
+        path: `/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),refreshInterval:(pause:!f,value:666),v:1)`,
         state: {},
       });
     });
 
-    it('should allow specifiying columns and sort', async () => {
+    it('should allow specifiying columns', async () => {
       const params: SingleDatasetLocatorParams = {
         integration,
         dataset,
         columns: ['_source'],
-        sort: [['timestamp, asc']] as string[][],
       };
 
       const { singleDatasetLocator } = await setup();
@@ -260,7 +263,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(columns:!(_source),index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA,sort:!(!('timestamp,%20asc')))`,
+        path: `/?pageState=(columns:!((field:_source)),datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),v:1)`,
         state: {},
       });
     });
@@ -296,9 +299,11 @@ describe('Observability Logs Explorer Locators', () => {
       const { singleDatasetLocator } = await setup();
       const { path } = await singleDatasetLocator.getLocation(params);
 
-      const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g'], { getFromHashQuery: false });
+      const { pageState } = getStatesFromKbnUrl(path, [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY], {
+        getFromHashQuery: false,
+      });
 
-      expect(_a).toEqual({
+      expect(pageState).toEqual({
         filters: [
           {
             $state: {
@@ -314,7 +319,7 @@ describe('Observability Logs Explorer Locators', () => {
         index:
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA',
       });
-      expect(_g).toEqual({
+      expect(pageState).toEqual({
         filters: [
           {
             $state: {
