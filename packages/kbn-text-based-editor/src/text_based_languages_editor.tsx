@@ -621,6 +621,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     <LanguageDocumentationPopover
                       language={getLanguageDisplayName(String(language))}
                       sections={documentationSections}
+                      searchInDescription
                       buttonProps={{
                         color: 'text',
                         size: 's',
@@ -825,6 +826,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       language={
                         String(language) === 'esql' ? 'ES|QL' : String(language).toUpperCase()
                       }
+                      searchInDescription
                       sections={documentationSections}
                       buttonProps={{
                         display: 'empty',

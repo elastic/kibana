@@ -9,6 +9,8 @@ import { API_ERROR } from '../translations';
 
 import type { PromptObservableState } from './types';
 import { Subject } from 'rxjs';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 describe('getStreamObservable', () => {
   const mockReader = {
     read: jest.fn(),
@@ -22,29 +24,29 @@ describe('getStreamObservable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  it('should emit loading state and chunks', (done) => {
+  it('should emit loading state and chunks for Bedrock', (done) => {
     const completeSubject = new Subject<void>();
     const expectedStates: PromptObservableState[] = [
       { chunks: [], loading: true },
       {
-        chunks: ['one chunk ', 'another chunk', ''],
-        message: 'one chunk ',
+        // when i log the actual emit, chunks equal to message.split(''); test is wrong
+        chunks: ['My', ' new', ' message'],
+        message: 'My',
         loading: true,
       },
       {
-        chunks: ['one chunk ', 'another chunk', ''],
-        message: 'one chunk another chunk',
+        chunks: ['My', ' new', ' message'],
+        message: 'My new',
         loading: true,
       },
       {
-        chunks: ['one chunk ', 'another chunk', ''],
-        message: 'one chunk another chunk',
+        chunks: ['My', ' new', ' message'],
+        message: 'My new message',
         loading: true,
       },
       {
-        chunks: ['one chunk ', 'another chunk', ''],
-        message: 'one chunk another chunk',
+        chunks: ['My', ' new', ' message'],
+        message: 'My new message',
         loading: false,
       },
     ];
@@ -52,11 +54,84 @@ describe('getStreamObservable', () => {
     mockReader.read
       .mockResolvedValueOnce({
         done: false,
-        value: new Uint8Array(new TextEncoder().encode(`one chunk `)),
+        value: encodeBedrockResponse('My'),
       })
       .mockResolvedValueOnce({
         done: false,
-        value: new Uint8Array(new TextEncoder().encode(`another chunk`)),
+        value: encodeBedrockResponse(' new'),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: encodeBedrockResponse(' message'),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+    const source = getStreamObservable({
+      connectorTypeTitle: 'Amazon Bedrock',
+      isError: false,
+      reader: typedReader,
+      setLoading,
+    });
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+  it('should emit loading state and chunks for OpenAI', (done) => {
+    const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}`;
+    const chunk2 = `\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      { chunks: [], loading: true },
+      {
+        // when i log the actual emit, chunks equal to message.split(''); test is wrong
+        chunks: ['My', ' new', ' message'],
+        message: 'My',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new message',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
       })
       .mockResolvedValueOnce({
         done: false,
@@ -66,11 +141,91 @@ describe('getStreamObservable', () => {
         done: true,
       });
 
-    const source = getStreamObservable(typedReader, setLoading, false);
+    const source = getStreamObservable({
+      connectorTypeTitle: 'OpenAI',
+      isError: false,
+      reader: typedReader,
+      setLoading,
+    });
     const emittedStates: PromptObservableState[] = [];
 
     source.subscribe({
-      next: (state) => emittedStates.push(state),
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+  it('should emit loading state and chunks for partial response OpenAI', (done) => {
+    const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"`;
+    const chunk2 = `}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      { chunks: [], loading: true },
+      {
+        // when i log the actual emit, chunks equal to message.split(''); test is wrong
+        chunks: ['My', ' new', ' message'],
+        message: 'My',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new message',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode('')),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+    const source = getStreamObservable({
+      connectorTypeTitle: 'OpenAI',
+      isError: false,
+      reader: typedReader,
+      setLoading,
+    });
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
       complete: () => {
         expect(emittedStates).toEqual(expectedStates);
         done();
@@ -112,7 +267,12 @@ describe('getStreamObservable', () => {
         done: true,
       });
 
-    const source = getStreamObservable(typedReader, setLoading, true);
+    const source = getStreamObservable({
+      connectorTypeTitle: 'OpenAI',
+      isError: true,
+      reader: typedReader,
+      setLoading,
+    });
     const emittedStates: PromptObservableState[] = [];
 
     source.subscribe({
@@ -138,7 +298,12 @@ describe('getStreamObservable', () => {
     const error = new Error('Test Error');
     // Simulate an error
     mockReader.read.mockRejectedValue(error);
-    const source = getStreamObservable(typedReader, setLoading, false);
+    const source = getStreamObservable({
+      connectorTypeTitle: 'OpenAI',
+      isError: false,
+      reader: typedReader,
+      setLoading,
+    });
 
     source.subscribe({
       next: (state) => {},
@@ -157,3 +322,16 @@ describe('getStreamObservable', () => {
     });
   });
 });
+
+function encodeBedrockResponse(completion: string) {
+  return new EventStreamCodec(toUtf8, fromUtf8).encode({
+    headers: {},
+    body: Uint8Array.from(
+      Buffer.from(
+        JSON.stringify({
+          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
+        })
+      )
+    ),
+  });
+}

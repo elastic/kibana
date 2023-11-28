@@ -23,12 +23,7 @@ export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
 export type KafkaVerificationMode = typeof kafkaVerificationModes;
-export type OutputSecret =
-  | string
-  | {
-      id: string;
-      hash?: string;
-    };
+
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
@@ -50,7 +45,11 @@ interface NewBaseOutput {
   allow_edit?: string[];
   secrets?: {
     ssl?: {
-      key?: OutputSecret;
+      key?:
+        | string
+        | {
+            id: string;
+          };
     };
   };
 }
@@ -132,9 +131,17 @@ export interface KafkaOutput extends NewBaseOutput {
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
   secrets?: {
-    password?: OutputSecret;
+    password?:
+      | string
+      | {
+          id: string;
+        };
     ssl?: {
-      key?: OutputSecret;
+      key?:
+        | string
+        | {
+            id: string;
+          };
     };
   };
 }

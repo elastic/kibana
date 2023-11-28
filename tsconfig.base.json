@@ -1280,6 +1280,12 @@
       "@kbn/security-api-integration-helpers/*": ["x-pack/test/security_api_integration/packages/helpers/*"],
       "@kbn/security-plugin": ["x-pack/plugins/security"],
       "@kbn/security-plugin/*": ["x-pack/plugins/security/*"],
+      "@kbn/security-plugin-types-common": ["x-pack/packages/security/plugin_types_common"],
+      "@kbn/security-plugin-types-common/*": ["x-pack/packages/security/plugin_types_common/*"],
+      "@kbn/security-plugin-types-public": ["x-pack/packages/security/plugin_types_public"],
+      "@kbn/security-plugin-types-public/*": ["x-pack/packages/security/plugin_types_public/*"],
+      "@kbn/security-plugin-types-server": ["x-pack/packages/security/plugin_types_server"],
+      "@kbn/security-plugin-types-server/*": ["x-pack/packages/security/plugin_types_server/*"],
       "@kbn/security-solution-ess": ["x-pack/plugins/security_solution_ess"],
       "@kbn/security-solution-ess/*": ["x-pack/plugins/security_solution_ess/*"],
       "@kbn/security-solution-features": ["x-pack/packages/security-solution/features"],
@@ -1500,8 +1506,6 @@
       "@kbn/stdio-dev-helpers/*": ["packages/kbn-stdio-dev-helpers/*"],
       "@kbn/storybook": ["packages/kbn-storybook"],
       "@kbn/storybook/*": ["packages/kbn-storybook/*"],
-      "@kbn/subscription-tracking": ["packages/kbn-subscription-tracking"],
-      "@kbn/subscription-tracking/*": ["packages/kbn-subscription-tracking/*"],
       "@kbn/synthetics-plugin": ["x-pack/plugins/synthetics"],
       "@kbn/synthetics-plugin/*": ["x-pack/plugins/synthetics/*"],
       "@kbn/task-manager-fixture-plugin": ["x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture"],
@@ -1680,9 +1684,7 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": [
-        "typings/@emotion"
-      ],
+      "@emotion/core": ["typings/@emotion"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -1753,6 +1755,6 @@
       "@kbn/ambient-ui-types",
       "@kbn/ambient-common-types",
       "@kbn/ambient-storybook-types"
-    ],
+    ]
   }
 }

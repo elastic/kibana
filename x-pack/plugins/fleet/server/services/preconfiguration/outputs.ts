@@ -8,16 +8,8 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
-import argon2 from 'argon2';
 
-import type {
-  PreconfiguredOutput,
-  Output,
-  NewOutput,
-  OutputSecret,
-  KafkaOutput,
-  NewLogstashOutput,
-} from '../../../common/types';
+import type { PreconfiguredOutput, Output, NewOutput } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
@@ -107,77 +99,23 @@ export async function createOrUpdatePreconfiguredOutputs(
       }
 
       const isUpdateWithNewData =
-        existingOutput && (await isPreconfiguredOutputDifferentFromCurrent(existingOutput, data));
+        existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
 
-      if (isCreate || isUpdateWithNewData) {
-        const secretHashes = await hashSecrets(output);
-
-        if (isCreate) {
-          logger.debug(`Creating preconfigured output ${output.id}`);
-          await outputService.create(soClient, esClient, data, {
-            id,
-            fromPreconfiguration: true,
-            secretHashes,
-          });
-        } else if (isUpdateWithNewData) {
-          logger.debug(`Updating preconfigured output ${output.id}`);
-          await outputService.update(soClient, esClient, id, data, {
-            fromPreconfiguration: true,
-            secretHashes,
-          });
-          // Bump revision of all policies using that output
-          if (outputData.is_default || outputData.is_default_monitoring) {
-            await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
-          } else {
-            await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
-          }
+      if (isCreate) {
+        logger.debug(`Creating output ${output.id}`);
+        await outputService.create(soClient, esClient, data, { id, fromPreconfiguration: true });
+      } else if (isUpdateWithNewData) {
+        logger.debug(`Updating output ${output.id}`);
+        await outputService.update(soClient, esClient, id, data, { fromPreconfiguration: true });
+        // Bump revision of all policies using that output
+        if (outputData.is_default || outputData.is_default_monitoring) {
+          await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+        } else {
+          await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
         }
       }
     })
   );
-}
-
-export async function hash(str: string) {
-  return argon2.hash(str, {
-    type: argon2.argon2id,
-    memoryCost: 19456,
-    timeCost: 2,
-    parallelism: 1,
-  });
-}
-
-async function hashSecrets(output: PreconfiguredOutput) {
-  if (output.type === 'kafka') {
-    const kafkaOutput = output as KafkaOutput;
-    if (typeof kafkaOutput.secrets?.password === 'string') {
-      const password = await hash(kafkaOutput.secrets?.password);
-      return {
-        password,
-      };
-    }
-    if (typeof kafkaOutput.secrets?.ssl?.key === 'string') {
-      const key = await hash(kafkaOutput.secrets?.ssl?.key);
-      return {
-        ssl: {
-          key,
-        },
-      };
-    }
-  }
-  if (output.type === 'logstash') {
-    const logstashOutput = output as NewLogstashOutput;
-
-    if (typeof logstashOutput.secrets?.ssl?.key === 'string') {
-      const key = await hash(logstashOutput.secrets?.ssl?.key);
-      return {
-        ssl: {
-          key,
-        },
-      };
-    }
-  }
-
-  return undefined;
 }
 
 export async function cleanPreconfiguredOutputs(
@@ -227,55 +165,14 @@ export async function cleanPreconfiguredOutputs(
   }
 }
 
-const hasHash = (secret?: OutputSecret): secret is { id: string; hash: string } => {
-  return !!secret && typeof secret !== 'string' && !!secret.hash;
-};
-
-async function isSecretDifferent(
-  preconfiguredValue: OutputSecret | undefined,
-  existingSecret: OutputSecret | undefined
-): Promise<boolean> {
-  if (!existingSecret && preconfiguredValue) {
-    return true;
-  }
-
-  if (!preconfiguredValue && existingSecret) {
-    return true;
-  }
-
-  if (!preconfiguredValue && !existingSecret) {
-    return false;
-  }
-
-  if (hasHash(existingSecret) && typeof preconfiguredValue === 'string') {
-    // verifying the has tells us if the value has changed
-    const hashIsVerified = await argon2.verify(existingSecret.hash, preconfiguredValue!);
-
-    return !hashIsVerified;
-  } else {
-    // if there is no hash then the safest thing to do is assume the value has changed
-    return true;
-  }
-}
-
-async function isPreconfiguredOutputDifferentFromCurrent(
+function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
-): Promise<boolean> {
-  const kafkaFieldsAreDifferent = async (): Promise<boolean> => {
+): boolean {
+  const kafkaFieldsAreDifferent = (): boolean => {
     if (existingOutput.type !== 'kafka' || preconfiguredOutput.type !== 'kafka') {
       return false;
     }
-
-    const passwordHashIsDifferent = await isSecretDifferent(
-      preconfiguredOutput.secrets?.password,
-      existingOutput.secrets?.password
-    );
-
-    const sslKeyHashIsDifferent = await isSecretDifferent(
-      preconfiguredOutput.secrets?.ssl?.key,
-      existingOutput.secrets?.ssl?.key
-    );
 
     return (
       isDifferent(existingOutput.client_id, preconfiguredOutput.client_id) ||
@@ -296,22 +193,8 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
       isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||
-      isDifferent(existingOutput.required_acks, preconfiguredOutput.required_acks) ||
-      passwordHashIsDifferent ||
-      sslKeyHashIsDifferent
+      isDifferent(existingOutput.required_acks, preconfiguredOutput.required_acks)
     );
-  };
-
-  const logstashFieldsAreDifferent = async (): Promise<boolean> => {
-    if (existingOutput.type !== 'logstash' || preconfiguredOutput.type !== 'logstash') {
-      return false;
-    }
-    const sslKeyHashIsDifferent = await isSecretDifferent(
-      preconfiguredOutput.secrets?.ssl?.key,
-      existingOutput.secrets?.ssl?.key
-    );
-
-    return sslKeyHashIsDifferent;
   };
 
   return (
@@ -338,7 +221,6 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
     isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
-    (await kafkaFieldsAreDifferent()) ||
-    (await logstashFieldsAreDifferent())
+    kafkaFieldsAreDifferent()
   );
 }

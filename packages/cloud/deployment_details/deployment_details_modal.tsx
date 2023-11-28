@@ -38,8 +38,8 @@ export const DeploymentDetailsModal: FC<Props> = ({ closeModal }) => {
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('cloud.deploymentDetails.helpMenuLinks.endpoints', {
-            defaultMessage: 'Endpoints',
+          {i18n.translate('cloud.deploymentDetails.helpMenuLinks.connectionDetails', {
+            defaultMessage: 'Connection details',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

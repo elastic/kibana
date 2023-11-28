@@ -322,7 +322,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         case outputType.Elasticsearch:
           return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
             defaultMessage:
-              'This output type does not support connectivity to a remote Elasticsearch cluster, please the Remote Elasticsearch type for that.',
+              'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
           });
       }
     };
@@ -335,7 +335,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
             values={{
               doc: (
-                <EuiLink href={docLinks.links.fleet.guide} target="_blank">
+                <EuiLink href={docLinks.links.fleet.remoteESOoutput} target="_blank">
                   {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
                     defaultMessage: 'our documentation',
                   })}

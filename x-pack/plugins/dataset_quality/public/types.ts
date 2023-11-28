@@ -5,14 +5,22 @@
  * 2.0.
  */
 
+import { ComponentType } from 'react';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DatasetQualityPluginStart {}
+export interface DatasetQualityPluginStart {
+  DatasetQuality: ComponentType;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DatasetQualityStartDependencies {}
+export interface DatasetQualityStartDeps {
+  share: SharePluginStart;
+  fieldFormats: FieldFormatsStart;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DatasetQualitySetupDependencies {}
+export interface DatasetQualitySetupDeps {
+  share: SharePluginSetup;
+}

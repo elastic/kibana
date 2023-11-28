@@ -643,6 +643,9 @@ packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/platform-deployment-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
 x-pack/plugins/security @elastic/kibana-security
+x-pack/packages/security/plugin_types_common @elastic/kibana-security
+x-pack/packages/security/plugin_types_public @elastic/kibana-security
+x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
@@ -753,7 +756,6 @@ test/server_integration/plugins/status_plugin_b @elastic/kibana-core
 packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
-packages/kbn-subscription-tracking @elastic/security-threat-hunting-investigations
 x-pack/plugins/synthetics @elastic/obs-ux-infra_services-team
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
