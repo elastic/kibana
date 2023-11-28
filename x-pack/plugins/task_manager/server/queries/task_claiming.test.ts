@@ -12,7 +12,7 @@ import { filter, take, toArray } from 'rxjs/operators';
 import { TaskStatus, ConcreteTaskInstance } from '../task';
 import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
-import { asOk } from '../lib/result_type';
+import { asOk, isOk, unwrap } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import type { MustNotCondition } from './query_clauses';
 import { mockLogger } from '../test_utils';
@@ -26,6 +26,8 @@ import { Observable } from 'rxjs';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
+import { ClaimOwnershipResult } from './task_claimer';
+import { FillPoolResult } from '../lib/fill_pool';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -210,7 +212,21 @@ describe('TaskClaiming', () => {
         versionConflicts,
       });
 
-      const results = await getAllAsPromise(taskClaiming.claimAvailableTasks(claimingOpts));
+      const resultsOrErr = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable(claimingOpts)
+      );
+      for (const resultOrErr of resultsOrErr) {
+        if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+          expect(resultOrErr).toBe(undefined);
+        }
+      }
+
+      const results = resultsOrErr.map((resultOrErr) => {
+        if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+          expect(resultOrErr).toBe(undefined);
+        }
+        return unwrap(resultOrErr) as ClaimOwnershipResult;
+      });
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
@@ -266,7 +282,7 @@ describe('TaskClaiming', () => {
 
       await expect(
         getAllAsPromise(
-          taskClaiming.claimAvailableTasks({
+          taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
             claimOwnershipUntil: new Date(),
           })
         )
@@ -708,7 +724,7 @@ if (doc['task.runAt'].size()!=0) {
       async function getUpdateByQueryScriptParams() {
         return (
           await getAllAsPromise(
-            taskClaiming.claimAvailableTasks({
+            taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
               claimOwnershipUntil: new Date(),
             })
           )
@@ -1277,7 +1293,7 @@ if (doc['task.runAt'].size()!=0) {
         .toPromise();
 
       await getFirstAsPromise(
-        taskClaiming.claimAvailableTasks({
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
           claimOwnershipUntil: new Date(),
         })
       );
