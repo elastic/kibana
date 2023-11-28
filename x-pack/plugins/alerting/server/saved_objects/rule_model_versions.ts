@@ -16,7 +16,7 @@ interface CustomSavedObjectsModelVersion extends SavedObjectsModelVersion {
   isCompatibleWithPreviousVersion: (param: RawRule) => boolean;
 }
 
-interface CustomSavedObjectsModelVersionMap extends SavedObjectsModelVersionMap {
+export interface CustomSavedObjectsModelVersionMap extends SavedObjectsModelVersionMap {
   [modelVersion: string]: CustomSavedObjectsModelVersion;
 }
 
@@ -32,13 +32,17 @@ export const ruleModelVersions: CustomSavedObjectsModelVersionMap = {
 
 export const getLatestRuleVersion = () => Math.max(...Object.keys(ruleModelVersions).map(Number));
 
-export function getMinimumCompatibleVersion(version: number, rawRule: RawRule): number {
+export function getMinimumCompatibleVersion(
+  modelVersions: CustomSavedObjectsModelVersionMap,
+  version: number,
+  rawRule: RawRule
+): number {
   if (version === 1) {
     return 1;
   }
 
-  if (ruleModelVersions[version].isCompatibleWithPreviousVersion(rawRule)) {
-    return getMinimumCompatibleVersion(version - 1, rawRule);
+  if (modelVersions[version].isCompatibleWithPreviousVersion(rawRule)) {
+    return getMinimumCompatibleVersion(modelVersions, version - 1, rawRule);
   }
 
   return version;
