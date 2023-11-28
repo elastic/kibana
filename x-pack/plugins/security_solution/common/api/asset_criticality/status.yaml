@@ -12,14 +12,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssetCriticlityStatusResponse'
+                $ref: '#/components/schemas/AssetCriticalityStatusResponse'
         '400':
           description: Invalid request
               responses:
 
 components:
   schemas:
-    AssetCriticlityStatusResponse:
+    AssetCriticalityStatusResponse:
       type: object
       properties:
         asset_criticality_resources_installed:
