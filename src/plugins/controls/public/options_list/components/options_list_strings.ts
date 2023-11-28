@@ -146,7 +146,7 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectedOptionsTitle', {
         defaultMessage: 'Show only selected options',
       }),
-    getSearchPlaceholder: (searchTechnique: OptionsListSearchTechnique) => {
+    getSearchPlaceholder: (searchTechnique?: OptionsListSearchTechnique) => {
       switch (searchTechnique) {
         case 'prefix': {
           return i18n.translate('controls.optionsList.popover.prefixSearchPlaceholder', {

@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 import {
-  getCompatibleSearchTypes,
+  getCompatibleSearchTechniques,
   OptionsListSearchTechnique,
 } from '../../../common/options_list/suggestions_searching';
 import {
@@ -127,20 +127,16 @@ export const OptionsListEditorOptions = ({
       return optionsListService.getAllowExpensiveQueries();
     }, []);
 
+  const compatibleSearchTechniques = useMemo(
+    () => getCompatibleSearchTechniques(fieldType),
+    [fieldType]
+  );
+
   const searchOptions = useMemo(() => {
-    const compatibleTypes = getCompatibleSearchTypes(fieldType);
     return allSearchOptions.filter((searchOption) => {
-      return compatibleTypes.includes(searchOption.id as OptionsListSearchTechnique);
+      return compatibleSearchTechniques.includes(searchOption.id as OptionsListSearchTechnique);
     });
-  }, [fieldType]);
-
-  useEffect(() => {
-    if (searchOptions.length === 0) return;
-
-    const searchTechnique = searchOptions[0].id as OptionsListSearchTechnique;
-    onChange({ searchTechnique });
-    setState((s) => ({ ...s, searchTechnique }));
-  }, [searchOptions, onChange]);
+  }, [compatibleSearchTechniques]);
 
   useEffect(() => {
     // when field type changes, ensure that the selected sort type is still valid
@@ -153,6 +149,20 @@ export const OptionsListEditorOptions = ({
       }));
     }
   }, [fieldType, onChange, state.sortBy]);
+
+  useEffect(() => {
+    // when field type changes, ensure that the selected search technique is still valid
+    const searchTechnique =
+      initialInput?.searchTechnique &&
+      compatibleSearchTechniques.includes(initialInput.searchTechnique)
+        ? initialInput.searchTechnique
+        : compatibleSearchTechniques[0];
+    onChange({ searchTechnique });
+    setState((s) => ({
+      ...s,
+      searchTechnique,
+    }));
+  }, [compatibleSearchTechniques, onChange, initialInput]);
 
   return (
     <>
@@ -175,7 +185,8 @@ export const OptionsListEditorOptions = ({
           <EuiLoadingSpinner size="l" />
         </EuiFormRow>
       ) : (
-        allowExpensiveQueries && (
+        allowExpensiveQueries &&
+        compatibleSearchTechniques.length > 0 && (
           <EuiFormRow
             label={OptionsListStrings.editor.getSearchOptionsTitle()}
             data-test-subj="optionsListControl__searchOptionsRadioGroup"

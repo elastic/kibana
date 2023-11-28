@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
-  EuiFieldSearch,
   EuiButtonIcon,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiToolTip,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
-import { OptionsListStrings } from './options_list_strings';
+import { getCompatibleSearchTechniques } from '../../../common/options_list/suggestions_searching';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
-import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
+import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -48,9 +48,14 @@ export const OptionsListPopoverActionBar = ({
     (state) => state.componentState.allowExpensiveQueries
   );
 
+  const compatibleSearchTechniques = useMemo(() => {
+    if (!fieldSpec) return [];
+    return getCompatibleSearchTechniques(fieldSpec.type);
+  }, [fieldSpec]);
+
   return (
     <div className="optionsList__actions">
-      {fieldSpec && fieldSpec.type !== 'date' && (
+      {compatibleSearchTechniques.length > 0 && (
         <EuiFormRow className="optionsList__searchRow" fullWidth>
           <EuiFieldSearch
             isInvalid={!searchString.valid}
@@ -61,7 +66,7 @@ export const OptionsListPopoverActionBar = ({
             value={searchString.value}
             data-test-subj="optionsList-control-search-input"
             placeholder={OptionsListStrings.popover.getSearchPlaceholder(
-              searchTechnique ?? getDefaultSearchTechnique(fieldSpec.type)
+              searchTechnique ?? compatibleSearchTechniques[0]
             )}
           />
         </EuiFormRow>
