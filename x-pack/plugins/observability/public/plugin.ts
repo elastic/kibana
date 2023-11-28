@@ -20,6 +20,10 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type {
+  AssetManagerPublicPluginSetup,
+  AssetManagerPublicPluginStart,
+} from '@kbn/assetManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -64,6 +68,7 @@ import { firstValueFrom } from 'rxjs';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
+  ASSETS_INVENTORY_PATH,
   CASES_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
@@ -107,6 +112,7 @@ export interface ConfigSchema {
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
+  assetManager: AssetManagerPublicPluginSetup;
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
@@ -120,6 +126,7 @@ export interface ObservabilityPublicPluginsSetup {
 
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assetManager: AssetManagerPublicPluginStart;
   cases: CasesUiStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
@@ -210,6 +217,13 @@ export class Plugin
         },
       },
     }),
+    {
+      id: 'assets-inventory',
+      title: 'Assets Inventory',
+      navLinkStatus: AppNavLinkStatus.visible,
+      order: 8004,
+      path: ASSETS_INVENTORY_PATH,
+    },
   ];
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}

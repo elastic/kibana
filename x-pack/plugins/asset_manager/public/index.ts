@@ -18,3 +18,4 @@ export const plugin: PluginInitializer<
 
 export type { AssetManagerPublicPluginSetup, AssetManagerPublicPluginStart };
 export type AssetManagerAppId = 'assetManager';
+export { assetFiltersRT } from '../common/types_api';

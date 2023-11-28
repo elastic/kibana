@@ -23,6 +23,7 @@ import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import {
   ALERTS_PATH,
   ALERT_DETAIL_PATH,
+  ASSETS_INVENTORY_PATH,
   CASES_PATH,
   EXPLORATORY_VIEW_PATH,
   LANDING_PATH,
@@ -37,6 +38,7 @@ import {
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
 } from '../../common/locators/paths';
+import { AssetsInventoryPage } from '../pages/assets_inventory/assets_inventory';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -161,6 +163,13 @@ export const routes = {
   [SLO_DETAIL_PATH]: {
     handler: () => {
       return <SloDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [ASSETS_INVENTORY_PATH]: {
+    handler: () => {
+      return <AssetsInventoryPage />;
     },
     params: {},
     exact: true,

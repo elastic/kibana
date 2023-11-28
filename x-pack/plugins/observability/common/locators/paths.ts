@@ -21,6 +21,7 @@ export const SLO_DETAIL_PATH = '/slos/:sloId' as const;
 export const SLO_CREATE_PATH = '/slos/create' as const;
 export const SLO_EDIT_PATH = '/slos/edit/:sloId' as const;
 export const CASES_PATH = '/cases' as const;
+export const ASSETS_INVENTORY_PATH = '/assets-inventory' as const;
 
 export const paths = {
   observability: {

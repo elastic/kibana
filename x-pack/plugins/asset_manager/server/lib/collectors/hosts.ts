@@ -65,7 +65,11 @@ export async function collectHosts({
     dsl.search_after = afterKey;
   }
 
+  console.log('hi 22', JSON.stringify(dsl));
+
   const esResponse = await client.search(dsl);
+
+  console.log('hi 33', JSON.stringify(esResponse));
 
   const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
     const { fields = {} } = hit;
@@ -111,6 +115,8 @@ export async function collectHosts({
 
     return acc;
   }, []);
+
+  console.log('hi 44');
 
   const hitsLen = esResponse.hits.hits.length;
   const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
