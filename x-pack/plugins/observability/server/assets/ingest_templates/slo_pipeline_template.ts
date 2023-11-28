@@ -12,6 +12,12 @@ export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => (
   description: 'Monthly date-time index naming for SLO data',
   processors: [
     {
+      set: {
+        field: 'event.ingested',
+        value: '{{{_ingest.timestamp}}}',
+      },
+    },
+    {
       date_index_name: {
         field: '@timestamp',
         index_name_prefix: indexNamePrefix,
