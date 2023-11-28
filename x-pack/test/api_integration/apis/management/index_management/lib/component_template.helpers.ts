@@ -29,15 +29,12 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
   const removeIndexTemplate = (name: string) =>
     es.indices.deleteIndexTemplate({ name }, { meta: true });
 
-  const addComponentTemplate = (
-    componentTemplate: ClusterPutComponentTemplateRequest,
-    shouldCacheTemplate: boolean
-  ) => {
+  const addComponentTemplate = (componentTemplate: Template, shouldCacheTemplate: boolean) => {
     if (shouldCacheTemplate) {
       componentTemplatesCreated.push(componentTemplate.name);
     }
 
-    return es.cluster.putComponentTemplate(componentTemplate, { meta: true });
+    return es.cluster.putComponentTemplate(componentTemplate as ClusterPutComponentTemplateRequest, { meta: true });
   };
 
   const addIndexTemplate = (indexTemplate: Template, shouldCacheTemplate: boolean) => {
