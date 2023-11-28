@@ -18,11 +18,11 @@ export interface CommonObservabilityLogExplorerContext {
   initialLogExplorerState: LogExplorerPublicStateUpdate;
 }
 
-interface WithLogExplorerState {
+export interface WithLogExplorerState {
   logExplorerState: LogExplorerPublicState;
 }
 
-interface WithController {
+export interface WithController {
   controller: LogExplorerController;
 }
 
