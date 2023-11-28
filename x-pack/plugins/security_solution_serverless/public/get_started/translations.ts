@@ -58,14 +58,14 @@ export const TASKS_LEFT = (tasks: number) =>
   );
 
 export const SECTION_1_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.getSetUp.title',
+  'xpack.securitySolutionServerless.getStarted.togglePanel.section1.title',
   {
     defaultMessage: 'Quick start',
   }
 );
 
 export const SECTION_2_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.getSetUp.title',
+  'xpack.securitySolutionServerless.getStarted.togglePanel.section2.title',
   {
     defaultMessage: 'Add and validate your data',
   }

@@ -35,6 +35,7 @@ import type { ProductLine } from '../../../common/product';
 import { StepContent } from './step_content';
 import { useKibana } from '../../common/services';
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
+import { useStepContext } from '../context/step_context';
 
 const HEIGHT_ANIMATION_DURATION = 250;
 
@@ -78,17 +79,19 @@ const CardStepComponent: React.FC<{
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
     [activeProducts, cardId, sectionId]
   );
-  const { title, description, splitPanel, icon, checkIfStepCompleted } =
+  const { title, description, splitPanel, icon, autoCheckIfStepCompleted } =
     steps?.find((step) => step.id === stepId) ?? {};
   const hasStepContent = description != null || splitPanel != null;
   const expandedStepPanelHeight = `calc(${stepContentRef.current?.offsetHeight}px + ${euiTheme.size.l} + ${euiTheme.size.xxxl})`;
+  const { indicesExist } = useStepContext();
 
   useCheckStepCompleted({
-    checkIfStepCompleted,
-    toggleTaskCompleteStatus,
-    stepId,
+    autoCheckIfStepCompleted,
     cardId,
+    indicesExist,
     sectionId,
+    stepId,
+    toggleTaskCompleteStatus,
   });
 
   const isDone = finishedSteps.has(stepId);
@@ -245,10 +248,11 @@ const CardStepComponent: React.FC<{
       {hasStepContent && isExpandedStep && (
         <div ref={stepContentRef}>
           <StepContent
+            autoCheckIfStepCompleted={autoCheckIfStepCompleted}
             cardId={cardId}
-            checkIfStepCompleted={checkIfStepCompleted}
             description={description}
             hasStepContent={hasStepContent}
+            indicesExist={indicesExist}
             isExpandedStep={isExpandedStep}
             sectionId={sectionId}
             splitPanel={splitPanel}

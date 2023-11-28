@@ -31,6 +31,9 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ hash: '#watch_the_overview_video' }),
 }));
 jest.mock('../common/hooks/use_user_name');
+jest.mock('@kbn/security-solution-plugin/public', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
+}));
 
 const productTypes = [
   { product_line: 'security', product_tier: 'essentials' },

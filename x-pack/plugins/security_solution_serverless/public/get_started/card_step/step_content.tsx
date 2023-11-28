@@ -23,21 +23,23 @@ const RIGHT_CONTENT_HEIGHT = 270;
 const RIGHT_CONTENT_WIDTH = 480;
 
 const StepContentComponent = ({
+  autoCheckIfStepCompleted,
   cardId,
-  checkIfStepCompleted,
   description,
   hasStepContent,
   isExpandedStep,
+  indicesExist,
   sectionId,
   splitPanel,
   stepId,
   toggleTaskCompleteStatus,
 }: {
+  autoCheckIfStepCompleted?: CheckIfStepCompleted;
   cardId: CardId;
-  checkIfStepCompleted?: CheckIfStepCompleted;
   description?: React.ReactNode[];
   hasStepContent: boolean;
   isExpandedStep: boolean;
+  indicesExist: boolean;
   sectionId: SectionId;
   splitPanel?: React.ReactNode;
   stepId: StepId;
@@ -47,11 +49,12 @@ const StepContentComponent = ({
   const shadow = useEuiShadow('s');
 
   useCheckStepCompleted({
-    checkIfStepCompleted,
-    toggleTaskCompleteStatus,
-    stepId,
+    autoCheckIfStepCompleted,
     cardId,
+    indicesExist,
     sectionId,
+    stepId,
+    toggleTaskCompleteStatus,
   });
 
   return hasStepContent && isExpandedStep ? (

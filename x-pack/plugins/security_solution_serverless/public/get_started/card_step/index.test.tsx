@@ -74,10 +74,13 @@ describe('CardStepComponent', () => {
   });
 
   it('should render step content when expanded', () => {
-    const { getByText, getByTestId } = render(<CardStep {...props} />);
-
-    const stepTitle = getByText(testStepTitle);
-    fireEvent.click(stepTitle);
+    const mockProps = {
+      ...props,
+      expandedSteps: new Set([
+        QuickStartSectionCardsId.watchTheOverviewVideo,
+      ]) as unknown as Set<StepId>,
+    };
+    const { getByTestId } = render(<CardStep {...mockProps} />);
 
     const content = getByTestId('mock-step-content');
 
@@ -108,17 +111,18 @@ describe('CardStepComponent', () => {
     expect(text).not.toBeInTheDocument();
   });
 
-  it('should  show the step as completed when it is done', () => {
+  it('should show the step as completed when it is done', async () => {
     (fetchRuleManagementFilters as jest.Mock).mockResolvedValue({
       rules_summary: { custom_count: 1, prebuilt_installed_count: 1 },
     });
     const mockProps = {
       ...props,
-      stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
       cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
-      finishedSteps: new Set<StepId>([]),
       description: undefined,
+      finishedSteps: new Set<StepId>([EnablePrebuiltRulesSteps.enablePrebuiltRules]),
+      sectionId: SectionId.getStartedWithAlerts,
       splitPanel: undefined,
+      stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
     };
     const { queryByText } = render(<CardStep {...mockProps} />);
 

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { useSourcererDataView } from '@kbn/security-solution-plugin/public';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useKibana } from '../../common/services';
-import { fetchRuleManagementFilters } from '../apis';
 import type {
   StepId,
   CardId,
@@ -16,63 +14,53 @@ import type {
   CheckIfStepCompleted,
   ToggleTaskCompleteStatus,
 } from '../types';
-import { AddIntegrationsSteps, EnablePrebuiltRulesSteps } from '../types';
 
 interface Props {
-  checkIfStepCompleted?: CheckIfStepCompleted;
-  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
-  stepId: StepId;
+  autoCheckIfStepCompleted?: CheckIfStepCompleted;
   cardId: CardId;
+  indicesExist: boolean;
   sectionId: SectionId;
+  stepId: StepId;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 
 export const useCheckStepCompleted = ({
-  checkIfStepCompleted,
-  toggleTaskCompleteStatus,
-  stepId,
+  autoCheckIfStepCompleted,
   cardId,
+  indicesExist,
   sectionId,
+  stepId,
+  toggleTaskCompleteStatus,
 }: Props) => {
-  const { indicesExist } = useSourcererDataView();
   const kibanaServicesHttp = useKibana().services.http;
   const abortSignal = useRef(new AbortController());
 
-  const autoCheckStepCompleted = useCallback(async () => {
-    if (checkIfStepCompleted == null) {
+  useEffect(() => {
+    if (!autoCheckIfStepCompleted) {
       return;
     }
 
-    if (stepId === EnablePrebuiltRulesSteps.enablePrebuiltRules) {
-      const ruleManagementFilters = await fetchRuleManagementFilters({
-        http: kibanaServicesHttp,
-        signal: abortSignal.current.signal,
+    const autoCheckStepCompleted = async () => {
+      const isDone = await autoCheckIfStepCompleted({
+        indicesExist,
+        abortSignal,
+        kibanaServicesHttp,
       });
-      const isRulesInstalled =
-        ruleManagementFilters?.rules_summary?.custom_count > 0 ||
-        ruleManagementFilters?.rules_summary?.prebuilt_installed_count > 0;
-      const done = checkIfStepCompleted?.(isRulesInstalled);
-      toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo: !done });
-    }
 
-    if (stepId === AddIntegrationsSteps.connectToDataSources) {
-      const done = checkIfStepCompleted?.(indicesExist);
-      toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo: !done });
-    }
-  }, [
-    cardId,
-    checkIfStepCompleted,
-    indicesExist,
-    kibanaServicesHttp,
-    sectionId,
-    stepId,
-    toggleTaskCompleteStatus,
-  ]);
-
-  useEffect(() => {
+      toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo: !isDone });
+    };
     autoCheckStepCompleted();
     const currentAbortController = abortSignal.current;
     return () => {
       currentAbortController.abort();
     };
-  }, [autoCheckStepCompleted]);
+  }, [
+    autoCheckIfStepCompleted,
+    stepId,
+    cardId,
+    sectionId,
+    toggleTaskCompleteStatus,
+    kibanaServicesHttp,
+    indicesExist,
+  ]);
 };

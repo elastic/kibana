@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MutableRefObject } from 'react';
 import React from 'react';
 
-import type { StepId } from './types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Step, StepId } from './types';
 import {
   SectionId,
   QuickStartSectionCardsId,
@@ -33,6 +35,7 @@ import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
 import { DashboardButton } from './step_links/dashboard_button';
 import overviewVideo from './images/overview_video.svg';
 import { Video } from './card_step/video';
+import { fetchRuleManagementFilters } from './apis';
 
 export const createProjectSteps = [
   {
@@ -51,7 +54,7 @@ export const overviewVideoSteps = [
   },
 ];
 
-export const addIntegrationsSteps = [
+export const addIntegrationsSteps: Array<Step<AddIntegrationsSteps.connectToDataSources>> = [
   {
     icon: { type: 'fleetApp', size: 'xl' as const },
     id: AddIntegrationsSteps.connectToDataSources,
@@ -65,7 +68,8 @@ export const addIntegrationsSteps = [
         width="100%"
       />
     ),
-    checkIfStepCompleted: (indicesExist: boolean) => indicesExist === true,
+    autoCheckIfStepCompleted: async ({ indicesExist }: { indicesExist: boolean }) =>
+      Promise.resolve(indicesExist),
   },
 ];
 
@@ -86,7 +90,7 @@ export const viewDashboardSteps = [
   },
 ];
 
-export const enablePrebuildRuleSteps = [
+export const enablePrebuildRuleSteps: Array<Step<EnablePrebuiltRulesSteps.enablePrebuiltRules>> = [
   {
     title: i18n.SECTION_3_CARD_1_TITLE,
     icon: { type: 'advancedSettingsApp', size: 'xl' as const },
@@ -100,7 +104,21 @@ export const enablePrebuildRuleSteps = [
         width="100%"
       />
     ),
-    checkIfStepCompleted: (rulesInstalled: boolean) => rulesInstalled === true,
+    autoCheckIfStepCompleted: async ({
+      abortSignal,
+      kibanaServicesHttp,
+    }: {
+      abortSignal: MutableRefObject<AbortController>;
+      kibanaServicesHttp: HttpSetup;
+    }) => {
+      const data = await fetchRuleManagementFilters({
+        http: kibanaServicesHttp,
+        signal: abortSignal.current.signal,
+      });
+      const isRulesInstalled =
+        data?.rules_summary?.custom_count > 0 || data?.rules_summary?.prebuilt_installed_count > 0;
+      return isRulesInstalled;
+    },
   },
 ];
 

@@ -9,6 +9,7 @@ import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
+import { useSourcererDataView } from '@kbn/security-solution-plugin/public';
 import { TogglePanel } from './toggle_panel';
 
 import type { SecurityProductTypes } from '../../common/config';
@@ -40,6 +41,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
   const productTier = productTypes.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
+  const { indicesExist } = useSourcererDataView();
 
   return (
     <KibanaPageTemplate
@@ -94,6 +96,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         <StepContextProvider
           expandedCardSteps={expandedCardSteps}
           finishedSteps={finishedSteps}
+          indicesExist={indicesExist}
           toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         >
           <TogglePanel

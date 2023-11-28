@@ -11,6 +11,7 @@ import type { ToggleTaskCompleteStatus, CardId, StepId, ExpandedCardSteps } from
 export interface StepContextType {
   expandedCardSteps: ExpandedCardSteps;
   finishedSteps: Record<CardId, Set<StepId>>;
+  indicesExist: boolean;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 

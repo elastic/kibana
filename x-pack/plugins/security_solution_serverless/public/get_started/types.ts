@@ -7,6 +7,8 @@
 
 import type { EuiIconProps } from '@elastic/eui';
 import type React from 'react';
+import type { MutableRefObject } from 'react';
+import type { HttpSetup } from '@kbn/core/public';
 
 import type { ProductLine } from '../../common/product';
 
@@ -30,10 +32,28 @@ export type StepId =
   | EnablePrebuiltRulesSteps
   | ViewAlertsSteps;
 
-export type CheckIfStepCompleted = (isCompleted: boolean) => boolean;
+type AutoCheckAddIntegrationsSteps = ({
+  indicesExist,
+}: {
+  indicesExist: boolean;
+}) => Promise<boolean>;
+type AutoCheckEnablePrebuiltRulesSteps = ({
+  abortSignal,
+  kibanaServicesHttp,
+}: {
+  abortSignal: MutableRefObject<AbortController>;
+  kibanaServicesHttp: HttpSetup;
+}) => Promise<boolean>;
 
-export interface Step {
-  checkIfStepCompleted?: CheckIfStepCompleted;
+export type CheckIfStepCompleted<T = StepId> =
+  T extends EnablePrebuiltRulesSteps.enablePrebuiltRules
+    ? AutoCheckEnablePrebuiltRulesSteps
+    : T extends AddIntegrationsSteps.connectToDataSources
+    ? AutoCheckAddIntegrationsSteps
+    : undefined;
+
+export interface Step<T = StepId> {
+  autoCheckIfStepCompleted?: CheckIfStepCompleted<T>;
   description?: Array<React.ReactNode | string>;
   id: StepId;
   productLineRequired?: ProductLine[];
