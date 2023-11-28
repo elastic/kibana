@@ -6,43 +6,43 @@
  */
 
 import { format as formatUrl } from 'url';
-import supertest from 'supertest';
-// @ts-ignore internal modules are not typed
-import TestAgent from 'supertest/lib/agent';
-// @ts-ignore internal modules are not typed
-import Test from 'supertest/lib/test';
+import supertest, { type SuperAgentTest } from 'supertest';
+import request from 'superagent';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-const methods = ['get', 'post', 'put', 'head', 'delete'];
-
-methods.forEach(function (method) {
-  TestAgent.prototype[method] = function (url: any, fn: any) {
-    const req = new Test(this.app, method.toUpperCase(), url);
-    if (this._options.http2) {
-      req.http2();
-    }
-
-    if (this._host) {
-      req.set('host', this._host);
-    }
-
-    req.on('response', this._saveCookies.bind(this));
-    req.on('redirect', this._saveCookies.bind(this));
-    req.on('redirect', this._attachCookies.bind(this, req));
-    this._setDefaults(req);
-    // The only change to the module original logic is to avoid caching cookies in agent
-    // this._attachCookies(req);
-
-    return req;
-  };
-});
+/**
+ * Return a new SuperAgentTest instance for every API call to avoid cookie caching.
+ * If you want to verify cookies are empty use the following code:
+ * import { CookieAccessInfo } from 'cookiejar';
+ * console.log(JSON.stringify(agent.jar.getCookies(CookieAccessInfo.All)));
+ */
+const initSuperAgentTest = (kbnUrl: string, ca?: string[]) => {
+  return {
+    get(url: string, callback?: request.CallbackHandler | undefined) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.get(url, callback);
+    },
+    delete(url: string, callback?: request.CallbackHandler | undefined) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.delete(url, callback);
+    },
+    post(url: string, callback?: request.CallbackHandler | undefined) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.post(url, callback);
+    },
+    put(url: string, callback?: request.CallbackHandler | undefined) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.put(url, callback);
+    },
+  } as Pick<SuperAgentTest, 'get' | 'delete' | 'post' | 'put'>;
+};
 
 export function SupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kbnUrl = formatUrl(config.get('servers.kibana'));
   const ca = config.get('servers.kibana').certificateAuthorities;
 
-  return supertest.agent(kbnUrl, { ca });
+  return initSuperAgentTest(kbnUrl, ca);
 }
 
 export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext) {
@@ -51,7 +51,7 @@ export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext)
     ...config.get('servers.kibana'),
     auth: false,
   });
-  const ca = config.get('servers.kibana').certificateAuthorities;
+  const ca = config.get('servers.kibana').certificateAuthorities as string[];
 
-  return supertest.agent(kbnUrl, { ca });
+  return initSuperAgentTest(kbnUrl, ca);
 }
