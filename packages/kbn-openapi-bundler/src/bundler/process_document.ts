@@ -141,7 +141,9 @@ export async function processDocument(
     const traverseItem = postOrderTraversalStack[i];
 
     for (const processor of processors) {
-      if (traverseItem.resolvedRef) {
+      // If ref has been inlined by one of the processors it's not a ref node anymore
+      // so we can skip the following processors
+      if (isRefNode(traverseItem.node) && traverseItem.resolvedRef) {
         processor.ref?.(
           traverseItem.node as RefNode,
           traverseItem.resolvedRef,

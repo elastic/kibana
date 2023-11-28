@@ -76,6 +76,47 @@ describe('OpenAPI Bundler', () => {
       /\/components\/schemas\/ConflictTestSchema/
     );
   });
+
+  describe('x-modify', () => {
+    it('makes properties in an object node partial', async () => {
+      await bundleFolder('modify_partial_node');
+      await expectBundleToMatchFile('modify_partial_node', 'expected.yaml');
+    });
+
+    it('makes properties in a referenced object node partial', async () => {
+      await bundleFolder('modify_partial_ref');
+      await expectBundleToMatchFile('modify_partial_ref', 'expected.yaml');
+    });
+
+    it('makes properties in an object node required', async () => {
+      await bundleFolder('modify_required_node');
+      await expectBundleToMatchFile('modify_required_node', 'expected.yaml');
+    });
+
+    it('makes properties in a referenced object node required', async () => {
+      await bundleFolder('modify_required_ref');
+      await expectBundleToMatchFile('modify_required_ref', 'expected.yaml');
+    });
+  });
+
+  describe('x-inline', () => {
+    it('inlines a reference', async () => {
+      await bundleFolder('inline_ref');
+      await expectBundleToMatchFile('inline_ref', 'expected.yaml');
+    });
+  });
+
+  describe('skip internal', () => {
+    it('skips nodes with x-internal property', async () => {
+      await bundleFolder('skip_internal');
+      await expectBundleToMatchFile('skip_internal', 'expected.yaml');
+    });
+
+    it('skips endpoints starting with /internal', async () => {
+      await bundleFolder('skip_internal_endpoint');
+      await expectBundleToMatchFile('skip_internal_endpoint', 'expected.yaml');
+    });
+  });
 });
 
 async function bundleFolder(folderName: string): Promise<void> {
