@@ -6,7 +6,7 @@
  */
 
 export const scaffoldingLensDoc = {
-  title: 'scaffoldingLensDoc',
+  title: 'Metric chart for comparison',
   description: '',
   visualizationType: 'lnsXY',
   type: 'lens',

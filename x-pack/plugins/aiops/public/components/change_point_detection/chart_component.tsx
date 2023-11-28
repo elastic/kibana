@@ -58,7 +58,6 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(
         }}
         disableTriggers
         onLoad={onLoading}
-        withDefaultActions={true}
       />
     );
   }

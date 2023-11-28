@@ -236,28 +236,32 @@ export default function AlertDetailsRelatedEvents({
                     paddingSize="xs"
                     hasShadow={false}
                     hasBorder={true}
-                    style={{ marginTop: 10, height: 450 }}
+                    style={{ marginTop: 10 }}
                   >
-                    <EuiText textAlign="right" size="s" style={{ marginTop: 3 }}>
-                      {metricAggType}
-                      <FormattedMessage
-                        id="xpack.observability.relatedEventsTab.TextLabelLeft"
-                        defaultMessage="("
+                    <EuiPanel paddingSize="none" hasShadow={false} hasBorder={false}>
+                      <EuiText textAlign="right" size="s" style={{ marginTop: 3 }}>
+                        {metricAggType}
+                        <FormattedMessage
+                          id="xpack.observability.relatedEventsTab.TextLabelLeft"
+                          defaultMessage="("
+                        />
+                        {relatedMetric}
+                        {i18n.translate('xpack.observability.relatedEventsTab.TextLabelRight', {
+                          defaultMessage: ')',
+                        })}
+                      </EuiText>
+                      <EuiHorizontalRule size="full" margin="xs" />
+                    </EuiPanel>
+                    <EuiPanel paddingSize="xs" hasShadow={false} hasBorder={false}>
+                      <lens.EmbeddableComponent
+                        id={`relatedMetricChangeChart${relatedMetricIndex}`}
+                        key={`relatedMetricChangeChart${relatedMetricIndex}`}
+                        style={{ marginTop: 25, height: 320 }}
+                        timeRange={relatedEventsTimeRange()}
+                        attributes={getMetricChart(relatedMetric)}
+                        withDefaultActions={true}
                       />
-                      {relatedMetric}
-                      {i18n.translate('xpack.observability.relatedEventsTab.TextLabelRight', {
-                        defaultMessage: ')',
-                      })}
-                    </EuiText>
-                    <EuiHorizontalRule size="full" margin="xs" />
-                    <lens.EmbeddableComponent
-                      id={`relatedMetricChangeChart${relatedMetricIndex}`}
-                      key={`relatedMetricChangeChart${relatedMetricIndex}`}
-                      style={{ marginTop: 60, height: 320 }}
-                      timeRange={relatedEventsTimeRange()}
-                      attributes={getMetricChart(relatedMetric)}
-                      withDefaultActions={true}
-                    />
+                    </EuiPanel>
                   </EuiPanel>
                 </EuiFlexItem>
               </EuiFlexGroup>
