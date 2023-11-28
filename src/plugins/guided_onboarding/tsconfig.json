@@ -21,6 +21,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/config-schema",
     "@kbn/features-plugin",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",
