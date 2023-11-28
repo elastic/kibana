@@ -9,24 +9,32 @@ import { render } from '@testing-library/react';
 import { StepContent } from './step_content';
 
 describe('StepContent', () => {
+  const updateStepStatus = jest.fn();
+  const description = ['Description Line 1', 'Description Line 2'];
+  const splitPanel = <div>{'Split Panel Content'}</div>;
+
   it('renders nothing when hasStepContent is false', () => {
     const { container } = render(
-      <StepContent hasStepContent={false} isExpandedStep={true} stepId="test-step" />
+      <StepContent
+        hasStepContent={false}
+        isExpandedStep={true}
+        stepId="test-step"
+        updateStepStatus={updateStepStatus}
+      />
     );
 
     expect(container.firstChild).toBeNull();
   });
 
   it('renders step content when hasStepContent is true and isExpandedStep is true', () => {
-    const description = ['Description Line 1', 'Description Line 2'];
-    const splitPanel = <div>{'Split Panel Content'}</div>;
     const { getByTestId, getByText } = render(
       <StepContent
+        description={description}
         hasStepContent={true}
         isExpandedStep={true}
-        stepId="test-step"
-        description={description}
         splitPanel={splitPanel}
+        stepId="test-step"
+        updateStepStatus={updateStepStatus}
       />
     );
 
@@ -41,7 +49,13 @@ describe('StepContent', () => {
 
   it('renders nothing when hasStepContent is true but isExpandedStep is false', () => {
     const { container } = render(
-      <StepContent hasStepContent={true} isExpandedStep={false} stepId="test-step" />
+      <StepContent
+        description={description}
+        hasStepContent={true}
+        isExpandedStep={false}
+        stepId="test-step"
+        updateStepStatus={updateStepStatus}
+      />
     );
 
     expect(container.firstChild).toBeNull();

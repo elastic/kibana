@@ -81,6 +81,7 @@ const CardItemComponent: React.FC<{
         }
       `}
       borderRadius="none"
+      data-test-subj={cardId}
     >
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem>

@@ -18,6 +18,8 @@ const mockEuiTheme: EuiThemeComputed = {
     l: '16px',
     base: '20px',
   },
+  colors: {},
+  font: { weight: { bold: 700 } },
 } as EuiThemeComputed;
 const finishedSteps = {
   [QuickStartSectionCardsId.createFirstProject]: new Set<StepId>([
