@@ -118,11 +118,13 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
   },
 } as const);
 
+export type ElasticCurateModelName = 'elser' | 'e5';
+
 export interface ModelDefinition {
   /**
    * Model name, e.g. elser
    */
-  modelName: string;
+  modelName: ElasticCurateModelName;
   version: number;
   /**
    * Default PUT model configuration

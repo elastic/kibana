@@ -76,6 +76,24 @@ describe('modelsProvider', () => {
           version: 2,
           modelName: 'elser',
         },
+        {
+          config: { input: { field_names: ['text_field'] } },
+          description: 'Embedding Model E5',
+          name: '.multilingual-e5-small',
+          default: true,
+          version: 1,
+          modelName: 'e5',
+        },
+        {
+          arch: 'amd64',
+          config: { input: { field_names: ['text_field'] } },
+          description: 'Embedding Model E5, optimized for linux-x86_64',
+          name: '.multilingual-e5-small_linux-x86_64',
+          os: 'Linux',
+          recommended: true,
+          version: 1,
+          modelName: 'e5',
+        },
       ]);
     });
 
@@ -129,6 +147,23 @@ describe('modelsProvider', () => {
           version: 2,
           modelName: 'elser',
         },
+        {
+          config: { input: { field_names: ['text_field'] } },
+          description: 'Embedding Model E5',
+          name: '.multilingual-e5-small',
+          recommended: true,
+          version: 1,
+          modelName: 'e5',
+        },
+        {
+          arch: 'amd64',
+          config: { input: { field_names: ['text_field'] } },
+          description: 'Embedding Model E5, optimized for linux-x86_64',
+          name: '.multilingual-e5-small_linux-x86_64',
+          os: 'Linux',
+          version: 1,
+          modelName: 'e5',
+        },
       ]);
     });
   });
@@ -173,6 +208,39 @@ describe('modelsProvider', () => {
     test('provides the requested version of a recommended architecture', async () => {
       const result = await modelService.getELSER({ version: 2 });
       expect(result.name).toEqual('.elser_model_2_linux-x86_64');
+    });
+  });
+
+  describe('getCuratedModelConfig', () => {
+    test('provides a recommended definition by default', async () => {
+      const result = await modelService.getCuratedModelConfig('e5');
+      expect(result.name).toEqual('.multilingual-e5-small_linux-x86_64');
+    });
+
+    test('provides a default version if there is no recommended', async () => {
+      mockCloud.cloudId = undefined;
+      (mockClient.asInternalUser.transport.request as jest.Mock).mockResolvedValueOnce({
+        _nodes: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+        },
+        cluster_name: 'default',
+        nodes: {
+          yYmqBqjpQG2rXsmMSPb9pQ: {
+            name: 'node-0',
+            roles: ['ml'],
+            attributes: {},
+            os: {
+              name: 'Mac OS X',
+              arch: 'aarch64',
+            },
+          },
+        },
+      });
+
+      const result = await modelService.getCuratedModelConfig('e5');
+      expect(result.name).toEqual('.multilingual-e5-small');
     });
   });
 });
