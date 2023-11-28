@@ -187,6 +187,38 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
               </div>
             ) : null}
 
+            {modelName === 'e5' ? (
+              <div>
+                <EuiTitle size={'s'}>
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.e5Title"
+                      defaultMessage="E5"
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <p>
+                  <EuiText color={'subdued'} size={'s'}>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.addModelFlyout.e5Description"
+                      defaultMessage="E5 produces dense vectors embeddings that can be searched in multiple languages."
+                    />
+                  </EuiText>
+                </p>
+                <EuiSpacer size="s" />
+                <p>
+                  <EuiLink href={docLinks.links.ml.nlpElser} external>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.elserViewDocumentationLinkLabel"
+                      defaultMessage="View documentation"
+                    />
+                  </EuiLink>
+                </p>
+                <EuiSpacer size={'m'} />
+              </div>
+            ) : null}
+
             <EuiFormFieldset
               legend={{
                 children: (
