@@ -51,7 +51,7 @@ import {
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
 import type {
-  FrameDatasourceAPI,
+  FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
@@ -477,7 +477,7 @@ export type FieldBasedOperationErrorMessage =
         newState: (
           data: DataPublicPluginStart,
           core: CoreStart,
-          frame: FrameDatasourceAPI,
+          frame: FramePublicAPI,
           layerId: string
         ) => Promise<FormBasedLayer>;
       };

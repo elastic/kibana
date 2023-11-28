@@ -249,6 +249,7 @@ describe('LogViewsClient class', () => {
           },
         ],
         "dataViewReference": DataView {
+          "allowHidden": false,
           "allowNoIndex": false,
           "deleteFieldFormat": [Function],
           "deleteScriptedFieldInternal": [Function],
@@ -274,6 +275,7 @@ describe('LogViewsClient class', () => {
           },
           "fields": FldList [],
           "flattenHit": [Function],
+          "getAllowHidden": [Function],
           "getFieldAttrs": [Function],
           "getIndexPattern": [Function],
           "getName": [Function],
@@ -298,6 +300,7 @@ describe('LogViewsClient class', () => {
             },
           },
           "scriptedFields": Array [],
+          "setAllowHidden": [Function],
           "setFieldFormat": [Function],
           "setIndexPattern": [Function],
           "shortDotsEnable": false,

@@ -71,7 +71,10 @@ export interface CreateTestEsClusterOptions {
    */
   esArgs?: string[];
   esFrom?: string;
-  esServerlessOptions?: Pick<ServerlessOptions, 'image' | 'tag' | 'resources' | 'host'>;
+  esServerlessOptions?: Pick<
+    ServerlessOptions,
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl'
+  >;
   esJavaOpts?: string;
   /**
    * License to run your cluster under. Keep in mind that a `trial` license
@@ -242,10 +245,7 @@ export function createTestEsCluster<
         await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
-          image: esServerlessOptions?.image,
-          tag: esServerlessOptions?.tag,
-          host: esServerlessOptions?.host,
-          resources: esServerlessOptions?.resources,
+          ...esServerlessOptions,
           port,
           clean: true,
           background: true,

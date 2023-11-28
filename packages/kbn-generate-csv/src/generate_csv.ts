@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { lastValueFrom } from 'rxjs';
+import type { Writable } from 'stream';
+
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
+import { ES_SEARCH_STRATEGY, cellHasFormulas, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
 import type {
@@ -17,20 +20,20 @@ import type {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import { lastValueFrom } from 'rxjs';
-import type { Writable } from 'stream';
 import {
-  CancellationToken,
   AuthenticationExpiredError,
+  CancellationToken,
   ReportingError,
-  TaskRunResult,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
-import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
-import { MaxSizeStringBuilder } from './max_size_string_builder';
-import { i18nTexts } from './i18n_texts';
-import { CsvExportSettings, getExportSettings } from './get_export_settings';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+
 import { CONTENT_TYPE_CSV } from './constants';
+import { CsvExportSettings, getExportSettings } from './get_export_settings';
+import { i18nTexts } from './i18n_texts';
+import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { JobParamsCSV } from '../types';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -49,8 +52,8 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: Omit<JobParams, 'version'>,
-    private config: CsvConfig,
+    private job: Omit<JobParamsCSV, 'version'>,
+    private config: ReportingConfigType['csv'],
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,

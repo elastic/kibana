@@ -47,7 +47,8 @@ const goToRulesAndOpenValueListModal = () => {
   openValueListsModal();
 };
 
-describe('Use Value list in exception entry', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/171252
+describe.skip('Use Value list in exception entry', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
   });

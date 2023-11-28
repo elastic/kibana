@@ -10,13 +10,19 @@ import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
-import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
-import { logRateAnalysisTestData } from './test_data';
+import { getLogRateAnalysisTestData, API_VERSIONS } from './test_data';
+import {
+  getAddSignificationItemsActions,
+  getHistogramActions,
+  getGroupActions,
+  getGroupHistogramActions,
+} from './test_helpers';
 
 export default ({ getService }: FtrProviderContext) => {
   const aiops = getService('aiops');
@@ -26,202 +32,202 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   describe('POST /internal/aiops/log_rate_analysis - full analysis', () => {
-    logRateAnalysisTestData.forEach((testData) => {
-      describe(`with ${testData.testName}`, () => {
-        before(async () => {
-          if (testData.esArchive) {
-            await esArchiver.loadIfNeeded(testData.esArchive);
-          } else if (testData.dataGenerator) {
-            await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
-          }
-        });
-
-        after(async () => {
-          if (testData.esArchive) {
-            await esArchiver.unload(testData.esArchive);
-          } else if (testData.dataGenerator) {
-            await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
-          }
-        });
-
-        async function assertAnalysisResult(data: any[]) {
-          expect(data.length).to.eql(
-            testData.expected.actionsLength,
-            `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
-          );
-          data.forEach((d) => {
-            expect(typeof d.type).to.be('string');
+    API_VERSIONS.forEach((apiVersion) => {
+      getLogRateAnalysisTestData<typeof apiVersion>().forEach((testData) => {
+        describe(`with v${apiVersion} - ${testData.testName}`, () => {
+          before(async () => {
+            if (testData.esArchive) {
+              await esArchiver.loadIfNeeded(testData.esArchive);
+            } else if (testData.dataGenerator) {
+              await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
+            }
           });
 
-          const addSignificantTermsActions = data.filter(
-            (d) => d.type === testData.expected.significantTermFilter
-          );
-          expect(addSignificantTermsActions.length).to.greaterThan(0);
-
-          const significantTerms = orderBy(
-            addSignificantTermsActions.flatMap((d) => d.payload),
-            ['doc_count'],
-            ['desc']
-          );
-
-          expect(significantTerms).to.eql(
-            testData.expected.significantTerms,
-            'Significant terms do not match expected values.'
-          );
-
-          const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
-          const histograms = histogramActions.flatMap((d) => d.payload);
-          // for each significant term we should get a histogram
-          expect(histogramActions.length).to.be(significantTerms.length);
-          // each histogram should have a length of 20 items.
-          histograms.forEach((h, index) => {
-            expect(h.histogram.length).to.be(20);
+          after(async () => {
+            if (testData.esArchive) {
+              await esArchiver.unload(testData.esArchive);
+            } else if (testData.dataGenerator) {
+              await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
+            }
           });
 
-          const groupActions = data.filter((d) => d.type === testData.expected.groupFilter);
-          const groups = groupActions.flatMap((d) => d.payload);
+          async function assertAnalysisResult(data: any[]) {
+            expect(data.length).to.eql(
+              testData.expected.actionsLength,
+              `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
+            );
+            data.forEach((d) => {
+              expect(typeof d.type).to.be('string');
+            });
 
-          expect(orderBy(groups, ['docCount'], ['desc'])).to.eql(
-            orderBy(testData.expected.groups, ['docCount'], ['desc']),
-            'Grouping result does not match expected values.'
-          );
+            const addSignificantItemsActions = getAddSignificationItemsActions(data, apiVersion);
+            expect(addSignificantItemsActions.length).to.greaterThan(0);
 
-          const groupHistogramActions = data.filter(
-            (d) => d.type === testData.expected.groupHistogramFilter
-          );
-          const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
-          // for each significant terms group we should get a histogram
-          expect(groupHistograms.length).to.be(groups.length);
-          // each histogram should have a length of 20 items.
-          groupHistograms.forEach((h, index) => {
-            expect(h.histogram.length).to.be(20);
-          });
-        }
+            const significantItems = orderBy(
+              addSignificantItemsActions.flatMap((d) => d.payload),
+              ['doc_count'],
+              ['desc']
+            );
 
-        async function requestWithoutStreaming(body: AiopsApiLogRateAnalysis['body']) {
-          const resp = await supertest
-            .post(`/internal/aiops/log_rate_analysis`)
-            .set('kbn-xsrf', 'kibana')
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-            .send(body)
-            .expect(200);
+            expect(significantItems).to.eql(
+              testData.expected.significantItems,
+              'Significant items do not match expected values.'
+            );
 
-          // compression is on by default so if the request body is undefined
-          // the response header should include "gzip" and otherwise be "undefined"
-          if (body.compressResponse === undefined) {
-            expect(resp.header['content-encoding']).to.be('gzip');
-          } else if (body.compressResponse === false) {
-            expect(resp.header['content-encoding']).to.be(undefined);
+            const histogramActions = getHistogramActions(data, apiVersion);
+            const histograms = histogramActions.flatMap((d) => d.payload);
+            // for each significant term we should get a histogram
+            expect(histogramActions.length).to.be(significantItems.length);
+            // each histogram should have a length of 20 items.
+            histograms.forEach((h, index) => {
+              expect(h.histogram.length).to.be(20);
+            });
+
+            const groupActions = getGroupActions(data, apiVersion);
+            const groups = groupActions.flatMap((d) => d.payload);
+
+            expect(orderBy(groups, ['docCount'], ['desc'])).to.eql(
+              orderBy(testData.expected.groups, ['docCount'], ['desc']),
+              'Grouping result does not match expected values.'
+            );
+
+            const groupHistogramActions = getGroupHistogramActions(data, apiVersion);
+            const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
+            // for each significant terms group we should get a histogram
+            expect(groupHistograms.length).to.be(groups.length);
+            // each histogram should have a length of 20 items.
+            groupHistograms.forEach((h, index) => {
+              expect(h.histogram.length).to.be(20);
+            });
           }
 
-          expect(Buffer.isBuffer(resp.body)).to.be(true);
+          async function requestWithoutStreaming(
+            body: AiopsLogRateAnalysisSchema<typeof apiVersion>
+          ) {
+            const resp = await supertest
+              .post(`/internal/aiops/log_rate_analysis`)
+              .set('kbn-xsrf', 'kibana')
+              .set(ELASTIC_HTTP_VERSION_HEADER, apiVersion)
+              .send(body)
+              .expect(200);
 
-          const chunks: string[] = resp.body.toString().split('\n');
-
-          expect(chunks.length).to.eql(
-            testData.expected.chunksLength,
-            `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
-          );
-
-          const lastChunk = chunks.pop();
-          expect(lastChunk).to.be('');
-
-          let data: any[] = [];
-
-          expect(() => {
-            data = chunks.map((c) => JSON.parse(c));
-          }).not.to.throwError();
-
-          await assertAnalysisResult(data);
-        }
-
-        it('should return full data without streaming with compression with flushFix', async () => {
-          await requestWithoutStreaming(testData.requestBody);
-        });
-
-        it('should return full data without streaming with compression without flushFix', async () => {
-          await requestWithoutStreaming({ ...testData.requestBody, flushFix: false });
-        });
-
-        it('should return full data without streaming without compression with flushFix', async () => {
-          await requestWithoutStreaming({ ...testData.requestBody, compressResponse: false });
-        });
-
-        it('should return full data without streaming without compression without flushFix', async () => {
-          await requestWithoutStreaming({
-            ...testData.requestBody,
-            compressResponse: false,
-            flushFix: false,
-          });
-        });
-
-        async function requestWithStreaming(body: AiopsApiLogRateAnalysis['body']) {
-          const resp = await fetch(`${kibanaServerUrl}/internal/aiops/log_rate_analysis`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              [ELASTIC_HTTP_VERSION_HEADER]: '1',
-              'kbn-xsrf': 'stream',
-            },
-            body: JSON.stringify(body),
-          });
-
-          // compression is on by default so if the request body is undefined
-          // the response header should include "gzip" and otherwise be "null"
-          if (body.compressResponse === undefined) {
-            expect(resp.headers.get('content-encoding')).to.be('gzip');
-          } else if (body.compressResponse === false) {
-            expect(resp.headers.get('content-encoding')).to.be(null);
-          }
-
-          expect(resp.ok).to.be(true);
-          expect(resp.status).to.be(200);
-
-          const stream = resp.body;
-
-          expect(stream).not.to.be(null);
-
-          if (stream !== null) {
-            const data: any[] = [];
-            let chunkCounter = 0;
-            const parseStreamCallback = (c: number) => (chunkCounter = c);
-
-            for await (const action of parseStream(stream, parseStreamCallback)) {
-              expect(action.type).not.to.be('error');
-              data.push(action);
+            // compression is on by default so if the request body is undefined
+            // the response header should include "gzip" and otherwise be "undefined"
+            if (body.compressResponse === undefined) {
+              expect(resp.header['content-encoding']).to.be('gzip');
+            } else if (body.compressResponse === false) {
+              expect(resp.header['content-encoding']).to.be(undefined);
             }
 
-            // Originally we assumed that we can assert streaming in contrast
-            // to non-streaming if there is more than one chunk. However,
-            // this turned out to be flaky since a stream could finish fast
-            // enough to contain only one chunk. So now we are checking if
-            // there's just one chunk or more.
-            expect(chunkCounter).to.be.greaterThan(
-              0,
-              `Expected 'chunkCounter' to be greater than 0, got ${chunkCounter}.`
+            expect(Buffer.isBuffer(resp.body)).to.be(true);
+
+            const chunks: string[] = resp.body.toString().split('\n');
+
+            expect(chunks.length).to.eql(
+              testData.expected.chunksLength,
+              `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
             );
+
+            const lastChunk = chunks.pop();
+            expect(lastChunk).to.be('');
+
+            let data: any[] = [];
+
+            expect(() => {
+              data = chunks.map((c) => JSON.parse(c));
+            }).not.to.throwError();
 
             await assertAnalysisResult(data);
           }
-        }
 
-        it('should return data in chunks with streaming with compression with flushFix', async () => {
-          await requestWithStreaming(testData.requestBody);
-        });
+          it('should return full data without streaming with compression with flushFix', async () => {
+            await requestWithoutStreaming(testData.requestBody);
+          });
 
-        it('should return data in chunks with streaming with compression without flushFix', async () => {
-          await requestWithStreaming({ ...testData.requestBody, flushFix: false });
-        });
+          it('should return full data without streaming with compression without flushFix', async () => {
+            await requestWithoutStreaming({ ...testData.requestBody, flushFix: false });
+          });
 
-        it('should return data in chunks with streaming without compression with flushFix', async () => {
-          await requestWithStreaming({ ...testData.requestBody, compressResponse: false });
-        });
+          it('should return full data without streaming without compression with flushFix', async () => {
+            await requestWithoutStreaming({ ...testData.requestBody, compressResponse: false });
+          });
 
-        it('should return data in chunks with streaming without compression without flushFix', async () => {
-          await requestWithStreaming({
-            ...testData.requestBody,
-            compressResponse: false,
-            flushFix: false,
+          it('should return full data without streaming without compression without flushFix', async () => {
+            await requestWithoutStreaming({
+              ...testData.requestBody,
+              compressResponse: false,
+              flushFix: false,
+            });
+          });
+
+          async function requestWithStreaming(body: AiopsLogRateAnalysisSchema<typeof apiVersion>) {
+            const resp = await fetch(`${kibanaServerUrl}/internal/aiops/log_rate_analysis`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                [ELASTIC_HTTP_VERSION_HEADER]: apiVersion,
+                'kbn-xsrf': 'stream',
+              },
+              body: JSON.stringify(body),
+            });
+
+            // compression is on by default so if the request body is undefined
+            // the response header should include "gzip" and otherwise be "null"
+            if (body.compressResponse === undefined) {
+              expect(resp.headers.get('content-encoding')).to.be('gzip');
+            } else if (body.compressResponse === false) {
+              expect(resp.headers.get('content-encoding')).to.be(null);
+            }
+
+            expect(resp.ok).to.be(true);
+            expect(resp.status).to.be(200);
+
+            const stream = resp.body;
+
+            expect(stream).not.to.be(null);
+
+            if (stream !== null) {
+              const data: any[] = [];
+              let chunkCounter = 0;
+              const parseStreamCallback = (c: number) => (chunkCounter = c);
+
+              for await (const action of parseStream(stream, parseStreamCallback)) {
+                expect(action.type).not.to.be('error');
+                data.push(action);
+              }
+
+              // Originally we assumed that we can assert streaming in contrast
+              // to non-streaming if there is more than one chunk. However,
+              // this turned out to be flaky since a stream could finish fast
+              // enough to contain only one chunk. So now we are checking if
+              // there's just one chunk or more.
+              expect(chunkCounter).to.be.greaterThan(
+                0,
+                `Expected 'chunkCounter' to be greater than 0, got ${chunkCounter}.`
+              );
+
+              await assertAnalysisResult(data);
+            }
+          }
+
+          it('should return data in chunks with streaming with compression with flushFix', async () => {
+            await requestWithStreaming(testData.requestBody);
+          });
+
+          it('should return data in chunks with streaming with compression without flushFix', async () => {
+            await requestWithStreaming({ ...testData.requestBody, flushFix: false });
+          });
+
+          it('should return data in chunks with streaming without compression with flushFix', async () => {
+            await requestWithStreaming({ ...testData.requestBody, compressResponse: false });
+          });
+
+          it('should return data in chunks with streaming without compression without flushFix', async () => {
+            await requestWithStreaming({
+              ...testData.requestBody,
+              compressResponse: false,
+              flushFix: false,
+            });
           });
         });
       });

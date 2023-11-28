@@ -14,7 +14,6 @@ import {
   TIMELINE_EVENTS_COUNT_PREV_PAGE,
   TIMELINE_FLYOUT,
 } from '../../../screens/timeline';
-import { cleanKibana } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
@@ -25,9 +24,9 @@ import { hostsUrl } from '../../../urls/navigation';
 
 // Flaky on serverless
 const defaultPageSize = 25;
-describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/169413
+describe.skip('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'timeline' });
   });
 

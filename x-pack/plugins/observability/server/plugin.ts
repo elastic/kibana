@@ -29,6 +29,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   ApmRuleType,
   ES_QUERY_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ObservabilityConfig } from '.';
@@ -81,6 +82,7 @@ const o11yRuleTypes = [
   SLO_BURN_RATE_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
 ];
 
@@ -168,6 +170,36 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                     delete: [observabilityFeatureId],
                   },
                   ui: casesCapabilities.delete,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.casesSettingsSubFeatureName', {
+            defaultMessage: 'Case Settings',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_settings',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
+                    {
+                      defaultMessage: 'Edit Case Settings',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  cases: {
+                    settings: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.settings,
                 },
               ],
             },

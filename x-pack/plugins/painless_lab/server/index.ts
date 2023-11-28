@@ -7,7 +7,6 @@
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { PainlessLabServerPlugin } from './plugin';
 
 export const configSchema = schema.object({
   enabled: offeringBasedSchema({
@@ -20,6 +19,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
 };
 
-export const plugin = (ctx: PluginInitializerContext) => {
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { PainlessLabServerPlugin } = await import('./plugin');
   return new PainlessLabServerPlugin(ctx);
 };

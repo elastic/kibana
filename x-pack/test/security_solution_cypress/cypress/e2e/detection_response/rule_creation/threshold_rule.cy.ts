@@ -45,7 +45,7 @@ import {
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -66,10 +66,6 @@ describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
   const expectedTags = rule.tags?.join('');
   const mitreAttack = rule.threat;
   const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
-
-  before(() => {
-    cleanKibana();
-  });
 
   beforeEach(() => {
     deleteAlertsAndRules();

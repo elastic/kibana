@@ -21,6 +21,7 @@ export interface PackSavedObject {
     name: string;
     query: string;
     interval: number;
+    timeout?: number;
     snapshot?: boolean;
     removed?: boolean;
     ecs_mapping?: Record<string, unknown>;
@@ -41,6 +42,7 @@ export interface SavedQuerySavedObject {
   description: string | undefined;
   query: string;
   interval: number | string;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform: string;

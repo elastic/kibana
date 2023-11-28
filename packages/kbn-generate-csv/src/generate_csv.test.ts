@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { identity, range } from 'lodash';
+import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
@@ -20,22 +24,24 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { identity, range } from 'lodash';
-import * as Rx from 'rxjs';
-import type { Writable } from 'stream';
+import { CancellationToken } from '@kbn/reporting-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import {
+  UI_SETTINGS_CSV_QUOTE_VALUES,
+  UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_DATEFORMAT_TZ,
+} from './constants';
 import { CsvGenerator } from './generate_csv';
-import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
-import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
-import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from './constants';
 
-const createMockJob = (baseObj: any = {}): JobParams => ({
+const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
   ...baseObj,
 });
 
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: IScopedSearchClient;
-  let mockConfig: CsvConfig;
+  let mockConfig: ReportingConfigType['csv'];
   let mockLogger: jest.Mocked<Logger>;
   let uiSettingsClient: IUiSettingsClient;
   let stream: jest.Mocked<Writable>;
@@ -111,6 +117,7 @@ describe('CsvGenerator', () => {
       maxSizeBytes: 180000,
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
+      enablePanelActionDownload: true,
     };
 
     searchSourceMock.getField = jest.fn((key: string) => {
@@ -237,6 +244,7 @@ describe('CsvGenerator', () => {
       maxSizeBytes: TEST_MAX_SIZE,
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
+      enablePanelActionDownload: true,
     };
 
     mockDataClient.search = jest.fn().mockImplementation(() =>
@@ -750,6 +758,7 @@ describe('CsvGenerator', () => {
         maxSizeBytes: 180000,
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s' },
+        enablePanelActionDownload: true,
       };
       mockDataClient.search = jest.fn().mockImplementation(() =>
         Rx.of({

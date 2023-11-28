@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
 import { FlyoutProps } from '../components/flyout_detail';
+import { useLogExplorerCustomizationsContext } from '../hooks/use_log_explorer_customizations';
 
 export const CustomFlyoutContent = ({
   actions,
@@ -16,12 +17,28 @@ export const CustomFlyoutContent = ({
   doc,
   renderDefaultContent,
 }: FlyoutProps) => {
+  const { flyout } = useLogExplorerCustomizationsContext();
+
+  const renderPreviousContent = useCallback(
+    () => (
+      <>
+        {/* Apply custom Log Explorer detail */}
+        <EuiFlexItem>
+          <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
+        </EuiFlexItem>
+      </>
+    ),
+    [actions, dataView, doc]
+  );
+
+  const content = flyout?.renderContent
+    ? flyout?.renderContent(renderPreviousContent, { doc })
+    : renderPreviousContent();
+
   return (
     <EuiFlexGroup direction="column">
       {/* Apply custom Log Explorer detail */}
-      <EuiFlexItem>
-        <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
-      </EuiFlexItem>
+      {content}
       {/* Restore default content */}
       <EuiFlexItem>{renderDefaultContent()}</EuiFlexItem>
     </EuiFlexGroup>

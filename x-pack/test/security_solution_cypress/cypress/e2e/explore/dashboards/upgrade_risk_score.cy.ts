@@ -24,7 +24,6 @@ import {
 import { clickUpgradeRiskScore } from '../../../tasks/risk_scores';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
@@ -38,7 +37,6 @@ const spaceId = 'default';
 
 describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     deleteRiskEngineConfiguration();
     createRule(getNewRule({ rule_id: 'rule1' }));

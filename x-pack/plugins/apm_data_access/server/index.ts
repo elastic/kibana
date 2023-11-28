@@ -7,7 +7,6 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ApmDataAccessPlugin } from './plugin';
 
 const configSchema = schema.object({
   indices: schema.object({
@@ -78,7 +77,8 @@ export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
 export type APMDataAccessConfig = TypeOf<typeof configSchema>;
 export type APMIndices = APMDataAccessConfig['indices'];
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ApmDataAccessPlugin } = await import('./plugin');
   return new ApmDataAccessPlugin(initializerContext);
 }
 

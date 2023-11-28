@@ -2,11 +2,13 @@
 
 exports[`ElasticAgentCard props button 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -51,11 +53,13 @@ exports[`ElasticAgentCard props button 1`] = `
 
 exports[`ElasticAgentCard props category 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -100,11 +104,13 @@ exports[`ElasticAgentCard props category 1`] = `
 
 exports[`ElasticAgentCard props href 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -149,11 +155,13 @@ exports[`ElasticAgentCard props href 1`] = `
 
 exports[`ElasticAgentCard props recommended 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -203,11 +211,13 @@ exports[`ElasticAgentCard props recommended 1`] = `
 
 exports[`ElasticAgentCard renders 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }

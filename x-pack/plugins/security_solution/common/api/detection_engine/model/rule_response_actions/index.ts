@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-export { RESPONSE_ACTION_TYPES, SUPPORTED_RESPONSE_ACTION_TYPES } from './response_actions_legacy';
 export * from './response_actions.gen';

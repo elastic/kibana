@@ -733,6 +733,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   }
   basePath={
     BasePath {
+      "assetsHrefBase": "/test",
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
@@ -918,6 +919,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   }
   basePath={
     BasePath {
+      "assetsHrefBase": "/test",
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],

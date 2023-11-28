@@ -7,7 +7,6 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { RulesClient as RulesClientClass } from './rules_client';
-import { AlertingPlugin } from './plugin';
 import { configSchema } from './config';
 import { AlertsConfigType } from './types';
 
@@ -70,7 +69,10 @@ export {
 } from './alerts_service';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 
-export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { AlertingPlugin } = await import('./plugin');
+  return new AlertingPlugin(initContext);
+};
 
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,

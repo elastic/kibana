@@ -113,7 +113,7 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
 
         cy.contains('New live query').click();
         selectAllAgents();
-        cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+        cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
         submitQuery();
         cy.contains('Query is a required field');
       });

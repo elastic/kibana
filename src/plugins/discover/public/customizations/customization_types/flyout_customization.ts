@@ -38,6 +38,7 @@ export interface FlyoutContentProps {
 
 export interface FlyoutCustomization {
   id: 'flyout';
+  title?: string;
   actions: {
     defaultActions?: FlyoutDefaultActions;
     getActionItems?: () => FlyoutActionItem[];

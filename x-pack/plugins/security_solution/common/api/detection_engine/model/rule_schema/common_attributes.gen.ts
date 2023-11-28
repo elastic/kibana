@@ -367,26 +367,38 @@ export const RuleActionFrequency = z.object({
   throttle: RuleActionThrottle.nullable(),
 });
 
+export type RuleActionAlertsFilter = z.infer<typeof RuleActionAlertsFilter>;
+export const RuleActionAlertsFilter = z.object({}).catchall(z.unknown());
+
+/**
+ * Object containing the allowed connector fields, which varies according to the connector type.
+ */
+export type RuleActionParams = z.infer<typeof RuleActionParams>;
+export const RuleActionParams = z.object({}).catchall(z.unknown());
+
+/**
+ * Optionally groups actions by use cases. Use `default` for alert notifications.
+ */
+export type RuleActionGroup = z.infer<typeof RuleActionGroup>;
+export const RuleActionGroup = z.string();
+
+/**
+ * The connector ID.
+ */
+export type RuleActionId = z.infer<typeof RuleActionId>;
+export const RuleActionId = z.string();
+
 export type RuleAction = z.infer<typeof RuleAction>;
 export const RuleAction = z.object({
   /**
    * The action type used for sending notifications.
    */
   action_type_id: z.string(),
-  /**
-   * Optionally groups actions by use cases. Use `default` for alert notifications.
-   */
-  group: z.string(),
-  /**
-   * The connector ID.
-   */
-  id: z.string(),
-  /**
-   * Object containing the allowed connector fields, which varies according to the connector type.
-   */
-  params: z.object({}).catchall(z.unknown()),
+  group: RuleActionGroup,
+  id: RuleActionId,
+  params: RuleActionParams,
   uuid: NonEmptyString.optional(),
-  alerts_filter: z.object({}).catchall(z.unknown()).optional(),
+  alerts_filter: RuleActionAlertsFilter.optional(),
   frequency: RuleActionFrequency.optional(),
 });
 

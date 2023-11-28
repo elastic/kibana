@@ -84,7 +84,7 @@ describe('TextBasedLanguagesEditor', () => {
     });
   });
 
-  it('should  render the date info with no @timestamp detected', async () => {
+  it('should  render the date info with no @timestamp found', async () => {
     const newProps = {
       ...props,
       isCodeEditorExpanded: true,
@@ -93,11 +93,11 @@ describe('TextBasedLanguagesEditor', () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
       expect(
         component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
-      ).toStrictEqual('@timestamp not detected');
+      ).toStrictEqual('@timestamp not found');
     });
   });
 
-  it('should render the date info with @timestamp detected if detectTimestamp is true', async () => {
+  it('should render the date info with @timestamp found if detectTimestamp is true', async () => {
     const newProps = {
       ...props,
       isCodeEditorExpanded: true,
@@ -107,7 +107,7 @@ describe('TextBasedLanguagesEditor', () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
       expect(
         component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
-      ).toStrictEqual('@timestamp detected');
+      ).toStrictEqual('@timestamp found');
     });
   });
 
@@ -263,6 +263,26 @@ describe('TextBasedLanguagesEditor', () => {
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
       expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
+    });
+  });
+
+  it('should render correctly if editorIsInline prop is set to true', async () => {
+    const onTextLangQuerySubmit = jest.fn();
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      hideRunQueryText: true,
+      editorIsInline: true,
+      onTextLangQuerySubmit,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-run-query-button"]').length
+      ).not.toBe(1);
+      findTestSubject(component, 'TextBasedLangEditor-run-query-button').simulate('click');
+      expect(onTextLangQuerySubmit).toHaveBeenCalled();
     });
   });
 });

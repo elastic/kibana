@@ -37,6 +37,7 @@ export { useLogSummary, WithSummary } from './containers/logs/log_summary';
 export { useLogEntryFlyout } from './components/logging/log_entry_flyout';
 
 // Shared components
+export type { LogAIAssistantDocument } from './components/log_ai_assistant/log_ai_assistant';
 export type {
   LogEntryStreamItem,
   LogEntryColumnWidths,

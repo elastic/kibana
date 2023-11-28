@@ -16,5 +16,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./filter_controls'));
     loadTestFile(require.resolve('./flyout'));
     loadTestFile(require.resolve('./header_menu'));
+    loadTestFile(require.resolve('./header_menu'));
+    loadTestFile(require.resolve('./flyout_highlights.ts'));
   });
 }

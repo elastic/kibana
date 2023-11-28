@@ -11,7 +11,7 @@ import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
 import type {
   EnableRiskEngineResponse,
   EnableDisableRiskEngineErrorResponse,
-} from '../../../../server/lib/risk_engine/types';
+} from '../../../../server/lib/entity_analytics/risk_engine/types';
 export const ENABLE_RISK_ENGINE_MUTATION_KEY = ['POST', 'ENABLE_RISK_ENGINE'];
 
 export const useEnableRiskEngineMutation = (options?: UseMutationOptions<{}>) => {

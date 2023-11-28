@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
+                aggType: 'custom',
                 comparator: Comparator.GT,
                 threshold: [7500000],
                 timeSize: 5,

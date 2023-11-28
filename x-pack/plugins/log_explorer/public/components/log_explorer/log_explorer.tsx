@@ -17,6 +17,7 @@ import { createLogExplorerProfileCustomizations } from '../../customizations/log
 import { createPropertyGetProxy } from '../../utils/proxies';
 import { LogExplorerProfileContext } from '../../state_machines/log_explorer_profile';
 import { LogExplorerStartDeps } from '../../types';
+import { LogExplorerCustomizations } from './types';
 
 export interface CreateLogExplorerArgs {
   core: CoreStart;
@@ -29,6 +30,7 @@ export interface LogExplorerStateContainer {
 }
 
 export interface LogExplorerProps {
+  customizations?: LogExplorerCustomizations;
   scopedHistory: ScopedHistory;
   state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
@@ -44,10 +46,10 @@ export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
     uiSettings: createUiSettingsServiceProxy(core.uiSettings),
   };
 
-  return ({ scopedHistory, state$ }: LogExplorerProps) => {
+  return ({ customizations = {}, scopedHistory, state$ }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ core, plugins, state$ })],
-      [state$]
+      () => [createLogExplorerProfileCustomizations({ core, customizations, plugins, state$ })],
+      [customizations, state$]
     );
 
     return (

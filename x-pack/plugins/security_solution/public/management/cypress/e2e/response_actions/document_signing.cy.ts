@@ -22,7 +22,8 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
-describe('Document signing:', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/170674
+describe.skip('Document signing:', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;

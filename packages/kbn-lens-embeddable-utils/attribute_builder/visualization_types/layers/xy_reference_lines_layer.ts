@@ -60,6 +60,7 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
         color: layer.getValueConfig().color,
         forAccessor: `${accessorId}_${index}_reference_column`,
         axisMode: 'left',
+        fill: layer.getValueConfig().fill,
       })),
     };
   }

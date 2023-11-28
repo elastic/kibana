@@ -33,6 +33,7 @@ export interface ResultsArgs {
 interface UseAllResults {
   actionId: string;
   activePage: number;
+  startDate?: string;
   limit: number;
   sort: Array<{ field: string; direction: Direction }>;
   kuery?: string;
@@ -43,6 +44,7 @@ interface UseAllResults {
 export const useAllResults = ({
   actionId,
   activePage,
+  startDate,
   limit,
   sort,
   kuery,
@@ -59,6 +61,7 @@ export const useAllResults = ({
         data.search.search<ResultsRequestOptions, ResultsStrategyResponse>(
           {
             actionId,
+            startDate,
             factoryQueryType: OsqueryQueries.results,
             kuery,
             pagination: generateTablePaginationOptions(activePage, limit),

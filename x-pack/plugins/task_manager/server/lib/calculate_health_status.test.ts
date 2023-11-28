@@ -267,7 +267,7 @@ describe('calculateHealthStatus', () => {
         true,
         logger
       )
-    ).toEqual({ status: HealthStatus.Warning, reason: `no health stats available` });
+    ).toEqual({ status: HealthStatus.Uninitialized, reason: `no health stats available` });
   });
 
   test('should return error status if any stat has status error', () => {

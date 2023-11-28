@@ -7,8 +7,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpHandler } from '@kbn/core/public';
-import { ToastInput } from '@kbn/core/public';
+import { HttpHandler, ToastInput } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useTrackedPromise, CanceledPromiseError } from '../utils/use_tracked_promise';

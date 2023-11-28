@@ -42,7 +42,7 @@ import { splitSizeAndUnits, DataStream } from '../../../../../../common';
 import { timeUnits } from '../../../../constants/time_units';
 import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
-import { UnitField } from './unit_field';
+import { UnitField } from '../../../../components/shared';
 import { updateDataRetention } from '../../../../services/api';
 
 interface Props {

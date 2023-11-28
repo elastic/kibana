@@ -9,20 +9,31 @@
 import type { BasePath } from './base_path_service';
 import { CdnConfig } from './cdn';
 
-export interface IStaticAssets {
+export interface InternalStaticAssets {
   getHrefBase(): string;
+  getPluginAssetHref(pluginName: string, assetPath: string): string;
 }
 
-export class StaticAssets implements IStaticAssets {
-  constructor(private readonly basePath: BasePath, private readonly cdnConfig: CdnConfig) {}
+export class StaticAssets implements InternalStaticAssets {
+  private readonly assetsHrefBase: string;
+
+  constructor(basePath: BasePath, cdnConfig: CdnConfig) {
+    const hrefToUse = cdnConfig.baseHref ?? basePath.serverBasePath;
+    this.assetsHrefBase = hrefToUse.endsWith('/') ? hrefToUse.slice(0, -1) : hrefToUse;
+  }
+
   /**
    * Returns a href (hypertext reference) intended to be used as the base for constructing
    * other hrefs to static assets.
    */
   getHrefBase(): string {
-    if (this.cdnConfig.baseHref) {
-      return this.cdnConfig.baseHref;
+    return this.assetsHrefBase;
+  }
+
+  getPluginAssetHref(pluginName: string, assetPath: string): string {
+    if (assetPath.startsWith('/')) {
+      assetPath = assetPath.slice(1);
     }
-    return this.basePath.serverBasePath;
+    return `${this.assetsHrefBase}/plugins/${pluginName}/assets/${assetPath}`;
   }
 }

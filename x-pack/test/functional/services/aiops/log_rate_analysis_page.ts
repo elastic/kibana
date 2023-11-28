@@ -255,7 +255,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async navigateToIndexPatternSelection() {
+    async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab logRateAnalysis');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },

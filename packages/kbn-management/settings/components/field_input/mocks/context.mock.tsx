@@ -32,6 +32,9 @@ const createRootMock = () => {
 
 export const createFieldInputServicesMock = (): FieldInputServices => ({
   showDanger: jest.fn(),
+  validateChange: async () => {
+    return { successfulValidation: true, valid: true };
+  },
 });
 
 export const TestWrapper = ({

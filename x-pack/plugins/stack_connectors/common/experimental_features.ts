@@ -12,7 +12,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  isMustacheAutocompleteOn: false,
+  isMustacheAutocompleteOn: true,
   sentinelOneConnectorOn: false,
 });
 

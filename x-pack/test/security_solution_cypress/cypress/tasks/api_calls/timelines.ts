@@ -7,7 +7,7 @@
 
 import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import type { CompleteTimeline } from '../../objects/timeline';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
   rootRequest<TimelineResponse>({
@@ -31,6 +31,9 @@ export const createTimeline = (timeline: CompleteTimeline) =>
           {
             id: 'host.name',
           },
+          {
+            id: 'message',
+          },
         ],
         kqlMode: 'filter',
         kqlQuery: {
@@ -42,7 +45,7 @@ export const createTimeline = (timeline: CompleteTimeline) =>
           },
         },
         dateRange: {
-          end: '2022-04-01T12:22:56.000Z',
+          end: '2023-04-01T12:22:56.000Z',
           start: '2018-01-01T12:22:56.000Z',
         },
         description: timeline.description,
@@ -52,11 +55,6 @@ export const createTimeline = (timeline: CompleteTimeline) =>
           ? { dataViewId: timeline.dataViewId, indexNames: timeline.indexNames }
           : {}),
       },
-    },
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
     },
   });
 
@@ -103,14 +101,23 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
         savedQueryId: null,
       },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '2023-10-31',
+    },
   });
 
 export const loadPrepackagedTimelineTemplates = () =>
   rootRequest({
     method: 'POST',
     url: 'api/timeline/_prepackaged',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+
+      'elastic-api-version': '2023-10-31',
+    },
   });
 
 export const favoriteTimeline = ({
@@ -133,5 +140,4 @@ export const favoriteTimeline = ({
       templateTimelineId: templateTimelineId || null,
       templateTimelineVersion: templateTimelineVersion || null,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });

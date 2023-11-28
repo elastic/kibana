@@ -11,7 +11,7 @@ import type { Moment } from 'moment';
 
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
@@ -34,7 +34,7 @@ export const useData = (
   contextId: string,
   searchQuery: estypes.QueryDslQueryContainer,
   onUpdate?: (params: Dictionary<unknown>) => void,
-  selectedSignificantTerm?: SignificantTerm,
+  selectedSignificantItem?: SignificantItem,
   selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
   timeRange?: { min: Moment; max: Moment }
@@ -78,27 +78,27 @@ export const useData = (
     return fieldStatsRequest
       ? {
           ...fieldStatsRequest,
-          selectedSignificantTerm,
+          selectedSignificantItem,
           selectedGroup,
-          includeSelectedSignificantTerm: false,
+          includeSelectedSignificantItem: false,
         }
       : undefined;
-  }, [fieldStatsRequest, selectedSignificantTerm, selectedGroup]);
+  }, [fieldStatsRequest, selectedSignificantItem, selectedGroup]);
 
-  const selectedSignificantTermStatsRequest = useMemo(() => {
-    return fieldStatsRequest && (selectedSignificantTerm || selectedGroup)
+  const selectedSignificantItemStatsRequest = useMemo(() => {
+    return fieldStatsRequest && (selectedSignificantItem || selectedGroup)
       ? {
           ...fieldStatsRequest,
-          selectedSignificantTerm,
+          selectedSignificantItem,
           selectedGroup,
-          includeSelectedSignificantTerm: true,
+          includeSelectedSignificantItem: true,
         }
       : undefined;
-  }, [fieldStatsRequest, selectedSignificantTerm, selectedGroup]);
+  }, [fieldStatsRequest, selectedSignificantItem, selectedGroup]);
 
   const documentStats = useDocumentCountStats(
     overallStatsRequest,
-    selectedSignificantTermStatsRequest,
+    selectedSignificantItemStatsRequest,
     lastRefresh
   );
 

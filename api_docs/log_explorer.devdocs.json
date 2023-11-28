@@ -6,6 +6,64 @@
     "interfaces": [
       {
         "parentPluginId": "logExplorer",
+        "id": "def-public.LogExplorerCustomizations",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogExplorerCustomizations",
+        "description": [],
+        "path": "x-pack/plugins/log_explorer/public/components/log_explorer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logExplorer",
+            "id": "def-public.LogExplorerCustomizations.flyout",
+            "type": "Object",
+            "tags": [],
+            "label": "flyout",
+            "description": [],
+            "signature": [
+              "{ renderContent?: ",
+              "FlyoutRenderContent",
+              " | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/log_explorer/public/components/log_explorer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logExplorer",
+        "id": "def-public.LogExplorerFlyoutContentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogExplorerFlyoutContentProps",
+        "description": [],
+        "path": "x-pack/plugins/log_explorer/public/components/log_explorer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logExplorer",
+            "id": "def-public.LogExplorerFlyoutContentProps.doc",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "DataTableRecord"
+            ],
+            "path": "x-pack/plugins/log_explorer/public/components/log_explorer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logExplorer",
         "id": "def-public.LogExplorerStateContainer",
         "type": "Interface",
         "tags": [],

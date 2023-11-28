@@ -380,7 +380,7 @@ describe('workspace_panel', () => {
           }}
           framePublicAPI={framePublicAPI}
           visualizationMap={{
-            testVis: mockVisualization,
+            testVis: { ...mockVisualization, toExpression: () => null },
           }}
           ExpressionRenderer={expressionRendererMock}
         />,
