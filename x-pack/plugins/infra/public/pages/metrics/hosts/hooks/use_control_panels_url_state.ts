@@ -13,15 +13,14 @@ import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
 import { useUrlState } from '../../../../utils/use_url_state';
+import {
+  availableControlsPanels,
+  helpMessages,
+} from '../components/search_bar/control_panels_config';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
-const availableControlsPanels = {
-  HOST_OS_NAME: 'host.os.name',
-  CLOUD_PROVIDER: 'cloud.provider',
-};
-
-const controlPanelConfigs: ControlPanels = {
+export const controlPanelConfigs: ControlPanels = {
   [availableControlsPanels.HOST_OS_NAME]: {
     order: 0,
     width: 'medium',
@@ -44,6 +43,18 @@ const controlPanelConfigs: ControlPanels = {
       title: 'Cloud Provider',
     },
   },
+  [availableControlsPanels.SERVICE_NAME]: {
+    order: 2,
+    width: 'medium',
+    grow: false,
+    type: 'optionsListControl',
+    explicitInput: {
+      id: availableControlsPanels.SERVICE_NAME,
+      fieldName: availableControlsPanels.SERVICE_NAME,
+      title: 'Service Name',
+      helpMessage: helpMessages[availableControlsPanels.SERVICE_NAME],
+    },
+  },
 };
 
 const availableControlPanelFields = Object.values(availableControlsPanels);
@@ -64,7 +75,8 @@ export const useControlPanels = (
    * Configure the control panels as
    * 1. Available fields from the data view
    * 2. Existing filters from the URL parameter (not colliding with allowed fields from data view)
-   * 3. Enhanced with dataView.id
+   *  - not including the helpMessage
+   * 3. Enhanced with dataView.id and explicitInput.helpMessage
    */
   const controlsPanelsWithId = dataView
     ? mergeDefaultPanelsWithUrlConfig(dataView, controlPanels)
@@ -90,13 +102,20 @@ const getVisibleControlPanelsConfig = (dataView: DataView | undefined) => {
   }, {} as ControlPanels);
 };
 
-const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: string = '') => {
+const addDataViewIdAndHelpMessageToControlPanels = (
+  controlPanels: ControlPanels,
+  dataViewId: string = ''
+) => {
   return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
     return {
       ...acc,
       [key]: {
         ...controlPanelConfig,
-        explicitInput: { ...controlPanelConfig.explicitInput, dataViewId },
+        explicitInput: {
+          ...controlPanelConfig.explicitInput,
+          dataViewId,
+          helpMessage: controlPanelConfigs[key].explicitInput.helpMessage,
+        },
       },
     };
   }, {});
@@ -105,10 +124,10 @@ const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: 
 const cleanControlPanels = (controlPanels: ControlPanels) => {
   return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
     const { explicitInput } = controlPanelConfig;
-    const { dataViewId, ...rest } = explicitInput;
+    const { dataViewId, helpMessage, ...rest } = explicitInput;
     return {
       ...acc,
-      [key]: { ...controlPanelConfig, explicitInput: rest },
+      [key]: { ...controlPanelConfig, ...rest },
     };
   }, {});
 };
@@ -118,11 +137,13 @@ const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlP
   const visiblePanels = getVisibleControlPanelsConfig(dataView);
 
   // Get list of panel which can be overridden to avoid merging additional config from url
-  const existingKeys = Object.keys(visiblePanels);
+  // and remove helpMessage as it should not be overwritten
+  const existingKeys = Object.keys(visiblePanels).filter((key) => key !== 'helpMessage');
+
   const controlPanelsToOverride = pick(urlPanels, existingKeys);
 
   // Merge default and existing configs and add dataView.id to each of them
-  return addDataViewIdToControlPanels(
+  return addDataViewIdAndHelpMessageToControlPanels(
     { ...visiblePanels, ...controlPanelsToOverride },
     dataView.id
   );
@@ -140,6 +161,7 @@ const PanelRT = rt.type({
       fieldName: rt.string,
       title: rt.union([rt.string, rt.undefined]),
       selectedOptions: rt.array(rt.string),
+      helpMessage: rt.any,
     }),
   ]),
 });
