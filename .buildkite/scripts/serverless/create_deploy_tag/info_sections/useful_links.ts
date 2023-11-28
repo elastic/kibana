@@ -35,7 +35,7 @@ export function getUsefulLinks({
   };
 }
 
-export function getUsefulLinksHtml(
+export function makeUsefulLinksHtml(
   heading: string,
   data: {
     previousCommitHash: string;

@@ -44,7 +44,7 @@ export function compareSOSnapshots(
   }
 }
 
-export function toSOComparisonBlockHtml(comparisonResult: {
+export function makeSOComparisonBlockHtml(comparisonResult: {
   hasChanges: boolean;
   changed: string[];
   command: string;
@@ -65,7 +65,7 @@ export function toSOComparisonBlockHtml(comparisonResult: {
   }
 }
 
-export function getSOComparisonErrorHtml(): string {
+export function makeSOComparisonErrorHtml(): string {
   return `<div>
 <h4>Plugin Saved Object migration changes: N/A</h4>
 <div>Could not compare plugin migrations. Check the logs for more info.</div>

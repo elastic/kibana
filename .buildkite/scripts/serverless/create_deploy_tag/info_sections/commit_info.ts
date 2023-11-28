@@ -55,7 +55,7 @@ export function getSelectedCommitHash() {
   return commitHash;
 }
 
-export async function hashToCommit(hash: string): Promise<GithubCommitType> {
+export async function getCommitByHash(hash: string): Promise<GithubCommitType> {
   const commit = await octokit.repos.getCommit({
     owner: 'elastic',
     repo: 'kibana',
@@ -74,10 +74,10 @@ export async function getRecentCommits(commitCount: number): Promise<GitCommitEx
     })
   ).data;
 
-  return kibanaCommits.map(getCommitExtract);
+  return kibanaCommits.map(toGitCommitExtract);
 }
 
-export function getCommitExtract(
+export function toGitCommitExtract(
   commit: GithubCommitType | ListedGithubCommitType
 ): GitCommitExtract {
   const title = commit.commit.message.split('\n')[0];
@@ -95,7 +95,7 @@ export function getCommitExtract(
   };
 }
 
-export function toCommitInfoHtml(sectionTitle: string, commitInfo: GitCommitExtract): string {
+export function makeCommitInfoHtml(sectionTitle: string, commitInfo: GitCommitExtract): string {
   const titleWithLink = commitInfo.title.replace(
     /#(\d{4,6})/,
     `<a href="${commitInfo.prLink}">$&</a>`

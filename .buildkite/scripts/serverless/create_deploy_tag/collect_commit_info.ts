@@ -8,38 +8,38 @@
 
 import { COMMIT_INFO_CTX, exec } from './shared';
 import {
-  getCommitExtract,
+  toGitCommitExtract,
   getCurrentQARelease,
   getSelectedCommitHash,
-  hashToCommit,
-  toCommitInfoHtml,
+  getCommitByHash,
+  makeCommitInfoHtml,
 } from './info_sections/commit_info';
 import {
   getArtifactBuild,
   getOnMergePRBuild,
   getQAFBuildContainingCommit,
-  toBuildkiteBuildInfoHtml,
+  makeBuildkiteBuildInfoHtml,
 } from './info_sections/build_info';
 import {
   compareSOSnapshots,
-  toSOComparisonBlockHtml,
-  getSOComparisonErrorHtml,
+  makeSOComparisonBlockHtml,
+  makeSOComparisonErrorHtml,
 } from './info_sections/so_snapshot_comparison';
-import { getUsefulLinksHtml } from './info_sections/useful_links';
+import { makeUsefulLinksHtml } from './info_sections/useful_links';
 
 async function main() {
   const previousSha = await getCurrentQARelease();
   const selectedSha = getSelectedCommitHash();
 
   // Current commit info
-  const previousCommit = await hashToCommit(previousSha);
-  const previousCommitInfo = getCommitExtract(previousCommit);
-  addBuildkiteInfoSection(toCommitInfoHtml('Current commit on QA:', previousCommitInfo));
+  const previousCommit = await getCommitByHash(previousSha);
+  const previousCommitInfo = toGitCommitExtract(previousCommit);
+  addBuildkiteInfoSection(makeCommitInfoHtml('Current commit on QA:', previousCommitInfo));
 
   // Target commit info
-  const selectedCommit = await hashToCommit(selectedSha);
-  const selectedCommitInfo = getCommitExtract(selectedCommit);
-  addBuildkiteInfoSection(toCommitInfoHtml('Target commit to deploy:', selectedCommitInfo));
+  const selectedCommit = await getCommitByHash(selectedSha);
+  const selectedCommitInfo = toGitCommitExtract(selectedCommit);
+  addBuildkiteInfoSection(makeCommitInfoHtml('Target commit to deploy:', selectedCommitInfo));
 
   // Buildkite build info
   const buildkiteBuild = await getOnMergePRBuild(selectedSha);
@@ -49,7 +49,7 @@ async function main() {
   );
   const artifactBuild = await getArtifactBuild(selectedSha);
   addBuildkiteInfoSection(
-    toBuildkiteBuildInfoHtml('Relevant build info:', {
+    makeBuildkiteBuildInfoHtml('Relevant build info:', {
       'Merge build': buildkiteBuild,
       'Artifact container build': artifactBuild,
       'Next QAF test build containing this commit': nextBuildContainingCommit,
@@ -59,14 +59,14 @@ async function main() {
   // Save Object migration comparison
   const comparisonResult = compareSOSnapshots(previousSha, selectedSha);
   if (comparisonResult) {
-    addBuildkiteInfoSection(toSOComparisonBlockHtml(comparisonResult));
+    addBuildkiteInfoSection(makeSOComparisonBlockHtml(comparisonResult));
   } else {
-    addBuildkiteInfoSection(getSOComparisonErrorHtml());
+    addBuildkiteInfoSection(makeSOComparisonErrorHtml());
   }
 
   // Useful links
   addBuildkiteInfoSection(
-    getUsefulLinksHtml('Useful links:', {
+    makeUsefulLinksHtml('Useful links:', {
       previousCommitHash: previousSha,
       selectedCommitHash: selectedSha,
     })

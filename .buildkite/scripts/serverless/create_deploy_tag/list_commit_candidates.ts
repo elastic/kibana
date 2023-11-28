@@ -17,7 +17,7 @@ import {
   getArtifactBuild,
   getOnMergePRBuild,
   getQAFBuildContainingCommit,
-  toCommitInfoWithBuildResults,
+  makeCommitInfoWithBuildResultsHtml,
 } from './info_sections/build_info';
 import { getRecentCommits, GitCommitExtract } from './info_sections/commit_info';
 import { BuildkiteInputStep } from '#pipeline-utils';
@@ -29,7 +29,7 @@ async function main(commitCountArg: string) {
   const commitsWithStatuses = await enrichWithStatuses(commitData);
 
   console.log('--- Updating buildkite context with listed commits');
-  const commitListWithBuildResultsHtml = toCommitInfoWithBuildResults(commitsWithStatuses);
+  const commitListWithBuildResultsHtml = makeCommitInfoWithBuildResultsHtml(commitsWithStatuses);
   exec(`buildkite-agent annotate --style 'info' --context '${COMMIT_INFO_CTX}'`, {
     input: commitListWithBuildResultsHtml,
   });

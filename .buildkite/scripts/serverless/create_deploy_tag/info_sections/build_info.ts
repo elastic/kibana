@@ -140,7 +140,7 @@ async function getCommitListCached() {
   return _commitListCache;
 }
 
-function toBuildInfoSnippetHtml(name: string, build: BuildkiteBuildExtract | null) {
+function makeBuildInfoSnippetHtml(name: string, build: BuildkiteBuildExtract | null) {
   if (!build) {
     return `[❓] ${name} - no build found`;
   } else {
@@ -154,25 +154,25 @@ function toBuildInfoSnippetHtml(name: string, build: BuildkiteBuildExtract | nul
   }
 }
 
-export function toBuildkiteBuildInfoHtml(
+export function makeBuildkiteBuildInfoHtml(
   heading: string,
   builds: Record<string, BuildkiteBuildExtract | null>
 ): string {
   let html = `<div><h4>${heading}</h4>`;
   for (const [name, build] of Object.entries(builds)) {
-    html += `<div> | ${toBuildInfoSnippetHtml(name, build)}</div>\n`;
+    html += `<div> | ${makeBuildInfoSnippetHtml(name, build)}</div>\n`;
   }
   html += '</div>';
 
   return html;
 }
 
-export function toCommitInfoWithBuildResults(commits: CommitWithStatuses[]) {
+export function makeCommitInfoWithBuildResultsHtml(commits: CommitWithStatuses[]) {
   const commitWithBuildResultsHtml = commits.map((commitInfo) => {
     const checks = commitInfo.checks;
-    const prBuildSnippet = toBuildInfoSnippetHtml('on merge job', checks.onMergeBuild);
-    const ftrBuildSnippet = toBuildInfoSnippetHtml('qaf/ftr tests', checks.ftrBuild);
-    const artifactBuildSnippet = toBuildInfoSnippetHtml('artifact build', checks.artifactBuild);
+    const prBuildSnippet = makeBuildInfoSnippetHtml('on merge job', checks.onMergeBuild);
+    const ftrBuildSnippet = makeBuildInfoSnippetHtml('qaf/ftr tests', checks.ftrBuild);
+    const artifactBuildSnippet = makeBuildInfoSnippetHtml('artifact build', checks.artifactBuild);
     const titleWithLink = commitInfo.title.replace(
       /#(\d{4,6})/,
       `<a href="${commitInfo.prLink}">$&</a>`
