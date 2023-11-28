@@ -6,9 +6,10 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ERROR_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../../transactions/get_transaction';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -38,7 +39,12 @@ export async function getErrorSampleDetails({
 }): Promise<ErrorSampleDetailsResponse> {
   const params = {
     apm: {
-      events: [ProcessorEvent.error as const],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent as const,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,

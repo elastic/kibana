@@ -17,9 +17,11 @@ import { MessageText } from './message_text';
 interface Props {
   amendMessage: (message: string) => void;
   content?: string;
+  isError?: boolean;
   isFetching?: boolean;
   isLastComment: boolean;
   index: number;
+  connectorTypeTitle: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
   regenerateMessage: () => void;
   transformMessage: (message: string) => ContentMessage;
@@ -28,7 +30,9 @@ interface Props {
 export const StreamComment = ({
   amendMessage,
   content,
+  connectorTypeTitle,
   index,
+  isError = false,
   isFetching = false,
   isLastComment,
   reader,
@@ -38,7 +42,9 @@ export const StreamComment = ({
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     amendMessage,
     content,
+    connectorTypeTitle,
     reader,
+    isError,
   });
 
   const currentState = useRef({ isStreaming, pendingMessage, amendMessage });

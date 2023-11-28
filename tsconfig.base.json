@@ -102,6 +102,10 @@
       "@kbn/bfetch-explorer-plugin/*": ["examples/bfetch_explorer/*"],
       "@kbn/bfetch-plugin": ["src/plugins/bfetch"],
       "@kbn/bfetch-plugin/*": ["src/plugins/bfetch/*"],
+      "@kbn/calculate-auto": ["packages/kbn-calculate-auto"],
+      "@kbn/calculate-auto/*": ["packages/kbn-calculate-auto/*"],
+      "@kbn/calculate-width-from-char-count": ["packages/kbn-calculate-width-from-char-count"],
+      "@kbn/calculate-width-from-char-count/*": ["packages/kbn-calculate-width-from-char-count/*"],
       "@kbn/canvas-plugin": ["x-pack/plugins/canvas"],
       "@kbn/canvas-plugin/*": ["x-pack/plugins/canvas/*"],
       "@kbn/cases-api-integration-test-plugin": ["x-pack/test/cases_api_integration/common/plugins/cases"],
@@ -596,6 +600,8 @@
       "@kbn/crypto-browser/*": ["packages/kbn-crypto-browser/*"],
       "@kbn/custom-branding-plugin": ["x-pack/plugins/custom_branding"],
       "@kbn/custom-branding-plugin/*": ["x-pack/plugins/custom_branding/*"],
+      "@kbn/custom-icons": ["packages/kbn-custom-icons"],
+      "@kbn/custom-icons/*": ["packages/kbn-custom-icons/*"],
       "@kbn/custom-integrations": ["packages/kbn-custom-integrations"],
       "@kbn/custom-integrations/*": ["packages/kbn-custom-integrations/*"],
       "@kbn/custom-integrations-plugin": ["src/plugins/custom_integrations"],
@@ -682,6 +688,8 @@
       "@kbn/ecs-data-quality-dashboard/*": ["x-pack/packages/security-solution/ecs_data_quality_dashboard/*"],
       "@kbn/ecs-data-quality-dashboard-plugin": ["x-pack/plugins/ecs_data_quality_dashboard"],
       "@kbn/ecs-data-quality-dashboard-plugin/*": ["x-pack/plugins/ecs_data_quality_dashboard/*"],
+      "@kbn/elastic-agent-utils": ["packages/kbn-elastic-agent-utils"],
+      "@kbn/elastic-agent-utils/*": ["packages/kbn-elastic-agent-utils/*"],
       "@kbn/elastic-assistant": ["x-pack/packages/kbn-elastic-assistant"],
       "@kbn/elastic-assistant/*": ["x-pack/packages/kbn-elastic-assistant/*"],
       "@kbn/elastic-assistant-plugin": ["x-pack/plugins/elastic_assistant"],
@@ -1060,8 +1068,12 @@
       "@kbn/ml-string-hash/*": ["x-pack/packages/ml/string_hash/*"],
       "@kbn/ml-trained-models-utils": ["x-pack/packages/ml/trained_models_utils"],
       "@kbn/ml-trained-models-utils/*": ["x-pack/packages/ml/trained_models_utils/*"],
+      "@kbn/ml-ui-actions": ["x-pack/packages/ml/ui_actions"],
+      "@kbn/ml-ui-actions/*": ["x-pack/packages/ml/ui_actions/*"],
       "@kbn/ml-url-state": ["x-pack/packages/ml/url_state"],
       "@kbn/ml-url-state/*": ["x-pack/packages/ml/url_state/*"],
+      "@kbn/mock-idp-plugin": ["packages/kbn-mock-idp-plugin"],
+      "@kbn/mock-idp-plugin/*": ["packages/kbn-mock-idp-plugin/*"],
       "@kbn/monaco": ["packages/kbn-monaco"],
       "@kbn/monaco/*": ["packages/kbn-monaco/*"],
       "@kbn/monitoring-collection-plugin": ["x-pack/plugins/monitoring_collection"],
@@ -1114,6 +1126,8 @@
       "@kbn/paertial-results-example-plugin/*": ["examples/partial_results_example/*"],
       "@kbn/painless-lab-plugin": ["x-pack/plugins/painless_lab"],
       "@kbn/painless-lab-plugin/*": ["x-pack/plugins/painless_lab/*"],
+      "@kbn/panel-loader": ["packages/kbn-panel-loader"],
+      "@kbn/panel-loader/*": ["packages/kbn-panel-loader/*"],
       "@kbn/peggy": ["packages/kbn-peggy"],
       "@kbn/peggy/*": ["packages/kbn-peggy/*"],
       "@kbn/peggy-loader": ["packages/kbn-peggy-loader"],
@@ -1270,6 +1284,12 @@
       "@kbn/security-api-integration-helpers/*": ["x-pack/test/security_api_integration/packages/helpers/*"],
       "@kbn/security-plugin": ["x-pack/plugins/security"],
       "@kbn/security-plugin/*": ["x-pack/plugins/security/*"],
+      "@kbn/security-plugin-types-common": ["x-pack/packages/security/plugin_types_common"],
+      "@kbn/security-plugin-types-common/*": ["x-pack/packages/security/plugin_types_common/*"],
+      "@kbn/security-plugin-types-public": ["x-pack/packages/security/plugin_types_public"],
+      "@kbn/security-plugin-types-public/*": ["x-pack/packages/security/plugin_types_public/*"],
+      "@kbn/security-plugin-types-server": ["x-pack/packages/security/plugin_types_server"],
+      "@kbn/security-plugin-types-server/*": ["x-pack/packages/security/plugin_types_server/*"],
       "@kbn/security-solution-ess": ["x-pack/plugins/security_solution_ess"],
       "@kbn/security-solution-ess/*": ["x-pack/plugins/security_solution_ess/*"],
       "@kbn/security-solution-features": ["x-pack/packages/security-solution/features"],
@@ -1490,8 +1510,6 @@
       "@kbn/stdio-dev-helpers/*": ["packages/kbn-stdio-dev-helpers/*"],
       "@kbn/storybook": ["packages/kbn-storybook"],
       "@kbn/storybook/*": ["packages/kbn-storybook/*"],
-      "@kbn/subscription-tracking": ["packages/kbn-subscription-tracking"],
-      "@kbn/subscription-tracking/*": ["packages/kbn-subscription-tracking/*"],
       "@kbn/synthetics-plugin": ["x-pack/plugins/synthetics"],
       "@kbn/synthetics-plugin/*": ["x-pack/plugins/synthetics/*"],
       "@kbn/task-manager-fixture-plugin": ["x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture"],
@@ -1670,9 +1688,7 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": [
-        "typings/@emotion"
-      ],
+      "@emotion/core": ["typings/@emotion"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -1743,6 +1759,6 @@
       "@kbn/ambient-ui-types",
       "@kbn/ambient-common-types",
       "@kbn/ambient-storybook-types"
-    ],
+    ]
   }
 }

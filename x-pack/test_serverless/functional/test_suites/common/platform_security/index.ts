@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless Common UI - Platform Security', function () {
     loadTestFile(require.resolve('./api_keys'));
     loadTestFile(require.resolve('./navigation/avatar_menu'));
+    loadTestFile(require.resolve('./user_profiles/user_profiles'));
   });
 }

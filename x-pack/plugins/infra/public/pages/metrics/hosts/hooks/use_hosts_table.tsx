@@ -15,6 +15,7 @@ import {
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
+import { CloudProvider } from '@kbn/custom-icons';
 import { hostLensFormulas } from '../../../../common/visualizations';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
@@ -35,7 +36,6 @@ import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 /**
  * Columns and items types
  */
-export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 type HostMetrics = Record<InfraAssetMetricType, number | null>;
 
 interface HostMetadata {

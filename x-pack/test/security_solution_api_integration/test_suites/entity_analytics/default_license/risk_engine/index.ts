@@ -15,5 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./risk_scoring_task/task_execution'));
     loadTestFile(require.resolve('./risk_scoring_task/task_execution_nondefault_spaces'));
     loadTestFile(require.resolve('./telemetry_usage'));
+    loadTestFile(require.resolve('./risk_engine_privileges'));
+    loadTestFile(require.resolve('./asset_criticality'));
   });
 }
