@@ -26,10 +26,6 @@ export const getCompatibleSearchTechniques = (type?: string): OptionsListSearchT
     case 'number': {
       return ['exact'];
     }
-    case 'date': {
-      // searching is not currently supported for date fields
-      return [];
-    }
     default: {
       return [];
     }

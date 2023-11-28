@@ -22,11 +22,7 @@ import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
 /**
  * Suggestion aggregations
  */
-export const getExpensiveSuggestionAggregationBuilder = ({
-  fieldSpec,
-  searchString,
-  searchTechnique,
-}: OptionsListRequestBody) => {
+export const getExpensiveSuggestionAggregationBuilder = ({ fieldSpec }: OptionsListRequestBody) => {
   if (fieldSpec?.type === 'number') {
     return expensiveSuggestionAggSubtypes.number;
   }
