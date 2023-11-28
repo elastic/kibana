@@ -7,7 +7,7 @@
 
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   HTTPFields,
   BrowserFields,
   MonitorFields,
@@ -32,7 +32,7 @@ describe('[Monitor Management] validation', () => {
     };
 
     it('should return false for all valid props', () => {
-      const validators = validate[DataStream.HTTP];
+      const validators = validate[MonitorTypeEnum.HTTP];
       const keysToValidate = [
         ConfigKey.SCHEDULE,
         ConfigKey.TIMEOUT,
@@ -52,7 +52,7 @@ describe('[Monitor Management] validation', () => {
   describe.each([[ConfigKey.SOURCE_INLINE, 'step(() => {});']])('Browser', (configKey, value) => {
     const browserProps: Partial<BrowserFields> = {
       ...commonPropsValid,
-      [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
       [ConfigKey.TIMEOUT]: null,
       [ConfigKey.URLS]: null,
       [ConfigKey.PORT]: null,
@@ -60,7 +60,7 @@ describe('[Monitor Management] validation', () => {
     };
 
     it('should return false for all valid props', () => {
-      const validators = validate[DataStream.BROWSER];
+      const validators = validate[MonitorTypeEnum.BROWSER];
       const keysToValidate = [ConfigKey.SCHEDULE, ConfigKey.TIMEOUT, configKey];
       const validatorFns = keysToValidate.map((key) => validators[key]);
       const result = validatorFns.map((fn) => fn?.(browserProps as Partial<MonitorFields>) ?? true);

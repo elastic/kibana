@@ -36,11 +36,11 @@
       "dashboard",
       "expressions",
       "taskManager",
+      "licensing"
     ],
     "optionalPlugins": [
       "discover",
       "home",
-      "licensing",
       "usageCollection",
       "cloud",
       "spaces",

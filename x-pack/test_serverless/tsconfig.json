@@ -69,5 +69,6 @@
     "@kbn/reporting-export-types-csv-common",
     "@kbn/slo-schema",
     "@kbn/mock-idp-plugin",
+    "@kbn/index-management-plugin",
   ]
 }

@@ -1844,6 +1844,14 @@
                 }
               }
             }
+          },
+          "service_token": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
           }
         }
       }
