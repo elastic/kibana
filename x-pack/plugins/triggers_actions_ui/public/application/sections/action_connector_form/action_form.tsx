@@ -294,6 +294,8 @@ export const ActionForm = ({
       .list()
       .filter((item) => actionTypesIndex[item.id] && !item.hideInUi)
       .filter((item) => !!item.actionParamsFields)
+      // Temporarily hide the SentinelOne action type
+      .filter((item) => item.id !== '.sentinelone')
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
       )

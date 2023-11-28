@@ -332,7 +332,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       name: '',
       render: (item: ActionConnectorTableItem) => {
         return (
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {item.isMissingSecrets ? (
               <>
