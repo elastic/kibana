@@ -104,6 +104,8 @@
       "@kbn/bfetch-plugin/*": ["src/plugins/bfetch/*"],
       "@kbn/calculate-auto": ["packages/kbn-calculate-auto"],
       "@kbn/calculate-auto/*": ["packages/kbn-calculate-auto/*"],
+      "@kbn/calculate-width-from-char-count": ["packages/kbn-calculate-width-from-char-count"],
+      "@kbn/calculate-width-from-char-count/*": ["packages/kbn-calculate-width-from-char-count/*"],
       "@kbn/canvas-plugin": ["x-pack/plugins/canvas"],
       "@kbn/canvas-plugin/*": ["x-pack/plugins/canvas/*"],
       "@kbn/cases-api-integration-test-plugin": ["x-pack/test/cases_api_integration/common/plugins/cases"],

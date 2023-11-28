@@ -117,7 +117,7 @@ export const createStartServicesMock = (
   const discover = discoverPluginMock.createStartContract();
   const cases = mockCasesContract();
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
-  cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
+  cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
