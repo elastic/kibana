@@ -24,7 +24,6 @@ SHOW : S H O W -> pushMode(EXPRESSION);
 SORT : S O R T -> pushMode(EXPRESSION);
 STATS : S T A T S -> pushMode(EXPRESSION);
 WHERE : W H E R E -> pushMode(EXPRESSION);
-UNKNOWN_CMD : ~[ \r\n\t[\]/]+ -> pushMode(EXPRESSION);
 
 LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
