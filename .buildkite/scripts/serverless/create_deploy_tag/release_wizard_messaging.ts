@@ -299,7 +299,6 @@ async function sendReleaseSlackAnnouncement({
   const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
   const buildShortname = `kibana-serverless-release #${process.env.BUILDKITE_BUILD_NUMBER}`;
 
-  const isDryRun = process.env.DRY_RUN?.match('(1|true)');
   const mergedAtDate = targetCommitData.commit?.committer?.date;
   const mergedAtUtcString = mergedAtDate ? new Date(mergedAtDate).toUTCString() : 'unknown';
   const targetCommitSha = targetCommitData.sha;
@@ -319,14 +318,8 @@ async function sendReleaseSlackAnnouncement({
   const mainMessage = [
     `:ship_it_parrot: Promotion of ${compareLink} to QA has been <${process.env.BUILDKITE_BUILD_URL}|initiated>!\n`,
     `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.\n`,
+    `cc: @kibana-serverless-promotion-notify`,
   ];
-  if (isDryRun) {
-    mainMessage.unshift(
-      `*:memo:This is a dry run - no commit will actually be promoted. Please ignore!*\n`
-    );
-  } else {
-    mainMessage.push(`cc: @kibana-serverless-promotion-notify`);
-  }
 
   const linksSection = {
     'Initiated by': process.env.BUILDKITE_BUILD_CREATOR || 'unknown',
