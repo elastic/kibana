@@ -83,10 +83,20 @@ const queryRT = rt.union([
   }),
 ]);
 
-const timeRangeRT = rt.strict({
-  from: rt.string,
-  to: rt.string,
-});
+const timeRangeRT = rt.intersection([
+  rt.strict({
+    from: rt.string,
+    to: rt.string,
+  }),
+  rt.exact(
+    rt.partial({
+      mode: rt.keyof({
+        absolute: null,
+        relative: null,
+      }),
+    })
+  ),
+]);
 
 const refreshIntervalRT = rt.strict({
   pause: rt.boolean,
