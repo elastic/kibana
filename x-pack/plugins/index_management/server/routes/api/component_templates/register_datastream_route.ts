@@ -31,8 +31,8 @@ async function getDatastreamsForComponentTemplate(
   const { index_templates: indexTemplates } = await esClient.indices.getIndexTemplate();
 
   const datastreamNames = indexTemplates
-    .filter((indexTemplate) => indexTemplate?.index_template?.composed_of?.includes(name))
-    .map((indexTemplate) => indexTemplate?.index_template?.index_patterns)
+    .filter((indexTemplate) => indexTemplate.index_template?.composed_of?.includes(name))
+    .map((indexTemplate) => indexTemplate.index_template.index_patterns)
     .flat()
     .join(',');
 
