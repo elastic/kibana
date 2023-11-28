@@ -7,19 +7,46 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { TestProviders, mockIndexNames, mockIndexPattern } from '../../../../common/mock';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { allCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TimelineActionMenu } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
+const mockedUseKibana = mockUseKibana();
+const mockCanUseCases = jest.fn();
+
 jest.mock('../../../../common/containers/sourcerer');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana/kibana_react', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana/kibana_react');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        cases: {
+          ...mockedUseKibana.services.cases,
+          helpers: { canUseCases: mockCanUseCases },
+        },
+      },
+      application: {
+        capabilities: {
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          actions: { show: true, crud: true },
+        },
+      },
+    }),
+  };
+});
+
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
@@ -41,20 +68,15 @@ describe('Action menu', () => {
   beforeEach(() => {
     // Mocking these services is required for the header component to render.
     mockUseSourcererDataView.mockImplementation(() => sourcererDefaultValue);
-    useKibanaMock().services.application.capabilities = {
-      navLinks: {},
-      management: {},
-      catalogue: {},
-      actions: { show: true, crud: true },
-    };
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   describe('AddToCaseButton', () => {
     it('renders the button when the user has create and read permissions', () => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+      mockCanUseCases.mockReturnValue(allCasesPermissions());
 
       render(
         <TestProviders>
@@ -70,7 +92,7 @@ describe('Action menu', () => {
     });
 
     it('does not render the button when the user does not have create permissions', () => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+      mockCanUseCases.mockReturnValue(readCasesPermissions());
 
       render(
         <TestProviders>
