@@ -29,11 +29,15 @@ const initSuperAgentTest = (kbnUrl: string, ca?: string[]) => {
       const agent = supertest.agent(kbnUrl, { ca });
       return agent.post(url);
     },
+    patch(url: string) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.patch(url);
+    },
     put(url: string) {
       const agent = supertest.agent(kbnUrl, { ca });
       return agent.put(url);
     },
-  } as Pick<SuperAgentTest, 'get' | 'delete' | 'post' | 'put'>;
+  } as Pick<SuperAgentTest, 'get' | 'delete' | 'post' | 'patch' | 'put'>;
 };
 
 export function SupertestProvider({ getService }: FtrProviderContext) {
