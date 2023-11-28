@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-
-interface Template {
-  name: string;
-  body: Record<string, any>;
-}
 
 export function componentTemplateHelpers(getService: FtrProviderContext['getService']) {
   const es = getService('es');
@@ -29,18 +22,18 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
   const removeIndexTemplate = (name: string) =>
     es.indices.deleteIndexTemplate({ name }, { meta: true });
 
-  const addComponentTemplate = (componentTemplate: Template, shouldCacheTemplate: boolean) => {
+  const addComponentTemplate = (componentTemplate: any, shouldCacheTemplate: boolean) => {
     if (shouldCacheTemplate) {
       componentTemplatesCreated.push(componentTemplate.name);
     }
 
     return es.cluster.putComponentTemplate(
-      componentTemplate as unknown as ClusterPutComponentTemplateRequest,
+      componentTemplate,
       { meta: true }
     );
   };
 
-  const addIndexTemplate = (indexTemplate: Template, shouldCacheTemplate: boolean) => {
+  const addIndexTemplate = (indexTemplate: any, shouldCacheTemplate: boolean) => {
     if (shouldCacheTemplate) {
       indexTemplatesCreated.push(indexTemplate.name);
     }
