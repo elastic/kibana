@@ -169,8 +169,8 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           defaultMessage: 'Using wildcards (*) in {name} is not allowed',
           values: {
             name: out.name,
-          }
-        })
+          },
+        }),
       };
     case 'ccsNotSupportedForCommand':
       return {
