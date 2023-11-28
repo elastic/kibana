@@ -1041,3 +1041,12 @@ during upgrades, where newly introduced or backfilled fields may not necessarily
 from the `search` API when the option is used.
 
    (*note*: both the previous and next version of Kibana must follow this rule then)
+
+### Using `bulkUpdate` for fields with large `json` blobs
+
+The savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents.
+These update operations are done in-memory, and cause memory constraint issues when
+updating many objects with large `json` blobs stored in some fields. As such, we recommend against using
+`bulkUpdate` for savedObjects that:
+- use arrays (as these tend to be large objects)
+- store large `json` blobs in some fields
