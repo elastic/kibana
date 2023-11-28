@@ -24,6 +24,7 @@ export interface Services {
   hasUserDataView: () => Promise<boolean>;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
+  defaultDataView: Promise<DataView>;
 }
 
 /**
@@ -33,6 +34,7 @@ export type KibanaNoDataPageServices = Services & NoDataCardServices & NoDataVie
 
 export interface KibanaDependencies {
   dataViews: {
+    defaultDataView: Promise<DataView>;
     hasData: {
       hasESData: () => Promise<boolean>;
       hasUserDataView: () => Promise<boolean>;

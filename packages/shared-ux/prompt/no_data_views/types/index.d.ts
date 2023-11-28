@@ -34,6 +34,7 @@ interface DataViewEditorOptions {
  * Abstract external services for this component.
  */
 export interface NoDataViewsPromptServices {
+  defaultDataView: Promise<DataView>
   /** True if the user has permission to create a new Data View, false otherwise. */
   canCreateNewDataView: boolean;
   /** A method to open the Data View Editor flow. */
@@ -69,6 +70,11 @@ export interface NoDataViewsPromptKibanaDependencies {
       };
     };
   };
+  defaultDataView: {
+    dataView: {
+      getDefaultDataView: () => boolean;
+    }
+  }
 }
 
 export interface NoDataViewsPromptComponentProps {
@@ -82,6 +88,7 @@ export interface NoDataViewsPromptComponentProps {
   emptyPromptColor?: EuiEmptyPromptProps['color'];
   /** Show a button to the user to navigate to the ES|QL Discover */
   showESQLView: boolean;
+  defaultDataView: Promise<DataView>;
 }
 
 // TODO: https://github.com/elastic/kibana/issues/127695

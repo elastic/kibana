@@ -29,7 +29,7 @@ export const NoDataViewsPrompt = ({
   showESQLView = false,
   allowAdHocDataView = false,
 }: NoDataViewsPromptProps) => {
-  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink } = useServices();
+  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, showESQLViewLocator, defaultDataView } = useServices();
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 
   useEffect(() => {
@@ -48,12 +48,12 @@ export const NoDataViewsPrompt = ({
   const setDataViewEditorRef = useCallback((ref: CloseDataViewEditorFn) => {
     closeDataViewEditor.current = ref;
   }, []);
+  
 
   const onClickCreate = useCallback(() => {
     if (!canCreateNewDataView) {
       return;
     }
-
     const ref = openDataViewEditor({
       onSave: (dataView) => {
         onDataViewCreated(dataView);
@@ -74,7 +74,6 @@ export const NoDataViewsPrompt = ({
 
   return (
     <NoDataViewsPromptComponent
-      {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink, showESQLView }}
-    />
+      {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink, showESQLView, showESQLViewLocator, defaultDataView }}    />
   );
 };
