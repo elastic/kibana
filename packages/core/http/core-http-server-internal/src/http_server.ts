@@ -14,12 +14,13 @@ import {
   createServer,
   getListenerOptions,
   getServerOptions,
+  setTlsConfig,
   getRequestId,
 } from '@kbn/server-http-tools';
 
 import type { Duration } from 'moment';
-import { firstValueFrom, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { take, pairwise } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
 // @ts-expect-error no type definition
 import Brok from 'brok';
@@ -154,9 +155,15 @@ export type LifecycleRegistrar = Pick<
   | 'registerOnPreResponse'
 >;
 
+export interface HttpServerSetupOptions {
+  config$: Observable<HttpConfig>;
+  executionContext?: InternalExecutionContextSetup;
+}
+
 export class HttpServer {
   private server?: Server;
   private config?: HttpConfig;
+  private subscriptions: Subscription[] = [];
   private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
@@ -203,13 +210,16 @@ export class HttpServer {
     }
   }
 
-  public async setup(
-    config: HttpConfig,
-    executionContext?: InternalExecutionContextSetup
-  ): Promise<HttpServerSetup> {
+  public async setup({
+    config$,
+    executionContext,
+  }: HttpServerSetupOptions): Promise<HttpServerSetup> {
+    const config = await firstValueFrom(config$);
+    this.config = config;
+
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
-    this.config = config;
+
     this.server = createServer(serverOptions, listenerOptions);
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
@@ -219,6 +229,29 @@ export class HttpServer {
           compress: { quality: config.compression.brotli.quality },
         },
       });
+    }
+
+    // only hot-reloading TLS config - don't need to subscribe if TLS is initially disabled,
+    // given we can't hot-switch from/to enabled/disabled.
+    if (config.ssl.enabled) {
+      const configSubscription = config$
+        .pipe(pairwise())
+        .subscribe(([{ ssl: prevSslConfig }, { ssl: newSslConfig }]) => {
+          if (prevSslConfig.enabled !== newSslConfig.enabled) {
+            this.log.warn(
+              'Incompatible TLS config change detected - TLS cannot be toggled without a full server reboot.'
+            );
+            return;
+          }
+
+          const sameConfig = newSslConfig.isEqualTo(prevSslConfig);
+
+          if (!sameConfig) {
+            this.log.info('TLS configuration change detected - reloading TLS configuration.');
+            setTlsConfig(this.server!, newSslConfig);
+          }
+        });
+      this.subscriptions.push(configSubscription);
     }
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.

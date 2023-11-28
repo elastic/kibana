@@ -423,49 +423,48 @@ export class SyntheticsService {
     };
 
     for await (const result of finder.find()) {
-      if (result.saved_objects.length === 0) {
-        return;
-      }
-      try {
-        if (!output) {
-          output = await this.getOutput();
+      if (result.saved_objects.length > 0) {
+        try {
           if (!output) {
-            sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-              reason: 'API key is not valid.',
-              message: 'Failed to push configs. API key is not valid.',
-              type: 'invalidApiKey',
-              stackVersion: service.server.stackVersion,
-            });
-            return;
-          }
-        }
-
-        const monitors = result.saved_objects.filter(({ error }) => !error);
-        const formattedConfigs = this.normalizeConfigs(monitors, paramsBySpace);
-
-        this.logger.debug(
-          `${formattedConfigs.length} monitors will be pushed to synthetics service.`
-        );
-
-        formattedConfigs.forEach((monitor) => {
-          monitor.locations.forEach((location) => {
-            if (location.isServiceManaged) {
-              bucketsByLocation[location.id]?.push(monitor);
+            output = await this.getOutput();
+            if (!output) {
+              sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+                reason: 'API key is not valid.',
+                message: 'Failed to push configs. API key is not valid.',
+                type: 'invalidApiKey',
+                stackVersion: service.server.stackVersion,
+              });
+              return;
             }
-          });
-        });
+          }
 
-        await syncAllLocations(PER_PAGE);
-      } catch (e) {
-        sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-          reason: 'Failed to push configs to service',
-          message: e?.message,
-          type: 'pushConfigsError',
-          code: e?.code,
-          status: e.status,
-          stackVersion: service.server.stackVersion,
-        });
-        this.logger.error(e);
+          const monitors = result.saved_objects.filter(({ error }) => !error);
+          const formattedConfigs = this.normalizeConfigs(monitors, paramsBySpace);
+
+          this.logger.debug(
+            `${formattedConfigs.length} monitors will be pushed to synthetics service.`
+          );
+
+          formattedConfigs.forEach((monitor) => {
+            monitor.locations.forEach((location) => {
+              if (location.isServiceManaged) {
+                bucketsByLocation[location.id]?.push(monitor);
+              }
+            });
+          });
+
+          await syncAllLocations(PER_PAGE);
+        } catch (e) {
+          sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+            reason: 'Failed to push configs to service',
+            message: e?.message,
+            type: 'pushConfigsError',
+            code: e?.code,
+            status: e.status,
+            stackVersion: service.server.stackVersion,
+          });
+          this.logger.error(e);
+        }
       }
     }
 

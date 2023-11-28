@@ -1,9 +1,9 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
     "title": "Alerting",
     "description": "OpenAPI schema for alerting endpoints",
-    "version": "0.1",
+    "version": "0.2",
     "contact": {
       "name": "Alerting Team"
     },
@@ -239,7 +239,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              "examples": [
+                "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              ]
             }
           }
         ],
@@ -496,9 +498,11 @@
             "description": "The default operator to use for the simple_query_string.",
             "schema": {
               "type": "string",
-              "default": "OR"
-            },
-            "example": "OR"
+              "default": "OR",
+              "examples": [
+                "OR"
+              ]
+            }
           },
           {
             "name": "fields",
@@ -541,9 +545,11 @@
             "description": "The page number to return.",
             "schema": {
               "type": "integer",
-              "default": 1
-            },
-            "example": 1
+              "default": 1,
+              "examples": [
+                1
+              ]
+            }
           },
           {
             "name": "per_page",
@@ -551,9 +557,11 @@
             "description": "The number of rules to return per page.",
             "schema": {
               "type": "integer",
-              "default": 20
-            },
-            "example": 20
+              "default": 20,
+              "examples": [
+                20
+              ]
+            }
           },
           {
             "name": "search",
@@ -599,9 +607,11 @@
                 "asc",
                 "desc"
               ],
-              "default": "desc"
-            },
-            "example": "asc"
+              "default": "desc",
+              "examples": [
+                "asc"
+              ]
+            }
           }
         ],
         "responses": {
@@ -684,7 +694,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -694,7 +706,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -704,7 +718,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -714,7 +730,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -724,7 +742,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -734,7 +754,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         }
@@ -743,12 +765,16 @@
                     "has_permanent_encryption_key": {
                       "type": "boolean",
                       "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
-                      "example": true
+                      "examples": [
+                        true
+                      ]
                     },
                     "is_sufficiently_secure": {
                       "type": "boolean",
                       "description": "If `false`, security is enabled but TLS is not.",
-                      "example": true
+                      "examples": [
+                        true
+                      ]
                     }
                   }
                 },
@@ -1030,7 +1056,9 @@
                       "minimum_license_required": {
                         "description": "The subscriptions required to use the rule type.",
                         "type": "string",
-                        "example": "basic"
+                        "examples": [
+                          "basic"
+                        ]
                       },
                       "name": {
                         "description": "The descriptive name of the rule type.",
@@ -1039,7 +1067,9 @@
                       "producer": {
                         "description": "An identifier for the application that produces this rule type.",
                         "type": "string",
-                        "example": "stackAlerts"
+                        "examples": [
+                          "stackAlerts"
+                        ]
                       },
                       "recovery_action_group": {
                         "description": "An action group to use when an alert goes from an active state to an inactive one.",
@@ -1055,7 +1085,9 @@
                       },
                       "rule_task_timeout": {
                         "type": "string",
-                        "example": "5m"
+                        "examples": [
+                          "5m"
+                        ]
                       }
                     }
                   }
@@ -1290,7 +1322,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1329,7 +1363,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1375,7 +1411,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -1464,7 +1502,9 @@
                       "interval": {
                         "type": "string",
                         "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
-                        "example": "10s"
+                        "examples": [
+                          "10s"
+                        ]
                       }
                     }
                   },
@@ -1529,7 +1569,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1601,7 +1643,9 @@
                       "interval": {
                         "type": "string",
                         "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
-                        "example": "1d"
+                        "examples": [
+                          "1d"
+                        ]
                       }
                     }
                   },
@@ -1668,7 +1712,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1712,7 +1758,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1756,7 +1804,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1800,7 +1850,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1840,9 +1892,11 @@
             "description": "The default operator to use for the `simple_query_string`.",
             "schema": {
               "type": "string",
-              "default": "OR"
-            },
-            "example": "OR"
+              "default": "OR",
+              "examples": [
+                "OR"
+              ]
+            }
           },
           {
             "name": "fields",
@@ -1885,9 +1939,11 @@
             "description": "The page number to return.",
             "schema": {
               "type": "integer",
-              "default": 1
-            },
-            "example": 1
+              "default": 1,
+              "examples": [
+                1
+              ]
+            }
           },
           {
             "name": "per_page",
@@ -1895,9 +1951,11 @@
             "description": "The number of alerts to return per page.",
             "schema": {
               "type": "integer",
-              "default": 20
-            },
-            "example": 20
+              "default": 20,
+              "examples": [
+                20
+              ]
+            }
           },
           {
             "name": "search",
@@ -1943,9 +2001,11 @@
                 "asc",
                 "desc"
               ],
-              "default": "desc"
-            },
-            "example": "asc"
+              "default": "desc",
+              "examples": [
+                "asc"
+              ]
+            }
           }
         ],
         "responses": {
@@ -2021,7 +2081,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -2031,7 +2093,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -2041,7 +2105,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -2051,7 +2117,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -2061,7 +2129,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -2071,7 +2141,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         }
@@ -2080,12 +2152,16 @@
                     "hasPermanentEncryptionKey": {
                       "type": "boolean",
                       "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
-                      "example": true
+                      "examples": [
+                        true
+                      ]
                     },
                     "isSufficientlySecure": {
                       "type": "boolean",
                       "description": "If `false`, security is enabled but TLS is not.",
-                      "example": true
+                      "examples": [
+                        true
+                      ]
                     }
                   }
                 }
@@ -2278,7 +2354,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -2288,7 +2366,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              "examples": [
+                "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              ]
             }
           }
         ],
@@ -2332,7 +2412,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -2342,7 +2424,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              "examples": [
+                "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              ]
             }
           }
         ],
@@ -2393,7 +2477,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "default"
+          "examples": [
+            "default"
+          ]
         }
       },
       "rule_id": {
@@ -2403,7 +2489,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          "examples": [
+            "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          ]
         }
       },
       "alert_id": {
@@ -2413,7 +2501,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          "examples": [
+            "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          ]
         }
       }
     },
@@ -2426,8 +2516,10 @@
             "type": "object",
             "properties": {
               "alias": {
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "controlledBy": {
                 "type": "string"
@@ -2480,19 +2572,27 @@
           "onActiveAlert",
           "onThrottleInterval"
         ],
-        "example": "onActiveAlert"
+        "examples": [
+          "onActiveAlert"
+        ]
       },
       "throttle": {
-        "type": "string",
+        "type": [
+          "string",
+          "null"
+        ],
         "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
-        "nullable": true,
         "default": null,
-        "example": "10m"
+        "examples": [
+          "10m"
+        ]
       },
       "actions": {
-        "type": "array",
+        "type": [
+          "array",
+          "null"
+        ],
         "default": [],
-        "nullable": true,
         "items": {
           "type": "object",
           "required": [
@@ -2532,12 +2632,14 @@
                       "items": {
                         "type": "integer"
                       },
-                      "example": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5
+                      "examples": [
+                        [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5
+                        ]
                       ]
                     },
                     "hours": {
@@ -2547,19 +2649,25 @@
                         "end": {
                           "type": "string",
                           "description": "The end of the time frame in 24-hour notation (`hh:mm`).",
-                          "example": "17:00"
+                          "examples": [
+                            "17:00"
+                          ]
                         },
                         "start": {
                           "type": "string",
                           "description": "The start of the time frame in 24-hour notation (`hh:mm`).",
-                          "example": "08:00"
+                          "examples": [
+                            "08:00"
+                          ]
                         }
                       }
                     },
                     "timezone": {
                       "type": "string",
                       "description": "The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.\n",
-                      "example": "Europe/Madrid"
+                      "examples": [
+                        "Europe/Madrid"
+                      ]
                     }
                   }
                 }
@@ -2568,7 +2676,9 @@
             "connector_type_id": {
               "type": "string",
               "description": "The type of connector. This property appears in responses but cannot be set in requests.",
-              "example": ".server-log",
+              "examples": [
+                ".server-log"
+              ],
               "readOnly": true
             },
             "frequency": {
@@ -2594,12 +2704,16 @@
             "group": {
               "type": "string",
               "description": "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.\n",
-              "example": "default"
+              "examples": [
+                "default"
+              ]
             },
             "id": {
               "type": "string",
               "description": "The identifier for the connector saved object.",
-              "example": "9dca3e00-74f5-11ed-9801-35303b735aef"
+              "examples": [
+                "9dca3e00-74f5-11ed-9801-35303b735aef"
+              ]
             },
             "params": {
               "type": "object",
@@ -2609,7 +2723,9 @@
             "uuid": {
               "type": "string",
               "description": "A universally unique identifier (UUID) for the action.",
-              "example": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+              "examples": [
+                "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+              ]
             }
           }
         }
@@ -2632,7 +2748,9 @@
         "properties": {
           "interval": {
             "type": "string",
-            "example": "1m"
+            "examples": [
+              "1m"
+            ]
           }
         }
       },
@@ -3210,7 +3328,9 @@
       "timewindowsize": {
         "description": "The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.\n",
         "type": "integer",
-        "example": 5
+        "examples": [
+          5
+        ]
       },
       "timewindowunit": {
         "description": "The type of units for the time window: seconds, minutes, hours, or days.\n",
@@ -3221,7 +3341,9 @@
           "h",
           "d"
         ],
-        "example": "m"
+        "examples": [
+          "m"
+        ]
       },
       "size": {
         "description": "The number of documents to pass to the configured actions when the threshold condition is met.\n",
@@ -3247,7 +3369,9 @@
         "type": "array",
         "items": {
           "type": "integer",
-          "example": 4000
+          "examples": [
+            4000
+          ]
         }
       },
       "thresholdcomparator": {
@@ -3261,7 +3385,9 @@
           "between",
           "notBetween"
         ],
-        "example": ">"
+        "examples": [
+          ">"
+        ]
       },
       "params_es_query_rule": {
         "oneOf": [
@@ -3309,12 +3435,16 @@
                 "enum": [
                   "esqlQuery"
                 ],
-                "example": "esqlQuery"
+                "examples": [
+                  "esqlQuery"
+                ]
               },
               "size": {
                 "type": "integer",
                 "description": "When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.\n",
-                "example": 0
+                "examples": [
+                  0
+                ]
               },
               "termSize": {
                 "$ref": "#/components/schemas/termsize"
@@ -3334,7 +3464,9 @@
                 "enum": [
                   ">"
                 ],
-                "example": ">"
+                "examples": [
+                  ">"
+                ]
               },
               "timeField": {
                 "$ref": "#/components/schemas/timefield"
@@ -3400,7 +3532,9 @@
                     "properties": {
                       "language": {
                         "type": "string",
-                        "example": "kuery"
+                        "examples": [
+                          "kuery"
+                        ]
                       },
                       "query": {
                         "type": "string"
@@ -3415,7 +3549,9 @@
                 "enum": [
                   "searchSource"
                 ],
-                "example": "searchSource"
+                "examples": [
+                  "searchSource"
+                ]
               },
               "size": {
                 "$ref": "#/components/schemas/size"
@@ -3493,7 +3629,9 @@
                   "esQuery"
                 ],
                 "default": "esQuery",
-                "example": "esQuery"
+                "examples": [
+                  "esQuery"
+                ]
               },
               "size": {
                 "$ref": "#/components/schemas/size"
@@ -6318,58 +6456,82 @@
           "api_key_created_by_user": {
             "type": "boolean",
             "description": "Indicates whether the API key that is associated with the rule was created by the user.",
-            "example": false
+            "examples": [
+              false
+            ]
           },
           "api_key_owner": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The owner of the API key that is associated with the rule and used to run background tasks.\n",
-            "nullable": true,
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           },
           "consumer": {
             "type": "string",
             "description": "The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
-            "example": "alerts"
+            "examples": [
+              "alerts"
+            ]
           },
           "created_at": {
             "type": "string",
             "description": "The date and time that the rule was created.",
             "format": "date-time",
-            "example": "2022-12-05T23:36:58.284Z"
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "created_by": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that created the rule.",
-            "nullable": true,
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           },
           "enabled": {
             "type": "boolean",
             "description": "Indicates whether the rule is currently enabled.",
-            "example": true
+            "examples": [
+              true
+            ]
           },
           "execution_status": {
             "type": "object",
             "properties": {
               "last_duration": {
                 "type": "integer",
-                "example": 55
+                "examples": [
+                  55
+                ]
               },
               "last_execution_date": {
                 "type": "string",
                 "format": "date-time",
-                "example": "2022-12-06T00:13:43.890Z"
+                "examples": [
+                  "2022-12-06T00:13:43.890Z"
+                ]
               },
               "status": {
                 "type": "string",
-                "example": "ok"
+                "examples": [
+                  "ok"
+                ]
               }
             }
           },
           "id": {
             "type": "string",
             "description": "The identifier for the rule.",
-            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "last_run": {
             "type": "object",
@@ -6393,51 +6555,71 @@
               },
               "outcome": {
                 "type": "string",
-                "example": "succeeded"
+                "examples": [
+                  "succeeded"
+                ]
               },
               "outcome_msg": {
-                "type": "array",
+                "type": [
+                  "array",
+                  "null"
+                ],
                 "items": {
                   "type": "string"
-                },
-                "nullable": true
+                }
               },
               "outcome_order": {
                 "type": "integer"
               },
               "warning": {
-                "type": "string",
-                "nullable": true,
-                "example": null
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               }
             }
           },
           "muted_alert_ids": {
-            "type": "array",
-            "nullable": true,
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
           "mute_all": {
             "type": "boolean",
-            "example": false
+            "examples": [
+              false
+            ]
           },
           "name": {
             "type": "string",
             "description": "The name of the rule.",
-            "example": "cluster_health_rule"
+            "examples": [
+              "cluster_health_rule"
+            ]
           },
           "next_run": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "nullable": true,
-            "example": "2022-12-06T00:14:43.818Z"
+            "examples": [
+              "2022-12-06T00:14:43.818Z"
+            ]
           },
           "notify_when": {
-            "type": "string",
-            "description": "Indicates how often alerts generate actions.",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Indicates how often alerts generate actions."
           },
           "params": {
             "type": "object",
@@ -6451,7 +6633,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.\n",
-            "example": "monitoring_alert_cluster_health"
+            "examples": [
+              "monitoring_alert_cluster_health"
+            ]
           },
           "running": {
             "type": "boolean",
@@ -6462,7 +6646,9 @@
           },
           "scheduled_task_id": {
             "type": "string",
-            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "tags": {
             "$ref": "#/components/schemas/tags"
@@ -6473,13 +6659,19 @@
           "updated_at": {
             "type": "string",
             "description": "The date and time that the rule was updated most recently.",
-            "example": "2022-12-05T23:36:58.284Z"
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "updated_by": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that updated this rule most recently.",
-            "nullable": true,
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           }
         }
       },
@@ -6489,7 +6681,9 @@
         "properties": {
           "error": {
             "type": "string",
-            "example": "Unauthorized",
+            "examples": [
+              "Unauthorized"
+            ],
             "enum": [
               "Unauthorized"
             ]
@@ -6499,7 +6693,9 @@
           },
           "statusCode": {
             "type": "integer",
-            "example": 401,
+            "examples": [
+              401
+            ],
             "enum": [
               401
             ]
@@ -6511,18 +6707,24 @@
         "properties": {
           "error": {
             "type": "string",
-            "example": "Not Found",
+            "examples": [
+              "Not Found"
+            ],
             "enum": [
               "Not Found"
             ]
           },
           "message": {
             "type": "string",
-            "example": "Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
+            "examples": [
+              "Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
+            ]
           },
           "statusCode": {
             "type": "integer",
-            "example": 404,
+            "examples": [
+              404
+            ],
             "enum": [
               404
             ]
@@ -6545,7 +6747,9 @@
           "name": {
             "type": "string",
             "description": "The name of the rule.",
-            "example": "cluster_health_rule"
+            "examples": [
+              "cluster_health_rule"
+            ]
           },
           "notify_when": {
             "$ref": "#/components/schemas/notify_when"
@@ -6604,28 +6808,40 @@
           },
           "alertTypeId": {
             "type": "string",
-            "example": ".index-threshold"
+            "examples": [
+              ".index-threshold"
+            ]
           },
           "apiKeyOwner": {
-            "type": "string",
-            "nullable": true,
-            "example": "elastic"
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "elastic"
+            ]
           },
           "createdAt": {
             "type": "string",
             "description": "The date and time that the alert was created.",
             "format": "date-time",
-            "example": "2022-12-05T23:36:58.284Z"
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "createdBy": {
             "type": "string",
             "description": "The identifier for the user that created the alert.",
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           },
           "enabled": {
             "type": "boolean",
             "description": "Indicates whether the alert is currently enabled.",
-            "example": true
+            "examples": [
+              true
+            ]
           },
           "executionStatus": {
             "type": "object",
@@ -6633,26 +6849,36 @@
               "lastExecutionDate": {
                 "type": "string",
                 "format": "date-time",
-                "example": "2022-12-06T00:13:43.890Z"
+                "examples": [
+                  "2022-12-06T00:13:43.890Z"
+                ]
               },
               "status": {
                 "type": "string",
-                "example": "ok"
+                "examples": [
+                  "ok"
+                ]
               }
             }
           },
           "id": {
             "type": "string",
             "description": "The identifier for the alert.",
-            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "muteAll": {
             "type": "boolean",
-            "example": false
+            "examples": [
+              false
+            ]
           },
           "mutedInstanceIds": {
-            "type": "array",
-            "nullable": true,
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -6660,11 +6886,15 @@
           "name": {
             "type": "string",
             "description": "The name of the alert.",
-            "example": "my alert"
+            "examples": [
+              "my alert"
+            ]
           },
           "notifyWhen": {
             "type": "string",
-            "example": "onActionGroupChange"
+            "examples": [
+              "onActionGroupChange"
+            ]
           },
           "params": {
             "type": "object",
@@ -6680,7 +6910,9 @@
           },
           "scheduledTaskId": {
             "type": "string",
-            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "tags": {
             "type": "array",
@@ -6689,18 +6921,26 @@
             }
           },
           "throttle": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "updatedAt": {
             "type": "string",
-            "example": "2022-12-05T23:36:58.284Z"
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "updatedBy": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that updated this alert most recently.",
-            "nullable": true,
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           }
         }
       }

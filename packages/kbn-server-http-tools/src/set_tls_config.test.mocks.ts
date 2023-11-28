@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { SubscriptionContextData } from '../types';
+export const getServerTLSOptionsMock = jest.fn();
 
-const sourceStringRegEx = /^(\w[\w\-_]*)__(\w[\w\-_]*)$/;
-export function isValidContext(context: SubscriptionContextData): boolean {
-  return context.feature.length > 0 && sourceStringRegEx.test(context.source);
-}
+jest.doMock('./get_server_options', () => {
+  const actual = jest.requireActual('./get_server_options');
+  return {
+    ...actual,
+    getServerTLSOptions: getServerTLSOptionsMock,
+  };
+});

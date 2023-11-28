@@ -119,46 +119,53 @@ export function getTemplate({
  *
  * @param fields
  */
-export function generateMappings(fields: Field[]): IndexTemplateMappings {
+export function generateMappings(
+  fields: Field[],
+  isIndexModeTimeSeries = false
+): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
   const runtimeFields: RuntimeFields = {};
 
-  const { properties } = _generateMappings(fields, {
-    addDynamicMapping: (dynamicMapping: {
-      path: string;
-      matchingType: string;
-      pathMatch: string;
-      properties: string;
-      runtimeProperties?: string;
-    }) => {
-      const name = dynamicMapping.path;
-      if (dynamicTemplateNames.has(name)) {
-        return;
-      }
+  const { properties } = _generateMappings(
+    fields,
+    {
+      addDynamicMapping: (dynamicMapping: {
+        path: string;
+        matchingType: string;
+        pathMatch: string;
+        properties: string;
+        runtimeProperties?: string;
+      }) => {
+        const name = dynamicMapping.path;
+        if (dynamicTemplateNames.has(name)) {
+          return;
+        }
 
-      const dynamicTemplate: Properties = {};
-      if (dynamicMapping.runtimeProperties !== undefined) {
-        dynamicTemplate.runtime = dynamicMapping.runtimeProperties;
-      } else {
-        dynamicTemplate.mapping = dynamicMapping.properties;
-      }
+        const dynamicTemplate: Properties = {};
+        if (dynamicMapping.runtimeProperties !== undefined) {
+          dynamicTemplate.runtime = dynamicMapping.runtimeProperties;
+        } else {
+          dynamicTemplate.mapping = dynamicMapping.properties;
+        }
 
-      if (dynamicMapping.matchingType) {
-        dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
-      }
+        if (dynamicMapping.matchingType) {
+          dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
+        }
 
-      if (dynamicMapping.pathMatch) {
-        dynamicTemplate.path_match = dynamicMapping.pathMatch;
-      }
+        if (dynamicMapping.pathMatch) {
+          dynamicTemplate.path_match = dynamicMapping.pathMatch;
+        }
 
-      dynamicTemplateNames.add(name);
-      dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+        dynamicTemplateNames.add(name);
+        dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+      },
+      addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
+        runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
+      },
     },
-    addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
-      runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
-    },
-  });
+    isIndexModeTimeSeries
+  );
 
   const indexTemplateMappings: IndexTemplateMappings = { properties };
   if (dynamicTemplates.length > 0) {
@@ -184,7 +191,8 @@ function _generateMappings(
     addDynamicMapping: any;
     addRuntimeField: any;
     groupFieldName?: string;
-  }
+  },
+  isIndexModeTimeSeries: boolean
 ): {
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
@@ -206,7 +214,7 @@ function _generateMappings(
         if (type === 'object' && field.object_type) {
           const pathMatch = path.includes('*') ? path : `${path}.*`;
 
-          let dynProperties: Properties = getDefaultProperties(field);
+          const dynProperties: Properties = getDefaultProperties(field);
           let matchingType: string | undefined;
           switch (field.object_type) {
             case 'keyword':
@@ -216,10 +224,10 @@ function _generateMappings(
             case 'double':
             case 'long':
             case 'boolean':
-              dynProperties = {
-                type: field.object_type,
-                time_series_metric: field.metric_type,
-              };
+              dynProperties.type = field.object_type;
+              if (isIndexModeTimeSeries) {
+                dynProperties.time_series_metric = field.metric_type;
+              }
               matchingType = field.object_type_mapping_type ?? field.object_type;
             default:
               break;
@@ -272,10 +280,10 @@ function _generateMappings(
           case 'long':
           case 'short':
           case 'boolean':
-            dynProperties = {
-              type: field.object_type,
-              time_series_metric: field.metric_type,
-            };
+            dynProperties.type = field.object_type;
+            if (isIndexModeTimeSeries) {
+              dynProperties.time_series_metric = field.metric_type;
+            }
             matchingType = field.object_type_mapping_type ?? field.object_type;
           default:
             break;
@@ -294,12 +302,16 @@ function _generateMappings(
 
         switch (type) {
           case 'group':
-            const mappings = _generateMappings(field.fields!, {
-              ...ctx,
-              groupFieldName: ctx.groupFieldName
-                ? `${ctx.groupFieldName}.${field.name}`
-                : field.name,
-            });
+            const mappings = _generateMappings(
+              field.fields!,
+              {
+                ...ctx,
+                groupFieldName: ctx.groupFieldName
+                  ? `${ctx.groupFieldName}.${field.name}`
+                  : field.name,
+              },
+              isIndexModeTimeSeries
+            );
             if (!mappings.hasNonDynamicTemplateMappings) {
               return;
             }
@@ -311,12 +323,16 @@ function _generateMappings(
             break;
           case 'group-nested':
             fieldProps = {
-              properties: _generateMappings(field.fields!, {
-                ...ctx,
-                groupFieldName: ctx.groupFieldName
-                  ? `${ctx.groupFieldName}.${field.name}`
-                  : field.name,
-              }).properties,
+              properties: _generateMappings(
+                field.fields!,
+                {
+                  ...ctx,
+                  groupFieldName: ctx.groupFieldName
+                    ? `${ctx.groupFieldName}.${field.name}`
+                    : field.name,
+                },
+                isIndexModeTimeSeries
+              ).properties,
               ...generateNestedProps(field),
               type: 'nested',
             };
@@ -404,10 +420,10 @@ function _generateMappings(
           }
         }
 
-        if ('metric_type' in field) {
+        if ('metric_type' in field && isIndexModeTimeSeries) {
           fieldProps.time_series_metric = field.metric_type;
         }
-        if (field.dimension) {
+        if (field.dimension && isIndexModeTimeSeries) {
           fieldProps.time_series_dimension = field.dimension;
         }
 

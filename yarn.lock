@@ -5951,10 +5951,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/subscription-tracking@link:packages/kbn-subscription-tracking":
-  version "0.0.0"
-  uid ""
-
 "@kbn/synthetics-plugin@link:x-pack/plugins/synthetics":
   version "0.0.0"
   uid ""
