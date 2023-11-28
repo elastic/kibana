@@ -19,6 +19,9 @@ export function compareSOSnapshots(
   changed: string[];
   command: string;
 } {
+  assertValidSha(previousSha);
+  assertValidSha(selectedSha);
+
   const command = `node scripts/snapshot_plugin_types compare --from ${previousSha} --to ${selectedSha}`;
   const outputPath = path.resolve(getKibanaDir(), 'so_comparison.json');
 
@@ -67,4 +70,10 @@ export function getSOComparisonErrorHtml(): string {
 <h4>Plugin Saved Object migration changes: N/A</h4>
 <div>Could not compare plugin migrations. Check the logs for more info.</div>
 </div>`;
+}
+
+function assertValidSha(sha: string) {
+  if (!sha.match(/^[a-f0-9]{8,40}$/)) {
+    throw new Error(`Invalid sha: ${sha}`);
+  }
 }
