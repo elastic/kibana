@@ -17,12 +17,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/actions-plugin",
     "@kbn/serverless",
-    "@kbn/server-route-repository",
-    "@kbn/io-ts-utils",
-    "@kbn/logging",
-    "@kbn/rule-registry-plugin",
-    "@kbn/features-plugin",
-    "@kbn/security-plugin",
   ],
   "exclude": ["target/**/*"]
 }
