@@ -194,6 +194,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
         delete: permissions.delete,
         push: permissions.push,
         connectors: permissions.connectors,
+        settings: permissions.settings,
       },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
@@ -215,6 +216,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       permissions.delete,
       permissions.push,
       permissions.connectors,
+      permissions.settings,
     ]
   );
 };
