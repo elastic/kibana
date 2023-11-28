@@ -70,20 +70,12 @@ export interface HighlightedFieldsCellProps {
    * Highlighted field's value to display
    */
   values: string[] | null | undefined;
-  /**
-   * Highlighted field's original name (if overrideField was used)
-   */
-  originalField: string;
 }
 
 /**
  * Renders a component in the highlighted fields table cell based on the field name
  */
-export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
-  values,
-  field,
-  originalField,
-}) => (
+export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({ values, field }) => (
   <>
     {values != null &&
       values.map((value, i) => {
@@ -95,13 +87,12 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
           >
             {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
               <LinkFieldCell value={value} />
-            ) : field === AGENT_STATUS_FIELD_NAME && originalField === 'agent.id' ? (
+            ) : field === AGENT_STATUS_FIELD_NAME ? (
               <EndpointAgentStatusById
                 endpointAgentId={String(value ?? '')}
                 data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
               />
-            ) : field === AGENT_STATUS_FIELD_NAME &&
-              originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
+            ) : field === SENTINEL_ONE_AGENT_ID_FIELD ? (
               <SentinelOneAgentStatus agentId={String(value ?? '')} />
             ) : (
               <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>

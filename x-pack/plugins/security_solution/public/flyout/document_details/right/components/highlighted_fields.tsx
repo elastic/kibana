@@ -76,7 +76,6 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       field: string;
       values: string[] | null | undefined;
       scopeId: string;
-      originalField: string;
       isPreview: boolean;
     }) => (
       <SecurityCellActions
@@ -95,11 +94,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
             : []
         }
       >
-        <HighlightedFieldsCell
-          values={description.values}
-          field={description.field}
-          originalField={description.originalField}
-        />
+        <HighlightedFieldsCell values={description.values} field={description.field} />
       </SecurityCellActions>
     ),
   },

@@ -36,7 +36,7 @@ export const useHostIsolationAction = ({
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
-  const hasActionsAllPrivileges = useKibana().services.application.capabilities.save;
+  const hasActionsAllPrivileges = useKibana().services.application.capabilities.actions.save;
 
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
@@ -157,23 +157,13 @@ export const useHostIsolationAction = ({
   );
 
   return useMemo(() => {
-    if (
-      isHostIsolationPanelOpen ||
-      !isEndpointAlert ||
-      !isSentinelOneAlert ||
-      !canIsolateHost ||
-      (isHostIsolated && !canUnIsolateHost)
-    ) {
+    if (isHostIsolationPanelOpen) {
       return [];
     }
 
-    if (isEndpointAlert && doesHostSupportIsolation && !loadingHostIsolationStatus) {
-      return menuItems;
-    }
-
     if (
-      sentinelOneManualHostActionsEnabled &&
       isSentinelOneAlert &&
+      sentinelOneManualHostActionsEnabled &&
       sentinelOneAgentId &&
       sentinelOneAgentData &&
       hasActionsAllPrivileges
@@ -181,20 +171,29 @@ export const useHostIsolationAction = ({
       return menuItems;
     }
 
+    if (
+      isEndpointAlert &&
+      doesHostSupportIsolation &&
+      !loadingHostIsolationStatus &&
+      (canIsolateHost || (isHostIsolated && !canUnIsolateHost))
+    ) {
+      return menuItems;
+    }
+
     return [];
   }, [
-    isHostIsolationPanelOpen,
-    isEndpointAlert,
-    isSentinelOneAlert,
     canIsolateHost,
-    isHostIsolated,
     canUnIsolateHost,
     doesHostSupportIsolation,
-    loadingHostIsolationStatus,
-    sentinelOneManualHostActionsEnabled,
-    sentinelOneAgentId,
-    sentinelOneAgentData,
     hasActionsAllPrivileges,
+    isEndpointAlert,
+    isHostIsolated,
+    isHostIsolationPanelOpen,
+    isSentinelOneAlert,
+    loadingHostIsolationStatus,
     menuItems,
+    sentinelOneAgentData,
+    sentinelOneAgentId,
+    sentinelOneManualHostActionsEnabled,
   ]);
 };

@@ -81,7 +81,7 @@ export const IsolateSentinelOneHost = React.memo(
           />
         </>
       ),
-      [connector, hostName, backToAlertDetails, confirmHostIsolation, isLoading, onChange]
+      [hostName, backToAlertDetails, confirmHostIsolation, isLoading, onChange]
     );
 
     return isIsolated ? hostIsolatedSuccessButton : hostNotIsolated;

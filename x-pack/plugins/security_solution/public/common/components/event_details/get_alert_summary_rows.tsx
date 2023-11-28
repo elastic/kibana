@@ -34,6 +34,10 @@ import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
+import {
+  SENTINEL_ONE_AGENT_ID_FIELD,
+  isAlertFromSentinelOneEvent,
+} from '../../utils/sentinelone_alert_check';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -48,7 +52,6 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   {
     id: 'observer.serial_number',
-    overrideField: AGENT_STATUS_FIELD_NAME,
     label: i18n.AGENT_STATUS,
   },
   // ** //
@@ -301,6 +304,7 @@ export const getSummaryRows = ({
   isDraggable = false,
   isReadOnly = false,
   investigationFields,
+  sentinelOneManualHostActionsEnabled,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
@@ -309,6 +313,7 @@ export const getSummaryRows = ({
   investigationFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
+  sentinelOneManualHostActionsEnabled?: boolean;
 }) => {
   const eventCategories = getEventCategoriesFromData(data);
 
@@ -361,6 +366,14 @@ export const getSummaryRows = ({
         };
 
         if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
+          return acc;
+        }
+
+        if (
+          field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
+          sentinelOneManualHostActionsEnabled &&
+          !isAlertFromSentinelOneEvent({ data })
+        ) {
           return acc;
         }
 
