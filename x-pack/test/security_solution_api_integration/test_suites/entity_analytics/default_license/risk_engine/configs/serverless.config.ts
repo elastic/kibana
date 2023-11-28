@@ -11,6 +11,7 @@ export default createTestConfig({
   kbnTestServerArgs: [
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'entityAnalyticsAssetCriticalityEnabled',
+      'riskEnginePrivilegesRouteEnabled',
     ])}`,
   ],
   testFiles: [require.resolve('..')],

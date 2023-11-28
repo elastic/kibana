@@ -41,7 +41,7 @@ describe('AssetCriticalityDataClient', () => {
               id_value: {
                 type: 'keyword',
               },
-              criticality: {
+              criticality_level: {
                 type: 'keyword',
               },
               '@timestamp': {
