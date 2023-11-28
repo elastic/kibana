@@ -2080,9 +2080,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.usernameLabel', {
-          defaultMessage: 'Username',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.usernameLabel',
+          {
+            defaultMessage: 'Username',
+          }
+        ),
         options: [],
         order: 3,
         required: true,
@@ -2097,9 +2100,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.passwordLabel', {
-          defaultMessage: 'Password',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.passwordLabel',
+          {
+            defaultMessage: 'Password',
+          }
+        ),
         options: [],
         order: 4,
         required: true,
@@ -2114,9 +2120,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.databaseLabel', {
-          defaultMessage: 'Database',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.databaseLabel',
+          {
+            defaultMessage: 'Database',
+          }
+        ),
         options: [],
         order: 5,
         required: true,
@@ -2131,9 +2140,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.tablesLabel', {
-          defaultMessage: 'Comma-separated list of tables',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.tablesLabel',
+          {
+            defaultMessage: 'Comma-separated list of tables',
+          }
+        ),
         options: [],
         order: 6,
         required: true,
@@ -2148,16 +2160,19 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 50,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.fetch_sizeLabel', {
-          defaultMessage: 'Rows fetched per request',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.fetch_sizeLabel',
+          {
+            defaultMessage: 'Rows fetched per request',
+          }
+        ),
         options: [],
         order: 7,
         required: false,
         sensitive: false,
         tooltip: '',
         type: FieldType.INTEGER,
-        ui_restrictions: ["advanced"],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: 50,
       },
@@ -2165,16 +2180,19 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 3,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.retry_countLabel', {
-          defaultMessage: 'Retries per request',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.retry_countLabel',
+          {
+            defaultMessage: 'Retries per request',
+          }
+        ),
         options: [],
         order: 8,
         required: false,
         sensitive: false,
         tooltip: '',
         type: FieldType.INTEGER,
-        ui_restrictions: ["advanced"],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: 3,
       },
@@ -2182,18 +2200,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 'TCP',
         depends_on: [],
         display: DisplayType.DROPDOWN,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.oracle_protocolLabel', {
-          defaultMessage: 'Oracle connection protocol',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.oracle_protocolLabel',
+          {
+            defaultMessage: 'Oracle connection protocol',
+          }
+        ),
         options: [
           {
-            label: "TCP",
-            value: "TCP"
+            label: 'TCP',
+            value: 'TCP',
           },
           {
-            label: "TCPS",
-            value: "TCPS"
-          }
+            label: 'TCPS',
+            value: 'TCPS',
+          },
         ],
         order: 9,
         required: true,
@@ -2208,16 +2229,19 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.oracle_homeLabel', {
-          defaultMessage: 'Path to Oracle Home',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.oracle_homeLabel',
+          {
+            defaultMessage: 'Path to Oracle Home',
+          }
+        ),
         options: [],
         order: 10,
         required: false,
         sensitive: false,
         tooltip: '',
         type: FieldType.STRING,
-        ui_restrictions: ["advanced"],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: '',
       },
@@ -2225,19 +2249,22 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.wallet_configuration_pathLabel', {
-          defaultMessage: 'Path to SSL Wallet configuration files',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.wallet_configuration_pathLabel',
+          {
+            defaultMessage: 'Path to SSL Wallet configuration files',
+          }
+        ),
         options: [],
         order: 11,
         required: false,
         sensitive: false,
         tooltip: '',
         type: FieldType.STRING,
-        ui_restrictions: ["advanced"],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: '',
-      }
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -2245,7 +2272,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('searchConnectors.nativeConnectors.oracle.name', {defaultMessage: 'Oracle'}),
+    name: i18n.translate('searchConnectors.nativeConnectors.oracle.name', {
+      defaultMessage: 'Oracle',
+    }),
     serviceType: 'oracle',
   },
   postgresql: {
