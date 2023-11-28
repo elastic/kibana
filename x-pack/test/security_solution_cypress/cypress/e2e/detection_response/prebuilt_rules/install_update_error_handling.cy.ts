@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   getInstallSingleRuleButtonByRuleId,
   getUpgradeSingleRuleButtonByRuleId,
@@ -14,14 +14,14 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
   UPGRADE_SELECTED_RULES_BUTTON,
-} from '../../../../screens/alerts_detection_rules';
-import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
+} from '../../../screens/alerts_detection_rules';
+import { selectRulesByName } from '../../../tasks/alerts_detection_rules';
 import {
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { login } from '../../../../tasks/login';
+} from '../../../tasks/api_calls/prebuilt_rules';
+import { login } from '../../../tasks/login';
 import {
   clickAddElasticRulesButton,
   assertInstallationRequestIsComplete,
@@ -33,8 +33,8 @@ import {
   assertRulesPresentInAddPrebuiltRulesTable,
   assertRuleUpgradeFailureToastShown,
   assertRulesPresentInRuleUpdatesTable,
-} from '../../../../tasks/prebuilt_rules';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+} from '../../../tasks/prebuilt_rules';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',

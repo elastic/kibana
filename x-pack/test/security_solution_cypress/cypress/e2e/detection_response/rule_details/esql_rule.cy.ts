@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { getEsqlRule } from '../../../../objects/rule';
+import { getEsqlRule } from '../../../objects/rule';
 
 import {
   ESQL_QUERY_DETAILS,
   DEFINITION_DETAILS,
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
-} from '../../../../screens/rule_details';
+} from '../../../screens/rule_details';
 
-import { createRule } from '../../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 
-import { getDetails } from '../../../../tasks/rule_details';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { getDetails } from '../../../tasks/rule_details';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
-import { ruleDetailsUrl } from '../../../../urls/rule_details';
+import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
   const rule = getEsqlRule();

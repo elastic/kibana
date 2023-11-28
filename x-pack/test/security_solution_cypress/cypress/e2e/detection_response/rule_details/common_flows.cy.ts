@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { deleteRuleFromDetailsPage } from '../../../../tasks/alerts_detection_rules';
+import { deleteRuleFromDetailsPage } from '../../../tasks/alerts_detection_rules';
 import {
   CUSTOM_RULES_BTN,
   RULES_MANAGEMENT_TABLE,
   RULES_ROW,
-} from '../../../../screens/alerts_detection_rules';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getDetails } from '../../../../tasks/rule_details';
-import { ruleFields } from '../../../../data/detection_engine';
-import { getTimeline } from '../../../../objects/timeline';
-import { getExistingRule, getNewRule } from '../../../../objects/rule';
+} from '../../../screens/alerts_detection_rules';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { getDetails } from '../../../tasks/rule_details';
+import { ruleFields } from '../../../data/detection_engine';
+import { getTimeline } from '../../../objects/timeline';
+import { getExistingRule, getNewRule } from '../../../objects/rule';
 
 import {
   ABOUT_DETAILS,
@@ -42,13 +42,13 @@ import {
   THREAT_TACTIC,
   THREAT_TECHNIQUE,
   TIMELINE_TEMPLATE_DETAILS,
-} from '../../../../screens/rule_details';
+} from '../../../screens/rule_details';
 
-import { createTimeline } from '../../../../tasks/api_calls/timelines';
-import { deleteAlertsAndRules, deleteConnectors } from '../../../../tasks/api_calls/common';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import { ruleDetailsUrl } from '../../../../urls/rule_details';
+import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/api_calls/common';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 // This test is meant to test all common aspects of the rule details page that should function
 // the same regardless of rule type. For any rule type specific functionalities, please include
