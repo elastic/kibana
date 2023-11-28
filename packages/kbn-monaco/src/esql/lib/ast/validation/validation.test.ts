@@ -266,19 +266,22 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
 
     testErrorsAndWarnings(`from remote-*:indexes*`, [
-      'CCS indexes are not supported [remote-*:indexes*]',
+      'ES|QL does not yet support querying remote indices [remote-*:indexes*]',
     ]);
     testErrorsAndWarnings(`from remote-*:indexes`, [
-      'CCS indexes are not supported [remote-*:indexes]',
+      'ES|QL does not yet support querying remote indices [remote-*:indexes]',
     ]);
     testErrorsAndWarnings(`from remote-ccs:indexes`, [
-      'CCS indexes are not supported [remote-ccs:indexes]',
+      'ES|QL does not yet support querying remote indices [remote-ccs:indexes]',
     ]);
     testErrorsAndWarnings(`from a, remote-ccs:indexes`, [
-      'CCS indexes are not supported [remote-ccs:indexes]',
+      'ES|QL does not yet support querying remote indices [remote-ccs:indexes]',
     ]);
     testErrorsAndWarnings(`from remote-ccs:indexes [METADATA _id]`, [
-      'CCS indexes are not supported [remote-ccs:indexes]',
+      'ES|QL does not yet support querying remote indices [remote-ccs:indexes]',
+    ]);
+    testErrorsAndWarnings(`from *:indexes [METADATA _id]`, [
+      'ES|QL does not yet support querying remote indices [*:indexes]',
     ]);
     testErrorsAndWarnings('from .secretIndex', []);
   });
