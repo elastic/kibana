@@ -14,7 +14,7 @@
 
 import type { NewPackagePolicy, PackageInfo } from '../types';
 
-import { getPolicySecretPaths, diffSecretPaths } from './secrets';
+import { getPolicySecretPaths, diffSecretPaths, diffOutputSecretPaths } from './secrets';
 
 describe('getPolicySecretPaths', () => {
   describe('integration package with one policy template', () => {
@@ -792,6 +792,186 @@ describe('diffSecretPaths', () => {
         {
           path: 'somepath2',
           value: { value: 'newvalue' },
+        },
+      ],
+      toDelete: [],
+      noChange: [paths1[0]],
+    });
+  });
+});
+
+describe('diffOutputSecretPaths', () => {
+  it('should return empty array if no secrets', () => {
+    expect(diffOutputSecretPaths([], [])).toEqual({
+      toCreate: [],
+      toDelete: [],
+      noChange: [],
+    });
+  });
+  it('should return empty array if single secret not changed', () => {
+    const paths = [
+      {
+        path: 'somepath',
+        value: {
+          id: 'secret-1',
+        },
+      },
+    ];
+    expect(diffOutputSecretPaths(paths, paths)).toEqual({
+      toCreate: [],
+      toDelete: [],
+      noChange: paths,
+    });
+  });
+  it('should return empty array if multiple secrets not changed', () => {
+    const paths = [
+      {
+        path: 'somepath',
+        value: {
+          id: 'secret-1',
+        },
+      },
+      {
+        path: 'somepath2',
+        value: {
+          id: 'secret-2',
+        },
+      },
+      {
+        path: 'somepath3',
+        value: {
+          id: 'secret-3',
+        },
+      },
+    ];
+
+    expect(diffOutputSecretPaths(paths, paths.slice().reverse())).toEqual({
+      toCreate: [],
+      toDelete: [],
+      noChange: paths,
+    });
+  });
+  it('single secret modified', () => {
+    const paths1 = [
+      {
+        path: 'somepath1',
+        value: {
+          id: 'secret-1',
+        },
+      },
+      {
+        path: 'somepath2',
+        value: {
+          id: 'secret-2',
+        },
+      },
+    ];
+
+    const paths2 = [
+      paths1[0],
+      {
+        path: 'somepath2',
+        value: 'newvalue',
+      },
+    ];
+
+    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
+      toCreate: [
+        {
+          path: 'somepath2',
+          value: 'newvalue',
+        },
+      ],
+      toDelete: [
+        {
+          path: 'somepath2',
+          value: {
+            id: 'secret-2',
+          },
+        },
+      ],
+      noChange: [paths1[0]],
+    });
+  });
+  it('double secret modified', () => {
+    const paths1 = [
+      {
+        path: 'somepath1',
+        value: {
+          id: 'secret-1',
+        },
+      },
+      {
+        path: 'somepath2',
+        value: {
+          id: 'secret-2',
+        },
+      },
+    ];
+
+    const paths2 = [
+      {
+        path: 'somepath1',
+        value: 'newvalue1',
+      },
+      {
+        path: 'somepath2',
+        value: 'newvalue2',
+      },
+    ];
+
+    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
+      toCreate: [
+        {
+          path: 'somepath1',
+          value: 'newvalue1',
+        },
+        {
+          path: 'somepath2',
+          value: 'newvalue2',
+        },
+      ],
+      toDelete: [
+        {
+          path: 'somepath1',
+          value: {
+            id: 'secret-1',
+          },
+        },
+        {
+          path: 'somepath2',
+          value: {
+            id: 'secret-2',
+          },
+        },
+      ],
+      noChange: [],
+    });
+  });
+
+  it('single secret added', () => {
+    const paths1 = [
+      {
+        path: 'somepath1',
+        value: {
+          id: 'secret-1',
+        },
+      },
+    ];
+
+    const paths2 = [
+      paths1[0],
+      {
+        path: 'somepath2',
+        value: 'newvalue',
+      },
+    ];
+
+    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
+      toCreate: [
+        {
+          path: 'somepath2',
+          value: 'newvalue',
         },
       ],
       toDelete: [],
