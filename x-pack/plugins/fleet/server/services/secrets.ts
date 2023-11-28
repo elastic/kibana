@@ -7,10 +7,16 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { get, keyBy } from 'lodash';
+import { keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import type { KafkaOutput, Output, OutputSecretPath } from '../../common/types';
+import type {
+  KafkaOutput,
+  NewLogstashOutput,
+  NewRemoteElasticsearchOutput,
+  Output,
+  OutputSecretPath,
+} from '../../common/types';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
 
@@ -228,13 +234,15 @@ export async function extractAndWriteSecrets(opts: {
     return { packagePolicy, secretReferences: [] };
   }
 
+  const secretsToCreate = secretPaths.filter((secretPath) => !!secretPath.value.value);
+
   const secrets = await createSecrets({
     esClient,
-    values: secretPaths.map((secretPath) => secretPath.value.value),
+    values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
   const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicy));
-  secretPaths.forEach((secretPath, i) => {
+  secretsToCreate.forEach((secretPath, i) => {
     set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(secrets[i].id));
   });
 
@@ -247,9 +255,8 @@ export async function extractAndWriteSecrets(opts: {
 export async function extractAndWriteOutputSecrets(opts: {
   output: NewOutput;
   esClient: ElasticsearchClient;
-  secretHashes?: Record<string, any>;
 }): Promise<{ output: NewOutput; secretReferences: PolicySecretReference[] }> {
-  const { output, esClient, secretHashes = {} } = opts;
+  const { output, esClient } = opts;
 
   const secretPaths = getOutputSecretPaths(output.type, output).filter(
     (path) => typeof path.value === 'string'
@@ -266,12 +273,7 @@ export async function extractAndWriteOutputSecrets(opts: {
 
   const outputWithSecretRefs = JSON.parse(JSON.stringify(output));
   secretPaths.forEach((secretPath, i) => {
-    const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
-    const maybeHash = get(secretHashes, pathWithoutPrefix);
-    set(outputWithSecretRefs, secretPath.path, {
-      id: secrets[i].id,
-      ...(typeof maybeHash === 'string' && { hash: maybeHash }),
-    });
+    set(outputWithSecretRefs, secretPath.path, { id: secrets[i].id });
   });
 
   return {
@@ -286,11 +288,14 @@ function getOutputSecretPaths(
 ): OutputSecretPath[] {
   const outputSecretPaths: OutputSecretPath[] = [];
 
-  if ((outputType === 'kafka' || outputType === 'logstash') && output.secrets?.ssl?.key) {
-    outputSecretPaths.push({
-      path: 'secrets.ssl.key',
-      value: output.secrets.ssl.key,
-    });
+  if (outputType === 'logstash') {
+    const logstashOutput = output as NewLogstashOutput;
+    if (logstashOutput?.secrets?.ssl?.key) {
+      outputSecretPaths.push({
+        path: 'secrets.ssl.key',
+        value: logstashOutput.secrets.ssl.key,
+      });
+    }
   }
 
   if (outputType === 'kafka') {
@@ -299,6 +304,22 @@ function getOutputSecretPaths(
       outputSecretPaths.push({
         path: 'secrets.password',
         value: kafkaOutput.secrets.password,
+      });
+    }
+    if (kafkaOutput?.secrets?.ssl?.key) {
+      outputSecretPaths.push({
+        path: 'secrets.ssl.key',
+        value: kafkaOutput.secrets.ssl.key,
+      });
+    }
+  }
+
+  if (outputType === 'remote_elasticsearch') {
+    const remoteESOutput = output as NewRemoteElasticsearchOutput;
+    if (remoteESOutput.secrets?.service_token) {
+      outputSecretPaths.push({
+        path: 'secrets.service_token',
+        value: remoteESOutput.secrets.service_token,
       });
     }
   }
@@ -346,6 +367,15 @@ export function getOutputSecretReferences(output: Output): PolicySecretReference
     });
   }
 
+  if (
+    output.type === 'remote_elasticsearch' &&
+    typeof output?.secrets?.service_token === 'object'
+  ) {
+    outputSecretPaths.push({
+      id: output.secrets.service_token.id,
+    });
+  }
+
   return outputSecretPaths;
 }
 
@@ -390,7 +420,7 @@ export async function extractAndUpdateSecrets(opts: {
     // check if the previous secret is actually a secret refrerence
     // it may be that secrets were not enabled at the time of creation
     // in which case they are just stored as plain text
-    if (secretPath.value.value.isSecretRef) {
+    if (secretPath.value.value?.isSecretRef) {
       secretsToDelete.push({ id: secretPath.value.value.id });
     }
   });
@@ -405,13 +435,12 @@ export async function extractAndUpdateOutputSecrets(opts: {
   oldOutput: Output;
   outputUpdate: Partial<Output>;
   esClient: ElasticsearchClient;
-  secretHashes?: Record<string, any>;
 }): Promise<{
   outputUpdate: Partial<Output>;
   secretReferences: PolicySecretReference[];
   secretsToDelete: PolicySecretReference[];
 }> {
-  const { oldOutput, outputUpdate, esClient, secretHashes } = opts;
+  const { oldOutput, outputUpdate, esClient } = opts;
   const outputType = outputUpdate.type || oldOutput.type;
   const oldSecretPaths = getOutputSecretPaths(outputType, oldOutput);
   const updatedSecretPaths = getOutputSecretPaths(outputType, outputUpdate);
@@ -432,13 +461,7 @@ export async function extractAndUpdateOutputSecrets(opts: {
 
   const outputWithSecretRefs = JSON.parse(JSON.stringify(outputUpdate));
   toCreate.forEach((secretPath, i) => {
-    const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
-    const maybeHash = get(secretHashes, pathWithoutPrefix);
-
-    set(outputWithSecretRefs, secretPath.path, {
-      id: createdSecrets[i].id,
-      ...(typeof maybeHash === 'string' && { hash: maybeHash }),
-    });
+    set(outputWithSecretRefs, secretPath.path, { id: createdSecrets[i].id });
   });
 
   const secretReferences = [

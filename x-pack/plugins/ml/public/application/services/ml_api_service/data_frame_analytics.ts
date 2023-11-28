@@ -49,7 +49,7 @@ export interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
-  destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destDataViewDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
 export interface JobsExistsResponse {
@@ -152,11 +152,11 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   deleteDataFrameAnalyticsAndDestIndex(
     analyticsId: string,
     deleteDestIndex: boolean,
-    deleteDestIndexPattern: boolean
+    deleteDestDataView: boolean
   ) {
     return httpService.http<DeleteDataFrameAnalyticsWithIndexResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
-      query: { deleteDestIndex, deleteDestIndexPattern },
+      query: { deleteDestIndex, deleteDestDataView },
       method: 'DELETE',
       version: '1',
     });

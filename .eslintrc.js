@@ -941,7 +941,7 @@ module.exports = {
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+        '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
       },
     },
     {

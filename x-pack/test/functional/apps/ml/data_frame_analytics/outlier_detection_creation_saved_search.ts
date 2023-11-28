@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         modelMemory: '1mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           histogramCharts: [
@@ -140,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         modelMemory: '65mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           histogramCharts: [
@@ -217,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         modelMemory: '65mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           histogramCharts: [
@@ -295,7 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         modelMemory: '65mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           histogramCharts: [
@@ -464,9 +464,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('sets the create data view switch');
           await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(
-            testData.createIndexPattern
-          );
+          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

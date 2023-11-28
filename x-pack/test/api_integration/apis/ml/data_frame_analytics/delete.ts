@@ -148,13 +148,13 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body.analyticsJobDeleted.success).to.eql(true);
           expect(body.destIndexDeleted.success).to.eql(true);
-          expect(body.destIndexPatternDeleted.success).to.eql(false);
+          expect(body.destDataViewDeleted.success).to.eql(false);
           await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
           await ml.api.assertIndicesNotToExist(destinationIndex);
         });
       });
 
-      describe('with deleteDestIndexPattern setting', function () {
+      describe('with deleteDestDataView setting', function () {
         const analyticsId = `${jobId}_3`;
         const destinationIndex = generateDestinationIndex(analyticsId);
 
@@ -170,20 +170,20 @@ export default ({ getService }: FtrProviderContext) => {
         it('should delete job and data view by id', async () => {
           const { body, status } = await supertest
             .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
-            .query({ deleteDestIndexPattern: true })
+            .query({ deleteDestDataView: true })
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(getCommonRequestHeader('1'));
           ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body.analyticsJobDeleted.success).to.eql(true);
           expect(body.destIndexDeleted.success).to.eql(false);
-          expect(body.destIndexPatternDeleted.success).to.eql(true);
+          expect(body.destDataViewDeleted.success).to.eql(true);
           await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
           await ml.testResources.assertDataViewNotExist(destinationIndex);
         });
       });
 
-      describe('with deleteDestIndex & deleteDestIndexPattern setting', function () {
+      describe('with deleteDestIndex & deleteDestDataView setting', function () {
         const analyticsId = `${jobId}_4`;
         const destinationIndex = generateDestinationIndex(analyticsId);
 
@@ -202,14 +202,14 @@ export default ({ getService }: FtrProviderContext) => {
         it('should delete job, target index, and data view by id', async () => {
           const { body, status } = await supertest
             .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
-            .query({ deleteDestIndex: true, deleteDestIndexPattern: true })
+            .query({ deleteDestIndex: true, deleteDestDataView: true })
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(getCommonRequestHeader('1'));
           ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body.analyticsJobDeleted.success).to.eql(true);
           expect(body.destIndexDeleted.success).to.eql(true);
-          expect(body.destIndexPatternDeleted.success).to.eql(true);
+          expect(body.destDataViewDeleted.success).to.eql(true);
           await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
           await ml.api.assertIndicesNotToExist(destinationIndex);
           await ml.testResources.assertDataViewNotExist(destinationIndex);

@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
-      indexPattern: { name: string; timeField: string };
+      dataView: { name: string; timeField: string };
       job: DeepPartial<DataFrameAnalyticsConfig>;
     }> = (() => {
       const timestamp = Date.now();
@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'classification job supported by the form',
           archive: 'x-pack/test/functional/es_archives/ml/bm_classification',
-          indexPattern: { name: 'ft_bank_marketing', timeField: '@timestamp' },
+          dataView: { name: 'ft_bank_marketing', timeField: '@timestamp' },
           job: {
             id: `bm_1_${timestamp}`,
             description:
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'outlier detection job supported by the form',
           archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
-          indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
+          dataView: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_1_${timestamp}`,
             description: 'This is the job description',
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'regression job supported by the form',
           archive: 'x-pack/test/functional/es_archives/ml/egs_regression',
-          indexPattern: { name: 'ft_egs_regression', timeField: '@timestamp' },
+          dataView: { name: 'ft_egs_regression', timeField: '@timestamp' },
           job: {
             id: `egs_1_${timestamp}`,
             description: 'This is the job description',
@@ -142,8 +142,8 @@ export default function ({ getService }: FtrProviderContext) {
         before(async () => {
           await esArchiver.loadIfNeeded(testData.archive);
           await ml.testResources.createDataViewIfNeeded(
-            testData.indexPattern.name,
-            testData.indexPattern.timeField
+            testData.dataView.name,
+            testData.dataView.timeField
           );
           await ml.api.createDataFrameAnalyticsJob(testData.job as DataFrameAnalyticsConfig);
 
@@ -159,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteIndices(testData.job.dest!.index as string);
           await ml.testResources.deleteDataViewByTitle(testData.job.dest!.index as string);
           await ml.testResources.deleteDataViewByTitle(cloneDestIndex);
-          await ml.testResources.deleteDataViewByTitle(testData.indexPattern.name);
+          await ml.testResources.deleteDataViewByTitle(testData.dataView.name);
         });
 
         it('opens the existing job in the data frame analytics job wizard', async () => {
