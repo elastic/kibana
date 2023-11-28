@@ -37,10 +37,14 @@ describe('diagnostics telemetry task test', () => {
       mockTelemetryEventsSender,
       testTaskExecutionPeriod
     );
-    expect(mockTelemetryReceiver.fetchDiagnosticAlerts).toHaveBeenCalledWith(
+
+    expect(mockTelemetryReceiver.openPointInTime).toBeCalledTimes(1);
+    expect(mockTelemetryReceiver.fetchDiagnosticAlertsBatch).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
-      testTaskExecutionPeriod.current
+      testTaskExecutionPeriod.current,
+      'test-pit-id',
+      undefined
     );
-    expect(mockTelemetryEventsSender.sendOnDemand).toBeCalledTimes(2);
+    expect(mockTelemetryEventsSender.sendOnDemand).toBeCalledTimes(1);
   });
 });

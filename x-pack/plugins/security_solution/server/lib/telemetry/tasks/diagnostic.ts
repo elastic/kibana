@@ -6,20 +6,26 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { tlog, getPreviousDiagTaskTimestamp, createTaskMetric } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_ENDPOINT_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
+import {
+  TELEMETRY_CHANNEL_ENDPOINT_ALERTS,
+  TASK_METRICS_CHANNEL,
+  DEFAULT_DIAGNOSTIC_INDEX,
+} from '../constants';
+import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryDiagnosticsTaskConfig() {
   return {
     type: 'security:endpoint-diagnostics',
     title: 'Security Solution Telemetry Diagnostics task',
     interval: '5m',
-    timeout: '1m',
-    version: '1.0.0',
+    timeout: '4m',
+    version: '1.1.0',
     getLastExecutionTime: getPreviousDiagTaskTimestamp,
     runTask: async (
       taskId: string,
@@ -35,29 +41,48 @@ export function createTelemetryDiagnosticsTaskConfig() {
           throw new Error('last execution timestamp is required');
         }
 
-        const response = await receiver.fetchDiagnosticAlerts(
-          taskExecutionPeriod.last,
-          taskExecutionPeriod.current
-        );
+        let alertCount = 0;
+        let fetchMore = true;
+        let searchAfterValue: SortResults | undefined;
+        let pitId = await receiver.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
 
-        const hits = response.hits?.hits || [];
-        if (!Array.isArray(hits) || !hits.length) {
-          tlog(logger, 'no diagnostic alerts retrieved');
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
-          return 0;
+        while (fetchMore) {
+          const { moreToFetch, newPitId, searchAfter, alerts } =
+            await receiver.fetchDiagnosticAlertsBatch(
+              taskExecutionPeriod.last,
+              taskExecutionPeriod.current,
+              pitId,
+              searchAfterValue
+            );
+
+          if (alerts.length === 0) {
+            tlog(logger, 'no diagnostic alerts retrieved');
+            await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+              createTaskMetric(taskName, true, startTime),
+            ]);
+            return alertCount;
+          }
+
+          fetchMore = moreToFetch;
+          searchAfterValue = searchAfter;
+          pitId = newPitId;
+
+          const processedAlerts = alerts.map(
+            (event: TelemetryEvent): TelemetryEvent =>
+              copyAllowlistedFields(filterList.endpointAlerts, event)
+          );
+
+          alertCount += alerts.length;
+          tlog(logger, `Sending ${alerts.length} diagnostic alerts`);
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, processedAlerts);
         }
-        tlog(logger, `Received ${hits.length} diagnostic alerts`);
-        const alerts: TelemetryEvent[] = hits.flatMap((h) =>
-          h._source != null ? [h._source] : []
-        );
 
-        await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, alerts);
+        await receiver.closePointInTime(pitId);
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return alerts.length;
+
+        return alertCount;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),

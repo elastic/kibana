@@ -126,6 +126,18 @@ export interface ITelemetryReceiver {
     TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
   >;
 
+  fetchDiagnosticAlertsBatch(
+    executeFrom: string,
+    executeTo: string,
+    pitId: string,
+    searchAfterValue: SortResults | undefined
+  ): Promise<{
+    moreToFetch: boolean;
+    newPitId: string;
+    searchAfter: SortResults | undefined;
+    alerts: TelemetryEvent[];
+  }>;
+
   fetchDiagnosticAlerts(
     executeFrom: string,
     executeTo: string
@@ -445,6 +457,86 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.esClient.search<TelemetryEvent>(query);
   }
 
+  public async fetchDiagnosticAlertsBatch(
+    executeFrom: string,
+    executeTo: string,
+    pitId: string,
+    searchAfterValue: SortResults | undefined
+  ) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
+    }
+
+    let newPitId = pitId;
+    let fetchMore = true;
+    let searchAfter: SortResults | undefined = searchAfterValue;
+
+    const query: ESSearchRequest = {
+      query: {
+        range: {
+          'event.ingested': {
+            gte: executeFrom,
+            lt: executeTo,
+          },
+        },
+      },
+      track_total_hits: false,
+      sort: [
+        {
+          'event.ingested': {
+            order: 'desc' as const,
+          },
+        },
+      ],
+      pit: { id: pitId },
+      search_after: searchAfter,
+      size: telemetryConfiguration.telemetry_max_buffer_size,
+      expand_wildcards: ['open' as const, 'hidden' as const],
+    };
+
+    let response = null;
+    try {
+      response = await this.esClient.search(query);
+      const numOfHits = response?.hits.hits.length;
+
+      if (numOfHits > 0) {
+        const lastHit = response?.hits.hits[numOfHits - 1];
+        searchAfter = lastHit?.sort;
+      }
+
+      fetchMore = numOfHits > 0 && numOfHits < 1_000;
+    } catch (e) {
+      tlog(this.logger, e);
+      fetchMore = false;
+    }
+
+    if (response == null) {
+      return {
+        moreToFetch: false,
+        newPitId: pitId,
+        searchAfter,
+        alerts: [] as TelemetryEvent[],
+      };
+    }
+
+    const alerts: TelemetryEvent[] = response.hits.hits.flatMap((h) =>
+      h._source != null ? ([h._source] as TelemetryEvent[]) : []
+    );
+
+    if (response?.pit_id != null) {
+      newPitId = response?.pit_id;
+    }
+
+    tlog(this.logger, `Diagnostic alerts to return: ${response.hits.hits.length}`);
+
+    return {
+      moreToFetch: fetchMore,
+      newPitId,
+      searchAfter,
+      alerts,
+    };
+  }
+
   public async fetchPolicyConfigs(id: string) {
     if (this.soClient === undefined || this.soClient === null) {
       throw Error(
@@ -701,7 +793,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       sort: [
         { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
         { _shard_doc: 'desc' },
-      ] as unknown as string[],
+      ],
       pit: { id: pitId },
       search_after: searchAfter,
       size: 1_000,
