@@ -89,6 +89,33 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       defaultMessage: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
     }),
   },
+  '.multilingual-e5-small': {
+    modelName: 'e5',
+    version: 1,
+    default: true,
+    config: {
+      input: {
+        field_names: ['text_field'],
+      },
+    },
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1Description', {
+      defaultMessage: 'Embedding Model E5',
+    }),
+  },
+  '.multilingual-e5-small_linux-x86_64': {
+    modelName: 'e5',
+    version: 1,
+    os: 'Linux',
+    arch: 'amd64',
+    config: {
+      input: {
+        field_names: ['text_field'],
+      },
+    },
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1Description', {
+      defaultMessage: 'Embedding Model E5, optimized for linux-x86_64',
+    }),
+  },
 } as const);
 
 export interface ModelDefinition {
