@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { difference } from 'lodash';
+
+export interface CompareResult {
+  error: boolean;
+  fieldsToAdd: string[];
+  missingFromModelVersion: string[];
+  missingFromDefinition: string[];
+}
+
+export const compareFieldLists = ({
+  fileFields,
+  registeredFields = [],
+  modelVersionFields = [],
+}: {
+  fileFields: string[] | undefined;
+  registeredFields: string[] | undefined;
+  modelVersionFields: string[] | undefined;
+}): CompareResult => {
+  // type not present in the file, so it was just added.
+  // in that case we just update the file to add all the registered fields.
+  if (!fileFields) {
+    return {
+      error: false,
+      fieldsToAdd: registeredFields,
+      missingFromModelVersion: [],
+      missingFromDefinition: [],
+    };
+  }
+
+  // we search all registered/mv fields not already in the file
+  const registeredFieldsNotInFile = difference(registeredFields, fileFields);
+  const modelVersionFieldsNotInFile = difference(modelVersionFields, fileFields);
+
+  // then we search for registered fields not in model versions, and the opposite
+  const registeredFieldsNotInModelVersions = difference(
+    registeredFieldsNotInFile,
+    modelVersionFieldsNotInFile
+  );
+  const modelVersionFieldsNotRegistered = difference(
+    modelVersionFieldsNotInFile,
+    registeredFieldsNotInFile
+  );
+
+  // if any non-file field is present only in mapping definition or in model version, then there's an error on the type
+  const anyFieldMissing =
+    registeredFieldsNotInModelVersions.length > 0 || modelVersionFieldsNotRegistered.length > 0;
+
+  return {
+    error: anyFieldMissing,
+    fieldsToAdd: anyFieldMissing ? [] : registeredFieldsNotInFile,
+    missingFromModelVersion: registeredFieldsNotInModelVersions,
+    missingFromDefinition: modelVersionFieldsNotRegistered,
+  };
+};

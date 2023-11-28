@@ -8,6 +8,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { runMappingsCompatibilityChecks } from './compatibility';
+import { runModelVersionMappingAdditionsChecks } from './mappings_additions';
 
 run(
   async ({ log, flagsReader, addCleanupTask }) => {
@@ -15,8 +16,17 @@ run(
     const verify = flagsReader.boolean('verify');
     const task = flagsReader.string('task');
 
+    if (!task || task === 'mapping-addition') {
+      log.info('Running model version mapping addition checks');
+      await log.indent(4, async () => {
+        await runModelVersionMappingAdditionsChecks({ fix, verify, log });
+      });
+    }
     if (!task || task === 'compatibility') {
-      await runMappingsCompatibilityChecks({ fix, verify, log, addCleanupTask });
+      log.info('Running mapping compatibility checks');
+      await log.indent(4, async () => {
+        await runMappingsCompatibilityChecks({ fix, verify, log, addCleanupTask });
+      });
     }
   },
   {
@@ -33,7 +43,7 @@ run(
       help: `
         --fix              If the current mappings differ from the mappings in the file, update the current_mappings.json file
         --no-verify        Don't run any validation, just update the current_mappings.json file.
-        --task             Specify which task(s) to run (compatibility | fields)
+        --task             Specify which task(s) to run (compatibility | mapping-addition)
       `,
     },
   }
