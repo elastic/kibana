@@ -9,13 +9,7 @@
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiLoadingChart,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFormControlLayout, EuiFormRow, EuiLoadingChart } from '@elastic/eui';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
@@ -25,10 +19,12 @@ import {
 } from '../embeddable/control_group_container';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { ControlError } from './control_error_component';
+import { ControlTitle } from './control_title';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
   enableActions?: boolean;
+  helpMessage?: JSX.Element;
   embeddableId: string;
   embeddableType: string;
 }
@@ -38,6 +34,7 @@ export const ControlFrame = ({
   enableActions,
   embeddableId,
   embeddableType,
+  helpMessage,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
@@ -80,11 +77,7 @@ export const ControlFrame = ({
     }
 
     return usingTwoLineLayout ? undefined : (
-      <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
-        <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-          {title}
-        </EuiFormLabel>
-      </EuiToolTip>
+      <ControlTitle title={title} helpMessage={helpMessage} embeddableId={embeddableId} />
     );
   }
 

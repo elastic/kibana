@@ -26,6 +26,7 @@ export type ControlInput = EmbeddableInput & {
   timeslice?: [number, number];
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
+  helpMessage?: JSX.Element;
 };
 
 export type DataControlInput = ControlInput & {
