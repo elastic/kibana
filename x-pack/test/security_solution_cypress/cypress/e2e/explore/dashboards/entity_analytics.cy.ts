@@ -11,7 +11,7 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 import {
   ANOMALIES_TABLE,
@@ -169,8 +169,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
         cy.get(HOSTS_TABLE_ALERT_CELL).should('have.length', 5);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/168490
-      it.skip('filters by risk level', () => {
+      it('filters by risk level', () => {
         openRiskTableFilterAndSelectTheLowOption();
 
         cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');

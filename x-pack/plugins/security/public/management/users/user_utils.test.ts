@@ -6,7 +6,7 @@
  */
 
 import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from './user_utils';
-import type { User } from '../../../common/model';
+import type { User } from '../../../common';
 
 describe('#isUserReserved', () => {
   it('returns false for a user with no metadata', () => {

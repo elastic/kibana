@@ -8,8 +8,6 @@ if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
   "$(dirname "${0}")/commit_status_start.sh"
 fi
 
-export CI_STATS_TOKEN="$(vault_get kibana_ci_stats api_token)"
-export CI_STATS_HOST="$(vault_get kibana_ci_stats api_host)"
 
 ts-node "$(dirname "${0}")/ci_stats_start.ts"
 

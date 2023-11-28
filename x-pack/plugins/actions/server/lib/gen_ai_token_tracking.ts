@@ -42,6 +42,7 @@ export const getGenAiTokenTracking = async ({
     try {
       const { total, prompt, completion } = await getTokenCountFromInvokeStream({
         responseStream: result.data.pipe(new PassThrough()),
+        actionTypeId,
         body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
         logger,
       });

@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectAttributes } from '@kbn/core/server';
-import { Filter } from '@kbn/es-query';
 import { IsoWeekday } from '../../../../common';
 import {
   ruleNotifyWhenAttributes,
@@ -16,6 +15,7 @@ import {
   ruleExecutionStatusWarningReasonAttributes,
 } from '../constants';
 import { RRuleAttributes } from '../../r_rule/types';
+import { AlertsFilterQueryAttributes } from '../../alerts_filter_query/types';
 
 export type RuleNotifyWhenAttributes =
   typeof ruleNotifyWhenAttributes[keyof typeof ruleNotifyWhenAttributes];
@@ -115,11 +115,7 @@ interface AlertsFilterTimeFrameAttributes {
 }
 
 interface AlertsFilterAttributes {
-  query?: {
-    kql: string;
-    filters: Filter[];
-    dsl: string;
-  };
+  query?: AlertsFilterQueryAttributes;
   timeframe?: AlertsFilterTimeFrameAttributes;
 }
 

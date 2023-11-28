@@ -21,6 +21,8 @@ import {
 import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
+  TITLE_HEADER_TEXT_TEST_ID,
+  TITLE_LINK_ICON_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
@@ -28,8 +30,14 @@ export const DOCUMENT_DETAILS_FLYOUT_BODY = getDataTestSubjectSelector(FLYOUT_BO
 
 /* Header */
 
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_ICON = getDataTestSubjectSelector(
+  TITLE_LINK_ICON_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
+);
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE = getDataTestSubjectSelector(
-  FLYOUT_HEADER_TITLE_TEST_ID
+  TITLE_HEADER_TEXT_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
+);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON = getDataTestSubjectSelector(
+  TITLE_LINK_ICON_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
 );
 export const DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON =
   getDataTestSubjectSelector('euiFlyoutCloseButton');

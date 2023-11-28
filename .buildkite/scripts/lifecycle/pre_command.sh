@@ -78,14 +78,14 @@ EOF
   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
   export CI_STATS_BUILD_ID
 
+  CI_STATS_TOKEN="$(vault_get kibana_ci_stats secret/kibana-issues/dev/kibana_ci_stats api_token)"
+  export CI_STATS_TOKEN
+
+  CI_STATS_HOST="$(vault_get kibana_ci_stats secret/kibana-issues/dev/kibana_ci_stats api_host)"
+  export CI_STATS_HOST
+
   if [[ "$CI_STATS_BUILD_ID" ]]; then
     echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
-
-    CI_STATS_TOKEN="$(vault_get kibana_ci_stats api_token)"
-    export CI_STATS_TOKEN
-
-    CI_STATS_HOST="$(vault_get kibana_ci_stats api_host)"
-    export CI_STATS_HOST
 
     KIBANA_CI_STATS_CONFIG=$(jq -n \
       --arg buildId "$CI_STATS_BUILD_ID" \

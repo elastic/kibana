@@ -235,6 +235,81 @@ describe('createPointInTimeFinder()', () => {
     );
   });
 
+  test('does not yield empty first page', async () => {
+    repository.openPointInTimeForType.mockResolvedValueOnce({
+      id: 'abc123',
+    });
+    repository.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [],
+      pit_id: 'abc123',
+      per_page: 2,
+      page: 0,
+    });
+
+    const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+      type: ['visualization'],
+      search: 'foo*',
+    };
+
+    const internalOptions = {};
+    const finder = new PointInTimeFinder(findOptions, {
+      logger,
+      client: repository,
+      internalOptions,
+    });
+
+    const hits: SavedObjectsFindResult[] = [];
+    let pageCount = 0;
+    for await (const result of finder.find()) {
+      hits.push(...result.saved_objects);
+      pageCount++;
+    }
+
+    expect(pageCount).toEqual(0);
+    expect(hits.length).toEqual(0);
+  });
+
+  test('yields empty first page if aggregations are used', async () => {
+    repository.openPointInTimeForType.mockResolvedValueOnce({
+      id: 'abc123',
+    });
+    repository.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [],
+      pit_id: 'abc123',
+      per_page: 2,
+      page: 0,
+    });
+
+    const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+      type: ['visualization'],
+      search: 'foo*',
+      aggs: {
+        some: {
+          avg: { field: 'fo' },
+        },
+      },
+    };
+
+    const internalOptions = {};
+    const finder = new PointInTimeFinder(findOptions, {
+      logger,
+      client: repository,
+      internalOptions,
+    });
+
+    const hits: SavedObjectsFindResult[] = [];
+    let pageCount = 0;
+    for await (const result of finder.find()) {
+      hits.push(...result.saved_objects);
+      pageCount++;
+    }
+
+    expect(pageCount).toEqual(1);
+    expect(hits.length).toEqual(0);
+  });
+
   test('still applies the defaults in the mandatory fields even when `undefined` is explicitly provided', async () => {
     repository.openPointInTimeForType.mockResolvedValueOnce({
       id: 'abc123',

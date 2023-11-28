@@ -45,6 +45,7 @@ export interface ColumnState {
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;
+  isMetric?: boolean;
 }
 
 export type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };

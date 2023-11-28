@@ -18,7 +18,6 @@ import {
   validateAxes,
 } from './validate';
 import { appendLayerIds, getDataLayers } from '../helpers';
-import { shouldShowLegendActionDefault } from '../helpers/visualization';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
@@ -67,7 +66,6 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
       overrides: handlers.variables?.overrides as XYRender['value']['overrides'],
-      shouldShowLegendAction: handlers?.shouldShowLegendAction ?? shouldShowLegendActionDefault,
     },
   };
 };
