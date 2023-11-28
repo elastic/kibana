@@ -18,6 +18,9 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
 
 jest.mock('../../utils/kibana_react');
+jest.mock('./components/preview_chart/preview_chart', () => ({
+  PreviewChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
+}));
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -89,10 +92,9 @@ describe('Expression', () => {
           },
         ],
         comparator: Comparator.GT,
-        threshold: [1000],
+        threshold: [100],
         timeSize: 1,
         timeUnit: 'm',
-        aggType: 'custom',
       },
     ]);
   });

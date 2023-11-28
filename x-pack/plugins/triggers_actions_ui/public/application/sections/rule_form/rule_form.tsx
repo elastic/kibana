@@ -153,6 +153,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   hideGrouping?: boolean;
   hideInterval?: boolean;
   connectorFeatureId?: string;
+  selectedConsumer?: RuleCreationValidConsumer | null;
   validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
   useRuleProducer?: boolean;
@@ -176,6 +177,7 @@ export const RuleForm = ({
   hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
+  selectedConsumer,
   validConsumers,
   onChangeMetaData,
   useRuleProducer,
@@ -643,6 +645,23 @@ export const RuleForm = ({
     }
   };
 
+  const hasFieldsForAAD = useMemo(() => {
+    const hasAlertHasData = selectedRuleType
+      ? selectedRuleType.hasFieldsForAAD ||
+        selectedRuleType.producer === AlertConsumers.SIEM ||
+        selectedRuleType.hasAlertsMappings
+      : false;
+
+    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
+      return (
+        (validConsumers || VALID_CONSUMERS).includes(
+          selectedConsumer as RuleCreationValidConsumer
+        ) && hasAlertHasData
+      );
+    }
+    return hasAlertHasData;
+  }, [rule?.ruleTypeId, selectedConsumer, selectedRuleType, validConsumers]);
+
   const ruleTypeDetails = (
     <>
       <EuiHorizontalRule />
@@ -820,8 +839,12 @@ export const RuleForm = ({
             defaultActionGroupId={defaultActionGroupId}
             hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}
-            producerId={selectedRuleType.producer}
-            hasFieldsForAAD={selectedRuleType.hasFieldsForAAD}
+            producerId={
+              MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId)
+                ? selectedConsumer ?? rule.consumer
+                : selectedRuleType.producer
+            }
+            hasFieldsForAAD={hasFieldsForAAD}
             ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)

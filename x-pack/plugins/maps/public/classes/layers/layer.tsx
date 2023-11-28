@@ -10,12 +10,18 @@
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
+import {
+  getWarningsTitle,
+  type SearchResponseWarning,
+  ViewDetailsPopover,
+} from '@kbn/search-response-warnings';
 import _ from 'lodash';
 import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
+import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import {
   LAYER_TYPE,
   MAX_ZOOM,
@@ -41,9 +47,16 @@ import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 import { TileErrorsList } from './tile_errors_list';
 
-export interface LayerError {
+export const INCOMPLETE_RESULTS_WARNING = i18n.translate(
+  'xpack.maps.layer.incompleteResultsWarning',
+  {
+    defaultMessage: `Layer had issues returning data and results might be incomplete.`,
+  }
+);
+
+export interface LayerMessage {
   title: string;
-  error: ReactNode;
+  body: ReactNode;
 }
 
 export interface ILayer {
@@ -77,7 +90,9 @@ export interface ILayer {
   isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
-  getErrors(): LayerError[];
+  getErrors(): LayerMessage[];
+  hasWarnings(): boolean;
+  getWarnings(): LayerMessage[];
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
@@ -405,14 +420,14 @@ export class AbstractLayer implements ILayer {
     });
   }
 
-  getErrors(): LayerError[] {
-    const errors: LayerError[] = [];
+  getErrors(): LayerMessage[] {
+    const errors: LayerMessage[] = [];
 
     const sourceError = this.getSourceDataRequest()?.renderError();
     if (sourceError) {
       errors.push({
         title: this._getSourceErrorTitle(),
-        error: sourceError,
+        body: sourceError,
       });
     }
 
@@ -421,11 +436,57 @@ export class AbstractLayer implements ILayer {
         title: i18n.translate('xpack.maps.layer.tileErrorTitle', {
           defaultMessage: `An error occurred when loading layer tiles`,
         }),
-        error: <TileErrorsList tileErrors={this._descriptor.__tileErrors} />,
+        body: <TileErrorsList tileErrors={this._descriptor.__tileErrors} />,
       });
     }
 
     return errors;
+  }
+
+  hasWarnings(): boolean {
+    const hasDataRequestWarnings = this._dataRequests.some((dataRequest) => {
+      const dataRequestMeta = dataRequest.getMeta();
+      return dataRequestMeta?.warnings?.length;
+    });
+
+    if (hasDataRequestWarnings) {
+      return true;
+    }
+
+    return this._isTiled() ? this._getTileMetaFeatures().some(hasIncompleteResults) : false;
+  }
+
+  getWarnings(): LayerMessage[] {
+    const warningMessages: LayerMessage[] = [];
+
+    const dataRequestWarnings: SearchResponseWarning[] = [];
+    this._dataRequests.forEach((dataRequest) => {
+      const dataRequestMeta = dataRequest.getMeta();
+      if (dataRequestMeta?.warnings?.length) {
+        dataRequestWarnings.push(...dataRequestMeta.warnings);
+      }
+    });
+
+    if (dataRequestWarnings.length) {
+      warningMessages.push({
+        title: getWarningsTitle(dataRequestWarnings),
+        body: (
+          <>
+            {INCOMPLETE_RESULTS_WARNING}{' '}
+            <ViewDetailsPopover displayAsLink={true} warnings={dataRequestWarnings} />
+          </>
+        ),
+      });
+    }
+
+    if (this._isTiled() && this._getTileMetaFeatures().some(hasIncompleteResults)) {
+      warningMessages.push({
+        title: '',
+        body: INCOMPLETE_RESULTS_WARNING,
+      });
+    }
+
+    return warningMessages;
   }
 
   async syncData(syncContext: DataRequestContext) {

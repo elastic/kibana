@@ -14,20 +14,15 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_SUMMARY_ENRICH_POLICY_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_NAME,
   SLO_SUMMARY_INGEST_PIPELINE_NAME,
 } from '../../assets/constants';
-import { getSLOSummaryEnrichPolicy } from '../../assets/enrich_policies/slo_summary_enrich_policy';
 import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
   it('installs the common resources', async () => {
     const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
     mockClusterClient.indices.getIndexTemplate.mockResponseOnce({ index_templates: [] });
-    mockClusterClient.enrich.getPolicy.mockResponseOnce({
-      policies: [],
-    });
     const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
     await installer.ensureCommonResourcesInstalled();
@@ -59,21 +54,6 @@ describe('resourceInstaller', () => {
       expect.objectContaining({ name: SLO_SUMMARY_INDEX_TEMPLATE_NAME })
     );
 
-    expect(mockClusterClient.enrich.getPolicy).toHaveBeenCalledTimes(1);
-    expect(mockClusterClient.enrich.getPolicy).toHaveBeenNthCalledWith(1, {
-      name: SLO_SUMMARY_ENRICH_POLICY_NAME,
-    });
-
-    expect(mockClusterClient.enrich.putPolicy).toHaveBeenCalledTimes(1);
-    expect(mockClusterClient.enrich.putPolicy).toHaveBeenNthCalledWith(
-      1,
-      getSLOSummaryEnrichPolicy()
-    );
-    expect(mockClusterClient.enrich.executePolicy).toHaveBeenCalledTimes(1);
-    expect(mockClusterClient.enrich.executePolicy).toHaveBeenNthCalledWith(1, {
-      name: SLO_SUMMARY_ENRICH_POLICY_NAME,
-    });
-
     expect(mockClusterClient.ingest.putPipeline).toHaveBeenCalledTimes(2);
     expect(mockClusterClient.ingest.putPipeline).toHaveBeenNthCalledWith(
       1,
@@ -83,35 +63,5 @@ describe('resourceInstaller', () => {
       2,
       expect.objectContaining({ id: SLO_SUMMARY_INGEST_PIPELINE_NAME })
     );
-  });
-  it('skips installing the enrich policy if it exists', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockClusterClient.indices.getIndexTemplate.mockResponseOnce({ index_templates: [] });
-    mockClusterClient.enrich.getPolicy.mockResponseOnce({
-      policies: [
-        {
-          config: {
-            // Sigh.... the Elasticsarch type for an enrich policy has defined the
-            // query as a string which is completely wrong, it's a QueryDSLContainer!
-            //
-            // See: https://github.com/elastic/elasticsearch-js/issues/2074
-            match: {
-              ...getSLOSummaryEnrichPolicy().match,
-              name: SLO_SUMMARY_ENRICH_POLICY_NAME,
-            } as any,
-          },
-        },
-      ],
-    });
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
-
-    await installer.ensureCommonResourcesInstalled();
-
-    expect(mockClusterClient.enrich.getPolicy).toHaveBeenCalledTimes(1);
-    expect(mockClusterClient.enrich.getPolicy).toHaveBeenNthCalledWith(1, {
-      name: SLO_SUMMARY_ENRICH_POLICY_NAME,
-    });
-    expect(mockClusterClient.enrich.putPolicy).not.toHaveBeenCalled();
-    expect(mockClusterClient.enrich.executePolicy).not.toHaveBeenCalled();
   });
 });

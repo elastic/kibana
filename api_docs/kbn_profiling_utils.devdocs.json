@@ -2701,6 +2701,18 @@
       },
       {
         "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.TopNComparisonFunctionSortField",
+        "type": "Enum",
+        "tags": [],
+        "label": "TopNComparisonFunctionSortField",
+        "description": [],
+        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
         "id": "def-common.TopNFunctionSortField",
         "type": "Enum",
         "tags": [],
@@ -2988,6 +3000,82 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.topNComparisonFunctionSortFieldRt",
+        "type": "Object",
+        "tags": [],
+        "label": "topNComparisonFunctionSortFieldRt",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonRank>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonFrame>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonSamples>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonSelfCPU>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonTotalCPU>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonDiff>]>"
+        ],
+        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

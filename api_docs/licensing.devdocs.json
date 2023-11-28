@@ -2208,7 +2208,7 @@
             },
             {
               "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/index.ts"
+              "path": "src/plugins/maps_ems/server/plugin.ts"
             },
             {
               "plugin": "osquery",
@@ -2295,7 +2295,7 @@
           "references": [
             {
               "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/index.ts"
+              "path": "src/plugins/maps_ems/server/plugin.ts"
             }
           ],
           "children": [],

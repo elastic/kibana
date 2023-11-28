@@ -478,9 +478,22 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
     className="mapTocEntry__layerDetails"
     data-test-subj="mapLayerTOCDetailslayer_1"
   >
-    <div>
-      TOC details mock
-    </div>
+    <LegendDetails
+      layer={
+        Object {
+          "getDisplayName": [Function],
+          "getErrors": [Function],
+          "getId": [Function],
+          "hasErrors": [Function],
+          "hasLegendDetails": [Function],
+          "isPreviewLayer": [Function],
+          "isVisible": [Function],
+          "renderLegendDetails": [Function],
+          "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
+        }
+      }
+    />
   </div>
   <span
     className="mapTocEntry__detailsToggle"

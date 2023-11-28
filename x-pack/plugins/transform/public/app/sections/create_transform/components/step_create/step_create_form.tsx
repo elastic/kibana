@@ -28,9 +28,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 
-import { DuplicateDataViewError } from '@kbn/data-plugin/public';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -44,7 +41,7 @@ import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
-import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
+import { isContinuousTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 
 export interface StepDetailsExposedState {
@@ -87,8 +84,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [discoverLink, setDiscoverLink] = useState<string>();
 
     const toastNotifications = useToastNotifications();
-    const { application, data, i18n: i18nStart, share, theme } = useAppDependencies();
-    const dataViews = data.dataViews;
+    const { application, i18n: i18nStart, share, theme } = useAppDependencies();
     const isDiscoverAvailable = application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
@@ -128,13 +124,13 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       setLoading(true);
 
       createTransform(
-        { transformId, transformConfig },
+        { transformId, transformConfig, createDataView, timeFieldName },
         {
           onError: () => setCreated(false),
-          onSuccess: () => {
+          onSuccess: (resp) => {
             setCreated(true);
-            if (createDataView) {
-              createKibanaDataView();
+            if (resp.dataViewsCreated.length === 1) {
+              setDataViewId(resp.dataViewsCreated[0].id);
             }
             if (startAfterCreation) {
               startTransform();
@@ -154,57 +150,6 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
         onSettled: () => setLoading(false),
       });
     }
-
-    const createKibanaDataView = async () => {
-      setLoading(true);
-      const dataViewName = transformConfig.dest.index;
-      const runtimeMappings = transformConfig.source.runtime_mappings as Record<
-        string,
-        RuntimeField
-      >;
-
-      try {
-        const newDataView = await dataViews.createAndSave(
-          {
-            title: dataViewName,
-            timeFieldName,
-            ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
-              ? { runtimeFieldMap: runtimeMappings }
-              : {}),
-            allowNoIndex: true,
-          },
-          false,
-          true
-        );
-
-        setDataViewId(newDataView.id);
-        setLoading(false);
-        return true;
-      } catch (e) {
-        if (e instanceof DuplicateDataViewError) {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepCreateForm.duplicateDataViewErrorMessage', {
-              defaultMessage:
-                'An error occurred creating the Kibana data view {dataViewName}: The data view already exists.',
-              values: { dataViewName },
-            })
-          );
-        } else {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepCreateForm.createDataViewErrorMessage', {
-              defaultMessage: 'An error occurred creating the Kibana data view {dataViewName}:',
-              values: { dataViewName },
-            }),
-            text: toMountPoint(<ToastNotificationText text={getErrorMessage(e)} />, {
-              theme,
-              i18n: i18nStart,
-            }),
-          });
-          setLoading(false);
-          return false;
-        }
-      }
-    };
 
     const isBatchTransform = typeof transformConfig.sync === 'undefined';
 

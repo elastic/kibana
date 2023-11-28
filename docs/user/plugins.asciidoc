@@ -81,7 +81,6 @@ Use it to create, edit and embed visualizations, and also to search inside an em
 
 * https://github.com/sw-jung/kibana_markdown_doc_view[Markdown Doc View] (sw-jung) - A plugin for custom doc view using markdown+handlebars template.
 * https://github.com/datasweet-fr/kibana-datasweet-formula[Datasweet Formula] (datasweet) - enables calculated metric on any standard Kibana visualization.
-* https://github.com/pjhampton/kibana-prometheus-exporter[Prometheus Exporter] - exports the Kibana metrics in the prometheus format
 
 NOTE: To add your plugin to this page, open a {kib-repo}tree/{branch}/docs/plugins/known-plugins.asciidoc[pull request].
 
