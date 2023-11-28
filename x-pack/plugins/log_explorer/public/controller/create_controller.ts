@@ -37,10 +37,10 @@ type InitialState = LogExplorerPublicStateUpdate;
 export const createLogExplorerControllerFactory =
   ({ core, plugins: { data } }: Dependencies) =>
   ({
-    customizations,
+    customizations = {},
     initialState,
   }: {
-    customizations: LogExplorerCustomizations;
+    customizations?: LogExplorerCustomizations;
     initialState?: InitialState;
   }): LogExplorerController => {
     const datasetsClient = new DatasetsService().start({

@@ -6,8 +6,11 @@
  */
 
 import { QueryState } from '@kbn/data-plugin/public';
-import { DiscoverContainerProps } from '@kbn/discover-plugin/public';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import { DataView } from '@kbn/data-views-plugin/common';
+import {
+  DiscoverContainerProps,
+  FlyoutContentProps as DiscoverFlyoutContentProps,
+} from '@kbn/discover-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { Observable } from 'rxjs';
 import {
@@ -35,18 +38,17 @@ export interface LogExplorerController {
 
 export interface LogExplorerCustomizations {
   flyout?: {
-    renderContent?: FlyoutRenderContent;
+    renderContent?: RenderContentCustomization<LogExplorerFlyoutContentProps>;
   };
 }
 
-export type FlyoutRenderContent = (
-  renderPreviousContent: RenderPreviousContent<LogExplorerFlyoutContentProps>,
-  props: LogExplorerFlyoutContentProps
-) => React.ReactNode;
-
-export interface LogExplorerFlyoutContentProps {
-  doc: DataTableRecord;
+export interface LogExplorerFlyoutContentProps extends DiscoverFlyoutContentProps {
+  dataView: DataView;
 }
+
+export type RenderContentCustomization<Props> = (
+  renderPreviousContent: RenderPreviousContent<Props>
+) => (props: Props) => React.ReactNode;
 
 export type RenderPreviousContent<Props> = (props: Props) => React.ReactNode;
 

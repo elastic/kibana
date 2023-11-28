@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FlyoutContentProps } from '@kbn/discover-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-
-export interface FlyoutProps extends FlyoutContentProps {
-  dataView: DataView;
-}
+export type { LogExplorerFlyoutContentProps } from '../../controller';
 
 export interface LogDocument extends DataTableRecord {
   flattened: {

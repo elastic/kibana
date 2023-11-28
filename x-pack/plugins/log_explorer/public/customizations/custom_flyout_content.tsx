@@ -5,47 +5,40 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
-import { FlyoutProps } from '../components/flyout_detail';
+import { LogExplorerFlyoutContentProps } from '../components/flyout_detail';
 import { useLogExplorerControllerContext } from '../controller';
 
-export const CustomFlyoutContent = ({
-  actions,
-  dataView,
-  doc,
-  renderDefaultContent,
-}: FlyoutProps) => {
+export const CustomFlyoutContent = (props: LogExplorerFlyoutContentProps) => {
   const {
     customizations: { flyout },
   } = useLogExplorerControllerContext();
 
-  const renderPreviousContent = useCallback(
-    () => (
-      <>
-        {/* Apply custom Log Explorer detail */}
-        <EuiFlexItem>
-          <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
-        </EuiFlexItem>
-      </>
-    ),
-    [actions, dataView, doc]
+  const renderCustomizedContent = useMemo(
+    () => flyout?.renderContent?.(renderContent) ?? renderContent,
+    [flyout]
   );
-
-  const content = flyout?.renderContent
-    ? flyout?.renderContent(renderPreviousContent, { doc })
-    : renderPreviousContent();
 
   return (
     <EuiFlexGroup direction="column">
       {/* Apply custom Log Explorer detail */}
-      {content}
+      {renderCustomizedContent(props)}
       {/* Restore default content */}
-      <EuiFlexItem>{renderDefaultContent()}</EuiFlexItem>
+      <EuiFlexItem>{props.renderDefaultContent()}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+const renderContent = ({ actions, dataView, doc }: LogExplorerFlyoutContentProps) => (
+  <>
+    {/* Apply custom Log Explorer detail */}
+    <EuiFlexItem>
+      <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
+    </EuiFlexItem>
+  </>
+);
 
 // eslint-disable-next-line import/no-default-export
 export default CustomFlyoutContent;
