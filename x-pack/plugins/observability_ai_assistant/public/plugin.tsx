@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import ReactDOM from 'react-dom';
 import {
   AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
@@ -15,8 +17,7 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createAnalytics } from '@kbn/analytics-client';
 import { createService } from './service/create_service';
 import type {
   ConfigSchema,
@@ -26,6 +27,7 @@ import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
 } from './types';
+import { MessageFeedback, MESSAGE_FEEDBACK_SCHEMA } from './analytics/schema';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -64,13 +66,14 @@ export class ObservabilityAIAssistantPlugin
           path: '/conversations/new',
         },
       ],
-
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
           coreSetup.getStartServices(),
         ]);
+
+        coreSetup.analytics.registerEventType<MessageFeedback>(MESSAGE_FEEDBACK_SCHEMA);
 
         ReactDOM.render(
           <Application
