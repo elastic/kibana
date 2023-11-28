@@ -58,7 +58,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   } = props;
 
   const isMounted = useMountedState();
-  let [shortUrl, isCreatingShortUrl] = useState<boolean | string>(false);
+  const [shortUrl, isCreatingShortUrl] = useState<boolean | string>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
@@ -125,7 +125,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     url = isEmbedded ? makeUrlEmbeddable(url) : url;
     url = urlParams ? getUrlParamExtensions(url) : url;
 
-    return (shortUrl = url);
+    return url;
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
@@ -203,12 +203,14 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     try {
       if (shareableUrlLocatorParams) {
         const shortUrls = urlService.shortUrls.get(null);
-        const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
-        setShortUrlCache(await shortUrl.locator.getUrl(shortUrl.params, { absolute: true }));
+        const tempShortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
+        setShortUrlCache(
+          await tempShortUrl.locator.getUrl(tempShortUrl.params, { absolute: true })
+        );
       } else {
         const snapshotUrl = getSnapshotUrl();
-        const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
-        setShortUrlCache(shortUrl.url);
+        const tempShortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
+        setShortUrlCache(tempShortUrl.url);
       }
     } catch (fetchError) {
       if (!isMounted) {
@@ -248,7 +250,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
       url = makeIframeTag(url);
     }
 
-    setUrl(url);
+    setUrl();
   };
 
   const handleShortUrlChange = async (evt: EuiSwitchEvent) => {

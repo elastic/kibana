@@ -62,17 +62,20 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     onClose,
   } = props;
   const isMounted = useMountedState();
-  const [, isCreatingShortUrl] = useState<boolean>(false);
-  const [urlParams] = useState<undefined | UrlParams>(undefined);
-  const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
+  const [isCreatingShortUrl, setIsCreatingShortUrl] = useState<boolean>(false);
+  const [urlParams, setUrlParams] = useState<undefined | UrlParams>(undefined);
+  const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState({ ['filterBar']: true });
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
 
-  const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
+  const [exportUrlAs, setExportUrlAs] = useState<ExportUrlAsType>(
+    ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT
+  );
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
-  const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
-  const [usePublicUrl] = useState<boolean>(false);
+  const [anonymousAccessParameters, setAnonymousAccessParameters] =
+    useState<null | AnonymousAccessServiceContract>(null);
+  const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
 
   interface UrlParams {
     [extensionName: string]: {
@@ -145,7 +148,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   };
 
   const createShortUrl = async () => {
-    setShortUrl(true);
+    setIsShortUrl(true);
     setShortUrlErrorMsg(undefined);
 
     try {
@@ -164,8 +167,8 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       }
 
       setShortUrlCache(undefined);
-      setShortUrl(false);
-      isCreatingShortUrl(false);
+      setIsShortUrl(false);
+      setIsCreatingShortUrl(false);
       setShortUrlErrorMsg(
         i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
           defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
@@ -233,7 +236,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
 
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       url = getSavedObjectUrl();
-    } else if (setShortUrl !== undefined) {
+    } else if (isShortUrl !== undefined) {
       url = shortUrlCache;
     } else {
       url = getSnapshotUrl();
@@ -254,7 +257,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     const isChecked = evt.target.checked;
 
     if (!isChecked || shortUrlCache !== undefined) {
-      setShortUrl(true);
+      setIsShortUrl(true);
       setUrl();
       return;
     }
@@ -270,7 +273,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
-    const switchLabel = Boolean(isCreatingShortUrl) ? (
+    const switchLabel = isCreatingShortUrl ? (
       <span>
         <EuiLoadingSpinner size="s" /> {shortUrlLabel}
       </span>
@@ -280,7 +283,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     const switchComponent = (
       <EuiSwitch
         label={switchLabel}
-        checked={setShortUrl as unknown as boolean}
+        checked={setIsShortUrl as unknown as boolean}
         onChange={handleShortUrlChange}
         data-test-subj="useShortUrl"
       />
