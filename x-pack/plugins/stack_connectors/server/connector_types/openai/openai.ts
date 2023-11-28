@@ -31,7 +31,7 @@ import {
   InvokeAIActionParams,
   InvokeAIActionResponse,
 } from '../../../common/openai/types';
-import { initDashboard } from './create_dashboard';
+import { initDashboard } from '../common/create_gen_ai_dashboard';
 import {
   getAxiosOptions,
   getRequestWithStreamOption,
@@ -186,7 +186,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     const response = await initDashboard({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
-      dashboardId,
+      dashboardId,s
+      genAIProvider: 'OpenAI',
     });
 
     return { available: response.success };
@@ -209,7 +210,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   /**
    * Deprecated. Use invokeStream instead.
-   * TODO: remove before 8.12 FF in part 3 of streaming work for security solution
+   * TODO: remove once streaming work is implemented in LLM mode for security solution
    * tracked here: https://github.com/elastic/security-team/issues/7363
    */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {

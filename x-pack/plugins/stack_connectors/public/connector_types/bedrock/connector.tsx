@@ -10,16 +10,23 @@ import {
   ActionConnectorFieldsProps,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { BEDROCK } from './translations';
+import DashboardLink from '../openai/dashboard_link';
 import { bedrockConfig, bedrockSecrets } from './constants';
 
 const BedrockConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+  const [{ id, name }] = useFormData();
   return (
-    <SimpleConnectorForm
-      isEdit={isEdit}
-      readOnly={readOnly}
-      configFormSchema={bedrockConfig}
-      secretsFormSchema={bedrockSecrets}
-    />
+    <>
+      <SimpleConnectorForm
+        isEdit={isEdit}
+        readOnly={readOnly}
+        configFormSchema={bedrockConfig}
+        secretsFormSchema={bedrockSecrets}
+      />
+      {isEdit && <DashboardLink connectorId={id} connectorName={name} selectedProvider={BEDROCK} />}
+    </>
   );
 };
 
