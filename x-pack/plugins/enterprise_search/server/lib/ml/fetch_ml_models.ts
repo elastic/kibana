@@ -9,6 +9,7 @@ import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearc
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
+
 import {
   BASE_MODEL,
   ELSER_MODEL_ID,
