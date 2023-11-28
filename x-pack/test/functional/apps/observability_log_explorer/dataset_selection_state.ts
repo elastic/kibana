@@ -5,17 +5,22 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { decodeOrThrow, indexPatternRt } from '@kbn/io-ts-utils';
+import { DatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
 import { FtrProviderContext } from './config';
 
-const azureActivityDatasetSelection = {
+const azureActivityDatasetSelection: DatasetSelectionPlain = {
   selection: {
-    dataset: { name: 'logs-azure.activitylogs-*', title: 'activitylogs' },
+    dataset: {
+      name: decodeOrThrow(indexPatternRt)('logs-azure.activitylogs-*'),
+      title: 'activitylogs',
+    },
     name: 'azure',
     title: 'Azure Logs',
     version: '1.5.23',
   },
   selectionType: 'single',
-} as const;
+};
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -51,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.navigateTo({
           pageState: {
             datasetSelection: {
+              // @ts-expect-error
               selectionType: 'invalid',
             },
           },

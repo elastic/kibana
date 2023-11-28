@@ -218,15 +218,12 @@ export function ObservabilityLogExplorerPageObject({
     async navigateTo(options: NavigateToAppOptions = {}) {
       const { pageState, ...extraOptions } = options;
 
-      const queryStringParams =
-        pageState != null
-          ? rison.encode({
-              [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: urlSchemaV1.urlSchemaRT.encode({
-                ...defaultPageState,
-                ...pageState,
-              }),
-            })
-          : '';
+      const queryStringParams = rison.encode({
+        [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: urlSchemaV1.urlSchemaRT.encode({
+          ...defaultPageState,
+          ...pageState,
+        }),
+      });
 
       return await PageObjects.common.navigateToApp('observabilityLogExplorer', {
         search: queryStringParams,

@@ -68,5 +68,7 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/reporting-export-types-csv-common",
     "@kbn/mock-idp-plugin",
+    "@kbn/io-ts-utils",
+    "@kbn/log-explorer-plugin",
   ]
 }
