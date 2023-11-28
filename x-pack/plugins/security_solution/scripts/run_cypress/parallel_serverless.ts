@@ -570,6 +570,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               KIBANA_USERNAME: credentials.username,
               KIBANA_PASSWORD: credentials.password,
 
+              EMAIL: process.env.EMAIL,
+              PASSWORD: process.env.PASSWORD,
+
               CLOUD_SERVERLESS: true,
             };
 
