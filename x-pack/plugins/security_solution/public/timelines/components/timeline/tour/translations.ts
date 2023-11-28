@@ -45,7 +45,7 @@ export const TIMELINE_TOUR_SAVE_TIMELINE_STEP_TITLE = i18n.translate(
 export const TIMELINE_TOUR_CHANGE_DATA_VIEW_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.changeDataView.title',
   {
-    defaultMessage: 'Change Dataview control has moved',
+    defaultMessage: 'Change Data view control has moved',
   }
 );
 
