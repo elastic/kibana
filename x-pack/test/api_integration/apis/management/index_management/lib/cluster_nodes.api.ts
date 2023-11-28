@@ -18,6 +18,6 @@ export function clusterNodesApi(getService: FtrProviderContext['getService']) {
       .set('x-elastic-internal-origin', 'xxx');
 
   return {
-    getNodesPlugins
+    getNodesPlugins,
   };
 }

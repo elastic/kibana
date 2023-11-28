@@ -18,9 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       ({
         clusterNodes: {
-          api: {
-            getNodesPlugins,
-          },
+          api: { getNodesPlugins },
         },
       } = indexManagementService);
     });
@@ -30,6 +28,5 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(Array.isArray(body)).to.be(true);
     });
-
   });
 }
