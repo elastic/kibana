@@ -171,7 +171,9 @@ enabled:
   - test/server_integration/http/ssl_with_p12/config.js
   - test/server_integration/http/ssl/config.js
   - test/ui_capabilities/newsfeed_err/config.ts
-  - x-pack/test/accessibility/config.ts
+  - x-pack/test/accessibility/apps/group1/config.ts
+  - x-pack/test/accessibility/apps/group2/config.ts
+  - x-pack/test/accessibility/apps/group3/config.ts
   - x-pack/test/localization/config.ja_jp.ts
   - x-pack/test/localization/config.fr_fr.ts
   - x-pack/test/localization/config.zh_cn.ts
