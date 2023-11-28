@@ -75,14 +75,15 @@ import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
 import {
-  riskScorePreviewRoute,
   riskEngineDisableRoute,
   riskEngineInitRoute,
   riskEngineEnableRoute,
   riskEngineStatusRoute,
   riskEnginePrivilegesRoute,
 } from '../lib/entity_analytics/risk_engine/routes';
-import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_engine/routes/risk_score_calculation_route';
+import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
+import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
+import { assetCriticalityStatusRoute } from '../lib/entity_analytics/asset_criticality/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -191,5 +192,8 @@ export const initRoutes = (
     if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
       riskEnginePrivilegesRoute(router, getStartServices);
     }
+  }
+  if (config.experimentalFeatures.entityAnalyticsAssetCriticalityEnabled) {
+    assetCriticalityStatusRoute(router, logger);
   }
 };
