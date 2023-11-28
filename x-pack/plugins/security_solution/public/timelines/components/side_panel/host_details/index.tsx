@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
+import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality_selector';
 import {
   ExpandableHostDetails,
   ExpandableHostDetailsPageLink,
@@ -78,6 +79,8 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <ExpandableHostDetailsTitle hostName={hostName} />
         </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>
+          <EuiSpacer size="m" />
+          <AssetCriticalitySelector />
           <EuiSpacer size="m" />
           <ExpandableHostDetailsPageLink hostName={hostName} />
           <EuiSpacer size="m" />
