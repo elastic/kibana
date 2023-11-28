@@ -13,12 +13,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ModelItem } from '../models_list';
 import { TestTrainedModelContent } from '../test_models/test_trained_model_content';
 import { useMlKibana } from '../../contexts/kibana';
+import { type InferecePipelineCreationState } from './state';
 
 interface ContentProps {
   model: ModelItem;
+  handlePipelineConfigUpdate: (configUpdate: Partial<InferecePipelineCreationState>) => void;
 }
 
-export const TestTrainedModel: FC<ContentProps> = ({ model }) => {
+export const TestTrainedModel: FC<ContentProps> = ({ model, handlePipelineConfigUpdate }) => {
   const {
     services: {
       docLinks: { links },
@@ -60,7 +62,10 @@ export const TestTrainedModel: FC<ContentProps> = ({ model }) => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
-        <TestTrainedModelContent model={model} />
+        <TestTrainedModelContent
+          model={model}
+          handlePipelineConfigUpdate={handlePipelineConfigUpdate}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

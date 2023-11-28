@@ -63,10 +63,9 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string,
-    pipeline?: estypes.IngestPipeline
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId, pipeline);
+    super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize(
       [this.questionText$.pipe(map((questionText) => questionText !== ''))],

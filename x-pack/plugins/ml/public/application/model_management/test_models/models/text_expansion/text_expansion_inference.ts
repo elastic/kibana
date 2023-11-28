@@ -52,10 +52,9 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string,
-    pipeline?: estypes.IngestPipeline
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId, pipeline);
+    super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize(
       [this.queryText$.pipe(map((questionText) => questionText !== ''))],
@@ -81,16 +80,13 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
   }
 
   protected async inferIndex() {
-    const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
-      this.getPipelineForCreation() ?? this.getPipeline(),
-      [
-        {
-          _source: {
-            text_field: this.getQueryText(),
-          },
+    const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(this.getPipeline(), [
+      {
+        _source: {
+          text_field: this.getQueryText(),
         },
-      ]
-    );
+      },
+    ]);
 
     if (docs.length === 0) {
       throw new Error(

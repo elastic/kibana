@@ -14,12 +14,17 @@ import { SelectedModel } from './selected_model';
 import { type ModelItem } from '../models_list';
 import { INPUT_TYPE } from './models/inference_base';
 import { useTestTrainedModelsContext } from './test_trained_models_context';
+import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
 
 interface ContentProps {
   model: ModelItem;
+  handlePipelineConfigUpdate?: (configUpdate: Partial<InferecePipelineCreationState>) => void;
 }
 
-export const TestTrainedModelContent: FC<ContentProps> = ({ model }) => {
+export const TestTrainedModelContent: FC<ContentProps> = ({
+  model,
+  handlePipelineConfigUpdate,
+}) => {
   const [deploymentId, setDeploymentId] = useState<string>(model.deployment_ids[0]);
   const mediumPadding = useEuiPaddingSize('m');
 
@@ -95,6 +100,7 @@ export const TestTrainedModelContent: FC<ContentProps> = ({ model }) => {
         model={model}
         inputType={onlyShowTab ?? inputType}
         deploymentId={deploymentId ?? model.model_id}
+        handlePipelineConfigUpdate={handlePipelineConfigUpdate}
       />
     </>
   );

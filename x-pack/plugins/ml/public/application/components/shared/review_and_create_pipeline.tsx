@@ -7,6 +7,7 @@
 
 import React, { FC, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiAccordion,
@@ -18,6 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
+  EuiTextColor,
   htmlIdGenerator,
 } from '@elastic/eui';
 
@@ -28,7 +30,17 @@ import { ReindexWithPipeline } from '../ml_inference/components/reindex_with_pip
 
 const MANAGEMENT_APP_ID = 'management';
 
+function getFieldFromPipelineConfig(config: estypes.IngestPipeline) {
+  const { processors } = config;
+  let field = '';
+  if (processors?.length) {
+    field = Object.keys(processors[0].inference?.field_map ?? {})[0];
+  }
+  return field;
+}
+
 interface Props {
+  highlightTargetField?: boolean;
   inferencePipeline: IngestPipeline;
   modelType?: string;
   pipelineName: string;
@@ -38,6 +50,7 @@ interface Props {
 }
 
 export const ReviewAndCreatePipeline: FC<Props> = ({
+  highlightTargetField = false,
   inferencePipeline,
   modelType,
   pipelineName,
@@ -62,6 +75,10 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
       : links.ingest.inferenceClassification;
 
   const accordionId = useMemo(() => htmlIdGenerator()(), []);
+  const targetedField = useMemo(
+    () => getFieldFromPipelineConfig(inferencePipeline),
+    [inferencePipeline]
+  );
 
   const configCodeBlock = useMemo(
     () => (
@@ -84,7 +101,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
         gutterSize="s"
         data-test-subj="mlTrainedModelsInferenceReviewAndCreateStep"
       >
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem grow={2}>
           {pipelineCreated === false ? (
             <EuiTitle size="s">
               <h4>
@@ -189,18 +206,17 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
             ) : null}
           </>
         </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiText color="subdued" size="s">
-            <p>
-              {!pipelineCreated ? (
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.description"
-                  defaultMessage="This pipeline will be created with the configuration below."
-                />
-              ) : null}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
+        {highlightTargetField ? (
+          <EuiFlexItem grow={2}>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.targetFieldDescription"
+                defaultMessage="The field {field} will be targeted by the model for evaluation."
+                values={{ field: <EuiTextColor color="accent">{targetedField}</EuiTextColor> }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow>
           {pipelineCreated ? (
             <>

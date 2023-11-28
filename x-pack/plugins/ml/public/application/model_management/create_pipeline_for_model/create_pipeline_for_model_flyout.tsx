@@ -155,9 +155,12 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
             onFailure={formState.onFailure}
           />
         )}
-        {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && <TestTrainedModel model={model} />}
+        {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
+          <TestTrainedModel model={model} handlePipelineConfigUpdate={handleConfigUpdate} />
+        )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
           <ReviewAndCreatePipeline
+            highlightTargetField
             inferencePipeline={getPipelineConfig(formState)}
             pipelineName={formState.pipelineName}
             pipelineCreated={formState.pipelineCreated}

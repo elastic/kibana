@@ -38,10 +38,9 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string,
-    pipeline?: estypes.IngestPipeline
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId, pipeline);
+    super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize(
       [this.labelsText$.pipe(map((labelsText) => labelsText !== ''))],

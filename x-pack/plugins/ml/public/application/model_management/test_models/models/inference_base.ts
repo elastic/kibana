@@ -82,8 +82,7 @@ export abstract class InferenceBase<TInferResponse> {
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     protected readonly model: estypes.MlTrainedModelConfig,
     protected readonly inputType: INPUT_TYPE,
-    protected readonly deploymentId: string,
-    private readonly pipelineForCreation?: estypes.IngestPipeline
+    protected readonly deploymentId: string
   ) {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField$.next(this.modelInputField);
@@ -254,10 +253,6 @@ export abstract class InferenceBase<TInferResponse> {
     return this.pipeline$.getValue();
   }
 
-  public getPipelineForCreation(): estypes.IngestPipeline | undefined {
-    return this.pipelineForCreation;
-  }
-
   public getSupportedFieldTypes(): ES_FIELD_TYPES[] {
     return this.supportedFieldTypes;
   }
@@ -298,15 +293,7 @@ export abstract class InferenceBase<TInferResponse> {
     try {
       this.setRunning();
       const inputText = this.inputText$.getValue()[0];
-      const pipelineForCreation = this.getPipelineForCreation();
-      let inferenceConfig = getInferenceConfig();
-      if (
-        pipelineForCreation?.processors &&
-        pipelineForCreation.processors.length &&
-        pipelineForCreation.processors[0].inference?.inference_config
-      ) {
-        inferenceConfig = pipelineForCreation.processors[0].inference?.inference_config;
-      }
+      const inferenceConfig = getInferenceConfig();
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
@@ -335,9 +322,8 @@ export abstract class InferenceBase<TInferResponse> {
   ): Promise<TInferResponse[]> {
     try {
       this.setRunning();
-      const pipeline = this.getPipelineForCreation() ?? this.getPipeline();
       const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
-        pipeline,
+        this.getPipeline(),
         this.getPipelineDocs()
       );
       const processedResponse = docs.map((d) => processResponse(this.getDocFromResponse(d)));

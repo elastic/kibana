@@ -111,7 +111,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({
           isCopyable={true}
           overflowHeight={300}
         >
-          {JSON.stringify(inferrer.getPipelineForCreation() ?? pipeline, null, 2)}
+          {JSON.stringify(pipeline, null, 2)}
         </EuiCodeBlock>
       </EuiAccordion>
     </>
