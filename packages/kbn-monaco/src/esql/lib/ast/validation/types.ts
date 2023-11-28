@@ -100,8 +100,12 @@ export interface ValidationErrors {
     type: { command: string; value: string };
   };
   wildcardNotSupportedForCommand: {
-    mesage: string;
+    message: string;
     type: { command: string; value: string };
+  };
+  noWildcardSupportAsArg: {
+    message: string;
+    type: { name: string };
   };
 }
 

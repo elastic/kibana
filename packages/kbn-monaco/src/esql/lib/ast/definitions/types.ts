@@ -21,6 +21,7 @@ export interface FunctionDefinition {
       type: string;
       optional?: boolean;
       noNestingFunctions?: boolean;
+      supportsWildcard?: boolean;
     }>;
     infiniteParams?: boolean;
     minParams?: number;

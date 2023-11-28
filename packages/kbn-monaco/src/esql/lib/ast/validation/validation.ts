@@ -176,23 +176,39 @@ function validateFunctionColumnArg(
         })
       );
     } else {
-      // guaranteed by the check above
-      const columnHit = getColumnHit(nameHit!, references);
-      // check the type of the column hit
-      const typeHit = columnHit!.type;
-      if (!isEqualType(actualArg, argDef, references, parentCommand)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wrongArgumentType',
-            values: {
-              name: astFunction.name,
-              argType: argDef.type,
-              value: actualArg.name,
-              givenType: typeHit,
-            },
-            locations: actualArg.location,
-          })
-        );
+      if (actualArg.name === '*') {
+        // if function does not support wildcards return a specific error
+        if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'noWildcardSupportAsArg',
+              values: {
+                name: astFunction.name,
+              },
+              locations: actualArg.location,
+            })
+          );
+        }
+        // do not validate any further for now, only count() accepts wildcard as args...
+      } else {
+        // guaranteed by the check above
+        const columnHit = getColumnHit(nameHit!, references);
+        // check the type of the column hit
+        const typeHit = columnHit!.type;
+        if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'wrongArgumentType',
+              values: {
+                name: astFunction.name,
+                argType: argDef.type,
+                value: actualArg.name,
+                givenType: typeHit,
+              },
+              locations: actualArg.location,
+            })
+          );
+        }
       }
     }
   }

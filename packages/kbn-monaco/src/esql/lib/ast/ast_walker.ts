@@ -342,15 +342,16 @@ export function visitPrimaryExpression(
   if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
     const fn = createFunction(functionExpressionCtx.identifier().text.toLowerCase(), ctx);
+    const asteriskArg = functionExpressionCtx.ASTERISK()
+      ? createColumnStar(functionExpressionCtx.ASTERISK()!)
+      : undefined;
+    if (asteriskArg) {
+      fn.args.push(asteriskArg);
+    }
     const functionArgs = functionExpressionCtx
       .booleanExpression()
       .flatMap(collectBooleanExpression)
-      .filter(nonNullable)
-      .concat(
-        functionExpressionCtx.ASTERISK()
-          ? [createColumnStar(functionExpressionCtx.ASTERISK()!)]
-          : []
-      );
+      .filter(nonNullable);
     if (functionArgs.length) {
       fn.args.push(...functionArgs);
     }
