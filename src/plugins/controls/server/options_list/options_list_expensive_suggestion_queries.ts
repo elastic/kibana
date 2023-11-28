@@ -27,10 +27,6 @@ export const getExpensiveSuggestionAggregationBuilder = ({
   searchString,
   searchTechnique,
 }: OptionsListRequestBody) => {
-  if (searchTechnique === 'exact' && searchString && searchString.length > 0) {
-    return expensiveSuggestionAggSubtypes.exactEqualSearch;
-  }
-
   if (fieldSpec?.type === 'number') {
     return expensiveSuggestionAggSubtypes.number;
   }
@@ -44,58 +40,6 @@ export const getExpensiveSuggestionAggregationBuilder = ({
 };
 
 const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
-  exactEqualSearch: {
-    buildAggregation: ({ fieldName, fieldSpec, searchString }: OptionsListRequestBody) => {
-      // if (searchString && isNaN(Number(searchString))) {
-      //   // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
-      //   // simply don't return an aggregation query for the ES search request
-      //   return undefined;
-      // }
-
-      return {
-        suggestions: {
-          filter: {
-            term: {
-              [fieldName]: { value: searchString, case_insensitive: fieldSpec?.type === 'string' },
-            },
-          },
-          aggs: {
-            field_value: {
-              terms: {
-                field: fieldName,
-              },
-            },
-          },
-        },
-      };
-    },
-    parse: (rawEsResult, request: OptionsListRequestBody) => {
-      if (!request.searchString) {
-        throw new Error('this should never happen');
-      }
-
-      const docCount = get(rawEsResult, 'aggregations.suggestions.doc_count');
-      if (!docCount) {
-        return {
-          suggestions: [],
-          totalCardinality: 0,
-        };
-      }
-      return {
-        suggestions: [
-          {
-            value:
-              request.fieldSpec?.type === 'string'
-                ? get(rawEsResult, 'aggregations.suggestions.field_value.buckets')[0].key
-                : request.searchString,
-            docCount,
-          },
-        ],
-        totalCardinality: 1,
-      };
-    },
-  },
-
   /**
    * The "textOrKeywordOrNested" query / parser should be used whenever the field is built on some type of string field,
    * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.
@@ -183,59 +127,40 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
    * the "number" query / parser should be used when the options list is built on a field of type float, long, etc.
    */
   number: {
-    buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => {
-      if (searchString && isNaN(Number(searchString))) {
-        // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
-        // simply don't return an aggregation query for the ES search request
-        return undefined;
+    buildAggregation: (request: OptionsListRequestBody) => {
+      const { fieldName, searchString, sort, size } = request;
+      if (searchString && searchString.length > 0) {
+        if (isNaN(Number(searchString))) {
+          // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
+          // simply don't return an aggregation query for the ES search request
+          return undefined;
+        }
+        // only exact match searching is supported for numeric fields
+        return exactMatchSearchAggBuilder.buildAggregation(request);
       }
 
-      return searchString && searchString.length > 0
-        ? // only exact match searching is supported for numeric fields
-          {
-            suggestions: {
-              filter: {
-                term: {
-                  [fieldName]: searchString,
-                },
-              },
-            },
-          }
-        : {
-            suggestions: {
-              terms: {
-                size,
-                field: fieldName,
-                shard_size: 10,
-                order: getSortType(sort),
-              },
-            },
-            unique_terms: {
-              cardinality: {
-                field: fieldName,
-              },
-            },
-          };
+      return {
+        suggestions: {
+          terms: {
+            size,
+            field: fieldName,
+            shard_size: 10,
+            order: getSortType(sort),
+          },
+        },
+        unique_terms: {
+          cardinality: {
+            field: fieldName,
+          },
+        },
+      };
     },
     parse: (rawEsResult, request) => {
-      if ((request.searchString ?? '').length > 0) {
-        const docCount = get(rawEsResult, 'aggregations.suggestions.doc_count');
-        if (!docCount) {
-          return {
-            suggestions: [],
-            totalCardinality: 0,
-          };
-        }
-        return {
-          suggestions: [
-            {
-              value: request.searchString,
-              docCount,
-            },
-          ],
-          totalCardinality: 1,
-        };
+      const { searchString } = request;
+      if (searchString && searchString.length > 0) {
+        return exactMatchSearchAggBuilder.parse(rawEsResult, request);
       }
+
       const suggestions = get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
           acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
@@ -243,7 +168,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         },
         []
       );
-      return { suggestions, totalCardinality: get(rawEsResult, `aggregations.unique_terms.value`) }; // cardinality is only ever 0, 1, or 2 so safe to use length here
+      return { suggestions, totalCardinality: get(rawEsResult, `aggregations.unique_terms.value`) };
     },
   },
 
@@ -276,7 +201,13 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
    * the "IP" query / parser should be used when the options list is built on a field of type IP.
    */
   ip: {
-    buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => {
+    buildAggregation: (request: OptionsListRequestBody) => {
+      const { fieldName, searchString, searchTechnique, sort, size } = request;
+      const hasSearchString = searchString && searchString.length > 0;
+      if (searchTechnique === 'exact' && hasSearchString) {
+        return exactMatchSearchAggBuilder.buildAggregation(request);
+      }
+
       let ipRangeQuery: IpRangeQuery = {
         validSearch: true,
         rangeQuery: [
@@ -288,7 +219,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         ],
       };
 
-      if (searchString && searchString.length > 0) {
+      if (hasSearchString) {
         ipRangeQuery = getIpRangeQuery(searchString);
         if (!ipRangeQuery.validSearch) {
           // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
@@ -323,6 +254,14 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       };
     },
     parse: (rawEsResult, request) => {
+      if (
+        request.searchTechnique === 'exact' &&
+        request.searchString &&
+        request.searchString.length > 0
+      ) {
+        return exactMatchSearchAggBuilder.parse(rawEsResult, request);
+      }
+
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
@@ -355,5 +294,50 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         totalCardinality,
       };
     },
+  },
+};
+
+const exactMatchSearchAggBuilder: OptionsListSuggestionAggregationBuilder = {
+  buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
+    return {
+      suggestions: {
+        filter: {
+          term: {
+            [fieldName]: { value: searchString },
+          },
+        },
+        aggs: {
+          field_value: {
+            terms: {
+              field: fieldName,
+            },
+          },
+        },
+      },
+    };
+  },
+  parse: (rawEsResult, request: OptionsListRequestBody) => {
+    const emptyResult = {
+      suggestions: [],
+      totalCardinality: 0,
+    };
+    if (!request.searchString || !Boolean(rawEsResult.aggregations?.suggestions)) {
+      // if this is happens, that means there is an invalid search that snuck through to the server side code;
+      // so, might as well early return with no suggestions
+      return emptyResult;
+    }
+
+    const docCount = get(rawEsResult, 'aggregations.suggestions.doc_count');
+    return {
+      suggestions: docCount
+        ? [
+            {
+              value: get(rawEsResult, 'aggregations.suggestions.field_value.buckets')[0].key,
+              docCount,
+            },
+          ]
+        : [],
+      totalCardinality: docCount ? 1 : 0,
+    };
   },
 };
