@@ -202,7 +202,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.e5Description"
-                      defaultMessage="E5 produces dense vectors embeddings that can be searched in multiple languages."
+                      defaultMessage="E5 produces dense vector embeddings that can be searched in multiple languages."
                     />
                   </EuiText>
                 </p>
