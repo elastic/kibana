@@ -92,8 +92,14 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
 } as const);
 
 export interface ModelDefinition {
+  /**
+   * Model name, e.g. elser
+   */
   modelName: string;
   version: number;
+  /**
+   * Default PUT model configuration
+   */
   config: object;
   description: string;
   os?: string;
@@ -103,7 +109,10 @@ export interface ModelDefinition {
   hidden?: boolean;
 }
 
-export type ModelDefinitionResponse = Omit<ModelDefinition, 'modelName'> & {
+export type ModelDefinitionResponse = ModelDefinition & {
+  /**
+   * Complete model id, e.g. .elser_model_2_linux-x86_64
+   */
   name: string;
 };
 
