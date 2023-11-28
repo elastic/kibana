@@ -22,7 +22,7 @@ const keysToOmit = [
   ConfigKey.FORM_MONITOR_TYPE,
 ];
 
-type Result = MonitorFields & { url?: string; host?: string };
+type Result = MonitorFields & { url?: string; host?: string; inline_script?: string };
 
 export const transformPublicKeys = (result: Result) => {
   if (result[ConfigKey.URLS]) {
