@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RUN_PACKS_SELECTABLE } from '../../screens/live_query';
 import { initializeDataViews } from '../../tasks/login';
 import {
   cleanupPack,
@@ -72,7 +73,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
-      cy.contains('Run a set of queries in a pack').click();
+      cy.getBySel(RUN_PACKS_SELECTABLE).click();
     });
     cy.getBySel('response-actions-error')
       .within(() => {

@@ -6,7 +6,7 @@
  */
 
 import { initializeDataViews } from '../../tasks/login';
-import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
+import { OSQUERY_FLYOUT_BODY_EDITOR, RUN_PACKS_SELECTABLE } from '../../screens/live_query';
 import {
   cleanupCase,
   cleanupPack,
@@ -67,10 +67,12 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
       const [caseName, caseDescription] = generateRandomStringName(2);
       cy.getBySel('expand-event').first().click({ force: true });
       cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('osquery-action-item').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.contains(/^\d+ agen(t|ts) selected/);
       cy.getBySel('globalLoadingIndicator').should('not.exist');
-      cy.contains('Run a set of queries in a pack').click();
+      cy.getBySel(RUN_PACKS_SELECTABLE).click();
       cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
