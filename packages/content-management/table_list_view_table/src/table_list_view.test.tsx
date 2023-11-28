@@ -8,6 +8,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import React, { useEffect } from 'react';
 import queryString from 'query-string';
 import moment, { Moment } from 'moment';
@@ -428,16 +429,85 @@ describe('TableListView', () => {
     });
   });
 
-  describe('column sorting', () => {
-    const setupColumnSorting = registerTestBed<string, TableListViewTableProps>(
+  describe('spaces column', () => {
+    const spacesApi = spacesPluginMock.createStartContract();
+    jest
+      .spyOn(spacesApi.ui.components, 'getSpaceList')
+      .mockImplementation(({ namespaces }) => <>{namespaces.toString()}</>);
+    const setupSpacesColumn = registerTestBed<string, TableListViewTableProps>(
       WithServices<TableListViewTableProps>(TableListViewTable, {
+        spacesApi,
         TagList: getTagList({ references: [] }),
       }),
       {
-        defaultProps: { ...requiredProps },
+        defaultProps: { ...requiredProps, itemIsShareable: ({ id }) => id !== '789' },
         memoryRouter: { wrapComponent: true },
       }
     );
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        namespaces: ['default', 'engineering', 'product-management'],
+        updatedAt: twoDaysAgo.toISOString(), // first asc, last desc
+        type: 'dashboard',
+        attributes: {
+          title: 'z-foo', // first desc, last asc
+        },
+        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
+      },
+      {
+        id: '456',
+        namespaces: ['*'],
+        updatedAt: yesterday.toISOString(), // first desc, last asc
+        type: 'dashboard',
+        attributes: {
+          title: 'a-foo', // first asc, last desc
+        },
+        references: [],
+      },
+      {
+        id: '789',
+        namespaces: ['default'],
+        updatedAt: yesterday.toISOString(),
+        type: 'lens',
+        attributes: {
+          title: 'not-shareable',
+        },
+        references: [],
+      },
+    ];
+
+    test('should display on shareable items when spaces is provided', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupSpacesColumn({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['a-foo', '*', yesterdayToString],
+        ['not-shareable', '', yesterdayToString],
+        ['z-foo', 'default,engineering,product-management', twoDaysAgoToString],
+      ]);
+    });
+  });
+
+  describe('column sorting', () => {
+    const tagList = WithServices<TableListViewTableProps>(TableListViewTable, {
+      TagList: getTagList({ references: [] }),
+    });
+    const setupColumnSorting = registerTestBed<string, TableListViewTableProps>(tagList, {
+      defaultProps: { ...requiredProps },
+      memoryRouter: { wrapComponent: true },
+    });
 
     const hits: UserContentCommonSchema[] = [
       {

@@ -158,6 +158,10 @@ export interface TableListViewKibanaDependencies {
       getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
     };
   };
+  /**
+   * The public API from the Spaces plugin. Provide the `spacesApi` to show the Spaces
+   * column in the table.
+   */
   spacesApi?: SpacesApi;
   /** The <FormattedRelative /> component from the @kbn/i18n-react package */
   FormattedRelative: typeof FormattedRelative;
