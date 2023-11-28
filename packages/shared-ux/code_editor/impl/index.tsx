@@ -7,16 +7,21 @@
  */
 
 import React from 'react';
-import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import {
+  EuiDelayRender,
+  EuiSkeletonText,
+  EuiFormControlLayout,
+  EuiErrorBoundary,
+} from '@elastic/eui';
 import type { CodeEditorProps } from './code_editor';
 export type { CodeEditorProps } from './code_editor';
 export * from './languages/constants';
 
-const LazyBaseEditor = React.lazy(() =>
-  import('./code_editor').then((m) => ({ default: m.CodeEditor }))
-);
-const LazyCodeEditorField = React.lazy(() =>
-  import('./code_editor_field').then((m) => ({ default: m.CodeEditorField }))
+const LazyCodeEditorBase = React.lazy(() =>
+  import(/* webpackChunkName: "code-editor-chunk" */ './code_editor').then((m) => ({
+    default: m.CodeEditor,
+  }))
 );
 
 const Fallback: React.FunctionComponent<{ height: CodeEditorProps['height'] }> = ({ height }) => {
@@ -41,7 +46,7 @@ export const CodeEditor: React.FunctionComponent<CodeEditorProps> = (props) => {
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
-        <LazyBaseEditor {...props} />
+        <LazyCodeEditorBase {...props} />
       </React.Suspense>
     </EuiErrorBoundary>
   );
@@ -51,10 +56,27 @@ export const CodeEditor: React.FunctionComponent<CodeEditorProps> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props) => {
+  const { width, height, options, fullWidth, useDarkTheme } = props;
+  const theme = useDarkTheme ? darkTheme : lightTheme;
+  const style = {
+    width,
+    height,
+    backgroundColor: options?.readOnly
+      ? theme.euiFormBackgroundReadOnlyColor
+      : theme.euiFormBackgroundColor,
+  };
+
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
-        <LazyCodeEditorField {...props} />
+        <EuiFormControlLayout
+          append={<div hidden />}
+          style={style}
+          readOnly={options?.readOnly}
+          fullWidth={fullWidth}
+        >
+          <LazyCodeEditorBase {...props} transparentBackground />
+        </EuiFormControlLayout>
       </React.Suspense>
     </EuiErrorBoundary>
   );
