@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
-  const comboBox = getService('comboBox');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
@@ -95,24 +94,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
-  const resourceId1 = data[0].resource.id;
-  const ruleSection1 = data[0].rule.section;
-
-  const benchMarkName = data[0].rule.benchmark.name;
-
   describe('Findings Page', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
-    let findingsByResourceTable: typeof findings.findingsByResourceTable;
-    let resourceFindingsTable: typeof findings.resourceFindingsTable;
     let distributionBar: typeof findings.distributionBar;
 
     before(async () => {
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
-      findingsByResourceTable = findings.findingsByResourceTable;
-      resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
@@ -217,20 +207,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await filterBar.removeFilter('result.evaluation');
         });
-      });
-    });
-
-    describe('GroupBy', () => {
-      it('groups findings by resource', async () => {
-        await comboBox.set('findings_group_by_selector', 'Resource');
-        expect(
-          await findingsByResourceTable.hasColumnValue('Applicable Benchmark', benchMarkName)
-        ).to.be(true);
-      });
-
-      it('navigates to resource findings page from resource id link', async () => {
-        await findingsByResourceTable.clickResourceIdLink(resourceId1, ruleSection1);
-        expect(await resourceFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
     });
   });

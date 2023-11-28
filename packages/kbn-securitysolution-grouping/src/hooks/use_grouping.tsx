@@ -19,7 +19,7 @@ import { Grouping as GroupingComponent } from '../components/grouping';
 /** Interface for grouping object where T is the `GroupingAggregation`
  *  @interface GroupingArgs<T>
  */
-interface Grouping<T> {
+export interface UseGrouping<T> {
   getGrouping: (props: DynamicGroupingProps<T>) => React.ReactElement;
   groupSelector: React.ReactElement<GroupSelectorProps>;
   selectedGroups: string[];
@@ -72,6 +72,7 @@ interface GroupingArgs<T> {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  title?: string;
 }
 
 /**
@@ -85,6 +86,7 @@ interface GroupingArgs<T> {
  * @param onGroupChange callback executed when selected group is changed, used for tracking
  * @param onOptionsChange callback executed when grouping options are changed, used for consumer grouping selector
  * @param tracker telemetry handler
+ * @param title of the grouping selector component
  * @returns {@link Grouping} the grouping constructor { getGrouping, groupSelector, pagination, selectedGroups }
  */
 export const useGrouping = <T,>({
@@ -96,7 +98,8 @@ export const useGrouping = <T,>({
   onGroupChange,
   onOptionsChange,
   tracker,
-}: GroupingArgs<T>): Grouping<T> => {
+  title,
+}: GroupingArgs<T>): UseGrouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
   const { activeGroups: selectedGroups } = useMemo(
     () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
@@ -125,6 +128,7 @@ export const useGrouping = <T,>({
     onGroupChange,
     onOptionsChange,
     tracker,
+    title,
   });
 
   const getGrouping = useCallback(

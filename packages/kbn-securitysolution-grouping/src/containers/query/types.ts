@@ -19,11 +19,11 @@ type RunTimeMappings =
   | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
   | undefined;
 
-interface BoolAgg {
+export interface BoolAgg {
   bool: BoolQuery;
 }
 
-interface RangeAgg {
+export interface RangeAgg {
   range: { '@timestamp': { gte: string; lte: string } };
 }
 
