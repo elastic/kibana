@@ -18,7 +18,7 @@ describe('AssetCriticalityDataClient', () => {
   const esClientInternal = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const logger = loggingSystemMock.createLogger();
   describe('init', () => {
-    it('should call create index', async () => {
+    it('ensures the index is available and up to date', async () => {
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient: esClientInternal,
         logger,

@@ -22,7 +22,7 @@ export const assetCriticalityFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  criticality: {
+  criticality_level: {
     type: 'keyword',
     array: false,
     required: false,

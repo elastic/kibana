@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
             '@timestamp': {
               type: 'date',
             },
-            criticality: {
+            criticality_level: {
               type: 'keyword',
             },
             id_field: {

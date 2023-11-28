@@ -5,11 +5,15 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { AssetCriticalityDataClient } from '../asset_criticality_data_client';
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import { AssetCriticalityDataClient } from './asset_criticality_data_client;
+import type { SecuritySolutionRequestHandlerContext } from '../../../types
 
-// As internal user we check for existence of asset crititcality resources
-// and initialise it if it does not exist
+/**
+ * As internal user we check for existence of asset crititcality resources
+ * and initialise it if it does not exist
+ * @param context
+ * @param logger
+ */
 export const checkAndInitAssetCriticalityResources = async (
   context: SecuritySolutionRequestHandlerContext,
   logger: Logger
@@ -24,9 +28,9 @@ export const checkAndInitAssetCriticalityResources = async (
     namespace: securityContext.getSpaceId(),
   });
 
-  const isIndexExists = await assetCriticalityDataClient.isIndexExists();
+  const doesIndexExist = await assetCriticalityDataClient.doesIndexExist();
 
-  if (!isIndexExists) {
+  if (!doesIndexExist) {
     logger.info('Asset criticality resources are not installed, initialising...');
     await assetCriticalityDataClient.init();
     logger.info('Asset criticality resources installed');
