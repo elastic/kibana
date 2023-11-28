@@ -61,6 +61,7 @@ export interface SetupStatus {
     | DefaultPackagesInstallationError
     | UpgradeManagedPackagePoliciesResult
     | { error: UninstallTokenError }
+    | { error: Error }
   >;
 }
 
@@ -188,7 +189,11 @@ async function createSetupSideEffects(
       'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
     );
   }
-  await appContextService.getMessageSigningService()?.generateKeyPair();
+  try {
+    await appContextService.getMessageSigningService()?.generateKeyPair();
+  } catch (error) {
+    nonFatalErrors.push({ error });
+  }
 
   logger.debug('Generating Agent uninstall tokens');
   if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {

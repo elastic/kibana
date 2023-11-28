@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { backOff } from 'exponential-backoff';
-
 import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
+
+import { backOff } from 'exponential-backoff';
 
 import type { LoggerFactory, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -250,7 +250,13 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       }
     | undefined
   > {
-    const currentKeyPair = await this.getCurrentKeyPairObjWithRetry();
+    let currentKeyPair;
+    try {
+      currentKeyPair = await this.getCurrentKeyPairObjWithRetry();
+    } catch (e) {
+      throw new Error('Cannot read existing Message Signing Key pair');
+    }
+
     if (!currentKeyPair) {
       return;
     }
