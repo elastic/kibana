@@ -223,7 +223,7 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
       )}
       {!initialLoadComplete && <PanelLoader />}
       <div
-        css={{ display: initialLoadComplete ? 'block' : 'none !important' }}
+        css={initialLoadComplete ? undefined : { display: 'none !important' }}
         className="embPanel__content"
         ref={embeddableRoot}
         {...contentAttrs}
