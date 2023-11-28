@@ -9,6 +9,8 @@ import type { AssetCriticalityDataClient } from './asset_criticality_data_client
 
 const createAssetCriticalityDataClientMock = () =>
   ({
+    doesIndexExist: jest.fn(),
+    getStatus: jest.fn(),
     init: jest.fn(),
   } as unknown as jest.Mocked<AssetCriticalityDataClient>);
 

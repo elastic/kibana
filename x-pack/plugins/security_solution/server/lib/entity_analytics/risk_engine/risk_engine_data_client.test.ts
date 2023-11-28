@@ -14,7 +14,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 import { RiskEngineDataClient } from './risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
-import { AssetCriticalityDataClient } from '../asset_criticality/asset_criticality_data_client';
 import type { RiskEngineConfiguration } from '../types';
 import * as savedObjectConfig from './utils/saved_object_configuration';
 import * as transforms from '../utils/transforms';
@@ -207,7 +206,6 @@ describe('RiskEngineDataClient', () => {
       describe('init', () => {
         let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
         const initRiskScore = jest.spyOn(RiskScoreDataClient.prototype, 'init');
-        const initAssetCriticality = jest.spyOn(AssetCriticalityDataClient.prototype, 'init');
         const enableRiskEngineMock = jest.spyOn(RiskEngineDataClient.prototype, 'enableRiskEngine');
 
         const disableLegacyRiskEngineMock = jest.spyOn(
@@ -233,7 +231,6 @@ describe('RiskEngineDataClient', () => {
 
         afterEach(() => {
           initRiskScore.mockReset();
-          initAssetCriticality.mockReset();
           enableRiskEngineMock.mockReset();
           disableLegacyRiskEngineMock.mockReset();
         });
