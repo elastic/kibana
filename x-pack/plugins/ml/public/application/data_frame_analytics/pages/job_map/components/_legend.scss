@@ -41,7 +41,7 @@
   height: $euiSizeM;
   width: $euiSizeM;
   background-color: $euiColorGhost;
-  border: $euiBorderWidthThick solid black;
+  border: $euiBorderWidthThick solid $euiColorFullShade;
   border-radius: 50%;
   display: 'inline-block';
 }
