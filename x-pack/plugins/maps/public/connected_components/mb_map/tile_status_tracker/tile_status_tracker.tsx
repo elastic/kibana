@@ -12,6 +12,7 @@ import type { AJAXError, Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import { ILayer } from '../../../classes/layers/layer';
+import { isLayerGroup } from '../../../classes/layers/layer_group';
 import { IVectorSource } from '../../../classes/sources/vector_source';
 import { getTileKey as getCenterTileKey } from '../../../classes/util/geo_tile_utils';
 import { boundsToExtent } from '../../../classes/util/maplibre_utils';
@@ -64,6 +65,10 @@ export class TileStatusTracker extends Component<Props> {
 
   componentDidUpdate() {
     this.props.layerList.forEach((layer) => {
+      if (isLayerGroup(layer)) {
+        return;
+      }
+
       const source = layer.getSource();
       if (
         source.isESSource() &&
