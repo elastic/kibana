@@ -9,7 +9,7 @@ import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
-import type { AuthenticationProvider } from '@kbn/security-plugin/common/model';
+import type { AuthenticationProvider } from '@kbn/security-plugin/common';
 import {
   getSAMLRequestId,
   getSAMLResponse,
