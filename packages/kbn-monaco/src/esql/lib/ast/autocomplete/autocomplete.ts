@@ -15,7 +15,6 @@ import {
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
-  getLastCharFromTrimmed,
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
