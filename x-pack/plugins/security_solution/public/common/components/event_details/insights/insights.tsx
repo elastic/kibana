@@ -11,12 +11,12 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { find } from 'lodash/fp';
 
+import { APP_ID } from '../../../../../common';
 import * as i18n from './translations';
 
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { hasData } from './helpers';
-import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useLicense } from '../../../hooks/use_license';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
@@ -24,6 +24,7 @@ import { RelatedCases } from './related_cases';
 import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsUpsell } from './related_alerts_upsell';
+import { useKibana } from '../../../lib/kibana';
 
 const StyledInsightItem = euiStyled(EuiFlexItem)`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
@@ -45,6 +46,7 @@ interface Props {
  */
 export const Insights = React.memo<Props>(
   ({ browserFields, eventId, data, isReadOnly, scopeId }) => {
+    const { cases } = useKibana().services;
     const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
       'insightsRelatedAlertsByProcessAncestry'
     );
@@ -83,7 +85,7 @@ export const Insights = React.memo<Props>(
     );
     const hasAlertSuppressionField = hasData(alertSuppressionField);
 
-    const userCasesPermissions = useGetUserCasesPermissions();
+    const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
     const hasCasesReadPermissions = userCasesPermissions.read;
 
     // Make sure that the alert has at least one of the associated fields

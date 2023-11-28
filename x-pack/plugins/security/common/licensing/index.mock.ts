@@ -9,9 +9,7 @@ import { Observable, of } from 'rxjs';
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
-
-import type { SecurityLicenseFeatures } from './license_features';
-import type { SecurityLicense } from './license_service';
+import type { SecurityLicense, SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 
 export const licenseMock = {
   create: (
