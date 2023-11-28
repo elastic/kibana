@@ -97,6 +97,19 @@ describe('TextBasedLanguagesEditor', () => {
     });
   });
 
+  it('should  render the feedback link', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-feedback-link"]').length
+      ).not.toBe(0);
+    });
+  });
+
   it('should render the date info with @timestamp found if detectTimestamp is true', async () => {
     const newProps = {
       ...props,
