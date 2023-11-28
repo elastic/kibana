@@ -67,10 +67,10 @@ export const bundle = async (config: BundlerConfig) => {
 
   logger.success(`Processed ${processedDocuments.length} schemas`);
 
-  const resultDocument = mergeDocuments(processedDocuments);
+  const resultDocument = await mergeDocuments(processedDocuments);
 
   try {
-    writeYamlDocument(outputFilePath, resultDocument);
+    await writeYamlDocument(outputFilePath, resultDocument);
 
     logger.success(`📖  Wrote all bundled OpenAPI specs to ${chalk.bold(outputFilePath)}`);
   } catch (e) {

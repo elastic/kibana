@@ -8,7 +8,7 @@
 
 import { dirname } from 'path';
 import { isPlainObject } from 'lodash';
-import { RefResolver } from './ref_resolver';
+import { IRefResolver } from './ref_resolver';
 import {
   DocumentNode,
   ResolvedDocument,
@@ -37,7 +37,7 @@ interface TraverseItem {
 
 export async function processDocument(
   resolvedDocument: ResolvedDocument,
-  refResolver: RefResolver,
+  refResolver: IRefResolver,
   processors: DocumentNodeProcessor[]
 ): Promise<void> {
   const nodesToVisit: TraverseItem[] = [

@@ -11,7 +11,12 @@ import { extractByJsonPointer } from '../utils/extract_by_json_pointer';
 import { readYamlDocument } from '../utils/read_yaml_document';
 import { ResolvedDocument, ResolvedRef } from './types';
 
-export class RefResolver {
+export interface IRefResolver {
+  resolveRef(refDocumentAbsolutePath: string, pointer: string): Promise<ResolvedRef>;
+  resolveDocument(documentAbsolutePath: string): Promise<ResolvedDocument>;
+}
+
+export class RefResolver implements IRefResolver {
   private documentsCache = new Map<string, ResolvedDocument>();
 
   async resolveRef(refDocumentAbsolutePath: string, pointer: string): Promise<ResolvedRef> {

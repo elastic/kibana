@@ -9,15 +9,19 @@
 import deepEqual from 'fast-deep-equal';
 import { basename, dirname, join } from 'path';
 import chalk from 'chalk';
-import { PlainObjectNode, ResolvedDocument, ResolvedRef } from './types';
-import { BundledDocument } from './bundle_document';
+import { parseRef } from '../utils/parse_ref';
 import { insertRefByPointer } from '../utils/insert_by_json_pointer';
+import { DocumentNodeProcessor, PlainObjectNode, ResolvedDocument, ResolvedRef } from './types';
+import { BundledDocument } from './bundle_document';
+import { processDocument } from './process_document';
 
 type MergedDocuments = Record<string, ResolvedDocument>;
 
 type MergedResult = Record<string, PlainObjectNode>;
 
-export function mergeDocuments(bundledDocuments: BundledDocument[]): MergedResult {
+const SHARED_COMPONENTS_FILE_NAME = 'shared_components.schema.yaml';
+
+export async function mergeDocuments(bundledDocuments: BundledDocument[]): Promise<MergedResult> {
   const mergedDocuments: MergedDocuments = {};
   const componentsMap = new Map<string, ResolvedRef>();
 
@@ -26,6 +30,7 @@ export function mergeDocuments(bundledDocuments: BundledDocument[]): MergedResul
 
     delete bundledDocument.document.components;
 
+    await setRefsFileName(bundledDocument, SHARED_COMPONENTS_FILE_NAME);
     mergeDocument(bundledDocument, mergedDocuments);
   }
 
@@ -35,7 +40,7 @@ export function mergeDocuments(bundledDocuments: BundledDocument[]): MergedResul
     result[fileName] = mergedDocuments[fileName].document;
   }
 
-  result['shared_components.schema.yaml'] = {
+  result[SHARED_COMPONENTS_FILE_NAME] = {
     components: componentsMapToComponents(componentsMap),
   };
 
@@ -106,4 +111,32 @@ function componentsMapToComponents(
   }
 
   return result;
+}
+
+async function setRefsFileName(
+  resolvedDocument: ResolvedDocument,
+  fileName: string
+): Promise<void> {
+  // We don't need to follow references
+  const stubRefResolver = {
+    resolveRef: async (refDocumentAbsolutePath: string, pointer: string): Promise<ResolvedRef> => ({
+      absolutePath: refDocumentAbsolutePath,
+      pointer,
+      document: resolvedDocument.document,
+      refNode: {},
+    }),
+    resolveDocument: async (): Promise<ResolvedDocument> => ({
+      absolutePath: '',
+      document: resolvedDocument.document,
+    }),
+  };
+  const setRefFileProcessor: DocumentNodeProcessor = {
+    ref: (node) => {
+      const { pointer } = parseRef(node.$ref);
+
+      node.$ref = `./${fileName}#${pointer}`;
+    },
+  };
+
+  await processDocument(resolvedDocument, stubRefResolver, [setRefFileProcessor]);
 }
