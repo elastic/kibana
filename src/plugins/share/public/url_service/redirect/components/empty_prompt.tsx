@@ -8,9 +8,10 @@
 
 import * as React from 'react';
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 
 const defaultTitle = i18n.translate('share.urlService.redirect.components.Error.title', {
   defaultMessage: 'Unable to open URL',
@@ -39,24 +40,19 @@ export const RedirectEmptyPrompt: React.FC<ErrorProps> = ({
   console.error('Short URL Redirect Error', props.error);
 
   return (
-    <EuiEmptyPrompt
+    <NotFoundPrompt
       title={<h2>{title}</h2>}
-      body={
-        <>
-          <p data-test-subj="redirectErrorEmptyPromptBody">{body}</p>
-          <p>
-            <EuiButton
-              iconType="refresh"
-              fill={true}
-              href={props.http.basePath.get()}
-              data-test-subj="redirectErrorEmptyPromptButton"
-            >
-              {i18n.translate('share.urlService.redirect.components.Error.homeButton', {
-                defaultMessage: 'Back to home',
-              })}
-            </EuiButton>
-          </p>
-        </>
+      body={<p data-test-subj="redirectErrorEmptyPromptBody">{body}</p>}
+      actions={
+        <EuiButtonEmpty
+          iconType="arrowLeft"
+          href={props.http.basePath.get()}
+          data-test-subj="redirectErrorEmptyPromptButton"
+        >
+          {i18n.translate('share.urlService.redirect.components.Error.homeButton', {
+            defaultMessage: 'Back to home',
+          })}
+        </EuiButtonEmpty>
       }
     />
   );
