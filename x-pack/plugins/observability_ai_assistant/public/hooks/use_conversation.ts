@@ -215,6 +215,20 @@ export function useConversation({
     next,
     stop,
     messages,
-    saveTitle: () => {},
+    saveTitle: (title: string) => {
+      if (!displayedConversationId || !conversation.value) {
+        throw new Error('Cannot save title if conversation is not stored');
+      }
+      const nextConversation = merge({}, conversation.value as Conversation, {
+        conversation: { title },
+      });
+      return update(nextConversation)
+        .then(() => {
+          return conversation.refresh();
+        })
+        .then(() => {
+          onConversationUpdate?.(nextConversation);
+        });
+    },
   };
 }

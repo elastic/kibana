@@ -537,6 +537,139 @@ describe('useConversation', () => {
   });
 
   describe('when the title is updated', () => {
-    it('the conversation is saved with the updated title', () => {});
+    describe('without a stored conversation', () => {
+      beforeEach(() => {
+        hookResult = renderHook(useConversation, {
+          initialProps: {
+            chatService: mockChatService,
+            connectorId: 'my-connector',
+            initialMessages: [
+              {
+                '@timestamp': new Date().toISOString(),
+                message: { content: '', role: MessageRole.User },
+              },
+            ],
+            initialConversationId: 'foo',
+          },
+          wrapper,
+        });
+      });
+
+      it('throws an error', () => {
+        expect(() => hookResult.result.current.saveTitle('my-new-title')).toThrow();
+      });
+    });
+
+    describe('with a stored conversation', () => {
+      let resolve: (value: unknown) => void;
+      beforeEach(async () => {
+        mockService.callApi.mockImplementation(async (endpoint, request) => {
+          if (
+            endpoint === 'PUT /internal/observability_ai_assistant/conversation/{conversationId}'
+          ) {
+            return new Promise((_resolve) => {
+              resolve = _resolve;
+            });
+          }
+          return {
+            '@timestamp': new Date().toISOString(),
+            conversation: {
+              id: 'my-conversation-id',
+              title: EMPTY_CONVERSATION_TITLE,
+            },
+            labels: {},
+            numeric_labels: {},
+            public: false,
+            messages: [],
+          };
+        });
+
+        await act(async () => {
+          hookResult = renderHook(useConversation, {
+            initialProps: {
+              chatService: mockChatService,
+              connectorId: 'my-connector',
+              initialConversationId: 'my-conversation-id',
+            },
+            wrapper,
+          });
+        });
+      });
+
+      it('does not throw an error', () => {
+        expect(() => hookResult.result.current.saveTitle('my-new-title')).not.toThrow();
+      });
+
+      it('calls the update API', async () => {
+        act(() => {
+          hookResult.result.current.saveTitle('my-new-title');
+        });
+
+        expect(resolve).not.toBeUndefined();
+
+        expect(mockService.callApi.mock.calls[1]).toEqual([
+          'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
+          {
+            signal: null,
+            params: {
+              path: {
+                conversationId: 'my-conversation-id',
+              },
+              body: {
+                conversation: {
+                  '@timestamp': expect.any(String),
+                  conversation: {
+                    title: 'my-new-title',
+                    id: 'my-conversation-id',
+                  },
+                  labels: expect.anything(),
+                  messages: expect.anything(),
+                  numeric_labels: expect.anything(),
+                  public: expect.anything(),
+                },
+              },
+            },
+          },
+        ]);
+
+        mockService.callApi.mockImplementation(async (endpoint, request) => {
+          return {
+            '@timestamp': new Date().toISOString(),
+            conversation: {
+              id: 'my-conversation-id',
+              title: 'my-new-title',
+            },
+            labels: {},
+            numeric_labels: {},
+            public: false,
+            messages: [],
+          };
+        });
+
+        await act(async () => {
+          resolve({
+            conversation: {
+              title: 'my-new-title',
+            },
+          });
+        });
+
+        expect(mockService.callApi.mock.calls[2]).toEqual([
+          'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          {
+            signal: expect.anything(),
+            params: {
+              path: {
+                conversationId: 'my-conversation-id',
+              },
+            },
+          },
+        ]);
+
+        expect(hookResult.result.current.conversation.value?.conversation.title).toBe(
+          'my-new-title'
+        );
+      });
+    });
   });
 });

@@ -7,7 +7,3 @@
 
 export type { Message, Conversation } from './types';
 export { MessageRole } from './types';
-
-export { type StreamingChatResponseEvent, StreamingChatResponseEventType } from './chat/streaming';
-
-export { ChatCompletionError, ChatCompletionErrorCode } from './errors';
