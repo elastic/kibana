@@ -21,6 +21,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-overlays-browser",
+    "@kbn/reporting-plugin",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",
