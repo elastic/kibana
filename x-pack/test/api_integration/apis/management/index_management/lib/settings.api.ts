@@ -7,6 +7,7 @@
 
 import { API_BASE_PATH } from '../constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { IndexSettings } from '@kbn/index-management-plugin/common'
 
 export function settingsApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');
@@ -17,7 +18,7 @@ export function settingsApi(getService: FtrProviderContext['getService']) {
       .set('kbn-xsrf', 'xxx')
       .set('x-elastic-internal-origin', 'xxx');
 
-  const updateIndexSettings = (index: string, settings: any) =>
+  const updateIndexSettings = (index: string, settings: IndexSettings) =>
     supertest
       .put(`${API_BASE_PATH}/settings/${index}`)
       .set('kbn-xsrf', 'xxx')
