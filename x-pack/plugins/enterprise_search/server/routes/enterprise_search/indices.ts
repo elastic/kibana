@@ -1114,26 +1114,12 @@ export function registerIndexRoutes({
         ? await ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
-      try {
-        const getStatusResult = await fetchMlModels(trainedModelsProvider);
+      const modelsResult = await fetchMlModels(trainedModelsProvider);
 
-        return response.ok({
-          body: getStatusResult,
-          headers: { 'content-type': 'application/json' },
-        });
-      } catch (error) {
-        if (isResourceNotFoundException(error)) {
-          // return specific message if model doesn't exist
-          return createError({
-            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
-            message: error.meta?.body?.error?.reason,
-            response,
-            statusCode: 404,
-          });
-        }
-        // otherwise, let the default handler wrap it
-        throw error;
-      }
+      return response.ok({
+        body: modelsResult,
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 
