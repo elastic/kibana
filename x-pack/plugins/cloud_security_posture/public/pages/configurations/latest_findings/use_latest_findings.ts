@@ -16,7 +16,10 @@ import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import {
+  CSP_LATEST_FINDINGS_DATA_VIEW,
+  LATEST_FINDINGS_RETENTION_POLICY,
+} from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 
@@ -41,11 +44,27 @@ interface FindingsAggs {
 
 export const getFindingsQuery = ({ query, sort }: UseFindingsOptions, pageParam: any) => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
-  query,
   sort: getMultiFieldsSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQuery(),
   ignore_unavailable: false,
+  query: {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter ?? []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+              lte: 'now',
+            },
+          },
+        },
+      ],
+    },
+  },
   ...(pageParam ? { search_after: pageParam } : {}),
 });
 
