@@ -23,7 +23,7 @@ export interface MlModelDeploymentStatus {
   threadsPerAllocation: number;
 }
 
-export type MlModel = {
+export interface MlModel {
   modelId: string;
   /** Model inference type, e.g. ner, text_classification */
   type: string;
