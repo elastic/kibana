@@ -138,10 +138,21 @@ export async function createOrUpdatePreconfiguredOutputs(
   );
 }
 
+// Values recommended by NodeJS documentation
+const keyLength = 64;
+const saltLength = 16;
+
+// N=2^14 (16 MiB), r=8 (1024 bytes), p=5
+const scryptParams = {
+  cost: 16384,
+  blockSize: 8,
+  parallelization: 5,
+};
+
 export async function hashSecret(secret: string) {
   return new Promise((resolve, reject) => {
-    const salt = crypto.randomBytes(16).toString('hex');
-    crypto.scrypt(secret, salt, 64, { p: 5 }, (err, derivedKey) => {
+    const salt = crypto.randomBytes(saltLength).toString('hex');
+    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
       if (err) reject(err);
       resolve(`${salt}:${derivedKey.toString('hex')}`);
     });
@@ -151,9 +162,9 @@ export async function hashSecret(secret: string) {
 async function verifySecret(hash: string, secret: string) {
   return new Promise((resolve, reject) => {
     const [salt, key] = hash.split(':');
-    crypto.scrypt(secret, salt, 64, { p: 5 }, (err, derivedKey) => {
+    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
       if (err) reject(err);
-      resolve(key === derivedKey.toString('hex'));
+      resolve(crypto.timingSafeEqual(Buffer.from(key, 'hex'), derivedKey));
     });
   });
 }
