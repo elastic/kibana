@@ -50,10 +50,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('with data loaded', function () {
         const dfaOutlierResultsJobId = 'iph_outlier_a11y';
-        const ecIndexPattern = 'ft_module_sample_ecommerce';
-        const ihpIndexPattern = 'ft_ihp_outlier';
-        const egsIndexPattern = 'ft_egs_regression';
-        const bmIndexPattern = 'ft_bank_marketing';
+        const ecIndexName = 'ft_module_sample_ecommerce';
+        const ihpIndexName = 'ft_ihp_outlier';
+        const egsIndexName = 'ft_egs_regression';
+        const bmIndexName = 'ft_bank_marketing';
         const ecExpectedTotalCount = '287';
 
         const dfaOutlierJobType = 'outlier_detection';
@@ -78,10 +78,10 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.loadIfNeeded(
             'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
           );
-          await ml.testResources.createIndexPatternIfNeeded(ihpIndexPattern);
-          await ml.testResources.createIndexPatternIfNeeded(egsIndexPattern);
-          await ml.testResources.createIndexPatternIfNeeded(bmIndexPattern);
-          await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
+          await ml.testResources.createDataViewIfNeeded(ihpIndexName);
+          await ml.testResources.createDataViewIfNeeded(egsIndexName);
+          await ml.testResources.createDataViewIfNeeded(bmIndexName);
+          await ml.testResources.createDataViewIfNeeded(ecIndexName, 'order_date');
           await ml.testResources.setKibanaTimeZoneToUTC();
 
           await ml.api.createAndRunDFAJob(
@@ -93,10 +93,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.cleanMlIndices();
           await ml.api.deleteIndices(`user-${dfaOutlierResultsJobId}`);
 
-          await ml.testResources.deleteIndexPatternByTitle(ihpIndexPattern);
-          await ml.testResources.deleteIndexPatternByTitle(egsIndexPattern);
-          await ml.testResources.deleteIndexPatternByTitle(bmIndexPattern);
-          await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
+          await ml.testResources.deleteDataViewByTitle(ihpIndexName);
+          await ml.testResources.deleteDataViewByTitle(egsIndexName);
+          await ml.testResources.deleteDataViewByTitle(bmIndexName);
+          await ml.testResources.deleteDataViewByTitle(ecIndexName);
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/egs_regression');
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/bm_classification');
@@ -134,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'job creation selects the source data and loads the DFA job wizard page'
           );
-          await ml.jobSourceSelection.selectSourceForAnalyticsJob(ihpIndexPattern);
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(ihpIndexName);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
           await a11y.testAppSnapshot();
         });
@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalytics.startAnalyticsCreation();
-          await ml.jobSourceSelection.selectSourceForAnalyticsJob(egsIndexPattern);
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(egsIndexName);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
           await ml.testExecution.logTestStep('selects the regression job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalytics.startAnalyticsCreation();
-          await ml.jobSourceSelection.selectSourceForAnalyticsJob(bmIndexPattern);
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(bmIndexName);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
           await ml.testExecution.logTestStep('selects the classification job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
@@ -275,12 +275,12 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('index data visualizer select index pattern page', async () => {
-          await ml.dataVisualizer.navigateToIndexPatternSelection();
+          await ml.dataVisualizer.navigateToDataViewSelection();
           await a11y.testAppSnapshot();
         });
 
         it('index data visualizer page for selected index', async () => {
-          await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(ecIndexPattern);
+          await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(ecIndexName);
 
           await ml.testExecution.logTestStep('should display the time range step');
           await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();

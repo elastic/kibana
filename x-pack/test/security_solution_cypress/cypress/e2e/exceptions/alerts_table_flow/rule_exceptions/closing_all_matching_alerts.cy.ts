@@ -10,7 +10,7 @@ import {
   goToClosedAlertsOnRuleDetailsPage,
   waitForAlerts,
 } from '../../../../tasks/alerts';
-import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
+import { deleteAlertsAndRules, postDataView } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';

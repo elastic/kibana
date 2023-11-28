@@ -7,7 +7,10 @@
  */
 
 import { RuleTester } from 'eslint';
-import { StringsShouldBeTranslatedWithFormattedMessage } from './strings_should_be_translated_with_formatted_message';
+import {
+  StringsShouldBeTranslatedWithFormattedMessage,
+  RULE_WARNING_MESSAGE,
+} from './strings_should_be_translated_with_formatted_message';
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -41,7 +44,7 @@ const babelTester = [
 const invalid: RuleTester.InvalidTestCase[] = [
   {
     name: 'A JSX element with a string literal should be translated with i18n',
-    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    filename: '/x-pack/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 
@@ -53,7 +56,7 @@ function TestComponent() {
     errors: [
       {
         line: 6,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -64,7 +67,7 @@ function TestComponent() {
   return (
     <div>
 <FormattedMessage
-  id="app_not_found_in_i18nrc.testComponent.div.thisIsATestLabel"
+  id="xpack.observability.testComponent.div.thisIsATestLabel"
   defaultMessage="This is a test"
 /></div>
   )
@@ -72,7 +75,7 @@ function TestComponent() {
   },
   {
     name: 'A JSX element with a string literal that are inside an Eui component should take the component name of the parent into account',
-    filename: 'x-pack/plugins/observability/public/another_component.tsx',
+    filename: '/x-pack/plugins/observability/public/another_component.tsx',
     code: `
 import React from 'react';
 
@@ -90,7 +93,7 @@ function AnotherComponent() {
     errors: [
       {
         line: 9,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -104,7 +107,7 @@ function AnotherComponent() {
         <EuiFlexItem>
           <EuiButton>
 <FormattedMessage
-  id="app_not_found_in_i18nrc.anotherComponent.thisIsATestButtonLabel"
+  id="xpack.observability.anotherComponent.thisIsATestButtonLabel"
   defaultMessage="This is a test"
 /></EuiButton>
         </EuiFlexItem>
@@ -115,7 +118,7 @@ function AnotherComponent() {
   },
   {
     name: 'When no import of the translation module is present, the import line should be added',
-    filename: 'x-pack/plugins/observability/public/yet_another_component.tsx',
+    filename: '/x-pack/plugins/observability/public/yet_another_component.tsx',
     code: `
 import React from 'react';
 
@@ -129,7 +132,7 @@ function YetAnotherComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -141,7 +144,7 @@ function YetAnotherComponent() {
     <div>
       <EuiSelect>
 <FormattedMessage
-  id="app_not_found_in_i18nrc.yetAnotherComponent.selectMeSelectLabel"
+  id="xpack.observability.yetAnotherComponent.selectMeSelectLabel"
   defaultMessage="Select me"
 /></EuiSelect>
     </div>
@@ -150,7 +153,7 @@ function YetAnotherComponent() {
   },
   {
     name: 'Import lines without the necessary translation module should be updated to include i18n',
-    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    filename: '/x-pack/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 import { SomeOtherModule } from '@kbn/i18n-react';
@@ -163,7 +166,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -172,13 +175,13 @@ import { SomeOtherModule, FormattedMessage } from '@kbn/i18n-react';
 
 function TestComponent() {
   return (
-    <SomeChildComponent label={<FormattedMessage id="app_not_found_in_i18nrc.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+    <SomeChildComponent label={<FormattedMessage id="xpack.observability.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
   )
 }`,
   },
   {
     name: 'JSX elements that have a label or aria-label prop with a string value should be translated with i18n',
-    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    filename: '/x-pack/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -191,7 +194,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -200,13 +203,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 function TestComponent() {
   return (
-    <SomeChildComponent label={<FormattedMessage id="app_not_found_in_i18nrc.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+    <SomeChildComponent label={<FormattedMessage id="xpack.observability.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
   )
 }`,
   },
   {
     name: 'JSX elements that have a label or aria-label prop with a JSXExpression value that is a string should be translated with i18n',
-    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    filename: '/x-pack/plugins/observability/public/test_component.tsx',
     code: `
   import React from 'react';
   import { FormattedMessage } from '@kbn/i18n-react';
@@ -219,7 +222,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -228,7 +231,7 @@ function TestComponent() {
 
   function TestComponent() {
     return (
-      <SomeChildComponent label={<FormattedMessage id="app_not_found_in_i18nrc.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+      <SomeChildComponent label={<FormattedMessage id="xpack.observability.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
     )
   }`,
   },
@@ -237,7 +240,7 @@ function TestComponent() {
 const valid: RuleTester.ValidTestCase[] = [
   {
     name: 'A JSXText element inside a EuiCode component should not be translated',
-    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    filename: '/x-pack/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 
@@ -249,7 +252,7 @@ function TestComponent() {
   },
   {
     name: 'A JSXText element that contains anything other than alpha characters should not be translated',
-    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    filename: '/x-pack/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 
@@ -261,7 +264,7 @@ function TestComponent() {
   },
   {
     name: 'A JSXText element that is wrapped in three backticks (markdown) should not be translated',
-    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    filename: '/x-pack/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 

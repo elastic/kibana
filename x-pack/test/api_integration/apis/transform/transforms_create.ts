@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ]);
 
-      await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
+      await transform.testResources.deleteDataViewByTitle(destinationIndex);
     });
 
     it('should create a transform with data view and time field', async () => {
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ]);
 
-      await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
+      await transform.testResources.deleteDataViewByTitle(destinationIndex);
     });
 
     it('should not allow pivot and latest configs in same transform', async () => {

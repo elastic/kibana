@@ -14,6 +14,7 @@ import { RuleType, RuleTypeIndex } from '../../types';
 
 interface UseLoadRuleTypesQueryProps {
   filteredRuleTypes: string[];
+  enabled?: boolean;
 }
 
 const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTypes: string[]) => {
@@ -32,7 +33,10 @@ const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTyp
   return filteredIndex;
 };
 
-export const useLoadRuleTypesQuery = ({ filteredRuleTypes }: UseLoadRuleTypesQueryProps) => {
+export const useLoadRuleTypesQuery = ({
+  filteredRuleTypes,
+  enabled = true,
+}: UseLoadRuleTypesQueryProps) => {
   const {
     http,
     notifications: { toasts },
@@ -56,6 +60,7 @@ export const useLoadRuleTypesQuery = ({ filteredRuleTypes }: UseLoadRuleTypesQue
     onError: onErrorFn,
     refetchOnWindowFocus: false,
     staleTime: 60 * 1000,
+    enabled,
   });
 
   const filteredIndex = useMemo(
