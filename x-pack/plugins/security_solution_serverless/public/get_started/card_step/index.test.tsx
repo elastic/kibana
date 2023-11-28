@@ -8,14 +8,29 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { CardStep } from '.';
 import type { StepId } from '../types';
-import { QuickStartSectionCardsId, SectionId, OverviewSteps, CreateProjectSteps } from '../types';
+
+import {
+  EnablePrebuiltRulesSteps,
+  GetStartedWithAlertsCardsId,
+  QuickStartSectionCardsId,
+  SectionId,
+  OverviewSteps,
+  CreateProjectSteps,
+} from '../types';
 import { ProductLine } from '../../../common/product';
+import { ALL_DONE_TEXT } from '../translations';
+import { fetchRuleManagementFilters } from '../apis';
 
 jest.mock('../../common/services');
 jest.mock('../context/step_context');
 jest.mock('./step_content', () => ({
   StepContent: () => <div data-test-subj="mock-step-content" />,
 }));
+jest.mock('@kbn/security-solution-plugin/public', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
+}));
+
+jest.mock('../apis');
 
 describe('CardStepComponent', () => {
   const step = {
@@ -84,5 +99,30 @@ describe('CardStepComponent', () => {
     fireEvent.click(stepTitle);
 
     expect(onStepClicked).toHaveBeenCalledTimes(0);
+  });
+
+  it('should not show the step as completed when it is not', () => {
+    const { queryByText } = render(<CardStep {...props} />);
+
+    const text = queryByText(ALL_DONE_TEXT);
+    expect(text).not.toBeInTheDocument();
+  });
+
+  it('should  show the step as completed when it is done', () => {
+    (fetchRuleManagementFilters as jest.Mock).mockResolvedValue({
+      rules_summary: { custom_count: 1, prebuilt_installed_count: 1 },
+    });
+    const mockProps = {
+      ...props,
+      stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+      cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+      finishedSteps: new Set<StepId>([]),
+      description: undefined,
+      splitPanel: undefined,
+    };
+    const { queryByText } = render(<CardStep {...mockProps} />);
+
+    const text = queryByText(ALL_DONE_TEXT);
+    expect(text).toBeInTheDocument();
   });
 });

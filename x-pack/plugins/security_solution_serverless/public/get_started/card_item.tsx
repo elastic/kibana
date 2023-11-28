@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiShadow } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  useEuiBackgroundColor,
+  useEuiShadow,
+} from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -58,6 +64,8 @@ const CardItemComponent: React.FC<{
     'card-expanded': isExpandedCard,
   });
 
+  const iconHoveredBackgroundColor = useEuiBackgroundColor('success');
+
   return cardItem && activeStepIds ? (
     <EuiPanel
       className={cardClassNames}
@@ -74,6 +82,10 @@ const CardItemComponent: React.FC<{
         &.card-expanded {
           ${shadow};
           transition: box-shadow ${SHADOW_ANIMATION_DURATION}ms ease-out;
+
+          & .step-icon {
+            background-color: ${iconHoveredBackgroundColor};
+          }
         }
 
         &.card-expanded {

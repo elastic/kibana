@@ -7,9 +7,15 @@
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme, useEuiShadow, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect } from 'react';
-import type { LandingPageContext } from '@kbn/security-solution-plugin/public/common/components/landing_page/land_page_context';
-import { useKibana } from '../../common/services';
+import React from 'react';
+import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
+import type {
+  CardId,
+  CheckIfStepCompleted,
+  SectionId,
+  StepId,
+  ToggleTaskCompleteStatus,
+} from '../types';
 
 const LEFT_CONTENT_PANEL_WIDTH = 486;
 const RIGHT_CONTENT_PANEL_WIDTH = 510;
@@ -17,40 +23,36 @@ const RIGHT_CONTENT_HEIGHT = 270;
 const RIGHT_CONTENT_WIDTH = 480;
 
 const StepContentComponent = ({
+  cardId,
+  checkIfStepCompleted,
   description,
   hasStepContent,
   isExpandedStep,
-  updateStepStatus,
+  sectionId,
   splitPanel,
   stepId,
-  checkIfStepCompleted,
+  toggleTaskCompleteStatus,
 }: {
+  cardId: CardId;
+  checkIfStepCompleted?: CheckIfStepCompleted;
   description?: React.ReactNode[];
   hasStepContent: boolean;
   isExpandedStep: boolean;
-  updateStepStatus: (undo: boolean | undefined) => void;
+  sectionId: SectionId;
   splitPanel?: React.ReactNode;
-  stepId: string;
-  checkIfStepCompleted?: (context: LandingPageContext) => boolean;
+  stepId: StepId;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('s');
-  const { securitySolution } = useKibana().services;
 
-  useEffect(() => {
-    securitySolution.getLandingPageContext$().subscribe((context) => {
-      if (checkIfStepCompleted == null) {
-        return;
-      }
-      const isDone = checkIfStepCompleted?.(context);
-      updateStepStatus(!isDone);
-    });
-  }, [
-    updateStepStatus,
-    securitySolution,
-    securitySolution.getLandingPageContext$,
+  useCheckStepCompleted({
     checkIfStepCompleted,
-  ]);
+    toggleTaskCompleteStatus,
+    stepId,
+    cardId,
+    sectionId,
+  });
 
   return hasStepContent && isExpandedStep ? (
     <EuiFlexGroup

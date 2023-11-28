@@ -11,6 +11,10 @@ import type { PluginSetup, PluginStart } from './types';
 export type { TimelineModel } from './timelines/store/timeline/model';
 export type { LinkItem } from './common/links';
 
+export type { GetRuleManagementFiltersResponse } from '../common/api/detection_engine/rule_management/get_rule_management_filters/get_rule_management_filters_route';
+export { RULE_MANAGEMENT_FILTERS_URL } from '../common/api/detection_engine/rule_management/urls';
+export { useSourcererDataView } from './common/containers/sourcerer';
+
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
 export type { PluginSetup, PluginStart };

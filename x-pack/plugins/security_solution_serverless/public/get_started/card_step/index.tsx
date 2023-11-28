@@ -13,12 +13,16 @@ import {
   EuiBadge,
   useEuiTheme,
   EuiButtonIcon,
+  useEuiBackgroundColor,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import classnames from 'classnames';
 import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
+
+import type { GetRuleManagementFiltersResponse } from '@kbn/security-solution-plugin/public';
+
 import type { CardId, OnStepClicked, ToggleTaskCompleteStatus, SectionId, StepId } from '../types';
 import {
   ALL_DONE_TEXT,
@@ -30,8 +34,15 @@ import type { ProductLine } from '../../../common/product';
 
 import { StepContent } from './step_content';
 import { useKibana } from '../../common/services';
+import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
 
 const HEIGHT_ANIMATION_DURATION = 250;
+
+export const isRulesTableEmpty = (
+  ruleManagementFilters: GetRuleManagementFiltersResponse | undefined
+) =>
+  ruleManagementFilters?.rules_summary.custom_count === 0 &&
+  ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
 
 const CardStepComponent: React.FC<{
   activeProducts: Set<ProductLine>;
@@ -55,6 +66,7 @@ const CardStepComponent: React.FC<{
   stepId,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const completeBadgeBackgroundColor = useEuiBackgroundColor('success');
 
   const { navigateToApp } = useKibana().services.application;
 
@@ -70,6 +82,16 @@ const CardStepComponent: React.FC<{
     steps?.find((step) => step.id === stepId) ?? {};
   const hasStepContent = description != null || splitPanel != null;
   const expandedStepPanelHeight = `calc(${stepContentRef.current?.offsetHeight}px + ${euiTheme.size.l} + ${euiTheme.size.xxxl})`;
+
+  useCheckStepCompleted({
+    checkIfStepCompleted,
+    toggleTaskCompleteStatus,
+    stepId,
+    cardId,
+    sectionId,
+  });
+
+  const isDone = finishedSteps.has(stepId);
 
   const toggleStep = useCallback(
     (e) => {
@@ -88,16 +110,8 @@ const CardStepComponent: React.FC<{
     [hasStepContent, cardId, stepId, navigateToApp, onStepClicked, sectionId, isExpandedStep]
   );
 
-  const updateStepStatus = useCallback(
-    (undo: boolean | undefined) => {
-      toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo });
-    },
-    [cardId, toggleTaskCompleteStatus, sectionId, stepId]
-  );
-
-  const isDone = finishedSteps.has(stepId);
-
   useEffect(() => {
+    // Handle card expansion transition
     if (isExpandedCard) {
       setPanelClassNames(
         classnames({
@@ -149,9 +163,10 @@ const CardStepComponent: React.FC<{
       `}
     >
       <EuiFlexGroup
-        gutterSize="s"
+        gutterSize="none"
         css={css`
           cursor: ${hasStepContent ? 'pointer' : 'default'};
+          gap: ${euiTheme.size.base};
         `}
       >
         <EuiFlexItem
@@ -168,7 +183,7 @@ const CardStepComponent: React.FC<{
               width: ${euiTheme.size.xxxl};
               height: ${euiTheme.size.xxxl};
               padding: ${euiTheme.size.m};
-              background-color: rgb(247, 248, 252);
+              background-color: ${euiTheme.colors.body};
             `}
           >
             {icon && <EuiIcon {...icon} size="l" className="eui-alignMiddle" />}
@@ -203,7 +218,7 @@ const CardStepComponent: React.FC<{
             {isDone && (
               <EuiBadge
                 css={css`
-                  background-color: rgba(0, 191, 179, 0.1);
+                  background-color: ${completeBadgeBackgroundColor};
                   color: ${euiTheme.colors.successText};
                 `}
                 color="success"
@@ -227,17 +242,21 @@ const CardStepComponent: React.FC<{
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div ref={stepContentRef}>
-        <StepContent
-          description={description}
-          hasStepContent={hasStepContent}
-          isExpandedStep={isExpandedStep}
-          updateStepStatus={updateStepStatus}
-          splitPanel={splitPanel}
-          stepId={stepId}
-          checkIfStepCompleted={checkIfStepCompleted}
-        />
-      </div>
+      {hasStepContent && isExpandedStep && (
+        <div ref={stepContentRef}>
+          <StepContent
+            cardId={cardId}
+            checkIfStepCompleted={checkIfStepCompleted}
+            description={description}
+            hasStepContent={hasStepContent}
+            isExpandedStep={isExpandedStep}
+            sectionId={sectionId}
+            splitPanel={splitPanel}
+            stepId={stepId}
+            toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+          />
+        </div>
+      )}
     </EuiPanel>
   );
 };

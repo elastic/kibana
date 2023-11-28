@@ -6,7 +6,6 @@
  */
 import React from 'react';
 
-import type { LandingPageContext } from '@kbn/security-solution-plugin/public/common/components/landing_page/land_page_context';
 import type { StepId } from './types';
 import {
   SectionId,
@@ -66,7 +65,7 @@ export const addIntegrationsSteps = [
         width="100%"
       />
     ),
-    checkIfStepCompleted: ({ indicesExist }: LandingPageContext) => indicesExist === true,
+    checkIfStepCompleted: (indicesExist: boolean) => indicesExist === true,
   },
 ];
 
@@ -101,7 +100,7 @@ export const enablePrebuildRuleSteps = [
         width="100%"
       />
     ),
-    checkIfStepCompleted: ({ rulesInstalled }: LandingPageContext) => rulesInstalled === true,
+    checkIfStepCompleted: (rulesInstalled: boolean) => rulesInstalled === true,
   },
 ];
 

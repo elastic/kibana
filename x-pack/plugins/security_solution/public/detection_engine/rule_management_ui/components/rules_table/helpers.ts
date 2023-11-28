@@ -7,10 +7,7 @@
 
 import type { Query } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type {
-  ExportRulesDetails,
-  GetRuleManagementFiltersResponse,
-} from '../../../../../common/api/detection_engine/rule_management';
+import type { ExportRulesDetails } from '../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionSummary } from '../../../rule_management/logic';
 
 export const caseInsensitiveSort = (tags: string[]): string[] => {
@@ -90,9 +87,3 @@ const NormalizedSeverity: Record<Severity, number> = {
 export const getNormalizedSeverity = (severity: Severity): number => {
   return NormalizedSeverity[severity] ?? -1;
 };
-
-export const isRulesTableEmpty = (
-  ruleManagementFilters: GetRuleManagementFiltersResponse | undefined
-) =>
-  ruleManagementFilters?.rules_summary.custom_count === 0 &&
-  ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;

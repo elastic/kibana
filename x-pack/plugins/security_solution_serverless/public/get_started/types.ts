@@ -7,7 +7,6 @@
 
 import type { EuiIconProps } from '@elastic/eui';
 import type React from 'react';
-import type { LandingPageContext } from '@kbn/security-solution-plugin/public/common/components/landing_page/land_page_context';
 
 import type { ProductLine } from '../../common/product';
 
@@ -31,8 +30,10 @@ export type StepId =
   | EnablePrebuiltRulesSteps
   | ViewAlertsSteps;
 
+export type CheckIfStepCompleted = (isCompleted: boolean) => boolean;
+
 export interface Step {
-  checkIfStepCompleted?: (context: LandingPageContext) => boolean;
+  checkIfStepCompleted?: CheckIfStepCompleted;
   description?: Array<React.ReactNode | string>;
   id: StepId;
   productLineRequired?: ProductLine[];
