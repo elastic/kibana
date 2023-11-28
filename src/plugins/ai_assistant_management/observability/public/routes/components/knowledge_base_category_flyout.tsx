@@ -22,6 +22,7 @@ import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/
 import moment from 'moment';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 import { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
+import { useAppContext } from '../../context/app_context';
 
 const CATEGORY_MAP = {
   lens: {
@@ -45,6 +46,9 @@ export function KnowledgeBaseCategoryFlyout({
   category: KnowledgeBaseEntryCategory;
   onClose: () => void;
 }) {
+  const { uiSettings } = useAppContext();
+  const dateFormat = uiSettings.get('dateFormat');
+
   const { mutate: deleteEntry } = useDeleteKnowledgeBaseEntry();
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntry>> = [
@@ -58,7 +62,7 @@ export function KnowledgeBaseCategoryFlyout({
       ),
       sortable: true,
       render: (timestamp: KnowledgeBaseEntry['@timestamp']) => (
-        <EuiBadge color="hollow">{moment(timestamp).format('MM-DD-YYYY')}</EuiBadge>
+        <EuiBadge color="hollow">{moment(timestamp).format(dateFormat)}</EuiBadge>
       ),
     },
     {

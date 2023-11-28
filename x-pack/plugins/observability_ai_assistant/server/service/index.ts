@@ -269,6 +269,7 @@ export class ObservabilityAIAssistantService {
                 ...entry.labels,
                 document_id: entry.id,
               },
+              role: 'elastic' as const,
             };
 
             const operations =

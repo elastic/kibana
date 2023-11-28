@@ -227,6 +227,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
         text,
         public: isPublic,
         labels,
+        role: 'assistant_summarization',
       },
     });
   },

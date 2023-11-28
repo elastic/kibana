@@ -28,6 +28,7 @@ import moment from 'moment';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
+import { useAppContext } from '../../context/app_context';
 
 export function KnowledgeBaseEditManualEntryFlyout({
   entry,
@@ -36,6 +37,9 @@ export function KnowledgeBaseEditManualEntryFlyout({
   entry?: KnowledgeBaseEntry;
   onClose: () => void;
 }) {
+  const { uiSettings } = useAppContext();
+  const dateFormat = uiSettings.get('dateFormat');
+
   const { mutateAsync: createEntry, isLoading } = useCreateKnowledgeBaseEntry();
   const { mutateAsync: deleteEntry, isLoading: isDeleting } = useDeleteKnowledgeBaseEntry();
 
@@ -108,7 +112,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
                   { defaultMessage: 'Created on' }
                 )}
               </EuiText>
-              <EuiText size="s">{moment(entry['@timestamp']).format('MM-DD-YYYY hh:mm')}</EuiText>
+              <EuiText size="s">{moment(entry['@timestamp']).format(dateFormat)}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

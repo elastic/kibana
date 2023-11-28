@@ -35,10 +35,10 @@ export const managementSidebarNav = ({
       const apps = sortBy(section.getAppsEnabled(), 'order');
 
       if (apps.length) {
-        if (!section.hide) {
+        if (!section.hideFromSidebar) {
           acc.push({
             ...createNavItem(section, {
-              items: appsToNavItems(apps.filter((app) => !app.hide)),
+              items: appsToNavItems(apps.filter((app) => !app.hideFromSidebar)),
             }),
           });
         }

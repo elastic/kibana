@@ -330,7 +330,7 @@ export class KnowledgeBaseService {
       const response = await this.dependencies.esClient.search<
         Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
       >({
-        index: this.dependencies.resources.aliases.kb,
+        index: [this.dependencies.resources.aliases.kb],
         query,
         size: 5,
         _source: {
@@ -368,9 +368,17 @@ export class KnowledgeBaseService {
               },
             }
           : {}),
-        size: 10000,
+        size: 500,
         _source: {
-          includes: ['text', 'is_correction', 'labels', 'confidence', 'public', '@timestamp'],
+          includes: [
+            'text',
+            'is_correction',
+            'labels',
+            'confidence',
+            'public',
+            '@timestamp',
+            'role',
+          ],
         },
       });
 

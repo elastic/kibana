@@ -4,7 +4,7 @@
   "owner": "@elastic/obs-knowledge-team",
   "plugin": {
     "id": "aiAssistantManagementObservability",
-    "server": true,
+    "server": false,
     "browser": true,
     "requiredPlugins": ["management"],
     "optionalPlugins": ["actions", "home", "observabilityAIAssistant", "serverless", "spaces"],

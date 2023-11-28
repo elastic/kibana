@@ -13,7 +13,7 @@ export class ManagementItem {
   public readonly title: string;
   public readonly tip?: string;
   public readonly order: number;
-  public readonly hide?: boolean;
+  public readonly hideFromSidebar?: boolean;
   public readonly euiIconType?: string;
   public readonly icon?: string;
   public readonly capabilitiesId?: string;
@@ -26,7 +26,7 @@ export class ManagementItem {
     title,
     tip,
     order = 100,
-    hide = false,
+    hideFromSidebar = false,
     euiIconType,
     icon,
     capabilitiesId,
@@ -36,7 +36,7 @@ export class ManagementItem {
     this.title = title;
     this.tip = tip;
     this.order = order;
-    this.hide = hide;
+    this.hideFromSidebar = hideFromSidebar;
     this.euiIconType = euiIconType;
     this.icon = icon;
     this.capabilitiesId = capabilitiesId;

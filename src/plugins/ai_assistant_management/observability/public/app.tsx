@@ -47,8 +47,9 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
               http: coreStart.http,
               navigateToApp: coreStart.application.navigateToApp,
               notifications: coreStart.notifications,
+              observabilityAIAssistant: startDeps.observabilityAIAssistant,
+              uiSettings: coreStart.uiSettings,
               setBreadcrumbs,
-              ...startDeps,
             }}
           >
             <QueryClientProvider client={queryClient}>

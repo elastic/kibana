@@ -72,6 +72,7 @@ export interface KnowledgeBaseEntry {
   is_correction: boolean;
   public: boolean;
   labels: Record<string, string>;
+  role: 'assistant_summarization' | 'user_entry' | 'elastic';
 }
 
 export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;

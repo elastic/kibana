@@ -20,7 +20,9 @@ export interface UseGetAiConnectorsResponse {
 }
 
 export function useGetAiConnectors(): UseGetAiConnectorsResponse {
-  const { http } = useAppContext();
+  const { observabilityAIAssistant } = useAppContext();
+
+  const observabilityAIAssistantApi = observabilityAIAssistant?.callApi;
 
   const {
     isLoading,
@@ -31,15 +33,13 @@ export function useGetAiConnectors(): UseGetAiConnectorsResponse {
   } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_GENAI_CONNECTORS],
     queryFn: async ({ signal }) => {
-      const response = await http.get<FindActionResult[]>(
-        `/internal/management/ai_assistant/observability/connectors`,
-        {
-          query: {},
-          signal,
-        }
-      );
+      if (!observabilityAIAssistantApi || !signal) {
+        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
+      }
 
-      return response;
+      return observabilityAIAssistantApi?.(`GET /internal/observability_ai_assistant/connectors`, {
+        signal,
+      });
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,

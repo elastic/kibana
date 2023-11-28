@@ -74,9 +74,7 @@ export function registerSummarizationFunction({
               is_correction: isCorrection,
               confidence,
               public: isPublic,
-              labels: {
-                type: 'assistant_summarization',
-              },
+              labels: {},
             },
           },
           signal,

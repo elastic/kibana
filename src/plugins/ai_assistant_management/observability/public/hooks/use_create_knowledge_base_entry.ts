@@ -17,10 +17,11 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCreateKnowledgeBaseEntry() {
   const {
-    http,
     notifications: { toasts },
+    observabilityAIAssistant,
   } = useAppContext();
   const queryClient = useQueryClient();
+  const observabilityAIAssistantApi = observabilityAIAssistant?.callApi;
 
   return useMutation<
     void,
@@ -28,14 +29,28 @@ export function useCreateKnowledgeBaseEntry() {
     {
       entry: Omit<
         KnowledgeBaseEntry,
-        '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels'
+        '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels' | 'role'
       >;
     }
   >(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
     ({ entry }) => {
-      const body = JSON.stringify(entry);
-      return http.post(`/internal/management/ai_assistant/observability/kb/entries/save`, { body });
+      if (!observabilityAIAssistantApi) {
+        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
+      }
+
+      return observabilityAIAssistantApi?.(
+        'POST /internal/observability_ai_assistant/kb/entries/save',
+        {
+          signal: null,
+          params: {
+            body: {
+              ...entry,
+              role: 'user_entry',
+            },
+          },
+        }
+      );
     },
     {
       onSuccess: (_data, { entry }) => {

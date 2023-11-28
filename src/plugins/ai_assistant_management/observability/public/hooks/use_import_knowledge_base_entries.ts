@@ -17,10 +17,11 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useImportKnowledgeBaseEntries() {
   const {
-    http,
+    observabilityAIAssistant,
     notifications: { toasts },
   } = useAppContext();
   const queryClient = useQueryClient();
+  const observabilityAIAssistantApi = observabilityAIAssistant?.callApi;
 
   return useMutation<
     void,
@@ -36,11 +37,21 @@ export function useImportKnowledgeBaseEntries() {
   >(
     [REACT_QUERY_KEYS.IMPORT_KB_ENTRIES],
     ({ entries }) => {
-      const body = JSON.stringify({ entries });
+      if (!observabilityAIAssistantApi) {
+        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
+      }
 
-      return http.post(`/internal/management/ai_assistant/observability/kb/entries/import`, {
-        body,
-      });
+      return observabilityAIAssistantApi?.(
+        'POST /internal/observability_ai_assistant/kb/entries/import',
+        {
+          signal: null,
+          params: {
+            body: {
+              entries,
+            },
+          },
+        }
+      );
     },
     {
       onSuccess: (_data, { entries }) => {

@@ -30,11 +30,15 @@ import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/cat
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
+import { useAppContext } from '../../context/app_context';
 
 export function KnowledgeBaseTab() {
   const [selectedCategory, setSelectedCategory] = useState<
     KnowledgeBaseEntryCategory | undefined
   >();
+
+  const { uiSettings } = useAppContext();
+  const dateFormat = uiSettings.get('dateFormat');
 
   const [flyoutOpenType, setFlyoutOpenType] = useState<
     'singleEntry' | 'bulkImport' | 'category' | undefined
@@ -79,12 +83,12 @@ export function KnowledgeBaseTab() {
       field: '',
       name: '',
       render: (category: KnowledgeBaseEntryCategory) => {
-        if (category.entries.length === 1 && category.entries[0].labels.type === 'manual') {
+        if (category.entries.length === 1 && category.entries[0].role === 'user_entry') {
           return <EuiIcon type="documentation" color="primary" />;
         }
         if (
           category.entries.length === 1 &&
-          category.entries[0].labels.type === 'assistant_summarization'
+          category.entries[0].role === 'assistant_summarization'
         ) {
           return <EuiIcon type="sparkles" color="primary" />;
         }
@@ -107,8 +111,8 @@ export function KnowledgeBaseTab() {
       render: (category: KnowledgeBaseEntryCategory) => {
         if (
           category.entries.length === 1 &&
-          (category.entries[0].labels.type === 'manual' ||
-            category.entries[0].labels.type === 'assistant_summarization')
+          (category.entries[0].role === 'user_entry' ||
+            category.entries[0].role === 'assistant_summarization')
         ) {
           return null;
         }
@@ -124,7 +128,7 @@ export function KnowledgeBaseTab() {
       width: '140px',
       sortable: true,
       render: (timestamp: KnowledgeBaseEntry['@timestamp']) => (
-        <EuiBadge color="hollow">{moment(timestamp).format('MM-DD-YYYY')}</EuiBadge>
+        <EuiBadge color="hollow">{moment(timestamp).format(dateFormat)}</EuiBadge>
       ),
     },
     {
@@ -133,7 +137,7 @@ export function KnowledgeBaseTab() {
       }),
       width: '140px',
       render: (category: KnowledgeBaseEntryCategory) => {
-        if (category.entries.length === 1 && category.entries[0].labels.type === 'manual') {
+        if (category.entries.length === 1 && category.entries[0].role === 'user_entry') {
           return (
             <EuiBadge color="hollow">
               {i18n.translate('aiAssistantManagementObservability.kbTab.columns.manualBadgeLabel', {
@@ -145,7 +149,7 @@ export function KnowledgeBaseTab() {
 
         if (
           category.entries.length === 1 &&
-          category.entries[0].labels.type === 'assistant_summarization'
+          category.entries[0].role === 'assistant_summarization'
         ) {
           return (
             <EuiBadge color="hollow">
@@ -286,8 +290,8 @@ export function KnowledgeBaseTab() {
 
       {selectedCategory ? (
         selectedCategory.entries.length === 1 &&
-        (selectedCategory.entries[0].labels.type === 'manual' ||
-          selectedCategory.entries[0].labels.type === 'assistant_summarization') ? (
+        (selectedCategory.entries[0].role === 'user_entry' ||
+          selectedCategory.entries[0].role === 'assistant_summarization') ? (
           <KnowledgeBaseEditManualEntryFlyout
             entry={selectedCategory.entries[0]}
             onClose={() => setSelectedCategory(undefined)}

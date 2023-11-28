@@ -15,6 +15,7 @@ interface ContextValue extends StartDependencies {
   http: HttpSetup;
   navigateToApp: CoreStart['application']['navigateToApp'];
   notifications: CoreStart['notifications'];
+  uiSettings: CoreStart['uiSettings'];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 

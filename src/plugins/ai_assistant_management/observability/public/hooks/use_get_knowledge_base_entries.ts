@@ -7,28 +7,29 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useAppContext } from '../context/app_context';
 
 export function useGetKnowledgeBaseEntries(query: string) {
-  const { http } = useAppContext();
+  const { observabilityAIAssistant } = useAppContext();
+
+  const observabilityAIAssistantApi = observabilityAIAssistant?.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query],
     queryFn: async ({ signal }) => {
-      const response = await http.get<{ entries: KnowledgeBaseEntry[] }>(
-        `/internal/management/ai_assistant/observability/kb/entries`,
-        {
-          query: query
-            ? {
-                query,
-              }
-            : {},
-          signal,
-        }
-      );
-      return response;
+      if (!observabilityAIAssistantApi || !signal) {
+        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
+      }
+
+      return observabilityAIAssistantApi?.(`GET /internal/observability_ai_assistant/kb/entries`, {
+        signal,
+        params: {
+          query: {
+            query,
+          },
+        },
+      });
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,

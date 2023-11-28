@@ -16,15 +16,30 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useDeleteKnowledgeBaseEntry() {
   const {
-    http,
+    observabilityAIAssistant,
     notifications: { toasts },
   } = useAppContext();
   const queryClient = useQueryClient();
+  const observabilityAIAssistantApi = observabilityAIAssistant?.callApi;
 
-  return useMutation<void, ServerError, { id: string }>(
+  return useMutation<unknown, ServerError, { id: string }>(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
-    ({ id }) => {
-      return http.delete(`/internal/management/ai_assistant/observability/kb/entries/${id}`);
+    ({ id: entryId }) => {
+      if (!observabilityAIAssistantApi) {
+        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
+      }
+
+      return observabilityAIAssistantApi?.(
+        'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
+        {
+          signal: null,
+          params: {
+            path: {
+              entryId,
+            },
+          },
+        }
+      );
     },
     {
       onSuccess: (_data, { id }) => {

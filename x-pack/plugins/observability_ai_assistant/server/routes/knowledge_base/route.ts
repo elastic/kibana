@@ -85,14 +85,23 @@ const getKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
   params: t.type({
-    body: t.type({
-      id: t.string,
-      text: nonEmptyStringRt,
-      confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
-      is_correction: toBooleanRt,
-      public: toBooleanRt,
-      labels: t.record(t.string, t.string),
-    }),
+    body: t.intersection([
+      t.type({
+        id: t.string,
+        text: nonEmptyStringRt,
+      }),
+      t.partial({
+        confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
+        is_correction: toBooleanRt,
+        public: toBooleanRt,
+        labels: t.record(t.string, t.string),
+        role: t.union([
+          t.literal('assistant_summarization'),
+          t.literal('user_entry'),
+          t.literal('elastic'),
+        ]),
+      }),
+    ]),
   }),
   options: {
     tags: ['access:ai_assistant'],
@@ -104,23 +113,17 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const {
-      confidence,
-      id,
-      is_correction: isCorrection,
-      text,
-      public: isPublic,
-      labels,
-    } = resources.params.body;
+    const { id, text } = resources.params.body;
 
     return client.createKnowledgeBaseEntry({
       entry: {
-        confidence,
         id,
-        is_correction: isCorrection,
         text,
-        public: isPublic,
-        labels,
+        confidence: resources.params.body.confidence ?? 'high',
+        is_correction: resources.params.body.is_correction ?? false,
+        public: resources.params.body.public ?? true,
+        labels: resources.params.body.labels ?? {},
+        role: resources.params.body.role ?? 'user_entry',
       },
     });
   },
@@ -147,10 +150,49 @@ const deleteKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+  params: t.type({
+    body: t.type({
+      entries: t.array(
+        t.type({
+          id: t.string,
+          text: nonEmptyStringRt,
+        })
+      ),
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    const entries = resources.params.body.entries.map((entry) => ({
+      confidence: 'high' as KnowledgeBaseEntry['confidence'],
+      is_correction: false,
+      public: true,
+      labels: {
+        type: 'manual',
+        document_id: entry.id,
+      },
+      role: 'user_entry' as KnowledgeBaseEntry['role'],
+      ...entry,
+    }));
+
+    return await client.importKnowledgeBaseEntries({ entries });
+  },
+});
+
 export const knowledgeBaseRoutes = {
   ...setupKnowledgeBase,
   ...getKnowledgeBaseStatus,
   ...getKnowledgeBaseEntries,
+  ...importKnowledgeBaseEntries,
   ...saveKnowledgeBaseEntry,
   ...deleteKnowledgeBaseEntry,
 };

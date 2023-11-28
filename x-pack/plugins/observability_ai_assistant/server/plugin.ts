@@ -127,8 +127,6 @@ export class ObservabilityAIAssistantPlugin
   }
 
   public start(): ObservabilityAIAssistantPluginStart {
-    return {
-      service: this.service,
-    };
+    return {};
   }
 }
