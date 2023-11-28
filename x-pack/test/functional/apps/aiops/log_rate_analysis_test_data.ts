@@ -18,10 +18,34 @@ export const logRateAnalysisTestData: TestData[] = [
   kibanaLogsDataViewTestData,
   farequoteDataViewTestData,
   farequoteDataViewTestDataWithQuery,
-  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE, false, false),
-  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE, true, false),
-  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE, true, true),
-  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE, false, true),
-  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.DIP, false, false),
-  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.DIP, true, false),
+  getArtificialLogDataViewTestData({
+    analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+    textField: false,
+    gaps: false,
+  }),
+  getArtificialLogDataViewTestData({
+    analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+    textField: true,
+    gaps: false,
+  }),
+  getArtificialLogDataViewTestData({
+    analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+    textField: true,
+    gaps: true,
+  }),
+  getArtificialLogDataViewTestData({
+    analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+    textField: false,
+    gaps: true,
+  }),
+  getArtificialLogDataViewTestData({
+    analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
+    textField: false,
+    gaps: false,
+  }),
+  getArtificialLogDataViewTestData({
+    analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
+    textField: true,
+    gaps: false,
+  }),
 ];

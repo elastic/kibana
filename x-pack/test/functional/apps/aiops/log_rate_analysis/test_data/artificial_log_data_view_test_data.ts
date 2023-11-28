@@ -30,11 +30,17 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-export const getArtificialLogDataViewTestData = (
-  analysisType: LogRateAnalysisType,
-  textField: boolean,
-  gaps: boolean
-): TestData => {
+interface GetArtificialLogDataViewTestDataOptions {
+  analysisType: LogRateAnalysisType;
+  textField: boolean;
+  gaps: boolean;
+}
+
+export const getArtificialLogDataViewTestData = ({
+  analysisType,
+  textField,
+  gaps,
+}: GetArtificialLogDataViewTestDataOptions): TestData => {
   function getAnalysisGroupsTable() {
     if (gaps) {
       return textField ? analysisGroupsTableTextfieldGaps : analysisGroupsTableNotextfieldGaps;
@@ -81,14 +87,22 @@ export const getArtificialLogDataViewTestData = (
     }`;
   }
 
+  function getBrushBaselineTargetTimestamp() {
+    return gaps ? BASELINE_TS - DAY_MS / 2 : BASELINE_TS + DAY_MS / 2;
+  }
+
+  function getBrushDeviationTargetTimestamp() {
+    return gaps ? DEVIATION_TS : DEVIATION_TS + DAY_MS / 2;
+  }
+
   return {
     suiteTitle: getSuiteTitle(),
     analysisType,
     dataGenerator: getDataGenerator(),
     isSavedSearch: false,
     sourceIndexOrSavedSearch: getDataGenerator(),
-    brushBaselineTargetTimestamp: gaps ? BASELINE_TS - DAY_MS / 2 : BASELINE_TS + DAY_MS / 2,
-    brushDeviationTargetTimestamp: gaps ? DEVIATION_TS : DEVIATION_TS + DAY_MS / 2,
+    brushBaselineTargetTimestamp: getBrushBaselineTargetTimestamp(),
+    brushDeviationTargetTimestamp: getBrushDeviationTargetTimestamp(),
     brushIntervalFactor: gaps ? 1 : 10,
     chartClickCoordinates: [-200, 30],
     fieldSelectorSearch: 'user',
