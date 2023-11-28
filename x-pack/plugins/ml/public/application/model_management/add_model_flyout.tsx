@@ -193,7 +193,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                   <h3>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.modelsList.e5Title"
-                      defaultMessage="E5"
+                      defaultMessage="E5 multilingual embedding model"
                     />
                   </h3>
                 </EuiTitle>
