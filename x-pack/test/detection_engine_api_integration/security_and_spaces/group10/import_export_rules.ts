@@ -26,9 +26,8 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getSimpleRule,
+  deleteAllExceptions,
 } from '../../utils';
-// Should be updated once this file gets moved to the new  security_solution_api_integration folder
-import { deleteAllExceptions } from '../../../security_solution_api_integration/test_suites/lists_and_exception_lists/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // This test was meant to be more full flow, ensuring that
