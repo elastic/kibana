@@ -588,6 +588,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
         },
       },
+      tooltip: { ...chartTheme, maxWidth: 500 },
     };
 
     const xAxisTitle = args.gridConfig.xTitle ?? xAxisColumn?.name;

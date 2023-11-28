@@ -25,6 +25,14 @@ export const partitionVisContainerStyle = css`
   margin-right: auto;
   width: 100%;
   height: 100%;
+  .echTooltip .echTooltip__tableCell--truncate {
+    white-space: normal !important;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
 `;
 
 export const partitionVisContainerWithToggleStyleFactory = (theme: EuiThemeComputed) => css`
@@ -33,4 +41,12 @@ export const partitionVisContainerWithToggleStyleFactory = (theme: EuiThemeCompu
   inset: 0;
   position: absolute;
   padding: ${theme.size.s};
+  .echTooltip .echTooltip__tableCell--truncate {
+    white-space: normal !important;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
 `;

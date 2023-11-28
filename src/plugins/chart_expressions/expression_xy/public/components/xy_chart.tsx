@@ -819,6 +819,10 @@ export function XYChart({
                   ),
                 },
                 markSizeRatio: args.markSizeRatio,
+                tooltip: {
+                  ...chartTheme.tooltip,
+                  maxWidth: 500,
+                },
               },
               ...(Array.isArray(settingsThemeOverrides)
                 ? settingsThemeOverrides

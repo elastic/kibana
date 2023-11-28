@@ -39,6 +39,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import './index.scss';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -572,7 +573,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendAction={legendActions}
                 theme={[
                   // Chart background should be transparent for the usage at Canvas.
-                  { background: { color: 'transparent' } },
+                  {
+                    background: { color: 'transparent' },
+                    tooltip: { ...chartTheme, maxWidth: 500 },
+                  },
                   themeOverrides,
                   chartTheme,
                   {

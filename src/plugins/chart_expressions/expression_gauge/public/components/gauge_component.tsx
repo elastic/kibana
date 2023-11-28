@@ -366,7 +366,10 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           <Settings
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
-            theme={[{ background: { color: 'transparent' } }, chartTheme]}
+            theme={[
+              { background: { color: 'transparent' }, tooltip: { ...chartTheme, maxWidth: 500 } },
+              chartTheme,
+            ]}
             baseTheme={chartBaseTheme}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}

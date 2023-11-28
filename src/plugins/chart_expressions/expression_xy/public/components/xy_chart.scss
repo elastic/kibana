@@ -5,3 +5,12 @@
   align-items: center;
   justify-content: center;
 }
+
+.echTooltip .echTooltip__tableCell--truncate {
+  white-space: normal !important;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden; 
+}
