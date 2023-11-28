@@ -103,7 +103,6 @@ export const QueryPackSelectable = ({
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <StyledEuiCard
-              data-test-subj={'run-query-selectable'}
               layout="horizontal"
               title={i18n.translate('xpack.osquery.liveQuery.queryForm.singleQueryTypeLabel', {
                 defaultMessage: 'Single query',
@@ -122,7 +121,6 @@ export const QueryPackSelectable = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <StyledEuiCard
-              data-test-subj={'run-packs-selectable'}
               layout="horizontal"
               title={i18n.translate('xpack.osquery.liveQuery.queryForm.packQueryTypeLabel', {
                 defaultMessage: 'Pack',

@@ -14,7 +14,7 @@ import {
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import { LIVE_QUERY_EDITOR, RUN_PACKS_SELECTABLE } from '../../screens/live_query';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { loadPack, cleanupPack, cleanupCase, loadCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -69,7 +69,7 @@ describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
 
   it('should run live pack', () => {
     cy.contains('New live query').click();
-    cy.getBySel(RUN_PACKS_SELECTABLE).click();
+    cy.contains('Run a set of queries in a pack.').click();
     cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
     cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
     cy.contains('This table contains 3 rows.');

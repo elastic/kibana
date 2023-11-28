@@ -35,7 +35,7 @@ import {
   interceptAgentPolicyId,
 } from '../../tasks/integrations';
 import { DEFAULT_POLICY, OSQUERY_POLICY } from '../../screens/fleet';
-import { LIVE_QUERY_EDITOR, RUN_PACKS_SELECTABLE } from '../../screens/live_query';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
@@ -161,7 +161,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       it('should be able to run live prebuilt pack', () => {
         navigateTo('/app/osquery/live_queries');
         cy.contains('New live query').click();
-        cy.getBySel(RUN_PACKS_SELECTABLE).click();
+        cy.contains('Run a set of queries in a pack.').click();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
         cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
         selectAllAgents();

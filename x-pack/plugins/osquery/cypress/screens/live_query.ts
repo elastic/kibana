@@ -16,7 +16,4 @@ export const RESULTS_TABLE = 'osqueryResultsTable';
 export const RESULTS_TABLE_BUTTON = 'dataGridFullScreenButton';
 export const RESULTS_TABLE_CELL_WRRAPER = 'EuiDataGridHeaderCellWrapper';
 
-export const RUN_QUERY_SELECTABLE = 'run-query-selectable';
-export const RUN_PACKS_SELECTABLE = 'run-packs-selectable';
-
 export const getIdFormField = () => cy.get('input[name="id"]');
