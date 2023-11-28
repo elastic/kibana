@@ -53,7 +53,7 @@ jest.mock('../utils/create_datastream', () => ({
   createDataStream: jest.fn(),
 }));
 
-jest.mock('../utils/create_index', () => ({
+jest.mock('../utils/create_or_update_index', () => ({
   createOrUpdateIndex: jest.fn(),
 }));
 

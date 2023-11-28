@@ -8,9 +8,9 @@
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
-import { createOrUpdateIndex } from '../utils/create_index';
+import { createOrUpdateIndex } from '../utils/create_or_update_index';
 
-jest.mock('../utils/create_index', () => ({
+jest.mock('../utils/create_or_update_index', () => ({
   createOrUpdateIndex: jest.fn(),
 }));
 

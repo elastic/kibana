@@ -28,7 +28,7 @@ import { getRiskScoreLatestIndex } from '../../../../common/risk_engine';
 import { getLatestTransformId, createTransform } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
-import { createOrUpdateIndex } from '../utils/create_index';
+import { createOrUpdateIndex } from '../utils/create_or_update_index';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;

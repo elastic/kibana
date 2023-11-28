@@ -20,7 +20,7 @@ import { RiskScoreDataClient } from './risk_score_data_client';
 import { createDataStream } from '../utils/create_datastream';
 
 import * as transforms from '../utils/transforms';
-import { createOrUpdateIndex } from '../utils/create_index';
+import { createOrUpdateIndex } from '../utils/create_or_update_index';
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
@@ -31,7 +31,7 @@ jest.mock('../utils/create_datastream', () => ({
   createDataStream: jest.fn(),
 }));
 
-jest.mock('../utils/create_index', () => ({
+jest.mock('../utils/create_or_update_index', () => ({
   createOrUpdateIndex: jest.fn(),
 }));
 
