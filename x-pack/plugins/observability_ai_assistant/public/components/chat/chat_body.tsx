@@ -171,7 +171,11 @@ export function ChatBody({
         </EuiFlexItem>
       </>
     );
-  } else if (connectors.loading || knowledgeBase.status.loading || conversation.loading) {
+  } else if (
+    connectors.loading ||
+    knowledgeBase.status.loading ||
+    (!conversation.value && conversation.loading)
+  ) {
     footer = (
       <EuiFlexItem className={loadingSpinnerContainerClassName}>
         <EuiLoadingSpinner />
@@ -316,7 +320,11 @@ export function ChatBody({
       <EuiFlexItem grow={false}>
         <ChatHeader
           connectors={connectors}
-          conversationId={initialConversationId}
+          conversationId={
+            conversation.value?.conversation && 'id' in conversation.value.conversation
+              ? conversation.value.conversation.id
+              : undefined
+          }
           connectorsManagementHref={connectorsManagementHref}
           modelsManagementHref={modelsManagementHref}
           knowledgeBase={knowledgeBase}
