@@ -17,7 +17,7 @@ import {
   createOrUpdatePreconfiguredOutputs,
   cleanPreconfiguredOutputs,
   getPreconfiguredOutputFromConfig,
-  hash,
+  hashSecret,
 } from './outputs';
 
 jest.mock('../agent_policy_update');
@@ -53,8 +53,8 @@ describe('output preconfiguration', () => {
     mockedOutputService.delete.mockReset();
     mockedOutputService.getDefaultDataOutputId.mockReset();
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
-    const keyHash = await hash('secretKey');
-    const passwordHash = await hash('secretPassword');
+    const keyHash = await hashSecret('secretKey');
+    const passwordHash = await hashSecret('secretPassword');
     mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
       return [
         {

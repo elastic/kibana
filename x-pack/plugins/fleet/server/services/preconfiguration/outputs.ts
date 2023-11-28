@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
-import argon2 from 'argon2';
+import crypto from 'crypto';
 
 import type {
   PreconfiguredOutput,
@@ -137,12 +137,23 @@ export async function createOrUpdatePreconfiguredOutputs(
   );
 }
 
-export async function hash(str: string) {
-  return argon2.hash(str, {
-    type: argon2.argon2id,
-    memoryCost: 19456,
-    timeCost: 2,
-    parallelism: 1,
+export async function hashSecret(secret: string) {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(16).toString('hex');
+    crypto.scrypt(secret, salt, 64, { p: 5 }, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(`${salt}:${derivedKey.toString('hex')}`);
+    });
+  });
+}
+
+async function verifySecret(hash: string, secret: string) {
+  return new Promise((resolve, reject) => {
+    const [salt, key] = hash.split(':');
+    crypto.scrypt(secret, salt, 64, { p: 5 }, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(key === derivedKey.toString('hex'));
+    });
   });
 }
 
@@ -150,13 +161,13 @@ async function hashSecrets(output: PreconfiguredOutput) {
   if (output.type === 'kafka') {
     const kafkaOutput = output as KafkaOutput;
     if (typeof kafkaOutput.secrets?.password === 'string') {
-      const password = await hash(kafkaOutput.secrets?.password);
+      const password = await hashSecret(kafkaOutput.secrets?.password);
       return {
         password,
       };
     }
     if (typeof kafkaOutput.secrets?.ssl?.key === 'string') {
-      const key = await hash(kafkaOutput.secrets?.ssl?.key);
+      const key = await hashSecret(kafkaOutput.secrets?.ssl?.key);
       return {
         ssl: {
           key,
@@ -168,7 +179,7 @@ async function hashSecrets(output: PreconfiguredOutput) {
     const logstashOutput = output as NewLogstashOutput;
 
     if (typeof logstashOutput.secrets?.ssl?.key === 'string') {
-      const key = await hash(logstashOutput.secrets?.ssl?.key);
+      const key = await hashSecret(logstashOutput.secrets?.ssl?.key);
       return {
         ssl: {
           key,
@@ -249,7 +260,7 @@ async function isSecretDifferent(
 
   if (hasHash(existingSecret) && typeof preconfiguredValue === 'string') {
     // verifying the has tells us if the value has changed
-    const hashIsVerified = await argon2.verify(existingSecret.hash, preconfiguredValue!);
+    const hashIsVerified = await verifySecret(existingSecret.hash, preconfiguredValue!);
 
     return !hashIsVerified;
   } else {
