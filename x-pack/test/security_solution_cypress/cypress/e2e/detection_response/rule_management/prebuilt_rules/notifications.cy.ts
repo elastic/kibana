@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   ADD_ELASTIC_RULES_BTN,
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
   RULES_UPDATES_TAB,
-} from '../../../screens/alerts_detection_rules';
-import { deleteFirstRule } from '../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../../tasks/api_calls/common';
+} from '../../../../screens/alerts_detection_rules';
+import { deleteFirstRule } from '../../../../tasks/alerts_detection_rules';
+import {
+  deleteAlertsAndRules,
+  deletePrebuiltRulesAssets,
+} from '../../../../tasks/api_calls/common';
 import {
   installAllPrebuiltRulesRequest,
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
-} from '../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState } from '../../../tasks/common';
-import { login } from '../../../tasks/login';
-import { visitRulesManagementTable } from '../../../tasks/rules_management';
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { resetRulesTableState } from '../../../../tasks/common';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
 const RULE_1 = createRuleAssetSavedObject({
   name: 'Test rule 1',

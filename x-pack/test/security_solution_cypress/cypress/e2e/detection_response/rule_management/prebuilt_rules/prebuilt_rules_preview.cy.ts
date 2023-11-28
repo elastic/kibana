@@ -12,22 +12,22 @@ import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 
-import { createRuleAssetSavedObject } from '../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   INSTALL_PREBUILT_RULE_BUTTON,
   INSTALL_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_BUTTON,
-} from '../../../screens/alerts_detection_rules';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../screens/breadcrumbs';
+} from '../../../../screens/alerts_detection_rules';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../screens/breadcrumbs';
 import {
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
-} from '../../../tasks/api_calls/prebuilt_rules';
-import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
-import { fetchMachineLearningModules } from '../../../tasks/api_calls/machine_learning';
-import { resetRulesTableState } from '../../../tasks/common';
-import { login } from '../../../tasks/login';
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
+import { fetchMachineLearningModules } from '../../../../tasks/api_calls/machine_learning';
+import { resetRulesTableState } from '../../../../tasks/common';
+import { login } from '../../../../tasks/login';
 import {
   assertRuleInstallationSuccessToastShown,
   assertRulesNotPresentInAddPrebuiltRulesTable,
@@ -36,7 +36,7 @@ import {
   assertRuleUpgradeSuccessToastShown,
   clickAddElasticRulesButton,
   clickRuleUpdatesTab,
-} from '../../../tasks/prebuilt_rules';
+} from '../../../../tasks/prebuilt_rules';
 import {
   assertAlertSuppressionPropertiesShown,
   assertCommonPropertiesShown,
@@ -55,13 +55,13 @@ import {
   closeRulePreview,
   openRuleInstallPreview,
   openRuleUpdatePreview,
-} from '../../../tasks/prebuilt_rules_preview';
-import { visitRulesManagementTable } from '../../../tasks/rules_management';
+} from '../../../../tasks/prebuilt_rules_preview';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   deleteAlertsAndRules,
   deleteDataView,
   postDataView,
-} from '../../../tasks/api_calls/common';
+} from '../../../../tasks/api_calls/common';
 
 const TEST_ENV_TAGS = ['@ess', '@serverless'];
 
