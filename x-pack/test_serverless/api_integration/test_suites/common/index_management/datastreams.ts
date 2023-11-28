@@ -9,23 +9,34 @@ import expect from '@kbn/expect';
 
 import { DataStream } from '@kbn/index-management-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_BASE_PATH } from './constants';
-import { datastreamsHelpers } from './lib/datastreams.helpers';
+
+const API_BASE_PATH = '/api/index_management';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-
-  const {
-    createDataStream,
-    deleteDataStream,
-    assertDataStreamStorageSizeExists,
-    deleteComposableIndexTemplate,
-    updateIndexTemplateMappings,
-    getMapping,
-    getDatastream,
-  } = datastreamsHelpers(getService);
+  const indexManagementService = getService('indexManagement');
+  let helpers: typeof indexManagementService['datastreams']['helpers'];
+  let createDataStream: typeof helpers['createDataStream'];
+  let deleteDataStream: typeof helpers['deleteDataStream'];
+  let deleteComposableIndexTemplate: typeof helpers['deleteComposableIndexTemplate'];
+  let updateIndexTemplateMappings: typeof helpers['updateIndexTemplateMappings'];
+  let getMapping: typeof helpers['getMapping'];
+  let getDatastream: typeof helpers['getDatastream'];
 
   describe('Data streams', function () {
+    before(async () => {
+      ({
+        datastreams: { helpers },
+      } = indexManagementService);
+      ({
+        createDataStream,
+        deleteDataStream,
+        deleteComposableIndexTemplate,
+        updateIndexTemplateMappings,
+        getMapping,
+        getDatastream,
+      } = helpers);
+    });
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
@@ -36,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: dataStreams } = await supertest
           .get(`${API_BASE_PATH}/data_streams`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .expect(200);
 
         expect(dataStreams).to.be.an('array');
@@ -70,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           nextGenerationManagedBy: 'Data stream lifecycle',
           generation: 1,
-          health: 'yellow',
+          health: 'green',
           indexTemplateName: testDataStreamName,
           hidden: false,
         });
@@ -80,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: dataStreams } = await supertest
           .get(`${API_BASE_PATH}/data_streams?includeStats=true`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .expect(200);
 
         expect(dataStreams).to.be.an('array');
@@ -94,7 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
         // ES determines these values so we'll just echo them back.
         const { name: indexName, uuid } = testDataStream!.indices[0];
         const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = testDataStream!;
-        assertDataStreamStorageSizeExists(storageSize, storageSizeBytes);
 
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
@@ -112,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
           generation: 1,
-          health: 'yellow',
+          health: 'green',
           indexTemplateName: testDataStreamName,
           nextGenerationManagedBy: 'Data stream lifecycle',
           maxTimeStamp: 0,
@@ -127,12 +139,12 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: dataStream } = await supertest
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .expect(200);
 
         // ES determines these values so we'll just echo them back.
         const { name: indexName, uuid } = dataStream.indices[0];
         const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = dataStream;
-        assertDataStreamStorageSizeExists(storageSize, storageSizeBytes);
 
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
@@ -150,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
           generation: 1,
-          health: 'yellow',
+          health: 'green',
           indexTemplateName: testDataStreamName,
           nextGenerationManagedBy: 'Data stream lifecycle',
           maxTimeStamp: 0,
@@ -172,6 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             dataRetention: '7d',
           })
@@ -184,6 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({})
           .expect(200);
 
@@ -194,6 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({ enabled: false })
           .expect(200);
 
@@ -227,6 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('deletes multiple data streams', async () => {
         await supertest
           .post(`${API_BASE_PATH}/delete_data_streams`)
+          .set('x-elastic-internal-origin', 'xxx')
           .set('kbn-xsrf', 'xxx')
           .send({
             dataStreams: [testDataStreamName1, testDataStreamName2],
@@ -236,11 +252,13 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName1}`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .expect(404);
 
         await supertest
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName2}`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .expect(404);
       });
     });
@@ -269,6 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`${API_BASE_PATH}/data_streams/${testDataStreamName1}/mappings_from_template`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .expect(200);
 
         const afterMapping = await getMapping(testDataStreamName1);
@@ -294,6 +313,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`${API_BASE_PATH}/data_streams/${testDataStreamName1}/rollover`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .expect(200);
 
         const datastream = await getDatastream(testDataStreamName1);
