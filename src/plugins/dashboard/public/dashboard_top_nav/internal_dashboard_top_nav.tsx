@@ -320,7 +320,7 @@ export function InternalDashboardTopNav({
         ])
       ).objects;
 
-      const hasNewReference = references.some(({ id }) => {
+      const hasUnsharedReference = references.some(({ id }) => {
         const shareableRef = shareableReferences.find(
           ({ id: refId }: { id: string }) => id === refId
         );
@@ -330,32 +330,22 @@ export function InternalDashboardTopNav({
         return namespaces.some((sharedSpace) => !shareableRef.spaces.includes(sharedSpace));
       });
 
-      if (!hasNewReference) {
-        // no unshared references added
+      // User cannot save when the changes include an unshared reference and the user is missing access to
+      // one of the shared spaces
+      const canSave = !(hasUnsharedReference && hasHiddenSpace);
+      if (canSave) {
         message = i18n.translate('dashboard.topNav.confirmSaveModal.shareableChangesDescription', {
           defaultMessage: `This dashboard is shared between {spacesCount} spaces. Any changes will also
             be reflected in those spaces. Clone the dashboard if you don't want the changes to be
             reflected in the rest of spaces.`,
           values: { spacesCount: namespaces.length },
         });
-      } else if (!hasHiddenSpace) {
-        // unshared shareable references added
-        message = i18n.translate(
-          'dashboard.topNav.confirmSaveModal.shareableReferenceDescription',
-          {
-            defaultMessage: `This dashboard is shared between {spacesCount} spaces, and the changes you are making involve sharing other 
-            saved objects too. You can choose to share them or you can clone the dashboard to keep your changes 
-            within the current space only.`,
-            values: { spacesCount: namespaces.length },
-          }
-        );
       } else {
-        // unshareable references added
         message = i18n.translate(
           'dashboard.topNav.confirmSaveModal.unshareableReferenceDescription',
           {
-            defaultMessage: `This dashboard is shared between {spacesCount} spaces, and some of your changes cannot be shared. 
-                    Please clone this dashboard to save your changes into the current space.`,
+            defaultMessage: `This dashboard is shared between {spacesCount} spaces, and some of your changes cannot 
+              be shared. Please clone this dashboard to save your changes into the current space.`,
             values: { spacesCount: namespaces.length },
           }
         );
@@ -371,7 +361,7 @@ export function InternalDashboardTopNav({
             message={message}
             title={modalTitle}
             spacesApi={spacesApi}
-            canSave={!(hasNewReference && hasHiddenSpace)}
+            canSave={canSave}
             namespaces={namespaces}
           />,
           {
