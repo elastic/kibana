@@ -63,7 +63,6 @@ export const anomalyParamsSchema = schema.object({
     schema.literal(ML_ANOMALY_SEVERITY.WARNING),
   ]),
   anomalyDetectorType: schema.oneOf([
-    schema.literal(ANOMALY_DETECTOR_TYPES.ALL),
     schema.literal(ANOMALY_DETECTOR_TYPES.LATENCY),
     schema.literal(ANOMALY_DETECTOR_TYPES.THROUGHPUT),
     schema.literal(ANOMALY_DETECTOR_TYPES.FAILED_TRANSACTION_RATE),
