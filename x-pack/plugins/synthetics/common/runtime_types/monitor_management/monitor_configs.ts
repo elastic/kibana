@@ -43,11 +43,6 @@ export enum MonacoEditorLangId {
   JAVASCRIPT = 'javascript',
 }
 
-export const MonacoEditorLangIdCodec = tEnum<MonacoEditorLangId>(
-  'MonacoEditorLangId',
-  MonacoEditorLangId
-);
-
 export enum CodeEditorMode {
   FORM = 'form',
   JSON = 'json',
@@ -63,8 +58,6 @@ export enum ContentType {
   XML = 'application/xml',
   FORM = 'application/x-www-form-urlencoded',
 }
-
-export const ContentTypeCodec = tEnum<ContentType>('ContentType', ContentType);
 
 export enum ScheduleUnit {
   MINUTES = 'm',

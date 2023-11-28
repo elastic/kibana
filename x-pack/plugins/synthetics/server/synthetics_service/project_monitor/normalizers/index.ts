@@ -14,7 +14,7 @@ import { NormalizedProjectProps } from './common_fields';
 
 export const normalizeProjectMonitor = (props: NormalizedProjectProps) => {
   const { monitor } = props;
-  const type = monitor.type as MonitorTypeEnum;
+  const type = monitor.type || MonitorTypeEnum.BROWSER;
 
   switch (type) {
     case MonitorTypeEnum.BROWSER:
