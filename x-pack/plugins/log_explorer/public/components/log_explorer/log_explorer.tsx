@@ -7,29 +7,18 @@
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
-import type { DiscoverAppState } from '@kbn/discover-plugin/public';
 import React, { useMemo } from 'react';
-import type { Observable } from 'rxjs';
 import type { LogExplorerController } from '../../controller';
 import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
-import type { LogExplorerControllerContext } from '../../state_machines/log_explorer_controller';
 import { LogExplorerStartDeps } from '../../types';
-import { LogExplorerCustomizations } from './types';
 
 export interface CreateLogExplorerArgs {
   core: CoreStart;
   plugins: LogExplorerStartDeps;
 }
 
-export interface LogExplorerStateContainer {
-  appState?: DiscoverAppState;
-  logExplorerState?: Partial<LogExplorerControllerContext>;
-}
-
 export interface LogExplorerProps {
-  customizations?: LogExplorerCustomizations;
   scopedHistory: ScopedHistory;
-  state$?: Observable<LogExplorerStateContainer>;
   controller: LogExplorerController;
 }
 
@@ -38,10 +27,10 @@ export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
     discover: { DiscoverContainer },
   } = plugins;
 
-  return ({ customizations = {}, scopedHistory, controller }: LogExplorerProps) => {
+  return ({ scopedHistory, controller }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ controller, core, customizations, plugins })],
-      [controller, customizations]
+      () => [createLogExplorerProfileCustomizations({ controller, core, plugins })],
+      [controller]
     );
 
     const { urlStateStorage, ...overrideServices } = controller.discoverServices;

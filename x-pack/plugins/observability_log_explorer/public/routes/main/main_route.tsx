@@ -14,7 +14,7 @@ import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
-import { createLogExplorerCustomizations } from '../../log_explorer_customizations';
+import { createLogExplorerControllerWithCustomizations } from '../../log_explorer_customizations';
 import {
   ObservabilityLogExplorerPageStateProvider,
   useObservabilityLogExplorerPageStateContext,
@@ -34,9 +34,14 @@ export const ObservablityLogExplorerMainRoute = () => {
 
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
+  const createLogExplorerController = useMemo(
+    () => createLogExplorerControllerWithCustomizations(logExplorer.createLogExplorerController),
+    [logExplorer.createLogExplorerController]
+  );
+
   return (
     <ObservabilityLogExplorerPageStateProvider
-      createLogExplorerController={logExplorer.createLogExplorerController}
+      createLogExplorerController={createLogExplorerController}
       toasts={notifications.toasts}
       urlStateStorageContainer={urlStateStorageContainer}
       timeFilterService={services.data.query.timefilter.timefilter}
@@ -97,15 +102,9 @@ const InitializedContent = React.memo(
     logExplorer: LogExplorerPluginStart;
     logExplorerController: LogExplorerController;
   }) => {
-    const customizations = useMemo(() => createLogExplorerCustomizations(), []);
-
     return (
       <ObservabilityLogExplorerPageTemplate>
-        <logExplorer.LogExplorer
-          controller={logExplorerController}
-          customizations={customizations}
-          scopedHistory={history}
-        />
+        <logExplorer.LogExplorer controller={logExplorerController} scopedHistory={history} />
       </ObservabilityLogExplorerPageTemplate>
     );
   }

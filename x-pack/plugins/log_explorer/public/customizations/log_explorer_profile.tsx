@@ -10,11 +10,8 @@ import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { type Observable } from 'rxjs';
 import { waitFor } from 'xstate/lib/waitFor';
-import { LogExplorerCustomizations, LogExplorerStateContainer } from '../components/log_explorer';
-import { LogExplorerController } from '../controller';
-import { LogExplorerCustomizationsProvider } from '../hooks/use_log_explorer_customizations';
+import { LogExplorerController, LogExplorerControllerProvider } from '../controller';
 import { LogExplorerStartDeps } from '../types';
 import { dynamic } from '../utils/dynamic';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
@@ -26,16 +23,13 @@ const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'))
 
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
-  customizations: LogExplorerCustomizations;
   plugins: LogExplorerStartDeps;
-  state$?: Observable<LogExplorerStateContainer>;
   controller: LogExplorerController;
 }
 
 export const createLogExplorerProfileCustomizations =
   ({
     core,
-    customizations: logExplorerCustomizations,
     plugins,
     controller,
   }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
@@ -124,9 +118,9 @@ export const createLogExplorerProfileCustomizations =
 
         return (
           <KibanaContextProviderForPlugin>
-            <LogExplorerCustomizationsProvider value={logExplorerCustomizations}>
+            <LogExplorerControllerProvider controller={controller}>
               <LazyCustomFlyoutContent {...props} dataView={internalState.dataView} />
-            </LogExplorerCustomizationsProvider>
+            </LogExplorerControllerProvider>
           </KibanaContextProviderForPlugin>
         );
       },

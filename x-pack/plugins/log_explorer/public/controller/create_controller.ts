@@ -22,6 +22,7 @@ import {
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
 import {
   LogExplorerController,
+  LogExplorerCustomizations,
   LogExplorerDiscoverServices,
   LogExplorerPublicStateUpdate,
 } from './types';
@@ -35,7 +36,13 @@ type InitialState = LogExplorerPublicStateUpdate;
 
 export const createLogExplorerControllerFactory =
   ({ core, plugins: { data } }: Dependencies) =>
-  ({ initialState }: { initialState?: InitialState }): LogExplorerController => {
+  ({
+    customizations,
+    initialState,
+  }: {
+    customizations: LogExplorerCustomizations;
+    initialState?: InitialState;
+  }): LogExplorerController => {
     const datasetsClient = new DatasetsService().start({
       http: core.http,
     }).client;
@@ -78,6 +85,7 @@ export const createLogExplorerControllerFactory =
 
     return {
       actions: {},
+      customizations,
       datasetsClient,
       discoverServices,
       event$: EMPTY,

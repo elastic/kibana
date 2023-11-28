@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
 import { FlyoutProps } from '../components/flyout_detail';
-import { useLogExplorerCustomizationsContext } from '../hooks/use_log_explorer_customizations';
+import { useLogExplorerControllerContext } from '../controller';
 
 export const CustomFlyoutContent = ({
   actions,
@@ -17,7 +17,9 @@ export const CustomFlyoutContent = ({
   doc,
   renderDefaultContent,
 }: FlyoutProps) => {
-  const { flyout } = useLogExplorerCustomizationsContext();
+  const {
+    customizations: { flyout },
+  } = useLogExplorerControllerContext();
 
   const renderPreviousContent = useCallback(
     () => (

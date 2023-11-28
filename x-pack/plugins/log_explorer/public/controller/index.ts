@@ -6,4 +6,5 @@
  */
 
 export * from './create_controller';
+export * from './provider';
 export * from './types';

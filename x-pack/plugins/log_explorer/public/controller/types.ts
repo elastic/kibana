@@ -7,6 +7,7 @@
 
 import { QueryState } from '@kbn/data-plugin/public';
 import { DiscoverContainerProps } from '@kbn/discover-plugin/public';
+import { DataTableRecord } from '@kbn/discover-utils/types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { Observable } from 'rxjs';
 import {
@@ -23,6 +24,7 @@ import {
 
 export interface LogExplorerController {
   actions: {};
+  customizations: LogExplorerCustomizations;
   datasetsClient: IDatasetsClient;
   discoverServices: LogExplorerDiscoverServices;
   event$: Observable<LogExplorerPublicEvent>;
@@ -30,6 +32,23 @@ export interface LogExplorerController {
   state$: Observable<LogExplorerPublicState>;
   stateMachine: LogExplorerControllerStateMachine;
 }
+
+export interface LogExplorerCustomizations {
+  flyout?: {
+    renderContent?: FlyoutRenderContent;
+  };
+}
+
+export type FlyoutRenderContent = (
+  renderPreviousContent: RenderPreviousContent<LogExplorerFlyoutContentProps>,
+  props: LogExplorerFlyoutContentProps
+) => React.ReactNode;
+
+export interface LogExplorerFlyoutContentProps {
+  doc: DataTableRecord;
+}
+
+export type RenderPreviousContent<Props> = (props: Props) => React.ReactNode;
 
 export type LogExplorerDiscoverServices = Pick<
   Required<DiscoverContainerProps['overrideServices']>,
