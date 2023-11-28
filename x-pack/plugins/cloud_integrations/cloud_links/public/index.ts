@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export type { CloudLinksDepsStart } from './plugin'
+export type { CloudLinksDepsStart } from './plugin';
 import { CloudLinksPlugin } from './plugin';
 
 export function plugin() {

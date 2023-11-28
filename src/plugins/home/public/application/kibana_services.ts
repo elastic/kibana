@@ -23,7 +23,7 @@ import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TutorialService } from '../services/tutorials';
 import { AddDataService } from '../services/add_data';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
@@ -54,11 +54,10 @@ export interface HomeKibanaServices {
   addDataService: AddDataService;
   welcomeService: WelcomeService;
   guidedOnboardingService?: GuidedOnboardingApi;
-  cloud?: CloudSetup;
+  cloud: CloudSetup;
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
-  cloudStart: CloudStart;
   shareStart: SharePluginStart;
 }
 

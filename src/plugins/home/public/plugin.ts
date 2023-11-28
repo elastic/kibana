@@ -84,13 +84,7 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          {
-            dataViews,
-            urlForwarding: urlForwardingStart,
-            guidedOnboarding,
-            cloudStart,
-            shareStart,
-          },
+          { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding, shareStart },
         ] = await core.getStartServices();
 
         setServices({
@@ -120,7 +114,6 @@ export class HomePublicPlugin
           openModal: coreStart.overlays.openModal,
           theme: core.theme,
           i18nStart: coreStart.i18n,
-          cloudStart,
           shareStart,
         });
         coreStart.chrome.docTitle.change(

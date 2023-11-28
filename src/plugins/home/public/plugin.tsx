@@ -37,7 +37,6 @@ import {
   WelcomeService,
   WelcomeServiceSetup,
 } from './services';
-import React from 'react';
 
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
@@ -85,11 +84,7 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          {
-            dataViews,
-            urlForwarding: urlForwardingStart,
-            guidedOnboarding,
-          },
+          { dataViews, shareStart, urlForwarding: urlForwardingStart, guidedOnboarding },
         ] = await core.getStartServices();
         setServices({
           share,
@@ -118,6 +113,7 @@ export class HomePublicPlugin
           openModal: coreStart.overlays.openModal,
           theme: core.theme,
           i18nStart: coreStart.i18n,
+          shareStart,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
@@ -171,9 +167,8 @@ export class HomePublicPlugin
 
   public start({ application: { capabilities } }: CoreStart) {
     this.featuresCatalogueRegistry.start({ capabilities });
-    const esEndpointModal = (<EndpointsModal />);
 
-    return { featureCatalogue: this.featuresCatalogueRegistry, esEndpointModal };
+    return { featureCatalogue: this.featuresCatalogueRegistry };
   }
 }
 
