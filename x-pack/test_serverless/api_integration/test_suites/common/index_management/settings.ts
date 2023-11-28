@@ -21,10 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       ({
         settings: {
-          api: {
-            getIndexSettings,
-            updateIndexSettings,
-          },
+          api: { getIndexSettings, updateIndexSettings },
         },
         indices: {
           helpers: { createIndex, deleteAllIndices },
@@ -122,6 +119,5 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: body2 } = await getIndexSettings(index);
       expect(body2.settings.index.number_of_replicas).to.be('2');
     });
-
   });
 }
