@@ -9,7 +9,11 @@ import { render, screen } from '@testing-library/react';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { BenchmarksTable } from './benchmarks_table';
 import { TestProvider } from '../../test/test_provider';
-import { getBenchmarkCisName, getBenchmarkApplicableTo, getBenchmarkPlurals } from '../../../common/utils/helpers';
+import {
+  getBenchmarkCisName,
+  getBenchmarkApplicableTo,
+  getBenchmarkPlurals,
+} from '../../../common/utils/helpers';
 
 describe('<BenchmarksTable />', () => {
   const tableProps = {
