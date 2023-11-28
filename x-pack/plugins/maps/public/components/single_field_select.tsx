@@ -106,7 +106,7 @@ export function SingleFieldSelect({
     }
   }
 
-  const options = fieldsToOptions(fields, isFieldDisabled);
+  const options = fieldsToOptions(fields, isFieldDisabled, getFieldDisabledReason);
 
   const panelMinWidth = calculateWidthFromCharCount(
     options.reduce((acc, curr) => (acc > curr.label.length ? acc : curr.label.length), 0)
