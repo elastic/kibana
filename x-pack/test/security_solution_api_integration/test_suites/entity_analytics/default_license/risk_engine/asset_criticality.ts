@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
         const statusResponse = await assetCriticalityRoutes.status();
 
         expect(statusResponse.body).to.eql({
-          asset_criticality_resources_installed: false,
+          asset_criticality_resources_installed: true,
         });
 
         const assetCriticalityIndexResult = await es.indices.get({
