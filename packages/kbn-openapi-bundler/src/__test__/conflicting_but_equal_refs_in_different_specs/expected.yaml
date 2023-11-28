@@ -1,7 +1,7 @@
 spec1.schema.yaml:
   openapi: 3.0.3
   info:
-    title: Test endpoint GET
+    title: Test endpoint
     version: '2023-10-31'
   paths:
     /api/some_api:
@@ -13,30 +13,28 @@ spec1.schema.yaml:
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    field1:
-                      type: integer
+                  $ref: './shared_components.schema.yaml#/components/schemas/ConflictTestSchema'
 
 spec2.schema.yaml:
   openapi: 3.0.3
   info:
-    title: Test endpoint POST
+    title: Another test endpoint
     version: '2023-10-31'
   paths:
-    /api/some_api:
-      post:
-        operationId: TestEndpointPost
+    /api/another_api:
+      put:
+        operationId: AnotherTestEndpointPut
         responses:
           '200':
             description: Successful response
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    field2:
-                      type: string
+                  $ref: './shared_components.schema.yaml#/components/schemas/ConflictTestSchema'
 
 shared_components.schema.yaml:
-  components: {}
+  components:
+    schemas:
+      ConflictTestSchema:
+        type: integer
+        minimum: 1

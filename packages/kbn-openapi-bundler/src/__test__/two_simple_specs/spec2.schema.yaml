@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: Test endpoint 1
+  title: Test endpoint POST
   version: '2023-10-31'
 paths:
   /api/some_api:
     post:
-      operationId: TestEndpoint1
+      operationId: TestEndpointPost
       responses:
         '200':
           description: Successful response

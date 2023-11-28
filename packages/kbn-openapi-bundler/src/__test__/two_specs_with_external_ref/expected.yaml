@@ -13,10 +13,7 @@ spec1.schema.yaml:
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    field1:
-                      type: integer
+                  $ref: './shared_components.schema.yaml#/components/schemas/TestSchema'
 
 spec2.schema.yaml:
   openapi: 3.0.3
@@ -33,10 +30,13 @@ spec2.schema.yaml:
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    field2:
-                      type: string
+                  $ref: './shared_components.schema.yaml#/components/schemas/TestSchema'
 
 shared_components.schema.yaml:
-  components: {}
+  components:
+    schemas:
+      TestSchema:
+        type: string
+        enum:
+          - value1
+          - value2

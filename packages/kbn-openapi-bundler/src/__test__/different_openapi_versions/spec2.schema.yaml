@@ -1,11 +1,11 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: Test endpoint GET
+  title: Test endpoint POST
   version: '2023-10-31'
 paths:
   /api/some_api:
-    get:
-      operationId: TestEndpointGet
+    post:
+      operationId: TestEndpointPost
       responses:
         '200':
           description: Successful response
@@ -14,5 +14,5 @@ paths:
               schema:
                 type: object
                 properties:
-                  field1:
-                    type: integer
+                  field2:
+                    type: string

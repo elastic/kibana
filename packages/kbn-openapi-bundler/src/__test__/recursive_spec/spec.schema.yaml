@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Test endpoint GET
+  title: Test endpoint
   version: '2023-10-31'
 paths:
   /api/some_api:
@@ -11,8 +11,13 @@ paths:
           description: Successful response
           content:
             application/json:
-              schema:
+              schema: &ref0
                 type: object
                 properties:
-                  field1:
-                    type: integer
+                  - name: field1
+                    required: false
+                    schema: *ref0
+                  - field2:
+                    required: false
+                    schema:
+                      type: string

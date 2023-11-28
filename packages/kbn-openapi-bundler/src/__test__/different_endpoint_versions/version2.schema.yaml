@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Test endpoint GET
-  version: '2023-10-31'
+  version: '2023-11-11'
 paths:
   /api/some_api:
     get:
@@ -16,3 +16,5 @@ paths:
                 properties:
                   field1:
                     type: integer
+                  field2:
+                    type: string

@@ -13,10 +13,7 @@ spec1.schema.yaml:
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    field1:
-                      type: integer
+                  $ref: './shared_components.schema.yaml#/components/schemas/CircularTestSchema'
 
 spec2.schema.yaml:
   openapi: 3.0.3
@@ -33,10 +30,21 @@ spec2.schema.yaml:
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    field2:
-                      type: string
+                  $ref: './shared_components.schema.yaml#/components/schemas/CircularTestSchema'
 
 shared_components.schema.yaml:
-  components: {}
+  components:
+    schemas:
+      CircularTestSchema:
+        type: string
+        data:
+          items:
+            $ref: '#/components/schemas/AnotherCircularTestSchema'
+
+      AnotherCircularTestSchema:
+        anyof:
+          - $ref: '#/components/schemas/CircularTestSchema'
+          - type: string
+            enum:
+              - value1
+              - value2

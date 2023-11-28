@@ -1,4 +1,4 @@
-spec1.schema.yaml:
+version1.schema.yaml:
   openapi: 3.0.3
   info:
     title: Test endpoint GET
@@ -18,15 +18,15 @@ spec1.schema.yaml:
                     field1:
                       type: integer
 
-spec2.schema.yaml:
+version2.schema.yaml:
   openapi: 3.0.3
   info:
-    title: Test endpoint POST
-    version: '2023-10-31'
+    title: Test endpoint GET
+    version: '2023-11-11'
   paths:
     /api/some_api:
-      post:
-        operationId: TestEndpointPost
+      get:
+        operationId: TestEndpointGet
         responses:
           '200':
             description: Successful response
@@ -35,6 +35,8 @@ spec2.schema.yaml:
                 schema:
                   type: object
                   properties:
+                    field1:
+                      type: integer
                     field2:
                       type: string
 
