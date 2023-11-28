@@ -54,7 +54,7 @@ describe('rule model versions', () => {
   };
 
   const rawRule = { name: 'test' } as RawRule;
-  const misMatchingRawRule = { enabled: true } as RawRule;
+  const mismatchingRawRule = { enabled: true } as RawRule;
 
   describe('getMinimumCompatibleVersion', () => {
     it('should return the minimum compatible version for the matching rawRule', () => {
@@ -64,8 +64,8 @@ describe('rule model versions', () => {
       expect(getMinimumCompatibleVersion(ruleModelVersions, 4, rawRule)).toBe(2);
     });
     it('should return the minimum compatible version for the mismatching rawRule', () => {
-      expect(getMinimumCompatibleVersion(ruleModelVersions, 3, misMatchingRawRule)).toBe(3);
-      expect(getMinimumCompatibleVersion(ruleModelVersions, 4, misMatchingRawRule)).toBe(4);
+      expect(getMinimumCompatibleVersion(ruleModelVersions, 3, mismatchingRawRule)).toBe(3);
+      expect(getMinimumCompatibleVersion(ruleModelVersions, 4, mismatchingRawRule)).toBe(4);
     });
   });
 
