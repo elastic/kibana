@@ -12,7 +12,6 @@ import {
   parseWarning,
   getInlineEditorText,
   getWrappedInPipesCode,
-  getIndicesForAutocomplete,
   extractESQLQueryToExecute,
   getIndicesList,
 } from './helpers';
