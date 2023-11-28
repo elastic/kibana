@@ -30,31 +30,17 @@ export interface FakeSAMLSessionParams {
   log: ToolingLog;
 }
 
-const envHosts: { [key: string]: string } = {
-  qa: 'console.qa.cld.elstc.co',
-  staging: 'staging.found.no',
-  production: 'api.elastic-cloud.com',
-};
-
 const getSessionCookie = (cookieString: string) => {
   return parseCookie(cookieString);
 };
 
 const getCloudHostName = () => {
-  const env = process.env.TEST_CLOUD_ENV;
-  if (!env) {
-    throw new Error(
-      'SAML Authentication requires TEST_CLOUD_ENV env variable to be set: qa, staging or production'
-    );
+  const hostname = process.env.TEST_CLOUD_HOST_NAME;
+  if (!hostname) {
+    throw new Error('SAML Authentication requires TEST_CLOUD_HOST_NAME env variable to be set');
   }
 
-  const host = envHosts[env.toLowerCase()];
-
-  if (host) {
-    return host;
-  } else {
-    throw new Error(`Unsupported Cloud environment: '${env}'`);
-  }
+  return hostname;
 };
 
 const getCloudUrl = (hostname: string, pathname: string) => {
