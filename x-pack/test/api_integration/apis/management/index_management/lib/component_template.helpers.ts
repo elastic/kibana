@@ -34,7 +34,10 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
       componentTemplatesCreated.push(componentTemplate.name);
     }
 
-    return es.cluster.putComponentTemplate(componentTemplate as ClusterPutComponentTemplateRequest, { meta: true });
+    return es.cluster.putComponentTemplate(
+      componentTemplate as ClusterPutComponentTemplateRequest,
+      { meta: true }
+    );
   };
 
   const addIndexTemplate = (indexTemplate: Template, shouldCacheTemplate: boolean) => {
