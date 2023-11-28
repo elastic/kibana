@@ -10,6 +10,7 @@ import {
   TransportResult,
   TransportRequestOptionsWithMeta,
   TransportRequestOptionsWithOutMeta,
+  TransportRequestParams,
 } from '@elastic/elasticsearch';
 import type {
   SearchRequest,
@@ -91,11 +92,70 @@ function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
 
   const wrappedClient = esClient.child({});
 
+  // Mutating the request function first so other wrapped functions use it
+  wrappedClient.transport.request = getWrappedTransportRequestFn({
+    esClient: wrappedClient,
+    ...rest,
+  });
+
   // Mutating the functions we want to wrap
   wrappedClient.search = getWrappedSearchFn({ esClient: wrappedClient, ...rest });
   wrappedClient.eql.search = getWrappedEqlSearchFn({ esClient: wrappedClient, ...rest });
 
   return wrappedClient;
+}
+
+function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
+  const originalRequestFn = opts.esClient.transport.request;
+
+  // A bunch of overloads to make TypeScript happy
+  async function request<TResponse = unknown>(
+    params: TransportRequestParams,
+    options?: TransportRequestOptionsWithOutMeta
+  ): Promise<TResponse>;
+  async function request<TResponse = unknown, TContext = unknown>(
+    params: TransportRequestParams,
+    options?: TransportRequestOptionsWithMeta
+  ): Promise<TransportResult<TResponse, TContext>>;
+  async function request<TResponse = unknown>(
+    params: TransportRequestParams,
+    options?: TransportRequestOptions
+  ): Promise<TResponse>;
+  async function request<TResponse = unknown, TContext = unknown>(
+    params: TransportRequestParams,
+    options?: TransportRequestOptions
+  ): Promise<TResponse | TransportResult<TResponse, TContext>> {
+    const requestOptions = options ?? {};
+
+    // Wrap ES|QL requests with an abort signal
+    if (params.method === 'POST' && params.path === '/_esql') {
+      const start = Date.now();
+      opts.logger.debug(
+        `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+          opts.rule.spaceId
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}`
+      );
+      const result = (await originalRequestFn.call(opts.esClient.transport, params, {
+        ...requestOptions,
+        signal: opts.abortController.signal,
+      })) as Promise<TResponse> | TransportResult<TResponse, TContext>;
+
+      const end = Date.now();
+      const durationMs = end - start;
+
+      opts.logMetricsFn({ esSearchDuration: 0, totalSearchDuration: durationMs });
+      return result;
+    }
+
+    // No wrap
+    return (await originalRequestFn.call(
+      opts.esClient.transport,
+      params,
+      requestOptions
+    )) as Promise<TResponse>;
+  }
+
+  return request;
 }
 
 function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
