@@ -254,7 +254,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     try {
       currentKeyPair = await this.getCurrentKeyPairObjWithRetry();
     } catch (e) {
-      throw new Error('Cannot read existing Message Signing Key pair');
+      throw new MessageSigningError('Cannot read existing Message Signing Key pair');
     }
 
     if (!currentKeyPair) {

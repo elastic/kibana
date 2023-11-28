@@ -55,6 +55,10 @@ interface UninstallTokenSOAggregation {
   by_policy_id: AggregationsMultiBucketAggregateBase<UninstallTokenSOAggregationBucket>;
 }
 
+export interface UninstallTokenInvalidError {
+  error: UninstallTokenError;
+}
+
 export interface UninstallTokenServiceInterface {
   /**
    * Get uninstall token based on its id.
@@ -140,14 +144,14 @@ export interface UninstallTokenServiceInterface {
    *
    * @param policyId policy Id to check
    */
-  checkTokenValidityForPolicy(policyId: string): Promise<void>;
+  checkTokenValidityForPolicy(policyId: string): Promise<UninstallTokenInvalidError[]>;
 
   /**
    * Check whether all policies have a valid uninstall token. Rejects returning promise if not.
    *
    * @param policyId policy Id to check
    */
-  checkTokenValidityForAllPolicies(): Promise<void>;
+  checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError[]>;
 }
 
 export class UninstallTokenService implements UninstallTokenServiceInterface {
@@ -489,13 +493,33 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return this._soClient;
   }
 
-  public async checkTokenValidityForPolicy(policyId: string): Promise<void> {
-    await this.getDecryptedTokensForPolicyIds([policyId]);
+  public async checkTokenValidityForPolicy(
+    policyId: string
+  ): Promise<UninstallTokenInvalidError[]> {
+    return await this.checkTokenValidity([policyId]);
   }
 
-  public async checkTokenValidityForAllPolicies(): Promise<void> {
+  public async checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError[]> {
     const policyIds = await this.getAllPolicyIds();
-    await this.getDecryptedTokensForPolicyIds(policyIds);
+    return await this.checkTokenValidity(policyIds);
+  }
+
+  private async checkTokenValidity(policyIds: string[]): Promise<UninstallTokenInvalidError[]> {
+    const errorResult: UninstallTokenInvalidError[] = [];
+
+    try {
+      await this.getDecryptedTokensForPolicyIds(policyIds);
+    } catch (error) {
+      if (error instanceof UninstallTokenError) {
+        // known errors are considered non-fatal
+        errorResult.push({ error });
+      } else {
+        // re-throw unknown errors
+        throw error;
+      }
+    }
+
+    return errorResult;
   }
 
   private get isEncryptionAvailable(): boolean {
