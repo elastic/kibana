@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RiskEnginePrivilegesResponse } from '../../../../server/lib/entity_analytics/risk_engine/types';
+import type { RiskEnginePrivilegesResponse } from '../../../../server/lib/entity_analytics/types';
 import { useRiskEnginePrivileges } from '../../api/hooks/use_risk_engine_privileges';
 import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
