@@ -10,12 +10,20 @@ import { indicesApi } from '../apis/management/index_management/lib/indices.api'
 import { mappingsApi } from '../apis/management/index_management/lib/mappings.api';
 import { indicesHelpers } from '../apis/management/index_management/lib/indices.helpers';
 import { settingsApi } from '../apis/management/index_management/lib/settings.api';
+import { clusterNodesApi } from '../apis/management/index_management/lib/cluster_nodes.api';
+import { datastreamsHelpers } from '../apis/management/index_management/lib/datastreams.helpers';
 
 export function IndexManagementProvider({ getService }: FtrProviderContext) {
   return {
     indices: {
       api: indicesApi(getService),
       helpers: indicesHelpers(getService),
+    },
+    clusterNodes: {
+      api: clusterNodesApi(getService),
+    },
+    datastreams: {
+      helpers: datastreamsHelpers(getService),
     },
     mappings: {
       api: mappingsApi(getService),
