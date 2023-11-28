@@ -44,12 +44,10 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="inputControlSubmitBtn"
           disabled={false}
           fill={true}
           onClick={[Function]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Apply changes"
@@ -137,12 +135,10 @@ exports[`Clear btns enabled when there are values 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="inputControlSubmitBtn"
           disabled={true}
           fill={true}
           onClick={[Function]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Apply changes"
@@ -230,12 +226,10 @@ exports[`Renders list control 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="inputControlSubmitBtn"
           disabled={true}
           fill={true}
           onClick={[Function]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Apply changes"
@@ -330,12 +324,10 @@ exports[`Renders range control 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="inputControlSubmitBtn"
           disabled={true}
           fill={true}
           onClick={[Function]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Apply changes"

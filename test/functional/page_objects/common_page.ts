@@ -33,6 +33,12 @@ export class CommonPageObject extends FtrService {
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
+  private getUrlWithoutPort(urlStr: string) {
+    const url = new URL(urlStr);
+    url.port = '';
+    return url.toString();
+  }
+
   /**
    * Logins to Kibana as default user and navigates to provided app
    * @param appUrl Kibana URL
@@ -121,8 +127,13 @@ export class CommonPageObject extends FtrService {
         throw new Error(msg);
       }
 
-      if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
-        throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+      if (ensureCurrentUrl) {
+        const actualUrl = this.getUrlWithoutPort(currentUrl);
+        const expectedUrl = this.getUrlWithoutPort(appUrl);
+
+        if (!actualUrl.includes(expectedUrl)) {
+          throw new Error(`expected ${actualUrl}.includes(${expectedUrl})`);
+        }
       }
     });
   }
@@ -376,6 +387,12 @@ export class CommonPageObject extends FtrService {
     this.log.debug('Clicking modal confirm');
     // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
     await this.testSubjects.exists('confirmModalTitleText');
+    // make sure button is enabled before clicking it
+    // (and conveniently give UI enough time to bind a handler to it)
+    const isEnabled = await this.testSubjects.isEnabled('confirmModalConfirmButton');
+    if (!isEnabled) {
+      throw new Error('Modal confirm button is not enabled');
+    }
     await this.testSubjects.click('confirmModalConfirmButton');
     if (ensureHidden) {
       await this.ensureModalOverlayHidden();

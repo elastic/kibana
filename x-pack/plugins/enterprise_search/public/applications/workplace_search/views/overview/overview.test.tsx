@@ -13,11 +13,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { WorkplaceSearchGatePage } from './gated_form_page';
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { Overview } from './overview';
 import { RecentActivity } from './recent_activity';
-import { WorkplaceSearchGatePage } from './workplace_search_gate_form';
 
 describe('Overview', () => {
   it('calls initialize function', async () => {

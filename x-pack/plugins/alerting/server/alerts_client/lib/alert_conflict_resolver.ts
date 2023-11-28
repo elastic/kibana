@@ -22,13 +22,12 @@ import {
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 
-import { set } from '@kbn/safer-lodash-set';
 import { zip, get } from 'lodash';
 
 // these fields are the one's we'll refresh from the fresh mget'd docs
 const REFRESH_FIELDS_ALWAYS = [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_TAGS, ALERT_CASE_IDS];
 const REFRESH_FIELDS_CONDITIONAL = [ALERT_STATUS];
-const REFRESH_FIELDS_ALL = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
+export const REFRESH_FIELDS_ALL = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
 
 export interface ResolveAlertConflictsParams {
   esClient: ElasticsearchClient;
@@ -147,7 +146,7 @@ async function refreshFieldsInDocs(
 
     for (const refreshField of REFRESH_FIELDS_ALWAYS) {
       const val = get(freshDoc, refreshField);
-      set(conflictDoc, refreshField, val);
+      conflictDoc[refreshField] = val;
     }
 
     // structured this way to make sure all conditional refresh
@@ -160,7 +159,7 @@ async function refreshFieldsInDocs(
           const freshStatus = get(freshDoc, ALERT_STATUS);
 
           if (freshStatus !== ALERT_STATUS_ACTIVE && freshStatus !== ALERT_STATUS_RECOVERED) {
-            set(conflictDoc, ALERT_STATUS, freshStatus);
+            conflictDoc[ALERT_STATUS] = freshStatus;
           }
           break;
       }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import {
   addLiveQueryToCase,
   checkActionItemsInResults,
@@ -18,6 +19,7 @@ describe('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
   before(() => {
+    initializeDataViews();
     loadLiveQuery({
       agent_all: true,
       query: "SELECT * FROM os_version where name='Ubuntu';",
@@ -31,7 +33,7 @@ describe('Add to Cases', () => {
   describe('observability', { tags: ['@ess'] }, () => {
     let caseId: string;
     let caseTitle: string;
-    before(() => {
+    beforeEach(() => {
       loadCase('observability').then((caseInfo) => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
@@ -40,7 +42,7 @@ describe('Add to Cases', () => {
       navigateTo('/app/osquery');
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupCase(caseId);
     });
 
@@ -63,7 +65,7 @@ describe('Add to Cases', () => {
     let caseId: string;
     let caseTitle: string;
 
-    before(() => {
+    beforeEach(() => {
       loadCase('securitySolution').then((caseInfo) => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
@@ -72,7 +74,7 @@ describe('Add to Cases', () => {
       navigateTo('/app/osquery');
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupCase(caseId);
     });
 

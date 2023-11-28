@@ -32,21 +32,21 @@ import {
   parseAlertsCountToInt,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
+// Iusse tracked in: https://github.com/elastic/kibana/issues/167809
 describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
-    cleanKibana();
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_big');
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   context('Opening alerts', () => {

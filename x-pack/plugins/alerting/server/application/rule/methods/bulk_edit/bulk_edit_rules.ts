@@ -8,7 +8,6 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
   SavedObjectsBulkUpdateObject,
@@ -25,7 +24,7 @@ import {
   convertRuleIdsToKueryNode,
 } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { parseDuration } from '../../../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
@@ -77,7 +76,7 @@ import {
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
-import { validateScheduleLimit } from '../get_schedule_frequency';
+import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -326,15 +325,16 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     .map((rule) => rule.attributes.schedule?.interval)
     .filter(isValidInterval);
 
-  try {
-    if (operations.some((operation) => operation.field === 'schedule')) {
-      await validateScheduleLimit({
-        context,
-        prevInterval,
-        updatedInterval,
-      });
-    }
-  } catch (error) {
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (operations.some((operation) => operation.field === 'schedule')) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      prevInterval,
+      updatedInterval,
+    });
+  }
+
+  if (validationPayload) {
     return {
       apiKeysToInvalidate: Array.from(apiKeysMap.values())
         .filter((value) => value.newApiKey)
@@ -342,7 +342,13 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
       resultSavedObjects: [],
       rules: [],
       errors: rules.map((rule) => ({
-        message: `Failed to bulk edit rule - ${error.message}`,
+        message: getRuleCircuitBreakerErrorMessage({
+          name: rule.attributes.name || 'n/a',
+          interval: validationPayload!.interval,
+          intervalAvailable: validationPayload!.intervalAvailable,
+          action: 'bulkEdit',
+          rules: updatedInterval.length,
+        }),
         rule: {
           id: rule.id,
           name: rule.attributes.name || 'n/a',
@@ -483,7 +489,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       context,
       operations,
       rule: ruleDomain,
-      ruleActions,
+      ruleActions: ruleActions as RuleDomain['actions'], // TODO (http-versioning) Remove this cast once we fix injectReferencesIntoActions
       ruleType,
     });
 
@@ -663,15 +669,6 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
         break;
       }
       case 'snoozeSchedule': {
-        // Silently skip adding snooze or snooze schedules on security
-        // rules until we implement snoozing of their rules
-        if (updatedRule.consumer === AlertConsumers.SIEM) {
-          // While the rule is technically not updated, we are still marking
-          // the rule as updated in case of snoozing, until support
-          // for snoozing is added.
-          isAttributesUpdateSkipped = false;
-          break;
-        }
         if (operation.operation === 'set') {
           const snoozeAttributes = getBulkSnooze<Params>(
             updatedRule,

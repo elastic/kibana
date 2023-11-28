@@ -11,6 +11,10 @@ import {
   BedrockSimulator,
   bedrockSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
+import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { PassThrough } from 'stream';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -159,7 +163,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring AWS Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: Error configuring Amazon Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -279,7 +283,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: AWS Bedrock. Connector type: .bedrock`,
+            service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: Amazon Bedrock. Connector type: .bedrock`,
           });
         });
       });
@@ -396,13 +400,50 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(simulator.requestData).to.eql({
               prompt:
                 '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
-              max_tokens_to_sample: 300,
+              max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+              temperature: 0.5,
               stop_sequences: ['\n\nHuman:'],
             });
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: bedrockSuccessResponse.completion,
+              data: { message: bedrockSuccessResponse.completion },
+            });
+          });
+
+          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
+            await new Promise<void>((resolve, reject) => {
+              const passThrough = new PassThrough();
+
+              supertest
+                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .on('error', reject)
+                .send({
+                  params: {
+                    subAction: 'invokeStream',
+                    subActionParams: {
+                      messages: [
+                        {
+                          role: 'user',
+                          content: 'Hello world',
+                        },
+                      ],
+                    },
+                  },
+                  assistantLangChain: false,
+                })
+                .pipe(passThrough);
+              const responseBuffer: Uint8Array[] = [];
+              passThrough.on('data', (chunk) => {
+                responseBuffer.push(chunk);
+              });
+
+              passThrough.on('end', () => {
+                const parsed = parseBedrockBuffer(responseBuffer);
+                expect(parsed).to.eql('Hello world, what a unique string!');
+                resolve();
+              });
             });
           });
         });
@@ -444,7 +485,79 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             retry: false,
           });
         });
+
+        it('should return an error when error happens', async () => {
+          const DEFAULT_BODY = {
+            prompt: `Hello world!`,
+            max_tokens_to_sample: 300,
+            stop_sequences: ['\n\nHuman:'],
+          };
+          const { body } = await supertest
+            .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                subAction: 'test',
+                subActionParams: {
+                  body: JSON.stringify(DEFAULT_BODY),
+                },
+              },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            status: 'error',
+            connector_id: bedrockActionId,
+            message: 'an error occurred while running the action',
+            retry: true,
+            service_message:
+              'Status code: 422. Message: API Error: Unprocessable Entity - Malformed input request: extraneous key [ooooo] is not permitted, please reformat your input and try again.',
+          });
+        });
       });
     });
   });
+}
+
+const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
+  let bedrockBuffer: Uint8Array = new Uint8Array(0);
+
+  return chunks
+    .map((chunk) => {
+      bedrockBuffer = concatChunks(bedrockBuffer, chunk);
+      let messageLength = getMessageLength(bedrockBuffer);
+      const buildChunks = [];
+      while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
+        const extractedChunk = bedrockBuffer.slice(0, messageLength);
+        buildChunks.push(extractedChunk);
+        bedrockBuffer = bedrockBuffer.slice(messageLength);
+        messageLength = getMessageLength(bedrockBuffer);
+      }
+
+      const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+
+      return buildChunks
+        .map((bChunk) => {
+          const event = awsDecoder.decode(bChunk);
+          const body = JSON.parse(
+            Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
+          );
+          return body.completion;
+        })
+        .join('');
+    })
+    .join('');
+};
+
+function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
+  const newBuffer = new Uint8Array(a.length + b.length);
+  newBuffer.set(a);
+  newBuffer.set(b, a.length);
+  return newBuffer;
+}
+
+function getMessageLength(buffer: Uint8Array): number {
+  if (buffer.byteLength === 0) return 0;
+  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  return view.getUint32(0, false);
 }

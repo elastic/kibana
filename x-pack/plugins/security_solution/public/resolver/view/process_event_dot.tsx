@@ -291,7 +291,9 @@ const UnstyledProcessEventDot = React.memo(
        */ false
     );
 
-    const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
+    const labelHTMLID = useMemo(() => {
+      return htmlIdGenerator('resolver')(`${nodeID}:label`);
+    }, [nodeID]);
 
     const isAriaCurrent = nodeID === ariaActiveDescendant;
     const isAriaSelected = nodeID === selectedNode;
@@ -351,6 +353,14 @@ const UnstyledProcessEventDot = React.memo(
       }
     }, [processEvent, nodeName]);
 
+    const flowToId = useMemo(() => {
+      return ariaFlowtoNodeID === null ? undefined : nodeHTMLID(ariaFlowtoNodeID);
+    }, [ariaFlowtoNodeID, nodeHTMLID]);
+
+    const generatedNodeHTMLID = useMemo(() => {
+      return nodeHTMLID(nodeID);
+    }, [nodeHTMLID, nodeID]);
+
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     return (
       <div
@@ -359,13 +369,13 @@ const UnstyledProcessEventDot = React.memo(
         className={`${className} kbn-resetFocusState`}
         role="treeitem"
         aria-level={ariaLevel === null ? undefined : ariaLevel}
-        aria-flowto={ariaFlowtoNodeID === null ? undefined : nodeHTMLID(ariaFlowtoNodeID)}
+        aria-flowto={flowToId}
         aria-labelledby={labelHTMLID}
         aria-haspopup="true"
         aria-current={isAriaCurrent ? 'true' : undefined}
         aria-selected={isAriaSelected ? 'true' : undefined}
         style={nodeViewportStyle}
-        id={nodeHTMLID(nodeID)}
+        id={generatedNodeHTMLID}
         tabIndex={-1}
       >
         <svg

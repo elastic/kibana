@@ -56,7 +56,9 @@ export const createRuleTypeMocks = () => {
       publicBaseUrl: 'http://localhost:5601/eyr',
       serverBasePath: '/eyr',
     } as IBasePath,
-    apmConfig: { searchAggregatedTransactions: true } as any as APMConfig,
+    apmConfig: {
+      searchAggregatedTransactions: true,
+    } as any as APMConfig,
     getApmIndices: async () => ({
       error: 'apm-*',
       transaction: 'apm-*',
@@ -95,6 +97,10 @@ export const createRuleTypeMocks = () => {
         },
         startedAt: new Date(),
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange: () => {
+          const date = new Date(Date.now()).toISOString();
+          return { dateStart: date, dateEnd: date };
+        },
       });
     },
   };

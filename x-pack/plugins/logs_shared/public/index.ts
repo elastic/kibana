@@ -37,6 +37,7 @@ export { useLogSummary, WithSummary } from './containers/logs/log_summary';
 export { useLogEntryFlyout } from './components/logging/log_entry_flyout';
 
 // Shared components
+export type { LogAIAssistantDocument } from './components/log_ai_assistant/log_ai_assistant';
 export type {
   LogEntryStreamItem,
   LogEntryColumnWidths,
@@ -46,8 +47,12 @@ export {
   useColumnWidths,
 } from './components/logging/log_text_stream/log_entry_column';
 export { LogEntryFlyout } from './components/logging/log_entry_flyout';
+export type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 export type { LogStreamProps } from './components/log_stream/log_stream';
 
+export const LogAIAssistant = dynamic(
+  () => import('./components/log_ai_assistant/log_ai_assistant')
+);
 export const LogStream = dynamic(() => import('./components/log_stream/log_stream'));
 export const LogColumnHeader = dynamic(
   () => import('./components/logging/log_text_stream/column_headers')

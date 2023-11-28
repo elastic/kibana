@@ -426,3 +426,18 @@ export const dataViewAdHoc = {
   }),
   isPersisted: () => false,
 } as DataView;
+
+export const dataViewWithDefaultColumnMock = buildDataViewMock({
+  name: 'data-view-with-user-default-column',
+  fields: [
+    ...fields,
+    {
+      name: 'default_column',
+      type: 'date',
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  ] as DataView['fields'],
+  timeFieldName: '@timestamp',
+});

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from './config';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -47,9 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
-        // Set timerange to specific values to match data and retrieve config
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-
         await retry.try(async () => {
           await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
           await testSubjects.existOrFail('superDatePickerendDatePopoverButton');

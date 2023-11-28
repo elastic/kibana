@@ -94,10 +94,10 @@ describe('maybeAddCloudLinks', () => {
             "title": "Give feedback",
           },
           Object {
-            "dataTestSubj": "endpointsHelpLink",
+            "dataTestSubj": "connectionDetailsHelpLink",
             "iconType": "console",
             "onClick": [Function],
-            "title": "Endpoints",
+            "title": "Connection details",
           },
         ],
       ]
@@ -168,10 +168,10 @@ describe('maybeAddCloudLinks', () => {
             "title": "Give feedback",
           },
           Object {
-            "dataTestSubj": "endpointsHelpLink",
+            "dataTestSubj": "connectionDetailsHelpLink",
             "iconType": "console",
             "onClick": [Function],
-            "title": "Endpoints",
+            "title": "Connection details",
           },
         ],
       ]

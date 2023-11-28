@@ -132,6 +132,7 @@ describe('updateRuleRoute', () => {
                 "params": Object {
                   "baz": true,
                 },
+                "useAlertDataForTemplate": undefined,
                 "uuid": "1234-5678",
               },
             ],

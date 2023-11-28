@@ -238,6 +238,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
+|{kib-repo}blob/{branch}/src/plugins/links/README.md[links]
+|This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
+
+
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual management section into it. This plugin does not contain any individual
@@ -474,10 +478,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat_provider/README.md[cloudChatProvider]
-|This plugin exists as a workaround for using cloudChat plugin in plugins which can't have a direct dependency on security plugin.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 
@@ -517,6 +517,10 @@ Plugin server-side only. Plugin has three main functions:
 
 |<<dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/dataset_quality/README.md[datasetQuality]
+|In order to make ongoing maintenance of log collection easy we want to introduce the concept of dataset quality, where users can easily get an overview on the datasets they have with information such as integration, size, last activity, among others.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
@@ -598,7 +602,7 @@ Index Management by running this series of requests in Console:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
-|Create an index with special characters and verify it renders correctly:
+|This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]

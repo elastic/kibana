@@ -37,7 +37,7 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
-import { BackButton } from './back_button';
+import { BackButton } from '../../shared/back_button';
 import { WindowsInstallStep } from '../../shared/windows_install_step';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
@@ -72,6 +72,7 @@ export function InstallElasticAgent() {
     await singleDatasetLocator!.navigate({
       integration,
       dataset: enforcedDatasetName,
+      origin: { id: 'application-log-onboarding' },
     });
   }
 
@@ -276,7 +277,7 @@ export function InstallElasticAgent() {
               'xpack.observability_onboarding.installElasticAgent.description',
               {
                 defaultMessage:
-                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipper is an Agent developed by Elastic.',
+                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipping tool is an agent developed by Elastic.',
               }
             )}
           </p>

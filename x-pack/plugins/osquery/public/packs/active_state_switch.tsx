@@ -96,6 +96,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
         checked={!!item.enabled}
         disabled={!permissions.writePacks || isLoading}
         showLabel={false}
+        aria-label={item.name}
         label=""
         onChange={handleToggleActiveClick}
       />

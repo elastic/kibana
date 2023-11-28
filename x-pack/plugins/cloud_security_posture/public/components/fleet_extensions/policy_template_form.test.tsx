@@ -547,7 +547,34 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
+  describe('K8S', () => {
+    it('K8S or KSPM Vanilla should not render any Setup Access option', () => {
+      const policy = getMockPolicyK8s();
+
+      const { queryByTestId } = render(<WrappedComponent newPolicy={policy} />);
+
+      expect(queryByTestId('assumeRoleTestId')).not.toBeInTheDocument();
+      expect(queryByTestId('directAccessKeyTestId')).not.toBeInTheDocument();
+      expect(queryByTestId('temporaryKeyTestId')).not.toBeInTheDocument();
+      expect(queryByTestId('sharedCredentialsTestId')).not.toBeInTheDocument();
+    });
+  });
+
   describe('EKS Credentials input fields', () => {
+    it(`documentation Hyperlink should have correct URL to redirect users to AWS page`, () => {
+      let policy = getMockPolicyEKS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
+        'aws.credentials.type': { value: 'assume_role' },
+        'aws.setup.format': { value: 'manual' },
+      });
+
+      const { getByText } = render(<WrappedComponent newPolicy={policy} />);
+
+      expect(getByText('documentation')).toHaveAttribute(
+        'href',
+        'https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html'
+      );
+    });
     it(`renders ${CLOUDBEAT_EKS} Assume Role fields`, () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
@@ -782,6 +809,55 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('AWS Organization')).toBeEnabled();
     });
 
+    it(`Getting started Hyperlink should have correct URL to redirect users to elastic page`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'assume_role' },
+        'aws.setup.format': { value: 'manual' },
+      });
+
+      const { getByText } = render(<WrappedComponent newPolicy={policy} />);
+
+      expect(getByText('Getting Started')).toHaveAttribute(
+        'href',
+        'https://ela.st/cspm-get-started'
+      );
+    });
+
+    it(`documentation Hyperlink should have correct URL to redirect users to elastic page if user chose Manual`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'assume_role' },
+        'aws.setup.format': { value: 'manual' },
+      });
+
+      const { getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAWS()} />
+      );
+
+      expect(getByTestId('externalLink')).toHaveAttribute(
+        'href',
+        'https://ela.st/cspm-get-started'
+      );
+    });
+
+    it(`documentation Hyperlink should have correct URL to redirect users to AWS page if user chose Cloudformation`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'cloud_formation' },
+        'aws.account_type': { value: 'single-account' },
+      });
+
+      const { getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAWS()} />
+      );
+
+      expect(getByTestId('externalLink')).toHaveAttribute(
+        'href',
+        'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
+      );
+    });
+
     it(`renders ${CLOUDBEAT_AWS} Assume Role fields`, () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
@@ -965,6 +1041,17 @@ describe('<CspPolicyTemplateForm />', () => {
       const policy = getMockPolicyVulnMgmtAWS();
 
       const packageInfo = getMockPackageInfoVulnMgmtAWS();
+      const { getByTestId } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={packageInfo} />
+      );
+
+      expect(getByTestId('additionalChargeCalloutTestSubj')).toBeInTheDocument();
+    });
+
+    it('Additional Charge Callout message should be rendered', () => {
+      const policy = getMockPolicyVulnMgmtAWS();
+
+      const packageInfo = getMockPackageInfoVulnMgmtAWS();
       render(<WrappedComponent newPolicy={policy} packageInfo={packageInfo} />);
 
       const expectedUpdatedPolicy = {
@@ -1008,6 +1095,20 @@ describe('<CspPolicyTemplateForm />', () => {
           'CIS GCP is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS GCP'
         )
       ).toBeInTheDocument();
+    });
+
+    it(`documentation Hyperlink should have correct URL to redirect users to elastic page`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        credentials_type: { value: 'credentials-file' },
+        setup_access: { value: 'manual' },
+      });
+
+      const { getByText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
+      );
+
+      expect(getByText('documentation')).toHaveAttribute('href', 'https://ela.st/cspm-get-started');
     });
 
     it(`renders Google Cloud Shell forms when Setup Access is set to Google Cloud Shell`, () => {
@@ -1210,7 +1311,7 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'arm_template' },
-        'azure.account_type': { value: 'single-account-azure' },
+        'azure.account_type': { value: 'single-account' },
       });
 
       const { getByText } = render(
@@ -1233,7 +1334,7 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'arm_template' },
-        'azure.account_type': { value: 'single-account-azure' },
+        'azure.account_type': { value: 'single-account' },
       });
 
       render(<WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure()} />);

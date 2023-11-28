@@ -17,6 +17,7 @@ import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { RecoveredActionGroupId } from '../common';
+import { AlertingConfig } from './config';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -30,6 +31,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockedLicenseState = licenseStateMock.create();
   ruleTypeRegistryParams = {
+    config: {} as AlertingConfig,
     logger,
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
@@ -63,6 +65,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -87,6 +90,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -125,6 +129,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -152,6 +157,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -181,6 +187,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
         validate: {
@@ -210,6 +217,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: '10s',
         validate: {
@@ -239,6 +247,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: '10s',
         validate: {
@@ -288,6 +297,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -319,6 +329,7 @@ describe('Create Lifecycle', () => {
             name: 'Back To Awesome',
           },
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           minimumLicenseRequired: 'basic',
           isExportable: true,
@@ -356,6 +367,7 @@ describe('Create Lifecycle', () => {
           defaultActionGroupId: 'default',
           ruleTaskTimeout: '13m',
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           minimumLicenseRequired: 'basic',
           isExportable: true,
@@ -399,6 +411,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -427,6 +440,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         ruleTaskTimeout: '20m',
         validate: {
@@ -458,6 +472,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -484,6 +499,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -503,6 +519,7 @@ describe('Create Lifecycle', () => {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           validate: {
             params: { validate: (params) => params },
@@ -526,6 +543,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         alerts: {
           context: 'test',
@@ -557,6 +575,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -564,6 +583,63 @@ describe('Create Lifecycle', () => {
       });
 
       expect(alertsService.register).not.toHaveBeenCalled();
+    });
+
+    test('registers rule with no overwrite on producer', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        ruleTaskTimeout: '20m',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(ruleType);
+      expect(registry.get('test').producer).toEqual('alerts');
+    });
+  });
+
+  describe('register() with overwriteProducer', () => {
+    test('registers rule and overwrite producer', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        ruleTaskTimeout: '20m',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry({
+        ...ruleTypeRegistryParams,
+        config: { rules: { overwriteProducer: 'observability' } } as unknown as AlertingConfig,
+      });
+      registry.register(ruleType);
+      expect(registry.get('test').producer).toEqual('observability');
     });
   });
 
@@ -583,6 +659,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -606,6 +683,7 @@ describe('Create Lifecycle', () => {
             "params": Array [],
             "state": Array [],
           },
+          "category": "test",
           "defaultActionGroupId": "default",
           "executor": [MockFunction],
           "id": "test",
@@ -659,6 +737,7 @@ describe('Create Lifecycle', () => {
         ruleTaskTimeout: '20m',
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -698,10 +777,12 @@ describe('Create Lifecycle', () => {
                 },
               },
             },
+            "category": "test",
             "defaultActionGroupId": "testActionGroup",
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
+            "fieldsForAAD": undefined,
             "hasAlertsMappings": true,
             "hasFieldsForAAD": false,
             "id": "test",
@@ -779,6 +860,7 @@ describe('Create Lifecycle', () => {
         ruleTaskTimeout: '20m',
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -805,6 +887,7 @@ describe('Create Lifecycle', () => {
         ],
         defaultActionGroupId: 'default',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         isExportable: true,
         minimumLicenseRequired: 'basic',
@@ -855,6 +938,7 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     async executor() {
       return { state: {} };
     },
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: { validate: (params) => params },

@@ -72,10 +72,10 @@ export const TestProvidersComponent: React.FC<Props> = ({
           <AssistantProvider
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={assistantAvailability}
-            assistantLangChain={false}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
             baseAllow={[]}
             baseAllowReplacement={[]}
+            basePath={'https://localhost:5601/kbn'}
             defaultAllow={[]}
             defaultAllowReplacement={[]}
             docLinks={{

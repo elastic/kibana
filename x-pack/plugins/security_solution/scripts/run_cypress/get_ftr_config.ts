@@ -6,11 +6,10 @@
  */
 
 import _ from 'lodash';
-import { SERVERLESS_NODES } from '@kbn/es';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CA_TRUSTED_FINGERPRINT } from '@kbn/dev-utils';
-import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
+import { getLocalhostRealIp } from '../endpoint/common/network_services';
 import type { parseTestFileConfig } from './utils';
 
 export const getFTRConfig = ({
@@ -90,15 +89,15 @@ export const getFTRConfig = ({
       vars.kbnTestServer.serverArgs = _.map(vars.kbnTestServer.serverArgs, (value) => {
         if (
           vars.servers.elasticsearch.protocol === 'https' &&
-          value.includes('--elasticsearch.hosts=http')
+          value.includes('--elasticsearch.hosts=http://')
         ) {
           return value.replace('http', 'https');
         }
 
         if (
           vars.servers.kibana.protocol === 'https' &&
-          (value.includes('--elasticsearch.hosts=http') ||
-            value.includes('--server.publicBaseUrl=http'))
+          (value.includes('--elasticsearch.hosts=http://') ||
+            value.includes('--server.publicBaseUrl=http://'))
         ) {
           return value.replace('http', 'https');
         }
@@ -135,14 +134,32 @@ export const getFTRConfig = ({
 
       if (hasFleetServerArgs) {
         if (vars.serverless) {
+          vars.esServerlessOptions = {
+            ...(vars.esServerlessOptions || {}),
+            // Bind ES docker container to the host network so that the Elastic agent running in the VM can connect to it
+            host: hostRealIp,
+          };
+
           vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:${fleetServerPort}"]`
+            `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
           );
           vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.elasticsearch.host=https://${SERVERLESS_NODES[0].name}:${esPort}`
-          );
-          vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.elasticsearch.ca_trusted_fingerprint=${CA_TRUSTED_FINGERPRINT}`
+            `--xpack.fleet.outputs=${JSON.stringify([
+              {
+                id: 'fleet-default-output',
+                name: 'default',
+                is_default: true,
+                is_default_monitoring: true,
+                type: 'elasticsearch',
+                ca_trusted_fingerprint: CA_TRUSTED_FINGERPRINT,
+                hosts: [`https://${hostRealIp}:${esPort}`],
+                config: {
+                  ssl: {
+                    verification_mode: 'none',
+                  },
+                },
+              },
+            ])}`
           );
         } else {
           vars.kbnTestServer.serverArgs.push(
@@ -152,26 +169,6 @@ export const getFTRConfig = ({
             `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
           );
         }
-      }
-
-      // Serverless Specific
-      if (vars.serverless) {
-        log.info(`Serverless mode detected`);
-
-        vars.kbnTestServer.serverArgs.push(
-          `--elasticsearch.hosts=https://localhost:${esPort}`,
-          `--server.publicBaseUrl=https://localhost:${kibanaPort}`
-        );
-        vars.esTestCluster.serverArgs.push(
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://host.docker.internal:${kibanaPort}`,
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://host.docker.internal:${kibanaPort}/logout`,
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://host.docker.internal:${kibanaPort}/api/security/saml/callback`
-        );
-      } else {
-        vars.kbnTestServer.serverArgs.push(
-          `--elasticsearch.hosts=http://localhost:${esPort}`,
-          `--server.publicBaseUrl=http://localhost:${kibanaPort}`
-        );
       }
 
       if (specFileFTRConfig?.productTypes) {

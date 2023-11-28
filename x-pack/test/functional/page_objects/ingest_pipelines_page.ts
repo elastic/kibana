@@ -100,5 +100,10 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     async closePipelineDetailsFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
     },
+
+    async increasePipelineListPageSize() {
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click(`tablePagination-50-rows`);
+    },
   };
 }

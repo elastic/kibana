@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
-import { isEmpty, find, pickBy } from 'lodash';
+import { isEmpty, find, pickBy, isNumber } from 'lodash';
 
 import {
   containsDynamicQuery,
@@ -26,7 +26,7 @@ import { usePacks } from '../../packs/use_packs';
 import { useCreateLiveQuery } from '../use_create_live_query_action';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { AgentSelection } from '../../agents/types';
-import { LiveQueryQueryField } from './live_query_query_field';
+import LiveQueryQueryField from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
@@ -39,6 +39,7 @@ export interface LiveQueryFormFields {
   savedQueryId?: string | null;
   ecs_mapping: ECSMapping;
   packId: string[];
+  timeout?: number;
   queryType: 'query' | 'pack';
 }
 
@@ -151,10 +152,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           alert_ids: values.alertIds,
           pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
+          timeout: values.timeout,
         },
-        (value) => !isEmpty(value)
+        (value) => !isEmpty(value) || isNumber(value)
       ) as unknown as LiveQueryFormFields;
-
       await mutateAsync(serializedData);
     },
     [alertAttachmentContext, mutateAsync, queryType]
@@ -221,6 +222,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.action_id ? (
         <ResultTabs
           actionId={singleQueryDetails?.action_id}
+          startDate={liveQueryDetails?.['@timestamp']}
           ecsMapping={serializedData.ecs_mapping}
           endDate={singleQueryDetails?.expiration}
           agentIds={singleQueryDetails?.agents}
@@ -231,6 +233,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.action_id,
       singleQueryDetails?.expiration,
       singleQueryDetails?.agents,
+      liveQueryDetails,
       serializedData.ecs_mapping,
       liveQueryActionId,
     ]

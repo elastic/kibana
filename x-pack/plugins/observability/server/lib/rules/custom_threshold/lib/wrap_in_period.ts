@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
-import { MetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 
 export const createLastPeriod = (
   lastPeriodEnd: number,
-  { timeUnit, timeSize }: MetricExpressionParams,
+  { timeUnit, timeSize }: CustomMetricExpressionParams,
   timeFieldName: string
 ) => {
   const start = moment(lastPeriodEnd).subtract(timeSize, timeUnit).toISOString();

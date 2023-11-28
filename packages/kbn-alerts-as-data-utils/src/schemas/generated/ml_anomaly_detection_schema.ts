@@ -25,19 +25,19 @@ export const IsoDateString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 export type IsoDateStringC = typeof IsoDateString;
-export const schemaDate = IsoDateString;
-export const schemaDateArray = rt.array(IsoDateString);
-export const schemaDateRange = rt.partial({
-  gte: schemaDate,
-  lte: schemaDate,
-});
-export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaUnknown = rt.unknown;
 export const schemaUnknownArray = rt.array(rt.unknown);
 export const schemaString = rt.string;
 export const schemaStringArray = rt.array(schemaString);
 export const schemaNumber = rt.number;
 export const schemaNumberArray = rt.array(schemaNumber);
+export const schemaDate = rt.union([IsoDateString, schemaNumber]);
+export const schemaDateArray = rt.array(schemaDate);
+export const schemaDateRange = rt.partial({
+  gte: schemaDate,
+  lte: schemaDate,
+});
+export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaStringOrNumber = rt.union([schemaString, schemaNumber]);
 export const schemaStringOrNumberArray = rt.array(schemaStringOrNumber);
 export const schemaBoolean = rt.boolean;
@@ -67,51 +67,43 @@ export const schemaGeoPoint = rt.union([
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const MlAnomalyDetectionAlertRequired = rt.type({
-  kibana: rt.type({
-    alert: rt.type({
-      job_id: schemaString,
-    }),
-  }),
+  'kibana.alert.job_id': schemaString,
 });
 const MlAnomalyDetectionAlertOptional = rt.partial({
-  kibana: rt.partial({
-    alert: rt.partial({
-      anomaly_score: schemaNumber,
-      anomaly_timestamp: schemaDate,
+  'kibana.alert.anomaly_score': schemaNumber,
+  'kibana.alert.anomaly_timestamp': schemaDate,
+  'kibana.alert.is_interim': schemaBoolean,
+  'kibana.alert.top_influencers': rt.array(
+    rt.partial({
+      influencer_field_name: schemaString,
+      influencer_field_value: schemaString,
+      influencer_score: schemaNumber,
+      initial_influencer_score: schemaNumber,
       is_interim: schemaBoolean,
-      top_influencers: rt.array(
-        rt.partial({
-          influencer_field_name: schemaString,
-          influencer_field_value: schemaString,
-          influencer_score: schemaNumber,
-          initial_influencer_score: schemaNumber,
-          is_interim: schemaBoolean,
-          job_id: schemaString,
-          timestamp: schemaDate,
-        })
-      ),
-      top_records: rt.array(
-        rt.partial({
-          actual: schemaNumber,
-          by_field_name: schemaString,
-          by_field_value: schemaString,
-          detector_index: schemaNumber,
-          field_name: schemaString,
-          function: schemaString,
-          initial_record_score: schemaNumber,
-          is_interim: schemaBoolean,
-          job_id: schemaString,
-          over_field_name: schemaString,
-          over_field_value: schemaString,
-          partition_field_name: schemaString,
-          partition_field_value: schemaString,
-          record_score: schemaNumber,
-          timestamp: schemaDate,
-          typical: schemaNumber,
-        })
-      ),
-    }),
-  }),
+      job_id: schemaString,
+      timestamp: schemaDate,
+    })
+  ),
+  'kibana.alert.top_records': rt.array(
+    rt.partial({
+      actual: schemaNumber,
+      by_field_name: schemaString,
+      by_field_value: schemaString,
+      detector_index: schemaNumber,
+      field_name: schemaString,
+      function: schemaString,
+      initial_record_score: schemaNumber,
+      is_interim: schemaBoolean,
+      job_id: schemaString,
+      over_field_name: schemaString,
+      over_field_value: schemaString,
+      partition_field_name: schemaString,
+      partition_field_value: schemaString,
+      record_score: schemaNumber,
+      timestamp: schemaDate,
+      typical: schemaNumber,
+    })
+  ),
 });
 
 // prettier-ignore

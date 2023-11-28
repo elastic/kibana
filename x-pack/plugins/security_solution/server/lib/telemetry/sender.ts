@@ -409,7 +409,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         counterType: 'docs_sent',
         incrementBy: events.length,
       });
-      tlog(this.logger, `Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+      tlog(this.logger, `Events sent!. Response: ${resp.status}`);
     } catch (err) {
       tlog(this.logger, `Error sending events: ${err}`);
       const errorStatus = err?.response?.status;

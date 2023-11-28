@@ -454,27 +454,36 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    recognizeIndex({ indexPatternTitle }: { indexPatternTitle: string }) {
+    recognizeIndex({
+      indexPatternTitle,
+      filter,
+    }: {
+      indexPatternTitle: string;
+      filter?: string[];
+    }) {
       return httpService.http<RecognizeResult[]>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/${indexPatternTitle}`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 
-    listDataRecognizerModules() {
+    listDataRecognizerModules(filter?: string[]) {
       return httpService.http<any>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/get_module`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 
-    getDataRecognizerModule({ moduleId }: { moduleId: string }) {
+    getDataRecognizerModule({ moduleId, filter }: { moduleId: string; filter?: string[] }) {
       return httpService.http<Module>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/${moduleId}`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 

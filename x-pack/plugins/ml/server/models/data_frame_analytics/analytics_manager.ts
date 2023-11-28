@@ -19,6 +19,7 @@ import {
   type MapElements,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { ModelService } from '../model_management/models_provider';
 import { modelsProvider } from '../model_management';
@@ -47,9 +48,10 @@ export class AnalyticsManager {
   constructor(
     private readonly _mlClient: MlClient,
     private readonly _client: IScopedClusterClient,
-    private readonly _enabledFeatures: MlFeatures
+    private readonly _enabledFeatures: MlFeatures,
+    cloud: CloudSetup
   ) {
-    this._modelsProvider = modelsProvider(this._client);
+    this._modelsProvider = modelsProvider(this._client, this._mlClient, cloud);
   }
 
   private async initData() {

@@ -6,25 +6,31 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  Suspense,
+  lazy,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+  memo,
+} from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiButtonIcon,
   EuiDataGridStyle,
   EuiSkeletonText,
   EuiDataGridRefProps,
+  EuiFlexGroup,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
+import styled from '@emotion/styled';
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
-import {
-  ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
-  ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
-} from './translations';
+import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
@@ -65,6 +71,62 @@ const isSystemCell = (columnId: string): columnId is SystemCellId => {
   return systemCells.includes(columnId as SystemCellId);
 };
 
+const Row = styled.div`
+  display: flex;
+  min-width: fit-content;
+`;
+
+type CustomGridBodyProps = Pick<
+  Parameters<Exclude<EuiDataGridProps['renderCustomGridBody'], undefined>>['0'],
+  'Cell' | 'visibleColumns'
+> & {
+  alertsData: FetchAlertData['oldAlertsData'];
+  isLoading: boolean;
+  pagination: RuleRegistrySearchRequestPagination;
+  actualGridStyle: EuiDataGridStyle;
+  stripes?: boolean;
+};
+
+const CustomGridBody = memo(
+  ({
+    alertsData,
+    isLoading,
+    pagination,
+    actualGridStyle,
+    visibleColumns,
+    Cell,
+    stripes,
+  }: CustomGridBodyProps) => {
+    return (
+      <>
+        {alertsData
+          .concat(isLoading ? Array.from({ length: pagination.pageSize - alertsData.length }) : [])
+          .map((_row, rowIndex) => (
+            <Row
+              role="row"
+              key={`${rowIndex},${pagination.pageIndex}`}
+              // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
+              // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
+              // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
+              // shouldHighlightRow is correct
+              className={`euiDataGridRow ${
+                stripes && rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
+              } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
+            >
+              {visibleColumns.map((_col, colIndex) => (
+                <Cell
+                  colIndex={colIndex}
+                  visibleRowIndex={rowIndex}
+                  key={`${rowIndex},${colIndex}`}
+                />
+              ))}
+            </Row>
+          ))}
+      </>
+    );
+  }
+);
+
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [activeRowClasses, setActiveRowClasses] = useState<
@@ -84,6 +146,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     refresh: alertsRefresh,
     getInspectQuery,
   } = alertsData;
+
   const queryClient = useQueryClient();
   const { data: cases, isLoading: isLoadingCases } = props.cases;
   const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
@@ -109,6 +172,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
     refresh: alertsRefresh,
+    featureIds: props.featureIds,
   });
 
   const refreshData = useCallback(() => {
@@ -208,12 +272,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   ])();
 
   const leadingControlColumns = useMemo(() => {
-    const isActionButtonsColumnActive =
-      props.showExpandToDetails || Boolean(renderCustomActionsRow);
-
     let controlColumns = [...props.leadingControlColumns];
 
-    if (isActionButtonsColumnActive) {
+    if (renderCustomActionsRow) {
       controlColumns = [
         {
           id: 'expandColumn',
@@ -230,38 +291,24 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               visibleRowIndex: number;
             };
 
+            if (!ecsAlertsData[visibleRowIndex]) {
+              return null;
+            }
+
             return (
               <EuiFlexGroup gutterSize="none" responsive={false}>
-                {props.showExpandToDetails && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
-                      <EuiButtonIcon
-                        size="s"
-                        iconType="expand"
-                        color="primary"
-                        onClick={() => {
-                          setFlyoutAlertIndex(visibleRowIndex);
-                        }}
-                        data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
-                        aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-                {renderCustomActionsRow &&
-                  ecsAlertsData[visibleRowIndex] &&
-                  renderCustomActionsRow({
-                    alert: alerts[visibleRowIndex],
-                    ecsAlert: ecsAlertsData[visibleRowIndex],
-                    nonEcsData: oldAlertsData[visibleRowIndex],
-                    rowIndex: visibleRowIndex,
-                    setFlyoutAlert: handleFlyoutAlert,
-                    id: props.id,
-                    cveProps,
-                    setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
-                    refresh,
-                    clearSelection,
-                  })}
+                {renderCustomActionsRow({
+                  alert: alerts[visibleRowIndex],
+                  ecsAlert: ecsAlertsData[visibleRowIndex],
+                  nonEcsData: oldAlertsData[visibleRowIndex],
+                  rowIndex: visibleRowIndex,
+                  setFlyoutAlert: handleFlyoutAlert,
+                  id: props.id,
+                  cveProps,
+                  setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
+                  refresh,
+                  clearSelection,
+                })}
               </EuiFlexGroup>
             );
           },
@@ -285,9 +332,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     isBulkActionsColumnActive,
     props.id,
     props.leadingControlColumns,
-    props.showExpandToDetails,
     renderCustomActionsRow,
-    setFlyoutAlertIndex,
     getSetIsActionLoadingCallback,
     refresh,
     clearSelection,
@@ -308,14 +353,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     if (shouldHighlightRowCheck) {
       mappedRowClasses = alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
         (rowClasses, alert, index) => {
-          if (props.gridStyle?.stripes && index % 2 !== 0) {
-            // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
-            // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
-            // Adding strips only on even rows. It will be replace by alertsTableHighlightedRow if
-            // shouldHighlightRow is correct
-            rowClasses[index + pagination.pageIndex * pagination.pageSize] =
-              'euiDataGridRow--striped';
-          }
           if (shouldHighlightRowCheck(alert)) {
             rowClasses[index + pagination.pageIndex * pagination.pageSize] =
               'alertsTableHighlightedRow';
@@ -327,13 +364,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       );
     }
     return mappedRowClasses;
-  }, [
-    props.shouldHighlightRow,
-    alerts,
-    pagination.pageIndex,
-    pagination.pageSize,
-    props.gridStyle,
-  ]);
+  }, [props.shouldHighlightRow, alerts, pagination.pageIndex, pagination.pageSize]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
@@ -359,7 +390,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         Object.entries(alert ?? {}).forEach(([key, value]) => {
           data.push({ field: key, value: value as string[] });
         });
-
         if (isSystemCell(_props.columnId)) {
           return (
             <SystemCellFactory
@@ -385,17 +415,27 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [
       alerts,
-      ecsAlertsData,
       cases,
-      maintenanceWindows,
+      ecsAlertsData,
       isLoading,
       isLoadingCases,
       isLoadingMaintenanceWindows,
+      maintenanceWindows,
       pagination.pageIndex,
       pagination.pageSize,
       renderCellValue,
       showAlertStatusWithFlapping,
     ]
+  );
+
+  const dataGridPagination = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: props.pageSizeOptions,
+      onChangeItemsPerPage: onChangePageSize,
+      onChangePage: onChangePageIndex,
+    }),
+    [onChangePageIndex, onChangePageSize, pagination, props.pageSizeOptions]
   );
 
   const { getCellActions, visibleCellActions, disabledCellActions } = props.alertsTableConfiguration
@@ -465,6 +505,23 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return mergedGridStyle;
   }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
 
+  const renderCustomGridBody = useCallback<
+    Exclude<EuiDataGridProps['renderCustomGridBody'], undefined>
+  >(
+    ({ visibleColumns: _visibleColumns, Cell }) => (
+      <CustomGridBody
+        visibleColumns={_visibleColumns}
+        Cell={Cell}
+        actualGridStyle={actualGridStyle}
+        alertsData={oldAlertsData}
+        pagination={pagination}
+        isLoading={isLoading}
+        stripes={props.gridStyle?.stripes}
+      />
+    ),
+    [actualGridStyle, oldAlertsData, pagination, isLoading, props.gridStyle?.stripes]
+  );
+
   return (
     <InspectButtonContainer>
       <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
@@ -495,15 +552,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             gridStyle={actualGridStyle}
             sorting={{ columns: sortingColumns, onSort }}
             toolbarVisibility={toolbarVisibility}
-            pagination={{
-              ...pagination,
-              pageSizeOptions: props.pageSizeOptions,
-              onChangeItemsPerPage: onChangePageSize,
-              onChangePage: onChangePageIndex,
-            }}
+            pagination={dataGridPagination}
             rowHeightsOptions={props.rowHeightsOptions}
             onColumnResize={onColumnResize}
             ref={dataGridRef}
+            renderCustomGridBody={props.dynamicRowHeight ? renderCustomGridBody : undefined}
           />
         )}
       </section>

@@ -7,22 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
-import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../common';
-import { UNGROUPED_FACTORY_KEY } from './utils';
-
-export const DOCUMENT_COUNT_I18N = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.documentCount',
-  {
-    defaultMessage: 'Document count',
-  }
-);
-
-export const CUSTOM_EQUATION_I18N = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.customEquation',
-  {
-    defaultMessage: 'Custom equation',
-  }
-);
+import { formatDurationFromTimeUnitChar } from '../../../../common';
+import { Evaluation } from './lib/evaluate_rule';
+import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
+import {
+  BELOW_TEXT,
+  ABOVE_TEXT,
+  BETWEEN_TEXT,
+  NOT_BETWEEN_TEXT,
+  CUSTOM_EQUATION_I18N,
+} from './translations';
+import { UNGROUPED_FACTORY_KEY } from './constants';
 
 const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;
@@ -32,31 +27,32 @@ const recoveredComparatorToI18n = (
   threshold: number[],
   currentValue: number
 ) => {
-  const belowText = i18n.translate(
-    'xpack.observability.customThreshold.rule.threshold.belowRecovery',
-    {
-      defaultMessage: 'below',
-    }
-  );
-  const aboveText = i18n.translate(
-    'xpack.observability.customThreshold.rule.threshold.aboveRecovery',
-    {
-      defaultMessage: 'above',
-    }
-  );
   switch (comparator) {
     case Comparator.BETWEEN:
-      return currentValue < threshold[0] ? belowText : aboveText;
+      return currentValue < threshold[0] ? BELOW_TEXT : ABOVE_TEXT;
     case Comparator.OUTSIDE_RANGE:
-      return i18n.translate('xpack.observability.customThreshold.rule.threshold.betweenRecovery', {
-        defaultMessage: 'between',
-      });
+      return BETWEEN_TEXT;
     case Comparator.GT:
     case Comparator.GT_OR_EQ:
-      return belowText;
+      return BELOW_TEXT;
     case Comparator.LT:
     case Comparator.LT_OR_EQ:
-      return aboveText;
+      return ABOVE_TEXT;
+  }
+};
+
+const alertComparatorToI18n = (comparator: Comparator) => {
+  switch (comparator) {
+    case Comparator.BETWEEN:
+      return BETWEEN_TEXT;
+    case Comparator.OUTSIDE_RANGE:
+      return NOT_BETWEEN_TEXT;
+    case Comparator.GT:
+    case Comparator.GT_OR_EQ:
+      return ABOVE_TEXT;
+    case Comparator.LT:
+    case Comparator.LT_OR_EQ:
+      return BELOW_TEXT;
   }
 };
 
@@ -70,41 +66,77 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
 
 const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? '' : ` for ${group}`);
 
-export const buildFiredAlertReason: (alertResult: {
-  group: string;
-  metric: string;
-  comparator: Comparator;
-  threshold: Array<number | string>;
-  currentValue: number | string;
-  timeSize: number;
-  timeUnit: TimeUnitChar;
-}) => string = ({ group, metric, comparator, threshold, currentValue, timeSize, timeUnit }) =>
+export const buildFiredAlertReason: (
+  alertResults: Array<Record<string, Evaluation>>,
+  group: string,
+  dataView: string
+) => string = (alertResults, group, dataView) => {
+  const aggregationReason =
+    alertResults
+      .map((result: any) => buildAggregationReason(formatAlertResult(result[group])))
+      .join('; ') + '.';
+  const sharedReason =
+    '(' +
+    [
+      i18n.translate('xpack.observability.customThreshold.rule.reason.forTheLast', {
+        defaultMessage: 'duration: {duration}',
+        values: {
+          duration: formatDurationFromTimeUnitChar(
+            alertResults[0][group].timeSize,
+            alertResults[0][group].timeUnit
+          ),
+        },
+      }),
+      i18n.translate('xpack.observability.customThreshold.rule.reason.dataView', {
+        defaultMessage: 'data view: {dataView}',
+        values: {
+          dataView,
+        },
+      }),
+      group !== UNGROUPED_FACTORY_KEY
+        ? i18n.translate('xpack.observability.customThreshold.rule.reason.group', {
+            defaultMessage: 'group: {group}',
+            values: {
+              group,
+            },
+          })
+        : null,
+    ]
+      .filter((item) => !!item)
+      .join(', ') +
+    ')';
+  return aggregationReason + ' ' + sharedReason;
+};
+
+const buildAggregationReason: (evaluation: FormattedEvaluation) => string = ({
+  label,
+  comparator,
+  threshold,
+  currentValue,
+}) =>
   i18n.translate('xpack.observability.customThreshold.rule.threshold.firedAlertReason', {
-    defaultMessage:
-      '{metric} is {currentValue} in the last {duration}{group}. Alert when {comparator} {threshold}.',
+    defaultMessage: '{label} is {currentValue}, {comparator} the threshold of {threshold}',
     values: {
-      group: formatGroup(group),
-      metric,
-      comparator,
+      label,
+      comparator: alertComparatorToI18n(comparator),
       threshold: thresholdToI18n(threshold),
       currentValue,
-      duration: formatDurationFromTimeUnitChar(timeSize, timeUnit),
     },
   });
 
 // Once recovered reason messages are re-enabled, checkout this issue https://github.com/elastic/kibana/issues/121272 regarding latest reason format
 export const buildRecoveredAlertReason: (alertResult: {
   group: string;
-  metric: string;
+  label?: string;
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ group, metric, comparator, threshold, currentValue }) =>
+}) => string = ({ group, label = CUSTOM_EQUATION_I18N, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.observability.customThreshold.rule.threshold.recoveredAlertReason', {
     defaultMessage:
-      '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
+      '{label} is now {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
-      metric,
+      label,
       comparator: recoveredComparatorToI18n(
         comparator,
         threshold.map(toNumber),
@@ -116,16 +148,16 @@ export const buildRecoveredAlertReason: (alertResult: {
     },
   });
 
-export const buildNoDataAlertReason: (alertResult: {
-  group: string;
-  metric: string;
-  timeSize: number;
-  timeUnit: string;
-}) => string = ({ group, metric, timeSize, timeUnit }) =>
+export const buildNoDataAlertReason: (alertResult: Evaluation & { group: string }) => string = ({
+  group,
+  label = CUSTOM_EQUATION_I18N,
+  timeSize,
+  timeUnit,
+}) =>
   i18n.translate('xpack.observability.customThreshold.rule.threshold.noDataAlertReason', {
-    defaultMessage: '{metric} reported no data in the last {interval}{group}',
+    defaultMessage: '{label} reported no data in the last {interval}{group}',
     values: {
-      metric,
+      label,
       interval: `${timeSize}${timeUnit}`,
       group: formatGroup(group),
     },
@@ -138,88 +170,3 @@ export const buildErrorAlertReason = (metric: string) =>
       metric,
     },
   });
-
-export const groupByKeysActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.groupByKeysActionVariableDescription',
-  {
-    defaultMessage: 'The object containing groups that are reporting data',
-  }
-);
-
-export const alertDetailUrlActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.alertDetailUrlActionVariableDescription',
-  {
-    defaultMessage:
-      'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
-  }
-);
-
-export const reasonActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.reasonActionVariableDescription',
-  {
-    defaultMessage: 'A concise description of the reason for the alert',
-  }
-);
-
-export const timestampActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.timestampDescription',
-  {
-    defaultMessage: 'A timestamp of when the alert was detected.',
-  }
-);
-
-export const valueActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.valueActionVariableDescription',
-  {
-    defaultMessage: 'List of the condition values.',
-  }
-);
-
-export const viewInAppUrlActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.viewInAppUrlActionVariableDescription',
-  {
-    defaultMessage: 'Link to the alert source',
-  }
-);
-
-export const cloudActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.cloudActionVariableDescription',
-  {
-    defaultMessage: 'The cloud object defined by ECS if available in the source.',
-  }
-);
-
-export const hostActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.hostActionVariableDescription',
-  {
-    defaultMessage: 'The host object defined by ECS if available in the source.',
-  }
-);
-
-export const containerActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.containerActionVariableDescription',
-  {
-    defaultMessage: 'The container object defined by ECS if available in the source.',
-  }
-);
-
-export const orchestratorActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.orchestratorActionVariableDescription',
-  {
-    defaultMessage: 'The orchestrator object defined by ECS if available in the source.',
-  }
-);
-
-export const labelsActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.labelsActionVariableDescription',
-  {
-    defaultMessage: 'List of labels associated with the entity where this alert triggered.',
-  }
-);
-
-export const tagsActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.tagsActionVariableDescription',
-  {
-    defaultMessage: 'List of tags associated with the entity where this alert triggered.',
-  }
-);

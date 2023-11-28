@@ -1,0 +1,139 @@
+{
+  "id": "@kbn/shared-ux-error-boundary",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.KibanaErrorBoundary",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaErrorBoundary",
+        "description": [
+          "\nImplementation of Kibana Error Boundary"
+        ],
+        "signature": [
+          "(props: ErrorBoundaryProps) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/error_boundary/src/ui/error_boundary.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.KibanaErrorBoundary.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- ErrorBoundaryProps"
+            ],
+            "signature": [
+              "ErrorBoundaryProps"
+            ],
+            "path": "packages/shared-ux/error_boundary/src/ui/error_boundary.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.KibanaErrorBoundaryProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaErrorBoundaryProvider",
+        "description": [
+          "\nProvider that uses dependencies to give context to the KibanaErrorBoundary component\nThis provider is aware if services were already created from a higher level of the component tree"
+        ],
+        "signature": [
+          "({ children, analytics, }: React.PropsWithChildren<",
+          "KibanaErrorBoundaryProviderDeps",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.KibanaErrorBoundaryProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  analytics,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "KibanaErrorBoundaryProviderDeps",
+              ">"
+            ],
+            "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.ThrowIfError",
+        "type": "Function",
+        "tags": [],
+        "label": "ThrowIfError",
+        "description": [
+          "\nThis component allows errors to be caught outside of a render tree, and re-thrown within a render tree\nwrapped by KibanaErrorBoundary. The purpose is to let KibanaErrorBoundary control the user experience when\nReact can not render due to an error.\n"
+        ],
+        "signature": [
+          "({ error }: React.PropsWithChildren<{ error: Error | null; }>) => null"
+        ],
+        "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.ThrowIfError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ error }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ error: Error | null; }>"
+            ],
+            "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

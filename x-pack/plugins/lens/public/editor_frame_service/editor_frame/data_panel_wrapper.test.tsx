@@ -9,9 +9,9 @@ import React from 'react';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { createMockFramePublicAPI, mockStoreDeps, mountWithProvider } from '../../mocks';
+import { createMockFramePublicAPI, mockStoreDeps, renderWithReduxStore } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
-import { selectTriggerApplyChanges } from '../../state_management';
+import { LensRootStore, selectTriggerApplyChanges } from '../../state_management';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -19,7 +19,8 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 describe('Data Panel Wrapper', () => {
   describe('Datasource data panel properties', () => {
     let datasourceDataPanelProps: DatasourceDataPanelProps;
-    let lensStore: Awaited<ReturnType<typeof mountWithProvider>>['lensStore'];
+    let store: LensRootStore;
+
     beforeEach(async () => {
       const DataPanelComponent = jest.fn().mockImplementation(() => <div />);
 
@@ -30,8 +31,7 @@ describe('Data Panel Wrapper', () => {
           getLayers: jest.fn(() => []),
         } as unknown as Datasource,
       };
-
-      const mountResult = await mountWithProvider(
+      const renderResult = renderWithReduxStore(
         <DataPanelWrapper
           datasourceMap={datasourceMap}
           visualizationMap={{} as VisualizationMap}
@@ -47,6 +47,7 @@ describe('Data Panel Wrapper', () => {
           indexPatternService={createIndexPatternServiceMock()}
           frame={createMockFramePublicAPI()}
         />,
+        {},
         {
           preloadedState: {
             activeDatasourceId: 'activeDatasource',
@@ -62,36 +63,46 @@ describe('Data Panel Wrapper', () => {
           storeDeps: mockStoreDeps({ datasourceMap }),
         }
       );
-
-      lensStore = mountResult.lensStore;
-
+      store = renderResult.store;
       datasourceDataPanelProps = DataPanelComponent.mock.calls[0][0] as DatasourceDataPanelProps;
     });
 
     describe('setState', () => {
       it('applies state immediately when option true', async () => {
-        lensStore.dispatch(disableAutoApply());
-        selectTriggerApplyChanges(lensStore.getState());
+        store.dispatch(disableAutoApply());
+        selectTriggerApplyChanges(store.getState());
 
         const newDatasourceState = { age: 'new' };
         datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
 
-        expect(lensStore.getState().lens.datasourceStates.activeDatasource.state).toEqual(
+        expect(store.getState().lens.datasourceStates.activeDatasource.state).toEqual(
           newDatasourceState
         );
-        expect(selectTriggerApplyChanges(lensStore.getState())).toBeTruthy();
+        expect(selectTriggerApplyChanges(store.getState())).toBeTruthy();
+      });
+      it('applies state immediately when option trueenz', async () => {
+        store.dispatch(disableAutoApply());
+        selectTriggerApplyChanges(store.getState());
+
+        const newDatasourceState = { age: 'new' };
+        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+
+        expect(store.getState().lens.datasourceStates.activeDatasource.state).toEqual(
+          newDatasourceState
+        );
+        expect(selectTriggerApplyChanges(store.getState())).toBeTruthy();
       });
 
       it('does not apply state immediately when option false', async () => {
-        lensStore.dispatch(disableAutoApply());
-        selectTriggerApplyChanges(lensStore.getState());
+        store.dispatch(disableAutoApply());
+        selectTriggerApplyChanges(store.getState());
 
         const newDatasourceState = { age: 'new' };
         datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: false });
 
-        const lensState = lensStore.getState().lens;
+        const lensState = store.getState().lens;
         expect(lensState.datasourceStates.activeDatasource.state).toEqual(newDatasourceState);
-        expect(selectTriggerApplyChanges(lensStore.getState())).toBeFalsy();
+        expect(selectTriggerApplyChanges(store.getState())).toBeFalsy();
       });
     });
   });

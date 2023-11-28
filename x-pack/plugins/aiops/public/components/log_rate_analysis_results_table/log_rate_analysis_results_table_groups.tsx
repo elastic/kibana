@@ -28,7 +28,7 @@ import {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
@@ -53,7 +53,7 @@ const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface LogRateAnalysisResultsTableProps {
-  significantTerms: SignificantTerm[];
+  significantItems: SignificantItem[];
   groupTableItems: GroupTableItem[];
   loading: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
@@ -66,7 +66,7 @@ interface LogRateAnalysisResultsTableProps {
 }
 
 export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTableProps> = ({
-  significantTerms,
+  significantItems,
   groupTableItems,
   loading,
   dataView,
@@ -98,9 +98,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     } else {
       itemIdToExpandedRowMapValues[item.id] = (
         <LogRateAnalysisResultsTable
-          significantTerms={item.groupItemsSortedByUniqueness.reduce<SignificantTerm[]>(
+          significantItems={item.groupItemsSortedByUniqueness.reduce<SignificantItem[]>(
             (p, groupItem) => {
-              const st = significantTerms.find(
+              const st = significantItems.find(
                 (d) => d.fieldName === groupItem.fieldName && d.fieldValue === groupItem.fieldValue
               );
 
@@ -139,7 +139,11 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
-          <span>Expand rows</span>
+          <span>
+            {i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.expandRowsLabel', {
+              defaultMessage: 'Expand rows',
+            })}
+          </span>
         </EuiScreenReaderOnly>
       ),
       render: (item: GroupTableItem) => (

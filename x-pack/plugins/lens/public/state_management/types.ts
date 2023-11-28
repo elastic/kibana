@@ -34,7 +34,12 @@ export interface DataViewsState {
   indexPatterns: Record<string, IndexPattern>;
 }
 
-export type DatasourceStates = Record<string, { isLoading: boolean; state: unknown }>;
+export interface DatasourceState {
+  isLoading: boolean;
+  state: unknown;
+}
+
+export type DatasourceStates = Record<string, DatasourceState>;
 export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;

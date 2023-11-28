@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
@@ -23,10 +24,16 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
+import type { MlClient } from '../../lib/ml_client';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
-export const modelsProvider = (client: IScopedClusterClient, cloud?: CloudSetup) =>
-  new ModelsProvider(client, cloud);
+
+export const modelsProvider = (
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  cloud: CloudSetup
+) => new ModelsProvider(client, mlClient, cloud);
 
 interface ModelMapResult {
   ingestPipelines: Map<string, Record<string, PipelineDefinition> | null>;
@@ -48,7 +55,11 @@ interface ModelMapResult {
 export class ModelsProvider {
   private _transforms?: TransformGetTransformTransformSummary[];
 
-  constructor(private _client: IScopedClusterClient, private _cloud?: CloudSetup) {}
+  constructor(
+    private _client: IScopedClusterClient,
+    private _mlClient: MlClient,
+    private _cloud: CloudSetup
+  ) {}
 
   private async initTransformData() {
     if (!this._transforms) {
@@ -83,6 +94,7 @@ export class ModelsProvider {
       return { [index]: null };
     }
   }
+
   private getNodeId(
     elementOriginalId: string,
     nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
@@ -446,18 +458,39 @@ export class ModelsProvider {
       }
     }
 
-    const result = Object.entries(ELASTIC_MODEL_DEFINITIONS).map(([name, def]) => {
+    const modelDefinitionMap = new Map<string, ModelDefinitionResponse[]>();
+
+    for (const [name, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
       const recommended =
         (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
         (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
-      return {
-        ...def,
-        name,
-        ...(recommended ? { recommended } : {}),
-      };
-    });
 
-    return result;
+      const { modelName } = def;
+
+      const modelDefinitionResponse = {
+        ...def,
+        ...(recommended ? { recommended } : {}),
+        name,
+      };
+
+      if (modelDefinitionMap.has(modelName)) {
+        modelDefinitionMap.get(modelName)!.push(modelDefinitionResponse);
+      } else {
+        modelDefinitionMap.set(modelName, [modelDefinitionResponse]);
+      }
+    }
+
+    // check if there is no recommended, so we mark default as recommended
+    for (const arr of modelDefinitionMap.values()) {
+      const defaultModel = arr.find((a) => a.default);
+      const recommendedModel = arr.find((a) => a.recommended);
+      if (defaultModel && !recommendedModel) {
+        delete defaultModel.default;
+        defaultModel.recommended = true;
+      }
+    }
+
+    return [...modelDefinitionMap.values()].flat();
   }
 
   /**
@@ -492,5 +525,42 @@ export class ModelsProvider {
     }
 
     return requestedModel || recommendedModel || defaultModel!;
+  }
+
+  /**
+   * Puts the requested ELSER model into elasticsearch, triggering elasticsearch to download the model.
+   * Assigns the model to the * space.
+   * @param modelId
+   * @param mlSavedObjectService
+   */
+  async installElasticModel(modelId: string, mlSavedObjectService: MLSavedObjectService) {
+    const availableModels = await this.getModelDownloads();
+    const model = availableModels.find((m) => m.name === modelId);
+    if (!model) {
+      throw Boom.notFound('Model not found');
+    }
+
+    let esModelExists = false;
+    try {
+      await this._client.asInternalUser.ml.getTrainedModels({ model_id: modelId });
+      esModelExists = true;
+    } catch (error) {
+      if (error.statusCode !== 404) {
+        throw error;
+      }
+      // model doesn't exist, ignore error
+    }
+
+    if (esModelExists) {
+      throw Boom.badRequest('Model already exists');
+    }
+
+    const putResponse = await this._mlClient.putTrainedModel({
+      model_id: model.name,
+      body: model.config,
+    });
+
+    await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
+    return putResponse;
   }
 }

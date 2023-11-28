@@ -8,12 +8,7 @@
 import type { Observable, Subject, Subscription } from 'rxjs';
 import { ReplaySubject, timer } from 'rxjs';
 import moment from 'moment';
-import { createHash } from 'crypto';
-import stringify from 'json-stable-stringify';
-
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { MaybePromise } from '@kbn/utility-types';
-import { isPromise } from '@kbn/std';
 import type {
   CoreSetup,
   Logger,
@@ -21,73 +16,17 @@ import type {
   PluginInitializerContext,
   IClusterClient,
 } from '@kbn/core/server';
-
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
-import type {
-  ILicense,
-  PublicLicense,
-  PublicFeatures,
-  LicenseType,
-  LicenseStatus,
-} from '../common/types';
+import type { ILicense } from '../common/types';
 import type { LicensingPluginSetup, LicensingPluginStart } from './types';
-import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
-
-import type { ElasticsearchError } from './types';
 import { registerRoutes } from './routes';
 import { FeatureUsageService } from './services';
-
 import type { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { getPluginStatus$ } from './plugin_status';
-
-function normalizeServerLicense(
-  license: estypes.XpackInfoMinimalLicenseInformation
-): PublicLicense {
-  return {
-    uid: license.uid,
-    type: license.type as LicenseType,
-    mode: license.mode as LicenseType,
-    expiryDateInMillis:
-      typeof license.expiry_date_in_millis === 'string'
-        ? parseInt(license.expiry_date_in_millis, 10)
-        : license.expiry_date_in_millis,
-    status: license.status as LicenseStatus,
-  };
-}
-
-function normalizeFeatures(rawFeatures: estypes.XpackInfoFeatures) {
-  const features: PublicFeatures = {};
-  for (const [name, feature] of Object.entries(rawFeatures)) {
-    features[name] = {
-      isAvailable: feature.available,
-      isEnabled: feature.enabled,
-    };
-  }
-  return features;
-}
-
-function sign({
-  license,
-  features,
-  error,
-}: {
-  license?: PublicLicense;
-  features?: PublicFeatures;
-  error?: string;
-}) {
-  return createHash('sha256')
-    .update(
-      stringify({
-        license,
-        features,
-        error,
-      })
-    )
-    .digest('hex');
-}
+import { getLicenseFetcher } from './license_fetcher';
 
 /**
  * @public
@@ -153,9 +92,16 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     this.logger.debug(`Polling Elasticsearch License API with frequency ${pollingFrequency}ms.`);
 
     const intervalRefresh$ = timer(0, pollingFrequency);
+    const licenseFetcher = getLicenseFetcher({
+      clusterClient,
+      logger: this.logger,
+      cacheDurationMs: this.config.license_cache_duration.asMilliseconds(),
+    });
 
-    const { license$, refreshManually } = createLicenseUpdate(intervalRefresh$, this.stop$, () =>
-      this.fetchLicense(clusterClient)
+    const { license$, refreshManually } = createLicenseUpdate(
+      intervalRefresh$,
+      this.stop$,
+      licenseFetcher
     );
 
     this.loggingSubscription = license$.subscribe((license) =>
@@ -176,50 +122,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       },
       license$,
     };
-  }
-
-  private fetchLicense = async (clusterClient: MaybePromise<IClusterClient>): Promise<ILicense> => {
-    const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
-    try {
-      const response = await client.asInternalUser.xpack.info();
-      const normalizedLicense =
-        response.license && response.license.type !== 'missing'
-          ? normalizeServerLicense(response.license)
-          : undefined;
-      const normalizedFeatures = response.features
-        ? normalizeFeatures(response.features)
-        : undefined;
-
-      const signature = sign({
-        license: normalizedLicense,
-        features: normalizedFeatures,
-        error: '',
-      });
-
-      return new License({
-        license: normalizedLicense,
-        features: normalizedFeatures,
-        signature,
-      });
-    } catch (error) {
-      this.logger.warn(
-        `License information could not be obtained from Elasticsearch due to ${error} error`
-      );
-      const errorMessage = this.getErrorMessage(error);
-      const signature = sign({ error: errorMessage });
-
-      return new License({
-        error: this.getErrorMessage(error),
-        signature,
-      });
-    }
-  };
-
-  private getErrorMessage(error: ElasticsearchError): string {
-    if (error.status === 400) {
-      return 'X-Pack plugin is not installed on the Elasticsearch cluster.';
-    }
-    return error.message;
   }
 
   public start() {

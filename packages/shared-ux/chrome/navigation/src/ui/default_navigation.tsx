@@ -6,34 +6,52 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
+import type { NodeDefinition } from '@kbn/core-chrome-browser';
 
 import { Navigation } from './components';
 import type {
   GroupDefinition,
-  NavigationGroupPreset,
+  PresetDefinition,
   NavigationTreeDefinition,
   ProjectNavigationDefinition,
   ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
+  RecentlyAccessedDefinition,
 } from './types';
 import { RecentlyAccessed } from './components/recently_accessed';
 import { NavigationFooter } from './components/navigation_footer';
 import { getPresets } from './nav_tree_presets';
+import type { ContentProvider } from './components/panel';
 
-type NodeDefinitionWithPreset = NodeDefinition<AppDeepLinkId, string> & {
-  preset?: NavigationGroupPreset;
+const isPresetDefinition = (
+  item: RootNavigationItemDefinition | NodeDefinition
+): item is PresetDefinition => {
+  return (item as PresetDefinition).preset !== undefined;
 };
 
-const isRootNavigationItemDefinition = (
-  item: RootNavigationItemDefinition | NodeDefinitionWithPreset
-): item is RootNavigationItemDefinition => {
-  // Only RootNavigationItemDefinition has a "type" property
-  return (item as RootNavigationItemDefinition).type !== undefined;
+const isGroupDefinition = (
+  item: RootNavigationItemDefinition | NodeDefinition
+): item is GroupDefinition => {
+  return (
+    (item as GroupDefinition).type === 'navGroup' || (item as NodeDefinition).children !== undefined
+  );
 };
 
+const isRecentlyAccessedDefinition = (
+  item: RootNavigationItemDefinition | NodeDefinition
+): item is RecentlyAccessedDefinition => {
+  return (item as RootNavigationItemDefinition).type === 'recentlyAccessed';
+};
+
+/**
+ * Handler to build a full navigation tree definition from a project definition
+ * It adds all the defaults and presets (recently accessed, footer content...)
+ *
+ * @param projectDefinition The project definition
+ * @returns The full navigation tree definition
+ */
 const getDefaultNavigationTree = (
   projectDefinition: ProjectNavigationTreeDefinition
 ): NavigationTreeDefinition => {
@@ -42,7 +60,13 @@ const getDefaultNavigationTree = (
       {
         type: 'recentlyAccessed',
       },
-      ...projectDefinition.map((def) => ({ ...def, type: 'navGroup' as const })),
+      ...projectDefinition.map((def) => {
+        if ((def as GroupDefinition).children) {
+          return { children: [], ...def, type: 'navGroup' as const };
+        } else {
+          return { ...def, type: 'navItem' as const };
+        }
+      }),
       {
         type: 'navGroup',
         ...getPresets('analytics'),
@@ -54,7 +78,7 @@ const getDefaultNavigationTree = (
     ],
     footer: [
       {
-        type: 'navGroup',
+        type: 'navItem',
         id: 'devTools',
         title: i18n.translate('sharedUXPackages.chrome.sideNavigation.devTools', {
           defaultMessage: 'Developer tools',
@@ -91,64 +115,62 @@ const getDefaultNavigationTree = (
   };
 };
 
-let idCounter = 0;
+interface Props {
+  dataTestSubj?: string;
+  panelContentProvider?: ContentProvider;
+}
 
-export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?: string }> = ({
+const DefaultNavigationComp: FC<ProjectNavigationDefinition & Props> = ({
   projectNavigationTree,
   navigationTree,
   dataTestSubj,
+  panelContentProvider,
 }) => {
   if (!navigationTree && !projectNavigationTree) {
     throw new Error('One of navigationTree or projectNavigationTree must be defined');
   }
 
-  const navigationDefinition = !navigationTree
-    ? getDefaultNavigationTree(projectNavigationTree!)
-    : navigationTree!;
-
-  const renderItems = useCallback(
-    (
-      items: RootNavigationItemDefinition[] | NodeDefinitionWithPreset[] = [],
-      path: string[] = []
-    ) => {
-      return items.map((item) => {
-        const isRootNavigationItem = isRootNavigationItemDefinition(item);
-        if (isRootNavigationItem && item.type === 'recentlyAccessed') {
-          return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
+  const renderNodes = useCallback(
+    (nodes: Array<RootNavigationItemDefinition | NodeDefinition> = []) => {
+      return nodes.map((navNode, i) => {
+        if (isPresetDefinition(navNode)) {
+          return <Navigation.Group preset={navNode.preset} key={`${navNode.preset}-${i}`} />;
         }
 
-        if (item.preset) {
-          return <Navigation.Group preset={item.preset} key={item.preset} />;
+        if (isRecentlyAccessedDefinition(navNode)) {
+          return <RecentlyAccessed {...navNode} key={`recentlyAccessed-${i}`} />;
         }
 
-        const id = item.id ?? item.link;
-
-        if (!id) {
-          throw new Error(
-            `At least one of id or link must be defined for navigation item ${item.title}`
+        if (isGroupDefinition(navNode)) {
+          // Recursively build the tree
+          return (
+            <Navigation.Group {...navNode} key={navNode.id ?? i}>
+              {renderNodes(navNode.children)}
+            </Navigation.Group>
           );
         }
 
-        return item.children || (item as GroupDefinition).type === 'navGroup' ? (
-          <Navigation.Group {...item} key={id}>
-            {renderItems(item.children, [...path, id])}
-          </Navigation.Group>
-        ) : (
-          <Navigation.Item {...item} key={id} />
-        );
+        return <Navigation.Item {...navNode} key={navNode.id ?? i} />;
       });
     },
     []
   );
 
+  const definitionToJSX = useMemo(() => {
+    const definition = !navigationTree
+      ? getDefaultNavigationTree(projectNavigationTree!)
+      : navigationTree;
+
+    const { body, footer } = definition;
+    return { body: renderNodes(body), footer: Boolean(footer) ? renderNodes(footer) : null };
+  }, [navigationTree, projectNavigationTree, renderNodes]);
+
   return (
-    <Navigation dataTestSubj={dataTestSubj}>
-      <>
-        {renderItems(navigationDefinition.body)}
-        {navigationDefinition.footer && (
-          <NavigationFooter>{renderItems(navigationDefinition.footer)}</NavigationFooter>
-        )}
-      </>
+    <Navigation dataTestSubj={dataTestSubj} panelContentProvider={panelContentProvider}>
+      {definitionToJSX.body}
+      {definitionToJSX.footer && <NavigationFooter>{definitionToJSX.footer}</NavigationFooter>}
     </Navigation>
   );
 };
+
+export const DefaultNavigation = React.memo(DefaultNavigationComp) as typeof DefaultNavigationComp;

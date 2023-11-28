@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { filter, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
+import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
@@ -17,7 +17,7 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
-import { ACTIONS_INDEX } from '../../../common/constants';
+import { ACTIONS_INDEX, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
@@ -100,9 +100,10 @@ export const createActionHandler = async (
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
               platform: packQuery.platform,
+              timeout: packQuery.timeout,
               agents: selectedAgents,
             },
-            (value) => !isEmpty(value)
+            (value) => !isEmpty(value) || isNumber(value)
           );
         })
       : await createDynamicQueries({
@@ -125,6 +126,7 @@ export const createActionHandler = async (
           input_type: 'osquery',
           agents: query.agents,
           user_id: metadata?.currentUser,
+          ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
         })
       )

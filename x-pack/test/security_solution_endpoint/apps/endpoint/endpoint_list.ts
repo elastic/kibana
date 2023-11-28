@@ -14,6 +14,7 @@ import {
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataUnitedIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
@@ -85,6 +86,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('endpoint list', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
       before(async () => {
@@ -114,7 +117,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.endpoint.navigateToEndpointList();
       });
 
-      describe('when there is data,', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/170357
+      describe.skip('when there is data,', () => {
         before(async () => {
           indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
           await pageObjects.endpoint.navigateToEndpointList();

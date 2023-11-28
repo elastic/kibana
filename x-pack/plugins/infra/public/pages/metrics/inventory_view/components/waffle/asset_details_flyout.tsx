@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { ContentTabIds } from '../../../../../components/asset_details/types';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import AssetDetails from '../../../../../components/asset_details/asset_details';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
@@ -18,9 +19,10 @@ interface Props {
   assetType: InventoryItemType;
   closeFlyout: () => void;
   currentTime: number;
+  options?: Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>;
+  isAutoReloading?: boolean;
+  refreshInterval?: number;
 }
-
-const ONE_HOUR = 60 * 60 * 1000;
 
 const flyoutTabs = [
   ...commonFlyoutTabs,
@@ -32,16 +34,43 @@ const flyoutTabs = [
   },
 ];
 
-export const AssetDetailsFlyout = ({ assetName, assetType, closeFlyout, currentTime }: Props) => {
+const ONE_HOUR = 60 * 60 * 1000;
+
+export const AssetDetailsFlyout = ({
+  assetName,
+  assetType,
+  closeFlyout,
+  currentTime,
+  options,
+  refreshInterval,
+  isAutoReloading = false,
+}: Props) => {
   const { source } = useSourceContext();
+
+  const dateRange = useMemo(() => {
+    // forces relative dates when auto-refresh is active
+    return isAutoReloading
+      ? {
+          from: 'now-1h',
+          to: 'now',
+        }
+      : {
+          from: new Date(currentTime - ONE_HOUR).toISOString(),
+          to: new Date(currentTime).toISOString(),
+        };
+  }, [currentTime, isAutoReloading]);
 
   return source ? (
     <AssetDetails
-      asset={{ id: assetName, name: assetName }}
+      assetId={assetName}
+      assetName={assetName}
       assetType={assetType}
       overrides={{
         metadata: {
           showActionsColumn: false,
+        },
+        alertRule: {
+          options,
         },
       }}
       tabs={flyoutTabs}
@@ -51,9 +80,10 @@ export const AssetDetailsFlyout = ({ assetName, assetType, closeFlyout, currentT
         closeFlyout,
       }}
       metricAlias={source.configuration.metricAlias}
-      dateRange={{
-        from: new Date(currentTime - ONE_HOUR).toISOString(),
-        to: new Date(currentTime).toISOString(),
+      dateRange={dateRange}
+      autoRefresh={{
+        isPaused: !isAutoReloading,
+        interval: refreshInterval,
       }}
     />
   ) : null;

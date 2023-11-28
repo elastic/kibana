@@ -52,7 +52,7 @@ describe('addConnector lib function', () => {
             default_extract_binary_content: true,
             default_name: 'ent-search-generic-ingestion',
             default_reduce_whitespace: true,
-            default_run_ml_inference: false,
+            default_run_ml_inference: true,
           },
           version: '1',
         },
@@ -87,7 +87,7 @@ describe('addConnector lib function', () => {
         extract_binary_content: true,
         name: 'ent-search-generic-ingestion',
         reduce_whitespace: true,
-        run_ml_inference: false,
+        run_ml_inference: true,
       },
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
@@ -205,7 +205,7 @@ describe('addConnector lib function', () => {
         extract_binary_content: true,
         name: 'ent-search-generic-ingestion',
         reduce_whitespace: true,
-        run_ml_inference: false,
+        run_ml_inference: true,
       },
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({

@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { Optional } from '@kbn/utility-types';
 import { LayoutParams } from '../../common';
-import { PerformanceMetrics } from '../browsers';
+import { PerformanceMetrics } from '../../common/types';
 import {
   PdfScreenshotOptions,
   PdfScreenshotResult,

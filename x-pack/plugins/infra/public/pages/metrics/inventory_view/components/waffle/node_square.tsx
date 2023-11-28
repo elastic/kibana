@@ -14,76 +14,142 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DispatchWithOptionalAction } from '../../../../../hooks/use_boolean';
 
-const SquareTextContentStyles = (color: string) => `
-  text-align: center;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1 0 auto;
-  color: ${readableColor(color)};
-`;
-const styles = {
-  nodeContainerSmall: (color: string) => `
-    cursor: pointer;
-    position: relative;
-    background-color: ${darken(0.1, color)};
-    border-radius: 3px;
-    margin: 2px;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  `,
-  valueInner: `
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    line-height: 1.2em;
-    align-items: center;
-    align-content: center;
-    padding: 1em;
-    overflow: hidden;
-    flex-wrap: wrap;
-    width: 100%;
-    border: none;
-    &:focus {
-      outline: none !important;
-      border: ${euiThemeVars.euiFocusRingSize} solid ${euiThemeVars.euiFocusRingColor};
-      box-shadow: none;
-    }
-  `,
-  squareOuter: (color: string) => `
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    bottom: 4px;
-    right: 4px;
-    background-color: ${darken(0.1, color)};
-    border-radius: 3px;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  `,
-  squareInner: (color: string) => `
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 2px;
-    left: 0;
-    border-radius: 3px;
-    background-color: ${color};
-  `,
-  label: (color: string) => `
-    font-size: 0.7em;
-    margin-bottom: 0.7em;
-    ${SquareTextContentStyles(color)}
-  `,
-  value: (color: string) => `
-    font-weight: bold;
-    font-size: 0.9em;
-    line-height: 1.2em;
-    ${SquareTextContentStyles(color)}
-  `,
+type NodeProps<T = HTMLDivElement> = React.DetailedHTMLProps<React.HTMLAttributes<T>, T> & {
+  'data-test-subj'?: string;
 };
+
+const SquareContent = ({
+  children,
+  css: contentStyle,
+  ...props
+}: NodeProps & { color: string }) => (
+  <div
+    css={css`
+      text-align: center;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1 0 auto;
+      color: ${readableColor(props.color)};
+    `}
+    {...props}
+  >
+    {children}
+  </div>
+);
+
+const NodeContainer = ({ children, ...props }: NodeProps) => (
+  <div
+    css={css`
+      position: relative;
+      cursor: pointer;
+    `}
+    {...props}
+  >
+    {children}
+  </div>
+);
+
+const NodeContainerSmall = ({ children, ...props }: NodeProps & { color: string }) => (
+  <div
+    css={css`
+      cursor: pointer;
+      position: relative;
+      background-color: ${darken(0.1, props.color)};
+      border-radius: 3px;
+      margin: 2px;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    `}
+    {...props}
+  >
+    {children}
+  </div>
+);
+const ValueInner = ({ children, ...props }: NodeProps<HTMLButtonElement>) => (
+  <button
+    css={css`
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      line-height: 1.2em;
+      align-items: center;
+      align-content: center;
+      padding: 1em;
+      overflow: hidden;
+      flex-wrap: wrap;
+      width: 100%;
+      border: none;
+      &:focus {
+        outline: none !important;
+        border: ${euiThemeVars.euiFocusRingSize} solid ${euiThemeVars.euiFocusRingColor};
+        box-shadow: none;
+      }
+    `}
+    {...props}
+  >
+    {children}
+  </button>
+);
+const SquareOuter = ({ children, ...props }: NodeProps & { color: string }) => (
+  <div
+    css={css`
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      bottom: 4px;
+      right: 4px;
+      background-color: ${darken(0.1, props.color)};
+      border-radius: 3px;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    `}
+    {...props}
+  >
+    {children}
+  </div>
+);
+const SquareInner = ({ children, ...props }: NodeProps & { color: string }) => (
+  <div
+    css={css`
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 2px;
+      left: 0;
+      border-radius: 3px;
+      background-color: ${props.color};
+    `}
+    {...props}
+  >
+    {children}
+  </div>
+);
+const Label = ({ children, ...props }: NodeProps & { color: string }) => (
+  <SquareContent
+    css={css`
+      font-size: 0.7em;
+      margin-bottom: 0.7em;
+    `}
+    {...props}
+  >
+    {children}
+  </SquareContent>
+);
+const Value = ({ children, ...props }: NodeProps & { color: string }) => (
+  <SquareContent
+    css={css`
+      font-weight: bold;
+      font-size: 0.9em;
+      line-height: 1.2em;
+    `}
+    {...props}
+  >
+    {children}
+  </SquareContent>
+);
 
 export const NodeSquare = ({
   squareSize,
@@ -113,11 +179,7 @@ export const NodeSquare = ({
   const style: CSSProperties | undefined = showBorder ? { border: 'solid 4px #000' } : undefined;
 
   return valueMode || ellipsisMode ? (
-    <div
-      css={css`
-        position: relative;
-        cursor: pointer;
-      `}
+    <NodeContainer
       data-test-subj="nodeContainer"
       style={{ width: squareSize || 0, height: squareSize || 0 }}
       onClick={togglePopover}
@@ -127,65 +189,29 @@ export const NodeSquare = ({
       onMouseLeave={hideToolTip}
       className="buttonContainer"
     >
-      <div
-        css={css`
-          ${styles.squareOuter(color)}
-        `}
-        style={style}
-      >
-        <div
-          css={css`
-            ${styles.squareInner(color)}
-          `}
-        >
+      <SquareOuter color={color} style={style}>
+        <SquareInner color={color}>
           {valueMode ? (
-            <button
-              css={css`
-                ${styles.valueInner}
-              `}
-              aria-label={nodeAriaLabel}
-            >
-              <div
-                css={css`
-                  ${styles.label(color)}
-                `}
-                data-test-subj="nodeName"
-              >
+            <ValueInner aria-label={nodeAriaLabel}>
+              <Label data-test-subj="nodeName" color={color}>
                 {nodeName}
-              </div>
-              <div
-                css={css`
-                  ${styles.value(color)}
-                `}
-                data-test-subj="nodeValue"
-              >
+              </Label>
+              <Value data-test-subj="nodeValue" color={color}>
                 {value}
-              </div>
-            </button>
+              </Value>
+            </ValueInner>
           ) : (
             ellipsisMode && (
-              <button
-                css={css`
-                  ${styles.valueInner}
-                `}
-                aria-label={nodeAriaLabel}
-              >
-                <div
-                  css={css`
-                    ${styles.label(color)}
-                  `}
-                >
-                  ...
-                </div>
-              </button>
+              <ValueInner aria-label={nodeAriaLabel}>
+                <Label color={color}>...</Label>
+              </ValueInner>
             )
           )}
-        </div>
-      </div>
-    </div>
+        </SquareInner>
+      </SquareOuter>
+    </NodeContainer>
   ) : (
-    <div
-      css={styles.nodeContainerSmall(color)}
+    <NodeContainerSmall
       data-test-subj="nodeContainer"
       style={{ width: squareSize || 0, height: squareSize || 0, ...style }}
       onClick={togglePopover}

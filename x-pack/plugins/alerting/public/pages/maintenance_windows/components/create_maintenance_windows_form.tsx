@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import moment from 'moment';
 import {
   FIELD_TYPES,
@@ -24,8 +24,12 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { FormProps, schema } from './schema';
 import * as i18n from '../translations';
@@ -34,9 +38,11 @@ import { SubmitButton } from './submit_button';
 import { convertToRRule } from '../helpers/convert_to_rrule';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
 import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
+import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
+import { MaintenanceWindowCategorySelection } from './maintenance_window_category_selection';
 
 const UseField = getUseField({ component: Field });
 
@@ -64,11 +70,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     const { defaultTimezone, isBrowser } = useDefaultTimezone();
 
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
+
+    const hasSetInitialCategories = useRef<boolean>(false);
+
     const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
       useCreateMaintenanceWindow();
     const { mutate: updateMaintenanceWindow, isLoading: isUpdateLoading } =
       useUpdateMaintenanceWindow();
     const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
+
+    const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
 
     const submitMaintenanceWindow = useCallback(
       async (formData, isValid) => {
@@ -83,6 +94,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               formData.timezone ? formData.timezone[0] : defaultTimezone,
               formData.recurringSchedule
             ),
+            categoryIds: formData.categoryIds,
           };
           if (isEditMode) {
             updateMaintenanceWindow({ maintenanceWindowId, maintenanceWindow }, { onSuccess });
@@ -108,15 +120,34 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       onSubmit: submitMaintenanceWindow,
     });
 
-    const [{ recurring, timezone }] = useFormData<FormProps>({
+    const [{ recurring, timezone, categoryIds }, _, mounted] = useFormData<FormProps>({
       form,
-      watch: ['recurring', 'timezone'],
+      watch: ['recurring', 'timezone', 'categoryIds'],
     });
     const isRecurring = recurring || false;
     const showTimezone = isBrowser || initialValue?.timezone !== undefined;
 
     const closeModal = useCallback(() => setIsModalVisible(false), []);
     const showModal = useCallback(() => setIsModalVisible(true), []);
+
+    const { setFieldValue } = form;
+
+    const onCategoryIdsChange = useCallback(
+      (id: string) => {
+        if (!categoryIds) {
+          return;
+        }
+        if (categoryIds.includes(id)) {
+          setFieldValue(
+            'categoryIds',
+            categoryIds.filter((category) => category !== id)
+          );
+          return;
+        }
+        setFieldValue('categoryIds', [...categoryIds, id]);
+      },
+      [categoryIds, setFieldValue]
+    );
 
     const modal = useMemo(() => {
       let m;
@@ -144,6 +175,58 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       return m;
     }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
 
+    const availableCategories = useMemo(() => {
+      if (!ruleTypes) {
+        return [];
+      }
+      return [...new Set(ruleTypes.map((ruleType) => ruleType.category))];
+    }, [ruleTypes]);
+
+    // For create mode, we want to initialize options to the rule type category the
+    // user has access
+    useEffect(() => {
+      if (isEditMode) {
+        return;
+      }
+      if (!mounted) {
+        return;
+      }
+      if (hasSetInitialCategories.current) {
+        return;
+      }
+      if (!ruleTypes) {
+        return;
+      }
+      setFieldValue('categoryIds', [...new Set(ruleTypes.map((ruleType) => ruleType.category))]);
+      hasSetInitialCategories.current = true;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditMode, ruleTypes, mounted]);
+
+    // For edit mode, if a maintenance window => category_ids is not an array, this means
+    // the maintenance window was created before the introduction of category filters.
+    // For backwards compat we will initialize all options for these.
+    useEffect(() => {
+      if (!isEditMode) {
+        return;
+      }
+      if (!mounted) {
+        return;
+      }
+      if (hasSetInitialCategories.current) {
+        return;
+      }
+      if (Array.isArray(categoryIds)) {
+        return;
+      }
+      setFieldValue('categoryIds', [
+        DEFAULT_APP_CATEGORIES.observability.id,
+        DEFAULT_APP_CATEGORIES.security.id,
+        DEFAULT_APP_CATEGORIES.management.id,
+      ]);
+      hasSetInitialCategories.current = true;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditMode, categoryIds, mounted]);
+
     return (
       <Form form={form}>
         <EuiFlexGroup direction="column" responsive={false}>
@@ -157,6 +240,17 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 },
               }}
             />
+          </EuiFlexItem>
+          <EuiSpacer size="xs" />
+          <EuiFlexItem>
+            <EuiText size="s">
+              <h4>{i18n.CREATE_FORM_TIMEFRAME_TITLE}</h4>
+              <p>
+                <EuiTextColor color="subdued">
+                  {i18n.CREATE_FORM_TIMEFRAME_DESCRIPTION}
+                </EuiTextColor>
+              </p>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexEnd" responsive={false}>
@@ -229,20 +323,39 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               }}
             />
           </EuiFlexItem>
+          {isRecurring && (
+            <EuiFlexItem>
+              <RecurringSchedule data-test-subj="recurring-form" />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
-            {isRecurring ? <RecurringSchedule data-test-subj="recurring-form" /> : null}
+            <EuiHorizontalRule margin="xl" />
+            <UseField path="categoryIds">
+              {(field) => (
+                <MaintenanceWindowCategorySelection
+                  selectedCategories={categoryIds || []}
+                  availableCategories={availableCategories}
+                  isLoading={isLoadingRuleTypes}
+                  errors={field.errors.map((error) => error.message)}
+                  onChange={onCategoryIdsChange}
+                />
+              )}
+            </UseField>
+            <EuiHorizontalRule margin="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {isEditMode ? (
-          <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">
-            <p>{i18n.ARCHIVE_SUBTITLE}</p>
-            <EuiButton fill color="danger" onClick={showModal}>
-              {i18n.ARCHIVE}
-            </EuiButton>
-            {modal}
-          </EuiCallOut>
-        ) : null}
-        <EuiHorizontalRule margin="xl" />
+        {isEditMode && (
+          <>
+            <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">
+              <p>{i18n.ARCHIVE_SUBTITLE}</p>
+              <EuiButton fill color="danger" onClick={showModal}>
+                {i18n.ARCHIVE}
+              </EuiButton>
+              {modal}
+            </EuiCallOut>
+            <EuiHorizontalRule margin="xl" />
+          </>
+        )}
         <EuiFlexGroup
           alignItems="center"
           justifyContent="flexEnd"

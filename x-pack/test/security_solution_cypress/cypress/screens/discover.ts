@@ -26,9 +26,13 @@ export const DISCOVER_DATA_VIEW_EDITOR_FLYOUT = {
   SAVE_DATA_VIEW_BTN: getDataTestSubjectSelector('saveIndexPatternButton'),
 };
 
-export const DISCOVER_QUERY_INPUT = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
-  'unifiedQueryInput'
+export const DISCOVER_ESQL_INPUT = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
+  'kibanaCodeEditor'
 )}`;
+
+export const DISCOVER_ESQL_INPUT_TEXT_CONTAINER = `${DISCOVER_ESQL_INPUT} .view-lines`;
+
+export const DISCOVER_ESQL_EDITABLE_INPUT = `${DISCOVER_ESQL_INPUT} textarea:first`;
 
 export const DISCOVER_ADD_FILTER = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
   'addFilter'

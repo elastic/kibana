@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { last } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { first } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import type { Subscription } from 'rxjs';
+import { isObservable, Subscription } from 'rxjs';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useKibana } from '../../hooks/use_kibana';
@@ -41,52 +41,136 @@ function ChatContent({
   const chatService = useObservabilityAIAssistantChatService();
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage | undefined>();
+
   const [loading, setLoading] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 
   const [conversationId, setConversationId] = useState<string>();
 
-  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
-    useConversation({
-      conversationId,
-      connectorId,
-      chatService,
-    });
+  const {
+    conversation,
+    displayedMessages,
+    setDisplayedMessages,
+    getSystemMessage,
+    save,
+    saveTitle,
+  } = useConversation({
+    conversationId,
+    connectorId,
+    chatService,
+    initialMessages,
+  });
 
   const conversationTitle = conversationId
     ? conversation.value?.conversation.title || ''
     : defaultTitle;
-  const reloadReply = useCallback(() => {
+
+  const controllerRef = useRef(new AbortController());
+
+  const reloadRecalledMessages = useCallback(
+    async (messages: Message[]) => {
+      controllerRef.current.abort();
+
+      const controller = (controllerRef.current = new AbortController());
+
+      const isStartOfConversation =
+        messages.some((message) => message.message.role === MessageRole.Assistant) === false;
+
+      if (isStartOfConversation && chatService.hasFunction('recall')) {
+        // manually execute recall function and append to list of
+        // messages
+        const functionCall = {
+          name: 'recall',
+          args: JSON.stringify({ queries: [], contexts: [] }),
+        };
+
+        const response = await chatService.executeFunction({
+          ...functionCall,
+          messages,
+          signal: controller.signal,
+          connectorId,
+        });
+
+        if (isObservable(response)) {
+          throw new Error('Recall function unexpectedly returned an Observable');
+        }
+
+        return [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: functionCall.name,
+                arguments: functionCall.args,
+                trigger: MessageRole.User as const,
+              },
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              name: functionCall.name,
+              content: JSON.stringify(response.content),
+            },
+          },
+        ];
+      }
+
+      return [];
+    },
+    [chatService, connectorId]
+  );
+
+  const reloadConversation = useCallback(async () => {
     setLoading(true);
+
+    setDisplayedMessages(initialMessages);
+    setPendingMessage(undefined);
+
+    const messages = [getSystemMessage(), ...initialMessages];
+
+    const recalledMessages = await reloadRecalledMessages(messages);
+    const next = messages.concat(recalledMessages);
+
+    setDisplayedMessages(next);
 
     let lastPendingMessage: PendingMessage | undefined;
 
     const nextSubscription = chatService
-      .chat({ messages: initialMessages, connectorId, function: 'none' })
+      .chat({ messages: next, connectorId, function: 'none' })
       .subscribe({
         next: (msg) => {
           lastPendingMessage = msg;
           setPendingMessage(() => msg);
         },
         complete: () => {
-          setDisplayedMessages((prevMessages) =>
-            prevMessages.concat({
+          setDisplayedMessages((prev) =>
+            prev.concat({
               '@timestamp': new Date().toISOString(),
-              message: {
-                ...lastPendingMessage!.message,
-              },
+              ...lastPendingMessage!,
             })
           );
+          setPendingMessage(lastPendingMessage);
           setLoading(false);
         },
       });
 
     setSubscription(nextSubscription);
-  }, [initialMessages, setDisplayedMessages, connectorId, chatService]);
+  }, [
+    reloadRecalledMessages,
+    chatService,
+    connectorId,
+    initialMessages,
+    getSystemMessage,
+    setDisplayedMessages,
+  ]);
 
   useEffect(() => {
-    reloadReply();
-  }, [reloadReply]);
+    reloadConversation();
+  }, [reloadConversation]);
 
   useEffect(() => {
     setDisplayedMessages(initialMessages);
@@ -105,14 +189,21 @@ function ChatContent({
       : displayedMessages;
   }, [pendingMessage, displayedMessages]);
 
-  const lastMessage = last(messagesWithPending);
+  const firstAssistantMessage = first(
+    messagesWithPending.filter(
+      (message) =>
+        message.message.role === MessageRole.Assistant &&
+        (!message.message.function_call?.trigger ||
+          message.message.function_call.trigger === MessageRole.Assistant)
+    )
+  );
 
   return (
     <>
       <MessagePanel
         body={
           <MessageText
-            content={lastMessage?.message.content ?? ''}
+            content={firstAssistantMessage?.message.content ?? ''}
             loading={loading}
             onActionClick={async () => {}}
           />
@@ -147,7 +238,7 @@ function ChatContent({
               <EuiFlexItem grow={false}>
                 <RegenerateResponseButton
                   onClick={() => {
-                    reloadReply();
+                    reloadConversation();
                   }}
                 />
               </EuiFlexItem>
@@ -189,7 +280,15 @@ function ChatContent({
   );
 }
 
-export function Insight({ messages, title }: { messages: Message[]; title: string }) {
+export function Insight({
+  messages,
+  title,
+  dataTestSubj,
+}: {
+  messages: Message[];
+  title: string;
+  dataTestSubj?: string;
+}) {
   const [hasOpened, setHasOpened] = useState(false);
 
   const connectors = useGenAIConnectors();
@@ -231,6 +330,7 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
       }}
       controls={<ConnectorSelectorBase {...connectors} />}
       loading={connectors.loading || chatService.loading}
+      dataTestSubj={dataTestSubj}
     >
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>

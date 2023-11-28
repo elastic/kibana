@@ -36,6 +36,7 @@ import {
   getAllIncompatibleMarkdownComments,
   getIncompatibleValuesFields,
   getIncompatibleMappingsFields,
+  getSameFamilyFields,
 } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
 import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
@@ -227,6 +228,11 @@ const IndexPropertiesComponent: React.FC<Props> = ({
           ? partitionedFieldMetadata.incompatible.length
           : undefined;
 
+      const indexSameFamily: number | undefined =
+        error == null && partitionedFieldMetadata != null
+          ? partitionedFieldMetadata.sameFamily.length
+          : undefined;
+
       if (patternRollup != null) {
         const markdownComments =
           partitionedFieldMetadata != null
@@ -255,6 +261,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               indexName,
               markdownComments,
               pattern,
+              sameFamily: indexSameFamily,
             },
           },
         });
@@ -272,8 +279,10 @@ const IndexPropertiesComponent: React.FC<Props> = ({
             numberOfIncompatibleFields: indexIncompatible,
             numberOfIndices: 1,
             numberOfIndicesChecked: 1,
+            numberOfSameFamily: indexSameFamily,
             sizeInBytes: getSizeInBytes({ stats: patternRollup.stats, indexName }),
             timeConsumedMs: requestTime,
+            sameFamilyFields: getSameFamilyFields(partitionedFieldMetadata.sameFamily),
             unallowedMappingFields: getIncompatibleMappingsFields(
               partitionedFieldMetadata.incompatible
             ),

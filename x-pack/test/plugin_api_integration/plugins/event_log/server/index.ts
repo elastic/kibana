@@ -8,5 +8,5 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 import { EventLogFixturePlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) =>
+export const plugin = async (initContext: PluginInitializerContext) =>
   new EventLogFixturePlugin(initContext);

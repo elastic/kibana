@@ -8,6 +8,7 @@
 import * as rt from 'io-ts';
 
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
+import { idFormatByJobTypeRT } from '../../id_formats/v1/id_formats';
 import { timeRangeRT, routeTimingMetadataRT } from '../../../shared';
 import {
   logEntryAnomalyRT,
@@ -54,6 +55,7 @@ export const getLogEntryAnomaliesRequestPayloadRT = rt.type({
     rt.type({
       // log view
       logView: persistedLogViewReferenceRT,
+      idFormats: idFormatByJobTypeRT,
       // the time range to fetch the log entry anomalies from
       timeRange: timeRangeRT,
     }),

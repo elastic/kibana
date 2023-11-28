@@ -7,51 +7,22 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { LandingPageComponent } from '.';
-import { useKibana } from '../../lib/kibana';
-import { Router } from 'react-router-dom';
-import { createBrowserHistory } from 'history';
-import { TestProviders } from '../../mock/test_providers';
 
-jest.mock('../../lib/kibana', () => ({
-  useKibana: jest.fn(),
+const mockUseContractComponents = jest.fn(() => ({}));
+jest.mock('../../hooks/use_contract_component', () => ({
+  useContractComponents: () => mockUseContractComponents(),
 }));
 
-jest.mock('react-use/lib/useObservable', () => jest.fn((fn) => fn()));
-
 describe('LandingPageComponent', () => {
-  const mockGetStartedComponent = jest.fn();
-  const history = createBrowserHistory();
-  const mockSecuritySolutionTemplateWrapper = jest
-    .fn()
-    .mockImplementation(({ children }) => <div>{children}</div>);
-
-  const renderPage = () =>
-    render(
-      <Router history={history}>
-        <LandingPageComponent />
-      </Router>,
-      { wrapper: TestProviders }
-    );
-
-  beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        securityLayout: {
-          getPluginWrapper: jest.fn().mockReturnValue(mockSecuritySolutionTemplateWrapper),
-        },
-        getStartedComponent$: mockGetStartedComponent,
-      },
-    });
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the get started component', () => {
-    mockGetStartedComponent.mockReturnValue(<div data-test-subj="get-started" />);
-    const { queryByTestId } = renderPage();
+    const GetStarted = () => <div data-test-subj="get-started-mock" />;
+    mockUseContractComponents.mockReturnValue({ GetStarted });
+    const { queryByTestId } = render(<LandingPageComponent />);
 
-    expect(queryByTestId('get-started')).toBeInTheDocument();
+    expect(queryByTestId('get-started-mock')).toBeInTheDocument();
   });
 });

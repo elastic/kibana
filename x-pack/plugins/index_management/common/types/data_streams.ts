@@ -21,27 +21,33 @@ type TimestampField = TimestampFieldFromEs;
 
 interface PrivilegesFromEs {
   delete_index: boolean;
+  manage_data_stream_lifecycle: boolean;
 }
 
 type Privileges = PrivilegesFromEs;
 
 export type HealthFromEs = 'GREEN' | 'YELLOW' | 'RED';
 
+export interface DataStreamIndexFromEs {
+  index_name: string;
+  index_uuid: string;
+  prefer_ilm: boolean;
+  managed_by: string;
+}
+
+export type Health = 'green' | 'yellow' | 'red';
+
 export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   store_size?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size'];
   store_size_bytes?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size_bytes'];
   maximum_timestamp?: IndicesDataStreamsStatsDataStreamsStatsItem['maximum_timestamp'];
+  indices: DataStreamIndexFromEs[];
+  next_generation_managed_by: string;
   privileges: {
     delete_index: boolean;
+    manage_data_stream_lifecycle: boolean;
   };
 }
-
-export interface DataStreamIndexFromEs {
-  index_name: string;
-  index_uuid: string;
-}
-
-export type Health = 'green' | 'yellow' | 'red';
 
 export interface DataStream {
   name: string;
@@ -57,10 +63,22 @@ export interface DataStream {
   _meta?: Metadata;
   privileges: Privileges;
   hidden: boolean;
-  lifecycle?: IndicesDataLifecycleWithRollover;
+  nextGenerationManagedBy: string;
+  lifecycle?: IndicesDataLifecycleWithRollover & {
+    enabled?: boolean;
+  };
 }
 
 export interface DataStreamIndex {
   name: string;
   uuid: string;
+  preferILM: boolean;
+  managedBy: string;
+}
+
+export interface DataRetention {
+  enabled: boolean;
+  infiniteDataRetention?: boolean;
+  value?: number;
+  unit?: string;
 }

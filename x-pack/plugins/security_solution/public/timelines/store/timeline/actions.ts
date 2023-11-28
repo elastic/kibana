@@ -46,15 +46,11 @@ export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSER
 
 export const addProvider = actionCreator<{ id: string; providers: DataProvider[] }>('ADD_PROVIDER');
 
-export const saveTimeline = actionCreator<TimelinePersistInput>('SAVE_TIMELINE');
+export const saveTimeline = actionCreator<{ id: string }>('SAVE_TIMELINE');
 
 export const createTimeline = actionCreator<TimelinePersistInput>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
-
-export const setTimelineUpdatedAt = actionCreator<{ id: string; updated: number | undefined }>(
-  'SET_TIMELINE_UPDATED_AT'
-);
 
 export const removeProvider = actionCreator<{
   id: string;
@@ -148,11 +144,6 @@ export const updateProviders = actionCreator<{ id: string; providers: DataProvid
 export const updateRange = actionCreator<{ id: string; start: string; end: string }>(
   'UPDATE_RANGE'
 );
-
-export const updateAutoSaveMsg = actionCreator<{
-  timelineId: string | null;
-  newTimelineModel: TimelineModel | null;
-}>('UPDATE_AUTO_SAVE');
 
 export const showCallOutUnauthorizedMsg = actionCreator('SHOW_CALL_OUT_UNAUTHORIZED_MSG');
 
@@ -281,3 +272,10 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   id: string;
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
+
+export const setDataProviderVisibility = actionCreator<{
+  id: string;
+  isDataProviderVisible: boolean;
+}>('SET_DATA_PROVIDER_VISIBLITY');
+
+export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');

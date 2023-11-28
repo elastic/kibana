@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { IconChartTagcloud } from '@kbn/chart-icons';
@@ -169,10 +170,7 @@ export const TagCloudChart = ({
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
-        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-        window.requestAnimationFrame(() => {
-          renderComplete();
-        });
+        renderComplete();
       }
     },
     [renderComplete]
@@ -240,6 +238,7 @@ export const TagCloudChart = ({
               onRenderChange={onRenderChange}
               ariaLabel={visParams.ariaLabel}
               ariaUseDefaultSummary={!visParams.ariaLabel}
+              locale={i18n.getLocale()}
               {...getOverridesFor(overrides, 'settings')}
             />
             <Wordcloud

@@ -52,8 +52,8 @@ describe('<Settings />', () => {
     trigger(wrapper).simulate('click');
     expect(portal(wrapper).exists()).toEqual(true);
     expect(popover(wrapper).prop('isOpen')).toEqual(true);
-    expect(menuItems(wrapper).length).toEqual(2);
-    expect(contextMenu(wrapper).text()).toEqual('SettingsAuto PlayToolbar');
+    expect(menuItems(wrapper).length).toEqual(3);
+    expect(contextMenu(wrapper).last().text()).toEqual('SettingsAuto PlayToolbar');
     trigger(wrapper).simulate('click');
     expect(popover(wrapper).prop('isOpen')).toEqual(false);
   });
@@ -62,7 +62,7 @@ describe('<Settings />', () => {
     await openSettings(wrapper);
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
 
-    await selectMenuItem(wrapper, 0);
+    await selectMenuItem(wrapper, 1);
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
   });
 
@@ -70,7 +70,7 @@ describe('<Settings />', () => {
     await openSettings(wrapper);
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
 
-    await selectMenuItem(wrapper, 1);
+    await selectMenuItem(wrapper, 2);
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
 
     // Click the Hide Toolbar switch

@@ -9,7 +9,7 @@
 import { KnownTypeToMetadata, SettingType } from '@kbn/management-settings-types';
 
 type Settings = {
-  [key in SettingType]: KnownTypeToMetadata<key>;
+  [key in Exclude<SettingType, 'json' | 'markdown'>]: KnownTypeToMetadata<key>;
 };
 
 /**
@@ -71,24 +71,25 @@ export const getSettingsMock = (
       category: ['dashboard', 'discover'],
       ...defaults,
     },
-    json: {
-      name: 'json:test:setting',
-      description: 'Description for Json test setting',
-      type: 'json',
-      userValue: null,
-      value: '{"foo": "bar"}',
-      category: ['dashboard', 'discover'],
-      ...defaults,
-    },
-    markdown: {
-      name: 'markdown:test:setting',
-      description: 'Description for Markdown test setting',
-      type: 'markdown',
-      userValue: null,
-      value: '',
-      category: ['notifications', 'search'],
-      ...defaults,
-    },
+    // These are notoriously difficult to test, in both Jest and Storybook.
+    // json: {
+    //   name: 'json:test:setting',
+    //   description: 'Description for Json test setting',
+    //   type: 'json',
+    //   userValue: null,
+    //   value: '{"foo": "bar"}',
+    //   category: ['dashboard', 'discover'],
+    //   ...defaults,
+    // },
+    // markdown: {
+    //   name: 'markdown:test:setting',
+    //   description: 'Description for Markdown test setting',
+    //   type: 'markdown',
+    //   userValue: null,
+    //   value: '',
+    //   category: ['notifications', 'search'],
+    //   ...defaults,
+    // },
     select: {
       description: 'Description for Select test setting',
       name: 'select:test:setting',

@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
@@ -31,6 +32,7 @@ export function HistogramIndicatorTypeForm() {
 
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(index);
+  const histogramFields = indexFields.filter((field) => field.type === 'histogram');
   const timestampFields = indexFields.filter((field) => field.type === 'date');
   const partitionByFields = indexFields.filter((field) => field.aggregatable);
 
@@ -109,7 +111,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <HistogramIndicator
             type="good"
-            indexFields={indexFields}
+            histogramFields={histogramFields}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -128,7 +130,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <HistogramIndicator
             type="total"
-            indexFields={indexFields}
+            histogramFields={histogramFields}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -139,6 +141,7 @@ export function HistogramIndicatorTypeForm() {
         <IndexFieldSelector
           indexFields={partitionByFields}
           name="groupBy"
+          defaultValue={ALL_VALUE}
           label={
             <span>
               {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {

@@ -69,14 +69,36 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         indexManagement: {
           pathname: '/app/management/data/index_management',
         },
+        transform: {
+          pathname: '/app/management/data/transform',
+        },
         connectors: {
           pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
         },
-        advancedSettings: {
+        triggersActions: {
+          pathname: '/app/management/insightsAndAlerting/triggersActions',
+        },
+        settings: {
           pathname: '/app/management/kibana/settings',
         },
         login: {
           pathname: '/login',
+        },
+        reportingManagement: {
+          pathname: '/app/management/insightsAndAlerting/reporting',
+        },
+        securitySolution: {
+          pathname: '/app/security',
+        },
+        dashboard: {
+          pathname: '/app/dashboards',
+        },
+        discover: {
+          pathname: '/app/discover',
+        },
+        context: {
+          pathname: '/app/discover',
+          hash: '/context',
         },
       },
       // choose where screenshots should be saved

@@ -7,16 +7,16 @@
 
 import { encode } from '@kbn/rison';
 
-import type { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
-import { hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import { GET_STARTED_URL, hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
 import { constructUrlWithUser, getUrlWithRoute, User } from './login';
 
 export const visit = (
   url: string,
   options?: {
     visitOptions?: Partial<Cypress.VisitOptions>;
-    role?: ROLES;
+    role?: SecurityRoleName;
   }
 ) => {
   cy.visit(options?.role ? getUrlWithRoute(options.role, url) : url, {
@@ -35,7 +35,7 @@ export const visitWithTimeRange = (
   url: string,
   options?: {
     visitOptions?: Partial<Cypress.VisitOptions>;
-    role?: ROLES;
+    role?: SecurityRoleName;
   }
 ) => {
   const timerangeConfig = {
@@ -74,7 +74,7 @@ export const visitWithTimeRange = (
   });
 };
 
-export const visitTimeline = (timelineId: string, role?: ROLES) => {
+export const visitTimeline = (timelineId: string, role?: SecurityRoleName) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
     onBeforeLoad: disableNewFeaturesTours,
@@ -85,6 +85,11 @@ export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
   visitWithTimeRange(hostDetailsUrl(hostName));
   cy.get('[data-test-subj="loading-spinner"]').should('exist');
   cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
+};
+
+export const visitGetStartedPage = () => {
+  visit(GET_STARTED_URL);
+  cy.get('#security-solution-app').should('exist');
 };
 
 export const visitUserDetailsPage = (userName = 'test') => {

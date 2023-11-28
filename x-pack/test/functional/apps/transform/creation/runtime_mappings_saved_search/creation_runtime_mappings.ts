@@ -34,11 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/166395
-  describe.skip('creation with runtime mappings', function () {
+  describe('creation with runtime mappings', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await transform.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -46,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await transform.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     const histogramCharts: HistogramCharts = [
@@ -255,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the wizard for the source data', async () => {

@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
 import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
+import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
-import { waitForAlertInIndex, waitForRuleStatus } from '../helpers/alerting_wait_for_helpers';
+import {
+  waitForAlertInIndex,
+  waitForDocumentInIndex,
+  waitForRuleStatus,
+} from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ActionDocument } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -31,19 +36,27 @@ export default function ({ getService }: FtrProviderContext) {
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
     const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
+    const MOCKED_AD_HOC_DATA_VIEW = {
+      id: DATA_VIEW_ID,
+      title: DATE_VIEW,
+      timeFieldName: '@timestamp',
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      allowNoIndex: false,
+      name: DATE_VIEW_NAME,
+      allowHidden: false,
+    };
     let infraDataIndex: string;
     let actionId: string;
     let ruleId: string;
+    let alertId: string;
+    let startedAt: string;
 
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
-      await createDataView({
-        supertest,
-        name: DATE_VIEW,
-        id: DATA_VIEW_ID,
-        title: DATE_VIEW,
-      });
     });
 
     after(async () => {
@@ -56,10 +69,6 @@ export default function ({ getService }: FtrProviderContext) {
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
-      });
-      await deleteDataView({
-        supertest,
-        id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
       await cleanup({ esClient, logger });
@@ -82,7 +91,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT,
                 threshold: [0.5],
                 timeSize: 5,
@@ -99,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
                 query: '',
                 language: 'kuery',
               },
-              index: DATA_VIEW_ID,
+              index: MOCKED_AD_HOC_DATA_VIEW,
             },
           },
           actions: [
@@ -110,6 +118,10 @@ export default function ({ getService }: FtrProviderContext) {
                 documents: [
                   {
                     ruleType: '{{rule.type}}',
+                    alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
+                    value: '{{context.value}}',
+                    host: '{{context.host}}',
                   },
                 ],
               },
@@ -140,10 +152,12 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
+        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (BETA)'
+          'Custom threshold (Technical Preview)'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -173,7 +187,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
                 comparator: '>',
                 threshold: [0.5],
                 timeSize: 5,
@@ -183,8 +196,28 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            searchConfiguration: {
+              index: MOCKED_AD_HOC_DATA_VIEW,
+              query: { query: '', language: 'kuery' },
+            },
           });
+      });
+
+      it('should set correct action variables', async () => {
+        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
+        const resp = await waitForDocumentInIndex<ActionDocument>({
+          esClient,
+          indexName: ALERT_ACTION_INDEX,
+        });
+
+        expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
+        expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
+          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+        );
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
+        );
+        expect(resp.hits.hits[0]._source?.value).eql('250%');
       });
     });
   });

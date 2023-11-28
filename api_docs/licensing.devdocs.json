@@ -2187,6 +2187,10 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
+              "plugin": "aiops",
+              "path": "x-pack/plugins/aiops/server/plugin.ts"
+            },
+            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/plugin.ts"
             },
@@ -2204,7 +2208,7 @@
             },
             {
               "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/index.ts"
+              "path": "src/plugins/maps_ems/server/plugin.ts"
             },
             {
               "plugin": "osquery",
@@ -2291,7 +2295,7 @@
           "references": [
             {
               "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/index.ts"
+              "path": "src/plugins/maps_ems/server/plugin.ts"
             }
           ],
           "children": [],

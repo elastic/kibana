@@ -6,24 +6,35 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
+import {
+  RISKY_HOSTS_DOC_LINK,
+  RISKY_USERS_DOC_LINK,
+  RISKY_ENTITY_SCORE_DOC_LINK,
+} from '../../../../../common/constants';
 import { LEARN_MORE } from '../../../../overview/components/entity_analytics/risk_score/translations';
 
 const RiskScoreDocLinkComponent = ({
   riskScoreEntity,
   title,
 }: {
-  riskScoreEntity: RiskScoreEntity;
+  riskScoreEntity?: RiskScoreEntity;
   title?: string | React.ReactNode;
 }) => {
-  const docLink =
-    riskScoreEntity === RiskScoreEntity.user ? RISKY_USERS_DOC_LINK : RISKY_HOSTS_DOC_LINK;
+  const docLink = useMemo(() => {
+    if (!riskScoreEntity) {
+      return RISKY_ENTITY_SCORE_DOC_LINK;
+    }
+    if (riskScoreEntity === RiskScoreEntity.user) {
+      return RISKY_USERS_DOC_LINK;
+    }
+    return RISKY_HOSTS_DOC_LINK;
+  }, [riskScoreEntity]);
 
   return (
     <EuiLink target="_blank" rel="noopener nofollow noreferrer" href={docLink}>
-      {title ? title : LEARN_MORE}
+      {title ? title : LEARN_MORE(riskScoreEntity)}
     </EuiLink>
   );
 };

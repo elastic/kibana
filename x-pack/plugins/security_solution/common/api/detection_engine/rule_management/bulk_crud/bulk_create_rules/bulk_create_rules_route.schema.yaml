@@ -5,8 +5,8 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_create:
     post:
-      operationId: CreateRulesBulk
-      x-codegen-enabled: false
+      operationId: BulkCreateRules
+      x-codegen-enabled: true
       deprecated: true
       description: Creates new detection rules in bulk.
       tags:

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { getRandomString } from './random';
-
 /**
  * Helpers to create and delete indices on the Elasticsearch instance
  * during our tests.
@@ -14,9 +12,7 @@ import { getRandomString } from './random';
  */
 export const initElasticsearchHelpers = (getService) => {
   const es = getService('es');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  let indicesCreated = [];
   let datastreamCreated = [];
   let indexTemplatesCreated = [];
   let componentTemplatesCreated = [];
@@ -39,22 +35,6 @@ export const initElasticsearchHelpers = (getService) => {
         // eslint-disable-next-line no-console
         console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
-
-  const createIndex = (index = getRandomString(), body) => {
-    indicesCreated.push(index);
-    return es.indices.create({ index, body }).then(() => index);
-  };
-
-  const deleteAllIndices = async () => {
-    await esDeleteAllIndices(indicesCreated);
-    indicesCreated = [];
-  };
-
-  const catIndex = (index, h) => es.cat.indices({ index, format: 'json', h }, { meta: true });
-
-  const indexStats = (index, metric) => es.indices.stats({ index, metric }, { meta: true });
-
-  const cleanUp = () => deleteAllIndices();
 
   const catTemplate = (name) => es.cat.templates({ name, format: 'json' }, { meta: true });
 
@@ -103,14 +83,9 @@ export const initElasticsearchHelpers = (getService) => {
       });
 
   return {
-    createIndex,
-    deleteAllIndices,
-    catIndex,
-    indexStats,
     createDatastream,
     deleteDatastream,
     cleanupDatastreams,
-    cleanUp,
     catTemplate,
     createIndexTemplate,
     deleteIndexTemplate,

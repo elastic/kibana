@@ -7513,7 +7513,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"pending\" | \"not-started\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -11700,7 +11700,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | undefined"
+              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false,
@@ -11925,7 +11925,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"unknown\" | \"_source\" | \"attachment\" | \"conflict\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -18920,7 +18920,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"pending\" | \"not-started\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -21833,7 +21833,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"unknown\" | \"_source\" | \"attachment\" | \"conflict\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -30258,7 +30258,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"unknown\" | \"_source\" | \"attachment\" | \"conflict\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -31231,7 +31231,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"pending\" | \"not-started\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -36540,7 +36540,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"unknown\" | \"_source\" | \"attachment\" | \"conflict\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,

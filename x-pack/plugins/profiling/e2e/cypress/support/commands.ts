@@ -71,3 +71,17 @@ Cypress.Commands.add(
     cy.getByTestSubj(dataTestSubj).type('{enter}');
   }
 );
+
+Cypress.Commands.add('updateAdvancedSettings', (settings: Record<string, unknown>) => {
+  const kibanaUrl = Cypress.env('KIBANA_URL');
+  cy.request({
+    log: false,
+    method: 'POST',
+    url: `${kibanaUrl}/internal/kibana/settings`,
+    body: { changes: settings },
+    headers: {
+      'kbn-xsrf': 'e2e_test',
+    },
+    auth: { user: 'elastic', pass: 'changeme' },
+  });
+});

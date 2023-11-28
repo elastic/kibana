@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/dom';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { render } from '../rtl_helpers';
 import { AddSeriesButton } from './add_series_button';
 import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';

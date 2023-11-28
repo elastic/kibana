@@ -7,12 +7,12 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { TelemetryCollectionManagerPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { TelemetryCollectionManagerPlugin } = await import('./plugin');
   return new TelemetryCollectionManagerPlugin(initializerContext);
 }
 

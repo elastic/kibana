@@ -173,7 +173,7 @@ describe('Create rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
     });
   });
   describe('rule containing response actions', () => {
@@ -237,7 +237,7 @@ describe('Create rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "processes" supplied to "response_actions,params,command"'
+        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "saved_query", saved_id: Required, type: Invalid literal value, expected "threshold", and 18 more'
       );
     });
   });

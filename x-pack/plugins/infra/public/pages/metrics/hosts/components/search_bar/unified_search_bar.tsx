@@ -102,13 +102,13 @@ export const UnifiedSearchBar = () => {
 
 const StickyContainer = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
-  const { headerHeight } = useKibanaHeader();
+  const { actionMenuHeight } = useKibanaHeader();
 
   return (
     <div
       css={css`
         position: sticky;
-        top: ${headerHeight}px;
+        top: calc(${actionMenuHeight}px + var(--euiFixedHeadersOffset, 0));
         z-index: ${euiTheme.levels.navigation};
         background: ${euiTheme.colors.emptyShade};
         padding: ${euiTheme.size.m} ${euiTheme.size.l} 0px;

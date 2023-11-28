@@ -29,8 +29,6 @@ import {
   processResults,
 } from '../../../common/components/utils';
 
-import { Chat } from '@kbn/cloud-chat-plugin/public';
-
 import { MODE } from './constants';
 
 export class FileDataVisualizerView extends Component {
@@ -353,7 +351,6 @@ export class FileDataVisualizerView extends Component {
             />
           </>
         )}
-        <Chat />
       </div>
     );
   }

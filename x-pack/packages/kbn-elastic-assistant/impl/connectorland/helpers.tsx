@@ -7,7 +7,7 @@
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface GenAiConfig {
@@ -20,7 +20,7 @@ interface GenAiConfig {
  * Returns the GenAiConfig for a given ActionConnector. Note that if the connector is preconfigured,
  * the config will be undefined as the connector is neither available nor editable.
  *
- * TODO: Extract and use separate types from GenAiConfig from '@kbn/stack-connectors-plugin/common/gen_ai/types'
+ * TODO: Extract and use separate types from GenAiConfig from '@kbn/stack-connectors-plugin/common/openai/types'
  *
  * @param connector
  */

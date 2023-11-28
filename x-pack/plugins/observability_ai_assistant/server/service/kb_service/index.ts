@@ -13,7 +13,11 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
 import { map } from 'lodash';
-import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
+import {
+  ELSER_MODEL_ID,
+  INDEX_QUEUED_DOCUMENTS_TASK_ID,
+  INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
+} from '..';
 import type { KnowledgeBaseEntry } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
@@ -41,8 +45,6 @@ function isAlreadyExistsError(error: Error) {
       error.body.error.type === 'status_exception')
   );
 }
-
-const ELSER_MODEL_ID = '.elser_model_1';
 
 function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
@@ -199,7 +201,7 @@ export class KnowledgeBaseService {
             text_expansion: {
               'ml.tokens': {
                 model_text: text,
-                model_id: '.elser_model_1',
+                model_id: ELSER_MODEL_ID,
               },
             } as unknown as QueryDslTextExpansionQuery,
           })),
@@ -218,7 +220,7 @@ export class KnowledgeBaseService {
       >({
         index: this.dependencies.resources.aliases.kb,
         query,
-        size: 10,
+        size: 5,
         _source: {
           includes: ['text', 'is_correction', 'labels'],
         },

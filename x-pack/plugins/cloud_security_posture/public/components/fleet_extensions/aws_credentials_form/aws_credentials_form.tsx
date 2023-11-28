@@ -103,6 +103,7 @@ interface Props {
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
 }
 
 const CloudFormationSetup = ({
@@ -215,6 +216,7 @@ export const AwsCredentialsForm = ({
   packageInfo,
   onChange,
   setIsValid,
+  disabled,
 }: Props) => {
   const {
     awsCredentialsType,
@@ -238,6 +240,7 @@ export const AwsCredentialsForm = ({
       <AWSSetupInfoContent integrationLink={integrationLink} />
       <EuiSpacer size="l" />
       <RadioGroup
+        disabled={disabled}
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}

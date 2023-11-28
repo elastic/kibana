@@ -401,9 +401,7 @@
               "\nReturns a confirm action, resulting on prompting a message to the user before leaving the\napplication, allowing him to choose if he wants to stay on the app or confirm that he\nwants to leave.\n"
             ],
             "signature": [
-              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: ",
-              "EuiButtonColor",
-              " | undefined) => ",
+              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined) => ",
               {
                 "pluginId": "@kbn/core-application-browser",
                 "scope": "common",
@@ -494,8 +492,7 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "EuiButtonColor",
-                  " | undefined"
+                  "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
@@ -614,8 +611,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "EuiButtonColor",
-              " | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
@@ -1082,6 +1078,23 @@
             "signature": [
               "Observable",
               "<string | undefined>"
+            ],
+            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser",
+            "id": "def-common.ApplicationStart.currentLocation$",
+            "type": "Object",
+            "tags": [],
+            "label": "currentLocation$",
+            "description": [
+              "\nAn observable that emits the current path#hash and each subsequent update using the global history instance"
+            ],
+            "signature": [
+              "Observable",
+              "<string>"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,

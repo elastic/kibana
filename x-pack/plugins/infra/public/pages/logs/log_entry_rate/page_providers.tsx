@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { logEntryCategoriesJobType, logEntryRateJobType } from '../../../../common/log_analysis';
 import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -15,6 +16,7 @@ import { LogEntryRateModuleProvider } from '../../../containers/logs/log_analysi
 import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
+import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
   const {
@@ -29,6 +31,9 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
 
   const { space } = useActiveKibanaSpace();
 
+  const { idFormats, isLoadingLogAnalysisIdFormats, hasFailedLoadingLogAnalysisIdFormats } =
+    useLogMlJobIdFormatsShimContext();
+
   // This is a rather crude way of guarding the dependent providers against
   // arguments that are only made available asynchronously. Ideally, we'd use
   // React concurrent mode and Suspense in order to handle that more gracefully.
@@ -36,9 +41,9 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
     return null;
   } else if (!isPersistedLogView) {
     return <InlineLogViewSplashPage revertToDefaultLogView={revertToDefaultLogView} />;
-  } else if (isLoading || isUninitialized) {
+  } else if (isLoading || isUninitialized || isLoadingLogAnalysisIdFormats || !idFormats) {
     return <SourceLoadingPage />;
-  } else if (hasFailedLoading) {
+  } else if (hasFailedLoading || hasFailedLoadingLogAnalysisIdFormats) {
     return <ConnectedLogViewErrorPage />;
   } else if (resolvedLogView != null) {
     if (logViewReference.type === 'log-view-inline') {
@@ -50,6 +55,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
           indexPattern={resolvedLogView.indices}
           logViewId={logViewReference.logViewId}
           spaceId={space.id}
+          idFormat={idFormats[logEntryRateJobType]}
           timestampField={resolvedLogView.timestampField}
           runtimeMappings={resolvedLogView.runtimeMappings}
         >
@@ -57,6 +63,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
             indexPattern={resolvedLogView.indices}
             logViewId={logViewReference.logViewId}
             spaceId={space.id}
+            idFormat={idFormats[logEntryCategoriesJobType]}
             timestampField={resolvedLogView.timestampField}
             runtimeMappings={resolvedLogView.runtimeMappings}
           >

@@ -10,7 +10,6 @@ import {
   switchAlertTableToGridView,
   waitForAlerts,
 } from '../../../tasks/alerts';
-import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
 import {
   addsFields,
@@ -28,13 +27,11 @@ import {
   GET_DATA_GRID_HEADER_CELL_ACTION_GROUP,
 } from '../../../screens/common/data_grid';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { ALERTS_URL } from '../../../urls/navigation';
+import { ALERTS_URL, TIMELINES_URL } from '../../../urls/navigation';
 import { DATAGRID_HEADER } from '../../../screens/timeline';
-import { TIMELINES, ALERTS } from '../../../screens/security_header';
 
 /*
  *
@@ -43,11 +40,7 @@ import { TIMELINES, ALERTS } from '../../../screens/security_header';
  *
  * */
 
-describe(`Alert Table Controls`, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     createRule(getNewRule());
@@ -102,8 +95,8 @@ describe(`Alert Table Controls`, () => {
       closeFieldsBrowser();
       cy.get(DATAGRID_HEADER(fieldName)).should('not.exist');
 
-      navigateFromHeaderTo(TIMELINES);
-      navigateFromHeaderTo(ALERTS);
+      visit(TIMELINES_URL);
+      visit(ALERTS_URL);
       waitForAlerts();
       cy.get(DATAGRID_HEADER('_id')).should('not.exist');
     });
@@ -115,8 +108,8 @@ describe(`Alert Table Controls`, () => {
       closeFieldsBrowser();
       cy.get(DATAGRID_HEADER('_id')).should('be.visible');
 
-      navigateFromHeaderTo(TIMELINES);
-      navigateFromHeaderTo(ALERTS);
+      visit(TIMELINES_URL);
+      visit(ALERTS_URL);
       waitForAlerts();
       cy.get(DATAGRID_HEADER('_id')).should('be.visible');
     });

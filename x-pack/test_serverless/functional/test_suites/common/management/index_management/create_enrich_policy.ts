@@ -20,8 +20,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const POLICY_NAME = `policy-${Math.random()}`;
 
   describe('Create enrich policy', function () {
+    // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="enrichPoliciesEmptyPromptCreateButton"])
+    this.tags(['failsOnMKI']);
     before(async () => {
-      await log.debug('Creating test index');
+      log.debug('Creating test index');
       try {
         await es.indices.create({
           index: INDEX_NAME,
@@ -43,7 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         throw e;
       }
 
-      await log.debug('Navigating to the enrich policies tab');
+      log.debug('Navigating to the enrich policies tab');
       await pageObjects.svlCommonPage.login();
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
@@ -56,7 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await log.debug('Cleaning up created index');
+      log.debug('Cleaning up created index');
 
       try {
         await es.indices.delete({ index: INDEX_NAME });

@@ -7,7 +7,6 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { UnsavedFieldChange } from '@kbn/management-settings-types';
 
 import {
   FieldCategoryKibanaProvider,
@@ -42,22 +41,22 @@ export const FormProvider = ({ children, ...services }: FormProviderProps) => {
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}.
  */
 export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...deps }) => {
-  const { settings, toasts, docLinks, theme, i18nStart } = deps;
+  const { settings, notifications, docLinks, theme, i18n } = deps;
+
+  const services: Services = {
+    saveChanges: (changes) => {
+      const arr = Object.entries(changes).map(([key, value]) =>
+        settings.client.set(key, value.unsavedValue)
+      );
+      return Promise.all(arr);
+    },
+    showError: (message: string) => notifications.toasts.addDanger(message),
+    showReloadPagePrompt: () => notifications.toasts.add(reloadPageToast(theme, i18n)),
+  };
 
   return (
-    <FormContext.Provider
-      value={{
-        saveChanges: (changes: Record<string, UnsavedFieldChange>) => {
-          const arr = Object.entries(changes).map(([key, value]) =>
-            settings.client.set(key, value.unsavedValue)
-          );
-          return Promise.all(arr);
-        },
-        showError: (message: string) => toasts.addDanger(message),
-        showReloadPagePrompt: () => toasts.add(reloadPageToast(theme, i18nStart)),
-      }}
-    >
-      <FieldCategoryKibanaProvider {...{ docLinks, toasts }}>
+    <FormContext.Provider value={services}>
+      <FieldCategoryKibanaProvider {...{ docLinks, notifications, settings }}>
         {children}
       </FieldCategoryKibanaProvider>
     </FormContext.Provider>

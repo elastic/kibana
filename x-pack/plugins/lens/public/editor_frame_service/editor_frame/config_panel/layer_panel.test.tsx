@@ -224,6 +224,33 @@ describe('LayerPanel', () => {
       const group = instance.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
       expect(group).toHaveLength(1);
     });
+    it('does not render a hidden group', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [],
+            filterOperations: () => true,
+            isHidden: true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+      const group = instance.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
+      expect(group).toHaveLength(1);
+    });
 
     it('should render the required warning when only one group is configured', async () => {
       mockVisualization.getConfiguration.mockReturnValue({

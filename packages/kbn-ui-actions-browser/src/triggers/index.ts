@@ -11,4 +11,3 @@ export * from './row_click_trigger';
 export * from './default_trigger';
 export * from './visualize_field_trigger';
 export * from './visualize_geo_field_trigger';
-export * from './categorize_field_trigger';

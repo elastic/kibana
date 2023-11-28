@@ -15,6 +15,7 @@ import type {
 } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -328,7 +329,7 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
   const { numDevices = 10 } = scenarioOpts || {};
 
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const androidDevices = [...Array(numDevices).keys()].map((index) => {
         const deviceMetadata = ANDROID_DEVICES[randomInt(ANDROID_DEVICES.length)];
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];
@@ -444,13 +445,13 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
         );
       };
 
-      return [
+      return withClient(apmEsClient, [
         ...androidDevices.flatMap((device) => [
           sessionTransactions(device),
           appLaunchMetrics(device),
         ]),
         ...iOSDevices.map((device) => sessionTransactions(device)),
-      ];
+      ]);
     },
   };
 };

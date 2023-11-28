@@ -5,41 +5,31 @@
  * 2.0.
  */
 
-import { enumeration } from '@kbn/securitysolution-io-ts-types';
-import { enumFromString } from '../../../../utils/enum_from_string';
 import { assertUnreachable } from '../../../../utility_types';
-import { RuleExecutionStatus } from './execution_status';
-
-export enum LogLevel {
-  'trace' = 'trace',
-  'debug' = 'debug',
-  'info' = 'info',
-  'warn' = 'warn',
-  'error' = 'error',
-}
-
-export const TLogLevel = enumeration('LogLevel', LogLevel);
+import type { RuleExecutionStatus } from './execution_status.gen';
+import { RuleExecutionStatusEnum } from './execution_status.gen';
+import { LogLevel, LogLevelEnum } from './execution_event.gen';
 
 /**
  * An array of supported log levels.
  */
-export const LOG_LEVELS = Object.values(LogLevel);
+export const LOG_LEVELS = LogLevel.options;
 
-export const logLevelToNumber = (level: keyof typeof LogLevel | null | undefined): number => {
+export const logLevelToNumber = (level: LogLevel | null | undefined): number => {
   if (!level) {
     return 0;
   }
 
   switch (level) {
-    case 'trace':
+    case LogLevelEnum.trace:
       return 0;
-    case 'debug':
+    case LogLevelEnum.debug:
       return 10;
-    case 'info':
+    case LogLevelEnum.info:
       return 20;
-    case 'warn':
+    case LogLevelEnum.warn:
       return 30;
-    case 'error':
+    case LogLevelEnum.error:
       return 40;
     default:
       assertUnreachable(level);
@@ -49,34 +39,32 @@ export const logLevelToNumber = (level: keyof typeof LogLevel | null | undefined
 
 export const logLevelFromNumber = (num: number | null | undefined): LogLevel => {
   if (num === null || num === undefined || num < 10) {
-    return LogLevel.trace;
+    return LogLevelEnum.trace;
   }
   if (num < 20) {
-    return LogLevel.debug;
+    return LogLevelEnum.debug;
   }
   if (num < 30) {
-    return LogLevel.info;
+    return LogLevelEnum.info;
   }
   if (num < 40) {
-    return LogLevel.warn;
+    return LogLevelEnum.warn;
   }
-  return LogLevel.error;
+  return LogLevelEnum.error;
 };
-
-export const logLevelFromString = enumFromString(LogLevel);
 
 export const logLevelFromExecutionStatus = (status: RuleExecutionStatus): LogLevel => {
   switch (status) {
-    case RuleExecutionStatus['going to run']:
-    case RuleExecutionStatus.running:
-    case RuleExecutionStatus.succeeded:
-      return LogLevel.info;
-    case RuleExecutionStatus['partial failure']:
-      return LogLevel.warn;
-    case RuleExecutionStatus.failed:
-      return LogLevel.error;
+    case RuleExecutionStatusEnum['going to run']:
+    case RuleExecutionStatusEnum.running:
+    case RuleExecutionStatusEnum.succeeded:
+      return LogLevelEnum.info;
+    case RuleExecutionStatusEnum['partial failure']:
+      return LogLevelEnum.warn;
+    case RuleExecutionStatusEnum.failed:
+      return LogLevelEnum.error;
     default:
       assertUnreachable(status);
-      return LogLevel.trace;
+      return LogLevelEnum.trace;
   }
 };

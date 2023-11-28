@@ -39,5 +39,7 @@ export const transformMaintenanceWindowAttributesToMaintenanceWindow = (
     eventStartTime,
     eventEndTime,
     status,
+    ...(attributes.categoryIds !== undefined ? { categoryIds: attributes.categoryIds } : {}),
+    ...(attributes.scopedQuery !== undefined ? { scopedQuery: attributes.scopedQuery } : {}),
   };
 };

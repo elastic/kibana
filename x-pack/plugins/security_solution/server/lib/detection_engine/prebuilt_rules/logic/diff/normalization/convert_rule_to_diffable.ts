@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type {
   EqlRule,
   EqlRuleCreateProps,
+  EsqlRule,
+  EsqlRuleCreateProps,
   MachineLearningRule,
   MachineLearningRuleCreateProps,
   NewTermsRule,
@@ -29,6 +32,7 @@ import type {
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
+  DiffableEsqlFields,
   DiffableMachineLearningFields,
   DiffableNewTermsFields,
   DiffableRule,
@@ -40,6 +44,7 @@ import { extractBuildingBlockObject } from './extract_building_block_object';
 import {
   extractInlineKqlQuery,
   extractRuleEqlQuery,
+  extractRuleEsqlQuery,
   extractRuleKqlQuery,
 } from './extract_rule_data_query';
 import { extractRuleDataSource } from './extract_rule_data_source';
@@ -91,6 +96,11 @@ export const convertRuleToDiffable = (rule: RuleResponse | PrebuiltRuleAsset): D
         ...commonFields,
         ...extractDiffableNewTermsFieldsFromRuleObject(rule),
       };
+    case 'esql':
+      return {
+        ...commonFields,
+        ...extractDiffableEsqlFieldsFromRuleObject(rule),
+      };
     default:
       return assertUnreachable(rule, 'Unhandled rule type');
   }
@@ -128,7 +138,7 @@ const extractDiffableCommonFields = (
 
     // Other domain fields
     rule_schedule: extractRuleSchedule(rule),
-    actions: rule.actions ?? [],
+    actions: (rule.actions ?? []) as RuleActionArray,
     throttle: rule.throttle ?? 'no_actions',
     exceptions_list: rule.exceptions_list ?? [],
     max_signals: rule.max_signals ?? DEFAULT_MAX_SIGNALS,
@@ -173,6 +183,15 @@ const extractDiffableEqlFieldsFromRuleObject = (
     event_category_override: rule.event_category_override,
     timestamp_field: rule.timestamp_field,
     tiebreaker_field: rule.tiebreaker_field,
+  };
+};
+
+const extractDiffableEsqlFieldsFromRuleObject = (
+  rule: EsqlRule | EsqlRuleCreateProps
+): DiffableEsqlFields => {
+  return {
+    type: rule.type,
+    esql_query: extractRuleEsqlQuery(rule.query, rule.language),
   };
 };
 

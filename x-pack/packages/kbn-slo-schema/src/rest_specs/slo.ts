@@ -19,6 +19,7 @@ import {
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  timesliceMetricIndicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
   previewDataSchema,
@@ -28,6 +29,9 @@ import {
   tagsSchema,
   timeWindowSchema,
   timeWindowTypeSchema,
+  timesliceMetricBasicMetricWithField,
+  timesliceMetricDocCountMetric,
+  timesliceMetricPercentileMetric,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -56,6 +60,10 @@ const createSLOResponseSchema = t.type({
 const getPreviewDataParamsSchema = t.type({
   body: t.type({
     indicator: indicatorSchema,
+    range: t.type({
+      start: t.number,
+      end: t.number,
+    }),
   }),
 });
 
@@ -270,6 +278,10 @@ type Indicator = t.OutputOf<typeof indicatorSchema>;
 type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
+type TimesliceMetricIndicator = t.OutputOf<typeof timesliceMetricIndicatorSchema>;
+type TimesliceMetricBasicMetricWithField = t.OutputOf<typeof timesliceMetricBasicMetricWithField>;
+type TimesliceMetricDocCountMetric = t.OutputOf<typeof timesliceMetricDocCountMetric>;
+type TimesclieMetricPercentileMetric = t.OutputOf<typeof timesliceMetricPercentileMetric>;
 type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 
@@ -327,6 +339,10 @@ export type {
   IndicatorType,
   Indicator,
   MetricCustomIndicator,
+  TimesliceMetricIndicator,
+  TimesliceMetricBasicMetricWithField,
+  TimesclieMetricPercentileMetric,
+  TimesliceMetricDocCountMetric,
   HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,
