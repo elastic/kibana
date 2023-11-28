@@ -26,7 +26,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { MappingInfoPanel } from './mapping_info_panel';
 import { RuleEditorPanel } from './rule_editor_panel';
 import { validateRoleMappingForSave } from './services/role_mapping_validation';
-import type { RoleMapping } from '../../../../common/model';
+import type { RoleMapping } from '../../../../common';
 import type { RolesAPIClient } from '../../roles';
 import {
   DeleteProvider,

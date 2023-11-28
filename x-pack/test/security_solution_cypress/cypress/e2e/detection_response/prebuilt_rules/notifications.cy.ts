@@ -12,16 +12,13 @@ import {
   RULES_UPDATES_TAB,
 } from '../../../screens/alerts_detection_rules';
 import { deleteFirstRule } from '../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../../tasks/api_calls/common';
 import {
   installAllPrebuiltRulesRequest,
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import {
-  resetRulesTableState,
-  deleteAlertsAndRules,
-  deletePrebuiltRulesAssets,
-} from '../../../tasks/common';
+import { resetRulesTableState } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 

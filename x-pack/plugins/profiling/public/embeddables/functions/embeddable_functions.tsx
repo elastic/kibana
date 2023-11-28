@@ -9,12 +9,12 @@ import { EMBEDDABLE_FUNCTIONS } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
-import { EmbeddableFunctionsEmbeddableInput } from './embeddable_functions_factory';
-import { EmbeddableFunctionsGrid } from './embeddable_functions_grid';
 import {
   ProfilingEmbeddableProvider,
   ProfilingEmbeddablesDependencies,
 } from '../profiling_embeddable_provider';
+import { EmbeddableFunctionsEmbeddableInput } from './embeddable_functions_factory';
+import { EmbeddableFunctionsGrid } from './embeddable_functions_grid';
 
 export class EmbeddableFunctions extends Embeddable<
   EmbeddableFunctionsEmbeddableInput,

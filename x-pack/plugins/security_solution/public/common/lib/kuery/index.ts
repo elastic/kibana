@@ -233,7 +233,7 @@ export const convertToBuildEsQuery = ({
 
 export const combineQueries = ({
   config,
-  dataProviders,
+  dataProviders = [],
   indexPattern,
   browserFields,
   filters = [],

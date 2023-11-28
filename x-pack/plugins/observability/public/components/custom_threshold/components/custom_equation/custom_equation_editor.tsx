@@ -22,6 +22,7 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { adjustThresholdBasedOnFormat } from '../../helpers/adjust_threshold_based_on_format';
 import {
   Aggregators,
   CustomThresholdExpressionMetric,
@@ -71,7 +72,12 @@ export function CustomEquationEditor({
       const currentVars = previous?.map((m) => m.name) ?? [];
       const name = first(xor(VAR_NAMES, currentVars))!;
       const nextMetrics = [...(previous || []), { ...NEW_METRIC, name }];
-      debouncedOnChange({ ...expression, metrics: nextMetrics, equation });
+      debouncedOnChange({
+        ...expression,
+        metrics: nextMetrics,
+        equation,
+        threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+      });
       return nextMetrics;
     });
   }, [debouncedOnChange, equation, expression]);
@@ -81,7 +87,12 @@ export function CustomEquationEditor({
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.filter((row) => row.name !== name) ?? [NEW_METRIC];
         const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_METRIC];
-        debouncedOnChange({ ...expression, metrics: finalMetrics, equation });
+        debouncedOnChange({
+          ...expression,
+          metrics: finalMetrics,
+          equation,
+          threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+        });
         return finalMetrics;
       });
     },
@@ -92,7 +103,12 @@ export function CustomEquationEditor({
     (metric: CustomThresholdExpressionMetric) => {
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.map((m) => (m.name === metric.name ? metric : m));
-        debouncedOnChange({ ...expression, metrics: nextMetrics, equation });
+        debouncedOnChange({
+          ...expression,
+          metrics: nextMetrics,
+          equation,
+          threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+        });
         return nextMetrics;
       });
     },
