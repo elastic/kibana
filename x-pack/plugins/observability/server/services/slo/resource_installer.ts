@@ -134,6 +134,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         this.esClient.enrich.executePolicy(
           {
             name: policy.name,
+            wait_for_completion: true,
           },
           { ignore: [404] }
         )
