@@ -7146,9 +7146,9 @@
               },
               ", options?: { spaceId?: string | undefined; id?: string | undefined; user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7303,9 +7303,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -7569,9 +7569,9 @@
               "NewPackagePolicyWithId",
               "[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7685,9 +7685,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -7779,9 +7779,9 @@
               },
               "[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7893,9 +7893,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8382,9 +8382,9 @@
               },
               ", options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8500,9 +8500,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8586,9 +8586,9 @@
               },
               ", ids: string[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8699,9 +8699,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8814,9 +8814,9 @@
               },
               ", ids: string[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8919,9 +8919,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
