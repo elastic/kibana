@@ -15,6 +15,7 @@ import { ILicenseState } from './license_state';
 import { licenseStateMock } from './license_state.mock';
 import { schema } from '@kbn/config-schema';
 import { createGetAlertIndicesAliasFn } from './create_get_alert_indices_alias';
+import { AlertingConfig } from '../config';
 
 describe('createGetAlertIndicesAliasFn', () => {
   const logger = loggingSystemMock.create().get();
@@ -23,6 +24,7 @@ describe('createGetAlertIndicesAliasFn', () => {
   const inMemoryMetrics = inMemoryMetricsMock.create();
 
   const ruleTypeRegistryParams: ConstructorOptions = {
+    config: {} as AlertingConfig,
     logger,
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),

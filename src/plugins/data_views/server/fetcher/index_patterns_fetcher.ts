@@ -9,6 +9,8 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
+import { defer, from } from 'rxjs';
+import { rateLimitingForkJoin } from '../../common/data_views/utils';
 import type { QueryDslQueryContainer } from '../../common/types';
 
 import {
@@ -128,5 +130,38 @@ export class IndexPatternsFetcher {
       };
     }
     return fieldCapsResponse;
+  }
+
+  /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices - index pattern list
+   * @returns index pattern list of index patterns that match indices
+   */
+  async getExistingIndices(indices: string[]): Promise<string[]> {
+    const indicesObs = indices.map((pattern) => {
+      // when checking a negative pattern, check if the positive pattern exists
+      const indexToQuery = pattern.trim().startsWith('-')
+        ? pattern.trim().substring(1)
+        : pattern.trim();
+      return defer(() =>
+        from(
+          this.getFieldsForWildcard({
+            // check one field to keep request fast/small
+            fields: ['_id'],
+            pattern: indexToQuery,
+          })
+        )
+      );
+    });
+
+    return new Promise<boolean[]>((resolve) => {
+      rateLimitingForkJoin(indicesObs, 3, { fields: [], indices: [] }).subscribe((value) => {
+        resolve(value.map((v) => v.indices.length > 0));
+      });
+    })
+      .then((allPatterns: boolean[]) =>
+        indices.filter((pattern, i, self) => self.indexOf(pattern) === i && allPatterns[i])
+      )
+      .catch(() => indices);
   }
 }

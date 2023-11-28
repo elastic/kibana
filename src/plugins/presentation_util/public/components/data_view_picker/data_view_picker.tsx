@@ -9,10 +9,11 @@
 import React, { useState } from 'react';
 import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 
-export type DataViewTriggerProps = ToolbarButtonProps & {
+export type DataViewTriggerProps = Omit<ToolbarButtonProps<'standard'>, 'label'> & {
   label: string;
   title?: string;
 };
@@ -46,15 +47,14 @@ export function DataViewPicker({
     const { label, title, ...rest } = trigger;
     return (
       <ToolbarButton
-        title={title}
+        aria-label={title}
         data-test-subj="open-data-view-picker"
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+        label={label}
         fullWidth
         {...colorProp}
         {...rest}
-      >
-        {label}
-      </ToolbarButton>
+      />
     );
   };
 
@@ -68,6 +68,7 @@ export function DataViewPicker({
       isOpen={isPopoverOpen}
       input={createTrigger()}
       closePopover={() => setPopoverIsOpen(false)}
+      panelMinWidth={calculateWidthFromEntries(dataViews, ['name', 'id'])}
       panelProps={{
         'data-test-subj': 'data-view-picker-popover',
       }}

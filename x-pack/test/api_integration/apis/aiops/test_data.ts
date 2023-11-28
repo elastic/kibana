@@ -10,12 +10,19 @@
 // that also the jest unit tests use mocks that are not outdated.
 import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_terms';
 import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_log_patterns';
-import { finalSignificantTermGroups as artificialLogsSignificantTermGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_term_groups';
-import { finalSignificantTermGroupsTextfield as artificialLogsSignificantTermGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_term_groups_textfield';
+import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups';
+import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups_textfield';
+
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
 
 import type { TestData } from './types';
 
-export const logRateAnalysisTestData: TestData[] = [
+export const API_VERSIONS: ApiVersion[] = ['1', '2'];
+
+export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestData<T>> => [
   {
     testName: 'ecommerce',
     esArchive: 'x-pack/test/functional/es_archives/ml/ecommerce',
@@ -30,7 +37,7 @@ export const logRateAnalysisTestData: TestData[] = [
       start: 0,
       timeFieldName: 'order_date',
       grouping: true,
-    },
+    } as AiopsLogRateAnalysisSchema<T>,
     expected: {
       chunksLength: 35,
       chunksLengthGroupOnly: 5,
@@ -38,12 +45,7 @@ export const logRateAnalysisTestData: TestData[] = [
       actionsLengthGroupOnly: 4,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTermFilter: 'add_significant_terms',
-      groupFilter: 'add_significant_terms_group',
-      groupHistogramFilter: 'add_significant_terms_group_histogram',
-      histogramFilter: 'add_significant_terms_histogram',
-      errorFilter: 'add_error',
-      significantTerms: [
+      significantItems: [
         {
           key: 'day_of_week:Thursday',
           type: 'keyword',
@@ -89,7 +91,7 @@ export const logRateAnalysisTestData: TestData[] = [
       deviationMin: 1668855600000,
       deviationMax: 1668924000000,
       grouping: true,
-    },
+    } as AiopsLogRateAnalysisSchema<T>,
     expected: {
       chunksLength: 27,
       chunksLengthGroupOnly: 11,
@@ -97,13 +99,8 @@ export const logRateAnalysisTestData: TestData[] = [
       actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTermFilter: 'add_significant_terms',
-      groupFilter: 'add_significant_terms_group',
-      groupHistogramFilter: 'add_significant_terms_group_histogram',
-      histogramFilter: 'add_significant_terms_histogram',
-      errorFilter: 'add_error',
-      significantTerms: artificialLogSignificantTerms,
-      groups: artificialLogsSignificantTermGroups,
+      significantItems: artificialLogSignificantTerms,
+      groups: artificialLogsSignificantItemGroups,
       histogramLength: 20,
     },
   },
@@ -121,7 +118,7 @@ export const logRateAnalysisTestData: TestData[] = [
       deviationMin: 1668855600000,
       deviationMax: 1668924000000,
       grouping: true,
-    },
+    } as AiopsLogRateAnalysisSchema<T>,
     expected: {
       chunksLength: 30,
       chunksLengthGroupOnly: 11,
@@ -129,13 +126,8 @@ export const logRateAnalysisTestData: TestData[] = [
       actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTermFilter: 'add_significant_terms',
-      groupFilter: 'add_significant_terms_group',
-      groupHistogramFilter: 'add_significant_terms_group_histogram',
-      histogramFilter: 'add_significant_terms_histogram',
-      errorFilter: 'add_error',
-      significantTerms: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
-      groups: artificialLogsSignificantTermGroupsTextfield,
+      significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
+      groups: artificialLogsSignificantItemGroupsTextfield,
       histogramLength: 20,
     },
   },
@@ -153,7 +145,7 @@ export const logRateAnalysisTestData: TestData[] = [
       deviationMin: 1668769200000,
       deviationMax: 1668837600000,
       grouping: true,
-    },
+    } as AiopsLogRateAnalysisSchema<T>,
     expected: {
       chunksLength: 27,
       chunksLengthGroupOnly: 11,
@@ -161,13 +153,8 @@ export const logRateAnalysisTestData: TestData[] = [
       actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTermFilter: 'add_significant_terms',
-      groupFilter: 'add_significant_terms_group',
-      groupHistogramFilter: 'add_significant_terms_group_histogram',
-      histogramFilter: 'add_significant_terms_histogram',
-      errorFilter: 'add_error',
-      significantTerms: artificialLogSignificantTerms,
-      groups: artificialLogsSignificantTermGroups,
+      significantItems: artificialLogSignificantTerms,
+      groups: artificialLogsSignificantItemGroups,
       histogramLength: 20,
     },
   },
@@ -185,7 +172,7 @@ export const logRateAnalysisTestData: TestData[] = [
       deviationMin: 1668769200000,
       deviationMax: 1668837600000,
       grouping: true,
-    },
+    } as AiopsLogRateAnalysisSchema<T>,
     expected: {
       chunksLength: 30,
       chunksLengthGroupOnly: 11,
@@ -193,13 +180,8 @@ export const logRateAnalysisTestData: TestData[] = [
       actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTermFilter: 'add_significant_terms',
-      groupFilter: 'add_significant_terms_group',
-      groupHistogramFilter: 'add_significant_terms_group_histogram',
-      histogramFilter: 'add_significant_terms_histogram',
-      errorFilter: 'add_error',
-      significantTerms: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
-      groups: artificialLogsSignificantTermGroupsTextfield,
+      significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
+      groups: artificialLogsSignificantItemGroupsTextfield,
       histogramLength: 20,
     },
   },

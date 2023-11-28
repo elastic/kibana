@@ -35,6 +35,17 @@ export const useEnterpriseSearchNav = () => {
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
+      id: 'overview',
+      name: i18n.translate('xpack.enterpriseSearch.nav.overviewTitle', {
+        defaultMessage: 'Overview',
+      }),
+      ...generateNavLink({
+        shouldNotCreateHref: true,
+        shouldShowActiveForSubroutes: true,
+        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      }),
+    },
+    {
       id: 'content',
       items: [
         {
@@ -78,7 +89,7 @@ export const useEnterpriseSearchNav = () => {
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
-            to: APPLICATIONS_PLUGIN.URL,
+            to: APPLICATIONS_PLUGIN.URL + SEARCH_APPLICATIONS_PATH,
           }),
         },
         {
@@ -98,13 +109,6 @@ export const useEnterpriseSearchNav = () => {
     },
     {
       id: 'es_getting_started',
-      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
-        defaultMessage: 'Getting started',
-      }),
-      ...generateNavLink({
-        shouldNotCreateHref: true,
-        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-      }),
       items: [
         {
           id: 'elasticsearch',
@@ -135,6 +139,9 @@ export const useEnterpriseSearchNav = () => {
           }),
         },
       ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
+        defaultMessage: 'Getting started',
+      }),
     },
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
       ? [

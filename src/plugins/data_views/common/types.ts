@@ -324,6 +324,11 @@ export interface FieldsForWildcardResponse {
   indices: string[];
 }
 
+/**
+ * Existing Indices response
+ */
+export type ExistingIndicesResponse = string[];
+
 export interface IDataViewsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
   hasUserDataView: () => Promise<boolean>;
@@ -518,7 +523,7 @@ export type DataViewSpec = {
    */
   name?: string;
   /**
-   * Whether the data view is hidden from the user
+   * Allow hidden and system indices when loading field list
    */
   allowHidden?: boolean;
 };

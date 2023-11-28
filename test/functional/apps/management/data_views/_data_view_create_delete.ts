@@ -254,10 +254,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('hidden index support', () => {
       it('can create data view against hidden index', async () => {
-        const pattern = 'logstash-2015.09.21';
+        const pattern = 'logstash-2015.09.2*';
 
         await es.transport.request({
-          path: '/logstash-2015.09.21/_settings',
+          path: '/logstash-2015.09.2*/_settings',
           method: 'PUT',
           body: {
             index: {
@@ -268,7 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.settings.createIndexPattern(
           pattern,
-          undefined,
+          '@timestamp',
           undefined,
           undefined,
           undefined,
@@ -276,6 +276,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const patternName = await PageObjects.settings.getIndexPageHeading();
         expect(patternName).to.be(pattern);
+
+        // verify that allow hidden persists through reload
+        await browser.refresh();
+
+        await testSubjects.click('editIndexPatternButton');
+        await testSubjects.click('toggleAdvancedSetting');
+        const allowHiddenField = await testSubjects.find('allowHiddenField');
+        const button = await allowHiddenField.findByTagName('button');
+        expect(await button.getAttribute('aria-checked')).to.be('true');
       });
     });
   });

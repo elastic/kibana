@@ -130,6 +130,7 @@ export const DecisionPathChart = ({
           // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
           theme={theme}
           rotation={90}
+          locale={i18n.getLocale()}
         />
         {regressionBaselineData && (
           <LineAnnotation

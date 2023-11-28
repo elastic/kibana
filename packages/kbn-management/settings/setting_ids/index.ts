@@ -52,7 +52,6 @@ export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
 // Presentation labs settings
 export const LABS_CANVAS_BY_VALUE_EMBEDDABLE_ID = 'labs:canvas:byValueEmbeddable';
 export const LABS_CANVAS_ENABLE_UI_ID = 'labs:canvas:enable_ui';
-export const LABS_DASHBOARD_CONTROLS_ID = 'labs:dashboard:dashboardControls';
 export const LABS_DASHBOARD_DEFER_BELOW_FOLD_ID = 'labs:dashboard:deferBelowFold';
 export const LABS_DASHBOARDS_ENABLE_UI_ID = 'labs:dashboard:enable_ui';
 
@@ -164,6 +163,10 @@ export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipRepu
 export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableCcsWarning';
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
+export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
+/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
+export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =
+  'securitySolution:enableExpandableFlyout' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

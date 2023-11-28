@@ -17,6 +17,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
 import { initDashboard } from './create_dashboard';
+import { PassThrough, Transform } from 'stream';
 jest.mock('./create_dashboard');
 
 describe('OpenAIConnector', () => {
@@ -33,10 +34,18 @@ describe('OpenAIConnector', () => {
             role: 'assistant',
             content: mockResponseString,
           },
+          delta: {
+            content: mockResponseString,
+          },
           finish_reason: 'stop',
           index: 0,
         },
       ],
+      usage: {
+        prompt_tokens: 4,
+        completion_tokens: 5,
+        total_tokens: 9,
+      },
     },
   };
   beforeEach(() => {
@@ -80,6 +89,7 @@ describe('OpenAIConnector', () => {
         const response = await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -97,6 +107,7 @@ describe('OpenAIConnector', () => {
         const response = await connector.runApi({ body: JSON.stringify(requestBody) });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -113,6 +124,7 @@ describe('OpenAIConnector', () => {
         const response = await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -143,6 +155,7 @@ describe('OpenAIConnector', () => {
         });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -259,11 +272,62 @@ describe('OpenAIConnector', () => {
       });
     });
 
+    describe('invokeStream', () => {
+      const mockStream = (
+        dataToStream: string[] = [
+          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}',
+        ]
+      ) => {
+        const streamMock = createStreamMock();
+        dataToStream.forEach((chunk) => {
+          streamMock.write(chunk);
+        });
+        streamMock.complete();
+        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: streamMock.transform });
+        return mockRequest;
+      };
+      beforeEach(() => {
+        // @ts-ignore
+        connector.request = mockStream();
+      });
+
+      it('the API call is successful with correct request parameters', async () => {
+        await connector.invokeStream(sampleOpenAiBody);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          responseType: 'stream',
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+        });
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+
+        await expect(connector.invokeStream(sampleOpenAiBody)).rejects.toThrow('API Error');
+      });
+
+      it('responds with a readable stream', async () => {
+        // @ts-ignore
+        connector.request = mockStream();
+        const response = await connector.invokeStream(sampleOpenAiBody);
+        expect(response instanceof PassThrough).toEqual(true);
+      });
+    });
+
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.invokeAI(sampleOpenAiBody);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -273,7 +337,8 @@ describe('OpenAIConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual(mockResponseString);
+        expect(response.message).toEqual(mockResponseString);
+        expect(response.usage.total_tokens).toEqual(9);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -373,6 +438,7 @@ describe('OpenAIConnector', () => {
         const response = await connector.runApi({ body: JSON.stringify(sampleAzureAiBody) });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
           url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -399,6 +465,7 @@ describe('OpenAIConnector', () => {
         });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
           url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -585,3 +652,21 @@ describe('OpenAIConnector', () => {
     });
   });
 });
+
+function createStreamMock() {
+  const transform: Transform = new Transform({});
+
+  return {
+    write: (data: string) => {
+      transform.push(data);
+    },
+    fail: () => {
+      transform.emit('error', new Error('Stream failed'));
+      transform.end();
+    },
+    transform,
+    complete: () => {
+      transform.end();
+    },
+  };
+}

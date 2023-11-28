@@ -8,7 +8,6 @@
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, GaugeConfig } from '../config';
-import { VisTypeGaugeServerPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<GaugeConfig> = {
   exposeToBrowser: {
@@ -17,5 +16,7 @@ export const config: PluginConfigDescriptor<GaugeConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new VisTypeGaugeServerPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { VisTypeGaugeServerPlugin } = await import('./plugin');
+  return new VisTypeGaugeServerPlugin(initializerContext);
+};

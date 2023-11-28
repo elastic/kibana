@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { isSignificantTerm, type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { isSignificantItem, type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -19,8 +19,8 @@ import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
 import type { GroupTableItem, TableItemAction } from './types';
 
-const isLogPattern = (tableItem: SignificantTerm | GroupTableItem) =>
-  isSignificantTerm(tableItem) && tableItem.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN;
+const isLogPattern = (tableItem: SignificantItem | GroupTableItem) =>
+  isSignificantItem(tableItem) && tableItem.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN;
 
 const viewInLogPatternAnalysisMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInLogPatternAnalysis',
@@ -35,7 +35,7 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
   const mlLocator = useMemo(() => share.url.locators.get('ML_APP_LOCATOR'), [share.url.locators]);
 
   const generateLogPatternAnalysisUrl = async (
-    groupTableItem: GroupTableItem | SignificantTerm
+    groupTableItem: GroupTableItem | SignificantItem
   ) => {
     if (mlLocator !== undefined) {
       const searchString = getTableItemAsKQL(groupTableItem);
@@ -85,7 +85,7 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
   }, [dataViewId, mlLocator]);
 
   return {
-    render: (tableItem: SignificantTerm | GroupTableItem) => {
+    render: (tableItem: SignificantItem | GroupTableItem) => {
       const message = logPatternAnalysisUrlError
         ? logPatternAnalysisUrlError
         : viewInLogPatternAnalysisMessage;

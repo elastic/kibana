@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 import {
   ANOMALIES_TABLE,
@@ -46,8 +47,8 @@ import { getNewRule } from '../../../objects/rule';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../tasks/risk_scores';
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/filter_group';
 import { setRowsPerPageTo } from '../../../tasks/table_pagination';
-import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
-import { setEndDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
+import { kqlSearch } from '../../../tasks/security_header';
+import { setEndDate, setStartDate, updateDates } from '../../../tasks/date_picker';
 import {
   enableJob,
   navigateToNextPage,
@@ -56,20 +57,26 @@ import {
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { enableRiskEngine } from '../../../tasks/entity_analytics';
 
-const TEST_USER_ALERTS = 2;
+const TEST_USER_ALERTS = 1;
 const TEST_USER_NAME = 'test';
-const SIEM_KIBANA_HOST_ALERTS = 2;
+const SIEM_KIBANA_HOST_ALERTS = 1;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
-const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
+const DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+const DATE_BEFORE_ALERT_CREATION = moment().format(DATE_FORMAT);
+const OLDEST_DATE = moment('2019-01-19T16:22:56.217Z').format(DATE_FORMAT);
 
-describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     login();
     deleteRiskEngineConfiguration();
   });
 
-  describe('legcay risk score', () => {
+  after(() => {
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
+  });
+
+  describe('legacy risk score', () => {
     describe('Without data', () => {
       beforeEach(() => {
         login();
@@ -135,8 +142,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168490
-    describe.skip('With host risk data', () => {
+    describe('With host risk data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       });
@@ -177,8 +183,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
         cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
         cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
-
-        clearSearchBar();
       });
 
       describe('With alerts data', () => {
@@ -202,14 +206,11 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         it('filters the alerts count with time range', () => {
-          setEndDate(END_DATE);
+          setEndDate(DATE_BEFORE_ALERT_CREATION);
+
           updateDates();
 
           cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
-
-          // CLEAR DATES
-          setEndDateNow();
-          updateDates();
         });
 
         it('opens alerts page when alerts count is clicked', () => {
@@ -265,8 +266,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
         cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
         cy.get(USERS_TABLE_ROWS).should('have.length', 1);
-
-        clearSearchBar();
       });
 
       describe('With alerts data', () => {
@@ -290,14 +289,10 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         it('filters the alerts count with time range', () => {
-          setEndDate(END_DATE);
+          setEndDate(DATE_BEFORE_ALERT_CREATION);
           updateDates();
 
           cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
-
-          // CLEAR DATES
-          setEndDateNow();
-          updateDates();
         });
 
         it('opens alerts page when alerts count is clicked', () => {
@@ -398,8 +393,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
         cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
         cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
-
-        clearSearchBar();
       });
 
       describe('With alerts data', () => {
@@ -423,13 +416,21 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         it('filters the alerts count with time range', () => {
-          setEndDate(END_DATE);
+          setEndDate(DATE_BEFORE_ALERT_CREATION);
           updateDates();
 
           cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
+        });
+
+        it('filters risk scores with time range', () => {
+          const now = moment().format(DATE_FORMAT);
+          setStartDate(now);
+          updateDates();
+
+          cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
 
           // CLEAR DATES
-          setEndDateNow();
+          setStartDate(OLDEST_DATE);
           updateDates();
         });
 
@@ -491,8 +492,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
         cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
         cy.get(USERS_TABLE_ROWS).should('have.length', 1);
-
-        clearSearchBar();
       });
 
       describe('With alerts data', () => {
@@ -516,13 +515,21 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         it('filters the alerts count with time range', () => {
-          setEndDate(END_DATE);
+          setEndDate(DATE_BEFORE_ALERT_CREATION);
           updateDates();
 
           cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
+        });
+
+        it('filters risk scores with time range', () => {
+          const now = moment().format(DATE_FORMAT);
+          setStartDate(now);
+          updateDates();
+
+          cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
 
           // CLEAR DATES
-          setEndDateNow();
+          setStartDate(OLDEST_DATE);
           updateDates();
         });
 

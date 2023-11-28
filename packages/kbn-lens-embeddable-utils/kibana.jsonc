@@ -1,5 +1,5 @@
 {
   "type": "shared-browser",
   "id": "@kbn/lens-embeddable-utils",
-  "owner": "@elastic/infra-monitoring-ui"
+  "owner": "@elastic/obs-ux-infra_services-team"
 }

@@ -7,4 +7,4 @@
 
 import { SampleTaskManagerFixturePlugin } from './plugin';
 
-export const plugin = () => new SampleTaskManagerFixturePlugin();
+export const plugin = async () => new SampleTaskManagerFixturePlugin();

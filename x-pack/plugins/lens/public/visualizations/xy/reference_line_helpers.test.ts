@@ -5,25 +5,9 @@
  * 2.0.
  */
 
-import { FramePublicAPI } from '../../types';
 import { computeOverallDataDomain, getStaticValue } from './reference_line_helpers';
 import { XYDataLayerConfig } from './types';
-
-function getActiveData(json: Array<{ id: string; rows: Array<Record<string, number | null>> }>) {
-  return json.reduce((memo, { id, rows }) => {
-    const columns = Object.keys(rows[0]).map((columnId) => ({
-      id: columnId,
-      name: columnId,
-      meta: { type: 'number' as const },
-    }));
-    memo[id] = {
-      type: 'datatable' as const,
-      columns,
-      rows,
-    };
-    return memo;
-  }, {} as NonNullable<FramePublicAPI['activeData']>);
-}
+import { generateActiveData } from '../../mocks';
 
 describe('reference_line helpers', () => {
   describe('getStaticValue', () => {
@@ -41,7 +25,7 @@ describe('reference_line helpers', () => {
           [],
           'x',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
             ]),
           },
@@ -54,7 +38,7 @@ describe('reference_line helpers', () => {
           [{ layerId: 'id-a', seriesType: 'area' } as XYDataLayerConfig], // missing xAccessor for groupId == x
           'x',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
             ]),
           },
@@ -73,7 +57,7 @@ describe('reference_line helpers', () => {
           ], // missing hit of accessor "d" in data
           'yLeft',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
             ]),
           },
@@ -92,7 +76,7 @@ describe('reference_line helpers', () => {
           ], // missing yConfig fallbacks to left axis, but the requested group is yRight
           'yRight',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
             ]),
           },
@@ -111,7 +95,7 @@ describe('reference_line helpers', () => {
           ], // same as above with x groupId
           'x',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
             ]),
           },
@@ -134,7 +118,7 @@ describe('reference_line helpers', () => {
           ],
           'yRight',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               {
                 id: 'id-a',
                 rows: [{ a: -30 }, { a: 10 }],
@@ -159,7 +143,7 @@ describe('reference_line helpers', () => {
           ],
           'yLeft',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
             ]),
           },
@@ -182,7 +166,7 @@ describe('reference_line helpers', () => {
           ],
           'yRight',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
             ]),
           },
@@ -192,7 +176,7 @@ describe('reference_line helpers', () => {
     });
 
     it('should correctly distribute axis on left and right with different formatters when in auto', () => {
-      const tables = getActiveData([
+      const tables = generateActiveData([
         { id: 'id-a', rows: Array(3).fill({ a: 100, b: 200, c: 100 }) },
       ]);
       tables['id-a'].columns[0].meta.params = { id: 'number' }; // a: number formatter
@@ -230,7 +214,7 @@ describe('reference_line helpers', () => {
     });
 
     it('should ignore hasHistogram for left or right axis', () => {
-      const tables = getActiveData([
+      const tables = generateActiveData([
         { id: 'id-a', rows: Array(3).fill({ a: 100, b: 200, c: 100 }) },
       ]);
       tables['id-a'].columns[0].meta.params = { id: 'number' }; // a: number formatter
@@ -285,7 +269,7 @@ describe('reference_line helpers', () => {
           ],
           'x', // this is influenced by the callback
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
             ]),
           },
@@ -312,7 +296,7 @@ describe('reference_line helpers', () => {
           ],
           'x',
           {
-            activeData: getActiveData([
+            activeData: generateActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
@@ -334,7 +318,7 @@ describe('reference_line helpers', () => {
           computeOverallDataDomain(
             [{ layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] } as XYDataLayerConfig],
             ['a', 'b', 'c'],
-            getActiveData([
+            generateActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
@@ -360,7 +344,7 @@ describe('reference_line helpers', () => {
           computeOverallDataDomain(
             [{ layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] } as XYDataLayerConfig],
             ['a', 'b', 'c'],
-            getActiveData([
+            generateActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
@@ -385,7 +369,7 @@ describe('reference_line helpers', () => {
               { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
             ] as XYDataLayerConfig[],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-            getActiveData([
+            generateActiveData([
               { id: 'id-a', rows: [{ a: 25, b: 100, c: 100 }] },
               { id: 'id-b', rows: [{ d: 50, e: 50, f: 50 }] },
             ])
@@ -399,7 +383,7 @@ describe('reference_line helpers', () => {
               { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
             ] as XYDataLayerConfig[],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-            getActiveData([
+            generateActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
@@ -435,7 +419,7 @@ describe('reference_line helpers', () => {
               { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
             ] as XYDataLayerConfig[],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-            getActiveData([
+            generateActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
               { id: 'id-b', rows: Array(3).fill({ d: 50, e: 50, f: 50 }) },
             ])
@@ -453,7 +437,7 @@ describe('reference_line helpers', () => {
                 { layerId: 'id-b', seriesType: stackedSeries, accessors: ['d', 'e', 'f'] },
               ] as XYDataLayerConfig[],
               ['a', 'b', 'c', 'd', 'e', 'f'],
-              getActiveData([
+              generateActiveData([
                 { id: 'id-a', rows: [{ a: 100, b: 100, c: 100 }] },
                 { id: 'id-b', rows: [{ d: 50, e: 50, f: 50 }] },
               ])
@@ -475,7 +459,7 @@ describe('reference_line helpers', () => {
               { layerId: 'id-b', seriesType, xAccessor: 'f', accessors: ['d', 'e'] },
             ] as XYDataLayerConfig[],
             ['a', 'b', 'd', 'e'],
-            getActiveData([
+            generateActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
@@ -502,7 +486,7 @@ describe('reference_line helpers', () => {
               { layerId: 'id-b', seriesType, accessors: ['f'] },
             ] as XYDataLayerConfig[],
             ['c', 'f'],
-            getActiveData([
+            generateActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
@@ -530,7 +514,7 @@ describe('reference_line helpers', () => {
               { layerId: 'id-b', seriesType, xAccessor: 'f', accessors: ['d', 'e'] },
             ] as XYDataLayerConfig[],
             ['a', 'b', 'd', 'e'],
-            getActiveData([
+            generateActiveData([
               {
                 id: 'id-a',
                 rows: Array(3)
@@ -560,7 +544,7 @@ describe('reference_line helpers', () => {
             } as XYDataLayerConfig,
           ],
           ['a', 'b', 'c'],
-          getActiveData([
+          generateActiveData([
             {
               id: 'id-a',
               rows: Array(3)
@@ -584,7 +568,7 @@ describe('reference_line helpers', () => {
             } as XYDataLayerConfig,
           ],
           ['a', 'b', 'c'],
-          getActiveData([
+          generateActiveData([
             {
               id: 'id-a',
               rows: Array(3)
@@ -605,7 +589,7 @@ describe('reference_line helpers', () => {
         computeOverallDataDomain(
           [],
           ['a', 'b', 'c'],
-          getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) }])
+          generateActiveData([{ id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) }])
         )
       ).toEqual({ min: undefined, max: undefined });
     });
@@ -618,7 +602,7 @@ describe('reference_line helpers', () => {
             { layerId: 'id-b', seriesType: 'line', accessors: ['d', 'e', 'f'] },
           ] as XYDataLayerConfig[],
           ['a', 'b'],
-          getActiveData([{ id: 'id-c', rows: [{ a: 100, b: 100 }] }]) // mind the layer id here
+          generateActiveData([{ id: 'id-c', rows: [{ a: 100, b: 100 }] }]) // mind the layer id here
         )
       ).toEqual({ min: undefined, max: undefined });
 
@@ -629,7 +613,7 @@ describe('reference_line helpers', () => {
             { layerId: 'id-b', seriesType: 'bar_stacked' },
           ] as XYDataLayerConfig[],
           ['a', 'b'],
-          getActiveData([])
+          generateActiveData([])
         )
       ).toEqual({ min: undefined, max: undefined });
     });

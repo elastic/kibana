@@ -26,6 +26,12 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  ApmRuleType,
+  ES_QUERY_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
@@ -58,7 +64,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   alerting: PluginSetupContract;
   features: FeaturesSetup;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
@@ -71,6 +77,14 @@ interface PluginStart {
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
+
+const o11yRuleTypes = [
+  SLO_BURN_RATE_RULE_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  ...Object.values(ApmRuleType),
+];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
@@ -161,6 +175,36 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.casesSettingsSubFeatureName', {
+            defaultMessage: 'Case Settings',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_settings',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
+                    {
+                      defaultMessage: 'Edit Case Settings',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  cases: {
+                    settings: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.settings,
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 
@@ -177,6 +221,58 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         const logger = this.initContext.logger.get('annotations');
         logger.warn(err);
         throw err;
+      });
+    }
+
+    if (config.createO11yGenericFeatureId) {
+      plugins.features.registerKibanaFeature({
+        id: observabilityFeatureId,
+        name: i18n.translate('xpack.observability.nameFeatureTitle', {
+          defaultMessage: 'Observability',
+        }),
+        order: 1000,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        app: [observabilityFeatureId],
+        catalogue: [observabilityFeatureId],
+        alerting: o11yRuleTypes,
+        privileges: {
+          all: {
+            app: [observabilityFeatureId],
+            catalogue: [observabilityFeatureId],
+            api: ['rac'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            alerting: {
+              rule: {
+                all: o11yRuleTypes,
+              },
+              alert: {
+                all: o11yRuleTypes,
+              },
+            },
+            ui: ['read', 'write'],
+          },
+          read: {
+            app: [observabilityFeatureId],
+            catalogue: [observabilityFeatureId],
+            api: ['rac'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            alerting: {
+              rule: {
+                read: o11yRuleTypes,
+              },
+              alert: {
+                read: o11yRuleTypes,
+              },
+            },
+            ui: ['read'],
+          },
+        },
       });
     }
 
@@ -280,7 +376,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     /**
      * Register a config for the observability guide
      */
-    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+    plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
     return {
       getAlertDetailsConfig() {

@@ -28,7 +28,7 @@ import { useHasSecurityCapability } from '../../helper_hooks';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-  const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
+  const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
 
   return (
@@ -36,7 +36,7 @@ const EntityAnalyticsComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">

@@ -6,8 +6,11 @@ Array [
     "get_error_distribution_buckets",
     Object {
       "apm": Object {
-        "events": Array [
-          "error",
+        "sources": Array [
+          Object {
+            "documentType": "error",
+            "rollupInterval": "none",
+          },
         ],
       },
       "body": Object {

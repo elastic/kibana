@@ -8,8 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { IEsError, isEsError } from './types';
@@ -19,19 +18,13 @@ import { getRootCause } from './utils';
 export class PainlessError extends EsError {
   painlessStack?: string;
   indexPattern?: DataView;
-  constructor(err: IEsError, indexPattern?: DataView) {
-    super(err);
+  constructor(err: IEsError, openInInspector: () => void, indexPattern?: DataView) {
+    super(err, openInInspector);
     this.indexPattern = indexPattern;
   }
 
-  public getErrorMessage(application: ApplicationStart) {
-    function onClick(indexPatternId?: string) {
-      application.navigateToApp('management', {
-        path: `/kibana/indexPatterns${indexPatternId ? `/patterns/${indexPatternId}` : ''}`,
-      });
-    }
-
-    const rootCause = getRootCause(this.err);
+  public getErrorMessage() {
+    const rootCause = getRootCause(this.err.attributes?.error);
     const scriptFromStackTrace = rootCause?.script_stack
       ? rootCause?.script_stack?.slice(-2).join('\n')
       : undefined;
@@ -41,7 +34,6 @@ export class PainlessError extends EsError {
     // fallback, show ES stacktrace
     const painlessStack = rootCause?.script_stack ? rootCause?.script_stack.join('\n') : undefined;
 
-    const indexPatternId = this?.indexPattern?.id;
     return (
       <>
         <EuiText size="s" data-test-subj="painlessScript">
@@ -54,31 +46,46 @@ export class PainlessError extends EsError {
           })}
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiSpacer size="s" />
         {scriptFromStackTrace || painlessStack ? (
           <EuiCodeBlock data-test-subj="painlessStackTrace" isCopyable={true} paddingSize="s">
             {hasScript ? scriptFromStackTrace : painlessStack}
           </EuiCodeBlock>
         ) : null}
         {humanReadableError ? (
-          <EuiText data-test-subj="painlessHumanReadableError">{humanReadableError}</EuiText>
+          <EuiText size="s" data-test-subj="painlessHumanReadableError">
+            {humanReadableError}
+          </EuiText>
         ) : null}
-        <EuiSpacer size="s" />
-        <EuiSpacer size="s" />
-        <EuiText textAlign="right">
-          <EuiButton color="danger" onClick={() => onClick(indexPatternId)} size="s">
-            <FormattedMessage id="data.painlessError.buttonTxt" defaultMessage="Edit script" />
-          </EuiButton>
-        </EuiText>
       </>
     );
+  }
+
+  getActions(application: ApplicationStart) {
+    function onClick(indexPatternId?: string) {
+      application.navigateToApp('management', {
+        path: `/kibana/indexPatterns${indexPatternId ? `/patterns/${indexPatternId}` : ''}`,
+      });
+    }
+    const actions = super.getActions(application) ?? [];
+    actions.push(
+      <EuiButtonEmpty
+        key="editPainlessScript"
+        onClick={() => onClick(this?.indexPattern?.id)}
+        size="s"
+      >
+        {i18n.translate('data.painlessError.buttonTxt', {
+          defaultMessage: 'Edit script',
+        })}
+      </EuiButtonEmpty>
+    );
+    return actions;
   }
 }
 
 export function isPainlessError(err: Error | IEsError) {
   if (!isEsError(err)) return false;
 
-  const rootCause = getRootCause(err as IEsError);
+  const rootCause = getRootCause((err as IEsError).attributes?.error);
   if (!rootCause) return false;
 
   const { lang } = rootCause;

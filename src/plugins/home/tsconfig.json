@@ -32,6 +32,7 @@
     "@kbn/storybook",
     "@kbn/shared-ux-router",
     "@kbn/core-http-common",
+    "@kbn/shared-ux-link-redirect-app",
   ],
   "exclude": [
     "target/**/*",

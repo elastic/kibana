@@ -22,6 +22,7 @@ import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_c
 import { AnonymousAccessServiceContract } from '../common';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
+import { registrations } from './lib/registrations';
 import type { BrowserUrlService } from './types';
 
 /** @public */
@@ -68,7 +69,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): SharePluginSetup {
-    const { http } = core;
+    const { analytics, http } = core;
     const { basePath } = http;
 
     this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
@@ -105,6 +106,8 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     });
     this.redirectManager.registerLocatorRedirectApp(core);
     this.redirectManager.registerLegacyShortUrlRedirectApp(core);
+
+    registrations.setup({ analytics });
 
     return {
       ...this.shareMenuRegistry.setup(),

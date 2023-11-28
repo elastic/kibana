@@ -28,7 +28,7 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
-import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
+import { postDataView, deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -49,7 +49,6 @@ describe(
     const ITEM_NAME = 'Sample Exception List Item';
 
     before(() => {
-      cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
       login();
       postDataView('exceptions-*');

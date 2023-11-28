@@ -43,17 +43,43 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
+  secrets?: {};
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
   type: OutputType['Elasticsearch'];
 }
 
-export interface NewLogstashOutput extends NewBaseOutput {
-  type: OutputType['Logstash'];
+export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
+  type: OutputType['RemoteElasticsearch'];
+  service_token?: string;
+  secrets?: {
+    service_token?:
+      | string
+      | {
+          id: string;
+        };
+  };
 }
 
-export type NewOutput = NewElasticsearchOutput | NewLogstashOutput | KafkaOutput;
+export interface NewLogstashOutput extends NewBaseOutput {
+  type: OutputType['Logstash'];
+  secrets?: {
+    ssl?: {
+      key?:
+        | string
+        | {
+            id: string;
+          };
+    };
+  };
+}
+
+export type NewOutput =
+  | NewElasticsearchOutput
+  | NewRemoteElasticsearchOutput
+  | NewLogstashOutput
+  | KafkaOutput;
 
 export type Output = NewOutput & {
   id: string;
@@ -112,4 +138,18 @@ export interface KafkaOutput extends NewBaseOutput {
   timeout?: number;
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+  secrets?: {
+    password?:
+      | string
+      | {
+          id: string;
+        };
+    ssl?: {
+      key?:
+        | string
+        | {
+            id: string;
+          };
+    };
+  };
 }

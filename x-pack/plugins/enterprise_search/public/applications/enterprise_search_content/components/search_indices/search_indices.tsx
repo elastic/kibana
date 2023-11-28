@@ -319,7 +319,6 @@ export const SearchIndices: React.FC = () => {
           </>
         )}
       </EnterpriseSearchContentPageTemplate>
-      )
     </>
   );
 };

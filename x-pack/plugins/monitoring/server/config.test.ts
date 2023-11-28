@@ -22,6 +22,7 @@ describe('config schema', () => {
           },
           "enabled": true,
         },
+        "enabled": true,
         "kibana": Object {
           "collection": Object {
             "enabled": true,

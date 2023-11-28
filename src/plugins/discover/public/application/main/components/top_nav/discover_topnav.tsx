@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -14,6 +15,7 @@ import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getTopNavLinks } from './get_top_nav_links';
+import { getTopNavBadges } from './get_top_nav_badges';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
@@ -114,6 +116,20 @@ export const DiscoverTopNav = ({
   }, [dataViewEditor, stateContainer]);
 
   const topNavCustomization = useDiscoverCustomization('top_nav');
+
+  const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
+  const hasUnsavedChanges =
+    hasSavedSearchChanges && Boolean(stateContainer.savedSearchState.getId());
+  const topNavBadges = useMemo(
+    () =>
+      getTopNavBadges({
+        stateContainer,
+        services,
+        hasUnsavedChanges,
+        topNavCustomization,
+      }),
+    [stateContainer, services, hasUnsavedChanges, topNavCustomization]
+  );
 
   const topNavMenu = useMemo(
     () =>
@@ -216,6 +232,7 @@ export const DiscoverTopNav = ({
   return (
     <SearchBar
       appName="discover"
+      badges={topNavBadges}
       config={topNavMenu}
       indexPatterns={[dataView]}
       onQuerySubmit={updateQuery}

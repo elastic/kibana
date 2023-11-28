@@ -124,4 +124,52 @@ describe('group selector', () => {
     );
     expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, Host name');
   });
+  describe('when maxGroupingLevels is 1', () => {
+    it('Presents single option selector label when dropdown is clicked', () => {
+      const { getByTestId } = render(
+        <GroupSelector {...testProps} maxGroupingLevels={1} groupsSelected={[]} />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(getByTestId('contextMenuPanelTitle').textContent).toMatch(/select grouping/i);
+    });
+    it('Does not disable any options when maxGroupingLevels is 1 and one option is selected', () => {
+      const groupSelected = ['kibana.alert.rule.name'];
+
+      const { getByTestId } = render(
+        <GroupSelector {...testProps} maxGroupingLevels={1} groupsSelected={groupSelected} />
+      );
+
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+
+      [...testProps.options, { key: 'custom', label: 'Custom field' }].forEach((o) => {
+        expect(getByTestId(`panel-${o.key}`)).not.toHaveAttribute('disabled');
+      });
+    });
+  });
+  describe('when maxGroupingLevels is greater than 1', () => {
+    it('Presents select up to "X" groupings when dropdown is clicked', () => {
+      const { getByTestId } = render(
+        <GroupSelector {...testProps} maxGroupingLevels={3} groupsSelected={[]} />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(getByTestId('contextMenuPanelTitle').textContent).toMatch(/select up to 3 groupings/i);
+    });
+    it('Disables non-selected options when maxGroupingLevels is greater than 1 and the selects items reaches the maxGroupingLevels', () => {
+      const groupSelected = ['kibana.alert.rule.name', 'user.name'];
+
+      const { getByTestId } = render(
+        <GroupSelector {...testProps} maxGroupingLevels={2} groupsSelected={groupSelected} />
+      );
+
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+
+      [...testProps.options, { key: 'custom', label: 'Custom field' }].forEach((o) => {
+        if (groupSelected.includes(o.key) || o.key === 'none') {
+          expect(getByTestId(`panel-${o.key}`)).not.toHaveAttribute('disabled');
+        } else {
+          expect(getByTestId(`panel-${o.key}`)).toHaveAttribute('disabled');
+        }
+      });
+    });
+  });
 });

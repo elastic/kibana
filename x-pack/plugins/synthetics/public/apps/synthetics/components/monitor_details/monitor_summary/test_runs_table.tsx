@@ -38,7 +38,7 @@ import {
   getTestRunDetailRelativeLink,
   TestDetailsLink,
 } from '../../common/links/test_details_link';
-import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
@@ -93,7 +93,7 @@ export const TestRunsTable = ({
   const selectedLocation = useSelectedLocation();
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
+  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
 
   const { expandedRows, setExpandedRows } = useExpandedPingList(pings);
 
@@ -213,7 +213,7 @@ export const TestRunsTable = ({
       name: MESSAGE_LABEL,
       textOnly: true,
       css: css`
-        max-width: 600px;
+        max-width: 500px;
       `,
       render: (errorMessage: string) => (
         <EuiText size="s">{errorMessage?.length > 0 ? errorMessage : '-'}</EuiText>
@@ -269,31 +269,16 @@ export const TestRunsTable = ({
     return {
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
-        const targetElem = evt.target as HTMLElement;
-        const isTableRow =
-          targetElem.parentElement?.classList.contains('euiTableCellContent') ||
-          targetElem.parentElement?.classList.contains('euiTableCellContent__text') ||
-          targetElem?.classList.contains('euiTableCellContent') ||
-          targetElem?.classList.contains('euiBadge__text');
-        // we dont want to capture image click event
-        if (
-          isTableRow &&
-          targetElem.tagName !== 'IMG' &&
-          targetElem.tagName !== 'path' &&
-          targetElem.tagName !== 'BUTTON' &&
-          !targetElem.parentElement?.classList.contains('euiLink')
-        ) {
-          if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
-            toggleDetails(item, expandedRows, setExpandedRows);
-          } else {
-            history.push(
-              getTestRunDetailRelativeLink({
-                monitorId,
-                checkGroup: item.monitor.check_group,
-                locationId: selectedLocation?.id,
-              })
-            );
-          }
+        if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
+          toggleDetails(item, expandedRows, setExpandedRows);
+        } else {
+          history.push(
+            getTestRunDetailRelativeLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
         }
       },
     };

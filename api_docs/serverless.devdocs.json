@@ -41,9 +41,21 @@
           "description": [],
           "signature": [
             "(breadcrumbs: ",
-            "EuiBreadcrumbProps",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.ChromeBreadcrumb",
+              "text": "ChromeBreadcrumb"
+            },
             " | ",
-            "EuiBreadcrumbProps",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.ChromeBreadcrumb",
+              "text": "ChromeBreadcrumb"
+            },
             "[], params?: Partial<",
             {
               "pluginId": "@kbn/core-chrome-browser",
@@ -66,9 +78,21 @@
               "label": "breadcrumbs",
               "description": [],
               "signature": [
-                "EuiBreadcrumbProps",
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "common",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-common.ChromeBreadcrumb",
+                  "text": "ChromeBreadcrumb"
+                },
                 " | ",
-                "EuiBreadcrumbProps",
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "common",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-common.ChromeBreadcrumb",
+                  "text": "ChromeBreadcrumb"
+                },
                 "[]"
               ],
               "path": "x-pack/plugins/serverless/public/types.ts",

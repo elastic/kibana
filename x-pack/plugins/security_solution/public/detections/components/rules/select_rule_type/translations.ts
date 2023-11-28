@@ -32,7 +32,8 @@ export const ESQL_TYPE_TITLE = i18n.translate(
 export const ESQL_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.esqlTypeDescription',
   {
-    defaultMessage: 'Use The Elasticsearch Query Language (ES|QL) to search or aggregate events',
+    defaultMessage:
+      'Use Elasticsearch Query Language (ES|QL) to find events and aggregate search results.',
   }
 );
 

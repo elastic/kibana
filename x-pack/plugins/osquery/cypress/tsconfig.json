@@ -15,7 +15,6 @@
     "types": [
       "cypress",
       "node",
-      "cypress-react-selector"
     ],
     "resolveJsonModule": true,
   },
@@ -37,5 +36,6 @@
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
+    "@kbn/security-solution-plugin/public/management/cypress",
   ]
 }

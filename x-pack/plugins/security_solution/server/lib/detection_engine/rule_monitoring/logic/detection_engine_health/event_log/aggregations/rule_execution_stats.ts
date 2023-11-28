@@ -5,31 +5,32 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { mapValues } from 'lodash';
 
 import type {
   AggregatedMetric,
+  HealthOverviewStats,
+  LogLevel,
   NumberOfDetectedGaps,
   NumberOfExecutions,
   NumberOfLoggedMessages,
-  HealthOverviewStats,
-  TopMessages,
   RuleExecutionStatus,
+  TopMessages,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  RuleExecutionEventType,
+  LogLevelEnum,
+  RuleExecutionEventTypeEnum,
   RuleExecutionStatusEnum,
-  LogLevel,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 
-import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
-import type { RawData } from '../../../utils/normalization';
-import * as f from '../../../event_log/event_log_fields';
 import {
   ALERTING_PROVIDER,
   RULE_EXECUTION_LOG_PROVIDER,
 } from '../../../event_log/event_log_constants';
+import * as f from '../../../event_log/event_log_fields';
+import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
+import type { RawData } from '../../../utils/normalization';
 
 export type RuleExecutionStatsAggregationLevel = 'whole-interval' | 'histogram';
 
@@ -74,7 +75,7 @@ export const getRuleExecutionStatsAggregation = (
         bool: {
           filter: [
             { term: { [f.EVENT_PROVIDER]: RULE_EXECUTION_LOG_PROVIDER } },
-            { term: { [f.EVENT_ACTION]: RuleExecutionEventType['status-change'] } },
+            { term: { [f.EVENT_ACTION]: RuleExecutionEventTypeEnum['status-change'] } },
           ],
           must_not: [
             {
@@ -101,7 +102,7 @@ export const getRuleExecutionStatsAggregation = (
         bool: {
           filter: [
             { term: { [f.EVENT_PROVIDER]: RULE_EXECUTION_LOG_PROVIDER } },
-            { term: { [f.EVENT_ACTION]: RuleExecutionEventType['execution-metrics'] } },
+            { term: { [f.EVENT_ACTION]: RuleExecutionEventTypeEnum['execution-metrics'] } },
           ],
         },
       },
@@ -144,8 +145,8 @@ export const getRuleExecutionStatsAggregation = (
             {
               terms: {
                 [f.EVENT_ACTION]: [
-                  RuleExecutionEventType['status-change'],
-                  RuleExecutionEventType.message,
+                  RuleExecutionEventTypeEnum['status-change'],
+                  RuleExecutionEventTypeEnum.message,
                 ],
               },
             },
@@ -162,7 +163,7 @@ export const getRuleExecutionStatsAggregation = (
           ? {
               errors: {
                 filter: {
-                  term: { [f.LOG_LEVEL]: LogLevel.error },
+                  term: { [f.LOG_LEVEL]: LogLevelEnum.error },
                 },
                 aggs: {
                   topErrors: {
@@ -176,7 +177,7 @@ export const getRuleExecutionStatsAggregation = (
               },
               warnings: {
                 filter: {
-                  term: { [f.LOG_LEVEL]: LogLevel.warn },
+                  term: { [f.LOG_LEVEL]: LogLevelEnum.warn },
                 },
                 aggs: {
                   topWarnings: {
@@ -263,11 +264,11 @@ const normalizeNumberOfLoggedMessages = (
   return {
     total: Number(messageContainingEvents.doc_count || 0),
     by_level: {
-      error: getMessageCount(LogLevel.error),
-      warn: getMessageCount(LogLevel.warn),
-      info: getMessageCount(LogLevel.info),
-      debug: getMessageCount(LogLevel.debug),
-      trace: getMessageCount(LogLevel.trace),
+      error: getMessageCount(LogLevelEnum.error),
+      warn: getMessageCount(LogLevelEnum.warn),
+      info: getMessageCount(LogLevelEnum.info),
+      debug: getMessageCount(LogLevelEnum.debug),
+      trace: getMessageCount(LogLevelEnum.trace),
     },
   };
 };

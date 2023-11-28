@@ -688,55 +688,108 @@ describe('tagKibanaAssets', () => {
     );
   });
 
-  it('should respect SecuritySolution tags', async () => {
-    savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
-    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
-      Promise.resolve({ id: name.toLowerCase(), name })
-    );
-    const kibanaAssets = {
-      dashboard: [
-        { id: 'dashboard1', type: 'dashboard' },
-        { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
-      ],
-    } as any;
-    const assetTags = [
-      {
-        text: 'Security Solution',
-        asset_types: ['dashboard'],
-      },
-    ];
-    await tagKibanaAssets({
-      savedObjectTagAssignmentService,
-      savedObjectTagClient,
-      kibanaAssets,
-      pkgTitle: 'TestPackage',
-      pkgName: 'test-pkg',
-      spaceId: 'default',
-      importedAssets: [],
-      assetTags,
+  describe('Security Solution tag', () => {
+    it('creates tag in default space', async () => {
+      savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
+      savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+        Promise.resolve({ id: name.toLowerCase(), name })
+      );
+      const kibanaAssets = {
+        dashboard: [
+          { id: 'dashboard1', type: 'dashboard' },
+          { id: 'dashboard2', type: 'dashboard' },
+          { id: 'search_id1', type: 'search' },
+          { id: 'search_id2', type: 'search' },
+        ],
+      } as any;
+      const assetTags = [
+        {
+          text: 'Security Solution',
+          asset_types: ['dashboard'],
+        },
+      ];
+      await tagKibanaAssets({
+        savedObjectTagAssignmentService,
+        savedObjectTagClient,
+        kibanaAssets,
+        pkgTitle: 'TestPackage',
+        pkgName: 'test-pkg',
+        spaceId: 'default',
+        importedAssets: [],
+        assetTags,
+      });
+      expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+        managedTagPayloadArg1,
+        managedTagPayloadArg2
+      );
+      expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+        {
+          color: '#4DD2CA',
+          description: '',
+          name: 'TestPackage',
+        },
+        { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+      );
+      expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+        {
+          color: expect.any(String),
+          description: 'Tag defined in package-spec',
+          name: 'Security Solution',
+        },
+        { id: 'security-solution-default', overwrite: true, refresh: false }
+      );
     });
-    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
-      managedTagPayloadArg1,
-      managedTagPayloadArg2
-    );
-    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
-      {
-        color: '#4DD2CA',
-        description: '',
-        name: 'TestPackage',
-      },
-      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
-    );
-    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
-      {
-        color: expect.any(String),
-        description: 'Tag defined in package-spec',
-        name: 'Security Solution',
-      },
-      { id: 'security-solution-default', overwrite: true, refresh: false }
-    );
+
+    it('creates tag in non-default space', async () => {
+      savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
+      savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+        Promise.resolve({ id: name.toLowerCase(), name })
+      );
+      const kibanaAssets = {
+        dashboard: [
+          { id: 'dashboard1', type: 'dashboard' },
+          { id: 'dashboard2', type: 'dashboard' },
+          { id: 'search_id1', type: 'search' },
+          { id: 'search_id2', type: 'search' },
+        ],
+      } as any;
+      const assetTags = [
+        {
+          text: 'Security Solution',
+          asset_types: ['dashboard'],
+        },
+      ];
+      await tagKibanaAssets({
+        savedObjectTagAssignmentService,
+        savedObjectTagClient,
+        kibanaAssets,
+        pkgTitle: 'TestPackage',
+        pkgName: 'test-pkg',
+        spaceId: 'my-secondary-space',
+        importedAssets: [],
+        assetTags,
+      });
+      expect(savedObjectTagClient.create).toHaveBeenCalledWith(managedTagPayloadArg1, {
+        ...managedTagPayloadArg2,
+        id: 'fleet-managed-my-secondary-space',
+      });
+      expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+        {
+          color: expect.any(String),
+          description: '',
+          name: 'TestPackage',
+        },
+        { id: 'fleet-pkg-test-pkg-my-secondary-space', overwrite: true, refresh: false }
+      );
+      expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+        {
+          color: expect.anything(),
+          description: 'Tag defined in package-spec',
+          name: 'Security Solution',
+        },
+        { id: 'security-solution-my-secondary-space', overwrite: true, refresh: false }
+      );
+    });
   });
 
   it('should only call savedObjectTagClient.create for basic tags if there are no assetTags to assign', async () => {

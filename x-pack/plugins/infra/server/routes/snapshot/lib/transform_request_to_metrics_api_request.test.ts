@@ -46,9 +46,6 @@ const source: InfraSource = {
       type: 'index_pattern',
       indexPatternId: 'kibana_index_pattern',
     },
-    fields: {
-      message: ['message', '@message'],
-    },
     inventoryDefaultView: '0',
     metricsExplorerDefaultView: '0',
     logColumns: [

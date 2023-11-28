@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/rules:
     patch:
       operationId: PatchRule
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       description: Patch a single rule
       tags:
         - Rules API

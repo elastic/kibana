@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
+import type { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
-import { CsvConfig } from '@kbn/generate-csv-types';
-import {
-  UI_SETTINGS_DATEFORMAT_TZ,
-  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from '@kbn/reporting-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_DATEFORMAT_TZ,
+  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from './constants';
 
 export interface CsvExportSettings {
@@ -37,7 +35,7 @@ export interface CsvExportSettings {
 
 export const getExportSettings = async (
   client: IUiSettingsClient,
-  config: CsvConfig,
+  config: ReportingConfigType['csv'],
   timezone: string | undefined,
   logger: Logger
 ): Promise<CsvExportSettings> => {

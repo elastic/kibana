@@ -165,9 +165,6 @@ export const importRulesRoute = (
             mlAuthz,
             overwriteRules: request.query.overwrite,
             rulesClient,
-            savedObjectsClient,
-            exceptionsClient,
-            spaceId: ctx.securitySolution.getSpaceId(),
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
           });

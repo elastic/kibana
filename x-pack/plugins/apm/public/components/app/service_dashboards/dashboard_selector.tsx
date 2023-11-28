@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import useMount from 'react-use/lib/useMount';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MergedServiceDashboard } from '.';
@@ -14,30 +15,43 @@ import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
 interface Props {
   serviceDashboards: MergedServiceDashboard[];
-  currentDashboard?: MergedServiceDashboard;
-  handleOnChange: (selectedId?: string) => void;
+  currentDashboardId?: string;
+  setCurrentDashboard: (newDashboard: MergedServiceDashboard) => void;
 }
 
 export function DashboardSelector({
   serviceDashboards,
-  currentDashboard,
-  handleOnChange,
+  currentDashboardId,
+  setCurrentDashboard,
 }: Props) {
   const history = useHistory();
 
-  useEffect(
-    () =>
+  const [selectedDashboard, setSelectedDashboard] =
+    useState<MergedServiceDashboard>();
+
+  useMount(() => {
+    if (!currentDashboardId) {
       history.push({
         ...history.location,
         search: fromQuery({
           ...toQuery(location.search),
-          dashboardId: currentDashboard?.id,
+          dashboardId: serviceDashboards[0].dashboardSavedObjectId,
         }),
-      }),
-    // It should only update when loaded
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+      });
+    }
+  });
+
+  useEffect(() => {
+    const preselectedDashboard = serviceDashboards.find(
+      ({ dashboardSavedObjectId }) =>
+        dashboardSavedObjectId === currentDashboardId
+    );
+    // preselect dashboard
+    if (preselectedDashboard) {
+      setSelectedDashboard(preselectedDashboard);
+      setCurrentDashboard(preselectedDashboard);
+    }
+  }, [serviceDashboards, currentDashboardId, setCurrentDashboard]);
 
   function onChange(newDashboardId?: string) {
     history.push({
@@ -47,8 +61,8 @@ export function DashboardSelector({
         dashboardId: newDashboardId,
       }),
     });
-    handleOnChange(newDashboardId);
   }
+
   return (
     <EuiComboBox
       compressed
@@ -56,7 +70,7 @@ export function DashboardSelector({
       placeholder={i18n.translate(
         'xpack.apm.serviceDashboards.selectDashboard.placeholder',
         {
-          defaultMessage: 'Select dasbboard',
+          defaultMessage: 'Select dashboard',
         }
       )}
       prepend={i18n.translate(
@@ -73,11 +87,11 @@ export function DashboardSelector({
         };
       })}
       selectedOptions={
-        currentDashboard
+        selectedDashboard
           ? [
               {
-                value: currentDashboard?.dashboardSavedObjectId,
-                label: currentDashboard?.title,
+                value: selectedDashboard?.dashboardSavedObjectId,
+                label: selectedDashboard?.title,
               },
             ]
           : []

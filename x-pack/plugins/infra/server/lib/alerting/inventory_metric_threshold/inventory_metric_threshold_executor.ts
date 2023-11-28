@@ -16,12 +16,12 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
-import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { InfraBackendLibs } from '../../infra_types';
 import { LogQueryFields } from '../../metrics/types';
@@ -83,6 +83,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       spaceId,
       startedAt,
       rule: { id: ruleId, tags: ruleTags },
+      getTimeRange,
     }) => {
       const startTime = Date.now();
 
@@ -175,13 +176,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
 
       const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
+      const { dateEnd } = getTimeRange();
       const results = await Promise.all(
         criteria.map((condition) =>
           evaluateCondition({
             compositeSize,
             condition,
             esClient,
-            executionTimestamp: startedAt,
+            executionTimestamp: new Date(dateEnd),
             filterQuery,
             logger,
             logQueryFields,

@@ -20,12 +20,16 @@ import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
+import { AlertHit, parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
-import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
+import {
+  transformActionParams,
+  TransformActionParamsOptions,
+  transformSummaryActionParams,
+} from './transform_action_params';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
@@ -256,6 +260,7 @@ export class ExecutionHandler<
             params: injectActionParams({
               actionTypeId,
               ruleUrl,
+              ruleName: this.rule.name,
               actionParams: transformSummaryActionParams({
                 alerts: summarizedAlerts,
                 rule: this.rule,
@@ -291,32 +296,40 @@ export class ExecutionHandler<
           };
         } else {
           const ruleUrl = this.buildRuleUrl(spaceId);
+          const executableAlert = alert!;
+          const transformActionParamsOptions: TransformActionParamsOptions = {
+            actionsPlugin,
+            alertId: ruleId,
+            alertType: this.ruleType.id,
+            actionTypeId,
+            alertName: this.rule.name,
+            spaceId,
+            tags: this.rule.tags,
+            alertInstanceId: executableAlert.getId(),
+            alertUuid: executableAlert.getUuid(),
+            alertActionGroup: actionGroup,
+            alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
+            context: executableAlert.getContext(),
+            actionId: action.id,
+            state: executableAlert.getState(),
+            kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+            alertParams: this.rule.params,
+            actionParams: action.params,
+            flapping: executableAlert.getFlapping(),
+            ruleUrl: ruleUrl?.absoluteUrl,
+          };
+
+          if (executableAlert.isAlertAsData()) {
+            transformActionParamsOptions.aadAlert = executableAlert.getAlertAsData();
+          }
+
           const actionToRun = {
             ...action,
             params: injectActionParams({
               actionTypeId,
               ruleUrl,
-              actionParams: transformActionParams({
-                actionsPlugin,
-                alertId: ruleId,
-                alertType: this.ruleType.id,
-                actionTypeId,
-                alertName: this.rule.name,
-                spaceId,
-                tags: this.rule.tags,
-                alertInstanceId: alert.getId(),
-                alertUuid: alert.getUuid(),
-                alertActionGroup: actionGroup,
-                alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-                context: alert.getContext(),
-                actionId: action.id,
-                state: alert.getState(),
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                alertParams: this.rule.params,
-                actionParams: action.params,
-                flapping: alert.getFlapping(),
-                ruleUrl: ruleUrl?.absoluteUrl,
-              }),
+              ruleName: this.rule.name,
+              actionParams: transformActionParams(transformActionParamsOptions),
             }),
           };
 
@@ -568,7 +581,6 @@ export class ExecutionHandler<
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
       let summarizedAlerts = null;
-
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
         summarizedAlerts = await this.getSummarizedAlerts({
           action,
@@ -632,6 +644,15 @@ export class ExecutionHandler<
           continue;
         }
 
+        if (summarizedAlerts) {
+          const alertAsData = summarizedAlerts.all.data.find(
+            (alertHit: AlertHit) => alertHit._id === alert.getUuid()
+          );
+          if (alertAsData) {
+            alert.setAlertAsData(alertAsData);
+          }
+        }
+
         if (action.group === actionGroup && !this.isAlertMuted(alertId)) {
           if (
             this.isRecoveredAlert(action.group) ||
@@ -665,12 +686,13 @@ export class ExecutionHandler<
       }
       return false;
     }
-
+    if (action.useAlertDataForTemplate) {
+      return true;
+    }
     // we fetch summarizedAlerts to filter alerts in memory as well
     if (!isSummaryAction(action) && !action.alertsFilter) {
       return false;
     }
-
     if (
       isSummaryAction(action) &&
       isSummaryActionThrottled({

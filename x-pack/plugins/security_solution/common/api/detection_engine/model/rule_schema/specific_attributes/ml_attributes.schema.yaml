@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: ML Rule Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    AnomalyThreshold:
+      type: integer
+      minimum: 0
+      description: Anomaly threshold
+    MachineLearningJobId:
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+          minItems: 1
+      description: Machine learning job ID

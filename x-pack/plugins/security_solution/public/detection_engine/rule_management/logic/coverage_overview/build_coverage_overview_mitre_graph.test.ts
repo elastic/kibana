@@ -5,66 +5,19 @@
  * 2.0.
  */
 
+import {
+  getMockCoverageOverviewTactics,
+  getMockCoverageOverviewTechniques,
+  getMockCoverageOverviewSubtechniques,
+} from '../../model/coverage_overview/__mocks__';
 import { buildCoverageOverviewMitreGraph } from './build_coverage_overview_mitre_graph';
 
 describe('buildCoverageOverviewModel', () => {
   it('builds domain model', () => {
-    const tactics = [
-      {
-        name: 'Tactic 1',
-        id: 'TA001',
-        reference: 'https://some-link/TA001',
-        label: 'Tactic 1',
-        value: 'tactic1',
-      },
-      {
-        name: 'Tactic 2',
-        id: 'TA002',
-        reference: 'https://some-link/TA002',
-        label: 'Tactic 2',
-        value: 'tactic2',
-      },
-    ];
-    const techniques = [
-      {
-        name: 'Technique 1',
-        id: 'T001',
-        reference: 'https://some-link/T001',
-        tactics: ['tactic-1'],
-        label: 'Technique 1',
-        value: 'technique1',
-      },
-      {
-        name: 'Technique 2',
-        id: 'T002',
-        reference: 'https://some-link/T002',
-        tactics: ['tactic-1', 'tactic-2'],
-        label: 'Technique 2',
-        value: 'technique2',
-      },
-    ];
-    const subtechniques = [
-      {
-        name: 'Subtechnique 1',
-        id: 'T001.001',
-        reference: 'https://some-link/T001/001',
-        tactics: ['tactic-1'],
-        techniqueId: 'T001',
-        label: 'Subtechnique 1',
-        value: 'subtechnique1',
-      },
-      {
-        name: 'Subtechnique 2',
-        id: 'T001.002',
-        reference: 'https://some-link/T001/002',
-        tactics: ['tactic-1'],
-        techniqueId: 'T001',
-        label: 'Subtechnique 2',
-        value: 'subtechnique2',
-      },
-    ];
-
-    const model = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
+    const mockTactics = getMockCoverageOverviewTactics();
+    const mockTechniques = getMockCoverageOverviewTechniques();
+    const mockSubtechniques = getMockCoverageOverviewSubtechniques();
+    const model = buildCoverageOverviewMitreGraph(mockTactics, mockTechniques, mockSubtechniques);
 
     expect(model).toEqual([
       {

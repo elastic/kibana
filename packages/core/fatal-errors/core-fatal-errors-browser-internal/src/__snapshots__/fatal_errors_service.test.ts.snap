@@ -4,6 +4,13 @@ exports[`#add() deletes all children of rootDomElement and renders <FatalErrorSc
 Array [
   Array [
     <KibanaRootContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Rx.Observable,
+        }
+      }
       globalStyles={true}
       i18n={
         Object {

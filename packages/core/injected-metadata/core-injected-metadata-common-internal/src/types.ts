@@ -42,6 +42,7 @@ export interface InjectedMetadata {
   basePath: string;
   serverBasePath: string;
   publicBaseUrl?: string;
+  assetsHrefBase: string;
   clusterInfo: InjectedMetadataClusterInfo;
   env: {
     mode: EnvironmentMode;

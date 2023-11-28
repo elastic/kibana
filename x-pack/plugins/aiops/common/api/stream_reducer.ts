@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
-import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis';
+import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis/actions';
 
 interface StreamState {
   ccsWarning: boolean;
-  significantTerms: SignificantTerm[];
-  significantTermsGroups: SignificantTermGroup[];
+  significantItems: SignificantItem[];
+  significantItemsGroups: SignificantItemGroup[];
   errors: string[];
   loaded: number;
   loadingState: string;
@@ -22,8 +22,8 @@ interface StreamState {
 
 export const initialState: StreamState = {
   ccsWarning: false,
-  significantTerms: [],
-  significantTermsGroups: [],
+  significantItems: [],
+  significantItemsGroups: [],
   errors: [],
   loaded: 0,
   loadingState: '',
@@ -31,17 +31,17 @@ export const initialState: StreamState = {
 
 export function streamReducer(
   state: StreamState,
-  action: AiopsLogRateAnalysisApiAction | AiopsLogRateAnalysisApiAction[]
+  action: AiopsLogRateAnalysisApiAction<'2'> | Array<AiopsLogRateAnalysisApiAction<'2'>>
 ): StreamState {
   if (Array.isArray(action)) {
     return action.reduce(streamReducer, state);
   }
 
   switch (action.type) {
-    case API_ACTION_NAME.ADD_SIGNIFICANT_TERMS:
-      return { ...state, significantTerms: [...state.significantTerms, ...action.payload] };
-    case API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM:
-      const significantTerms = state.significantTerms.map((cp) => {
+    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS:
+      return { ...state, significantItems: [...state.significantItems, ...action.payload] };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM:
+      const significantItems = state.significantItems.map((cp) => {
         const cpHistogram = action.payload.find(
           (h) => h.fieldName === cp.fieldName && h.fieldValue === cp.fieldValue
         );
@@ -50,24 +50,24 @@ export function streamReducer(
         }
         return cp;
       });
-      return { ...state, significantTerms };
-    case API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP:
-      return { ...state, significantTermsGroups: action.payload };
-    case API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM:
-      const significantTermsGroups = state.significantTermsGroups.map((cpg) => {
+      return { ...state, significantItems };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP:
+      return { ...state, significantItemsGroups: action.payload };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM:
+      const significantItemsGroups = state.significantItemsGroups.map((cpg) => {
         const cpHistogram = action.payload.find((h) => h.id === cpg.id);
         if (cpHistogram) {
           cpg.histogram = cpHistogram.histogram;
         }
         return cpg;
       });
-      return { ...state, significantTermsGroups };
+      return { ...state, significantItemsGroups };
     case API_ACTION_NAME.ADD_ERROR:
       return { ...state, errors: [...state.errors, action.payload] };
     case API_ACTION_NAME.RESET_ERRORS:
       return { ...state, errors: [] };
     case API_ACTION_NAME.RESET_GROUPS:
-      return { ...state, significantTermsGroups: [] };
+      return { ...state, significantItemsGroups: [] };
     case API_ACTION_NAME.RESET_ALL:
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:

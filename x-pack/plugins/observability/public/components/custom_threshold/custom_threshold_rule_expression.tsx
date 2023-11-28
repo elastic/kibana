@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiFormErrorText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
@@ -39,10 +40,9 @@ import { useKibana } from '../../utils/kibana_react';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
-import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerGroupBy } from './components/group_by';
-import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
+import { MetricsExplorerFields, GroupBy } from './components/group_by';
+import { PreviewChart } from './components/preview_chart/preview_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -51,13 +51,18 @@ type Props = Omit<
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
-export const defaultExpression = {
-  aggType: Aggregators.CUSTOM,
+export const defaultExpression: MetricExpression = {
   comparator: Comparator.GT,
-  threshold: [],
+  metrics: [
+    {
+      name: 'A',
+      aggType: Aggregators.COUNT,
+    },
+  ],
+  threshold: [100],
   timeSize: 1,
   timeUnit: 'm',
-} as MetricExpression;
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
@@ -146,15 +151,7 @@ export default function Expressions(props: Props) {
       setTimeSize(ruleParams.criteria[0].timeSize);
       setTimeUnit(ruleParams.criteria[0].timeUnit);
     } else {
-      preFillAlertCriteria();
-    }
-
-    if (!ruleParams.filterQuery) {
-      preFillAlertFilter();
-    }
-
-    if (!ruleParams.groupBy) {
-      preFillAlertGroupBy();
+      setRuleParams('criteria', [defaultExpression]);
     }
 
     if (typeof ruleParams.alertOnNoData === 'undefined') {
@@ -164,17 +161,6 @@ export default function Expressions(props: Props) {
       setRuleParams('alertOnGroupDisappear', true);
     }
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const options = useMemo<MetricsExplorerOptions>(() => {
-    if (metadata?.currentOptions?.metrics) {
-      return metadata.currentOptions as MetricsExplorerOptions;
-    } else {
-      return {
-        metrics: [],
-        aggregation: 'avg',
-      };
-    }
-  }, [metadata]);
 
   const onSelectDataView = useCallback(
     (newDataView: DataView) => {
@@ -215,11 +201,8 @@ export default function Expressions(props: Props) {
 
   const removeExpression = useCallback(
     (id: number) => {
-      const ruleCriteria = ruleParams.criteria?.slice() || [];
-      if (ruleCriteria.length > 1) {
-        ruleCriteria.splice(id, 1);
-        setRuleParams('criteria', ruleCriteria);
-      }
+      const ruleCriteria = ruleParams.criteria?.filter((_, index) => index !== id) || [];
+      setRuleParams('criteria', ruleCriteria);
     },
     [setRuleParams, ruleParams.criteria]
   );
@@ -276,65 +259,9 @@ export default function Expressions(props: Props) {
     [ruleParams.criteria, setRuleParams]
   );
 
-  const preFillAlertCriteria = useCallback(() => {
-    const md = metadata;
-    if (md?.currentOptions?.metrics?.length) {
-      setRuleParams(
-        'criteria',
-        md.currentOptions.metrics.map((metric) => ({
-          metric: metric.field,
-          comparator: Comparator.GT,
-          threshold: [],
-          timeSize,
-          timeUnit,
-          aggType: metric.aggregation,
-        })) as AlertParams['criteria']
-      );
-    } else {
-      setRuleParams('criteria', [defaultExpression]);
-    }
-  }, [metadata, setRuleParams, timeSize, timeUnit]);
-
-  const preFillAlertFilter = useCallback(() => {
-    const md = metadata;
-    if (md && md.currentOptions?.filterQuery) {
-      setRuleParams('searchConfiguration', {
-        ...ruleParams.searchConfiguration,
-        query: {
-          query: md.currentOptions.filterQuery,
-          language: 'kuery',
-        },
-      });
-    } else if (md && md.currentOptions?.groupBy && md.series) {
-      const { groupBy } = md.currentOptions;
-      const query = Array.isArray(groupBy)
-        ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
-        : `${groupBy}: "${md.series.id}"`;
-      setRuleParams('searchConfiguration', {
-        ...ruleParams.searchConfiguration,
-        query: {
-          query,
-          language: 'kuery',
-        },
-      });
-    }
-  }, [metadata, setRuleParams, ruleParams.searchConfiguration]);
-
-  const preFillAlertGroupBy = useCallback(() => {
-    const md = metadata;
-    if (md && md.currentOptions?.groupBy && !md.series) {
-      setRuleParams('groupBy', md.currentOptions.groupBy);
-    }
-  }, [metadata, setRuleParams]);
-
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
     [ruleParams.groupBy]
-  );
-
-  const disableNoData = useMemo(
-    () => ruleParams.criteria?.every((c) => c.aggType === Aggregators.COUNT),
-    [ruleParams.criteria]
   );
 
   // Test to see if any of the group fields in groupBy are already filtered down to a single
@@ -387,7 +314,6 @@ export default function Expressions(props: Props) {
       defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
   );
-
   return (
     <>
       <EuiTitle size="xs">
@@ -445,33 +371,14 @@ export default function Expressions(props: Props) {
         </EuiFormErrorText>
       )}
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.observability.customThreshold.rule.alertFlyout.setConditions"
-            defaultMessage="Set rule conditions"
-          />
-        </h5>
-      </EuiTitle>
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
             <div key={idx}>
-              {/* index has semantic meaning, we show the condition title starting from the 2nd one  */}
-              {idx >= 1 && (
-                <EuiTitle size="xs">
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.observability.customThreshold.rule.alertFlyout.condition"
-                      defaultMessage="Condition {conditionNumber}"
-                      values={{ conditionNumber: idx + 1 }}
-                    />
-                  </h5>
-                </EuiTitle>
-              )}
+              {idx > 0 && <EuiHorizontalRule margin="s" />}
               <ExpressionRow
                 canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-                fields={derivedIndexPattern.fields as any}
+                fields={derivedIndexPattern.fields}
                 remove={removeExpression}
                 addExpression={addExpression}
                 key={idx} // idx's don't usually make good key's but here the index has semantic meaning
@@ -480,14 +387,27 @@ export default function Expressions(props: Props) {
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}
                 dataView={derivedIndexPattern}
+                title={
+                  ruleParams.criteria.length === 1 ? (
+                    <FormattedMessage
+                      id="xpack.observability.customThreshold.rule.alertFlyout.setConditions"
+                      defaultMessage="Set rule conditions"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.observability.customThreshold.rule.alertFlyout.condition"
+                      defaultMessage="Condition {conditionNumber}"
+                      values={{ conditionNumber: idx + 1 }}
+                    />
+                  )
+                }
               >
-                {/* Preview */}
-                <ExpressionChart
-                  expression={e}
-                  derivedIndexPattern={derivedIndexPattern}
+                <PreviewChart
+                  metricExpression={e}
+                  dataView={dataView}
                   filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
                   groupBy={ruleParams.groupBy}
-                  timeFieldName={dataView?.timeFieldName}
+                  error={(errors[idx] as IErrorObject) || emptyError}
                 />
               </ExpressionRow>
             </div>
@@ -537,12 +457,11 @@ export default function Expressions(props: Props) {
         fullWidth
         display="rowCompressed"
       >
-        <MetricsExplorerGroupBy
+        <GroupBy
           onChange={onGroupByChange}
-          fields={derivedIndexPattern.fields as any}
+          fields={derivedIndexPattern.fields as MetricsExplorerFields}
           options={{
-            ...options,
-            groupBy: ruleParams.groupBy || undefined,
+            groupBy: ruleParams.groupBy || null,
           }}
           errorOptions={redundantFilterGroupBy}
         />
@@ -585,22 +504,19 @@ export default function Expressions(props: Props) {
               }
             )}{' '}
             <EuiToolTip
-              content={
-                (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                i18n.translate(
-                  'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
-                  {
-                    defaultMessage:
-                      'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                  }
-                )
-              }
+              content={i18n.translate(
+                'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
+                {
+                  defaultMessage:
+                    'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                }
+              )}
             >
               <EuiIcon type="questionInCircle" color="subdued" />
             </EuiToolTip>
           </>
         }
-        disabled={disableNoData || !hasGroupBy}
+        disabled={!hasGroupBy}
         checked={Boolean(hasGroupBy && ruleParams.alertOnGroupDisappear)}
         onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
       />
@@ -608,10 +524,3 @@ export default function Expressions(props: Props) {
     </>
   );
 }
-
-const docCountNoDataDisabledHelpText = i18n.translate(
-  'xpack.observability.customThreshold.rule.alertFlyout.docCountNoDataDisabledHelpText',
-  {
-    defaultMessage: '[This setting is not applicable to the Document Count aggregator.]',
-  }
-);

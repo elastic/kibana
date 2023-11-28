@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, Fragment } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -25,9 +25,10 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
-type Badge = EuiBadgeProps & {
+export type TopNavMenuBadgeProps = EuiBadgeProps & {
   badgeText: string;
   toolTipProps?: Partial<EuiToolTipProps>;
+  renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
 };
 
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
@@ -35,7 +36,7 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   'kibana' | 'intl' | 'timeHistory'
 > & {
   config?: TopNavMenuData[];
-  badges?: Badge[];
+  badges?: TopNavMenuBadgeProps[];
   showSearchBar?: boolean;
   showQueryInput?: boolean;
   showDatePicker?: boolean;
@@ -82,14 +83,22 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     return null;
   }
 
-  function createBadge({ badgeText, toolTipProps, ...badgeProps }: Badge, i: number): ReactElement {
-    const Badge = ({ key, ...rest }: { key?: string }) => (
-      <EuiBadge key={key} tabIndex={0} {...rest} {...badgeProps}>
+  function createBadge(
+    { badgeText, toolTipProps, renderCustomBadge, ...badgeProps }: TopNavMenuBadgeProps,
+    i: number
+  ): ReactElement {
+    const key = `nav-menu-badge-${i}`;
+
+    const Badge = () => (
+      <EuiBadge tabIndex={0} {...badgeProps}>
         {badgeText}
       </EuiBadge>
     );
 
-    const key = `nav-menu-badge-${i}`;
+    if (renderCustomBadge) {
+      return <Fragment key={key}>{renderCustomBadge({ badgeText })}</Fragment>;
+    }
+
     return toolTipProps ? (
       <EuiToolTip key={key} {...toolTipProps}>
         <Badge />

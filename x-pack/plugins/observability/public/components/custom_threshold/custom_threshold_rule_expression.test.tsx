@@ -12,13 +12,15 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import { Comparator } from '../../../common/custom_threshold_rule/types';
-import { MetricsExplorerMetric } from '../../../common/custom_threshold_rule/metrics_explorer';
+import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
 
 jest.mock('../../utils/kibana_react');
+jest.mock('./components/preview_chart/preview_chart', () => ({
+  PreviewChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
+}));
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -36,11 +38,7 @@ describe('Expression', () => {
     mockKibana();
   });
 
-  async function setup(currentOptions: {
-    metrics?: MetricsExplorerMetric[];
-    filterQuery?: string;
-    groupBy?: string;
-  }) {
+  async function setup() {
     const ruleParams = {
       criteria: [],
       groupBy: undefined,
@@ -64,7 +62,6 @@ describe('Expression', () => {
           setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
           setRuleProperty={() => {}}
           metadata={{
-            currentOptions,
             adHocDataViewList: [],
           }}
           dataViews={dataViewMock}
@@ -84,46 +81,25 @@ describe('Expression', () => {
     return { wrapper, update, ruleParams };
   }
 
-  it('should prefill the alert using the context metadata', async () => {
-    const currentOptions = {
-      groupBy: 'host.hostname',
-      filterQuery: 'foo',
-      metrics: [
-        { aggregation: 'avg', field: 'system.load.1' },
-        { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
-      ] as MetricsExplorerMetric[],
-    };
-    const { ruleParams } = await setup(currentOptions);
-    expect(ruleParams.groupBy).toBe('host.hostname');
-    expect(ruleParams.searchConfiguration.query.query).toBe('foo');
+  it('should use default metrics', async () => {
+    const { ruleParams } = await setup();
     expect(ruleParams.criteria).toEqual([
       {
-        metric: 'system.load.1',
+        metrics: [
+          {
+            name: 'A',
+            aggType: Aggregators.COUNT,
+          },
+        ],
         comparator: Comparator.GT,
-        threshold: [],
+        threshold: [100],
         timeSize: 1,
         timeUnit: 'm',
-        aggType: 'avg',
-      },
-      {
-        metric: 'system.cpu.user.pct',
-        comparator: Comparator.GT,
-        threshold: [],
-        timeSize: 1,
-        timeUnit: 'm',
-        aggType: 'cardinality',
       },
     ]);
   });
 
   it('should show an error message when searchSource throws an error', async () => {
-    const currentOptions = {
-      groupBy: 'host.hostname',
-      metrics: [
-        { aggregation: 'avg', field: 'system.load.1' },
-        { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
-      ] as MetricsExplorerMetric[],
-    };
     const errorMessage = 'Error in searchSource create';
     const kibanaMock = kibanaStartMock.startContract();
     useKibanaMock.mockReturnValue({
@@ -149,20 +125,13 @@ describe('Expression', () => {
         },
       },
     });
-    const { wrapper } = await setup(currentOptions);
+    const { wrapper } = await setup();
     expect(wrapper.find(`[data-test-subj="thresholdRuleExpressionError"]`).first().text()).toBe(
       errorMessage
     );
   });
 
   it('should show no timestamp error when selected data view does not have a timeField', async () => {
-    const currentOptions = {
-      groupBy: 'host.hostname',
-      metrics: [
-        { aggregation: 'avg', field: 'system.load.1' },
-        { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
-      ] as MetricsExplorerMetric[],
-    };
     const mockedIndex = {
       id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
       title: 'metrics-fake_hosts',
@@ -214,7 +183,7 @@ describe('Expression', () => {
         },
       },
     });
-    const { wrapper } = await setup(currentOptions);
+    const { wrapper } = await setup();
     expect(
       wrapper.find(`[data-test-subj="thresholdRuleDataViewErrorNoTimestamp"]`).first().text()
     ).toBe(

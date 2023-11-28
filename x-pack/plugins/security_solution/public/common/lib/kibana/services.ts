@@ -12,6 +12,7 @@ type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'uiSettings' | 'n
   Pick<StartPlugins, 'data' | 'unifiedSearch' | 'expressions'>;
 
 export class KibanaServices {
+  private static buildFlavor?: string;
   private static kibanaBranch?: string;
   private static kibanaVersion?: string;
   private static prebuiltRulesPackageVersion?: string;
@@ -24,6 +25,7 @@ export class KibanaServices {
     unifiedSearch,
     kibanaBranch,
     kibanaVersion,
+    buildFlavor,
     prebuiltRulesPackageVersion,
     uiSettings,
     notifications,
@@ -31,6 +33,7 @@ export class KibanaServices {
   }: GlobalServices & {
     kibanaBranch: string;
     kibanaVersion: string;
+    buildFlavor: string;
     prebuiltRulesPackageVersion?: string;
   }) {
     this.services = {
@@ -44,6 +47,7 @@ export class KibanaServices {
     };
     this.kibanaBranch = kibanaBranch;
     this.kibanaVersion = kibanaVersion;
+    this.buildFlavor = buildFlavor;
     this.prebuiltRulesPackageVersion = prebuiltRulesPackageVersion;
   }
 
@@ -73,6 +77,13 @@ export class KibanaServices {
 
   public static getPrebuiltRulesPackageVersion(): string | undefined {
     return this.prebuiltRulesPackageVersion;
+  }
+
+  public static getBuildFlavor(): string {
+    if (!this.buildFlavor) {
+      this.throwUninitializedError();
+    }
+    return this.buildFlavor;
   }
 
   private static throwUninitializedError(): never {

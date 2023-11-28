@@ -37,10 +37,8 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    cy.task('esArchiverResetKibana');
     login();
 
     // Create exception list associated with a rule

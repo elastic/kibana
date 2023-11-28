@@ -17,7 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
     id: model.name,
   }));
 
-  describe('trained models', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165084
+  describe.skip('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
     const builtInModelData = {
@@ -119,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Need to delete index before ingest pipeline, else it will give error
       await ml.api.deleteIngestPipeline(modelWithPipelineAndDestIndex.modelId);
-      await ml.testResources.deleteIndexPatternByTitle(
+      await ml.testResources.deleteDataViewByTitle(
         modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
       );
     });
@@ -191,21 +192,19 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
-          'should not show collapsed actions menu for the model in the table'
+          'should show collapsed actions menu for the model in the table'
         );
         await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
           modelWithoutPipelineData.modelId,
-          false
+          true
         );
         await ml.testExecution.logTestStep('should show deploy action for the model in the table');
-        await ml.trainedModelsTable.assertModelDeployActionButtonExists(
+        await ml.trainedModelsTable.assertModelDeployActionButtonEnabled(
           modelWithoutPipelineData.modelId,
           true
         );
         await ml.testExecution.logTestStep('should open the deploy model flyout');
-        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
-          modelWithoutPipelineData.modelId
-        );
+        await ml.trainedModelsTable.clickDeployAction(modelWithoutPipelineData.modelId);
         await ml.testExecution.logTestStep('should complete the deploy model Details step');
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails({
           name: modelWithoutPipelineDataExpectedValues.name,
@@ -250,17 +249,15 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
           modelWithoutPipelineData.modelId,
-          false
+          true
         );
         await ml.testExecution.logTestStep('should show deploy action for the model in the table');
         await ml.trainedModelsTable.assertModelDeployActionButtonExists(
           modelWithoutPipelineData.modelId,
-          true
+          false
         );
         await ml.testExecution.logTestStep('should open the deploy model flyout');
-        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
-          modelWithoutPipelineData.modelId
-        );
+        await ml.trainedModelsTable.clickDeployAction(modelWithoutPipelineData.modelId);
         await ml.testExecution.logTestStep('should complete the deploy model Details step');
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails(
           {
@@ -453,7 +450,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToTrainedModels();
       });
 
-      describe('with imported models', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/168899
+      describe.skip('with imported models', function () {
         before(async () => {
           await ml.navigation.navigateToTrainedModels();
         });

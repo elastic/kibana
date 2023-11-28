@@ -9,7 +9,6 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { RuleRegistryPlugin } from './plugin';
 
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
 export type { IRuleDataService, RuleDataPluginService } from './rule_data_plugin_service';
@@ -37,5 +36,7 @@ export { createPersistenceRuleTypeWrapper } from './utils/create_persistence_rul
 export * from './utils/persistence_types';
 export type { AlertsClient } from './alert_data_client/alerts_client';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new RuleRegistryPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { RuleRegistryPlugin } = await import('./plugin');
+  return new RuleRegistryPlugin(initContext);
+};

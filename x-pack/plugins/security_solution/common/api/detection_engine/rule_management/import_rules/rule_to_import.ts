@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { OnlyFalseAllowed } from '@kbn/securitysolution-io-ts-types';
-
+import * as z from 'zod';
 import {
-  RelatedIntegrationArray,
-  RequiredFieldArray,
-  RuleObjectId,
-  RuleSignatureId,
-  SetupGuide,
   BaseCreateProps,
+  ResponseRequiredFields,
+  RuleSignatureId,
   TypeSpecificCreateProps,
-  created_at,
-  updated_at,
-  created_by,
-  updated_by,
-  revision,
-} from '../../model';
+} from '../../model/rule_schema';
 
 /**
  * Differences from this and the createRulesSchema are
@@ -33,23 +23,11 @@ import {
  *   - created_by is optional (but ignored in the import code)
  *   - updated_by is optional (but ignored in the import code)
  */
-export type RuleToImport = t.TypeOf<typeof RuleToImport>;
-export const RuleToImport = t.intersection([
-  BaseCreateProps,
-  TypeSpecificCreateProps,
-  t.exact(t.type({ rule_id: RuleSignatureId })),
-  t.exact(
-    t.partial({
-      id: RuleObjectId,
-      immutable: OnlyFalseAllowed,
-      updated_at,
-      updated_by,
-      created_at,
-      created_by,
-      related_integrations: RelatedIntegrationArray,
-      required_fields: RequiredFieldArray,
-      revision,
-      setup: SetupGuide,
-    })
-  ),
-]);
+export type RuleToImport = z.infer<typeof RuleToImport>;
+export type RuleToImportInput = z.input<typeof RuleToImport>;
+export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
+  ResponseRequiredFields.partial().extend({
+    rule_id: RuleSignatureId,
+    immutable: z.literal(false).default(false),
+  })
+);

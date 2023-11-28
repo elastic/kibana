@@ -20,6 +20,9 @@ import {
   asSavedObjectExecutionSource,
 } from './action_execution_source';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { finished } from 'stream/promises';
+import { PassThrough } from 'stream';
+import { SecurityConnectorFeatureId } from '../../common';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -835,6 +838,44 @@ test('successfully authorize system actions', async () => {
     operation: 'execute',
     additionalPrivileges: ['test/create'],
   });
+});
+
+test('Execute of SentinelOne sub-actions require create privilege', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.sentinelone',
+    name: 'sentinelone',
+    minimumLicenseRequired: 'enterprise',
+    supportedFeatureIds: [SecurityConnectorFeatureId],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: '.sentinelone',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+      isMissingSecrets: false,
+    },
+    references: [],
+  };
+
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  await actionExecutor.execute({ ...executeParams, actionId: 'sentinel-one-connector-authz' });
+
+  expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({ operation: 'create' });
 });
 
 test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
@@ -1837,6 +1878,102 @@ test('writes usage data to event log for OpenAI events', async () => {
   });
 });
 
+test('writes usage data to event log for streaming OpenAI events', async () => {
+  const executorMock = setupActionExecutorMock('.gen-ai', {
+    params: { schema: schema.any() },
+    config: { schema: schema.any() },
+    secrets: { schema: schema.any() },
+  });
+
+  const stream = new PassThrough();
+
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+    // @ts-ignore
+    data: stream,
+  });
+
+  await actionExecutor.execute({
+    ...executeParams,
+    params: {
+      subActionParams: {
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: 'System message',
+            },
+            {
+              role: 'user',
+              content: 'User message',
+            },
+          ],
+        }),
+      },
+    },
+  });
+
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+  stream.write(
+    `data: ${JSON.stringify({
+      object: 'chat.completion.chunk',
+      choices: [{ delta: { content: 'Single' } }],
+    })}\n`
+  );
+  stream.write(`data: [DONE]`);
+
+  stream.end();
+
+  await finished(stream);
+
+  await new Promise(process.nextTick);
+
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    event: {
+      action: 'execute',
+      kind: 'action',
+      outcome: 'success',
+    },
+    kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+          gen_ai: {
+            usage: {
+              completion_tokens: 5,
+              prompt_tokens: 30,
+              total_tokens: 35,
+            },
+          },
+        },
+        name: 'action-1',
+        id: '1',
+      },
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          id: '1',
+          namespace: 'some-namespace',
+          rel: 'primary',
+          type: 'action',
+          type_id: '.gen-ai',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action executed: .gen-ai:1: action-1',
+    user: { name: 'coolguy', id: '123' },
+  });
+});
+
 test('does not fetches actionInfo if passed as param', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
@@ -1898,13 +2035,16 @@ test('does not fetches actionInfo if passed as param', async () => {
   );
 });
 
-function setupActionExecutorMock(actionTypeId = 'test') {
+function setupActionExecutorMock(
+  actionTypeId = 'test',
+  validationOverride?: ActionType['validate']
+) {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
-    validate: {
+    validate: validationOverride || {
       config: { schema: schema.object({ bar: schema.boolean() }) },
       secrets: { schema: schema.object({ baz: schema.boolean() }) },
       params: { schema: schema.object({ foo: schema.boolean() }) },

@@ -39,8 +39,10 @@ import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 import { AlertsService } from './alerts_service/alerts_service';
 import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
+import { AlertingConfig } from './config';
 
 export interface ConstructorOptions {
+  config: AlertingConfig;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
@@ -148,6 +150,7 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
 >;
 
 export class RuleTypeRegistry {
+  private readonly config: AlertingConfig;
   private readonly logger: Logger;
   private readonly taskManager: TaskManagerSetupContract;
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
@@ -159,6 +162,7 @@ export class RuleTypeRegistry {
   private readonly alertsService: AlertsService | null;
 
   constructor({
+    config,
     logger,
     taskManager,
     taskRunnerFactory,
@@ -168,6 +172,7 @@ export class RuleTypeRegistry {
     inMemoryMetrics,
     alertsService,
   }: ConstructorOptions) {
+    this.config = config;
     this.logger = logger;
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
@@ -277,7 +282,7 @@ export class RuleTypeRegistry {
       ActionGroupIds,
       RecoveryActionGroupId,
       AlertData
-    >(ruleType);
+    >(ruleType, this.config);
 
     this.ruleTypes.set(
       ruleTypeIdSchema.validate(ruleType.id),
@@ -414,6 +419,7 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
+          fieldsForAAD,
           hasFieldsForAAD: Boolean(fieldsForAAD),
           hasAlertsMappings: !!alerts,
           validLegacyConsumers,
@@ -457,7 +463,8 @@ function augmentActionGroupsWithReserved<
     ActionGroupIds,
     RecoveryActionGroupId,
     AlertData
-  >
+  >,
+  config: AlertingConfig
 ): NormalizedRuleType<
   Params,
   ExtractedParams,
@@ -505,6 +512,7 @@ function augmentActionGroupsWithReserved<
 
   return {
     ...ruleType,
+    ...(config?.rules?.overwriteProducer ? { producer: config.rules.overwriteProducer } : {}),
     actionGroups: [...actionGroups, ...reservedActionGroups],
     recoveryActionGroup: recoveryActionGroup ?? RecoveredActionGroup,
     validLegacyConsumers: getRuleTypeIdValidLegacyConsumers(id),

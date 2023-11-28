@@ -126,7 +126,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(1).simulate('click');
       await nextTick();
     });
@@ -160,7 +160,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(1).simulate('click');
       await nextTick();
     });
@@ -192,7 +192,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(0).simulate('click');
       await nextTick();
     });
@@ -226,7 +226,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(0).simulate('click');
       await nextTick();
     });
@@ -267,7 +267,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(1).simulate('click');
     });
 

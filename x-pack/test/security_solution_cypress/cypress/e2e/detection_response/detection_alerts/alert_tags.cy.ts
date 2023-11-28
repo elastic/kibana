@@ -13,7 +13,7 @@ import {
   updateAlertTags,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -27,21 +27,21 @@ import {
 
 describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
-    cy.task('esArchiverResetKibana');
+    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', 'endpoint');
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
-  });
-
-  afterEach(() => {
-    cy.task('esArchiverUnload', 'endpoint');
   });
 
   it('Add and remove a tag using the alert bulk action menu', () => {
@@ -71,13 +71,13 @@ describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
     // Then add tags to both alerts
-    selectNumberOfAlerts(2);
+    selectNumberOfAlerts(5);
     openAlertTaggingBulkActionMenu();
     cy.get(MIXED_ALERT_TAG).contains('Duplicate');
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    selectNumberOfAlerts(2);
+    selectNumberOfAlerts(5);
     openAlertTaggingBulkActionMenu();
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
   });

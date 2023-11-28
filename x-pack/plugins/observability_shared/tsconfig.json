@@ -36,7 +36,8 @@
     "@kbn/profiling-utils",
     "@kbn/advanced-settings-plugin",
     "@kbn/utility-types",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

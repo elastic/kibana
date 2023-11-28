@@ -7,7 +7,7 @@
 
 export type { LogCategorizationAppStateProps } from './log_categorization_app_state';
 import { LogCategorizationAppState } from './log_categorization_app_state';
-export { categorizeFieldAction } from './categorize_field_actions';
+export { createCategorizeFieldAction } from './categorize_field_actions';
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

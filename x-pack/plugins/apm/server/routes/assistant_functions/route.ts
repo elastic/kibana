@@ -177,7 +177,7 @@ const getApmErrorDocRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{ content: Partial<APMError> | undefined }> => {
+  ): Promise<{ content: Array<Partial<APMError>> }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { query } = params;

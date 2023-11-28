@@ -85,18 +85,17 @@ describe('validate', () => {
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
-      const [validated, errors] = transformValidate(ruleAlert);
+      const validated = transformValidate(ruleAlert);
       expect(validated).toEqual(ruleOutput());
-      expect(errors).toEqual(null);
     });
 
     test('it should do an in-validation correctly of a partial alert', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const [validated, errors] = transformValidate(ruleAlert);
-      expect(validated).toEqual(null);
-      expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
+      expect(() => {
+        transformValidate(ruleAlert);
+      }).toThrowError('Invalid input');
     });
   });
 
@@ -114,7 +113,8 @@ describe('validate', () => {
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
       const expected: BulkError = {
         error: {
-          message: 'Invalid value "undefined" supplied to "name"',
+          message:
+            'name: Required, type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", name: Required, name: Required, and 22 more',
           status_code: 500,
         },
         rule_id: 'rule-1',

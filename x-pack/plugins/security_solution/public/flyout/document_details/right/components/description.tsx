@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eu
 import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
+import { css } from '@emotion/react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -19,14 +20,19 @@ import {
   DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import { PreviewPanelKey, type PreviewPanelProps, RulePreviewPanel } from '../../preview';
+import {
+  DocumentDetailsPreviewPanelKey,
+  type PreviewPanelProps,
+  RulePreviewPanel,
+} from '../../preview';
 
 /**
  * Displays the description of a document.
  * If the document is an alert we show the rule description. If the document is of another type, we show -.
  */
 export const Description: FC = () => {
-  const { dataFormattedForFieldBrowser, scopeId, eventId, indexName } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
+    useRightPanelContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
@@ -34,7 +40,7 @@ export const Description: FC = () => {
   const openRulePreview = useCallback(() => {
     const PreviewPanelRulePreview: PreviewPanelProps['path'] = { tab: RulePreviewPanel };
     openPreviewPanel({
-      id: PreviewPanelKey,
+      id: DocumentDetailsPreviewPanelKey,
       path: PreviewPanelRulePreview,
       params: {
         id: eventId,
@@ -70,7 +76,7 @@ export const Description: FC = () => {
               defaultMessage: 'Show rule summary',
             }
           )}
-          disabled={isEmpty(ruleName) || isEmpty(ruleId)}
+          disabled={isEmpty(ruleName) || isEmpty(ruleId) || isPreview}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel"
@@ -79,7 +85,7 @@ export const Description: FC = () => {
         </EuiButtonEmpty>
       </EuiFlexItem>
     ),
-    [ruleName, openRulePreview, ruleId]
+    [ruleName, openRulePreview, ruleId, isPreview]
   );
 
   const alertRuleDescription =
@@ -97,7 +103,12 @@ export const Description: FC = () => {
       <EuiFlexItem data-test-subj={DESCRIPTION_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
           {isAlert ? (
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+              alignItems="center"
+              gutterSize="none"
+              responsive={false}
+            >
               <EuiFlexItem>
                 <h5>
                   <FormattedMessage
@@ -119,7 +130,17 @@ export const Description: FC = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={DESCRIPTION_DETAILS_TEST_ID}>
-        {isAlert ? alertRuleDescription : '-'}
+        <p
+          css={css`
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          `}
+        >
+          {isAlert ? alertRuleDescription : '-'}
+        </p>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

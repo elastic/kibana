@@ -9,7 +9,7 @@ import { loginWithUser } from '../../../tasks/login';
 import { visitWithUser } from '../../../tasks/navigation';
 
 import { hostsUrl } from '../../../urls/navigation';
-import { postDataView } from '../../../tasks/common';
+import { postDataView } from '../../../tasks/api_calls/common';
 import {
   createUsersAndRoles,
   secReadCasesAll,
@@ -23,7 +23,6 @@ const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kib
 
 describe('Sourcerer permissions', { tags: ['@ess', '@skipInServerless'] }, () => {
   before(() => {
-    cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
     createUsersAndRoles(usersToCreate, rolesToCreate);
   });

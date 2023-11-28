@@ -11,7 +11,7 @@ import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
 import type {
   InitRiskEngineResponse,
   InitRiskEngineError,
-} from '../../../../server/lib/risk_engine/types';
+} from '../../../../server/lib/entity_analytics/risk_engine/types';
 
 export const INIT_RISK_ENGINE_STATUS_KEY = ['POST', 'INIT_RISK_ENGINE'];
 

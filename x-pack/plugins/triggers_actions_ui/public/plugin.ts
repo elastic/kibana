@@ -27,6 +27,7 @@ import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -165,6 +166,7 @@ interface PluginsStart {
   expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export class Plugin
@@ -290,6 +292,7 @@ export class Plugin
           kibanaFeatures,
           licensing: pluginsStart.licensing,
           expressions: pluginsStart.expressions,
+          isServerless: !!pluginsStart.serverless,
         });
       },
     });

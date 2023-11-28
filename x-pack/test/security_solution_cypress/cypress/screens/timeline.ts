@@ -29,7 +29,7 @@ export const CORRELATION_EVENT_TABLE_CELL =
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
-export const COMBO_BOX = '.euiComboBoxOption__content';
+export const COMBO_BOX = 'button.euiFilterSelectItem[role="option"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
@@ -146,8 +146,6 @@ export const SOURCE_IP_KPI = '[data-test-subj="siem-timeline-source-ip-kpi"]';
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
 
-export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiProgress';
-
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
 export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
@@ -177,7 +175,7 @@ export const SAVE_DATA_PROVIDER_BTN = `[data-test-subj="save"]`;
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
-export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="edit-timeline-description"]';
+export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
 
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
@@ -224,7 +222,7 @@ export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
 
 export const TIMELINE_HEADER = '[data-test-subj="timeline-hide-show-container"]';
 
-export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
+export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-empty-button"]`;
 
 export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 
@@ -248,7 +246,7 @@ export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
-export const TIMELINE_TITLE_INPUT = '[data-test-subj="edit-timeline-title"]';
+export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
 
 export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
 
@@ -257,9 +255,9 @@ export const TIMESTAMP_TOGGLE_FIELD =
 
 export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
-export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="edit-timeline-button-icon"]';
+export const TIMELINE_SAVE_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-btn"]';
 
-export const TIMELINE_SAVE_MODAL = '[data-test-subj="edit-timeline-modal"]';
+export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
 
 export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
@@ -268,6 +266,8 @@ export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-scre
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
+
+export const TIMELINE_PROGRESS_BAR = '[data-test-subj="progress-bar"]';
 
 const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-modal"]';
 
@@ -299,9 +299,9 @@ export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
 
 export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
 
-export const EDIT_TIMELINE_BTN = '[data-test-subj="edit-timeline-button-icon"]';
+export const TIMELINE_STATUS = '[data-test-subj="timeline-status"]';
 
-export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="edit-timeline-btn-tooltip"]';
+export const SAVE_TIMELINE_BTN_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
@@ -354,3 +354,14 @@ export const OPEN_TIMELINE_MODAL_SEARCH_BAR = `${OPEN_TIMELINE_MODAL}  ${getData
 export const OPEN_TIMELINE_MODAL_TIMELINE_NAMES = `${OPEN_TIMELINE_MODAL} ${getDataTestSubjectSelectorStartWith(
   'timeline-title-'
 )}`;
+
+export const TIMELINE_FILTER_BADGE = `[data-test-subj^='timeline-filters-container'] [data-test-subj^="filter-badge"]`;
+
+export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector('new-timeline-action');
+
+export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('save-timeline-action');
+export const SAVE_TIMELINE_ACTION_BTN = getDataTestSubjectSelector('save-timeline-action-btn');
+
+export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector('save-timeline-btn-tooltip');
+
+export const TOGGLE_DATA_PROVIDER_BTN = getDataTestSubjectSelector('toggle-data-provider');

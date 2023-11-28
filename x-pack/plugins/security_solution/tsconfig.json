@@ -9,6 +9,7 @@
     "server/**/*",
     "scripts/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "common/**/*.json",
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
@@ -173,11 +174,14 @@
     "@kbn/security-solution-features",
     "@kbn/content-management-plugin",
     "@kbn/discover-utils",
-    "@kbn/subscription-tracking",
     "@kbn/core-application-common",
     "@kbn/openapi-generator",
     "@kbn/es",
     "@kbn/react-kibana-mount",
-    "@kbn/unified-doc-viewer-plugin"
+    "@kbn/react-kibana-context-styled",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/zod-helpers",
+    "@kbn/core-http-common"
   ]
 }
