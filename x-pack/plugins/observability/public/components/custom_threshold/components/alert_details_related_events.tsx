@@ -256,6 +256,7 @@ export default function AlertDetailsRelatedEvents({
                       style={{ marginTop: 60, height: 320 }}
                       timeRange={relatedEventsTimeRange()}
                       attributes={getMetricChart(relatedMetric)}
+                      withDefaultActions={true}
                     />
                   </EuiPanel>
                 </EuiFlexItem>
