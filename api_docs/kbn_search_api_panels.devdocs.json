@@ -1111,9 +1111,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },

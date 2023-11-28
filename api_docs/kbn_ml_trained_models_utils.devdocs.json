@@ -72,7 +72,9 @@
             "type": "string",
             "tags": [],
             "label": "modelName",
-            "description": [],
+            "description": [
+              "\nModel name, e.g. elser"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -94,7 +96,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "config",
-            "description": [],
+            "description": [
+              "\nDefault PUT model configuration"
+            ],
             "signature": [
               "object"
             ],
@@ -314,7 +318,6 @@
         "label": "ModelDefinitionResponse",
         "description": [],
         "signature": [
-          "Omit<",
           {
             "pluginId": "@kbn/ml-trained-models-utils",
             "scope": "common",
@@ -322,7 +325,7 @@
             "section": "def-common.ModelDefinition",
             "text": "ModelDefinition"
           },
-          ", \"modelName\"> & { name: string; }"
+          " & { name: string; }"
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

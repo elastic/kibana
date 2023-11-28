@@ -1596,14 +1596,11 @@
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeProjectNavigationNode.path",
-            "type": "Array",
+            "type": "string",
             "tags": [],
             "label": "path",
             "description": [
               "Path in the tree of the node"
-            ],
-            "signature": [
-              "string[]"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -1657,19 +1654,21 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeProjectNavigationNode.isActive",
-            "type": "CompoundType",
+            "id": "def-common.ChromeProjectNavigationNode.renderItem",
+            "type": "Function",
             "tags": [],
-            "label": "isActive",
+            "label": "renderItem",
             "description": [
-              "\nFlag to indicate if the node is currently active."
+              "\nHandler to render the node item with custom JSX. This handler is added to render the `children` of\nthe Navigation.Item component when React components are used to declare the navigation tree."
             ],
             "signature": [
-              "boolean | undefined"
+              "(() => React.ReactNode) | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
