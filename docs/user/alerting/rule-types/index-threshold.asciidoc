@@ -39,10 +39,10 @@ The result of the aggregation is compared to this threshold.
 5. In the `FOR THE LAST` clause, specify a time window.
 It determines how far back to search for documents and uses the time field set in the index clause.
 
-6. Set the check interval, which defines how often to evaluate the rule conditions. 
-Generally this value should be set to a value that is smaller than the time window, to avoid gaps in detection.
+6. Optionally add a KQL expression to further refine the conditions that the rule detects.
 
-7. Optionally add a KQL expression to further refine the conditions that the rule detects. 
+7. Set the check interval, which defines how often to evaluate the rule conditions. 
+Generally this value should be set to a value that is smaller than the time window, to avoid gaps in detection.
 
 If data is available and all clauses have been defined, a preview chart will render the threshold value and display a line chart showing the value for the last 30 intervals.
 This can provide an indication of recent values and their proximity to the threshold, and help you tune the clauses.
