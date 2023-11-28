@@ -7,8 +7,6 @@
 
 // / <reference types="cypress" />
 
-// eslint-disable-next-line import/no-nodejs-modules
-import { userInfo } from 'os';
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
