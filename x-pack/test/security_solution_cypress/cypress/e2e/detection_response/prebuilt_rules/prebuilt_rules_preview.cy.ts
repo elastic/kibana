@@ -26,12 +26,7 @@ import {
 } from '../../../tasks/api_calls/prebuilt_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
 import { fetchMachineLearningModules } from '../../../tasks/api_calls/machine_learning';
-import {
-  resetRulesTableState,
-  deleteAlertsAndRules,
-  postDataView,
-  deleteDataView,
-} from '../../../tasks/common';
+import { resetRulesTableState } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   assertRuleInstallationSuccessToastShown,
@@ -62,6 +57,11 @@ import {
   openRuleUpdatePreview,
 } from '../../../tasks/prebuilt_rules_preview';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
+import {
+  deleteAlertsAndRules,
+  deleteDataView,
+  postDataView,
+} from '../../../tasks/api_calls/common';
 
 const TEST_ENV_TAGS = ['@ess', '@serverless'];
 

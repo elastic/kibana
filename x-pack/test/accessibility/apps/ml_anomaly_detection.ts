@@ -65,10 +65,10 @@ export default function ({ getService }: FtrProviderContext) {
         const eventDescription = 'calendar_event_a11y';
         const filterId = 'filter_a11y';
         const filterItems = ['filter_item_a11y'];
-        const fqIndexPattern = 'ft_farequote';
-        const ecIndexPattern = 'ft_module_sample_ecommerce';
+        const fqIndexName = 'ft_farequote';
+        const ecIndexName = 'ft_module_sample_ecommerce';
 
-        const categorizationIndexPattern = 'ft_categorization_small';
+        const categorizationIndexName = 'ft_categorization_small';
 
         const adJobAggAndFieldIdentifier = 'Mean(responsetime)';
         const adJobBucketSpan = '30m';
@@ -87,12 +87,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         const advancedJobTestData = {
           suiteTitle: 'with multiple metric detectors and custom datafeed settings',
-          jobSource: ecIndexPattern,
+          jobSource: ecIndexName,
           jobId: `ec_advanced_1_${Date.now()}`,
           get jobIdClone(): string {
             return `${this.jobId}_clone`;
           },
-          jobDescription: `Create advanced job from ${ecIndexPattern} dataset with multiple metric detectors and custom datafeed settings`,
+          jobDescription: `Create advanced job from ${ecIndexName} dataset with multiple metric detectors and custom datafeed settings`,
           jobGroups: ['automated', 'ecommerce', 'advanced'],
           get jobGroupsClone(): string[] {
             return [...this.jobGroups, 'clone'];
@@ -149,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const populationJobTestData = {
           suiteTitle: 'population job',
-          jobSource: ecIndexPattern,
+          jobSource: ecIndexName,
           jobId: `ec_population_1_${Date.now()}`,
           get jobIdClone(): string {
             return `${this.jobId}_clone`;
@@ -201,12 +201,9 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.loadIfNeeded(
             'x-pack/test/functional/es_archives/ml/categorization_small'
           );
-          await ml.testResources.createIndexPatternIfNeeded(fqIndexPattern, '@timestamp');
-          await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
-          await ml.testResources.createIndexPatternIfNeeded(
-            'ft_categorization_small',
-            '@timestamp'
-          );
+          await ml.testResources.createDataViewIfNeeded(fqIndexName, '@timestamp');
+          await ml.testResources.createDataViewIfNeeded(ecIndexName, 'order_date');
+          await ml.testResources.createDataViewIfNeeded('ft_categorization_small', '@timestamp');
           await ml.testResources.setKibanaTimeZoneToUTC();
 
           await ml.api.createAndRunAnomalyDetectionLookbackJob(
@@ -238,9 +235,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteCalendar(calendarId);
           await ml.api.deleteFilter(filterId);
 
-          await ml.testResources.deleteIndexPatternByTitle(fqIndexPattern);
-          await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
-          await ml.testResources.deleteIndexPatternByTitle(categorizationIndexPattern);
+          await ml.testResources.deleteDataViewByTitle(fqIndexName);
+          await ml.testResources.deleteDataViewByTitle(ecIndexName);
+          await ml.testResources.deleteDataViewByTitle(categorizationIndexName);
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');
@@ -259,7 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('anomaly detection create job select type page', async () => {
-          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(fqIndexPattern);
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(fqIndexName);
           await a11y.testAppSnapshot();
         });
 
@@ -308,7 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
           // as the other steps have already been tested for the single metric job
           await ml.navigation.navigateToAnomalyDetection();
           await ml.jobManagement.navigateToNewJobSourceSelection();
-          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(fqIndexPattern);
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(fqIndexName);
           await ml.jobTypeSelection.selectMultiMetricJob();
           await ml.testExecution.logTestStep('job creation set the time range');
           await ml.jobWizardCommon.clickUseFullDataButton(
@@ -442,7 +439,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToJobManagement();
           await ml.jobManagement.navigateToNewJobSourceSelection();
 
-          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(ecIndexPattern);
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(ecIndexName);
 
           await ml.testExecution.logTestStep('job creation loads the population job wizard page');
           await ml.jobTypeSelection.selectPopulationJob();
@@ -509,9 +506,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToJobManagement();
           await ml.jobManagement.navigateToNewJobSourceSelection();
 
-          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(
-            categorizationIndexPattern
-          );
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(categorizationIndexName);
 
           await ml.testExecution.logTestStep(
             'job creation loads the categorization job wizard page'
@@ -566,7 +561,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('anomaly detection create job from data recognizer module open wizard', async () => {
           await ml.navigation.navigateToJobManagement();
           await ml.jobManagement.navigateToNewJobSourceSelection();
-          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(ecIndexPattern);
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(ecIndexName);
           await ml.testExecution.logTestStep(
             `job creation loads the data recognizer job wizard page for the ${adRecognizerJobModuleId} module`
           );
