@@ -69,7 +69,7 @@ export const SearchIndexDocuments: React.FC = () => {
   const indexToShow =
     selectedIndexType === 'content-index'
       ? indexName
-      : stripSearchPrefix(indexName, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+      : `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexName}`;
   const mappingLogic = mappingsWithPropsApiLogic(indexToShow);
   const documentLogic = searchDocumentsApiLogic(indexToShow);
 
