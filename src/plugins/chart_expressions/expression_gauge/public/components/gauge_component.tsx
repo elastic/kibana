@@ -12,7 +12,11 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import {
+  type ChartDimensionOptions,
+  getOverridesFor,
+  useDimensionTransitionVeil,
+} from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -178,6 +182,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     chartsThemeService,
     renderComplete,
     overrides,
+    setDimensions,
   }) => {
     const {
       shape: gaugeType,
@@ -252,6 +257,23 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       },
       [renderComplete]
     );
+
+    const dimensions: ChartDimensionOptions = {
+      maxDimensions: {
+        unit: 'pixels',
+        ...(gaugeType === GaugeShapes.HORIZONTAL_BULLET
+          ? {
+              x: 600,
+              y: 300,
+            }
+          : {
+              y: 600,
+              x: 300,
+            }),
+      },
+    };
+
+    const { veil, onResize } = useDimensionTransitionVeil(dimensions, setDimensions);
 
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);
@@ -362,6 +384,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     return (
       <div className="gauge__wrapper">
+        {veil}
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
@@ -371,6 +394,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}
+            onResize={onResize}
             locale={i18n.getLocale()}
             {...getOverridesFor(overrides, 'settings')}
           />

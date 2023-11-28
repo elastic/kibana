@@ -70,25 +70,14 @@ export const gaugeRenderer: (
       handlers.done();
     };
 
-    const dimensionsEvent: DimensionsEvent = {
-      name: 'dimensions',
-      data: {
-        maxDimensions: {
-          unit: 'pixels',
-          ...(config.args.shape === GaugeShapes.HORIZONTAL_BULLET
-            ? {
-                x: 600,
-                y: 300,
-              }
-            : {
-                y: 600,
-                x: 300,
-              }),
-        },
-      },
-    };
+    const setDimensions = (dimensions: DimensionsEvent['data']) => {
+      const dimensionsEvent: DimensionsEvent = {
+        name: 'dimensions',
+        data: dimensions,
+      };
 
-    handlers.event(dimensionsEvent);
+      handlers.event(dimensionsEvent);
+    };
 
     const { GaugeComponent } = await import('../components/gauge_component');
     render(
@@ -96,6 +85,7 @@ export const gaugeRenderer: (
         <div className="gauge-container" data-test-subj="gaugeChart">
           <GaugeComponent
             {...config}
+            setDimensions={setDimensions}
             formatFactory={getFormatService().deserialize}
             chartsThemeService={plugins.charts.theme}
             paletteService={getPaletteService()}

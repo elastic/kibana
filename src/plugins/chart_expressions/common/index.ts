@@ -20,3 +20,4 @@ export type {
 } from './types';
 export { isDimensionsEvent } from './types';
 export { getColorCategories } from './color_categories';
+export { useDimensionTransitionVeil } from './dimension_transition_veil';

@@ -42,7 +42,6 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import fastIsEqual from 'fast-deep-equal';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
@@ -52,7 +51,11 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { ChartDimensionOptions, getOverridesFor } from '@kbn/chart-expressions-common';
+import {
+  useDimensionTransitionVeil,
+  ChartDimensionOptions,
+  getOverridesFor,
+} from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -307,28 +310,7 @@ export function XYChart({
         },
   };
 
-  const [showVeil, setShowVeil] = useState(false);
-  const currentDimensions = useRef<typeof dimensions>();
-
-  if (!fastIsEqual(dimensions, currentDimensions.current)) {
-    // If the dimensions have changed we request new dimensions from the client
-    // and set off a chain of events:
-    //
-    // 1. we show the veil to hide step 4
-    // 2. the charts library will plan a render
-    // 3. the client will resize the container
-    // 4. the charts library will render the chart based on the original container dimensions
-    // 5. the charts library will resize the chart to the updated container dimensions
-    // 6. we hide the veil
-
-    setDimensions(dimensions);
-    setShowVeil(true);
-    currentDimensions.current = dimensions;
-  }
-
-  const onResize = useCallback(() => {
-    setShowVeil(false);
-  }, []);
+  const { veil, onResize } = useDimensionTransitionVeil(dimensions, setDimensions);
 
   const formattedDatatables = useMemo(
     () =>
@@ -749,16 +731,7 @@ export function XYChart({
 
   return (
     <div css={chartContainerStyle}>
-      <div
-        css={{
-          height: '100%',
-          width: '100%',
-          backgroundColor: 'white',
-          position: 'absolute',
-          zIndex: 1,
-          display: showVeil ? 'block' : 'none',
-        }}
-      />
+      {veil}
       {showLegend !== undefined && uiState && (
         <LegendToggle
           onClick={toggleLegend}
