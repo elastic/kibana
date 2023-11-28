@@ -14,6 +14,7 @@ import {
   getWrappedInPipesCode,
   getIndicesForAutocomplete,
   extractESQLQueryToExecute,
+  getIndicesList,
 } from './helpers';
 
 describe('helpers', function () {
@@ -235,8 +236,8 @@ describe('helpers', function () {
     });
   });
 
-  describe('getIndicesForAutocomplete', function () {
-    it('should not return system indices', async function () {
+  describe('getIndicesList', function () {
+    it('should return also system indices with hidden flag on', async function () {
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const updatedDataViewsMock = {
         ...dataViewsMock,
@@ -251,8 +252,11 @@ describe('helpers', function () {
           },
         ]),
       };
-      const indices = await getIndicesForAutocomplete(updatedDataViewsMock);
-      expect(indices).toStrictEqual(['logs']);
+      const indices = await getIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([
+        { name: '.system1', hidden: true },
+        { name: 'logs', hidden: false },
+      ]);
     });
   });
 
