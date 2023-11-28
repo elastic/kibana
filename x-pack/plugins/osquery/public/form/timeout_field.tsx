@@ -26,14 +26,7 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
     defaultValue: QUERY_TIMEOUT.DEFAULT,
     rules: {
       validate: (currentValue: number) => {
-        if (isNaN(currentValue)) {
-          return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMinNumberError', {
-            defaultMessage: 'Timeout value must be greater than {than} seconds.',
-            values: { than: QUERY_TIMEOUT.DEFAULT },
-          });
-        }
-
-        if (currentValue < QUERY_TIMEOUT.DEFAULT) {
+        if (currentValue < QUERY_TIMEOUT.DEFAULT || isNaN(currentValue)) {
           return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMinNumberError', {
             defaultMessage: 'Timeout value must be greater than {than} seconds.',
             values: { than: QUERY_TIMEOUT.DEFAULT },
