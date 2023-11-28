@@ -79,8 +79,10 @@ export const postActionsConnectorExecuteRoute = (
 
         return response.ok({
           body: langChainResponseBody,
+          headers: { 'Content-Type': 'text/plain' },
         });
       } catch (err) {
+        console.log('THIS SHOULD BE ERROR?????', err);
         logger.error(err);
         const error = transformError(err);
 

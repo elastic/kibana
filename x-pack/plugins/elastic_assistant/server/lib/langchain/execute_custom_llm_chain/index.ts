@@ -9,10 +9,9 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool, Tool } from 'langchain/tools';
-import { HttpResponseOutputParser } from 'langchain/output_parsers';
 
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
+import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 
@@ -81,13 +80,13 @@ export const callAgentExecutor = async ({
     returnIntermediateSteps: true,
     memory,
     verbose: true,
-    agentArgs: {
-      outputParser: HttpResponseOutputParser,
-    },
   });
 
   console.log('THIS SHOULD BE before stream call');
   const resp = await executor.stream({ input: latestMessage[0].content, chat_history: [] });
-  console.log('THIS SHOULD BE after stream call', { resp, stream: llm.getActionResultStream() });
+  // for await (const chunk of resp) {
+  //   console.log('CHUNKCHUNKCHUNK', chunk);
+  // }
+  console.log('THIS SHOULD BE after stream call', { resp });
   return resp;
 };
