@@ -33,7 +33,10 @@ const fields = [
   },
 ];
 
-const indexes = ['a', 'index', 'otherIndex'];
+const indexes = ['a', 'index', 'otherIndex', '.secretIndex'].map((name) => ({
+  name,
+  hidden: name.startsWith('.'),
+}));
 const policies = [
   {
     name: 'policy',
@@ -124,7 +127,7 @@ function getLiteralsByType(type: string) {
 
 function createCustomCallbackMocks(
   customFields: Array<{ name: string; type: string }> | undefined,
-  customSources: string[] | undefined,
+  customSources: Array<{ name: string; hidden: boolean }> | undefined,
   customPolicies:
     | Array<{
         name: string;
@@ -267,12 +270,13 @@ describe('autocomplete', () => {
   });
 
   describe('from', () => {
+    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
     // Monaco will filter further down here
     testSuggestions('f', sourceCommands);
-    testSuggestions('from ', indexes);
-    testSuggestions('from a,', indexes);
+    testSuggestions('from ', suggestedIndexes);
+    testSuggestions('from a,', suggestedIndexes);
     testSuggestions('from a, b ', ['[metadata $0 ]', '|', ',']);
-    testSuggestions('from *,', indexes);
+    testSuggestions('from *,', suggestedIndexes);
   });
 
   describe('where', () => {

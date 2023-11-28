@@ -43,7 +43,12 @@ function getCallbackMocks() {
             { name: 'yetAnotherField', type: 'number' },
           ]
     ),
-    getSources: jest.fn(async () => ['a', 'index', 'otherIndex']),
+    getSources: jest.fn(async () =>
+      ['a', 'index', 'otherIndex', '.secretIndex'].map((name) => ({
+        name,
+        hidden: name.startsWith('.'),
+      }))
+    ),
     getPolicies: jest.fn(async () => [
       {
         name: 'policy',
@@ -259,6 +264,26 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from in*ex`, []);
     testErrorsAndWarnings(`from ind*ex`, []);
     testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
+
+    testErrorsAndWarnings(`from remote-*:indexes*`, [
+      'ES|QL does not yet support querying remote indices [remote-*:indexes*]',
+    ]);
+    testErrorsAndWarnings(`from remote-*:indexes`, [
+      'ES|QL does not yet support querying remote indices [remote-*:indexes]',
+    ]);
+    testErrorsAndWarnings(`from remote-ccs:indexes`, [
+      'ES|QL does not yet support querying remote indices [remote-ccs:indexes]',
+    ]);
+    testErrorsAndWarnings(`from a, remote-ccs:indexes`, [
+      'ES|QL does not yet support querying remote indices [remote-ccs:indexes]',
+    ]);
+    testErrorsAndWarnings(`from remote-ccs:indexes [METADATA _id]`, [
+      'ES|QL does not yet support querying remote indices [remote-ccs:indexes]',
+    ]);
+    testErrorsAndWarnings(`from *:indexes [METADATA _id]`, [
+      'ES|QL does not yet support querying remote indices [*:indexes]',
+    ]);
+    testErrorsAndWarnings('from .secretIndex', []);
   });
 
   describe('row', () => {

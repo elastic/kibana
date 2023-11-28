@@ -56,7 +56,7 @@ import {
   type MonacoMessage,
   getWrappedInPipesCode,
   parseErrors,
-  getIndicesForAutocomplete,
+  getIndicesList,
   extractESQLQueryToExecute,
   clearCacheWhenOld,
 } from './helpers';
@@ -321,7 +321,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(
     () => ({
       getSources: async () => {
-        return await getIndicesForAutocomplete(dataViews);
+        return await getIndicesList(dataViews);
       },
       getFieldsFor: async (options: { sourcesOnly?: boolean } | { customQuery?: string } = {}) => {
         // we're caching here with useMemo

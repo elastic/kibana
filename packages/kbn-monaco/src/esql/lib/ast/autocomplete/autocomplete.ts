@@ -226,7 +226,9 @@ function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
 function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   const helper = getSourcesHelper(resourceRetriever);
   return async () => {
-    return buildSourcesDefinitions((await helper()) || []);
+    const list = (await helper()) || [];
+    // hide indexes that start with .
+    return buildSourcesDefinitions(list.filter(({ hidden }) => !hidden).map(({ name }) => name));
   };
 }
 
