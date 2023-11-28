@@ -11,7 +11,7 @@ import { ASSET_CRITICALITY_URL, APP_ID } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { AssetCriticalityRecordIdParts } from '../../../../../common/api/asset_criticality';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
-import { checkAndInitAssetCriticalityResources } from './check_and_init_asset_criticality_resources';
+import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 export const assetCriticalityDeleteRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger

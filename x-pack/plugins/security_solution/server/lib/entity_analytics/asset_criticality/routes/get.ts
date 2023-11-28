@@ -9,7 +9,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ASSET_CRITICALITY_URL, APP_ID } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { checkAndInitAssetCriticalityResources } from './check_and_init_asset_criticality_resources';
+import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { AssetCriticalityRecordIdParts } from '../../../../../common/api/asset_criticality';
 export const assetCriticalityGetRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
