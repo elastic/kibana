@@ -1035,11 +1035,6 @@
           }
         }
       },
-      "someNewMapping": {
-        "type": "keyword",
-        "index": false,
-        "doc_values": false
-      },
       "timeFrom": {
         "type": "keyword",
         "index": false,
