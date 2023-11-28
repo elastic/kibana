@@ -328,6 +328,9 @@ export class LensPlugin {
         this.editorFrameService!.loadVisualizations(),
         this.editorFrameService!.loadDatasources(),
       ]);
+      const { setVisualizationMap, setDatasourceMap } = await import('./utils');
+      setDatasourceMap(datasourceMap);
+      setVisualizationMap(visualizationMap);
       const eventAnnotationService = await plugins.eventAnnotation.getService();
 
       if (plugins.usageCollection) {
@@ -559,7 +562,7 @@ export class LensPlugin {
     this.gaugeVisualization.setup(core, dependencies);
     this.tagcloudVisualization.setup(core, dependencies);
 
-    this.queuedVisualizations.forEach((queuedVis) => {
+    this.queuedVisualizations?.forEach((queuedVis) => {
       editorFrameSetupInterface.registerVisualization(queuedVis);
     });
     this.editorFrameSetup = editorFrameSetupInterface;
@@ -599,12 +602,10 @@ export class LensPlugin {
     );
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
 
-    const createESQLPanelAction = new CreateESQLPanelAction(
-      startDependencies,
-      core.overlays,
-      core.theme
-    );
+    // Displays the add ESQL panel in the dashboard add Panel menu
+    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
     startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createESQLPanelAction);
+
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerAction(

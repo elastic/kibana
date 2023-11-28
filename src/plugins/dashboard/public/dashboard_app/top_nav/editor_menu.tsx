@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
@@ -126,24 +126,36 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
   const aggBasedPanelID = 1;
 
   let panelCount = 1 + aggBasedPanelID;
-  const lensFactory = unwrappedEmbeddableFactories.find(({ factory }) => factory.type === 'lens');
 
-  useEffect(() => {
-    const actionContext = {
-      factories: embeddableFactories,
+  // move all this logic to a different file
+  const onClick =
+    (action: Action, context: ActionExecutionContext<object>) => (event: React.MouseEvent) => {
+      if (event.currentTarget instanceof HTMLAnchorElement) {
+        if (
+          !event.defaultPrevented && // onClick prevented default
+          event.button === 0 && // ignore everything but left clicks
+          (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
+          !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+        ) {
+          event.preventDefault();
+          action.execute(context);
+        }
+      } else action.execute(context);
     };
 
+  // Retrieve menu items registered with the ADD_PANEL_TRIGGER action
+  useEffect(() => {
     async function loadPanelActions() {
       const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
         ADD_PANEL_TRIGGER,
-        actionContext
+        {}
       );
       const actionsWithContext = registeredActions?.map((action) => ({
         action,
-        context: actionContext,
+        context: {},
         trigger: addPanelMenuTrigger,
       }));
-      if (actionsWithContext?.length && lensFactory) {
+      if (actionsWithContext?.length) {
         const menuItems = actionsWithContext.map((item) => {
           const context: ActionExecutionContext<object> = {
             ...item.context,
@@ -153,7 +165,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
           return {
             name: actionName,
             icon: item.action.getIconType(context),
-            onClick: item.action.execute(context),
+            onClick: onClick(item.action, context),
             'data-test-subj': `create-action-${actionName}`,
             toolTipContent: item.action?.getDisplayNameTooltip?.(context),
           };
@@ -162,7 +174,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
       }
     }
     loadPanelActions();
-  }, [embeddableFactories, lensFactory, uiActions]);
+  }, [embeddableFactories, uiActions]);
 
   factories.forEach(({ factory }) => {
     const { grouping } = factory;

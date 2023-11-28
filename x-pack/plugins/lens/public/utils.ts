@@ -8,6 +8,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { uniq, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type { Serializable } from '@kbn/utility-types';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -429,3 +430,12 @@ export const getColorMappingDefaults = () => {
   }
   return { ...DEFAULT_COLOR_MAPPING_CONFIG };
 };
+
+// datasourceMap and visualizationMap setters/getters
+export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
+  Record<string, Visualization<unknown, unknown, unknown>>
+>('VisualizationMap', false);
+
+export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
+  Record<string, Datasource<unknown, unknown>>
+>('DatasourceMap', false);

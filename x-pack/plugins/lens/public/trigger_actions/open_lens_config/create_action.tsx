@@ -5,34 +5,31 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
+import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
+import { suggestionsApi } from '../../lens_suggestions_api';
+
 // import { isLensEmbeddable } from '../utils';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 
-interface Context {
-  factories: EmbeddableFactory[];
-}
+// export const EditorFrameService = async () => await import('../../async_services');
 
-export const getConfigureLensHelpersAsync = async () => await import('../../async_services');
-
-export class CreateESQLPanelAction implements Action<Context> {
+export class CreateESQLPanelAction implements Action<{}> {
   public type = ACTION_CREATE_ESQL_CHART;
   public id = ACTION_CREATE_ESQL_CHART;
   public order = 50;
 
   constructor(
     protected readonly startDependencies: LensPluginStartDependencies,
-    protected readonly overlays: OverlayStart,
-    protected readonly theme: ThemeServiceStart
+    protected readonly core: CoreStart
   ) {}
 
-  public getDisplayName(context: Context): string {
+  public getDisplayName(): string {
     return i18n.translate('xpack.lens.app.createVisualizationLabel', {
-      defaultMessage: 'ESQL',
+      defaultMessage: 'ES|QL',
     });
   }
 
@@ -41,13 +38,54 @@ export class CreateESQLPanelAction implements Action<Context> {
     return 'tableDensityExpanded';
   }
 
-  public async isCompatible({ factories }: Context) {
-    const factory = factories.find(({ type }) => type === 'lens');
-    return Boolean(factory);
+  public async isCompatible() {
+    // check the UI setting value here
+    return true;
   }
 
-  public async execute({ factories }: Context) {
-    // const factory = factories.find(({ type }) => type === 'lens');
+  public async execute() {
+    const { getVisualizationMap, getDatasourceMap } = await import('../../utils');
+    const visualizationMap = getVisualizationMap();
+    const datasourceMap = getDatasourceMap();
+    // const embeddableStart = this.startDependencies.embeddable;
+    // const factory = embeddableStart.getEmbeddableFactory('lens')!;
+    // console.dir(this.startDependencies);
+    const defaultDataView = await this.startDependencies.dataViews.getDefaultDataView({
+      displayErrors: false,
+    });
+    if (!defaultDataView) {
+      return undefined;
+    }
+    const defaultEsqlQuery = {
+      esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
+    };
+
+    const performantQuery = {
+      esql: `from ${defaultDataView?.getIndexPattern()} | limit 0`,
+    };
+
+    const table = await fetchDataFromAggregateQuery(
+      performantQuery,
+      defaultDataView,
+      this.startDependencies.data,
+      this.startDependencies.expressions
+    );
+
+    const context = {
+      dataViewSpec: defaultDataView?.toSpec(),
+      fieldName: '',
+      textBasedColumns: table?.columns,
+      query: defaultEsqlQuery,
+    };
+
+    const allSuggestions =
+      suggestionsApi({ context, dataView: defaultDataView, datasourceMap, visualizationMap }) ?? [];
+
+    // Lens might not return suggestions for some cases, i.e. in case of errors
+    if (!allSuggestions.length) return undefined;
+
+    // get the initial attributes from the suggestions api
     // create a new embeddable with factory.create
+    // factory?.create()
   }
 }
