@@ -20,5 +20,7 @@ cd x-pack/test/security_solution_cypress
 set +e
 
 QA_API_KEY=$(retry 5 5 vault read -field=qa_api_key secret/kibana-issues/dev/security-solution-qg-enc-key)
+EMAIL=$(retry 5 5 vault read -field=email secret/kibana-issues/dev/security-solution-qg-enc-key)
+PASSWORD=$(retry 5 5 vault read -field=password secret/kibana-issues/dev/security-solution-qg-enc-key)
 
-CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+CLOUD_QA_API_KEY=$QA_API_KEY EMAIL=$EMAIL PASSWORD=$PASSWORD yarn $1; status=$?; yarn junit:merge || :; exit $status

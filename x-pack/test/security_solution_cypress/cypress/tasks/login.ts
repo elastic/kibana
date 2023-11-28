@@ -8,7 +8,6 @@
 import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
-import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
@@ -18,7 +17,6 @@ import {
   ELASTICSEARCH_USERNAME,
   IS_SERVERLESS,
 } from '../env_var_names_constants';
-import { API_HEADERS, rootRequest } from './api_calls/common';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -202,6 +200,12 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
     throw Error(`Cypress config baseUrl not set!`);
   }
 
+  cy.task('createNewSAMLSession').then((cookie) => {
+    cy.setCookie('sid', cookie as string);
+    cy.visit('/');
+  });
+
+  /*
   // Programmatically authenticate without interacting with the Kibana login page.
   rootRequest<LoginState>({
     url: `${baseUrl}/internal/security/login_state`,
@@ -222,4 +226,6 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
       headers: API_HEADERS,
     });
   });
+
+  */
 };
