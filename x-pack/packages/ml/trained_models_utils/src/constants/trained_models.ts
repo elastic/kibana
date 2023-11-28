@@ -112,7 +112,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
         field_names: ['text_field'],
       },
     },
-    description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1Description', {
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1x86Description', {
       defaultMessage: 'E5 multilingual embedding model, optimized for linux-x86_64',
     }),
   },
