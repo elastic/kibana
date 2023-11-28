@@ -410,6 +410,9 @@ function getWildcardPosition(name: string) {
 export function hasWildcard(name: string) {
   return name.includes('*');
 }
+export function hasCCSSource(name: string) {
+  return name.includes(':');
+}
 
 export function columnExists(
   column: ESQLColumn,

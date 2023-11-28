@@ -38,9 +38,9 @@ export const commandDefinitions: CommandDefinition[] = [
     name: 'from',
     description: i18n.translate('monaco.esql.definitions.fromDoc', {
       defaultMessage:
-        'Retrieves data from one or more datasets. A dataset is a collection of data that you want to search. The only supported dataset is an index. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
+        'Retrieves data from one or more data streams, indices, or aliases. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
     }),
-    examples: ['from logs', 'from logs-*', 'from logs_*, events-*', 'from remote*:logs*'],
+    examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     signature: {
       multipleParams: true,
@@ -171,12 +171,12 @@ export const commandDefinitions: CommandDefinition[] = [
     name: 'sort',
     description: i18n.translate('monaco.esql.definitions.sortDoc', {
       defaultMessage:
-        'Sorts all results by the specified fields. When in descending order, the results missing a field are considered the smallest possible value of the field, or the largest possible value of the field when in ascending order.',
+        'Sorts all results by the specified fields. By default, null values are treated as being larger than any other value. With an ascending sort order, null values are sorted last, and with a descending sort order, null values are sorted first. You can change that by providing NULLS FIRST or NULLS LAST',
     }),
     examples: [
       '… | sort a desc, b nulls last, c asc nulls first',
-      '… | sort b nulls last`',
-      '… | sort c asc nulls first`',
+      '… | sort b nulls last',
+      '… | sort c asc nulls first',
     ],
     options: [],
     signature: {
@@ -207,7 +207,7 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | dissect a "%{b} %{c}";'],
+    examples: ['… | dissect a "%{b} %{c}"'],
     options: [appendSeparatorOption],
     signature: {
       multipleParams: false,
@@ -223,7 +223,7 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | grok a "%{b} %{c}";'],
+    examples: ['… | grok a "%{IP:b} %{NUMBER:c}"'],
     options: [],
     signature: {
       multipleParams: false,
@@ -248,7 +248,8 @@ export const commandDefinitions: CommandDefinition[] = [
   {
     name: 'enrich',
     description: i18n.translate('monaco.esql.definitions.enrichDoc', {
-      defaultMessage: 'Enrich table with another table',
+     defaultMessage:
+        'Enrich table with another table. Before you can use enrich, you need to create and execute an enrich policy.',
     }),
     examples: [
       '… | enrich my-policy',

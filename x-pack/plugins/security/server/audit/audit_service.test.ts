@@ -16,8 +16,8 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
-import type { AuditEvent } from './audit_events';
 import {
   AuditService,
   createLoggingConfig,
