@@ -25,6 +25,7 @@ export const applicationServiceFactory: ApplicationServiceFactory = () => {
       maps: pluginMock.capabilities.maps,
       navLinks: pluginMock.capabilities.navLinks,
       visualize: pluginMock.capabilities.visualize,
+      savedObjectsManagement: pluginMock.capabilities.savedObjectsManagement,
     },
   };
 };

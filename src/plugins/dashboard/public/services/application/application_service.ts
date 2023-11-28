@@ -22,7 +22,7 @@ export const applicationServiceFactory: ApplicationServiceFactory = ({ coreStart
       navigateToApp,
       navigateToUrl,
       getUrlForApp,
-      capabilities: { advancedSettings, maps, navLinks, visualize },
+      capabilities: { advancedSettings, maps, navLinks, visualize, savedObjectsManagement },
     },
   } = coreStart;
 
@@ -36,6 +36,7 @@ export const applicationServiceFactory: ApplicationServiceFactory = ({ coreStart
       maps,
       navLinks,
       visualize,
+      savedObjectsManagement,
     },
   };
 };

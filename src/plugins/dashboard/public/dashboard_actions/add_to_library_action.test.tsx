@@ -40,6 +40,7 @@ const defaultCapabilities = {
   visualize: { save: true },
   maps: { save: true },
   navLinks: {},
+  savedObjectsManagement: {},
 };
 
 Object.defineProperty(pluginServices.getServices().application, 'capabilities', {

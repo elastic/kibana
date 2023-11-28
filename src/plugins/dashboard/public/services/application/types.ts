@@ -18,5 +18,6 @@ export interface DashboardApplicationService {
     maps: CoreStart['application']['capabilities']['maps']; // only used in `add_to_library_action`
     navLinks: CoreStart['application']['capabilities']['navLinks'];
     visualize: CoreStart['application']['capabilities']['visualize']; // only used in `add_to_library_action`
+    savedObjectsManagement: CoreStart['application']['capabilities']['savedObjectsManagement'];
   };
 }
