@@ -28,9 +28,7 @@ function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error
  * saved object mappings for all plugins. We run this in a child process so that we can
  * harvest logs and feed them into the logger when debugging.
  */
-export async function extractFieldListsFromPlugins(
-  log: SomeDevLog
-): Promise<Result> {
+export async function extractFieldListsFromPlugins(log: SomeDevLog): Promise<Result> {
   log.info('Loading core with all plugins enabled so that we can get all savedObject mappings...');
 
   const fork = ChildProcess.fork(require.resolve('./extract_field_lists_from_plugins_worker.ts'), {
