@@ -63,7 +63,6 @@ export const createDashboardSavedObjectType = ({
           ignoreParentSettingsJSON: { type: 'text', index: false },
         },
       },
-      someNewMapping: { type: 'keyword', index: false, doc_values: false },
       timeFrom: { type: 'keyword', index: false, doc_values: false },
       timeRestore: { type: 'boolean', index: false, doc_values: false },
       timeTo: { type: 'keyword', index: false, doc_values: false },
