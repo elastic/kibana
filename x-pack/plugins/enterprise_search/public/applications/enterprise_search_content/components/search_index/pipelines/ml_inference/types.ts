@@ -14,6 +14,7 @@ export interface InferencePipelineConfiguration {
   inferenceConfig?: InferencePipelineInferenceConfig;
   modelID: string;
   pipelineName: string;
+  pipelineNameUserSupplied?: boolean;
   fieldMappings?: FieldMapping[];
   targetField: string;
 }

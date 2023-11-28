@@ -62,7 +62,7 @@ export const ConfigurePipeline: React.FC = () => {
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
 
-  const { existingPipeline, modelID, pipelineName } = configuration;
+  const { existingPipeline, modelID, pipelineName, pipelineNameUserSupplied } = configuration;
 
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
 
@@ -149,6 +149,7 @@ export const ConfigurePipeline: React.FC = () => {
                   setInferencePipelineConfiguration({
                     ...configuration,
                     pipelineName: e.target.value,
+                    pipelineNameUserSupplied: true,
                   })
                 }
               />
@@ -166,15 +167,23 @@ export const ConfigurePipeline: React.FC = () => {
                 hasDividers
                 disabled={inputsDisabled}
                 itemLayoutAlign="top"
-                onChange={(value) =>
-                  setInferencePipelineConfiguration({
+                onChange={(value) => {
+                  const newConfiguration = {
                     ...configuration,
                     inferenceConfig: undefined,
                     modelID: value,
                     fieldMappings: undefined,
-                    pipelineName: pipelineName || indexName + '-' + normalizeModelName(value),
-                  })
-                }
+                    pipelineName: indexName + '-' + normalizeModelName(value),
+                    pipelineNameUserSupplied: false,
+                  };
+
+                  if (pipelineName && pipelineNameUserSupplied) {
+                    newConfiguration.pipelineName = pipelineName;
+                    newConfiguration.pipelineNameUserSupplied = true;
+                  }
+
+                  setInferencePipelineConfiguration(newConfiguration);
+                }}
                 options={modelOptions}
                 valueOfSelected={modelID === '' ? MODEL_SELECT_PLACEHOLDER_VALUE : modelID}
               />
