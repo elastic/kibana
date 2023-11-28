@@ -35,7 +35,7 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
     }
 
     return es.cluster.putComponentTemplate(
-      componentTemplate as ClusterPutComponentTemplateRequest,
+      componentTemplate as unknown as ClusterPutComponentTemplateRequest,
       { meta: true }
     );
   };
