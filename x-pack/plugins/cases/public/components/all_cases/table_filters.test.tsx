@@ -763,5 +763,54 @@ describe('CasesTableFilters ', () => {
         expect(allOptions).toHaveLength(6);
       });
     });
+
+    it('should delete stored filters that dont exist anymore', async () => {
+      const previousState = [
+        { key: 'severity', isActive: true },
+        { key: 'status', isActive: false },
+        { key: 'fakeField', isActive: true }, // does not exist, should be removed
+        { key: 'tags', isActive: true },
+        { key: 'category', isActive: false },
+        { key: 'owner', isActive: false }, // isnt available, should be removed
+        { key: `${CUSTOM_FIELD_KEY_PREFIX}toggle`, isActive: true },
+      ];
+      localStorage.setItem(
+        'testAppId.cases.list.tableFiltersConfig',
+        JSON.stringify(previousState)
+      );
+
+      appMockRender.render(<CasesTableFilters {...props} />);
+
+      userEvent.click(screen.getByRole('button', { name: 'More' }));
+      // we need any user action to trigger the filter config update
+      userEvent.click(await screen.findByRole('option', { name: 'Toggle' }));
+
+      const storedFilterState = localStorage.getItem('testAppId.cases.list.tableFiltersConfig');
+      // the fakeField and owner filter should be removed and toggle should update isActive
+      expect(JSON.parse(storedFilterState || '')).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "isActive": true,
+            "key": "severity",
+          },
+          Object {
+            "isActive": false,
+            "key": "status",
+          },
+          Object {
+            "isActive": true,
+            "key": "tags",
+          },
+          Object {
+            "isActive": false,
+            "key": "category",
+          },
+          Object {
+            "isActive": false,
+            "key": "cf_toggle",
+          },
+        ]
+      `);
+    });
   });
 });

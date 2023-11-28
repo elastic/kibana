@@ -108,6 +108,7 @@ export const getSystemFilterConfig = ({
       label: i18n.TAGS,
       isActive: true,
       isAvailable: true,
+
       deactivate: () => {
         onFilterOptionChange({ filterId: 'tags', selectedOptionKeys: [] });
       },

@@ -41,11 +41,19 @@ export const useFilterConfig = ({
   const [filterConfigs, setFilterConfigs] = useState<Map<string, FilterConfig>>(
     () => new Map([...systemFilterConfig].map((filter) => [filter.key, filter]))
   );
+  /**
+   * Initially we won't save any order, it will use the default config as it is defined in the system.
+   * Once the user adds/removes a filter, we start saving the order and the visible state.
+   */
   const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
     `${appId}.${LOCAL_STORAGE_KEYS.casesTableFiltersConfig}`,
     []
   );
 
+  /**
+   * This effect is needed in case a filter (mostly custom field) is removed from the settings
+   * but the user was filtering by it.
+   */
   useEffect(() => {
     const newFilterConfig = mergeSystemAndCustomFieldConfigs({
       systemFilterConfig,
@@ -59,6 +67,11 @@ export const useFilterConfig = ({
     });
   }, [filterConfigs, systemFilterConfig, customFieldsFilterConfig]);
 
+  /**
+   * As custom fields are loaded by fetching an API and they might also be removed
+   * while using the app, we merge the system and custom fields configs on every time
+   * they change.
+   */
   useEffect(() => {
     setFilterConfigs(
       mergeSystemAndCustomFieldConfigs({
@@ -73,7 +86,8 @@ export const useFilterConfig = ({
     const deactivatedFilters: string[] = [];
 
     // for each filter in the current state, this way we keep the order
-    (activeByFilterKey || []).forEach(({ key, isActive: prevIsActive }, currentIndex) => {
+    (activeByFilterKey || []).forEach(({ key, isActive: prevIsActive }) => {
+      const currentIndex = newActiveByFilterKey.findIndex((filter) => filter.key === key);
       if (filterConfigs.has(key)) {
         const isActive = selectedOptionKeys.find((optionKey) => optionKey === key);
         if (isActive && !prevIsActive) {
@@ -86,7 +100,7 @@ export const useFilterConfig = ({
           newActiveByFilterKey[currentIndex] = { key, isActive: false };
         }
       } else {
-        // clean up filters that are no longer available
+        // we might have in local storage a key of a field that don't exist anymore
         newActiveByFilterKey.splice(currentIndex, 1);
       }
     });
