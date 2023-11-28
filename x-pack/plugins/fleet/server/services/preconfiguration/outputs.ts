@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
-import crypto from 'crypto';
 
 import type {
   PreconfiguredOutput,

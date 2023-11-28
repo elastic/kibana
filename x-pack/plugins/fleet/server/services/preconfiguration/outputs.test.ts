@@ -53,8 +53,8 @@ describe('output preconfiguration', () => {
     mockedOutputService.delete.mockReset();
     mockedOutputService.getDefaultDataOutputId.mockReset();
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
-    const keyHash = await hashSecret('secretKey');
-    const passwordHash = await hashSecret('secretPassword');
+    const keyHash = (await hashSecret('secretKey')) as string;
+    const passwordHash = (await hashSecret('secretPassword')) as string;
     mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
       return [
         {
