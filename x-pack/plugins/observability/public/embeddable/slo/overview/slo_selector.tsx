@@ -26,11 +26,7 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const {
-    isInitialLoading,
-    isLoading,
-    data: sloList,
-  } = useFetchSloList({
+  const { isLoading, data: sloList } = useFetchSloList({
     kqlQuery: `slo.name: ${searchValue.replaceAll(' ', '*')}*`,
   });
 
@@ -69,10 +65,6 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
       }, 300),
     []
   );
-
-  if (isInitialLoading) {
-    return null;
-  }
 
   return (
     <EuiFormRow fullWidth isInvalid={hasError} error={hasError ? SLO_REQUIRED : undefined}>

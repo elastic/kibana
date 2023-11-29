@@ -78,7 +78,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
 
         <EuiButton
           data-test-subj="sloConfirmButton"
-          isDisabled={!selectedSlos || hasError}
+          isDisabled={!selectedSlos || selectedSlos.length === 0 || hasError}
           onClick={onConfirmClick}
           fill
         >
