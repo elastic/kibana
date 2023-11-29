@@ -11,23 +11,20 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-interface Props {
+interface CreateDataViewTimeFieldProps {
   dataViewAvailableTimeFields: string[];
   dataViewTimeField: string | undefined;
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export const StepDetailsTimeField: FC<Props> = ({
+export const CreateDataViewTimeField: FC<CreateDataViewTimeFieldProps> = ({
   dataViewAvailableTimeFields,
   dataViewTimeField,
   onTimeFieldChanged,
 }) => {
-  const noTimeFieldLabel = i18n.translate(
-    'xpack.transform.stepDetailsForm.noTimeFieldOptionLabel',
-    {
-      defaultMessage: "I don't want to use the time field option",
-    }
-  );
+  const noTimeFieldLabel = i18n.translate('xpack.ml.dataViewUtils.noTimeFieldOptionLabel', {
+    defaultMessage: "I don't want to use the time field option",
+  });
 
   const noTimeFieldOption = {
     text: noTimeFieldLabel,
@@ -44,13 +41,13 @@ export const StepDetailsTimeField: FC<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.transform.stepDetailsForm.dataViewTimeFieldLabel"
-          defaultMessage="Time field for Kibana data view"
+          id="xpack.ml.dataViewUtils.dataViewTimeFieldLabel"
+          defaultMessage="Time field for data view"
         />
       }
       helpText={
         <FormattedMessage
-          id="xpack.transform.stepDetailsForm.dataViewTimeFieldHelpText"
+          id="xpack.ml.dataViewUtils.dataViewTimeFieldHelpText"
           defaultMessage="Select a primary time field for use with the global time filter."
         />
       }
@@ -63,7 +60,7 @@ export const StepDetailsTimeField: FC<Props> = ({
         ]}
         value={dataViewTimeField}
         onChange={onTimeFieldChanged}
-        data-test-subj="transformDataViewTimeFieldSelect"
+        data-test-subj="mlDataViewTimeFieldSelect"
       />
     </EuiFormRow>
   );
