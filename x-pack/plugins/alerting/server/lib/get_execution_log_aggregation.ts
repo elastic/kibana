@@ -14,7 +14,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
 import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
-const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
+const DEFAULT_MAX_BUCKETS_LIMIT = 10000; // do not retrieve more than this number of executions. UI limits 1000 to display, but we need to fetch all 10000 to accurately reflect the KPIs
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const RULE_ID_FIELD = 'rule.id';
@@ -104,9 +104,7 @@ export interface ExecutionUuidKPIAggResult<TBucket = IExecutionUuidKpiAggBucket>
 
 interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidAggResult;
-  executionUuidCardinality: {
-    executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
-  };
+  executionUuidCardinality: estypes.AggregationsCardinalityAggregate; // This is an accurate type even though we're actually using a sum bucket agg
 }
 
 interface ExcludeExecuteStartKpiAggResult extends estypes.AggregationsAggregateBase {
@@ -301,19 +299,27 @@ export function getExecutionLogAggregation({
       },
       aggs: {
         // Get total number of executions
-        executionUuidCardinality: {
-          filter: {
-            bool: {
-              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-              must: [getProviderAndActionFilter('alerting', 'execute')],
-            },
+        executionUuidCardinalityBuckets: {
+          terms: {
+            field: EXECUTION_UUID_FIELD,
+            size: DEFAULT_MAX_BUCKETS_LIMIT,
           },
           aggs: {
-            executionUuidCardinality: {
-              cardinality: {
-                field: EXECUTION_UUID_FIELD,
+            filtered: {
+              filter: {
+                bool: {
+                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+                  must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
               },
             },
+          },
+        },
+        // Cardinality aggregation isn't accurate for this use case because we want to limit the cardinality
+        // to DEFAULT_MAX_BUCKETS_LIMIT. Instead, we sum the buckets and call it a cardinality.
+        executionUuidCardinality: {
+          sum_bucket: {
+            buckets_path: 'executionUuidCardinalityBuckets>filtered._count',
           },
         },
         executionUuid: {
@@ -613,7 +619,7 @@ export function formatExecutionLogResult(
 
   const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
 
-  const total = aggs.executionUuidCardinality.executionUuidCardinality.value;
+  const total = aggs.executionUuidCardinality.value;
   const buckets = aggs.executionUuid.buckets;
 
   return {

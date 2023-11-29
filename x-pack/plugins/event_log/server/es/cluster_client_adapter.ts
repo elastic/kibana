@@ -498,9 +498,10 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         aggregations,
       };
     } catch (err) {
-      throw new Error(
+      this.logger.debug(
         `querying for Event Log by for type "${type}" and auth filter failed with: ${err.message}`
       );
+      throw err;
     }
   }
 }
