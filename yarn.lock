@@ -5493,6 +5493,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-index-documents@link:packages/kbn-search-index-documents":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-response-warnings@link:packages/kbn-search-response-warnings":
   version "0.0.0"
   uid ""

@@ -1278,6 +1278,8 @@
       "@kbn/search-connectors/*": ["packages/kbn-search-connectors/*"],
       "@kbn/search-examples-plugin": ["examples/search_examples"],
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
+      "@kbn/search-index-documents": ["packages/kbn-search-index-documents"],
+      "@kbn/search-index-documents/*": ["packages/kbn-search-index-documents/*"],
       "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
       "@kbn/search-response-warnings/*": ["packages/kbn-search-response-warnings/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/plugins/searchprofiler"],
