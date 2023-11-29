@@ -190,6 +190,19 @@ describe('CasesTableFilters ', () => {
     });
   });
 
+  it('should show in progress status only when "in p" is searched in the filter', async () => {
+    appMockRender.render(<CasesTableFilters {...props} />);
+
+    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
+    await waitForEuiPopoverOpen();
+
+    userEvent.type(screen.getByTestId('status-search-input'), 'in p');
+
+    const allOptions = screen.getAllByRole('option');
+    expect(allOptions).toHaveLength(1);
+    expect(allOptions[0]).toHaveTextContent('In progress');
+  });
+
   it('should remove assignee from selected assignees when assignee no longer exists', async () => {
     const overrideProps = {
       ...props,
