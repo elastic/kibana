@@ -29,6 +29,7 @@ export function SLOViewSettings({
       id="sloListCompactToggle"
       checked={listViewMode === 'compact'}
       onChange={toggleCompactView}
+      compressed
     />
   );
 }
