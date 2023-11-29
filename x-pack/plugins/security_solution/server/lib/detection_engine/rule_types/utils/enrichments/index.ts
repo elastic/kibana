@@ -72,6 +72,18 @@ export const enrichEvents: EnrichEventsFunction = async ({
       );
     }
 
+    // TODO, check if the right index exists
+    if (true) {
+      enrichments.push(
+        createUserAssetCriticalityEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
+    }
+
     const allEnrichmentsResults = await Promise.allSettled(enrichments);
 
     const allFulfilledEnrichmentsResults: EventsMapByEnrichments[] = allEnrichmentsResults

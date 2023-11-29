@@ -83,6 +83,12 @@ export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
   }
 ) => Promise<EventsMapByEnrichments>;
 
+export type CreateCriticalityEnrichment = <T extends BaseFieldsLatest>(
+  params: BasedEnrichParamters<T> & {
+    spaceId: string;
+  }
+) => Promise<EventsMapByEnrichments>;
+
 export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     name: string;
