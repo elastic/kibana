@@ -16,56 +16,18 @@ export const groupBy = {
       field: 'slo.revision',
     },
   },
-  'slo.groupBy': {
-    terms: {
-      field: 'slo.groupBy',
-    },
-  },
   'slo.instanceId': {
     terms: {
       field: 'slo.instanceId',
     },
   },
-  'slo.name': {
-    terms: {
-      field: 'slo.name',
-    },
-  },
-  'slo.description': {
-    terms: {
-      field: 'slo.description',
-    },
-  },
-  'slo.tags': {
-    terms: {
-      field: 'slo.tags',
-    },
-  },
-  'slo.indicator.type': {
-    terms: {
-      field: 'slo.indicator.type',
-    },
-  },
-  'slo.budgetingMethod': {
-    terms: {
-      field: 'slo.budgetingMethod',
-    },
-  },
-  'slo.timeWindow.duration': {
-    terms: {
-      field: 'slo.timeWindow.duration',
-    },
-  },
-  'slo.timeWindow.type': {
-    terms: {
-      field: 'slo.timeWindow.type',
-    },
-  },
+  // we might get ride of this by using the ingest pipeline instead
   errorBudgetEstimated: {
     terms: {
       field: 'errorBudgetEstimated',
     },
   },
+  // we might get ride of this by using the ingest pipeline instead
   // Differentiate the temporary document from the summary one
   isTempDoc: {
     terms: {
