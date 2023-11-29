@@ -136,7 +136,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
         item.installationInfo && semverLt(item.installationInfo.version, attempt.target_version)
     )
   ) {
-    const upgradelFailedAttempt = item.installationInfo?.latest_install_failed_attempts?.find(
+    const updateFailedAttempt = item.installationInfo?.latest_install_failed_attempts?.find(
       (attempt) =>
         item.installationInfo && semverLt(item.installationInfo.version, attempt.target_version)
     );
@@ -151,7 +151,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
                 defaultMessage="Update failed"
               />
             }
-            content={upgradelFailedAttempt ? formatAttempt(upgradelFailedAttempt) : undefined}
+            content={updateFailedAttempt ? formatAttempt(updateFailedAttempt) : undefined}
           >
             <EuiBadge color="danger" iconType="error">
               <FormattedMessage
