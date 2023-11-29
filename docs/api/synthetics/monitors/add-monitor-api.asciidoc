@@ -137,7 +137,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 }
 --------------------------------------------------
 
-  * `response` The expected response. Under check.response, specify these options:
+  * `response` The expected response. Under `check.response`, specify these options:
       ** `status`  A list of expected status codes. 4xx and 5xx codes are considered down by default. Other codes are considered up.
       ** `headers` (Optional, object): A dictionary of expected HTTP headers. If the header is not found, the check fails.
       ** `body.positive`: A list of regular expressions to match the body output. Only a single expression needs to match.
