@@ -12,6 +12,8 @@ import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-pl
 import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_log_patterns';
 import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups';
 import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups_textfield';
+import { topTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/top_terms';
+import { topTermsGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/top_terms_groups';
 
 import type {
   AiopsLogRateAnalysisSchema,
@@ -101,6 +103,33 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       noIndexActionsLength: 3,
       significantItems: artificialLogSignificantTerms,
       groups: artificialLogsSignificantItemGroups,
+      histogramLength: 20,
+    },
+  },
+  {
+    testName: 'artificial_logs_with_spike_zerodocsfallback',
+    dataGenerator: 'artificial_logs_with_spike_zerodocsfallback',
+    requestBody: {
+      start: 1668760018793,
+      end: 1668931954793,
+      searchQuery: '{"match_all":{}}',
+      timeFieldName: '@timestamp',
+      index: 'artificial_logs_with_spike_zerodocsfallback',
+      baselineMin: 0,
+      baselineMax: 10,
+      deviationMin: 1668855600000,
+      deviationMax: 1668924000000,
+      grouping: true,
+    } as AiopsLogRateAnalysisSchema<T>,
+    expected: {
+      chunksLength: 62,
+      chunksLengthGroupOnly: 11,
+      actionsLength: 61,
+      actionsLengthGroupOnly: 10,
+      noIndexChunksLength: 4,
+      noIndexActionsLength: 3,
+      significantItems: topTerms,
+      groups: topTermsGroups,
       histogramLength: 20,
     },
   },
