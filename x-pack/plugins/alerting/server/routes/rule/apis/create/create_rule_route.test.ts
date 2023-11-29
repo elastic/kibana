@@ -198,7 +198,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "useAlertDataForTemplate": undefined,
               },
             ],
             "alertTypeId": "1",
@@ -315,7 +314,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "useAlertDataForTemplate": undefined,
               },
             ],
             "alertTypeId": "1",
@@ -433,7 +431,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "useAlertDataForTemplate": undefined,
               },
             ],
             "alertTypeId": "1",
@@ -551,7 +548,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "useAlertDataForTemplate": undefined,
               },
             ],
             "alertTypeId": "1",
