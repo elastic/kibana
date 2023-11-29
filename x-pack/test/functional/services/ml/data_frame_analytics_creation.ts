@@ -679,16 +679,20 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDestIndexSameAsIdCheckState(checkState);
     },
 
-    async assertStartJobCheckboxExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardStartJobCheckbox');
+    async assertStartJobSwitchExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardStartJobSwitch');
     },
 
-    async assertStartJobCheckboxCheckState(expectedCheckState: boolean) {
-      const actualCheckState =
-        (await testSubjects.getAttribute(
-          'mlAnalyticsCreateJobWizardStartJobCheckbox',
-          'checked'
-        )) === 'true';
+    async getStartJobSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardStartJobSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertStartJobSwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getStartJobSwitchCheckState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Start job check state should be ${expectedCheckState} (got ${actualCheckState})`
