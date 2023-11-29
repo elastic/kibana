@@ -9,19 +9,11 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
 import { JobSelectorTable } from './job_selector_table';
-import { kibanaContextMock } from '../../../contexts/kibana/__mocks__/kibana_context';
 
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: jest.fn(() => {
-    const mock = kibanaContextMock;
-    mock.services.application.capabilities = {
-      ml: {
-        canCreateJob: true,
-      },
-    };
-    return mock;
-  }),
-}));
+jest.mock('../../../contexts/kibana');
+jest.mock('../../node_available_warning', () => {
+  return { MlNodeAvailableWarningShared: () => <div /> };
+});
 
 const props = {
   ganttBarWidth: 299,
