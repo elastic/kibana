@@ -195,11 +195,13 @@ export function DiscoverGridFlyout({
       });
   const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
 
+  const flyoutSize = flyoutCustomization?.size ?? 'm';
+
   return (
     <EuiPortal>
       <EuiFlyout
         onClose={onClose}
-        size="m"
+        size={flyoutSize}
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
         ownFocus={false}
