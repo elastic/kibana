@@ -94,7 +94,6 @@ export const CreateStep: FC<Props> = ({ actions, state, step, showCreateDataView
                 <EuiSwitch
                   data-test-subj="mlAnalyticsCreateJobWizardStartJobSwitch"
                   name="mlAnalyticsCreateJobWizardStartJobSwitch"
-                  disabled={canCreateDataView === false}
                   label={i18n.translate('xpack.ml.dataframe.analytics.create.wizardStartCheckbox', {
                     defaultMessage: 'Start immediately',
                   })}
