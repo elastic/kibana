@@ -32,11 +32,7 @@ import * as i18n from './translations';
 
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 
-import { RuleDiffTabAppExperienceTeamPoc } from '../../../../rule_management/components/rule_details/rule_diff_tab_app_experience_team_poc';
-import { RuleDiffTabReactDiffViewerContinued } from '../../../../rule_management/components/rule_details/rule_diff_tab_react_diff_viewer_continued';
-import { RuleDiffTabReactDiffView } from '../../../../rule_management/components/rule_details/rule_diff_tab_react_diff_view';
-import { RuleDiffTabMonaco } from '../../../../rule_management/components/rule_details/rule_diff_tab_monaco';
-import { RuleDiffTabDiff2Html } from '../../../../rule_management/components/rule_details/rule_diff_tab_diff2html';
+import { RuleDiffTabMonaco } from '../../../../rule_management/components/rule_details/json_diff/rule_diff_tab_monaco';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -266,8 +262,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     actions,
   ]);
 
-  // console.log('ReactDiffViewer pre', ReactDiffViewer);
-
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
       <>
@@ -299,37 +293,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             }
             getRuleTabs={(rule, defaultTabs) => {
               const activeRule = filteredRules.find(({ id }) => rule.id);
-              const diff = activeRule?.diff;
-
-              if (!diff) {
+              if (!activeRule) {
                 return defaultTabs;
               }
-
-              const diffTabReactDiffViewerContinued = {
-                id: 'react-diff-viewer-continued',
-                name: 'react-diff-viewer-continued',
-                content: (
-                  <TabContentPadding>
-                    <RuleDiffTabReactDiffViewerContinued
-                      oldRule={activeRule.current_rule}
-                      newRule={activeRule.target_rule}
-                    />
-                  </TabContentPadding>
-                ),
-              };
-
-              const diffTabReactDiffView = {
-                id: 'react-diff-view',
-                name: 'react-diff-view',
-                content: (
-                  <TabContentPadding>
-                    <RuleDiffTabReactDiffView
-                      oldRule={activeRule.current_rule}
-                      newRule={activeRule.target_rule}
-                    />
-                  </TabContentPadding>
-                ),
-              };
 
               const diffTabMonaco = {
                 id: 'monaco',
@@ -344,40 +310,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                 ),
               };
 
-              const diffTabDiff2Html = {
-                id: 'diff2html',
-                name: 'diff2html',
-                content: (
-                  <TabContentPadding>
-                    <RuleDiffTabDiff2Html
-                      oldRule={activeRule.current_rule}
-                      newRule={activeRule.target_rule}
-                    />
-                  </TabContentPadding>
-                ),
-              };
-
-              const diffTabAppExperienceTeamPoc = {
-                id: 'app-experience-team-poc',
-                name: 'app-experience-team-poc',
-                content: (
-                  <TabContentPadding>
-                    <RuleDiffTabAppExperienceTeamPoc
-                      oldRule={activeRule.current_rule}
-                      newRule={activeRule.target_rule}
-                    />
-                  </TabContentPadding>
-                ),
-              };
-
-              return [
-                diffTabReactDiffViewerContinued,
-                diffTabReactDiffView,
-                diffTabMonaco,
-                diffTabDiff2Html,
-                diffTabAppExperienceTeamPoc,
-                ...defaultTabs,
-              ];
+              return [diffTabMonaco, ...defaultTabs];
             }}
           />
         )}

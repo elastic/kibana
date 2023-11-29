@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
 import { EuiSpacer } from '@elastic/eui';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
-import { sortAndStringifyJson } from './json_diff/sort_stringify_json';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
+import { sortAndStringifyJson } from './sort_stringify_json';
 
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
