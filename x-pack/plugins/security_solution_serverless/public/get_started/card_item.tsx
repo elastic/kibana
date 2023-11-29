@@ -11,8 +11,8 @@ import {
   EuiPanel,
   useEuiBackgroundColor,
   useEuiShadow,
+  useEuiTheme,
 } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
@@ -34,7 +34,6 @@ const CardItemComponent: React.FC<{
   activeProducts: Set<ProductLine>;
   activeStepIds: StepId[] | undefined;
   cardId: CardId;
-  euiTheme: EuiThemeComputed;
   expandedCardSteps: ExpandedCardSteps;
   finishedSteps: Set<StepId>;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
@@ -44,13 +43,13 @@ const CardItemComponent: React.FC<{
   activeProducts,
   activeStepIds,
   cardId,
-  euiTheme,
   expandedCardSteps,
   finishedSteps,
   toggleTaskCompleteStatus,
   onStepClicked,
   sectionId,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const isExpandedCard = expandedCardSteps[cardId].isExpanded;
 
   const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);

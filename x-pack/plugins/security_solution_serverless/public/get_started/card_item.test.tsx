@@ -10,7 +10,6 @@ import { CardItem } from './card_item';
 import type { ExpandedCardSteps, StepId } from './types';
 
 import { QuickStartSectionCardsId, SectionId, OverviewSteps } from './types';
-import type { EuiThemeComputed } from '@elastic/eui';
 import { ProductLine } from '../../common/product';
 jest.mock('./card_step');
 
@@ -25,7 +24,6 @@ describe('CardItemComponent', () => {
     },
   } as ExpandedCardSteps;
 
-  const mockEuiTheme = { size: { xxs: '4px' }, base: 16, colors: {} } as EuiThemeComputed;
   it('should render card', () => {
     const { getByTestId } = render(
       <CardItem
@@ -33,7 +31,6 @@ describe('CardItemComponent', () => {
         activeStepIds={[OverviewSteps.getToKnowElasticSecurity]}
         cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
         expandedCardSteps={expandedCardSteps}
-        euiTheme={mockEuiTheme}
         finishedSteps={finishedSteps}
         toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}
@@ -52,7 +49,6 @@ describe('CardItemComponent', () => {
         activeStepIds={[]}
         cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
         expandedCardSteps={expandedCardSteps}
-        euiTheme={mockEuiTheme}
         finishedSteps={new Set([])}
         toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}

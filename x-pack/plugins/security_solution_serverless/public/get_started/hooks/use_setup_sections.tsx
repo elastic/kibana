@@ -52,7 +52,6 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
                 cardId={cardItem.id}
                 data-test-subj={cardItem.id}
                 expandedCardSteps={expandedCardSteps}
-                euiTheme={euiTheme}
                 finishedSteps={finishedSteps[cardItem.id]}
                 toggleTaskCompleteStatus={toggleTaskCompleteStatus}
                 onStepClicked={onStepClicked}
@@ -62,7 +61,7 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
           ))
         : null;
     },
-    [euiTheme]
+    []
   );
 
   const setUpSections = useCallback(
