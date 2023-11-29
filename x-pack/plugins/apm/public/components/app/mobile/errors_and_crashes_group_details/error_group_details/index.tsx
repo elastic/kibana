@@ -26,7 +26,7 @@ import { useErrorGroupDistributionFetcher } from '../../../../../hooks/use_error
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { ErrorSampler } from '../shared/error_sampler';
+import { ErrorSampler } from '../../../error_group_details/error_sampler';
 import { ErrorDistribution } from '../shared/distribution';
 import { ChartPointerEventContextProvider } from '../../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { MobileErrorsAndCrashesTreemap } from '../../charts/mobile_errors_and_crashes_treemap';
