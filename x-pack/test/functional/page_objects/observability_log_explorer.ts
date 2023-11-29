@@ -230,6 +230,26 @@ export function ObservabilityLogExplorerPageObject({
       );
     },
 
+    async navigateToWithUncheckedState({
+      pageState: uncheckedPageState,
+    }: {
+      pageState?: {};
+    } = {}) {
+      const queryStringParams = querystring.stringify({
+        [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: rison.encode({
+          ...uncheckedPageState,
+        }),
+      });
+
+      log.info('queryStringParams');
+
+      return await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'observabilityLogExplorer',
+        '/',
+        queryStringParams
+      );
+    },
+
     getDatasetSelector() {
       return testSubjects.find('datasetSelectorPopover');
     },
@@ -364,9 +384,7 @@ export function ObservabilityLogExplorerPageObject({
 
     async assertRestoreFailureToastExist() {
       const successToast = await toasts.getToastElement(1);
-      expect(await successToast.getVisibleText()).to.contain(
-        "We couldn't restore your datasets selection"
-      );
+      expect(await successToast.getVisibleText()).to.contain('Error restoring state from URL');
     },
 
     assertLoadingSkeletonExists() {

@@ -68,10 +68,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo({
+        await PageObjects.observabilityLogExplorer.navigateToWithUncheckedState({
           pageState: {
+            v: 1,
             datasetSelection: {
-              // @ts-expect-error
               selectionType: 'invalid',
             },
           },
