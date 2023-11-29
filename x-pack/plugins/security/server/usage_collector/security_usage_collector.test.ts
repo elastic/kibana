@@ -13,7 +13,7 @@ import {
 } from '@kbn/usage-collection-plugin/server/mocks';
 
 import { registerSecurityUsageCollector } from './security_usage_collector';
-import type { SecurityLicenseFeatures } from '../../common/licensing';
+import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 
