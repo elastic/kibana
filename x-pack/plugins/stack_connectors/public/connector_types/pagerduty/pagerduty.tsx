@@ -50,6 +50,8 @@ export function getConnectorType(): ConnectorTypeModel<
         summary: new Array<string>(),
         timestamp: new Array<string>(),
         dedupKey: new Array<string>(),
+        links: new Array<string>(),
+        customDetails: new Array<string>(),
       };
       const validationResult = { errors };
       if (
@@ -76,6 +78,31 @@ export function getConnectorType(): ConnectorTypeModel<
                 nowLongFormat,
               },
             })
+          );
+        }
+      }
+      if (Array.isArray(actionParams.links)) {
+        actionParams.links.forEach(({ href, text }) => {
+          if ((!href || !text) && errors.links.length === 0) {
+            errors.links.push(
+              i18n.translate('xpack.stackConnectors.components.pagerDuty.error.invalidLink', {
+                defaultMessage: 'Link properties cannot be empty.',
+              })
+            );
+          }
+        });
+      }
+      if (actionParams.customDetails?.length && !hasMustacheTokens(actionParams.customDetails)) {
+        try {
+          JSON.parse(actionParams.customDetails);
+        } catch {
+          errors.customDetails.push(
+            i18n.translate(
+              'xpack.stackConnectors.components.pagerDuty.error.invalidCustomDetails',
+              {
+                defaultMessage: 'Custom details must be a valid JSON.',
+              }
+            )
           );
         }
       }

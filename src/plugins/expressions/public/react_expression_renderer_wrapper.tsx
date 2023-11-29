@@ -7,7 +7,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { PanelLoader } from '@kbn/panel-loader';
 import type { ReactExpressionRendererProps } from './react_expression_renderer';
 
 const ReactExpressionRendererComponent = lazy(async () => {
@@ -17,7 +17,7 @@ const ReactExpressionRendererComponent = lazy(async () => {
 });
 
 export const ReactExpressionRenderer = (props: ReactExpressionRendererProps) => (
-  <Suspense fallback={<EuiLoadingSpinner />}>
+  <Suspense fallback={<PanelLoader />}>
     <ReactExpressionRendererComponent {...props} />
   </Suspense>
 );

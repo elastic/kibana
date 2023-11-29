@@ -44,7 +44,7 @@ import {
   deleteAlertsAndRules,
   deleteEndpointExceptionList,
   deleteExceptionLists,
-} from '../../../tasks/common';
+} from '../../../tasks/api_calls/common';
 
 describe('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

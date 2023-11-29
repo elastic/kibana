@@ -446,7 +446,11 @@ const OverviewFooter = () => {
       <EuiFlexGroup gutterSize="m" alignItems="center">
         {cloud.usersAndRolesUrl && (
           <FooterButtonContainer>
-            <EuiButtonEmpty iconType="users" href={cloud.usersAndRolesUrl}>
+            <EuiButtonEmpty
+              data-test-subj="serverlessSearchOverviewFooterInviteMoreUsersButton"
+              iconType="users"
+              href={cloud.usersAndRolesUrl}
+            >
               {i18n.translate('xpack.serverlessSearch.overview.footer.links.inviteUsers', {
                 defaultMessage: 'Invite more users',
               })}
@@ -454,14 +458,22 @@ const OverviewFooter = () => {
           </FooterButtonContainer>
         )}
         <FooterButtonContainer>
-          <EuiButtonEmpty iconType="heart" href="https://www.elastic.co/community/">
+          <EuiButtonEmpty
+            data-test-subj="serverlessSearchOverviewFooterJoinOurCommunityButton"
+            iconType="heart"
+            href="https://www.elastic.co/community/"
+          >
             {i18n.translate('xpack.serverlessSearch.overview.footer.links.community', {
               defaultMessage: 'Join our community',
             })}
           </EuiButtonEmpty>
         </FooterButtonContainer>
         <FooterButtonContainer>
-          <EuiButtonEmpty iconType="faceHappy" href={docLinks.kibanaFeedback}>
+          <EuiButtonEmpty
+            data-test-subj="serverlessSearchOverviewFooterGiveFeedbackButton"
+            iconType="faceHappy"
+            href={docLinks.kibanaFeedback}
+          >
             {i18n.translate('xpack.serverlessSearch.overview.footer.links.feedback', {
               defaultMessage: 'Give feedback',
             })}
