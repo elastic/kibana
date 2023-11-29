@@ -30,11 +30,14 @@ export const OptionsListPopoverSuggestions = ({
 }: OptionsListPopoverSuggestionsProps) => {
   const optionsList = useOptionsList();
 
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
   const searchString = optionsList.select((state) => state.componentState.searchString);
   const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
   const totalCardinality = optionsList.select((state) => state.componentState.totalCardinality);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
-  const fieldSpec = optionsList.select((state) => state.componentState.field);
+  const allowExpensiveQueries = optionsList.select(
+    (state) => state.componentState.allowExpensiveQueries
+  );
 
   const sort = optionsList.select((state) => state.explicitInput.sort);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
@@ -53,11 +56,11 @@ export const OptionsListPopoverSuggestions = ({
 
   const canLoadMoreSuggestions = useMemo(
     () =>
-      searchString.valid && totalCardinality && !showOnlySelected
+      allowExpensiveQueries && searchString.valid && totalCardinality && !showOnlySelected
         ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
-    [availableOptions, totalCardinality, searchString, showOnlySelected]
+    [availableOptions, totalCardinality, searchString, showOnlySelected, allowExpensiveQueries]
   );
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
@@ -148,7 +151,7 @@ export const OptionsListPopoverSuggestions = ({
 
   const renderOption = useCallback(
     (option, searchStringValue) => {
-      if (searchTechnique === 'exact') return option.label;
+      if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
 
       return (
         <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
@@ -156,7 +159,7 @@ export const OptionsListPopoverSuggestions = ({
         </EuiHighlight>
       );
     },
-    [searchTechnique]
+    [searchTechnique, allowExpensiveQueries]
   );
 
   useEffect(() => {

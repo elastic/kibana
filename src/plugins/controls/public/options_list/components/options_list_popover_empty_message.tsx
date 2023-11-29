@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiSelectableMessage, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
+
+import { EuiIcon, EuiSelectableMessage, EuiSpacer } from '@elastic/eui';
 
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';

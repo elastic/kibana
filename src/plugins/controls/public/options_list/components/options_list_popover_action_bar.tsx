@@ -66,7 +66,7 @@ export const OptionsListPopoverActionBar = ({
             value={searchString.value}
             data-test-subj="optionsList-control-search-input"
             placeholder={OptionsListStrings.popover.getSearchPlaceholder(
-              searchTechnique ?? compatibleSearchTechniques[0]
+              allowExpensiveQueries ? searchTechnique ?? compatibleSearchTechniques[0] : 'exact'
             )}
           />
         </EuiFormRow>

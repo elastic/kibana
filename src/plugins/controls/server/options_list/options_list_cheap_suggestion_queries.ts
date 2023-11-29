@@ -10,155 +10,62 @@ import { get } from 'lodash';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
 import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
-import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
-import {
-  getEscapedRegexQuery,
-  getIpBuckets,
-  getSortType,
-} from './options_list_suggestion_query_helpers';
+import { getEscapedRegexQuery, getSortType } from './options_list_suggestion_query_helpers';
 
 /**
  * Suggestion aggregations
  */
-export const getCheapSuggestionAggregationBuilder = ({ fieldSpec }: OptionsListRequestBody) => {
-  if (fieldSpec?.type === 'boolean') {
-    return cheapSuggestionAggSubtypes.boolean;
+export const getCheapSuggestionAggregationBuilder = ({
+  fieldSpec,
+  searchString,
+}: OptionsListRequestBody) => {
+  const hasSearchString = searchString && searchString.length > 0;
+  if (!hasSearchString) {
+    // the field type only matters when there is a search string; so, if no search string,
+    // return generic "fetch all" aggregation builder
+    return cheapSuggestionAggSubtypes.genericNoSearchStringFetchAll;
   }
-  if (fieldSpec?.type === 'ip') {
-    return cheapSuggestionAggSubtypes.ip;
-  }
+
   if (fieldSpec && getFieldSubtypeNested(fieldSpec)) {
     return cheapSuggestionAggSubtypes.subtypeNested;
   }
-  return cheapSuggestionAggSubtypes.keywordOrText;
+  return cheapSuggestionAggSubtypes.exactMatchSearch;
 };
 
 const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
-  /**
-   * The "textOrKeyword" query / parser should be used whenever the field is built on some type non-nested string field
-   * (such as a keyword field or a keyword+text multi-field)
-   */
-  keywordOrText: {
-    buildAggregation: ({ fieldName, fieldSpec, searchString, sort }: OptionsListRequestBody) => ({
-      suggestions: {
-        terms: {
-          field: fieldName,
-          // disabling for date fields because applying a search string will return an error
-          ...(fieldSpec?.type !== 'date' && searchString && searchString.length > 0
-            ? { include: `${getEscapedRegexQuery(searchString)}.*` }
-            : {}),
-          shard_size: 10,
-          order: getSortType(sort),
+  genericNoSearchStringFetchAll: {
+    buildAggregation: ({ fieldName, searchString, size, sort }: OptionsListRequestBody) => {
+      if (searchString && searchString.length > 0) {
+        // this should never be called with a search string
+        return undefined;
+      }
+
+      return {
+        suggestions: {
+          terms: {
+            field: fieldName,
+            shard_size: 10,
+            order: getSortType(sort),
+          },
         },
-      },
-    }),
-    parse: (rawEsResult) => ({
-      suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
+      };
+    },
+    parse: (rawEsResult, request: OptionsListRequestBody) => {
+      const { searchString } = request;
+      if (!rawEsResult || (searchString && searchString.length > 0)) {
+        // this should never be called with a search string
+        return { suggestions: [], totalCardinality: 0 };
+      }
+      const suggestions = get(rawEsResult, `aggregations.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
           acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
           return acc;
         },
         []
-      ),
-    }),
-  },
-
-  /**
-   * the "Boolean" query / parser should be used when the options list is built on a field of type boolean. The query is slightly different than a keyword query.
-   */
-  boolean: {
-    buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
-      suggestions: {
-        terms: {
-          field: fieldName,
-          shard_size: 10,
-          order: getSortType(sort),
-        },
-      },
-    }),
-    parse: (rawEsResult) => ({
-      suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
-          acc.push({ value: suggestion.key_as_string, docCount: suggestion.doc_count });
-          return acc;
-        },
-        []
-      ),
-    }),
-  },
-
-  /**
-   * the "IP" query / parser should be used when the options list is built on a field of type IP.
-   */
-  ip: {
-    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => {
-      let ipRangeQuery: IpRangeQuery = {
-        validSearch: true,
-        rangeQuery: [
-          {
-            key: 'ipv6',
-            from: '::',
-            to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
-          },
-        ],
-      };
-
-      if (searchString && searchString.length > 0) {
-        ipRangeQuery = getIpRangeQuery(searchString);
-        if (!ipRangeQuery.validSearch) {
-          // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
-          // simply don't return an aggregation query for the ES search request
-          return undefined;
-        }
-      }
-
+      );
       return {
-        suggestions: {
-          ip_range: {
-            field: fieldName,
-            ranges: ipRangeQuery.rangeQuery,
-            keyed: true,
-          },
-          aggs: {
-            filteredSuggestions: {
-              terms: {
-                field: fieldName,
-                shard_size: 10,
-                order: getSortType(sort),
-              },
-            },
-          },
-        },
-      };
-    },
-    parse: (rawEsResult, { sort }) => {
-      if (!Boolean(rawEsResult.aggregations?.suggestions)) {
-        // if this is happens, that means there is an invalid search that snuck through to the server side code;
-        // so, might as well early return with no suggestions
-        return { suggestions: [] };
-      }
-
-      const buckets: EsBucket[] = [];
-      getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
-      getIpBuckets(rawEsResult, buckets, 'ipv6');
-
-      const sortedSuggestions =
-        sort?.direction === 'asc'
-          ? buckets.sort(
-              (bucketA: EsBucket, bucketB: EsBucket) => bucketA.doc_count - bucketB.doc_count
-            )
-          : buckets.sort(
-              (bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count
-            );
-
-      return {
-        suggestions: sortedSuggestions
-          .slice(0, 10) // only return top 10 results
-          .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
-            acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
-            return acc;
-          }, []),
+        suggestions,
       };
     },
   },
@@ -168,6 +75,7 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
    */
   subtypeNested: {
     buildAggregation: (req: OptionsListRequestBody) => {
+      console.log('SUB TYPE NESTED');
       const { fieldSpec, fieldName, searchString, sort } = req;
       const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
       if (!subTypeNested) {
@@ -203,5 +111,91 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
         []
       ),
     }),
+  },
+
+  exactMatchSearch: {
+    buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
+      if (!searchString || searchString.length === 0) {
+        // this must be called with a search string
+        return undefined;
+      }
+
+      return {
+        suggestions: {
+          filter: {
+            term: {
+              [fieldName]: searchString,
+            },
+          },
+          aggs: {
+            filteredSuggestions: {
+              terms: {
+                field: fieldName,
+                shard_size: 10,
+              },
+            },
+          },
+        },
+      };
+    },
+    parse: (rawEsResult) => {
+      if (!rawEsResult || !Boolean(rawEsResult.aggregations?.suggestions)) {
+        return { suggestions: [], totalCardinality: 0 };
+      }
+      const suggestions = get(
+        rawEsResult,
+        `aggregations.suggestions.filteredSuggestions.buckets`
+      )?.reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
+        acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+        return acc;
+      }, []);
+      return {
+        suggestions,
+        totalCardinality: suggestions.length, // should only be 0 or 1, since only exact match searching is allowed
+      };
+    },
+  },
+};
+
+const exactMatchSearchAggBuilder: OptionsListSuggestionAggregationBuilder = {
+  buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
+    if (!searchString || searchString.length === 0) {
+      // this must be called with a search string
+      return undefined;
+    }
+
+    return {
+      suggestions: {
+        filter: {
+          term: {
+            [fieldName]: searchString,
+          },
+        },
+        aggs: {
+          filteredSuggestions: {
+            terms: {
+              field: fieldName,
+              shard_size: 10,
+            },
+          },
+        },
+      },
+    };
+  },
+  parse: (rawEsResult) => {
+    if (!rawEsResult || !Boolean(rawEsResult.aggregations?.suggestions)) {
+      return { suggestions: [], totalCardinality: 0 };
+    }
+    const suggestions = get(
+      rawEsResult,
+      `aggregations.suggestions.filteredSuggestions.buckets`
+    )?.reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
+      acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+      return acc;
+    }, []);
+    return {
+      suggestions,
+      totalCardinality: suggestions.length, // should only be 0 or 1, since only exact match searching is allowed
+    };
   },
 };

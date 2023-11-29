@@ -104,6 +104,7 @@ export const setupOptionsListSuggestionsRoute = (
       : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
 
     let suggestionBuilder: OptionsListSuggestionAggregationBuilder;
+    const hasSearchString = request.searchString && request.searchString.length > 0;
     if (allowExpensiveQueries) {
       suggestionBuilder = getExpensiveSuggestionAggregationBuilder(request);
     } else {

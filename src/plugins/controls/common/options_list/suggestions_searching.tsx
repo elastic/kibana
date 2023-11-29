@@ -32,11 +32,15 @@ export const getCompatibleSearchTechniques = (type?: string): OptionsListSearchT
   }
 };
 
-export const isValidSearch = (
-  searchString: string,
-  fieldType?: string,
-  searchTechnique?: OptionsListSearchTechnique
-): boolean => {
+export const isValidSearch = ({
+  searchString,
+  fieldType,
+  searchTechnique,
+}: {
+  searchString: string;
+  fieldType?: string;
+  searchTechnique?: OptionsListSearchTechnique;
+}): boolean => {
   if (searchString.length === 0) return true;
 
   switch (fieldType) {

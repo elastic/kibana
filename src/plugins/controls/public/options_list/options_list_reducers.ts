@@ -36,11 +36,13 @@ export const optionsListReducers = {
   },
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     state.componentState.searchString.value = action.payload;
-    state.componentState.searchString.valid = isValidSearch(
-      action.payload,
-      state.componentState.field?.type,
-      state.explicitInput.searchTechnique
-    );
+    state.componentState.searchString.valid = isValidSearch({
+      searchString: action.payload,
+      fieldType: state.componentState.field?.type,
+      searchTechnique: state.componentState.allowExpensiveQueries
+        ? state.explicitInput.searchTechnique
+        : 'exact', // only exact match searching is supported when allowExpensiveQueries is false
+    });
   },
   setAllowExpensiveQueries: (
     state: WritableDraft<OptionsListReduxState>,

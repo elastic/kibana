@@ -34,7 +34,7 @@ export const getExpensiveSuggestionAggregationBuilder = ({
     return expensiveSuggestionAggSubtypes.genericNoSearchStringFetchAll;
   }
 
-  // note that date fields are non-searchable, so type-specific search aggs are not necessary
+  // note that date and boolean fields are non-searchable, so type-specific search aggs are not necessary
   switch (fieldSpec?.type) {
     case 'number': {
       return expensiveSuggestionAggSubtypes.number;
@@ -324,6 +324,9 @@ const exactMatchSearchAggBuilder: OptionsListSuggestionAggregationBuilder = {
     };
   },
   parse: (rawEsResult) => {
+    if (!rawEsResult || !Boolean(rawEsResult.aggregations?.suggestions)) {
+      return { suggestions: [], totalCardinality: 0 };
+    }
     const suggestions = get(
       rawEsResult,
       `aggregations.suggestions.filteredSuggestions.buckets`
