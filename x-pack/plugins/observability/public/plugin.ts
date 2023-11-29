@@ -23,7 +23,7 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import type { LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -83,6 +83,7 @@ import {
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
@@ -104,9 +105,7 @@ export interface ConfigSchema {
     };
   };
 }
-
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -118,7 +117,6 @@ export interface ObservabilityPublicPluginsSetup {
   embeddable: EmbeddableSetup;
   licensing: LicensingPluginSetup;
 }
-
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
@@ -147,8 +145,9 @@ export interface ObservabilityPublicPluginsStart {
   aiops: AiopsPluginStart;
   serverless?: ServerlessPluginStart;
 }
-
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
+
+const LOG_EXPLORER_LOCATOR_ID = 'LOG_EXPLORER_LOCATOR';
 
 export class Plugin
   implements
