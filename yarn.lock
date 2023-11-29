@@ -4993,11 +4993,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-creation-wizard-utils@link:x-pack/packages/ml/creation_wizard_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-data-frame-analytics-utils@link:x-pack/packages/ml/data_frame_analytics_utils":
   version "0.0.0"
   uid ""
 
 "@kbn/ml-data-grid@link:x-pack/packages/ml/data_grid":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-data-view-utils@link:x-pack/packages/ml/data_view_utils":
   version "0.0.0"
   uid ""
 
@@ -5161,6 +5169,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/openapi-bundler@link:packages/kbn-openapi-bundler":
+  version "0.0.0"
+  uid ""
+
 "@kbn/openapi-generator@link:packages/kbn-openapi-generator":
   version "0.0.0"
   uid ""
@@ -5186,6 +5198,10 @@
   uid ""
 
 "@kbn/painless-lab-plugin@link:x-pack/plugins/painless_lab":
+  version "0.0.0"
+  uid ""
+
+"@kbn/panel-loader@link:packages/kbn-panel-loader":
   version "0.0.0"
   uid ""
 
