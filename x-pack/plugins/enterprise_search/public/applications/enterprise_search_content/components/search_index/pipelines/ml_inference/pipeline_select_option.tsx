@@ -23,6 +23,7 @@ import { MLInferencePipelineOption } from './ml_inference_logic';
 import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS, MODEL_REDACTED_VALUE } from './utils';
 
 export interface PipelineSelectOptionProps {
+  checked?: 'on';
   label: string;
   pipeline: MLInferencePipelineOption;
 }
@@ -57,6 +58,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
     // TODO: Add status & action menu
     // TODO: Test rendering when pipeline.modelType.length == 0
     // TODO: Need to hide source fields when pipeline is disabled?
+    // TODO: How to handle when a pipeline is disabled?
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiTitle size="xxs">

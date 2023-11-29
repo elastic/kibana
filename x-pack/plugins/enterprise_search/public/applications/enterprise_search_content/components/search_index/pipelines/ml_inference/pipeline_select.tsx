@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiSelectable } from '@elastic/eui';
 
@@ -16,6 +16,7 @@ import { PipelineSelectOption, PipelineSelectOptionProps } from './pipeline_sele
 
 export const PipelineSelect: React.FC = () => {
   const { existingInferencePipelines } = useValues(MLInferenceLogic);
+  const { selectExistingPipeline } = useActions(MLInferenceLogic);
 
   const getPipelineOptions = (
     pipelineOptions: MLInferencePipelineOption[]
@@ -31,8 +32,16 @@ export const PipelineSelect: React.FC = () => {
     return <PipelineSelectOption label={option.label} pipeline={option.pipeline} />;
   };
 
+  const onChange = (options: PipelineSelectOptionProps[]) => {
+    const selectedOption = options.find((option) => option.checked === 'on');
+    if (selectedOption) {
+      selectExistingPipeline(selectedOption.pipeline.pipelineName);
+    }
+  };
+
   return (
     // TODO: Make list scrollable
+    // TODO: Fix selection highlighting when using keyboard to select
     <EuiSelectable
       options={getPipelineOptions(existingInferencePipelines)}
       listProps={{
@@ -43,6 +52,7 @@ export const PipelineSelect: React.FC = () => {
       }}
       height={360}
       singleSelection="always"
+      onChange={onChange}
       renderOption={renderPipelineOption}
     >
       {(list) => list}
