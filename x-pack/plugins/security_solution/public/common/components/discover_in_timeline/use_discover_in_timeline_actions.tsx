@@ -235,7 +235,6 @@ export const useDiscoverInTimelineActions = (
             title: DISCOVER_SEARCH_SAVE_ERROR_TITLE,
             toastMessage: String(err),
           });
-        } finally {
           dispatch(
             timelineActions.endTimelineSaving({
               id: TimelineId.active,
