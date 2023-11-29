@@ -106,7 +106,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 `proxy_url`:: (Optional, string): The URL of the proxy to use for this monitor.
 
-`response`:: (Optional, object): Controls the indexing of the HTTP response body contents to the http.response.body.contents field.
+`response`:: (Optional, object): Controls the indexing of the HTTP response body contents to the `http.response.body.contents` field.
 
 `response.include_body`:: (Optional, boolean, default: true): Controls the indexing of the HTTP response body contents to the http.response.body.contents field.
   * `include_body` ("on_error" | "never" | "always", default: on_error) Set response.include_body to one of the options listed below.
