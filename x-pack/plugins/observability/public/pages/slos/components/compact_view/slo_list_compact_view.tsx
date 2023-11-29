@@ -220,7 +220,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       render: (_, slo: SLOWithSummaryResponse) => (
         <>
           <SloRulesBadge rules={rulesBySlo?.[slo.id]} onClick={() => setSloToAddRule(slo)} />
-          <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlertsBySlo.get(slo)} />
+          <SloActiveAlertsBadge
+            slo={slo}
+            activeAlerts={activeAlertsBySlo.get(slo)}
+            viewMode="compact"
+          />
         </>
       ),
     },
