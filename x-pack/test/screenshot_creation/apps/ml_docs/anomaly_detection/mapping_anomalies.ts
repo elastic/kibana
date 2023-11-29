@@ -60,7 +60,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('open index in data visualizer');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToDataVisualizer();
-      await ml.dataVisualizer.navigateToIndexPatternSelection();
+      await ml.dataVisualizer.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(LOGS_INDEX_PATTERN);
 
       await ml.testExecution.logTestStep('set data visualizer options');

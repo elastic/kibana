@@ -150,6 +150,7 @@ export function getSuggestions({
           return filteredCount || filteredCount === datasourceSuggestion.keptLayerIds.length;
         })
         .flatMap((datasourceSuggestion) => {
+          const datasourceId = datasourceSuggestion.datasourceId;
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualization?.id ? visualizationState : undefined;
@@ -170,7 +171,8 @@ export function getSuggestions({
             palette,
             visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
             activeData,
-            allowMixed
+            allowMixed,
+            datasourceId
           );
         });
     })
@@ -240,7 +242,8 @@ function getVisualizationSuggestions(
   mainPalette?: SuggestionRequest['mainPalette'],
   isFromContext?: boolean,
   activeData?: Record<string, Datatable>,
-  allowMixed?: boolean
+  allowMixed?: boolean,
+  datasourceId?: string
 ) {
   try {
     return visualization
@@ -253,6 +256,7 @@ function getVisualizationSuggestions(
         isFromContext,
         activeData,
         allowMixed,
+        datasourceId,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,

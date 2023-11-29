@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import Boom from '@hapi/boom';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import type { MaintenanceWindow } from '../../types';
 import {
@@ -45,12 +46,31 @@ async function updateWithOCC(
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger } = context;
   const { id, data } = params;
-  const { title, enabled, duration, rRule, categoryIds } = data;
+  const { title, enabled, duration, rRule, categoryIds, scopedQuery } = data;
 
   try {
     updateMaintenanceWindowParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Error validating update maintenance window data - ${error.message}`);
+  }
+
+  let scopedQueryWithGeneratedValue = scopedQuery;
+  try {
+    if (scopedQuery) {
+      const dsl = JSON.stringify(
+        buildEsQuery(
+          undefined,
+          [{ query: scopedQuery.kql, language: 'kuery' }],
+          scopedQuery.filters as Filter[]
+        )
+      );
+      scopedQueryWithGeneratedValue = {
+        ...scopedQuery,
+        dsl,
+      };
+    }
+  } catch (error) {
+    throw Boom.badRequest(`Error validating update maintenance scoped query - ${error.message}`);
   }
 
   try {
@@ -88,6 +108,9 @@ async function updateWithOCC(
         ...(title ? { title } : {}),
         ...(rRule ? { rRule: rRule as MaintenanceWindow['rRule'] } : {}),
         ...(categoryIds !== undefined ? { categoryIds } : {}),
+        ...(scopedQueryWithGeneratedValue !== undefined
+          ? { scopedQuery: scopedQueryWithGeneratedValue }
+          : {}),
         ...(typeof duration === 'number' ? { duration } : {}),
         ...(typeof enabled === 'boolean' ? { enabled } : {}),
         expirationDate,

@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     const DEFAULT_NUM_FAILURE_RETRIES = '5';
@@ -326,7 +326,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the wizard for the source data', async () => {
