@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { MlModel } from '@kbn/enterprise-search-plugin/common/types/ml';
 import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
 import { Status } from '../../../../../common/types/api';
+import { MlModel } from '../../../../../common/types/ml';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
 import {
-  FetchModelsArgs,
   FetchModelsApiLogic,
   FetchModelsApiResponse,
 } from './fetch_models_api_logic';
@@ -23,12 +22,12 @@ const FETCH_MODELS_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_MODELS_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
 
 export interface CachedFetchModlesApiLogicActions {
-  apiError: Actions<FetchModelsArgs, FetchModelsApiResponse>['apiError'];
-  apiReset: Actions<FetchModelsArgs, FetchModelsApiResponse>['apiReset'];
-  apiSuccess: Actions<FetchModelsArgs, FetchModelsApiResponse>['apiSuccess'];
+  apiError: Actions<{}, FetchModelsApiResponse>['apiError'];
+  apiReset: Actions<{}, FetchModelsApiResponse>['apiReset'];
+  apiSuccess: Actions<{}, FetchModelsApiResponse>['apiSuccess'];
   clearPollTimeout(): void;
   createPollTimeout(duration: number): { duration: number };
-  makeRequest: Actions<FetchModelsArgs, FetchModelsApiResponse>['makeRequest'];
+  makeRequest: Actions<{}, FetchModelsApiResponse>['makeRequest'];
   setTimeoutId(id: NodeJS.Timeout): { id: NodeJS.Timeout };
   startPolling(): void;
   stopPolling(): void;

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { MlModel } from '@kbn/enterprise-search-plugin/common/types/ml';
-
+import { MlModel } from '../../../../../common/types/ml';
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export interface FetchModelsArgs {};
 export type FetchModelsApiResponse = MlModel[];
 
 export const fetchModels = async () => {
@@ -22,4 +20,4 @@ export const FetchModelsApiLogic = createApiLogic(['fetch_models_api_logic'], fe
   showErrorFlash: false,
 });
 
-export type FetchModelsApiLogicActions = Actions<FetchModelsArgs, FetchModelsApiResponse>;
+export type FetchModelsApiLogicActions = Actions<{}, FetchModelsApiResponse>;
