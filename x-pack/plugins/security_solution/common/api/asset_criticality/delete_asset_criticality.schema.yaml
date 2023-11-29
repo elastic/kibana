@@ -6,12 +6,9 @@ paths:
   /internal/asset_criticality:
     delete:
       summary: Delete Criticality Record
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+      parameters:
+        - $ref: '#/components/parameters/id_value'
+        - $ref: '#/components/parameters/id_field'
       responses:
         '200':
           description: Successful response

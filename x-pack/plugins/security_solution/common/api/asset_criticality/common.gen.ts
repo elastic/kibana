@@ -37,15 +37,3 @@ export const AssetCriticalityRecord = CreateAssetCriticalityRecord.and(
     '@timestamp': z.string().datetime(),
   })
 );
-
-export type AssetCriticalityRecordIdParts = z.infer<typeof AssetCriticalityRecordIdParts>;
-export const AssetCriticalityRecordIdParts = z.object({
-  /**
-   * The ID value of the asset.
-   */
-  id_value: z.string(),
-  /**
-   * The field representing the ID.
-   */
-  id_field: z.string(),
-});
