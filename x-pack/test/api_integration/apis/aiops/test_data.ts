@@ -134,6 +134,33 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
     },
   },
   {
+    testName: 'artificial_logs_with_dip_zerodocsfallback',
+    dataGenerator: 'artificial_logs_with_dip_zerodocsfallback',
+    requestBody: {
+      start: 0,
+      end: 1768855600010,
+      searchQuery: '{"match_all":{}}',
+      timeFieldName: '@timestamp',
+      index: 'artificial_logs_with_dip_zerodocsfallback',
+      baselineMin: 1768855600000,
+      baselineMax: 1768855600010,
+      deviationMin: 1668855600000,
+      deviationMax: 1668924000000,
+      grouping: true,
+    } as AiopsLogRateAnalysisSchema<T>,
+    expected: {
+      chunksLength: 62,
+      chunksLengthGroupOnly: 11,
+      actionsLength: 61,
+      actionsLengthGroupOnly: 10,
+      noIndexChunksLength: 4,
+      noIndexActionsLength: 3,
+      significantItems: topTerms,
+      groups: topTermsGroups,
+      histogramLength: 20,
+    },
+  },
+  {
     testName: 'artificial_logs_with_spike_textfield',
     dataGenerator: 'artificial_logs_with_spike_textfield',
     requestBody: {
