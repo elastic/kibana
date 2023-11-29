@@ -214,7 +214,12 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+  - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
+    env:
+      TARGET: cypress:dw:serverless:run
+      CURRENT_WORKING_DIR: x-pack/plugins/security_solution
+      JOB_TITLE: kibana-defend-workflows-serverless-cypress
+      MSG: "--- Defend Workflows Cypress tests on Serverless"
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       queue: n2-4-virt
