@@ -9,7 +9,6 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
-import { waitFor } from '@testing-library/react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -132,21 +131,6 @@ describe('DataView component', () => {
     );
     component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
     expect(addDataViewSpy).toHaveBeenCalled();
-  });
-
-  it('should render the refresh fields menu item if onRefreshFields is given', async () => {
-    const onRefreshFields = jest.fn();
-    const component = mount(wrapDataViewComponentInContext({ ...props, onRefreshFields }, false));
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    expect(component.find('[data-test-subj="dataview-refresh-fields"]').at(0).text()).toContain(
-      'Refresh fields of this data view'
-    );
-    await act(async () => {
-      component.find('[data-test-subj="dataview-refresh-fields"]').first().simulate('click');
-      await waitFor(() => {
-        expect(onRefreshFields).toHaveBeenCalled();
-      });
-    });
   });
 
   it('should not render the refresh fields menu item if onRefreshFields is not given', async () => {

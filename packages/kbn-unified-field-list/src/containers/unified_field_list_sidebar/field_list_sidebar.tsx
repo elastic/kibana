@@ -73,7 +73,6 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Custom logic for determining which field is selected
    */
   onSelectedFieldFilter?: GroupedFieldsParams<DataViewField>['onSelectedFieldFilter'];
-  onNewFields?: () => void;
   onRefreshDataView?: () => void;
 };
 
@@ -162,7 +161,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onEditField,
   onDeleteField,
   onToggleSidebar,
-  onRefreshDataView,
 }) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(

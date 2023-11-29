@@ -122,7 +122,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
   );
-  const onNewFields = useCallback(() => {}, []);
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const { isSidebarCollapsed, onToggleSidebar } = useSidebarToggle({ stateService });
@@ -155,7 +154,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     fromDate: querySubscriberResult.fromDate,
     toDate: querySubscriberResult.toDate,
     services,
-    onNewFields,
   });
 
   const editField = useMemo(

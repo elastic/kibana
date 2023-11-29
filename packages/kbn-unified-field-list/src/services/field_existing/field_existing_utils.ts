@@ -64,7 +64,6 @@ export async function fetchFieldExistence({
   return {
     indexPatternTitle: dataView.getIndexPattern(),
     existingFieldNames: existingFields(existingFieldList, allFields),
-    hasNewFields: newFields.length > 0,
     newFields: newFields.map(
       (field) => dataView.getFieldByName(field.name) ?? new DataViewField(field)
     ),

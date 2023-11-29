@@ -27,8 +27,7 @@ interface FetchFieldExistenceParams {
 export type LoadFieldExistingHandler = (params: FetchFieldExistenceParams) => Promise<{
   existingFieldNames: string[];
   indexPatternTitle: string;
-  hasNewFields: boolean;
-  newFields: DataViewField[];
+  newFields?: DataViewField[];
 }>;
 
 export const loadFieldExisting: LoadFieldExistingHandler = async ({

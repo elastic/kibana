@@ -37,7 +37,6 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   paginatedFields: T[];
   renderFieldItem: (params: RenderFieldItemParams<T>) => JSX.Element;
   renderCallout: () => JSX.Element;
-  renderBottom?: () => JSX.Element;
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
 }
@@ -58,7 +57,6 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   paginatedFields,
   renderFieldItem,
   renderCallout,
-  renderBottom,
   showExistenceFetchError,
   showExistenceFetchTimeout,
 }: FieldsAccordionProps<T>) {
@@ -165,8 +163,6 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         ) : (
           renderCallout()
         ))}
-      <EuiSpacer size="s" />
-      {renderBottom && renderBottom()}
     </EuiAccordion>
   );
 }

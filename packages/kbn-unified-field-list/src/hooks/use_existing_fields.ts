@@ -44,7 +44,6 @@ export interface ExistingFieldsFetcherParams {
     dataViews: DataViewsContract;
   };
   onNoData?: (dataViewId: string) => unknown;
-  onNewFields?: () => void;
 }
 
 type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
@@ -58,7 +57,6 @@ export interface ExistingFieldsReader {
   hasFieldData: (dataViewId: string, fieldName: string) => boolean;
   getFieldsExistenceStatus: (dataViewId: string) => ExistenceFetchStatus;
   isFieldsExistenceInfoUnavailable: (dataViewId: string) => boolean;
-  isNewField: (dataViewId: string, fieldName: string) => boolean;
   getNewFields: (dataViewId: string) => DataViewField[];
 }
 
@@ -95,7 +93,6 @@ export const useExistingFieldsFetcher = (
       toDate,
       services: { dataViews, data, core },
       onNoData,
-      onNewFields,
       fetchId,
     }: ExistingFieldsFetcherParams & {
       dataViewId: string | undefined;
@@ -154,9 +151,6 @@ export const useExistingFieldsFetcher = (
           });
 
           const existingFieldNames = result?.existingFieldNames || [];
-          if (result?.hasNewFields && onNewFields) {
-            onNewFields();
-          }
 
           if (
             onNoData &&
@@ -168,7 +162,6 @@ export const useExistingFieldsFetcher = (
           }
 
           info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
-          info.newFieldsByFieldNameMap = booleanMap(result.newFields.map((field) => field.name));
           info.newFields = result.newFields;
           info.fetchStatus = ExistenceFetchStatus.succeeded;
         } catch (error) {
@@ -299,19 +292,6 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
     [existingFieldsByDataViewMap]
   );
 
-  const isNewField = useCallback(
-    (dataViewId: string, fieldName: string) => {
-      const info = existingFieldsByDataViewMap[dataViewId];
-
-      if (info?.fetchStatus === ExistenceFetchStatus.succeeded) {
-        return info?.hasDataViewRestrictions || Boolean(info?.newFieldsByFieldNameMap[fieldName]);
-      }
-
-      return true;
-    },
-    [existingFieldsByDataViewMap]
-  );
-
   const getNewFields = useCallback(
     (dataViewId: string) => {
       const info = existingFieldsByDataViewMap[dataViewId];
@@ -357,19 +337,12 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
 
   return useMemo(
     () => ({
-      isNewField,
       hasFieldData,
       getFieldsExistenceStatus,
       isFieldsExistenceInfoUnavailable,
       getNewFields,
     }),
-    [
-      isNewField,
-      hasFieldData,
-      getFieldsExistenceStatus,
-      isFieldsExistenceInfoUnavailable,
-      getNewFields,
-    ]
+    [hasFieldData, getFieldsExistenceStatus, isFieldsExistenceInfoUnavailable, getNewFields]
   );
 };
 

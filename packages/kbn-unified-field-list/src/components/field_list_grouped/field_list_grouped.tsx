@@ -10,8 +10,7 @@ import { partition, throttle } from 'lodash';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiCallOut, EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
@@ -62,7 +61,6 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
     ([, { showInAccordion }]) => showInAccordion
   );
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
-  const [isLoadingDataView, setIsLoadingDataView] = useState(false);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const [storedInitiallyOpenSections, storeInitiallyOpenSections] =
     useLocalStorage<InitiallyOpenSections>(
@@ -297,37 +295,6 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                   />
                 )}
                 renderFieldItem={renderFieldItem}
-                renderBottom={
-                  key === 'AvailableFields'
-                    ? () => (
-                        <EuiCallOut color="success" iconType="info" size="s">
-                          <EuiButtonEmpty
-                            size="xs"
-                            data-test-subj={`unifiedFieldListUpdateMapping`}
-                            onClick={async () => {
-                              if (fieldGroup?.loadMappingFn) {
-                                setIsLoadingDataView(true);
-                                try {
-                                  await fieldGroup?.loadMappingFn();
-                                } catch (e) {
-                                  // eslint-disable-next-line no-console
-                                  console.error(e);
-                                } finally {
-                                  setIsLoadingDataView(false);
-                                }
-                              }
-                            }}
-                            isLoading={isLoadingDataView}
-                          >
-                            <FormattedMessage
-                              id="unifiedFieldList.fieldListSidebar.loadMapping"
-                              defaultMessage="Load Mapping"
-                            />
-                          </EuiButtonEmpty>
-                        </EuiCallOut>
-                      )
-                    : undefined
-                }
               />
               <EuiSpacer size="m" />
             </Fragment>
