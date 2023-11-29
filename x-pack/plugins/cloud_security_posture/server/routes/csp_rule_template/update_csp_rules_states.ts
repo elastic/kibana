@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import { CspRouter } from '../../types';
-import { cspRuleBulkActionRequest } from '@kbn/cloud-security-posture-plugin/common/schemas/csp_rule_template_api/bulk_action';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/core/server';
+import { cspRuleBulkActionRequest } from '../../../common/schemas/csp_rule_template_api/bulk_action';
 
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   UPDATE_CSP_RULE_STATE_ROUTE_PATH,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+} from '../../../common/constants';
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { CspRuleBulkActionRequest } from '@kbn/cloud-security-posture-plugin/common/types';
-import type {
-  CspRulesStates,
-  CspSettings,
-} from '@kbn/cloud-security-posture-plugin/common/schemas/csp_settings';
-import type { Logger } from '@kbn/core/server';
+import type { CspRuleBulkActionRequest } from '../../../common/types';
+import type { CspRulesStates, CspSettings } from '../../../common/schemas/csp_settings';
+import { CspRouter } from '../../types';
 
 const muteStatesMap = {
   mute: true,
@@ -78,7 +75,7 @@ export const getCspSettings = async (
     return cspSettings.attributes;
   } catch (err) {
     const error = transformError(err);
-    if (error.statusCode == 404) {
+    if (error.statusCode === 404) {
       return undefined;
     } else {
       logger.error(`An error occurred while trying to fetch csp settings: ${error}`);
@@ -99,7 +96,7 @@ export const getCspSettingObjectSafe = async (
 
 export const defineUpdateCspRuleStateRoute = (router: CspRouter) =>
   router.versioned
-    .get({
+    .post({
       access: 'internal',
       path: UPDATE_CSP_RULE_STATE_ROUTE_PATH,
     })

@@ -7,6 +7,7 @@
 
 import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { CspSettings, cspSettingsSchema } from '../../common/schemas/csp_settings';
 import { cspRuleTemplateSavedObjectMapping, cspSettingsSavedObjectMapping } from './mappings';
 import { cspRuleTemplateMigrations } from './migrations';
 import {
@@ -20,10 +21,6 @@ import {
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import {
-  CspSettings,
-  cspSettingsSchema,
-} from '@kbn/cloud-security-posture-plugin/common/schemas/csp_settings';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType<CspRuleTemplate>({
@@ -47,7 +44,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType<CspSettings>({
     name: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
-    hidden: false, // TODO: change to True before merging
+    hidden: false,
     namespaceType: 'agnostic',
     management: {
       importableAndExportable: true,

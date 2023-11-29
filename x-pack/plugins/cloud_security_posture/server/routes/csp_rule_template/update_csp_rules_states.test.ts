@@ -17,7 +17,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+} from '../../../common/constants';
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';

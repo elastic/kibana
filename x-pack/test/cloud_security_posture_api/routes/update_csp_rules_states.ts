@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       const rule2 = generateRandomRuleId();
 
       const { body } = await supertest
-        .get(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
@@ -86,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
       const rule2 = generateRandomRuleId();
 
       const { body } = await supertest
-        .get(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // unmute rule1 and rule2
       const cspSettingsResponse = await supertest
-        .get(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // mute rule1 and rule3
       const updatedCspSettingsResponse = await supertest
-        .get(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('set wrong action input', async () => {
       const { body } = await supertest
-        .get(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
@@ -170,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('set wrong rule ids input', async () => {
       const { body } = await supertest
-        .get(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
