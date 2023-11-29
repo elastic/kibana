@@ -272,7 +272,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const renderRemoteElasticsearchSection = () => {
     if (isRemoteESOutputEnabled) {
-      return <OutputFormRemoteEsSection inputs={inputs} />;
+      return (
+        <OutputFormRemoteEsSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          onUsePlainText={onUsePlainText}
+        />
+      );
     }
     return null;
   };

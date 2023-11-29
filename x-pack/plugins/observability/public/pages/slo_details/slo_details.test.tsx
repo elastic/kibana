@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import type { Capabilities } from '@kbn/core/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useParams, useLocation } from 'react-router-dom';
@@ -60,6 +61,9 @@ const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
 const mockClone = jest.fn();
 const mockDelete = jest.fn();
+const mockCapabilities = {
+  apm: { show: true },
+} as unknown as Capabilities;
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -68,7 +72,7 @@ const mockKibana = () => {
       lens: {
         EmbeddableComponent: () => <div data-test-subj="errorRateChart">mocked component</div>,
       },
-      application: { navigateToUrl: mockNavigate },
+      application: { navigateToUrl: mockNavigate, capabilities: mockCapabilities },
       charts: chartPluginMock.createStartContract(),
       http: {
         basePath: {
