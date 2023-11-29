@@ -16,14 +16,11 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { CardsPerRow } from './card_view/cards_per_row';
-import { SLOListViewSettings } from './compact_view/slo_list_view_settings';
+import { SLOViewSettings } from './slo_view_settings';
 
 export type SLOViewType = 'cardView' | 'listView';
 
 interface Props {
-  setCardsPerRow: (gridSize?: string) => void;
-  cardsPerRow?: string;
   toggleListViewMode: () => void;
   listViewMode?: 'compact' | 'default';
   setSLOView: (view: SLOViewType) => void;
@@ -47,8 +44,6 @@ const toggleButtonsIcons = [
 export function ToggleSLOView({
   sloView,
   setSLOView,
-  setCardsPerRow,
-  cardsPerRow = '4',
   toggleListViewMode,
   listViewMode = 'compact',
 }: Props) {
@@ -66,17 +61,7 @@ export function ToggleSLOView({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ViewSettings>
-          {sloView === 'cardView' && (
-            <CardsPerRow setCardsPerRow={setCardsPerRow} cardsPerRow={cardsPerRow} />
-          )}
-          {sloView === 'listView' && (
-            <SLOListViewSettings
-              toggleCompactView={toggleListViewMode}
-              listViewMode={listViewMode}
-            />
-          )}
-        </ViewSettings>
+        <SLOViewSettings toggleCompactView={toggleListViewMode} listViewMode={listViewMode} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

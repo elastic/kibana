@@ -10,8 +10,7 @@ import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SlosView } from './slos_view';
-import { SLO_CARD_VIEW_PER_ROW_SIZE } from './card_view/cards_per_row';
-import { SLO_LIST_VIEW_MODE } from './compact_view/slo_list_view_settings';
+import { SLO_LIST_VIEW_MODE } from './slo_view_settings';
 import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
@@ -48,7 +47,6 @@ export function SloList({ autoRefresh }: Props) {
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-  const [cardsPerRow, setCardsPerRow] = useLocalStorage(SLO_CARD_VIEW_PER_ROW_SIZE, '4');
   const [listViewMode, setListViewMode] = useLocalStorage<'compact' | 'default'>(
     SLO_LIST_VIEW_MODE,
     'compact'
@@ -85,8 +83,6 @@ export function SloList({ autoRefresh }: Props) {
         <ToggleSLOView
           sloView={sloView}
           setSLOView={setSLOView}
-          setCardsPerRow={setCardsPerRow}
-          cardsPerRow={cardsPerRow}
           toggleListViewMode={() =>
             listViewMode === 'default' ? setListViewMode('compact') : setListViewMode('default')
           }
@@ -97,8 +93,7 @@ export function SloList({ autoRefresh }: Props) {
         sloList={results}
         loading={isLoading || isRefetching}
         error={isError}
-        cardsPerRow={cardsPerRow}
-        listViewMode={listViewMode}
+        viewMode={listViewMode}
         sloView={sloView}
       />
 

@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 
 export const SLO_LIST_VIEW_MODE = 'slo-list-view-mode';
 
-export function SLOListViewSettings({
+export function SLOViewSettings({
   toggleCompactView,
   listViewMode,
 }: {
@@ -19,19 +19,16 @@ export function SLOListViewSettings({
   listViewMode: 'compact' | 'default';
 }) {
   return (
-    <EuiFormRow
+    <EuiSwitch
       label={
         <FormattedMessage
           id="xpack.observability.slo.listView.compactViewLabel"
           defaultMessage="Compact view"
         />
       }
-    >
-      <EuiCheckbox
-        id="sloListCompactToggle"
-        checked={listViewMode === 'compact'}
-        onChange={toggleCompactView}
-      />
-    </EuiFormRow>
+      id="sloListCompactToggle"
+      checked={listViewMode === 'compact'}
+      onChange={toggleCompactView}
+    />
   );
 }
