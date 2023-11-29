@@ -8,6 +8,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function componentTemplateHelpers(getService: FtrProviderContext['getService']) {
+  const log = getService('log');
   const es = getService('es');
 
   let componentTemplatesCreated: string[] = [];
@@ -52,8 +53,7 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
         componentTemplatesCreated = [];
       })
       .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+        log.debug(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
 
   const cleanUpIndexTemplates = () =>
@@ -62,8 +62,7 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
         indexTemplatesCreated = [];
       })
       .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+        log.debug(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
 
   const cleanupDatastreams = () =>
@@ -72,8 +71,7 @@ export function componentTemplateHelpers(getService: FtrProviderContext['getServ
         datastreamCreated = [];
       })
       .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+        log.debug(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
 
   return {

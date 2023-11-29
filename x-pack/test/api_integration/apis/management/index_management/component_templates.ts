@@ -10,13 +10,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { componentTemplatesApi } from './lib/component_templates.api';
 import { componentTemplateHelpers } from './lib/component_template.helpers';
-// @ts-ignore
 import { API_BASE_PATH } from './constants';
 
 const CACHE_TEMPLATES = true;
 
 export default function ({ getService }: FtrProviderContext) {
+  const log = getService('log');
   const supertest = getService('supertest');
+
   const {
     createComponentTemplate,
     getAllComponentTemplates,
@@ -73,8 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         try {
           await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating component template');
+          log.debug('[Setup error] Error creating component template');
           throw err;
         }
       });
@@ -123,8 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
         await Promise.all(
           [COMPONENT_NAME, REQUIRED_FIELDS_COMPONENT_NAME].map(removeComponentTemplate)
         ).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.log(`[Cleanup error] Error deleting component templates: ${err.message}`);
+          log.debug(`[Cleanup error] Error deleting component templates: ${err.message}`);
           throw err;
         });
       });
@@ -233,8 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
         try {
           await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating component template');
+          log.debug('[Setup error] Error creating component template');
           throw err;
         }
       });
@@ -307,8 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
             (template) => addComponentTemplate(template, !CACHE_TEMPLATES)
           )
         ).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.log(`[Setup error] Error creating component templates: ${err.message}`);
+          log.debug(`[Setup error] Error creating component templates: ${err.message}`);
           throw err;
         });
       });
@@ -418,8 +415,7 @@ export default function ({ getService }: FtrProviderContext) {
           await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
           await addIndexTemplate({ body: TEMPLATE, name: TEMPLATE_NAME }, CACHE_TEMPLATES);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating component template');
+          log.debug('[Setup error] Error creating component template');
           throw err;
         }
       });
