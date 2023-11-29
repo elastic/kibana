@@ -56,7 +56,7 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh 
+      - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh 
         env:
           TARGET: cypress:run:serverless
           CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
@@ -74,7 +74,7 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
+      - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
         env:
           TARGET: cypress:explore:run:serverless
           CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
@@ -92,7 +92,7 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
+      - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
         env:
           TARGET: cypress:investigations:run:serverless
           CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
@@ -110,7 +110,7 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
+      - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
         env:
           TARGET: cypress:rule_management:run:serverless
           CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
@@ -128,7 +128,7 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
+      - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
         env:
           TARGET: cypress:rule_management:prebuilt_rules:run:serverless
           CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
@@ -146,7 +146,7 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
+      - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
         env:
           TARGET: cypress:dw:serverless:run
           CURRENT_WORKING_DIR: x-pack/plugins/security_solution
