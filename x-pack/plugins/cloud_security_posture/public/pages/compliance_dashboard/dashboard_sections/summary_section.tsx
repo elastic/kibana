@@ -188,9 +188,6 @@ export const SummarySection = ({
             'xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle',
             { defaultMessage: 'Compliance By CIS Section' }
           )}
-          styles={{
-            padding: `${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.m}`,
-          }}
         >
           <RisksTable
             data={complianceData.groupedFindingsEvaluation}
