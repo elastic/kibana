@@ -67,17 +67,15 @@ const customizer = (destVal: any, srcValue: any, key: string) => {
 };
 
 export const removeMonitorEmptyValues = (v: any) => {
-  if (v === undefined || v === null) {
-    return true;
-  }
-  if (typeof v === 'string' && v.trim() === '') {
-    return true;
-  }
-  if (Array.isArray(v) && v.length === 0) {
-    return true;
-  }
-  if (typeof v === 'object' && Object.keys(v).length === 0) {
-    return true;
-  }
-  return false;
+  // value is falsy
+  return (
+    v === undefined ||
+    v === null ||
+    // value is empty string
+    (typeof v === 'string' && v.trim() === '') ||
+    // is empty array
+    (Array.isArray(v) && v.length === 0) ||
+    // object is has no values
+    (typeof v === 'object' && Object.keys(v).length === 0)
+  );
 };

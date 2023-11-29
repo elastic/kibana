@@ -26,12 +26,12 @@ The request body should contain the attributes of the monitor you want to create
 
 `name`:: (Required, string): The monitor's name.
 
-`type`:: (Required, string): The monitor type (e.g., "http," "tcp," "icmp," or "browser").
+`type`:: (Required, string): The monitor type (e.g., `http` , `tcp` , `icmp` or `browser`).
 
-`schedule`:: (Optional, number): The monitor's schedule in minutes. Supported values are 1, 3, 5, 10, 15, 30, 60, 120 and 240.
-  * The default value is 3 minutes for HTTP, TCP, and ICMP monitors.
+`schedule`:: (Optional, number): The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120` and `240`.
+  * The default value is `3` minutes for HTTP, TCP, and ICMP monitors.
 
-  * The default value is 10 minutes for Browser monitors.
+  * The default value is `10` minutes for Browser monitors.
 
 :private-locations-url: https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html
 :locations-command: https://www.elastic.co/guide/en/observability/current/synthetics-command-reference.html#elastic-synthetics-locations-command
@@ -68,7 +68,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 `tags`:: (Optional, array of strings): An array of tags. 
 
-`alert`:: (Optional, object, default: { status: { enabled: true }, tls: { enabled: true } }): Alert configuration.
+`alert`:: (Optional, object, default: `{ status: { enabled: true }, tls: { enabled: true } }`): Alert configuration.
 
 `service.name`:: (Optional, string): The APM service name.
 
@@ -169,8 +169,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 *ICMP Monitor Fields*:
 
-`host`:: (Required, string): Host to monitor, can be an IP address or a hostname. Port can be appended to the host using a colon (e.g., "example.com:9200").
-
+`host`:: (Required, string): Host to ping.
 `wait`:: (Optional, number, default: 1): Wait time in seconds.
 
 *Browser Monitor Fields*:
@@ -189,7 +188,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 Here are some examples of creating monitors of different types:
 
-1. **HTTP Monitor**:
+**HTTP Monitor**:
 Create an HTTP monitor to check a website's availability.
 
 [source,sh]
@@ -198,13 +197,13 @@ POST /api/synthetics/monitors
 {
   "type": "http",
   "name": "Website Availability",
-  "urls": "https://example.com",
+  "url": "https://example.com",
   "tags": ["website", "availability"],
   "locations": ["united_kingdom"]
 }
 --------------------------------------------------
 
-1. **TCP Monitor**:
+**TCP Monitor**:
 Create a TCP monitor to monitor a server's availability.
 
 [source,sh]
@@ -213,12 +212,12 @@ POST /api/synthetics/monitors
 {
   "type": "tcp",
   "name": "Server Availability",
-  "hosts": "example.com",
+  "host": "example.com",
   "private_locations": ["my_private_location"]
 }
 --------------------------------------------------
 
-1. **ICMP Monitor**:
+**ICMP Monitor**:
 Create an ICMP monitor to perform ping checks.
 
 [source,sh]
@@ -227,12 +226,12 @@ POST /api/synthetics/monitors
 {
   "type": "icmp",
   "name": "Ping Test",
-  "hosts": "example.com",
+  "host": "example.com",
   "locations": ["united_kingdom"]
 }
 --------------------------------------------------
 
-1. **Browser Monitor**:
+**Browser Monitor**:
 Create a Browser monitor to check a website.
 
 [source,sh]
@@ -241,10 +240,7 @@ POST /api/synthetics/monitors
 {
   "type": "browser",
   "name": "Example journey",
-  "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))"
+  "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+  "locations": ["united_kingdom"]
 }
 --------------------------------------------------
-
-This API allows you to create different types of monitors by providing the required attributes for each monitor type. The response will include details of the newly created monitor.
-
-You can replace `<your-api-host>` with the actual host where your API is available.
