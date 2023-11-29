@@ -17,7 +17,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-analytics-browser",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/shared-ux-prompt-not-found",
   ],
   "exclude": [
     "target/**/*",

@@ -10,34 +10,38 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
-  const browser = getService('browser');
-  const log = getService('log');
-  const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
-
   describe('Short URLs', () => {
-    it('opening a missing short URL shows empty prompt', async () => {
+    const PageObjects = getPageObjects(['common']);
+    const browser = getService('browser');
+    const log = getService('log');
+    const testSubjects = getService('testSubjects');
+    const retry = getService('retry');
+
+    it('shows Page for missing short URL', async () => {
       await PageObjects.common.navigateToApp('home');
 
-      log.info('Navigating to Home...');
-      await retry.try(async () => {
-        const title = await browser.getTitle();
-        expect(title).to.be('Home - Elastic');
-      });
-
-      log.info('Changing URL to missing short URL...');
+      // go to 404
       const currentUrl = await browser.getCurrentUrl();
+      log.info('Changing URL to missing short URL...');
       const newUrl = currentUrl.replace(/\/app\/home/, '/app/r/s/foofoo');
       await browser.get(newUrl);
+
+      // check the page for 404 contents
+      log.info('Checking page title...');
+      await retry.try(async () => {
+        const title = await browser.getTitle();
+        expect(title).to.be('Not Found - Elastic');
+      });
 
       await retry.try(async () => {
         await testSubjects.existOrFail('redirectErrorEmptyPromptBody');
       });
 
+      // click "back to home" button
       log.info('Clicking the prompt button...');
       await testSubjects.click('redirectErrorEmptyPromptButton');
 
+      // check the page
       await retry.try(async () => {
         const title = await browser.getTitle();
         expect(title).to.be('Home - Elastic');
