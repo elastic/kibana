@@ -154,24 +154,24 @@ export default ({ getService }: FtrProviderContext) => {
           criticality_level: 'important',
         };
 
-        await assetCriticalityRoutes.upsert(assetCriticality);
-
+        const { body: createdDoc } = await assetCriticalityRoutes.upsert(assetCriticality);
         const updatedAssetCriticality = {
           id_field: 'host.name',
           id_value: 'host-01',
           criticality_level: 'very_important',
         };
 
-        const { body: result } = await assetCriticalityRoutes.upsert(updatedAssetCriticality);
+        const { body: updatedDoc } = await assetCriticalityRoutes.upsert(updatedAssetCriticality);
 
-        expect(result.id_field).to.eql('host.name');
-        expect(result.id_value).to.eql('host-01');
-        expect(result.criticality_level).to.eql('very_important');
-        expect(result['@timestamp']).to.be.a('string');
+        expect(updatedDoc.id_field).to.eql('host.name');
+        expect(updatedDoc.id_value).to.eql('host-01');
+        expect(updatedDoc.criticality_level).to.eql('very_important');
+        expect(updatedDoc['@timestamp']).to.be.a('string');
+        expect(updatedDoc['@timestamp']).to.not.eql(createdDoc['@timestamp']);
 
         const doc = await getAssetCriticalityDoc('host.name', 'host-01');
 
-        expect(doc).to.eql(result);
+        expect(doc).to.eql(updatedDoc);
       });
     });
 
