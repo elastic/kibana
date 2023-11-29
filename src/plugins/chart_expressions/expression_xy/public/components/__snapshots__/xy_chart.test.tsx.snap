@@ -1127,10 +1127,10 @@ exports[`XYChart component it renders area 1`] = `
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -2649,10 +2649,10 @@ exports[`XYChart component it renders bar 1`] = `
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -4171,10 +4171,10 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -5693,10 +5693,10 @@ exports[`XYChart component it renders line 1`] = `
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -7215,10 +7215,10 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -8737,10 +8737,10 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -10259,10 +10259,10 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -11811,10 +11811,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -13571,10 +13571,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {
@@ -15324,10 +15324,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
               "barSeriesStyle": Object {},
               "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
+                "bottom": 10,
+                "left": 10,
+                "right": 10,
+                "top": 10,
               },
               "legend": Object {
                 "labelOptions": Object {

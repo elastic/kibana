@@ -30,6 +30,7 @@ import {
   Tooltip,
   XYChartSeriesIdentifier,
   SettingsProps,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
@@ -113,13 +114,6 @@ import './xy_chart.scss';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
-
-export const LEGACY_CHART_MARGINS = {
-  left: 10,
-  right: 10,
-  top: 10,
-  bottom: 10,
-};
 
 declare global {
   interface Window {
@@ -814,7 +808,7 @@ export function XYChart({
                 // if not title or labels are shown for axes, add some padding if required by reference line markers
                 chartMargins: {
                   // Temporary margin defaults
-                  ...LEGACY_CHART_MARGINS,
+                  ...LEGACY_LIGHT_THEME.chartMargins,
                   ...computeChartMargins(
                     linesPaddings,
                     { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
