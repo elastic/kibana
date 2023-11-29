@@ -65,6 +65,7 @@ export const EsqlQueryExpression: React.FC<
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
+  const [indexPattern, setIndexPattern] = useState<string>();
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -140,9 +141,15 @@ export const EsqlQueryExpression: React.FC<
 
   const refreshTimeFields = async (q: AggregateQuery) => {
     let hasTimestamp = false;
-    const indexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
-    const currentEsFields = await getFields(http, [indexPattern]);
 
+    const currentIndexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
+    if (indexPattern !== undefined && currentIndexPattern !== indexPattern) {
+      // reset the sourceFields if the index pattern has changed
+      setParam('sourceFields', DEFAULT_VALUES.SOURCE_FIELDS);
+    }
+    setIndexPattern(currentIndexPattern);
+
+    const currentEsFields = await getFields(http, [currentIndexPattern]);
     setEsFields(currentEsFields);
 
     const timeFields = getTimeFieldOptions(currentEsFields);

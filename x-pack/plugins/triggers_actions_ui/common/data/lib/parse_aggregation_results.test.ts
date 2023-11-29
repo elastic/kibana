@@ -62,6 +62,50 @@ const sampleHit = {
   sort: [1668020234918],
 };
 
+const sampleSourceFieldsHit = {
+  _index: 'test-data',
+  _id: '6S04F4wBEMHmjvc_YPJ_',
+  _score: null,
+  _source: {
+    '@timestamp': '2023-11-27T10:00:00',
+    host: { id: '1', name: 'host-1', hostname: 'host-1' },
+  },
+  fields: { '@timestamp': ['2023-11-27T10:00:00.000Z'] },
+  sort: ['2023-11-27T10:00:00.000Z'],
+};
+
+const sampleAggregations = {
+  'host.name': {
+    doc_count_error_upper_bound: 0,
+    sum_other_doc_count: 0,
+    buckets: [{ key: 'host-1', doc_count: 5 }],
+  },
+  'host.hostname': {
+    doc_count_error_upper_bound: 0,
+    sum_other_doc_count: 0,
+    buckets: [{ key: 'host-1', doc_count: 5 }],
+  },
+  'host.id': {
+    doc_count_error_upper_bound: 0,
+    sum_other_doc_count: 0,
+    buckets: [{ key: '1', doc_count: 5 }],
+  },
+};
+
+const sampleEsqlSourceFieldsHit = {
+  _id: 'esql_query_document',
+  _index: '',
+  _source: {
+    '@timestamp': '2023-11-27T10:00:00.000Z',
+    'host.hostname': 'host-1',
+    'host.hostname.keyword': 'host-1',
+    'host.id': '1',
+    'host.id.keyword': '1',
+    'host.name': 'host-1',
+    'host.name.keyword': 'host-1',
+  },
+};
+
 describe('parseAggregationResults', () => {
   it('correctly parses results for count over all', () => {
     expect(
@@ -637,6 +681,175 @@ describe('parseAggregationResults', () => {
         },
       ],
       truncated: true,
+    });
+  });
+
+  it('correctly parses results for count with source fields', () => {
+    expect(
+      parseAggregationResults({
+        isCountAgg: true,
+        isGroupAgg: false,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: 491,
+            max_score: null,
+            hits: [sampleSourceFieldsHit],
+          },
+          aggregations: sampleAggregations,
+        },
+        resultLimit: 1000,
+        sourceFieldsParams: [
+          { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
+          { label: 'host.id', searchPath: 'host.id.keyword' },
+          { label: 'host.name', searchPath: 'host.name.keyword' },
+        ],
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'all documents',
+          count: 491,
+          hits: [sampleSourceFieldsHit],
+          sourceFields: {
+            'host.hostname': ['host-1'],
+            'host.id': ['1'],
+            'host.name': ['host-1'],
+          },
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly parses results for aggregate metric with source fields', () => {
+    expect(
+      parseAggregationResults({
+        isCountAgg: true,
+        isGroupAgg: true,
+        esResult: {
+          took: 7,
+          timed_out: false,
+          _shards: { total: 4, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 4, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'host-1',
+                  doc_count: 4,
+                  topHitsAgg: {
+                    hits: {
+                      total: { value: 4, relation: 'eq' },
+                      max_score: 0,
+                      hits: [
+                        sampleSourceFieldsHit,
+                        sampleSourceFieldsHit,
+                        sampleSourceFieldsHit,
+                        sampleSourceFieldsHit,
+                      ],
+                    },
+                  },
+                  'host.name': {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [{ key: 'host-1', doc_count: 4 }],
+                  },
+                  'host.hostname': {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [{ key: 'host-1', doc_count: 4 }],
+                  },
+                  'host.id': {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [{ key: '1', doc_count: 4 }],
+                  },
+                },
+              ],
+            },
+            groupAggCount: { count: 1, min: 4, max: 4, avg: 4, sum: 4 },
+          },
+        },
+        resultLimit: 1000,
+        sourceFieldsParams: [
+          { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
+          { label: 'host.id', searchPath: 'host.id.keyword' },
+          { label: 'host.name', searchPath: 'host.name.keyword' },
+        ],
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'host-1',
+          hits: [
+            sampleSourceFieldsHit,
+            sampleSourceFieldsHit,
+            sampleSourceFieldsHit,
+            sampleSourceFieldsHit,
+          ],
+          count: 4,
+          sourceFields: {
+            'host.hostname': ['host-1'],
+            'host.id': ['1'],
+            'host.name': ['host-1'],
+          },
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly parses results for count with source fields and generateSourceFieldsFromHits = true', () => {
+    expect(
+      parseAggregationResults({
+        isCountAgg: true,
+        isGroupAgg: false,
+        esResult: {
+          took: 0,
+          timed_out: false,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          hits: {
+            total: 4,
+            hits: [
+              sampleEsqlSourceFieldsHit,
+              sampleEsqlSourceFieldsHit,
+              sampleEsqlSourceFieldsHit,
+              sampleEsqlSourceFieldsHit,
+            ],
+          },
+        },
+        resultLimit: 1000,
+        sourceFieldsParams: [
+          { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
+          { label: 'host.id', searchPath: 'host.id.keyword' },
+          { label: 'host.name', searchPath: 'host.name.keyword' },
+        ],
+        generateSourceFieldsFromHits: true,
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'all documents',
+          count: 4,
+          hits: [
+            sampleEsqlSourceFieldsHit,
+            sampleEsqlSourceFieldsHit,
+            sampleEsqlSourceFieldsHit,
+            sampleEsqlSourceFieldsHit,
+          ],
+          sourceFields: {
+            'host.hostname': ['host-1'],
+            'host.id': ['1'],
+            'host.name': ['host-1'],
+          },
+        },
+      ],
+      truncated: false,
     });
   });
 });

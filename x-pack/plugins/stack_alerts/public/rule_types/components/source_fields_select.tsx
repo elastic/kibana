@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { uniqBy } from 'lodash';
 import { EuiComboBox, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
@@ -13,6 +14,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { validSourceFields } from '../../../common/constants';
 import { SourceField } from '../es_query/types';
+
+interface SourceFieldsOption {
+  label: string;
+  value: string;
+}
 
 interface SourceFieldsProps {
   esFields: FieldOption[];
@@ -27,17 +33,44 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
   errors,
   sourceFields,
 }) => {
-  const sourceFieldsOptions = esFields
-    .filter((f) => f.aggregatable)
-    .flatMap((f) => {
-      const validSourceField = validSourceFields.find(
-        (validatedField) => f.name === validatedField || f.name === `${validatedField}.keyword`
-      );
-      if (validSourceField) {
-        return [{ label: validSourceField, value: f.name }];
-      }
-      return [];
-    });
+  const [sourceFieldsOptions, setSourceFieldsOptions] = useState<SourceFieldsOption[]>([]);
+
+  useEffect(() => {
+    const options = uniqBy(
+      esFields
+        .filter((f) => f.aggregatable)
+        .flatMap((f) => {
+          const validSourceField = validSourceFields.find(
+            (validatedField) => f.name === validatedField || f.name === `${validatedField}.keyword`
+          );
+          if (validSourceField) {
+            return [
+              {
+                label: validSourceField,
+                value: f.name,
+                'data-test-subj': `option-${validSourceField}`,
+              },
+            ];
+          }
+          return [];
+        }),
+      'label'
+    );
+
+    setSourceFieldsOptions(options);
+
+    // if no sourceFields, auto select the current options
+    if (!sourceFields || sourceFields.length === 0) {
+      const fields: SourceField[] = [];
+      options.forEach((f) => {
+        if (f.value) {
+          fields.push({ label: f.label, searchPath: f.value });
+        }
+      });
+      onChangeSourceFields(fields);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [esFields]);
 
   return sourceFieldsOptions.length > 0 ? (
     <EuiFormRow
@@ -68,10 +101,11 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
           selectedOptions={(sourceFields || []).map((f) => ({
             label: f.label,
             value: f.searchPath,
+            'data-test-subj': `option-${f.label}`,
           }))}
-          onChange={(selectedOptions) => {
+          onChange={(options) => {
             const fields: SourceField[] = [];
-            selectedOptions.forEach((f) => {
+            options.forEach((f) => {
               if (f.value) {
                 fields.push({ label: f.label, searchPath: f.value });
               }
