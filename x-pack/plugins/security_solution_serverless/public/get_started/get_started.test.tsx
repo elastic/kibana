@@ -10,6 +10,7 @@ import { GetStartedComponent } from './get_started';
 import type { SecurityProductTypes } from '../../common/config';
 
 jest.mock('./toggle_panel');
+jest.mock('../common/services');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -31,9 +32,6 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ hash: '#watch_the_overview_video' }),
 }));
 jest.mock('../common/hooks/use_user_name');
-jest.mock('@kbn/security-solution-plugin/public', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
-}));
 
 const productTypes = [
   { product_line: 'security', product_tier: 'essentials' },

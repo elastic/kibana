@@ -6,10 +6,9 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-import { useSourcererDataView } from '@kbn/security-solution-plugin/public';
 import { TogglePanel } from './toggle_panel';
 
 import type { SecurityProductTypes } from '../../common/config';
@@ -19,6 +18,7 @@ import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
+import { useKibana } from '../common/services';
 
 export interface GetStartedProps {
   productTypes: SecurityProductTypes;
@@ -41,7 +41,14 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
   const productTier = productTypes.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
-  const { indicesExist } = useSourcererDataView();
+  const [isIndicesExist, setIsIndicesExist] = useState<boolean | null>();
+  const { securitySolution } = useKibana().services;
+
+  useEffect(() => {
+    securitySolution.getSourcerer$().subscribe(({ indicesExist }) => {
+      setIsIndicesExist(indicesExist);
+    });
+  }, [securitySolution, setIsIndicesExist]);
 
   return (
     <KibanaPageTemplate
@@ -96,7 +103,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         <StepContextProvider
           expandedCardSteps={expandedCardSteps}
           finishedSteps={finishedSteps}
-          indicesExist={indicesExist}
+          indicesExist={!!isIndicesExist}
           toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         >
           <TogglePanel
@@ -110,7 +117,6 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
   );
 };
 
-GetStartedComponent.displayName = 'GetStartedComponent';
 export const GetStarted = React.memo(GetStartedComponent);
 
 // eslint-disable-next-line import/no-default-export
