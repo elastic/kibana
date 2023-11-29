@@ -38,7 +38,9 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
         summary: frequency!.summary,
       },
       alerts_filter: alertsFilter,
-      ...(useAlertDataForTemplate ? { use_alert_data_for_template: useAlertDataForTemplate } : {}),
+      ...(typeof useAlertDataForTemplate === 'undefined'
+        ? { use_alert_data_for_template: useAlertDataForTemplate }
+        : {}),
     })
   ),
 });
