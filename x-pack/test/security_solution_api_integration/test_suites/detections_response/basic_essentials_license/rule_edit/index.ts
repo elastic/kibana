@@ -10,7 +10,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rules edit Basic and Essentials API', function () {
     loadTestFile(require.resolve('./patch_rules_bulk'));
     loadTestFile(require.resolve('./patch_rules'));
+    loadTestFile(require.resolve('./patch_rules_ess'));
     loadTestFile(require.resolve('./update_rules_bulk'));
     loadTestFile(require.resolve('./update_rules'));
+    loadTestFile(require.resolve('./update_rules_ess'));
   });
 }

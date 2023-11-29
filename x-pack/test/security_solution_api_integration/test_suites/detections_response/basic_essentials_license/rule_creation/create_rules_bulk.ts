@@ -20,6 +20,7 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  updateUsername,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -27,8 +28,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
   const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+
+  // TODO: add a new service
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
@@ -53,18 +56,25 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should create a single rule with a rule_id', async () => {
+        const rule = getSimpleRule();
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .send([getSimpleRule()])
+          .send([rule])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        const expectedRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should create a single rule without a rule_id', async () => {
+        const rule = getSimpleRuleWithoutRuleId();
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
@@ -73,7 +83,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+        const expectedRule = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id twice', async () => {

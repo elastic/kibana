@@ -23,12 +23,15 @@ import {
   createRule,
   getSimpleRule,
   deleteAllAlerts,
+  updateUsername,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess @serverless update_rules_bulk', () => {
     describe('update rules bulk', () => {
@@ -42,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+        const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         const updatedRule = getSimpleRuleUpdate('rule-1');
         updatedRule.name = 'some other name';
@@ -55,7 +58,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -87,11 +93,17 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
-        const outputRule1 = getSimpleRuleOutput();
+        const outputRule1 = updateUsername(
+          getSimpleRuleOutput(updatedRule1.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
 
-        const outputRule2 = getSimpleRuleOutput('rule-2');
+        const outputRule2 = updateUsername(
+          getSimpleRuleOutput(updatedRule2.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
 
@@ -117,7 +129,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(createRuleBody.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -146,11 +161,17 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
-        const outputRule1 = getSimpleRuleOutputWithoutRuleId('rule-1');
+        const outputRule1 = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(createRule1.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
 
-        const outputRule2 = getSimpleRuleOutputWithoutRuleId('rule-2');
+        const outputRule2 = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(createRule2.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
 
@@ -176,7 +197,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(createdBody.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -198,7 +222,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(updatedRule1.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
@@ -208,7 +235,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change other properties when it does updates and effectively delete them such as timeline_title', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+        const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's timeline_title
         const ruleUpdate = getSimpleRuleUpdate('rule-1');
@@ -233,7 +260,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send([ruleUpdate2])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 2;
 
@@ -285,7 +315,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update one rule property and give an error about a second fake rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+        const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         const ruleUpdate = getSimpleRuleUpdate('rule-1');
         ruleUpdate.name = 'some other name';
@@ -303,7 +333,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send([ruleUpdate, ruleUpdate2])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
 
@@ -341,7 +374,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send([rule1, rule2])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(createdBody.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
 

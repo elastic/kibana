@@ -17,6 +17,7 @@ import {
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
+  updateUsername,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -59,8 +60,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
+      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+
       expect(body).to.eql({
-        data: [getSimpleRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)],
+        data: [expectedRule],
         page: 1,
         perPage: 20,
         total: 1,
@@ -86,8 +89,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
+      const expectedRule = updateUsername(getComplexRuleOutput(), ELASTICSEARCH_USERNAME);
+
       expect(body).to.eql({
-        data: [getComplexRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)],
+        data: [expectedRule],
         page: 1,
         perPage: 20,
         total: 1,

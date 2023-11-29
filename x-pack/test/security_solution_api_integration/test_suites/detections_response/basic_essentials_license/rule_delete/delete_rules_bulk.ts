@@ -20,12 +20,15 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  updateUsername,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess @serverless delete_rules_bulk', () => {
     describe('deleting rules bulk using DELETE', () => {
@@ -39,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete a single rule with a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        const rule = await createRule(supertest, log, getSimpleRule());
 
         // delete the rule in bulk
         const { body } = await supertest
@@ -50,7 +53,11 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        const expectedRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should delete a single rule using an auto generated rule_id', async () => {
@@ -65,7 +72,11 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+        const expectedRule = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(bodyWithCreatedRule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should delete a single rule using an auto generated id', async () => {
@@ -80,7 +91,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+        const expectedRule = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(bodyWithCreatedRule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
@@ -133,7 +149,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
-          getSimpleRuleOutputWithoutRuleId(),
+          updateUsername(
+            getSimpleRuleOutputWithoutRuleId(bodyWithCreatedRule.rule_id),
+            ELASTICSEARCH_USERNAME
+          ),
           {
             id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
             error: {
@@ -157,7 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete a single rule with a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        const rule = await createRule(supertest, log, getSimpleRule());
 
         // delete the rule in bulk
         const { body } = await supertest
@@ -168,7 +187,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        const expectedRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should delete a single rule using an auto generated rule_id', async () => {
@@ -183,7 +207,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+        const expectedRule = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(bodyWithCreatedRule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should delete a single rule using an auto generated id', async () => {
@@ -198,7 +227,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+        const expectedRule = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(bodyWithCreatedRule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
@@ -251,7 +285,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
-          getSimpleRuleOutputWithoutRuleId(),
+          getSimpleRuleOutputWithoutRuleId(
+            bodyWithCreatedRule.rule_id,
+            bodyWithCreatedRule.enabled,
+            ELASTICSEARCH_USERNAME
+          ),
           {
             id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
             error: {

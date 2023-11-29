@@ -18,6 +18,7 @@ import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   ruleToNdjson,
+  updateUsername,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -100,8 +101,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+
         expect(bodyToCompare).to.eql({
-          ...getSimpleRuleOutput('rule-1', false, ELASTICSEARCH_USERNAME),
+          ...expectedRule,
           output_index: '',
         });
       });
@@ -376,8 +379,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+
         const ruleOutput = {
-          ...getSimpleRuleOutput('rule-1', false, ELASTICSEARCH_USERNAME),
+          ...expectedRule,
           output_index: '',
         };
         ruleOutput.name = 'some other name';
@@ -470,7 +475,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should be able to correctly read back a mixed import of different rules even if some cause conflicts', async () => {
         const getRuleOutput = (name: string) => ({
-          ...getSimpleRuleOutput(name, false, ELASTICSEARCH_USERNAME),
+          ...updateUsername(getSimpleRuleOutput(name), ELASTICSEARCH_USERNAME),
           output_index: '',
         });
         await supertest

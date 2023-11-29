@@ -20,6 +20,7 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  updateUsername,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -52,9 +53,8 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(
-          getSimpleRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)
-        );
+        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should be able to read a single rule using id', async () => {
@@ -69,9 +69,8 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(
-          getSimpleRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)
-        );
+        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should be able to read a single rule with an auto-generated rule_id', async () => {
@@ -85,13 +84,12 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-        expect(bodyToCompare).to.eql(
-          getSimpleRuleOutputWithoutRuleId(
-            createRuleBody.rule_id,
-            createRuleBody.enabled,
-            ELASTICSEARCH_USERNAME
-          )
+        const expectedRule = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(),
+          ELASTICSEARCH_USERNAME
         );
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should return 404 if given a fake id', async () => {

@@ -19,12 +19,15 @@ import {
   getSimpleRuleOutputWithoutRuleId,
   createRule,
   deleteAllAlerts,
+  updateUsername,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess @serverless patch_rules', () => {
     describe('patch rules', () => {
@@ -38,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch a single rule property of name using a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+        const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
         const { body } = await supertest
@@ -48,28 +51,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', name: 'some other name' })
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
-      });
-
-      it('should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
-
-        // patch a simple rule's type to machine learning
-        const { body } = await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', type: 'machine_learning' })
-          .expect(403);
-
-        expect(body).to.eql({
-          message: 'Your license does not support machine learning. Please upgrade your license.',
-          status_code: 403,
-        });
       });
 
       it('should patch a single rule property of name using the auto-generated rule_id', async () => {
@@ -86,7 +75,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: createRuleBody.rule_id, name: 'some other name' })
           .expect(200);
 
-        const outputRule = getSimpleRuleOutputWithoutRuleId();
+        const outputRule = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
@@ -104,7 +96,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ id: createdBody.id, name: 'some other name' })
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(createdBody.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -112,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not change the revision of a rule when it patches only enabled', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+        const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
         const { body } = await supertest
@@ -122,7 +117,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', enabled: false })
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.enabled = false;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -130,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change the revision of a rule when it patches enabled and another property', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+        const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
         const { body } = await supertest
@@ -140,7 +138,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', severity: 'low', enabled: false })
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
@@ -150,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not change other properties when it does patches', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+        const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's timeline_title
         await supertest
@@ -168,7 +169,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ rule_id: 'rule-1', name: 'some other name' })
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(
+          getSimpleRuleOutput(rule.rule_id),
+          ELASTICSEARCH_USERNAME
+        );
         outputRule.name = 'some other name';
         outputRule.timeline_title = 'some title';
         outputRule.timeline_id = 'some id';

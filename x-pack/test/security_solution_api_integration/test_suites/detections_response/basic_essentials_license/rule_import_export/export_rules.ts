@@ -18,6 +18,7 @@ import {
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
+  updateUsername,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -65,10 +66,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
         const bodyToTest = removeServerGeneratedProperties(bodySplitAndParsed);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
 
-        expect(bodyToTest).to.eql(
-          getSimpleRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)
-        );
+        expect(bodyToTest).to.eql(expectedRule);
       });
 
       it('should export a exported count with a single rule_id', async () => {
@@ -121,11 +121,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
         const firstRule = removeServerGeneratedProperties(firstRuleParsed);
         const secondRule = removeServerGeneratedProperties(secondRuleParsed);
+        const expectedRule1 = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule2 = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
 
-        expect([firstRule, secondRule]).to.eql([
-          getSimpleRuleOutput(rule1.rule_id, rule1.enabled, ELASTICSEARCH_USERNAME),
-          getSimpleRuleOutput(rule2.rule_id, rule2.enabled, ELASTICSEARCH_USERNAME),
-        ]);
+        expect([firstRule, secondRule]).to.eql([expectedRule1, expectedRule2]);
       });
     });
   });

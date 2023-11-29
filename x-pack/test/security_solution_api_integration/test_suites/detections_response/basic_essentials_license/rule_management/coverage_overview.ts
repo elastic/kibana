@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless @brokenInServerless coverage_overview', () => {
+  describe('@ess @serverless @brokenInServerless @skipInQA coverage_overview', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
