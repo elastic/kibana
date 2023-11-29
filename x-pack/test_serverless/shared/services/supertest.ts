@@ -6,15 +6,46 @@
  */
 
 import { format as formatUrl } from 'url';
-import supertest from 'supertest';
+import supertest, { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
+
+/**
+ * Return a new SuperAgentTest instance for every API call to avoid cookie caching.
+ * If you want to verify cookies are empty use the following code:
+ * import { CookieAccessInfo } from 'cookiejar';
+ * console.log(JSON.stringify(agent.jar.getCookies(CookieAccessInfo.All)));
+ */
+const initSuperAgentTest = (kbnUrl: string, ca?: string[]) => {
+  return {
+    get(url: string) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.get(url);
+    },
+    delete(url: string) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.delete(url);
+    },
+    post(url: string) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.post(url);
+    },
+    patch(url: string) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.patch(url);
+    },
+    put(url: string) {
+      const agent = supertest.agent(kbnUrl, { ca });
+      return agent.put(url);
+    },
+  } as Partial<SuperTest<Test>>;
+};
 
 export function SupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kbnUrl = formatUrl(config.get('servers.kibana'));
-  const ca = config.get('servers.kibana').certificateAuthorities;
+  const ca = config.get('servers.kibana').certificateAuthorities as string[];
 
-  return supertest.agent(kbnUrl, { ca });
+  return initSuperAgentTest(kbnUrl, ca);
 }
 
 export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext) {
@@ -23,7 +54,7 @@ export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext)
     ...config.get('servers.kibana'),
     auth: false,
   });
-  const ca = config.get('servers.kibana').certificateAuthorities;
+  const ca = config.get('servers.kibana').certificateAuthorities as string[];
 
-  return supertest.agent(kbnUrl, { ca });
+  return initSuperAgentTest(kbnUrl, ca);
 }
