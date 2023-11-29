@@ -32,6 +32,7 @@ export const PipelineSelect: React.FC = () => {
   };
 
   return (
+    // TODO: Make list scrollable
     <EuiSelectable
       options={getPipelineOptions(existingInferencePipelines)}
       listProps={{

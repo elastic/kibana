@@ -16,7 +16,6 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { MLModelTypeBadge } from '../ml_model_type_badge';
 
@@ -54,61 +53,89 @@ export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }>
 export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipeline }) => {
   const modelIdDisplay = pipeline.modelId.length > 0 ? pipeline.modelId : MODEL_REDACTED_VALUE;
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    // TODO: Verify text size
+    // TODO: Add status & action menu
+    // TODO: Test rendering when pipeline.modelType.length == 0
+    // TODO: Need to hide source fields when pipeline is disabled?
+    <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h4>{pipeline.pipelineName}</h4>
-            </EuiTitle>
+        <EuiTitle size="xxs">
+          <h4>{pipeline.pipelineName}</h4>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{modelIdDisplay}</EuiText>
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
             <EuiFlexItem grow={false}>
               <MLModelTypeBadge type={pipeline.modelType} />
             </EuiFlexItem>
           )}
+          <EuiFlexItem />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiSpacer size="m" />
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem>
-            <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.model',
-                { defaultMessage: 'Model' }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color={pipeline.disabled ? 'subdued' : 'normal'}>
-              {modelIdDisplay}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="s">{pipeline.sourceFields.join(', ')}</EuiText>
       </EuiFlexItem>
-      <EuiSpacer size="xs" />
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem style={{ minWidth: 100 }}>
-            <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.sourceFields',
-                { defaultMessage: 'Source fields' }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color={pipeline.disabled ? 'subdued' : 'normal'} textAlign="right">
-              {pipeline.sourceFields.join(', ')}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiSpacer size="s" />
-      {pipeline.disabled && (
-        <PipelineSelectOptionDisabled disabledReason={pipeline.disabledReason} />
-      )}
     </EuiFlexGroup>
+
+    // <EuiFlexGroup direction="column" gutterSize="none">
+    //   <EuiFlexItem>
+    //     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+    //       <EuiFlexItem>
+    //         <EuiTitle size="xs">
+    //           <h4>{pipeline.pipelineName}</h4>
+    //         </EuiTitle>
+    //       </EuiFlexItem>
+    //       {pipeline.modelType.length > 0 && (
+    //         <EuiFlexItem grow={false}>
+    //           <MLModelTypeBadge type={pipeline.modelType} />
+    //         </EuiFlexItem>
+    //       )}
+    //     </EuiFlexGroup>
+    //   </EuiFlexItem>
+    //   <EuiSpacer size="m" />
+    //   <EuiFlexItem>
+    //     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+    //       <EuiFlexItem>
+    //         <EuiText size="s" color="subdued">
+    //           {i18n.translate(
+    //             'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.model',
+    //             { defaultMessage: 'Model' }
+    //           )}
+    //         </EuiText>
+    //       </EuiFlexItem>
+    //       <EuiFlexItem grow={false}>
+    //         <EuiText size="s" color={pipeline.disabled ? 'subdued' : 'normal'}>
+    //           {modelIdDisplay}
+    //         </EuiText>
+    //       </EuiFlexItem>
+    //     </EuiFlexGroup>
+    //   </EuiFlexItem>
+    //   <EuiSpacer size="xs" />
+    //   <EuiFlexItem>
+    //     <EuiFlexGroup>
+    //       <EuiFlexItem style={{ minWidth: 100 }}>
+    //         <EuiText size="s" color="subdued">
+    //           {i18n.translate(
+    //             'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.sourceFields',
+    //             { defaultMessage: 'Source fields' }
+    //           )}
+    //         </EuiText>
+    //       </EuiFlexItem>
+    //       <EuiFlexItem grow={false}>
+    //         <EuiText size="s" color={pipeline.disabled ? 'subdued' : 'normal'} textAlign="right">
+    //           {pipeline.sourceFields.join(', ')}
+    //         </EuiText>
+    //       </EuiFlexItem>
+    //     </EuiFlexGroup>
+    //   </EuiFlexItem>
+    //   <EuiSpacer size="s" />
+    //   {pipeline.disabled && (
+    //     <PipelineSelectOptionDisabled disabledReason={pipeline.disabledReason} />
+    //   )}
+    // </EuiFlexGroup>
   );
 };
