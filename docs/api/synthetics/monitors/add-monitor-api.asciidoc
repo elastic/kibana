@@ -163,7 +163,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
     * `send` (Optional, string): check.send: 'Hello World'
     * `receive` (Optional, string): check.receive: 'Hello World'
 
-`proxy_url`:: (Optional, string): The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://. If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client. You can change this behavior by setting the proxy_use_local_resolver option.
+`proxy_url`:: (Optional, string): The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of `socks5://`. If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client. You can change this behavior by setting the `proxy_use_local_resolver` option.
 
 `proxy_use_local_resolver`:: (Optional, boolean, default: false): A Boolean value that determines whether hostnames are resolved locally instead of being resolved on the proxy server. The default value is false, which means that name resolution occurs on the proxy server.
 
