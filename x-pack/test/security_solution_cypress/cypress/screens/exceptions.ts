@@ -12,10 +12,10 @@ export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExce
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
 export const FIELD_INPUT =
-  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"] input';
+  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxSearchInput"]';
 
 export const FIELD_INPUT_PARENT =
-  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
+  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxSearchInput"]';
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 
@@ -25,7 +25,7 @@ export const OPERATOR_INPUT =
   '[data-test-subj="operatorAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
 
 export const VALUES_INPUT =
-  '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxInput"]';
+  '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxSearchInput"]';
 
 export const VALUES_MATCH_ANY_INPUT =
   '[data-test-subj="valuesAutocompleteMatchAny"] [data-test-subj="comboBoxInput"]';
