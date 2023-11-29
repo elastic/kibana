@@ -15,7 +15,7 @@ import type {
 import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticatedUser } from '../../../common';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import type { DeauthenticationResult } from '../deauthentication_result';
