@@ -1244,6 +1244,7 @@
     "@kbn/managed-vscode-config-cli": "link:packages/kbn-managed-vscode-config-cli",
     "@kbn/management-storybook-config": "link:packages/kbn-management/storybook/config",
     "@kbn/mock-idp-plugin": "link:packages/kbn-mock-idp-plugin",
+    "@kbn/openapi-bundler": "link:packages/kbn-openapi-bundler",
     "@kbn/openapi-generator": "link:packages/kbn-openapi-generator",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
     "@kbn/optimizer-webpack-helpers": "link:packages/kbn-optimizer-webpack-helpers",
