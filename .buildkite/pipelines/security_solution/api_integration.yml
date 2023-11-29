@@ -176,3 +176,57 @@ steps:
         - exit_status: '1'
           limit: 2
           
+  - label: Running rule_delete:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_delete:qa:serverless
+    key: rule_delete:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2       
+
+  - label: Running rule_edit:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_edit:qa:serverless
+    key: rule_edit:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2   
+
+  - label: Running rule_import_export:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_import_export:qa:serverless
+    key: rule_import_export:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2 
+
+  - label: Running rule_management:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_management:qa:serverless
+    key: rule_management:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2   
+
+  - label: Running rule_read:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_read:qa:serverless
+    key: rule_read:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2
