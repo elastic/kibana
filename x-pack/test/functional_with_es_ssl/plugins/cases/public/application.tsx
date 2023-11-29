@@ -43,6 +43,7 @@ const permissions = {
   delete: true,
   push: true,
   connectors: true,
+  settings: true,
 };
 
 const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];

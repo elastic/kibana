@@ -41,6 +41,7 @@ import {
   EVENT_KIND,
   TAGS,
 } from '@kbn/rule-data-utils';
+import { MultiField } from './types';
 
 export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {
@@ -92,6 +93,13 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    multi_fields: [
+      {
+        flat_name: `${ALERT_REASON}.text`,
+        name: 'text',
+        type: 'match_only_text',
+      },
+    ] as MultiField[],
   },
   [ALERT_RULE_CATEGORY]: {
     type: 'keyword',

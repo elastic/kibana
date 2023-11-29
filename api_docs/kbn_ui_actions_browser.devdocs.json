@@ -440,21 +440,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ui-actions-browser",
-        "id": "def-common.CATEGORIZE_FIELD_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CATEGORIZE_FIELD_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CATEGORIZE_FIELD_TRIGGER\""
-        ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ui-actions-browser",
         "id": "def-common.PresentableGrouping",
         "type": "Type",
         "tags": [],
@@ -522,53 +507,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/ui-actions-browser",
-        "id": "def-common.categorizeFieldTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "categorizeFieldTrigger",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.categorizeFieldTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.categorizeFieldTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.categorizeFieldTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/ui-actions-browser",
         "id": "def-common.defaultTrigger",

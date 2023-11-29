@@ -273,4 +273,9 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
 
+export const setDataProviderVisibility = actionCreator<{
+  id: string;
+  isDataProviderVisible: boolean;
+}>('SET_DATA_PROVIDER_VISIBLITY');
+
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');
