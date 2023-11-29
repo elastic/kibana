@@ -157,11 +157,11 @@ const getBenchmarks = async (
           const benchmarkEvaluation = await getClusters(esClient, query, pitId, runtimeMappings);
 
           return {
-            benchmark_id: benchmarkId,
-            benchmark_name: benchmarkName,
-            benchmark_version: benchmarkVersion.replace('v', ''),
-            benchmark_score: benchmarkScore,
-            benchmark_evaluation: benchmarkEvaluation.length,
+            id: benchmarkId,
+            name: benchmarkName,
+            version: benchmarkVersion.replace('v', ''),
+            score: benchmarkScore,
+            evaluation: benchmarkEvaluation.length,
           };
         })
       );
@@ -183,6 +183,69 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
     .addVersion(
       {
         version: '1',
+        validate: {
+          request: {
+            query: benchmarksQueryParamsSchema,
+          },
+        },
+      },
+      async (context, request, response) => {
+        if (!(await context.fleet).authz.fleet.all) {
+          return response.forbidden();
+        }
+
+        const cspContext = await context.csp;
+        const excludeVulnMgmtPackages = true;
+        try {
+          const packagePolicies: ListResult<PackagePolicy> = await getCspPackagePolicies(
+            cspContext.soClient,
+            cspContext.packagePolicyService,
+            CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+            request.query,
+            POSTURE_TYPE_ALL,
+            excludeVulnMgmtPackages
+          );
+
+          const agentPolicies = await getCspAgentPolicies(
+            cspContext.soClient,
+            packagePolicies.items,
+            cspContext.agentPolicyService
+          );
+
+          const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
+            cspContext.agentService,
+            agentPolicies,
+            cspContext.logger
+          );
+
+          const benchmarks = await createBenchmarks(
+            cspContext.soClient,
+            agentPolicies,
+            agentStatusesByAgentPolicyId,
+            packagePolicies.items
+          );
+
+          const getBenchmarkResponse = {
+            ...packagePolicies,
+            items: benchmarks,
+          };
+
+          return response.ok({
+            body: getBenchmarkResponse,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
+      }
+    )
+    .addVersion(
+      {
+        version: '2',
         validate: {
           request: {
             query: benchmarksQueryParamsSchema,

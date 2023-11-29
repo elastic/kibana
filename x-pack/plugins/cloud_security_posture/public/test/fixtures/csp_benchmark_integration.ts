@@ -13,15 +13,15 @@ type CreateCspBenchmarkIntegrationFixtureInput = {
 
 export const createCspBenchmarkIntegrationFixture =
   ({}: CreateCspBenchmarkIntegrationFixtureInput = {}): BenchmarkVersion2 => ({
-    benchmark_id: 'cis_aws',
-    benchmark_version: '1.0.1',
-    benchmark_evaluation: 2,
-    benchmark_score: {
+    id: 'cis_aws',
+    version: '1.0.1',
+    evaluation: 2,
+    score: {
       postureScore: 85,
       resourcesEvaluated: 183,
       totalFailed: 66,
       totalFindings: 440,
       totalPassed: 374,
     },
-    benchmark_name: 'CIS Amazon Web Services Foundations',
+    name: 'CIS Amazon Web Services Foundations',
   });

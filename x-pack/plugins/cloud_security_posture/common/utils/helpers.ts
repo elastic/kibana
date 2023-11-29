@@ -202,19 +202,3 @@ export const getBenchmarkApplicableTo = (benchmarkId: string) => {
       return 'Google Cloud Provider';
   }
 };
-
-export const getBenchmarkPlurals = (benchmarkId: string, benchmarkEvaluation: number) => {
-  const plural = benchmarkEvaluation !== 1 ? 's' : '';
-  switch (benchmarkId) {
-    case 'cis_k8s':
-      return benchmarkEvaluation + ' cluster' + plural;
-    case 'cis_azure':
-      return benchmarkEvaluation + ' subscription' + plural;
-    case 'cis_aws':
-      return benchmarkEvaluation + ' account' + plural;
-    case 'cis_eks':
-      return benchmarkEvaluation + ' cluster' + plural;
-    case 'cis_gcp':
-      return benchmarkEvaluation + ' project' + plural;
-  }
-};

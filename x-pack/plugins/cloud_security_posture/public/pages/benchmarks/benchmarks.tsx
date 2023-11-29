@@ -29,7 +29,7 @@ import {
   useCspBenchmarkIntegrations,
   UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
-import { extractErrorMessage } from '../../../common/utils/helpers';
+import { extractErrorMessage, getBenchmarkCisName } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
@@ -146,9 +146,10 @@ export const Benchmarks = () => {
   });
 
   const queryResult = useCspBenchmarkIntegrations(query);
-  const benchmarkResult = queryResult.data?.items || [];
+  const benchmarkResult =
+    queryResult.data?.items.filter((obj) => getBenchmarkCisName(obj.id).includes(query.name)) || [];
   const totalItemCount = queryResult.data?.items.length || 0;
-  // console.log(queryResult);
+
   return (
     <CloudPosturePage>
       <EuiPageHeader

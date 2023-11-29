@@ -24,11 +24,7 @@ import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
-import {
-  getBenchmarkCisName,
-  getBenchmarkApplicableTo,
-  getBenchmarkPlurals,
-} from '../../../common/utils/helpers';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
@@ -77,6 +73,53 @@ interface BenchmarksTableProps
 //   );
 // };
 
+export const getBenchmarkPlurals = (benchmarkId: string, accountEvaluation: number) => {
+  let id: string;
+  let counter: string;
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkK8sAccountPlural"
+          defaultMessage="{ruleCount, plural, one {# cluster} other {# clusters}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
+        />
+      );
+    case 'cis_azure':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAzureAccountPlural"
+          defaultMessage="{ruleCount, plural, one {# subscription} other {# subscriptions}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
+        />
+      );
+    case 'cis_aws':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAwsAccountPlural"
+          defaultMessage="{ruleCount, plural, one {# account} other {# accounts}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
+        />
+      );
+    case 'cis_eks':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkEksAccountPlural"
+          defaultMessage="{ruleCount, plural, one {# cluster} other {# clusters}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
+        />
+      );
+    case 'cis_gcp':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkGcpAccountPlural"
+          defaultMessage="{ruleCount, plural, one {# project} other {# projects}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
+        />
+      );
+  }
+};
+
 const ErrorMessageComponent = (error: { error: unknown }) => (
   <FullSizeCenteredPage>
     <EuiEmptyPrompt
@@ -112,7 +155,7 @@ const ErrorMessageComponent = (error: { error: unknown }) => (
 
 const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVersion2>> = [
   {
-    field: 'benchmark_id',
+    field: 'id',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkCisName', {
       defaultMessage: 'Benchmark',
     }),
@@ -125,7 +168,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CIS_NAME,
   },
   {
-    field: 'benchmark_version',
+    field: 'version',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkVersion', {
       defaultMessage: 'Version',
     }),
@@ -135,7 +178,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.VERSION,
   },
   {
-    field: 'benchmark_id',
+    field: 'id',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.applicableTo', {
       defaultMessage: 'Applicable To',
     }),
@@ -165,11 +208,11 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
     render: (complianceScore: BenchmarkVersion2['benchmark_evaluation'], data) => {
-      return getBenchmarkPlurals(data.benchmark_id, data.benchmark_evaluation);
+      return getBenchmarkPlurals(data.id, data.evaluation);
     },
   },
   {
-    field: 'benchmark_score',
+    field: 'score',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.score', {
       defaultMessage: 'Compliance',
     }),
@@ -223,7 +266,7 @@ export const BenchmarksTable = ({
       data-test-subj={rest['data-test-subj']}
       items={benchmarks}
       columns={BENCHMARKS_TABLE_COLUMNS_VERSION_2}
-      itemId={(item) => [item.benchmark_id, item.benchmark_version].join('/')}
+      itemId={(item) => [item.id, item.version].join('/')}
       pagination={pagination}
       onChange={onChange}
       tableLayout="fixed"

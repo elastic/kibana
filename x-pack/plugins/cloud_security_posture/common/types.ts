@@ -135,11 +135,11 @@ export interface BenchmarkScore {
 }
 
 export interface BenchmarkVersion2 {
-  benchmark_id: string;
-  benchmark_name: string;
-  benchmark_version: string;
-  benchmark_score: BenchmarkScore;
-  benchmark_evaluation: number;
+  id: string;
+  name: string;
+  version: string;
+  score: BenchmarkScore;
+  evaluation: number;
 }
 
 export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];

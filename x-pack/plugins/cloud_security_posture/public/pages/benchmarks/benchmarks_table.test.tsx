@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { BenchmarksTable } from './benchmarks_table';
 import { TestProvider } from '../../test/test_provider';
-import { getBenchmarkCisName, getBenchmarkApplicableTo, getBenchmarkPlurals } from '../../../common/utils/helpers';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 
 describe('<BenchmarksTable />', () => {
   const tableProps = {
@@ -23,7 +23,7 @@ describe('<BenchmarksTable />', () => {
   it('renders cis integration name', () => {
     const item = createCspBenchmarkIntegrationFixture();
     const benchmarks = [item];
-    const benchmarkCisIntegrationName = getBenchmarkCisName(item.benchmark_id) || '';
+    const benchmarkCisIntegrationName = getBenchmarkCisName(item.id) || '';
 
     render(
       <TestProvider>
@@ -56,13 +56,13 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(item.benchmark_version)).toBeInTheDocument();
+    expect(screen.getByText(item.version)).toBeInTheDocument();
   });
 
   it('renders applicable to', () => {
     const item = createCspBenchmarkIntegrationFixture();
     const benchmarks = [item];
-    const benchmarkApplicableTo = getBenchmarkApplicableTo(item.benchmark_id) || '';
+    const benchmarkApplicableTo = getBenchmarkApplicableTo(item.id) || '';
     render(
       <TestProvider>
         <BenchmarksTable
@@ -93,10 +93,7 @@ describe('<BenchmarksTable />', () => {
         />
       </TestProvider>
     );
-
-    expect(
-      screen.getByText(getBenchmarkPlurals(item.benchmark_id, item.benchmark_evaluation))
-    ).toBeInTheDocument();
+    expect(screen.getByText(benchmarks[0].evaluation + ' accounts')).toBeInTheDocument();
   });
 
   it('renders compliance', () => {
@@ -115,6 +112,6 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(item.benchmark_score.postureScore + '%')).toBeInTheDocument();
+    expect(screen.getByText(item.score.postureScore + '%')).toBeInTheDocument();
   });
 });
