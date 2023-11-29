@@ -5189,6 +5189,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/panel-loader@link:packages/kbn-panel-loader":
+  version "0.0.0"
+  uid ""
+
 "@kbn/peggy-loader@link:packages/kbn-peggy-loader":
   version "0.0.0"
   uid ""
