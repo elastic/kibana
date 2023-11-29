@@ -58,7 +58,13 @@ export class EsError extends Error {
 
   public getActions(application: ApplicationStart) {
     return [
-      <EuiButton key="viewRequestDetails" color="primary" onClick={this.openInInspector} size="s">
+      <EuiButton
+        data-test-subj="viewEsErrorButton"
+        key="viewRequestDetails"
+        color="primary"
+        onClick={this.openInInspector}
+        size="s"
+      >
         {i18n.translate('searchErrors.esError.viewDetailsButtonLabel', {
           defaultMessage: 'View details',
         })}
