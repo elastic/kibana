@@ -91,7 +91,7 @@ const updateCurrentFields = (
     if (!typeResult.error) {
       updatedFields[typeName] = [
         ...new Set([...(updatedFields[typeName] || []), ...typeResult.fieldsToAdd]),
-      ];
+      ].sort();
     }
   });
   return updatedFields;
