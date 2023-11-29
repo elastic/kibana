@@ -17,5 +17,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cluster_nodes'));
     loadTestFile(require.resolve('./datastreams'));
     loadTestFile(require.resolve('./mappings'));
+    loadTestFile(require.resolve('./settings'));
   });
 }
