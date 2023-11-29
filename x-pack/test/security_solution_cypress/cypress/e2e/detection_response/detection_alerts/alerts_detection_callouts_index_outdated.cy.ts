@@ -25,7 +25,7 @@ import {
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
   login(ROLES.soc_manager);
-  visit(url, { role: ROLES.soc_manager });
+  visit(url);
   waitForPageTitleToBeShown();
 };
 

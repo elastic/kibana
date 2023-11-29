@@ -107,6 +107,7 @@ export const TemporarySourcererComp = React.memo<Props>(
     const timelineType = useDeepEqualSelector(
       (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).timelineType
     );
+
     return (
       <>
         <EuiCallOut
@@ -139,14 +140,15 @@ export const TemporarySourcererComp = React.memo<Props>(
               )}
               {isModified === 'missingPatterns' && (
                 <>
-                  <FormattedMessage
-                    data-test-subj="sourcerer-missing-patterns-callout"
-                    id="xpack.securitySolution.indexPatterns.missingPatterns.callout"
-                    defaultMessage="Security Data View is missing the following index patterns: {callout}"
-                    values={{
-                      callout: <Blockquote>{missingPatterns.join(', ')}</Blockquote>,
-                    }}
-                  />
+                  <span data-test-subj="sourcerer-missing-patterns-callout">
+                    <FormattedMessage
+                      id="xpack.securitySolution.indexPatterns.missingPatterns.callout"
+                      defaultMessage="Security Data View is missing the following index patterns: {callout}"
+                      values={{
+                        callout: <Blockquote>{missingPatterns.join(', ')}</Blockquote>,
+                      }}
+                    />
+                  </span>
                   <MissingPatternsMessage timelineType={timelineType} onReset={onReset} />
                 </>
               )}
