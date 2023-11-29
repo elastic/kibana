@@ -222,9 +222,11 @@ function _generateMappings(
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
   hasDynamicTemplateMappings: boolean;
+  subobjects?: boolean;
 } {
   let hasNonDynamicTemplateMappings = false;
   let hasDynamicTemplateMappings = false;
+  let subobjects: boolean | undefined;
   const props: Properties = {};
 
   function addParentObjectAsStaticProperty(field: Field) {
@@ -237,6 +239,7 @@ function _generateMappings(
     const fieldProps = {
       type: 'object',
       dynamic: true,
+      ...(field.subobjects !== undefined && { subobjects: field.subobjects })
     };
 
     props[field.name] = fieldProps;
@@ -435,6 +438,13 @@ function _generateMappings(
             );
         }
 
+        // Flag that the mapping of this field subobjects property is set.
+        if (field.subobjects !== undefined) {
+          if (path.includes('*')) {
+            subobjects = field.subobjects;
+          } 
+        }
+
         if (dynProperties && matchingType) {
           addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
 
@@ -443,16 +453,6 @@ function _generateMappings(
           addParentObjectAsStaticProperty(field);
         }
 
-        if (field.subobjects !== undefined) {
-          const fieldProps: Properties = {
-            subobjects: field.subobjects,
-            type: 'object',
-          };
-
-          // props['what?'] = fieldProps;
-
-          hasNonDynamicTemplateMappings = true;
-        }
       } else {
         let fieldProps = getDefaultProperties(field);
 
@@ -486,6 +486,9 @@ function _generateMappings(
               hasDynamicTemplateMappings = true;
             } else {
               return;
+            }
+            if (mappings.subobjects !== undefined) {
+              fieldProps.subobjects = mappings.subobjects;
             }
             break;
           case 'group-nested':
@@ -616,7 +619,7 @@ function _generateMappings(
     });
   }
 
-  return { properties: props, hasNonDynamicTemplateMappings, hasDynamicTemplateMappings };
+  return { properties: props, hasNonDynamicTemplateMappings, hasDynamicTemplateMappings, subobjects };
 }
 
 function generateDynamicAndEnabled(field: Field) {
