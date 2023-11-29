@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         .query({
           from,
           to,
-          stringFilters: JSON.stringify({ ean: 'service:service-5' }),
+          stringFilters: JSON.stringify({ ean: 'service:service-4' }),
         })
         .expect(200);
 
@@ -57,8 +57,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.services.length).to.equal(1);
       expect(omit(response.body.services[0], ['@timestamp'])).to.eql({
         'asset.kind': 'service',
-        'asset.id': 'service-5',
-        'asset.ean': 'service:service-5',
+        'asset.id': 'service-4',
+        'asset.ean': 'service:service-4',
         'asset.references': [],
         'asset.parents': [],
         'service.environment': 'production',
