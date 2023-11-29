@@ -26,8 +26,8 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getSimpleRule,
+  deleteAllExceptions,
 } from '../../utils';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // This test was meant to be more full flow, ensuring that

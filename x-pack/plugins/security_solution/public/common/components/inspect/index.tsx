@@ -40,7 +40,7 @@ interface InspectButtonProps {
   onCloseInspect?: () => void;
   queryId: string;
   showInspectButton?: boolean;
-  title: string | React.ReactElement | React.ReactNode;
+  title?: string | React.ReactElement | React.ReactNode;
 }
 
 const InspectButtonComponent: React.FC<InspectButtonProps> = ({
@@ -80,9 +80,6 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           className={BUTTON_CLASS}
           aria-label={i18n.INSPECT}
           data-test-subj="inspect-empty-button"
-          color="text"
-          iconSide="left"
-          iconType="inspect"
           isDisabled={isButtonDisabled}
           isLoading={loading}
           onClick={handleClick}

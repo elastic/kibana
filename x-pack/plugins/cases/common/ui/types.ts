@@ -12,7 +12,11 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
+import type {
+  CASES_CONNECTORS_CAPABILITY,
+  CASES_SETTINGS_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+} from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
   CaseSeverity,
@@ -299,6 +303,7 @@ export interface CasesPermissions {
   delete: boolean;
   push: boolean;
   connectors: boolean;
+  settings: boolean;
 }
 
 export interface CasesCapabilities {
@@ -308,4 +313,5 @@ export interface CasesCapabilities {
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
   [CASES_CONNECTORS_CAPABILITY]: boolean;
+  [CASES_SETTINGS_CAPABILITY]: boolean;
 }

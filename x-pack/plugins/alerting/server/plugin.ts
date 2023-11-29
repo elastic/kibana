@@ -77,7 +77,7 @@ import {
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, getLatestRuleVersion } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
@@ -305,6 +305,7 @@ export class AlertingPlugin {
       alertsService: this.alertsService,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       inMemoryMetrics: this.inMemoryMetrics,
+      latestRuleVersion: getLatestRuleVersion(),
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
