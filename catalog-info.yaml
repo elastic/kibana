@@ -176,7 +176,7 @@ spec:
         trigger_mode: none
       repository: elastic/kibana
       teams:
-        ci-systems:
+        kibana_operations:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
