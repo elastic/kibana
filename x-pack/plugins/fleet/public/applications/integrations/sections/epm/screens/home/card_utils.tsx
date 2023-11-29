@@ -36,7 +36,6 @@ import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../..
 import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
-import type { ReactNode } from 'react-markdown';
 
 export interface IntegrationCardItem {
   url: string;
@@ -127,7 +126,8 @@ export const mapToCard = ({
     extraLabelsBadges,
   };
 };
-function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
+
+export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
   const extraLabelsBadges: React.ReactNode[] = [];
 
   if (
@@ -200,7 +200,7 @@ function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
   return extraLabelsBadges;
 }
 
-function formatAttempt(attempt: InstallFailedAttempt): ReactNode {
+function formatAttempt(attempt: InstallFailedAttempt): React.ReactNode {
   return (
     <>
       <FormattedMessage
