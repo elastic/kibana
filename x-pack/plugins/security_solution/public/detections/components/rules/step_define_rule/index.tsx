@@ -445,7 +445,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         options={[
           {
             id: GroupByOptions.PerRuleExecution,
-            label: 'Per rule execution',
+            label: (
+              <EuiToolTip
+                content={
+                  isThresholdRule ? i18n.THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING : null
+                }
+              >
+                <> {i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION}</>
+              </EuiToolTip>
+            ),
             disabled: isThresholdRule,
           },
           {
@@ -453,7 +461,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             disabled: isThresholdRule && !enableThresholdSuppression,
             label: (
               <>
-                {`Per time period`}
+                {i18n.ALERT_SUPPRESSION_PER_TIME_PERIOD}
                 <DurationInput
                   data-test-subj="alertSuppressionDurationInput"
                   durationValueField={groupByDurationValue}

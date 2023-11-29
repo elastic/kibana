@@ -202,6 +202,27 @@ export const ENABLE_THRESHOLD_SUPPRESSION_LICENSE_WARNING = i18n.translate(
   }
 );
 
+export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionOptions.perRuleExecutionLabel',
+  {
+    defaultMessage: 'Per rule execution',
+  }
+);
+
+export const ALERT_SUPPRESSION_PER_TIME_PERIOD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionOptions.perTimePeriodLabel',
+  {
+    defaultMessage: 'Per time period',
+  }
+);
+
+export const THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.Su.perRuleExecutionWarning',
+  {
+    defaultMessage: 'Per rule execution option is not available for Threshold rule type',
+  }
+);
+
 export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined) =>
   fields?.length ? (
     <FormattedMessage
