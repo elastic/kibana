@@ -49,6 +49,7 @@ export const AlertAttributesExcludedFromAAD = [
   'nextRun',
   'revision',
   'running',
+  'typeVersion',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -69,7 +70,8 @@ export type AlertAttributesExcludedFromAADType =
   | 'lastRun'
   | 'nextRun'
   | 'revision'
-  | 'running';
+  | 'running'
+  | 'typeVersion';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

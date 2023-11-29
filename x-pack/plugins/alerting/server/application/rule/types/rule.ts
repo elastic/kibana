@@ -120,4 +120,5 @@ export interface RuleDomain<Params extends RuleParams = never> {
   revision: RuleDomainSchemaType['revision'];
   running?: RuleDomainSchemaType['running'];
   viewInAppRelativeUrl?: RuleDomainSchemaType['viewInAppRelativeUrl'];
+  typeVersion?: RuleDomainSchemaType['typeVersion'];
 }

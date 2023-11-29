@@ -329,16 +329,10 @@ export class TaskManagerRunner implements TaskRunner {
         description: 'run task',
       };
 
-      let taskParamsValidation;
-      if (this.requeueInvalidTasksConfig.enabled) {
-        taskParamsValidation = this.validateTaskParams(modifiedContext);
-        if (!taskParamsValidation.error) {
-          taskParamsValidation = await this.validateIndirectTaskParams(modifiedContext);
-        }
-      }
+      const taskValidationResult = await this.validateTask(modifiedContext);
 
-      const result = taskParamsValidation?.error
-        ? taskParamsValidation
+      const result = taskValidationResult?.error
+        ? taskValidationResult
         : await this.executionContext.withContext(ctx, () =>
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
@@ -369,59 +363,72 @@ export class TaskManagerRunner implements TaskRunner {
     }
   }
 
-  private validateTaskParams({ taskInstance }: RunContext) {
-    let error;
+  private async validateTask({ taskInstance }: RunContext) {
     const { state, taskType, params, id, numSkippedRuns = 0 } = taskInstance;
-    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
 
-    try {
-      const paramsSchema = this.definition.paramsSchema;
-      if (paramsSchema) {
+    if (!this.requeueInvalidTasksConfig.enabled) {
+      return { state };
+    }
+
+    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
+    const { paramsSchema, indirectParamsSchema, latestTypeVersion } = this.definition;
+    let hasValidationError = false;
+
+    // validate task params
+    if (paramsSchema) {
+      try {
         paramsSchema.validate(params);
-      }
-    } catch (err) {
-      this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
-      if (numSkippedRuns < maxAttempts) {
-        error = createSkipError(err);
-      } else {
-        this.logger.warn(
-          `Task Manager has reached the max skip attempts for task ${taskType}/${id}`
-        );
+      } catch (err) {
+        hasValidationError = true;
+        this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
+        if (numSkippedRuns < maxAttempts) {
+          return { error: createSkipError(err), state };
+        }
       }
     }
 
-    return { ...(error ? { error } : {}), state };
-  }
-
-  private async validateIndirectTaskParams({ taskInstance }: RunContext) {
-    let error;
-    const { state, taskType, id, numSkippedRuns = 0 } = taskInstance;
-    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
-    const indirectParamsSchema = this.definition.indirectParamsSchema;
-
-    if (this.task?.loadIndirectParams && !!indirectParamsSchema) {
+    if (this.task?.loadIndirectParams) {
       const { data } = await this.task.loadIndirectParams();
-      if (data) {
+      const indirectParams = data?.indirectParams;
+      const typeVersion = data?.typeVersion;
+
+      // validate runtime version
+      if (typeVersion && latestTypeVersion && typeVersion > latestTypeVersion) {
+        hasValidationError = true;
+        this.logger.warn(
+          `Task (${taskType}/${id}) has a newer version(${typeVersion}) than expected((${latestTypeVersion}))`
+        );
+        if (numSkippedRuns < maxAttempts) {
+          return {
+            error: createSkipError(
+              new Error('Task has already been run by a newer Kibana version')
+            ),
+            state,
+          };
+        }
+      }
+
+      // validate indirect params e.g. connector or rule.params
+      if (indirectParamsSchema && indirectParams) {
         try {
-          if (indirectParamsSchema) {
-            indirectParamsSchema.validate(data.indirectParams);
-          }
+          indirectParamsSchema.validate(indirectParams);
         } catch (err) {
+          hasValidationError = true;
           this.logger.warn(
             `Task (${taskType}/${id}) has a validation error in its indirect params: ${err.message}`
           );
           if (numSkippedRuns < maxAttempts) {
-            error = createSkipError(err);
-          } else {
-            this.logger.warn(
-              `Task Manager has reached the max skip attempts for task ${taskType}/${id}`
-            );
+            return { error: createSkipError(err), state };
           }
         }
       }
     }
 
-    return { ...(error ? { error } : {}), state };
+    if (numSkippedRuns >= maxAttempts && hasValidationError) {
+      this.logger.warn(`Task Manager has reached the max skip attempts for task ${taskType}/${id}`);
+    }
+
+    return { state };
   }
 
   public async removeTask(): Promise<void> {

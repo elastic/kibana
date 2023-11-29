@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 import { RawRule } from '../types';
 
 describe('rule model versions', () => {
-  const ruleModelVersions: CustomSavedObjectsModelVersionMap = {
+  const modelVersions: CustomSavedObjectsModelVersionMap = {
     '1': {
       changes: [],
       schemas: {
@@ -58,14 +58,22 @@ describe('rule model versions', () => {
 
   describe('getMinimumCompatibleVersion', () => {
     it('should return the minimum compatible version for the matching rawRule', () => {
-      expect(getMinimumCompatibleVersion(ruleModelVersions, 1, rawRule)).toBe(1);
-      expect(getMinimumCompatibleVersion(ruleModelVersions, 2, rawRule)).toBe(2);
-      expect(getMinimumCompatibleVersion(ruleModelVersions, 3, rawRule)).toBe(2);
-      expect(getMinimumCompatibleVersion(ruleModelVersions, 4, rawRule)).toBe(2);
+      expect(getMinimumCompatibleVersion({ modelVersions, version: 1, rawRule })).toBe(1);
+      expect(getMinimumCompatibleVersion({ modelVersions, version: 2, rawRule })).toBe(2);
+      expect(getMinimumCompatibleVersion({ modelVersions, version: 3, rawRule })).toBe(2);
+      expect(getMinimumCompatibleVersion({ modelVersions, version: 4, rawRule })).toBe(2);
     });
     it('should return the minimum compatible version for the mismatching rawRule', () => {
-      expect(getMinimumCompatibleVersion(ruleModelVersions, 3, mismatchingRawRule)).toBe(3);
-      expect(getMinimumCompatibleVersion(ruleModelVersions, 4, mismatchingRawRule)).toBe(4);
+      expect(
+        getMinimumCompatibleVersion({ modelVersions, version: 3, rawRule: mismatchingRawRule })
+      ).toBe(3);
+      expect(
+        getMinimumCompatibleVersion({ modelVersions, version: 4, rawRule: mismatchingRawRule })
+      ).toBe(4);
+    });
+
+    it('should return the given version number if the number does not exist in ruleModelVersions', () => {
+      expect(getMinimumCompatibleVersion({ version: 999, rawRule: mismatchingRawRule })).toBe(999);
     });
   });
 

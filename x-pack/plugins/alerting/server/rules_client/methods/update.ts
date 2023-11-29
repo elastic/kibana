@@ -267,6 +267,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
+    typeVersion: context.ruleTypeRegistry.getLatestRuleVersion(),
   });
 
   const mappedParams = getMappedParams(updatedParams);

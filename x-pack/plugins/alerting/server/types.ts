@@ -477,6 +477,7 @@ export interface RawRule extends SavedObjectAttributes {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
+  typeVersion?: number;
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

@@ -164,6 +164,7 @@ describe('create()', () => {
       ownerId: null,
     });
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
+    ruleTypeRegistry.getLatestRuleVersion.mockReturnValue(1);
   });
 
   describe('authorization', () => {
@@ -499,6 +500,7 @@ describe('create()', () => {
           "foo",
         ],
         "throttle": null,
+        "typeVersion": 1,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
@@ -727,6 +729,7 @@ describe('create()', () => {
           "foo",
         ],
         "throttle": null,
+        "typeVersion": 1,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
@@ -1167,6 +1170,7 @@ describe('create()', () => {
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
+        typeVersion: 1,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
@@ -1426,6 +1430,7 @@ describe('create()', () => {
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
+        typeVersion: 1,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
@@ -1648,6 +1653,7 @@ describe('create()', () => {
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
+        typeVersion: 1,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
@@ -1837,6 +1843,7 @@ describe('create()', () => {
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
+        typeVersion: 1,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
@@ -2004,6 +2011,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: '10m',
+        typeVersion: 1,
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
         snoozeSchedule: [],
@@ -2145,6 +2153,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: '10m',
+        typeVersion: 1,
         notifyWhen: 'onThrottleInterval',
         muteAll: false,
         snoozeSchedule: [],
@@ -2286,6 +2295,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
+        typeVersion: 1,
         notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
@@ -2479,6 +2489,7 @@ describe('create()', () => {
         },
         revision: 0,
         running: false,
+        typeVersion: 1,
       },
       {
         references: [
@@ -2836,6 +2847,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
+        typeVersion: 1,
         notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
@@ -2942,6 +2954,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
+        typeVersion: 1,
         notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
@@ -3821,6 +3834,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
+        typeVersion: 1,
         notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],

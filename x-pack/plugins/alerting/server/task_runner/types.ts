@@ -17,7 +17,6 @@ import {
   AlertInstanceState,
   RuleTypeParams,
   IntervalSchedule,
-  RuleMonitoring,
   RuleTaskState,
   SanitizedRule,
   RuleTypeState,
@@ -31,7 +30,6 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
-  monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
   taskRunError?: DecoratedError;
 }

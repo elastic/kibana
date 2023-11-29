@@ -174,4 +174,5 @@ export interface RuleAttributes {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
+  typeVersion?: number;
 }

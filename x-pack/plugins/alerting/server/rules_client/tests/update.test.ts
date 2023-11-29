@@ -191,6 +191,7 @@ describe('update()', () => {
       },
       validLegacyConsumers: [],
     });
+    ruleTypeRegistry.getLatestRuleVersion.mockReturnValue(1);
     (migrateLegacyActions as jest.Mock).mockResolvedValue({
       hasLegacyActions: false,
       resultedActions: [],
@@ -444,6 +445,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": null,
+        "typeVersion": 1,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
@@ -674,6 +676,7 @@ describe('update()', () => {
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
+        typeVersion: 1,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
@@ -914,6 +917,7 @@ describe('update()', () => {
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
+        typeVersion: 1,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
@@ -1103,6 +1107,7 @@ describe('update()', () => {
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
+        typeVersion: 1,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
@@ -1291,6 +1296,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": "5m",
+        "typeVersion": 1,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
@@ -1444,6 +1450,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": "5m",
+        "typeVersion": 1,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
@@ -2464,6 +2471,7 @@ describe('update()', () => {
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
+        typeVersion: 1,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
@@ -3017,6 +3025,7 @@ describe('update()', () => {
         tags: ['foo'],
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        typeVersion: 1,
       },
       {
         id: '1',
@@ -3227,6 +3236,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": "5m",
+        "typeVersion": 1,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }

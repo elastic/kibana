@@ -95,6 +95,7 @@ export interface LoadedIndirectParams<
 > {
   [key: string]: unknown;
   indirectParams: IndirectParams;
+  typeVersion?: number;
 }
 
 export type LoadIndirectParamsResult<T extends LoadedIndirectParams = LoadedIndirectParams> =
@@ -175,6 +176,7 @@ export const taskDefinitionSchema = schema.object(
     paramsSchema: schema.maybe(schema.any()),
     // schema of the data fetched by the task runner (in loadIndirectParams) e.g. rule, action etc.
     indirectParamsSchema: schema.maybe(schema.any()),
+    latestTypeVersion: schema.maybe(schema.number()),
   },
   {
     validate({ timeout }) {

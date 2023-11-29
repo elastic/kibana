@@ -174,6 +174,7 @@ describe('Task Runner Cancel', () => {
       (actionTypeId, actionId, params) => params
     );
     ruleTypeRegistry.get.mockReturnValue(ruleType);
+    ruleTypeRegistry.getLatestRuleVersion.mockReturnValue(1);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
@@ -265,6 +266,7 @@ describe('Task Runner Cancel', () => {
         },
         nextRun: '1970-01-01T00:00:10.000Z',
         running: false,
+        typeVersion: 1,
       },
       { refresh: false, namespace: undefined }
     );

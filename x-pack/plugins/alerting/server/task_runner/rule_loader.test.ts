@@ -13,7 +13,7 @@ import { getRuleAttributes, getFakeKibanaRequest, validateRule } from './rule_lo
 import { TaskRunnerContext } from './task_runner_factory';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { rulesClientMock } from '../rules_client.mock';
-import { Rule } from '../types';
+import { Rule, RuleTypeParams, RuleTypeParamsValidator } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { ErrorWithReason, getReasonFromError } from '../lib/error_with_reason';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -42,7 +42,7 @@ describe('rule_loader', () => {
 
   const paramValidator = schema.object({
     bar: schema.boolean(),
-  });
+  }) as RuleTypeParamsValidator<RuleTypeParams>;
 
   const getDefaultValidateRuleParams = ({
     fakeRequest,
@@ -64,11 +64,14 @@ describe('rule_loader', () => {
       ? { error }
       : {
           data: {
-            indirectParams: { ...mockedRawRuleSO.attributes, enabled: ruleEnabled },
-            rule: { ...mockedRule, params },
+            indirectParams: mockedRawRuleSO.attributes.params,
+            rule: { ...mockedRule, params, enabled: ruleEnabled },
             rulesClient,
             version: '1',
             fakeRequest,
+            apiKey: mockedRawRuleSO.attributes.apiKey,
+            typeVersion: 1,
+            latestTypeVersion: 1,
           },
         },
   });
@@ -106,7 +109,7 @@ describe('rule_loader', () => {
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
         expect(result.rule.params).toBe(ruleParams);
-        expect(result.indirectParams).toEqual(mockedRawRuleSO.attributes);
+        expect(result.indirectParams).toEqual(mockedRawRuleSO.attributes.params);
         expect(result.version).toBe('1');
         expect(result.rulesClient).toBe(rulesClient);
       });
@@ -189,12 +192,7 @@ describe('rule_loader', () => {
 
       expect(result.fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(result.rule.alertTypeId).toBe(ruleTypeId);
-      expect(result.indirectParams).toEqual({
-        ...mockedRawRuleSO.attributes,
-        apiKey,
-        enabled,
-        consumer,
-      });
+      expect(result.indirectParams).toEqual(mockedRawRuleSO.attributes.params);
       expect(result.rulesClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual(['default']);
 
@@ -210,12 +208,7 @@ describe('rule_loader', () => {
       expect(result.rule.alertTypeId).toBe(ruleTypeId);
       expect(result.rulesClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual([spaceId]);
-      expect(result.indirectParams).toEqual({
-        ...mockedRawRuleSO.attributes,
-        apiKey,
-        enabled,
-        consumer,
-      });
+      expect(result.indirectParams).toEqual(mockedRawRuleSO.attributes.params);
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
       expect(esoArgs).toEqual(['alert', ruleId, { namespace: spaceId }]);

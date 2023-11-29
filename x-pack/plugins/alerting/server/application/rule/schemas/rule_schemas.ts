@@ -168,6 +168,7 @@ export const ruleDomainSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
+  typeVersion: schema.maybe(schema.number()),
 });
 
 /**

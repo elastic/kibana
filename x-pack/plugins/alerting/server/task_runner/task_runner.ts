@@ -208,6 +208,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      typeVersion: number;
     }
   ) {
     const client = this.context.internalSavedObjectsRepository;
@@ -787,6 +788,7 @@ export class TaskRunner<
         nextRun,
         lastRun: lastRunToRaw(lastRun),
         monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+        typeVersion: this.context.ruleTypeRegistry.getLatestRuleVersion(),
       });
     }
 
@@ -941,7 +943,6 @@ export class TaskRunner<
 
         return { interval: retryInterval };
       }),
-      monitoring: this.ruleMonitoring.getMonitoring(),
       ...(isErr(schedule)
         ? { taskRunError: createTaskRunError(schedule.error, TaskErrorSource.FRAMEWORK) }
         : {}),
@@ -1013,6 +1014,7 @@ export class TaskRunner<
       },
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
+      typeVersion: this.context.ruleTypeRegistry.getLatestRuleVersion(),
     });
   }
 }

@@ -172,6 +172,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   revision: number;
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
+  typeVersion?: number;
 }
 
 export interface SanitizedAlertsFilter extends AlertsFilter {

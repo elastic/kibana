@@ -187,6 +187,7 @@ export async function createRule<Params extends RuleParams = never>(
       monitoring: getDefaultMonitoringRuleDomainProperties(lastRunTimestamp.toISOString()),
       revision: 0,
       running: false,
+      typeVersion: context.ruleTypeRegistry.getLatestRuleVersion(),
     },
     {
       legacyId,

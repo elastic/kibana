@@ -24,13 +24,16 @@ import {
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { getMinimumCompatibleVersion } from '../saved_objects';
 
-export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<RawRule> {
-  indirectParams: RawRule;
+export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<Params> {
+  indirectParams: Params;
   rule: SanitizedRule<Params>;
   version: string | undefined;
+  typeVersion: number;
   fakeRequest: CoreKibanaRequest;
   rulesClient: RulesClientApi;
+  apiKey: string | null;
 }
 
 export type RuleDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
@@ -59,16 +62,14 @@ export function validateRule<Params extends RuleTypeParams>(
 
   const {
     ruleData: {
-      data: { indirectParams, rule, fakeRequest, rulesClient, version },
+      data: { indirectParams, rule, fakeRequest, rulesClient, version, apiKey, typeVersion },
     },
     ruleTypeRegistry,
     paramValidator,
     alertingEventLogger,
   } = params;
 
-  const { enabled, apiKey } = indirectParams;
-
-  if (!enabled) {
+  if (!rule.enabled) {
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Disabled,
       new Error(`Rule failed to execute because rule ran after it was disabled.`)
@@ -103,6 +104,7 @@ export function validateRule<Params extends RuleTypeParams>(
     rulesClient,
     validatedParams,
     version,
+    typeVersion,
   };
 }
 
@@ -130,12 +132,19 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
     omitGeneratedValues: false,
   });
 
+  const typeVersion = getMinimumCompatibleVersion({
+    version: rawRule.attributes.typeVersion,
+    rawRule: rawRule.attributes,
+  });
+
   return {
     rule,
     version: rawRule.version,
-    indirectParams: rawRule.attributes,
+    indirectParams: rule.params,
     fakeRequest,
     rulesClient,
+    apiKey: rawRule.attributes.apiKey,
+    typeVersion,
   };
 }
 

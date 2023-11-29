@@ -82,6 +82,7 @@ import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { getLatestRuleVersion } from '../saved_objects';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -220,6 +221,7 @@ describe('Task Runner', () => {
       (actionTypeId, actionId, params) => params
     );
     ruleTypeRegistry.get.mockReturnValue(ruleType);
+    ruleTypeRegistry.getLatestRuleVersion.mockReturnValue(getLatestRuleVersion());
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
@@ -2746,26 +2748,6 @@ describe('Task Runner', () => {
     );
   });
 
-  test('caps monitoring history at 200', async () => {
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-    });
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-
-    for (let i = 0; i < 300; i++) {
-      await taskRunner.run();
-    }
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult.monitoring?.run.history.length).toBe(200);
-  });
-
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
     const actionsConfigMap = {
       default: {
@@ -3216,6 +3198,7 @@ describe('Task Runner', () => {
 
   test('loadIndirectParams Fetches the ruleData and returns the indirectParams', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: {
@@ -3233,7 +3216,7 @@ describe('Task Runner', () => {
 
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
-      data: expect.objectContaining({ indirectParams: mockedRawRuleSO.attributes }),
+      data: expect.objectContaining({ indirectParams: mockedRawRuleSO.attributes.params }),
     });
   });
 

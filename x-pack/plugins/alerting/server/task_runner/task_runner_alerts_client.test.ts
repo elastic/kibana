@@ -97,6 +97,7 @@ import {
   TAGS,
   VERSION,
 } from '@kbn/rule-data-utils';
+import { getLatestRuleVersion } from '../saved_objects';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -236,6 +237,7 @@ describe('Task Runner', () => {
           (actionTypeId, actionId, params) => params
         );
         ruleTypeRegistry.get.mockReturnValue(ruleTypeWithAlerts);
+        ruleTypeRegistry.getLatestRuleVersion.mockReturnValue(getLatestRuleVersion());
         taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation(
           (ctx, fn) => fn()
         );
