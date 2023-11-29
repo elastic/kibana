@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DEPLOY_TAG="deploy@$(date +%s%3N)"
+DEPLOY_TAG="deploy@$(date +%s)"
 KIBANA_COMMIT_SHA=$(buildkite-agent meta-data get selected-commit-hash)
 
 if [[ -z "$KIBANA_COMMIT_SHA" ]]; then
