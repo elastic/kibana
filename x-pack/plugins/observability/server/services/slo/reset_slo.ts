@@ -15,7 +15,7 @@ import {
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../assets/constants';
 import { SLORepository } from './slo_repository';
-import { createTempSummaryDocument } from './summary_transform/helpers/create_temp_summary';
+import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
 
 export class ResetSLO {

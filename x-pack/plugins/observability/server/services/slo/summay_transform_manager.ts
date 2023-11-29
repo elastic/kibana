@@ -10,7 +10,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SLO } from '../../domain/models';
 import { SecurityException } from '../../errors';
 import { retryTransientEsErrors } from '../../utils/retry';
-import { SummaryTransformGenerator } from './summary_transform/summary_transform_generator';
+import { SummaryTransformGenerator } from './summary_transform_generator/summary_transform_generator';
 import { TransformManager } from './transform_manager';
 
 type TransformId = string;
