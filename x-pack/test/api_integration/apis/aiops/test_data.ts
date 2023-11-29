@@ -123,9 +123,9 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
       chunksLength: 62,
-      chunksLengthGroupOnly: 11,
+      chunksLengthGroupOnly: 32,
       actionsLength: 61,
-      actionsLengthGroupOnly: 10,
+      actionsLengthGroupOnly: 31,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: topTerms,
@@ -150,9 +150,9 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
       chunksLength: 62,
-      chunksLengthGroupOnly: 11,
+      chunksLengthGroupOnly: 32,
       actionsLength: 61,
-      actionsLengthGroupOnly: 10,
+      actionsLengthGroupOnly: 31,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: topTerms,
