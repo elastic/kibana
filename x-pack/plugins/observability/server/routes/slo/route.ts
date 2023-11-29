@@ -100,7 +100,8 @@ const createSLORoute = createObservabilityServerRoute({
       esClient,
       repository,
       transformManager,
-      summaryTransformManager
+      summaryTransformManager,
+      logger
     );
 
     const response = await createSLO.execute(params.body);

@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { SLO_MODEL_VERSION, SLO_SUMMARY_TEMP_INDEX_NAME } from '../../assets/constants';
+import {
+  getSLOSummaryPipelineId,
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+  SLO_MODEL_VERSION,
+  SLO_SUMMARY_TEMP_INDEX_NAME,
+} from '../../assets/constants';
 import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
+import { retryTransientEsErrors } from '../../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
@@ -21,7 +28,8 @@ export class CreateSLO {
     private esClient: ElasticsearchClient,
     private repository: SLORepository,
     private transformManager: TransformManager,
-    private summaryTransformManager: TransformManager
+    private summaryTransformManager: TransformManager,
+    private logger: Logger
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -29,49 +37,98 @@ export class CreateSLO {
     validateSLO(slo);
 
     await this.repository.save(slo, { throwOnConflict: true });
-    let transformId;
+
+    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+
     try {
-      transformId = await this.transformManager.install(slo);
+      await this.transformManager.install(slo);
     } catch (err) {
+      this.logger.error(
+        `Cannot install rollup transform for SLO [id: ${slo.id}, revision: ${slo.revision}]`
+      );
       await this.repository.deleteById(slo.id);
       throw err;
     }
 
     try {
-      await this.transformManager.start(transformId);
+      await this.transformManager.start(rollupTransformId);
     } catch (err) {
+      this.logger.error(
+        `Cannot start rollup transform for SLO [id: ${slo.id}, revision: ${slo.revision}]`
+      );
       await Promise.all([
-        this.transformManager.uninstall(transformId),
+        this.transformManager.uninstall(rollupTransformId),
         this.repository.deleteById(slo.id),
       ]);
 
       throw err;
     }
 
-    await this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo));
-
-    let summaryTransformId;
     try {
-      summaryTransformId = await this.summaryTransformManager.install(slo);
+      await retryTransientEsErrors(
+        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo)),
+        { logger: this.logger }
+      );
     } catch (err) {
-      // handle rollback
+      this.logger.error(
+        `Cannot create summary pipeline for SLO [id: ${slo.id}, revision: ${slo.revision}]`
+      );
+
+      await this.transformManager.stop(rollupTransformId);
+      await Promise.all([
+        this.transformManager.uninstall(rollupTransformId),
+        this.repository.deleteById(slo.id),
+      ]);
+
       throw err;
     }
 
     try {
-      await this.transformManager.start(summaryTransformId);
+      await this.summaryTransformManager.install(slo);
     } catch (err) {
-      // handle rollback
-      await Promise.all([this.transformManager.uninstall(summaryTransformId)]);
+      this.logger.error(
+        `Cannot create summary transform for SLO [id: ${slo.id}, revision: ${slo.revision}]`
+      );
+
+      await this.transformManager.stop(rollupTransformId);
+      await Promise.all([
+        this.esClient.ingest.deletePipeline({ id: getSLOSummaryPipelineId(slo.id, slo.revision) }),
+        this.transformManager.uninstall(rollupTransformId),
+        this.repository.deleteById(slo.id),
+      ]);
       throw err;
     }
 
-    await this.esClient.index({
-      index: SLO_SUMMARY_TEMP_INDEX_NAME,
-      id: `slo-${slo.id}`,
-      document: createTempSummaryDocument(slo),
-      refresh: true,
-    });
+    try {
+      await this.summaryTransformManager.start(summaryTransformId);
+    } catch (err) {
+      this.logger.error(
+        `Cannot start summary transform for SLO [id: ${slo.id}, revision: ${slo.revision}]`
+      );
+
+      await Promise.all([
+        await this.summaryTransformManager.uninstall(summaryTransformId),
+        await this.transformManager.stop(rollupTransformId),
+      ]);
+      await Promise.all([
+        this.esClient.ingest.deletePipeline({ id: getSLOSummaryPipelineId(slo.id, slo.revision) }),
+        this.transformManager.uninstall(rollupTransformId),
+        this.repository.deleteById(slo.id),
+      ]);
+      throw err;
+    }
+
+    await retryTransientEsErrors(
+      () =>
+        this.esClient.index({
+          index: SLO_SUMMARY_TEMP_INDEX_NAME,
+          id: `slo-${slo.id}`,
+          document: createTempSummaryDocument(slo),
+          refresh: true,
+        }),
+      { logger: this.logger }
+    );
 
     return this.toResponse(slo);
   }
