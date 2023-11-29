@@ -38,3 +38,20 @@ export interface SingleDatasetLocatorParams extends DatasetLocatorParams {
    */
   dataset: string;
 }
+
+export const TRACE_LOGS_LOCATOR_ID = 'TRACE_LOGS_LOCATOR';
+
+export interface TraceLogsLocatorParams extends SerializableRecord {
+  traceId: string;
+  time?: number;
+}
+
+export const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
+
+type NodeType = 'host' | 'pod' | 'container' | 'awsEC2' | 'awsS3' | 'awsSQS' | 'awsRDS';
+
+export interface NodeLogsLocatorParams extends SerializableRecord {
+  nodeId: string;
+  nodeType: NodeType;
+  time?: number;
+}

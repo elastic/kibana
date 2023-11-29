@@ -6,6 +6,10 @@
  */
 
 import * as rt from 'io-ts';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { NodeLogsLocatorParams, TraceLogsLocatorParams } from '@kbn/deeplinks-observability';
+
+import { LogsLocatorParams } from './infra';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -18,3 +22,9 @@ export const ItemTypeRT = rt.keyof({
 });
 
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
+
+export interface LogsSharedLocators {
+  logsLocator: LocatorPublic<LogsLocatorParams>;
+  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  traceLogsLocator: LocatorPublic<TraceLogsLocatorParams>;
+}

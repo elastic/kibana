@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import {
+  DEFAULT_LOG_VIEW,
+  getLogsLocatorsFromUrlService,
+  LogViewReference,
+} from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../loading';
@@ -34,7 +38,7 @@ export const Logs = () => {
   const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
-  const { locators } = services;
+  const { nodeLogsLocator } = getLogsLocatorsFromUrlService(services.share.url);
   const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
@@ -77,21 +81,14 @@ export const Logs = () => {
   );
 
   const logsUrl = useMemo(() => {
-    return locators.nodeLogsLocator.getRedirectUrl({
+    return nodeLogsLocator.getRedirectUrl({
       nodeType: asset.type,
       nodeId: asset.name,
       time: state.startTimestamp,
       filter: textQueryDebounced,
       logView,
     });
-  }, [
-    locators.nodeLogsLocator,
-    asset.name,
-    asset.type,
-    state.startTimestamp,
-    textQueryDebounced,
-    logView,
-  ]);
+  }, [nodeLogsLocator, asset.name, asset.type, state.startTimestamp, textQueryDebounced, logView]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent" ref={ref}>

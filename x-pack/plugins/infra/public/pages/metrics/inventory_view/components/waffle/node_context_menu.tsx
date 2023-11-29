@@ -23,6 +23,7 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common/locators';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
@@ -43,7 +44,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
-    const { application, share, locators } = services;
+    const { application, share } = services;
+    const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
     const uiCapabilities = application?.capabilities;
     // Due to the changing nature of the fields between APM and this UI,
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
@@ -109,7 +111,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} logs',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      href: locators.nodeLogsLocator.getRedirectUrl({
+      href: nodeLogsLocator.getRedirectUrl({
         nodeType,
         nodeId: node.id,
         time: currentTime,

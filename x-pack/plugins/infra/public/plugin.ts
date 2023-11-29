@@ -27,8 +27,8 @@ import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embedd
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import {
   type InfraLocators,
-  LogsLocatorDefinition,
-  NodeLogsLocatorDefinition,
+  InfraLogsLocatorDefinition,
+  InfraNodeLogsLocatorDefinition,
 } from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
@@ -179,13 +179,15 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     // Register Locators
-    const logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
-    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
-      new NodeLogsLocatorDefinition({ core })
-    );
+    const logsLocator = this.config.featureFlags.logsUIEnabled
+      ? pluginsSetup.share.url.locators.create(new InfraLogsLocatorDefinition({ core }))
+      : undefined;
+    const nodeLogsLocator = this.config.featureFlags.logsUIEnabled
+      ? pluginsSetup.share.url.locators.create(new InfraNodeLogsLocatorDefinition({ core }))
+      : undefined;
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdRuleType(core, logsLocator)
+      createLogThresholdRuleType(core, pluginsSetup.share.url)
     );
 
     if (this.config.featureFlags.logsUIEnabled) {

@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { LogsLocatorDefinition, LogsLocatorDependencies } from './logs_locator';
-import { NodeLogsLocatorDefinition } from './node_logs_locator';
+import { InfraLogsLocatorDefinition, InfraLogsLocatorDependencies } from './logs_locator';
+import { InfraNodeLogsLocatorDefinition } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import moment from 'moment';
@@ -15,15 +15,15 @@ import {
   DEFAULT_LOG_VIEW,
   LogViewReference,
   LogsLocatorParams,
-  NodeLogsLocatorParams,
+  InfraNodeLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
 
 const setupLogsLocator = async () => {
-  const deps: LogsLocatorDependencies = {
+  const deps: InfraLogsLocatorDependencies = {
     core: coreMock.createSetup(),
   };
-  const logsLocator = new LogsLocatorDefinition(deps);
-  const nodeLogsLocator = new NodeLogsLocatorDefinition(deps);
+  const logsLocator = new InfraLogsLocatorDefinition(deps);
+  const nodeLogsLocator = new InfraNodeLogsLocatorDefinition(deps);
 
   return {
     logsLocator,
@@ -122,7 +122,7 @@ describe('Infra Locators', () => {
 
   describe('Node Logs Locator', () => {
     it('should create a link to Node Logs with no state', async () => {
-      const params: NodeLogsLocatorParams = {
+      const params: InfraNodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -137,7 +137,7 @@ describe('Infra Locators', () => {
     });
 
     it('should allow specifying specific logPosition', async () => {
-      const params: NodeLogsLocatorParams = {
+      const params: InfraNodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -150,7 +150,7 @@ describe('Infra Locators', () => {
     });
 
     it('should allow specifying specific filter', async () => {
-      const params: NodeLogsLocatorParams = {
+      const params: InfraNodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -164,7 +164,7 @@ describe('Infra Locators', () => {
     });
 
     it('should allow specifying specific view id', async () => {
-      const params: NodeLogsLocatorParams = {
+      const params: InfraNodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -178,7 +178,7 @@ describe('Infra Locators', () => {
     });
 
     it('should allow specifying specific time range', async () => {
-      const params: NodeLogsLocatorParams = {
+      const params: InfraNodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -194,7 +194,7 @@ describe('Infra Locators', () => {
     });
 
     it('should return correct structured url', async () => {
-      const params: NodeLogsLocatorParams = {
+      const params: InfraNodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -217,7 +217,7 @@ describe('Infra Locators', () => {
  * Helpers
  */
 
-export const constructUrlSearchString = (params: Partial<NodeLogsLocatorParams>) => {
+export const constructUrlSearchString = (params: Partial<InfraNodeLogsLocatorParams>) => {
   const { time = 1550671089404, logView } = params;
 
   return `/stream?logView=${constructLogView(logView)}&logPosition=${constructLogPosition(
@@ -242,7 +242,7 @@ const constructLogFilter = ({
   filter,
   timeRange,
   time,
-}: Partial<NodeLogsLocatorParams>) => {
+}: Partial<InfraNodeLogsLocatorParams>) => {
   let finalFilter = filter || '';
 
   if (nodeId) {

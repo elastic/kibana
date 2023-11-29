@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
+import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
@@ -16,14 +16,15 @@ export const RedirectToLogs = () => {
   const location = useLocation();
 
   const {
-    services: { locators },
+    services: { share },
   } = useKibanaContextForPlugin();
+  const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
 
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
   useEffect(() => {
-    locators.logsLocator.navigate(
+    logsLocator.navigate(
       {
         time,
         filter,
@@ -31,7 +32,7 @@ export const RedirectToLogs = () => {
       },
       { replace: true }
     );
-  }, [filter, locators.logsLocator, logViewId, time]);
+  }, [filter, logsLocator, logViewId, time]);
 
   return null;
 };

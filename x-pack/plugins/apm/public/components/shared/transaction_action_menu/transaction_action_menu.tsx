@@ -25,14 +25,9 @@ import {
   AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
-import {
-  LOGS_LOCATOR_ID,
-  LogsLocatorParams,
-  NODE_LOGS_LOCATOR_ID,
-  NodeLogsLocatorParams,
-} from '@kbn/logs-shared-plugin/common';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { useDataViewId } from '../../../hooks/use_data_view_id';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -139,15 +134,11 @@ function ActionMenuSections({
   const { core, uiActions, share } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
-  const dataViewId = useDataViewId();
 
   const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
     ALL_DATASETS_LOCATOR_ID
   )!;
-  const logsLocator =
-    share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)!;
-  const nodeLogsLocator =
-    share.url.locators.get<NodeLogsLocatorParams>(NODE_LOGS_LOCATOR_ID)!;
+  const logsLocators = getLogsLocatorsFromUrlService(share.url);
 
   const infraLinksAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.InfraUiAvailable
@@ -173,8 +164,7 @@ function ActionMenuSections({
     rangeTo,
     environment,
     allDatasetsLocator,
-    logsLocator,
-    nodeLogsLocator,
+    logsLocators,
     dataViewId,
   });
 

@@ -6,9 +6,19 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import {
+  LogsLocatorDefinition,
+  NodeLogsLocatorDefinition,
+  TraceLogsLocatorDefinition,
+} from '../common/locators';
 import { createLogAIAssistant } from './components/log_ai_assistant';
 import { LogViewsService } from './services/log_views';
-import { LogsSharedClientPluginClass, LogsSharedClientStartDeps } from './types';
+import {
+  LogsSharedClientCoreSetup,
+  LogsSharedClientPluginClass,
+  LogsSharedClientSetupDeps,
+  LogsSharedClientStartDeps,
+} from './types';
 
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   private logViews: LogViewsService;
@@ -17,10 +27,27 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     this.logViews = new LogViewsService();
   }
 
-  public setup() {
+  public setup(_: LogsSharedClientCoreSetup, pluginsSetup: LogsSharedClientSetupDeps) {
     const logViews = this.logViews.setup();
 
-    return { logViews };
+    const logsLocator = pluginsSetup.share.url.locators.create(
+      new LogsLocatorDefinition(pluginsSetup.share.url.locators)
+    );
+    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
+      new NodeLogsLocatorDefinition(pluginsSetup.share.url.locators)
+    );
+
+    const traceLogsLocator = pluginsSetup.share.url.locators.create(
+      new TraceLogsLocatorDefinition(pluginsSetup.share.url.locators)
+    );
+
+    const locators = {
+      logsLocator,
+      nodeLogsLocator,
+      traceLogsLocator,
+    };
+
+    return { logViews, locators };
   }
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
