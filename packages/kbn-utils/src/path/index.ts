@@ -6,26 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getConfigFromFiles } from '@kbn/config';
+import getopts from 'getopts';
 
 const isString = (v: any): v is string => typeof v === 'string';
 
-const CONFIG_PATHS = [
-  process.env.KBN_PATH_CONF && join(process.env.KBN_PATH_CONF, 'kibana.yml'),
-  join(REPO_ROOT, 'config/kibana.yml'),
-  '/etc/kibana/kibana.yml',
-].filter(isString);
+const buildConfigPaths = () => {
+  return [
+    process.env.KBN_PATH_CONF && resolve(process.env.KBN_PATH_CONF, 'kibana.yml'),
+    join(REPO_ROOT, 'config/kibana.yml'),
+    '/etc/kibana/kibana.yml',
+  ].filter(isString);
+};
 
 const CONFIG_DIRECTORIES = [
   process.env.KBN_PATH_CONF,
   join(REPO_ROOT, 'config'),
   '/etc/kibana',
 ].filter(isString);
-
-const DATA_PATHS = [join(REPO_ROOT, 'data'), '/var/lib/kibana'].filter(isString);
 
 const LOGS_PATHS = [join(REPO_ROOT, 'logs'), '/var/log/kibana'].filter(isString);
 
@@ -41,11 +43,29 @@ function findFile(paths: string[]) {
   return availablePath || paths[0];
 }
 
+export const buildDataPaths = (): string[] => {
+  const configDataPath = getConfigFromFiles([getConfigPath()]).path?.data;
+  const argv = process.argv.slice(2);
+  const options = getopts(argv, {
+    string: ['pathData'],
+    alias: {
+      pathData: 'path.data',
+    },
+  });
+
+  return [
+    !!options.pathData && resolve(REPO_ROOT, options.pathData),
+    configDataPath && resolve(REPO_ROOT, configDataPath),
+    join(REPO_ROOT, 'data'),
+    '/var/lib/kibana',
+  ].filter(isString);
+};
+
 /**
  * Get the path of kibana.yml
  * @internal
  */
-export const getConfigPath = () => findFile(CONFIG_PATHS);
+export const getConfigPath = () => findFile(buildConfigPaths());
 
 /**
  * Get the directory containing configuration files
@@ -57,7 +77,7 @@ export const getConfigDirectory = () => findFile(CONFIG_DIRECTORIES);
  * Get the directory containing runtime data
  * @internal
  */
-export const getDataPath = () => findFile(DATA_PATHS);
+export const getDataPath = () => findFile(buildDataPaths());
 
 /**
  * Get the directory containing logs
