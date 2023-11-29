@@ -328,7 +328,7 @@ export class LensPlugin {
         this.editorFrameService!.loadVisualizations(),
         this.editorFrameService!.loadDatasources(),
       ]);
-      const { setVisualizationMap, setDatasourceMap } = await import('./utils');
+      const { setVisualizationMap, setDatasourceMap } = await import('./async_services');
       setDatasourceMap(datasourceMap);
       setVisualizationMap(visualizationMap);
       const eventAnnotationService = await plugins.eventAnnotation.getService();

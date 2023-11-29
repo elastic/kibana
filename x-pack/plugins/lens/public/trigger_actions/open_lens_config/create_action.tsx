@@ -15,7 +15,7 @@ import { suggestionsApi } from '../../lens_suggestions_api';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 
-// export const EditorFrameService = async () => await import('../../async_services');
+export const getAsyncHelpers = async () => await import('../../async_services');
 
 export class CreateESQLPanelAction implements Action<{}> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -44,7 +44,7 @@ export class CreateESQLPanelAction implements Action<{}> {
   }
 
   public async execute() {
-    const { getVisualizationMap, getDatasourceMap } = await import('../../utils');
+    const { getVisualizationMap, getDatasourceMap } = await getAsyncHelpers();
     const visualizationMap = getVisualizationMap();
     const datasourceMap = getDatasourceMap();
     // const embeddableStart = this.startDependencies.embeddable;

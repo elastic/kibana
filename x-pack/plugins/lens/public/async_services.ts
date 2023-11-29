@@ -51,3 +51,9 @@ export * from './chart_info_api';
 
 export * from './trigger_actions/open_in_discover_helpers';
 export * from './trigger_actions/open_lens_config/helpers';
+export {
+  getVisualizationMap,
+  setVisualizationMap,
+  getDatasourceMap,
+  setDatasourceMap,
+} from './utils';
