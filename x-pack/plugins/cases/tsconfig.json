@@ -71,6 +71,7 @@
     "@kbn/alerting-plugin",
     "@kbn/content-management-plugin",
     "@kbn/core-logging-server-mocks",
+    "@kbn/datemath",
   ],
   "exclude": [
     "target/**/*",
