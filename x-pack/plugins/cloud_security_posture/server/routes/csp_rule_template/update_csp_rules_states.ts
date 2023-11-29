@@ -94,6 +94,10 @@ export const getCspSettingObjectSafe = async (
   return cspSettings;
 };
 
+const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
+  return `${benchmarkId};${benchmarkVersion};${ruleNumber}`;
+};
+
 export const defineUpdateCspRuleStateRoute = (router: CspRouter) =>
   router.versioned
     .post({
@@ -105,7 +109,7 @@ export const defineUpdateCspRuleStateRoute = (router: CspRouter) =>
         version: '1',
         validate: {
           request: {
-            query: cspRuleBulkActionRequest,
+            body: cspRuleBulkActionRequest,
           },
         },
       },
@@ -116,15 +120,19 @@ export const defineUpdateCspRuleStateRoute = (router: CspRouter) =>
         const cspContext = await context.csp;
 
         try {
-          const requestBody: CspRuleBulkActionRequest = request.query;
+          const requestBody: CspRuleBulkActionRequest = request.body;
 
           const cspSettings = await getCspSettingObjectSafe(cspContext.soClient, cspContext.logger);
 
           const currentRulesStates = cspSettings.rules_states;
 
+          const ruleKeys = requestBody.rules.map((rule) =>
+            buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
+          );
+
           const newRulesStates = setRulesStates(
             currentRulesStates,
-            requestBody.rule_ids,
+            ruleKeys,
             muteStatesMap[requestBody.action]
           );
 

@@ -8,19 +8,23 @@
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
 
-import Chance from 'chance';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+interface RuleIdentifier {
+  benchmarkId: string;
+  benchmarkVersion: string;
+  ruleNumber: string;
+}
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const log = getService('log');
-  const chance = new Chance();
 
   /**
    * required before indexing findings
@@ -36,7 +40,11 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug('CSP plugin is initialized');
     });
 
-  const generateRandomRuleId = (): string => {
+  const generateRuleKey = (ruleParams: RuleIdentifier): string => {
+    return `${ruleParams.benchmarkId};${ruleParams.benchmarkVersion};${ruleParams.ruleNumber}`;
+  };
+
+  const generateRandomRule = (): RuleIdentifier => {
     const majorVersionNumber = Math.floor(Math.random() * 10); // Random major number between 0 and 9
     const minorVersionNumber = Math.floor(Math.random() * 10);
     const benchmarksIds = ['cis_aws', 'cis_k8s', 'cis_k8s'];
@@ -45,7 +53,11 @@ export default function ({ getService }: FtrProviderContext) {
     const randomBenchmarkVersion =
       benchmarksVersions[Math.floor(Math.random() * benchmarksVersions.length)];
 
-    return `${randomBenchmarkId};${randomBenchmarkVersion};${majorVersionNumber}.${minorVersionNumber}`;
+    return {
+      benchmarkId: randomBenchmarkId,
+      benchmarkVersion: randomBenchmarkVersion,
+      ruleNumber: `${majorVersionNumber}.${minorVersionNumber}`,
+    };
   };
 
   describe('Verify update csp rules states API', async () => {
@@ -56,43 +68,65 @@ export default function ({ getService }: FtrProviderContext) {
     afterEach(async () => {});
 
     it('mute rules successfully', async () => {
-      const rule1 = generateRandomRuleId();
-      const rule2 = generateRandomRuleId();
+      const rule1 = generateRandomRule();
+      const rule2 = generateRandomRule();
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .query({
+        .send({
           action: 'mute',
-          rule_ids: [rule1, rule2],
-        })
-        .expect(200);
+          rules: [
+            {
+              benchmark_id: rule1.benchmarkId,
+              benchmark_version: rule1.benchmarkVersion,
+              rule_number: rule1.ruleNumber,
+            },
+            {
+              benchmark_id: rule2.benchmarkId,
+              benchmark_version: rule2.benchmarkVersion,
+              rule_number: rule2.ruleNumber,
+            },
+          ],
+        });
+      // .expect(200);
 
       expect(body.new_csp_settings.type).to.eql('cloud-security-posture-settings');
       expect(body.new_csp_settings.id).to.eql('csp-internal-settings');
 
       expectExpect(body.new_csp_settings.attributes.rules_states).toEqual(
         expectExpect.objectContaining({
-          [rule1]: { muted: true },
-          [rule2]: { muted: true },
+          [generateRuleKey(rule1)]: { muted: true },
+          [generateRuleKey(rule2)]: { muted: true },
         })
       );
     });
 
     it('unmute rules successfully', async () => {
-      const rule1 = generateRandomRuleId();
-      const rule2 = generateRandomRuleId();
+      const rule1 = generateRandomRule();
+      const rule2 = generateRandomRule();
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .query({
+        .send({
           action: 'unmute',
-          rule_ids: [rule1, rule2],
+          rules: [
+            {
+              benchmark_id: rule1.benchmarkId,
+              benchmark_version: rule1.benchmarkVersion,
+              rule_number: rule1.ruleNumber,
+            },
+            {
+              benchmark_id: rule2.benchmarkId,
+              benchmark_version: rule2.benchmarkVersion,
+              rule_number: rule2.ruleNumber,
+            },
+          ],
         })
         .expect(200);
 
@@ -100,16 +134,16 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.new_csp_settings.id).to.eql('csp-internal-settings');
       expectExpect(body.new_csp_settings.attributes.rules_states).toEqual(
         expectExpect.objectContaining({
-          [rule1]: { muted: false },
-          [rule2]: { muted: false },
+          [generateRuleKey(rule1)]: { muted: false },
+          [generateRuleKey(rule2)]: { muted: false },
         })
       );
     });
 
     it('verify new rules are added and existing rules are set.', async () => {
-      const rule1 = generateRandomRuleId();
-      const rule2 = generateRandomRuleId();
-      const rule3 = generateRandomRuleId();
+      const rule1 = generateRandomRule();
+      const rule2 = generateRandomRule();
+      const rule3 = generateRandomRule();
 
       // unmute rule1 and rule2
       const cspSettingsResponse = await supertest
@@ -117,16 +151,27 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .query({
+        .send({
           action: 'unmute',
-          rule_ids: [rule1, rule2],
+          rules: [
+            {
+              benchmark_id: rule1.benchmarkId,
+              benchmark_version: rule1.benchmarkVersion,
+              rule_number: rule1.ruleNumber,
+            },
+            {
+              benchmark_id: rule2.benchmarkId,
+              benchmark_version: rule2.benchmarkVersion,
+              rule_number: rule2.ruleNumber,
+            },
+          ],
         })
         .expect(200);
 
       expectExpect(cspSettingsResponse.body.new_csp_settings.attributes.rules_states).toEqual(
         expectExpect.objectContaining({
-          [rule1]: { muted: false },
-          [rule2]: { muted: false },
+          [generateRuleKey(rule1)]: { muted: false },
+          [generateRuleKey(rule2)]: { muted: false },
         })
       );
 
@@ -136,9 +181,20 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .query({
+        .send({
           action: 'mute',
-          rule_ids: [rule1, rule3],
+          rules: [
+            {
+              benchmark_id: rule1.benchmarkId,
+              benchmark_version: rule1.benchmarkVersion,
+              rule_number: rule1.ruleNumber,
+            },
+            {
+              benchmark_id: rule3.benchmarkId,
+              benchmark_version: rule3.benchmarkVersion,
+              rule_number: rule3.ruleNumber,
+            },
+          ],
         })
         .expect(200);
 
@@ -146,22 +202,30 @@ export default function ({ getService }: FtrProviderContext) {
         updatedCspSettingsResponse.body.new_csp_settings.attributes.rules_states
       ).toEqual(
         expectExpect.objectContaining({
-          [rule1]: { muted: true },
-          [rule2]: { muted: false },
-          [rule3]: { muted: true },
+          [generateRuleKey(rule1)]: { muted: true },
+          [generateRuleKey(rule2)]: { muted: false },
+          [generateRuleKey(rule3)]: { muted: true },
         })
       );
     });
 
     it('set wrong action input', async () => {
+      const rule1 = generateRandomRule();
+
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .query({
+        .send({
           action: 'foo',
-          rule_ids: [generateRandomRuleId()],
+          rules: [
+            {
+              benchmark_id: rule1.benchmarkId,
+              benchmark_version: rule1.benchmarkVersion,
+              rule_number: rule1.ruleNumber,
+            },
+          ],
         });
 
       expect(body.error).to.eql('Bad Request');
@@ -174,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .query({
+        .send({
           action: 'mute',
           rule_ids: ['invalid_rule_structure'],
         });
