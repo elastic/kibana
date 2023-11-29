@@ -94,8 +94,6 @@ const NullGroupComponent = ({
   );
 };
 
-// const InlineFlexItem = ({ children }: { children: React.ReactNode }) => (
-
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
   selectedGroup,
   bucket,
@@ -207,7 +205,12 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
-            <EuiFlexItem grow={0} style={{ marginLeft: 12 }}>
+            <EuiFlexItem
+              grow={0}
+              css={css`
+                margin-left: 12px;
+              `}
+            >
               <CISBenchmarkIcon
                 type={benchmarkId}
                 name={firstNonNullValue(bucket.benchmarkName?.buckets?.[0]?.key)}
@@ -216,7 +219,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           )}
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem style={{ display: 'inline' }}>
+              <EuiFlexItem>
                 <EuiText size="s">
                   <strong>{bucket.key_as_string}</strong>
                 </EuiText>
@@ -259,9 +262,9 @@ export const groupStatsRenderer = (
     const totalPassed = bucket.doc_count - totalFailed;
     return (
       <EuiFlexGroup
-        style={{
-          width: 198,
-        }}
+        css={css`
+          width: 198px;
+        `}
         gutterSize="s"
       >
         <EuiFlexItem
