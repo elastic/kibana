@@ -22,16 +22,6 @@ const GroupSelectorWrapper: React.FC = ({ children }) => {
   );
 };
 
-const GroupSelectorWrapper: React.FC = ({ children }) => {
-  const styles = useStyles();
-
-  return (
-    <EuiFlexItem grow={false} className={styles.groupBySelector}>
-      {children}
-    </EuiFlexItem>
-  );
-};
-
 export const AdditionalControls = ({
   total,
   title,
