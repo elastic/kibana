@@ -62,7 +62,7 @@ export const ConfigurePipeline: React.FC = () => {
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
 
-  const { existingPipeline, modelID, pipelineName, pipelineNameUserSupplied } = configuration;
+  const { existingPipeline, modelID, pipelineName, isPipelineNameUserSupplied } = configuration;
 
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
 
@@ -148,8 +148,8 @@ export const ConfigurePipeline: React.FC = () => {
                 onChange={(e) =>
                   setInferencePipelineConfiguration({
                     ...configuration,
+                    isPipelineNameUserSupplied: true,
                     pipelineName: e.target.value,
-                    pipelineNameUserSupplied: true,
                   })
                 }
               />
@@ -171,15 +171,15 @@ export const ConfigurePipeline: React.FC = () => {
                   const newConfiguration = {
                     ...configuration,
                     inferenceConfig: undefined,
+                    isPipelineNameUserSupplied: false,
                     modelID: value,
                     fieldMappings: undefined,
                     pipelineName: indexName + '-' + normalizeModelName(value),
-                    pipelineNameUserSupplied: false,
                   };
 
-                  if (pipelineName && pipelineNameUserSupplied) {
+                  if (pipelineName && isPipelineNameUserSupplied) {
                     newConfiguration.pipelineName = pipelineName;
-                    newConfiguration.pipelineNameUserSupplied = true;
+                    newConfiguration.isPipelineNameUserSupplied = true;
                   }
 
                   setInferencePipelineConfiguration(newConfiguration);
