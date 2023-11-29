@@ -186,6 +186,7 @@ export const getBenchmarkCisName = (benchmarkId: string) => {
     case 'cis_gcp':
       return 'CIS GCP';
   }
+  return 'undefined';
 };
 
 export const getBenchmarkApplicableTo = (benchmarkId: string) => {
@@ -201,4 +202,5 @@ export const getBenchmarkApplicableTo = (benchmarkId: string) => {
     case 'cis_gcp':
       return 'Google Cloud Provider';
   }
+  return 'undefined';
 };
