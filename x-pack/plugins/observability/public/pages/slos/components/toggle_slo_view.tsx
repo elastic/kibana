@@ -6,16 +6,8 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiPopoverTitle,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOViewSettings } from './slo_view_settings';
 
 export type SLOViewType = 'cardView' | 'listView';
@@ -64,36 +56,5 @@ export function ToggleSLOView({
         <SLOViewSettings toggleCompactView={toggleListViewMode} listViewMode={listViewMode} />
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-}
-
-function ViewSettings({ children }: { children: React.ReactNode }) {
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-
-  return (
-    <EuiPopover
-      button={
-        <EuiButtonIcon
-          data-test-subj="o11yToggleSLOViewButton"
-          iconType={'gear'}
-          aria-label={i18n.translate(
-            'xpack.observability.toggleSLOView.euiButtonIcon.settingsLabel',
-            { defaultMessage: 'Settings' }
-          )}
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        />
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      anchorPosition="downCenter"
-    >
-      <EuiPopoverTitle>
-        <FormattedMessage
-          id="xpack.observability.viewSettings.viewSettingsPopoverTitleLabel"
-          defaultMessage="View settings"
-        />
-      </EuiPopoverTitle>
-      <div style={{ width: '300px' }}>{children}</div>
-    </EuiPopover>
   );
 }
