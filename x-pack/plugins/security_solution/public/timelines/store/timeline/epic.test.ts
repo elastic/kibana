@@ -177,6 +177,7 @@ describe('Epic Timeline', () => {
         savedQueryId: 'my endgame timeline query',
         savedSearchId: null,
         savedSearch: null,
+        isDataProviderVisible: true,
       };
 
       expect(

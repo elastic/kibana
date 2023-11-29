@@ -81,6 +81,7 @@ export const timelineDefaults: SubsetTimelineModel &
   savedSearchId: null,
   savedSearch: null,
   isDiscoverSavedSearchLoaded: false,
+  isDataProviderVisible: false,
 };
 
 export const getTimelineManageDefaults = (id: string) => ({

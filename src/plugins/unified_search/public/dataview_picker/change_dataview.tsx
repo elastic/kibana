@@ -96,7 +96,9 @@ export function ChangeDataView({
   const { application, data, storage, dataViews, dataViewEditor, appName, usageCollection } =
     kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
+
+  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth, dataViewsList });
+
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );
@@ -338,11 +340,21 @@ export function ChangeDataView({
         <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
         <EuiPanel color="transparent" paddingSize="none" key="try-esql">
           <EuiButton
+            css={css`
+              border-top-right-radius: unset;
+              border-top-left-radius: unset;
+            `}
             color="success"
             size="s"
             fullWidth
             onClick={() => onTextBasedSubmit({ esql: `from ${trigger.title} | limit 10` })}
             data-test-subj="select-text-based-language-panel"
+            contentProps={{
+              css: {
+                justifyContent: 'flex-start',
+                paddingLeft: '26px',
+              },
+            }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
               defaultMessage: 'Try ES|QL',

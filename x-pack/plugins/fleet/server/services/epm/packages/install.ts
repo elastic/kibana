@@ -57,11 +57,13 @@ import {
   DATASET_VAR_NAME,
 } from '../../../../common/constants';
 import {
-  type FleetError,
+  FleetError,
   PackageOutdatedError,
   PackagePolicyValidationError,
   ConcurrentInstallOperationError,
   FleetUnauthorizedError,
+  PackageInvalidArchiveError,
+  PackageNotFoundError,
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
@@ -104,6 +106,7 @@ import { cacheAssets } from './custom_integrations/assets/cache';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
+import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -202,7 +205,7 @@ export async function ensureInstalledPackage(options: {
   }
 
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  if (!installation) throw new Error(`could not get installation ${pkgName}`);
+  if (!installation) throw new FleetError(`Could not get installation for ${pkgName}`);
   return installation;
 }
 
@@ -234,22 +237,33 @@ export async function handleInstallPackageFailure({
     version: pkgVersion,
   });
 
+  const latestInstallFailedAttempts = addErrorToLatestFailedAttempts({
+    error,
+    targetVersion: pkgVersion,
+    createdAt: new Date().toISOString(),
+    latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
+  });
+
   // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
-    if (installType === 'install' || installType === 'reinstall') {
+    if (installType === 'install') {
       logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
       return;
     }
 
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
-      (err) => {
-        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          logger.error(`failed to update package status to: install_failed  ${err}`);
-        }
-      }
-    );
+    await updateInstallStatusToFailed({
+      logger,
+      savedObjectsClient,
+      pkgName,
+      status: 'install_failed',
+      latestInstallFailedAttempts,
+    });
+
+    if (installType === 'reinstall') {
+      logger.error(`Failed to reinstall ${pkgkey}: [${error.toString()}]`, { error });
+    }
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -272,13 +286,20 @@ export async function handleInstallPackageFailure({
     }
   } catch (e) {
     // If an error happens while removing the integration or while doing a rollback update the status to failed
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
-      (err) => {
-        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          logger.error(`failed to update package status to: install_failed  ${err}`);
-        }
-      }
-    );
+    await updateInstallStatusToFailed({
+      logger,
+      savedObjectsClient,
+      pkgName,
+      status: 'install_failed',
+      latestInstallFailedAttempts: installedPkg
+        ? addErrorToLatestFailedAttempts({
+            error: e,
+            targetVersion: installedPkg.attributes.version,
+            createdAt: installedPkg.attributes.install_started_at,
+            latestAttempts: latestInstallFailedAttempts,
+          })
+        : [],
+    });
     logger.error(`failed to uninstall or rollback package after installation error ${e}`);
   }
 }
@@ -714,7 +735,7 @@ export type InstallPackageParams = {
 
 export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
   if (!('installSource' in args)) {
-    throw new Error('installSource is required');
+    throw new FleetError('installSource is required');
   }
 
   const logger = appContextService.getLogger();
@@ -805,7 +826,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     });
     return response;
   }
-  throw new Error(`Unknown installSource: ${args.installSource}`);
+  throw new FleetError(`Unknown installSource: ${args.installSource}`);
 }
 
 export async function installCustomPackage(
@@ -877,24 +898,34 @@ export const updateVersion = async (
   });
 };
 
-export const updateInstallStatus = async ({
+export const updateInstallStatusToFailed = async ({
+  logger,
   savedObjectsClient,
   pkgName,
   status,
+  latestInstallFailedAttempts,
 }: {
+  logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   status: EpmPackageInstallStatus;
+  latestInstallFailedAttempts: any;
 }) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    install_status: status,
-  });
+  try {
+    return await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      install_status: status,
+      latest_install_failed_attempts: latestInstallFailedAttempts,
+    });
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      logger.error(`failed to update package status to: install_failed  ${err}`);
+    }
+  }
 };
 
 export async function restartInstallation(options: {
@@ -1275,7 +1306,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
   if (pkgInfo.type !== 'input') return;
 
   const paths = await getArchiveFilelist(pkgInfo);
-  if (!paths) throw new Error('No paths found for ');
+  if (!paths) throw new PackageInvalidArchiveError(`No paths found for ${pkgInfo.name}`);
 
   const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
@@ -1338,7 +1369,9 @@ export async function installAssetsForInputPackagePolicy(opts: {
     logger,
   });
   if (!installedPkg)
-    throw new Error('Unable to find installed package while creating index templates');
+    throw new PackageNotFoundError(
+      `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
+    );
   await installIndexTemplatesAndPipelines({
     installedPkg,
     paths,
@@ -1383,5 +1416,5 @@ export function getInstallType(args: NoPkgArgs | HasPkgArgs): OnlyInstall | NotI
   if (pkgVersion === lastStartedInstallVersion && pkgVersion !== currentPkgVersion)
     return 'reupdate';
   if (pkgVersion !== lastStartedInstallVersion && pkgVersion !== currentPkgVersion) return 'update';
-  throw new Error('unknown install type');
+  throw new FleetError('Unknown install type');
 }

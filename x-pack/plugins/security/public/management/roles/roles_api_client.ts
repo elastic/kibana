@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common/model';
+import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
 import { copyRole } from '../../../common/model';
 
 export class RolesAPIClient {
