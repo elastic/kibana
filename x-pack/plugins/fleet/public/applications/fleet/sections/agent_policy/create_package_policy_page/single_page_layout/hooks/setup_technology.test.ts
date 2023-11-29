@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { SetupTechnology } from '../../../../../../../../common/types';
 import { ExperimentalFeaturesService } from '../../../../../services';
-import { sendGetOneAgentPolicy } from '../../../../../hooks';
+import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 
 import { useSetupTechnology } from './setup_technology';
@@ -18,6 +18,7 @@ jest.mock('../../../../../services');
 jest.mock('../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../hooks'),
   sendGetOneAgentPolicy: jest.fn(),
+  useStartServices: jest.fn(),
 }));
 
 type MockFn = jest.MockedFunction<any>;
@@ -39,6 +40,11 @@ describe('useSetupTechnology', () => {
     (sendGetOneAgentPolicy as MockFn).mockResolvedValue({
       data: {
         item: { id: 'agentless-policy-id' },
+      },
+    });
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isServerlessEnabled: true,
       },
     });
     jest.clearAllMocks();
@@ -76,6 +82,27 @@ describe('useSetupTechnology', () => {
     await waitForNextUpdate();
 
     expect(result.current.agentlessPolicy).toEqual({ id: 'agentless-policy-id' });
+  });
+
+  it('should not fetch agentless policy if agentless is enabled but serverless is disabled', async () => {
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isServerlessEnabled: false,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useSetupTechnology({
+        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicy: updateAgentPolicyMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+      })
+    );
+
+    expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
+    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+    expect(result.current.agentlessPolicy).toBeUndefined();
   });
 
   it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
