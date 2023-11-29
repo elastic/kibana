@@ -6,3 +6,4 @@
  */
 
 export * from './common.gen';
+export * from './get_asset_criticality_status.gen';
