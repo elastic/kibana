@@ -67,10 +67,6 @@ function normalizeType(type: string): DatatableColumnType {
   }
 }
 
-function sanitize(value: string) {
-  return value.replace(/[\(\)]/g, '_');
-}
-
 function extractTypeAndReason(attributes: any): { type?: string; reason?: string } {
   if (['type', 'reason'].every((prop) => prop in attributes)) {
     return attributes;
@@ -249,8 +245,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         map(({ rawResponse: body, warning }) => {
           const columns =
             body.columns?.map(({ name, type }) => ({
-              id: sanitize(name),
-              name: sanitize(name),
+              id: name,
+              name,
               meta: { type: normalizeType(type) },
             })) ?? [];
           const columnNames = columns.map(({ name }) => name);
