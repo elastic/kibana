@@ -296,7 +296,11 @@ export const RiskScoreEnableSection = () => {
               )}
               {!isUpdateAvailable && (
                 <EuiFlexGroup gutterSize="s" alignItems={'center'}>
-                  <EuiFlexItem>{isLoading && <EuiLoadingSpinner size="m" />}</EuiFlexItem>
+                  <EuiFlexItem>
+                    {isLoading && (
+                      <EuiLoadingSpinner data-test-subj="risk-score-status-loading" size="m" />
+                    )}
+                  </EuiFlexItem>
                   <EuiFlexItem
                     css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}
                     data-test-subj="risk-score-status"

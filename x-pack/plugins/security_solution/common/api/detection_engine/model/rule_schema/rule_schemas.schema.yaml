@@ -7,6 +7,7 @@ components:
   x-codegen-enabled: true
   schemas:
     BaseRequiredFields:
+      x-inline: true
       type: object
       properties:
         name:
@@ -24,6 +25,7 @@ components:
         - severity
 
     BaseOptionalFields:
+      x-inline: true
       type: object
       properties:
         # Field overrides
@@ -73,6 +75,7 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleActionThrottle'
 
     BaseDefaultableFields:
+      x-inline: true
       type: object
       properties:
         # Main attributes
@@ -127,12 +130,14 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/ThreatArray'
 
     BaseCreateProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseRequiredFields'
         - $ref: '#/components/schemas/BaseOptionalFields'
         - $ref: '#/components/schemas/BaseDefaultableFields'
 
     BasePatchProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseRequiredFields'
           x-modify: partial
@@ -140,6 +145,7 @@ components:
         - $ref: '#/components/schemas/BaseDefaultableFields'
 
     BaseResponseProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseRequiredFields'
         - $ref: '#/components/schemas/BaseOptionalFields'
@@ -195,6 +201,7 @@ components:
         - setup
 
     SharedCreateProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseCreateProps'
         - type: object
@@ -203,6 +210,7 @@ components:
               $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
 
     SharedUpdateProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseCreateProps'
         - type: object
@@ -213,6 +221,7 @@ components:
               $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
 
     SharedPatchProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BasePatchProps'
         - type: object
@@ -223,6 +232,7 @@ components:
               $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
 
     SharedResponseProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseResponseProps'
         - $ref: '#/components/schemas/ResponseFields'

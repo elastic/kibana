@@ -21,7 +21,7 @@ import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 import {
   APP_ID,
   CASES_PATH,
@@ -56,7 +56,7 @@ const TimelineDetailsPanel = () => {
 const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules

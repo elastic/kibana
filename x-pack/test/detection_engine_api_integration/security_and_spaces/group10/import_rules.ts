@@ -38,8 +38,8 @@ import {
   createRule,
   getRule,
   getRuleSOById,
+  deleteAllExceptions,
 } from '../../utils';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 const getImportRuleBuffer = (connectorId: string) => {
