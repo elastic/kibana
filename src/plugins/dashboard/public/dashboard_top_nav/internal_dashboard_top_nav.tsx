@@ -333,23 +333,6 @@ export function InternalDashboardTopNav({
       // User cannot save when the changes include an unshared reference and the user is missing access to
       // one of the shared spaces
       const canSave = !(hasUnsharedReference && hasHiddenSpace);
-      if (canSave) {
-        message = i18n.translate('dashboard.topNav.confirmSaveModal.shareableChangesDescription', {
-          defaultMessage: `This dashboard is shared between {spacesCount} spaces. Any changes will also
-            be reflected in those spaces. Clone the dashboard if you don't want the changes to be
-            reflected in the rest of spaces.`,
-          values: { spacesCount: namespaces.length },
-        });
-      } else {
-        message = i18n.translate(
-          'dashboard.topNav.confirmSaveModal.unshareableReferenceDescription',
-          {
-            defaultMessage: `This dashboard is shared between {spacesCount} spaces, and some of your changes cannot 
-              be shared. Please clone this dashboard to save your changes into the current space.`,
-            values: { spacesCount: namespaces.length },
-          }
-        );
-      }
 
       const session = openModal(
         toMountPoint(
@@ -358,11 +341,11 @@ export function InternalDashboardTopNav({
             onSave={onSave}
             onCancel={onCancel}
             onClose={() => session.close()}
-            message={message}
             title={modalTitle}
             spacesApi={spacesApi}
             canSave={canSave}
             namespaces={namespaces}
+            noun="dashboard"
           />,
           {
             theme$,

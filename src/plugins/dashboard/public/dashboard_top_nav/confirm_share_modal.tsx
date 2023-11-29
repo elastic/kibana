@@ -18,15 +18,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import React, { useMemo } from 'react';
 
 export const ConfirmShareModal = ({
   canSave,
-  message,
   namespaces,
   spacesApi,
+  noun,
   title,
   onSave,
   onClone,
@@ -34,8 +35,8 @@ export const ConfirmShareModal = ({
   onClose,
 }: {
   canSave: boolean;
-  message: string;
   namespaces: string[];
+  noun: string;
   spacesApi: SpacesApi;
   title: string;
   onCancel?: () => void;
@@ -49,6 +50,23 @@ export const ConfirmShareModal = ({
     () => spacesApi.ui.components.getSpaceList,
     [spacesApi.ui.components.getSpaceList]
   );
+
+  let message;
+
+  if (canSave) {
+    message = i18n.translate('xpack.spaces.confirmShareModal.shareableChangesDescription', {
+      defaultMessage: `This {noun} is shared between {spacesCount} spaces. Any changes will also
+        be reflected in those spaces. Save as a new {noun} if you don't want the changes to be
+        reflected in the rest of spaces.`,
+      values: { spacesCount: namespaces.length, noun },
+    });
+  } else {
+    message = i18n.translate('xpack.spaces.confirmShareModal.unshareableChangesDescription', {
+      defaultMessage: `This {noun} is shared between {spacesCount} spaces, and some of your changes cannot 
+          be shared. Please save as a new {noun} to save your changes into the current space.`,
+      values: { spacesCount: namespaces.length, noun },
+    });
+  }
 
   return (
     <SpacesContextWrapper>
