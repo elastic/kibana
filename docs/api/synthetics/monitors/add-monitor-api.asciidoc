@@ -78,7 +78,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 `params`:: (Optional, string): Monitor parameters.
 
-`retest_on_failure`:: (Optional, boolean, default: true): Enable or disable retesting when a monitor fails. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created, and if configured, an alert sent. Then the monitor will resume running according to the defined schedule. Using retestOnFailure can reduce noise related to transient problems.
+`retest_on_failure`:: (Optional, boolean, default: true): Enable or disable retesting when a monitor fails. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created, and if configured, an alert sent. Then the monitor will resume running according to the defined schedule. Using `retest_on_failure` can reduce noise related to transient problems.
 
 
 *HTTP Monitor Fields*:
