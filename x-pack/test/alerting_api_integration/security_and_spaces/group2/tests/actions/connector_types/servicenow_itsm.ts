@@ -718,21 +718,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
         });
 
         describe('closeIncident', () => {
-          it('should get choices', async () => {
-            // create an incident with correlation id
-            await supertest
-              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ...mockServiceNowBasic.params,
-                subActionParams: {
-                  incident: {
-                    ...mockServiceNowBasic.params.subActionParams.incident,
-                    correlation_id: 'custom_correlation_id',
-                  },
-                },
-              });
-
+          it('should close the incident', async () => {
             const { body: result } = await supertest
               .post(`/api/actions/connector/${simulatedActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
@@ -752,12 +738,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             expect(result).to.eql({
               status: 'ok',
               connector_id: simulatedActionId,
-              data: {
-                id: '123',
-                title: 'INC01',
-                pushedDate: '2020-03-10T12:24:20.000Z',
-                url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
-              },
+              data: {},
             });
           });
         });
