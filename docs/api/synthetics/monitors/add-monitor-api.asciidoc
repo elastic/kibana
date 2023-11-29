@@ -241,7 +241,7 @@ POST /api/synthetics/monitors
 {
   "type": "browser",
   "name": "Example journey",
-  "inline_script": "step('Go to https://google.com.co', async () => {\n  await page.goto('https://www.google.com');\n});"
+  "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))"
 }
 --------------------------------------------------
 
