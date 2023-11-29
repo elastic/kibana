@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { useLocation } from 'react-router-dom';
-import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { ProductLine } from '../../../common/product';
 import type { SecurityProductTypes } from '../../../common/config';
 import { getStartedStorage } from '../storage';
@@ -27,7 +28,6 @@ import type {
 } from '../types';
 import { GetStartedPageActions } from '../types';
 import { findCardByStepId } from '../helpers';
-import { useKibana } from '../../common/services';
 
 const syncExpandedCardStepsToStorageFromURL = (maybeStepId: string) => {
   const { matchedCard, matchedStep } = findCardByStepId(maybeStepId);
@@ -61,7 +61,7 @@ const syncExpandedCardStepsFromStorageToURL = (
 };
 
 export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProductTypes }) => {
-  const { navigateToApp } = useKibana().services.application;
+  const { navigateTo } = useNavigateTo();
 
   const { hash: detailName } = useLocation();
   const stepIdFromHash = detailName.split('#')[1];
@@ -119,13 +119,13 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
       expandedCardsInitialStates,
       ({ matchedStep }: { matchedStep: Step | null }) => {
         if (!matchedStep) return;
-        navigateToApp(APP_UI_ID, {
+        navigateTo({
           deepLinkId: SecurityPageName.landing,
           path: `#${matchedStep.id}`,
         });
       }
     );
-  }, [expandedCardsInitialStates, getAllExpandedCardStepsFromStorage, navigateToApp]);
+  }, [expandedCardsInitialStates, getAllExpandedCardStepsFromStorage, navigateTo]);
 
   const [state, dispatch] = useReducer(reducer, {
     activeProducts: activeProductsInitialStates,

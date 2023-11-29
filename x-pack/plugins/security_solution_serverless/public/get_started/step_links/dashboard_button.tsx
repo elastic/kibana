@@ -27,7 +27,7 @@ const DashboardButtonComponent = () => {
     <LinkButton id={SecurityPageName.dashboards} onClick={onClick} fill>
       <FormattedMessage
         id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description2.button"
-        defaultMessage="Go to  dashboards"
+        defaultMessage="Go to dashboards"
       />
     </LinkButton>
   );

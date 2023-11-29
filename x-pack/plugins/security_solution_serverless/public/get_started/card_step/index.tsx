@@ -33,7 +33,6 @@ import { getStepsByActiveProduct } from '../helpers';
 import type { ProductLine } from '../../../common/product';
 
 import { StepContent } from './step_content';
-import { useKibana } from '../../common/services';
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
 import { useStepContext } from '../context/step_context';
 
@@ -68,8 +67,7 @@ const CardStepComponent: React.FC<{
 }) => {
   const { euiTheme } = useEuiTheme();
   const completeBadgeBackgroundColor = useEuiBackgroundColor('success');
-
-  const { navigateToApp } = useKibana().services.application;
+  const { navigateTo } = useNavigateTo();
 
   const stepContentRef = React.useRef<HTMLDivElement>(null);
 
@@ -104,13 +102,13 @@ const CardStepComponent: React.FC<{
         // Toggle step and sync the expanded card step to storage & reducer
         onStepClicked({ stepId, cardId, sectionId, isExpanded: !isExpandedStep });
 
-        navigateToApp(APP_UI_ID, {
+        navigateTo({
           deepLinkId: SecurityPageName.landing,
           path: `#${stepId}`,
         });
       }
     },
-    [hasStepContent, cardId, stepId, navigateToApp, onStepClicked, sectionId, isExpandedStep]
+    [hasStepContent, onStepClicked, stepId, cardId, sectionId, isExpandedStep, navigateTo]
   );
 
   useEffect(() => {
