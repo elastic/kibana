@@ -73,7 +73,7 @@ const mockImportIncident = (update: boolean) =>
   }));
 
 const mockIncidentResponse = (update: boolean) =>
-  requestMock.mockImplementation(() => ({
+  requestMock.mockImplementationOnce(() => ({
     data: {
       result: {
         sys_id: '1',
@@ -82,6 +82,19 @@ const mockIncidentResponse = (update: boolean) =>
           ? { sys_updated_on: '2020-03-10 12:24:20' }
           : { sys_created_on: '2020-03-10 12:24:20' }),
       },
+    },
+  }));
+
+const mockCorrelationIdIncidentResponse = () =>
+  requestMock.mockImplementationOnce(() => ({
+    data: {
+      result: [
+        {
+          sys_id: '1',
+          number: 'INC01',
+          sys_updated_on: '2020-03-10 12:24:20',
+        },
+      ],
     },
   }));
 
@@ -109,6 +122,35 @@ const updateIncident = async (service: ExternalService) => {
   return await service.updateIncident({
     incidentId: '1',
     incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+  });
+};
+
+const closeIncident = async ({
+  service,
+  incidentId,
+  correlationId,
+}: {
+  service: ExternalService;
+  incidentId: string | null;
+  correlationId: string | null;
+}) => {
+  // Get incident response
+  if (incidentId) {
+    mockIncidentResponse(false);
+  } else if (correlationId) {
+    // get incident by correlationId response
+    mockCorrelationIdIncidentResponse();
+  }
+  // Get application version
+  mockApplicationVersion();
+  // Import set api response
+  mockImportIncident(true);
+  // Get incident response
+  mockIncidentResponse(true);
+
+  return await service.closeIncident({
+    incidentId: incidentId ?? null,
+    correlationId: correlationId ?? null,
   });
 };
 
@@ -474,7 +516,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://example.com/api/now/v2/table/incident?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=custom_correlation_id^state!=7',
+        url: 'https://example.com/api/now/v2/table/incident?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=custom_correlation_id',
         method: 'get',
       });
     });
@@ -500,22 +542,38 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://example.com/api/now/v2/table/sn_si_incident?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=custom_correlation_id^state!=7',
+        url: 'https://example.com/api/now/v2/table/sn_si_incident?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=custom_correlation_id',
         method: 'get',
       });
     });
 
+    test('it should log warning if no incident found', async () => {
+      requestMock.mockImplementationOnce(() => ({
+        status: 404,
+        data: { result: [] },
+      }));
+      const res = await service.getIncidentByCorrelationId('custom_correlation_id');
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "No incident found with correlation ID custom_correlation_id.",
+        ]
+      `);
+      expect(res).toBe(null);
+    });
+
     test('it should throw an error', async () => {
-      requestMock.mockImplementation(() => {
+      requestMock.mockImplementationOnce(() => {
         throw new Error('An error has occurred');
       });
       await expect(service.getIncidentByCorrelationId('custom_correlation_id')).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to find incidents. Error: An error has occurred Reason: unknown: errorResponse was null'
+        '[Action][ServiceNow]: Unable to get incident by correlation ID custom_correlation_id. Error: An error has occurred Reason: unknown: errorResponse was null'
       );
     });
 
     test('it should throw an error when instance is not alive', async () => {
-      requestMock.mockImplementation(() => ({
+      requestMock.mockImplementationOnce(() => ({
         status: 200,
         data: {},
         request: { connection: { servername: 'Developer instance' } },
@@ -645,6 +703,8 @@ describe('ServiceNow service', () => {
 
       test('it creates the incident correctly', async () => {
         mockIncidentResponse(false);
+        mockIncidentResponse(false);
+
         const res = await service.createIncident({
           incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
         });
@@ -679,6 +739,7 @@ describe('ServiceNow service', () => {
           axiosInstance: axios,
         });
 
+        mockIncidentResponse(false);
         mockIncidentResponse(false);
 
         const res = await service.createIncident({
@@ -820,6 +881,8 @@ describe('ServiceNow service', () => {
 
       test('it updates the incident correctly', async () => {
         mockIncidentResponse(true);
+        mockIncidentResponse(true);
+
         const res = await service.updateIncident({
           incidentId: '1',
           incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
@@ -856,6 +919,7 @@ describe('ServiceNow service', () => {
         });
 
         mockIncidentResponse(false);
+        mockIncidentResponse(true);
 
         const res = await service.updateIncident({
           incidentId: '1',
@@ -877,21 +941,10 @@ describe('ServiceNow service', () => {
   });
 
   describe('closeIncident', () => {
-    const closeIncidentMock = () =>
-      Promise.resolve({
-        title: 'INC01',
-        id: '1',
-        pushedDate: '2020-03-10T12:24:20.000Z',
-        url: 'https://example.com/nav_to.do?uri=incident.do?sys_id=1',
-      });
-
     // new connectors
     describe('import set table', () => {
       test('it closes the incident correctly with incident id', async () => {
-        const spyOnCloseIncident = jest.spyOn(service, 'closeIncident');
-        spyOnCloseIncident.mockImplementation(closeIncidentMock);
-
-        const res = await service.closeIncident({ incidentId: '1', correlationId: null });
+        const res = await closeIncident({ service, incidentId: '1', correlationId: null });
 
         expect(res).toEqual({
           title: 'INC01',
@@ -901,25 +954,55 @@ describe('ServiceNow service', () => {
         });
       });
 
-      test('it should call request with correct arguments', async () => {
-        const spyOnCloseIncident = jest.spyOn(service, 'closeIncident');
-        spyOnCloseIncident.mockImplementation(closeIncidentMock);
+      test('it should call request with correct arguments with incidentId', async () => {
+        const res = await closeIncident({ service, incidentId: '1', correlationId: null });
+        expect(requestMock).toHaveBeenCalledTimes(4);
 
-        await service.closeIncident({ incidentId: '1', correlationId: null });
-
-        expect(spyOnCloseIncident).toHaveBeenNthCalledWith(1, {
-          incidentId: '1',
-          correlationId: null,
+        expect(requestMock).toHaveBeenNthCalledWith(1, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/now/v2/table/incident/1',
+          method: 'get',
         });
+
+        expect(requestMock).toHaveBeenNthCalledWith(2, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/x_elas2_inc_int/elastic_api/health',
+          method: 'get',
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(3, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/now/import/x_elas2_inc_int_elastic_incident',
+          method: 'post',
+          data: {
+            elastic_incident_id: '1',
+            u_close_code: 'Closed/Resolved by Caller',
+            u_state: '7',
+          },
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(4, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/now/v2/table/incident/1',
+          method: 'get',
+        });
+
+        expect(res?.url).toEqual('https://example.com/nav_to.do?uri=incident.do?sys_id=1');
       });
 
       test('it closes the incident correctly with correlation id', async () => {
-        const spyOnCloseIncident = jest.spyOn(service, 'closeIncident');
-        spyOnCloseIncident.mockImplementation(closeIncidentMock);
-
-        const res = await service.closeIncident({
-          correlationId: 'custom correlation id',
+        const res = await closeIncident({
+          service,
           incidentId: null,
+          correlationId: 'custom_correlation_id',
         });
 
         expect(res).toEqual({
@@ -931,15 +1014,52 @@ describe('ServiceNow service', () => {
       });
 
       test('it should call request with correct arguments with correlationId', async () => {
-        const spyOnCloseIncident = jest.spyOn(service, 'closeIncident');
-        spyOnCloseIncident.mockImplementation(closeIncidentMock);
-
-        await service.closeIncident({ correlationId: 'custom correlation id', incidentId: null });
-
-        expect(spyOnCloseIncident).toHaveBeenNthCalledWith(1, {
-          correlationId: 'custom correlation id',
+        const res = await closeIncident({
+          service,
           incidentId: null,
+          correlationId: 'custom_correlation_id',
         });
+
+        expect(requestMock).toHaveBeenCalledTimes(4);
+
+        expect(requestMock).toHaveBeenNthCalledWith(1, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/now/v2/table/incident?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=custom_correlation_id',
+          method: 'get',
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(2, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/x_elas2_inc_int/elastic_api/health',
+          method: 'get',
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(3, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/now/import/x_elas2_inc_int_elastic_incident',
+          method: 'post',
+          data: {
+            elastic_incident_id: '1',
+            u_close_code: 'Closed/Resolved by Caller',
+            u_state: '7',
+          },
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(4, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/now/v2/table/incident/1',
+          method: 'get',
+        });
+
+        expect(res?.url).toEqual('https://example.com/nav_to.do?uri=incident.do?sys_id=1');
       });
 
       test('it should throw an error when the incidentId and correlation Id are null', async () => {
@@ -950,24 +1070,53 @@ describe('ServiceNow service', () => {
         );
       });
 
-      test('it should throw an error when no incidents found with given correlation', async () => {
+      test('it should throw an error when the no incidents found with given incidentId ', async () => {
         await expect(
-          service.closeIncident({ incidentId: null, correlationId: 'foo' })
+          service.closeIncident({ incidentId: 'xyz', correlationId: null })
         ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to find incidents. Error: No incident found with correlation_id: foo. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
+          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to update incident with id undefined. Error: An error has occurred while importing the incident Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
         );
       });
 
-      test('it should throw an error when the application is not installed', async () => {
-        requestMock.mockImplementation(() => {
-          throw new Error('An error has occurred');
-        });
-
+      test('it should throw an error when no incidents found with given correlationId', async () => {
         await expect(
-          service.closeIncident({ incidentId: '1', correlationId: null })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
-        );
+          service.closeIncident({ incidentId: null, correlationId: 'foo' })
+        ).resolves.toBe(null);
+      });
+
+      test('it should throw warning if found incident is closed', async () => {
+        requestMock.mockImplementationOnce(() => ({
+          data: {
+            result: {
+              sys_id: '1',
+              number: 'INC01',
+              state: 7,
+              sys_created_on: '2020-03-10 12:24:20',
+            },
+          },
+        }));
+
+        await service.closeIncident({ incidentId: '1', correlationId: null });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+        expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Incident is already closed.",
+        ]
+      `);
+      });
+
+      test('it should return null if found incident with correlation id is null', async () => {
+        requestMock.mockImplementationOnce(() => ({
+          data: {
+            result: [null],
+          },
+        }));
+
+        const res = await service.closeIncident({ incidentId: null, correlationId: 'bar' });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+        expect(res).toBeNull();
       });
 
       test('it should throw an error when instance is not alive', async () => {
@@ -983,18 +1132,6 @@ describe('ServiceNow service', () => {
           })
         ).rejects.toThrow(
           'There is an issue with your Service Now Instance. Please check Developer instance.'
-        );
-      });
-
-      test('it should throw an error when there is an import set api error', async () => {
-        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
-        await expect(
-          service.closeIncident({
-            incidentId: '1',
-            correlationId: null,
-          })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: An error has occurred while importing the incident Reason: unknown'
         );
       });
     });
@@ -1015,8 +1152,9 @@ describe('ServiceNow service', () => {
       });
 
       test('it closes the incident correctly', async () => {
-        const spyOnCloseIncident = jest.spyOn(service, 'closeIncident');
-        spyOnCloseIncident.mockImplementation(closeIncidentMock);
+        mockIncidentResponse(false);
+        mockImportIncident(true);
+        mockIncidentResponse(true);
 
         const res = await service.closeIncident({
           incidentId: '1',
@@ -1028,11 +1166,6 @@ describe('ServiceNow service', () => {
           id: '1',
           pushedDate: '2020-03-10T12:24:20.000Z',
           url: 'https://example.com/nav_to.do?uri=incident.do?sys_id=1',
-        });
-
-        expect(spyOnCloseIncident).toHaveBeenNthCalledWith(1, {
-          incidentId: '1',
-          correlationId: null,
         });
       });
 
@@ -1048,7 +1181,8 @@ describe('ServiceNow service', () => {
           axiosInstance: axios,
         });
 
-        mockImportIncident(false);
+        mockIncidentResponse(false);
+        mockImportIncident(true);
         mockIncidentResponse(true);
 
         const res = await service.closeIncident({
@@ -1068,12 +1202,11 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://example.com/api/now/v2/table/sn_si_incident',
-          method: 'post',
+          url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
+          method: 'patch',
           data: {
-            u_close_code: 'Closed/Resolved by Caller',
-            elastic_incident_id: undefined,
-            u_state: '7',
+            close_code: 'Closed/Resolved by Caller',
+            state: '7',
           },
         });
 
@@ -1081,11 +1214,11 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
+          url: 'https://example.com/api/now/v2/table/sn_si_incident/undefined',
           method: 'get',
         });
 
-        expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
+        expect(res?.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
       });
     });
   });

@@ -116,7 +116,9 @@ export interface ExternalService {
   getFields: () => Promise<GetCommonFieldsResponse>;
   createIncident: (params: ExternalServiceParamsCreate) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParamsUpdate) => Promise<ExternalServiceIncidentResponse>;
-  closeIncident: (params: ExternalServiceParamsClose) => Promise<ExternalServiceIncidentResponse>;
+  closeIncident: (
+    params: ExternalServiceParamsClose
+  ) => Promise<ExternalServiceIncidentResponse | null>;
   findIncidents: (params?: Record<string, string>) => Promise<ServiceNowIncident>;
   getUrl: () => string;
   checkInstance: (res: AxiosResponse) => void;
@@ -215,7 +217,9 @@ export interface ExternalServiceAPI {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<ServiceNowIncident>;
-  closeIncident: (args: CloseIncidentApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
+  closeIncident: (
+    args: CloseIncidentApiHandlerArgs
+  ) => Promise<ExternalServiceIncidentResponse | null>;
 }
 
 export interface ExternalServiceCommentResponse {
