@@ -27,7 +27,7 @@ import {
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { DataStream, MonitorFields } from '../../../../../../common/runtime_types';
+import { MonitorTypeEnum, MonitorFields } from '../../../../../../common/runtime_types';
 import { inspectMonitorAPI, MonitorInspectResponse } from '../../../state/monitor_management/api';
 
 interface InspectorProps {
@@ -159,7 +159,7 @@ const formatContent = (result: MonitorInspectResponse) => {
 
   const currentInput = result.privateConfig?.inputs.find((input) => input.enabled);
   const compiledConfig = currentInput?.streams.find((stream) =>
-    Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
+    Object.values(MonitorTypeEnum).includes(stream.data_stream.dataset as MonitorTypeEnum)
   )?.compiled_stream;
 
   return JSON.stringify(

@@ -21,6 +21,7 @@ import {
   RISK_ENGINE_DISABLE_URL,
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_STATUS_URL,
+  RISK_ENGINE_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
   createRule,
@@ -499,6 +500,20 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(200),
+});
+
+export const riskEngineRouteHelpersFactoryNoAuth = (
+  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  namespace?: string
+) => ({
+  privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
+    await supertestWithoutAuth
+      .get(RISK_ENGINE_PRIVILEGES_URL)
+      .auth(username, password)
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
