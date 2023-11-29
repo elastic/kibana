@@ -102,8 +102,6 @@ export class CspPlugin
     core: CoreStart,
     plugins: CspServerPluginStartDeps
   ): Promise<CspServerPluginStart> {
-    const soClient = core.savedObjects.createInternalRepository();
-
     plugins.fleet.fleetSetupCompleted().then(async () => {
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
         CLOUD_SECURITY_POSTURE_PACKAGE_NAME
@@ -185,6 +183,7 @@ export class CspPlugin
         async (deletedPackagePolicies: DeepReadonly<PostDeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
+              const soClient = core.savedObjects.createInternalRepository();
               const packagePolicyService = plugins.fleet.packagePolicyService;
               const isPackageExists = await isCspPackagePolicyInstalled(
                 packagePolicyService,
@@ -200,8 +199,6 @@ export class CspPlugin
       );
     });
 
-    await getCspSettingObjectSafe(soClient, this.logger);
-
     return {};
   }
 
@@ -216,6 +213,7 @@ export class CspPlugin
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
+    await getCspSettingObjectSafe(core.savedObjects.createInternalRepository(), this.logger);
     this.#isInitialized = true;
   }
 

@@ -28,7 +28,7 @@ const muteStatesMap = {
   unmute: false,
 };
 
-const updateRulesStates = async (
+export const updateRulesStates = async (
   soClient: SavedObjectsClientContract,
   newRulesStates: CspRulesStates
 ) => {
@@ -39,7 +39,7 @@ const updateRulesStates = async (
   );
 };
 
-const setRulesStates = (
+export const setRulesStates = (
   currentRulesStates: CspRulesStates,
   ruleIds: string[],
   state: boolean
@@ -67,7 +67,7 @@ export const createCspSettingObject = async (soClient: SavedObjectsClientContrac
   );
 };
 
-const getCspSettings = async (
+export const getCspSettings = async (
   soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<CspSettings | undefined> => {
@@ -98,7 +98,7 @@ export const getCspSettingObjectSafe = async (
   return cspSettings;
 };
 
-export const defineUpdateCspRuleState = (router: CspRouter) =>
+export const defineUpdateCspRuleStateRoute = (router: CspRouter) =>
   router.versioned
     .get({
       access: 'internal',
@@ -124,7 +124,7 @@ export const defineUpdateCspRuleState = (router: CspRouter) =>
 
           const cspSettings = await getCspSettingObjectSafe(cspContext.soClient, cspContext.logger);
 
-          const currentRulesStates = cspSettings.attributes.rules_states;
+          const currentRulesStates = cspSettings.rules_states;
 
           const newRulesStates = setRulesStates(
             currentRulesStates,
