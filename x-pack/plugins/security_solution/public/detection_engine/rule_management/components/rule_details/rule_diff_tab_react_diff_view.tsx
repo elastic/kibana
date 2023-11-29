@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useContext, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { css, Global } from '@emotion/react';
 import {
@@ -22,27 +22,10 @@ import {
 import 'react-diff-view/style/index.css';
 import type { RenderGutter, HunkData, DecorationProps, TokenizeOptions } from 'react-diff-view';
 import unidiff from 'unidiff';
-import { get } from 'lodash';
-import {
-  EuiSpacer,
-  EuiAccordion,
-  EuiIcon,
-  EuiLink,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  useGeneratedHtmlId,
-  useEuiTheme,
-  EuiSwitch,
-  EuiRadioGroup,
-} from '@elastic/eui';
-import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
+import { EuiSpacer, EuiIcon, EuiLink, useEuiTheme, EuiSwitch, EuiRadioGroup } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { markEditsBy, DiffMethod } from './mark_edits_by_word';
-
-const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
-
-const CompareMethodContext = React.createContext(DiffMethod.CHARS);
+import { sortAndStringifyJson } from './json_diff/sort_stringify_json';
 
 interface UnfoldProps extends Omit<DecorationProps, 'children'> {
   start: number;
@@ -158,7 +141,7 @@ const useExpand = (hunks: HunkData[], oldSource: string, newSource: string) => {
   };
 };
 
-const useTokens = (hunks: HunkData[], compareMethod: DiffMethod, oldSource: string) => {
+const useTokens = (hunks: HunkData[], diffMethod: DiffMethod, oldSource: string) => {
   if (!hunks) {
     return undefined;
   }
@@ -168,12 +151,12 @@ const useTokens = (hunks: HunkData[], compareMethod: DiffMethod, oldSource: stri
     highlight: false,
     enhancers: [
       /*
-        "markEditsBy" is a slightly modified version of "markEdits" enhancer from react-diff-view 
+        "markEditsBy" is a slightly modified version of "markEdits" enhancer from react-diff-view
         to enable word-level highlighting.
       */
-      compareMethod === DiffMethod.CHARS
+      diffMethod === DiffMethod.CHARS
         ? markEdits(hunks, { type: 'block' }) // Using built-in "markEdits" enhancer for char-level diffing
-        : markEditsBy(hunks, compareMethod), // Using custom "markEditsBy" enhancer for other-level diffing
+        : markEditsBy(hunks, diffMethod), // Using custom "markEditsBy" enhancer for other-level diffing
     ],
   };
 
@@ -191,7 +174,7 @@ const useTokens = (hunks: HunkData[], compareMethod: DiffMethod, oldSource: stri
 };
 
 const convertToDiffFile = (oldSource: string, newSource: string) => {
-  /* 
+  /*
     "diffLines" call below converts two strings of text into an array of Change objects.
     Change objects look like this:
     [
@@ -258,6 +241,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
 interface DiffViewProps {
   oldSource: string;
   newSource: string;
+  diffMethod: DiffMethod;
 }
 
 interface HunksProps {
@@ -349,9 +333,7 @@ const CustomStyles = ({ children }: CustomStylesProps) => {
   );
 };
 
-function DiffView({ oldSource, newSource }: DiffViewProps) {
-  const compareMethod = useContext(CompareMethodContext);
-
+function DiffView({ oldSource, newSource, diffMethod }: DiffViewProps) {
   /*
     "react-diff-view" components consume diffs not as a strings, but as something they call "hunks".
     So we first need to convert our "before" and "after" strings into these "hunks".
@@ -363,7 +345,7 @@ function DiffView({ oldSource, newSource }: DiffViewProps) {
   */
   const diffFile = useMemo(() => convertToDiffFile(oldSource, newSource), [oldSource, newSource]);
 
-  /* 
+  /*
     Sections of diff without changes are hidden by default, because they are not present in the "hunks" array.
 
     "useExpand" allows to show these hidden sections when user clicks on "Expand hidden <number> lines" button.
@@ -378,15 +360,15 @@ function DiffView({ oldSource, newSource }: DiffViewProps) {
     Here we go over each hunk and extract tokens from it. For example, splitting strings into words,
     so we can later highlight changes on a word-by-word basis vs line-by-line.
   */
-  const tokens = useTokens(hunks, compareMethod, oldSource);
+  const tokens = useTokens(hunks, diffMethod, oldSource);
 
   return (
     <Diff
       viewType={'split'} // Can be 'unified' or 'split'
-      /* 
+      /*
         "diffType": can be 'add', 'delete', 'modify', 'rename' or 'copy'
         passing 'add' or 'delete' would skip rendering one of the sides in split view.
-        As I understand we'll never end up with anything other than 'modify' here, 
+        As I understand we'll never end up with anything other than 'modify' here,
         because we always have two string to compare.
       */
       diffType={diffFile.type}
@@ -402,78 +384,8 @@ function DiffView({ oldSource, newSource }: DiffViewProps) {
   );
 }
 
-interface FieldsProps {
-  fields: Partial<RuleFieldsDiff>;
-  openSections: Record<string, boolean>;
-  toggleSection: (sectionName: string) => void;
-}
-
-const Fields = ({ fields, openSections, toggleSection }: FieldsProps) => {
-  const visibleFields = Object.keys(fields).filter(
-    (fieldName) => !HIDDEN_FIELDS.includes(fieldName)
-  );
-
-  return (
-    <>
-      {visibleFields.map((fieldName) => {
-        const currentVersion: string = get(fields, [fieldName, 'current_version'], '');
-        const mergedVersion: string = get(fields, [fieldName, 'merged_version'], '');
-
-        const oldSource = JSON.stringify(currentVersion, null, 2);
-        const newSource = JSON.stringify(mergedVersion, null, 2);
-
-        return (
-          <>
-            <ExpandableSection
-              title={fieldName}
-              isOpen={openSections[fieldName]}
-              toggle={() => {
-                toggleSection(fieldName);
-              }}
-            >
-              <DiffView oldSource={oldSource} newSource={newSource} />
-            </ExpandableSection>
-            <EuiHorizontalRule margin="m" />
-          </>
-        );
-      })}
-    </>
-  );
-};
-
-interface ExpandableSectionProps {
-  title: string;
-  isOpen: boolean;
-  toggle: () => void;
-  children: React.ReactNode;
-}
-
-const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectionProps) => {
-  const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
-
-  return (
-    <EuiAccordion
-      forceState={isOpen ? 'open' : 'closed'}
-      onToggle={toggle}
-      paddingSize="none"
-      id={accordionId}
-      buttonContent={
-        <EuiTitle size="s">
-          <h3>{title}</h3>
-        </EuiTitle>
-      }
-      initialIsOpen={true}
-    >
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none" direction="column">
-        {children}
-      </EuiFlexGroup>
-    </EuiAccordion>
-  );
-};
-
 const renderGutter: RenderGutter = ({ change }) => {
-  /* 
+  /*
     Custom gutter (a column where you normally see line numbers).
     Here's I am returning "+" or "-" so the diff is more readable by colorblind people.
   */
@@ -490,59 +402,12 @@ const renderGutter: RenderGutter = ({ change }) => {
   }
 };
 
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  JSON.stringify(jsObject, Object.keys(jsObject).sort(), 2);
-
-interface WholeObjectDiffProps {
-  oldRule: RuleResponse;
-  newRule: RuleResponse;
-  openSections: Record<string, boolean>;
-  toggleSection: (sectionName: string) => void;
-}
-
-const WholeObjectDiff = ({
-  oldRule,
-  newRule,
-  openSections,
-  toggleSection,
-}: WholeObjectDiffProps) => {
-  const oldSource = sortAndStringifyJson(oldRule);
-  const newSource = sortAndStringifyJson(newRule);
-
-  return (
-    <>
-      <ExpandableSection
-        title={'Whole object diff'}
-        isOpen={openSections.whole}
-        toggle={() => {
-          toggleSection('whole');
-        }}
-      >
-        <DiffView oldSource={oldSource} newSource={newSource} />
-      </ExpandableSection>
-      <EuiHorizontalRule margin="m" />
-    </>
-  );
-};
-
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
-  fields: Partial<RuleFieldsDiff>;
 }
 
-export const RuleDiffTabReactDiffView = ({ fields, oldRule, newRule }: RuleDiffTabProps) => {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
-    Object.keys(fields).reduce((sections, fieldName) => ({ ...sections, [fieldName]: true }), {})
-  );
-
-  const toggleSection = (sectionName: string) => {
-    setOpenSections((prevOpenSections) => ({
-      ...prevOpenSections,
-      [sectionName]: !prevOpenSections[sectionName],
-    }));
-  };
-
+export const RuleDiffTabReactDiffView = ({ oldRule, newRule }: RuleDiffTabProps) => {
   const options = [
     {
       id: DiffMethod.CHARS,
@@ -566,16 +431,20 @@ export const RuleDiffTabReactDiffView = ({ fields, oldRule, newRule }: RuleDiffT
     },
   ];
 
-  const [compareMethod, setCompareMethod] = useState<DiffMethod>(DiffMethod.CHARS);
+  const [diffMethod, setDiffMethod] = useState<DiffMethod>(DiffMethod.CHARS);
+
+  const [oldSource, newSource] = useMemo(() => {
+    return [sortAndStringifyJson(oldRule), sortAndStringifyJson(newRule)];
+  }, [oldRule, newRule]);
 
   return (
     <>
       <EuiSpacer size="m" />
       <EuiRadioGroup
         options={options}
-        idSelected={compareMethod}
+        idSelected={diffMethod}
         onChange={(optionId) => {
-          setCompareMethod(optionId as DiffMethod);
+          setDiffMethod(optionId as DiffMethod);
         }}
         legend={{
           children: <span>{'Diffing algorthm'}</span>,
@@ -583,15 +452,7 @@ export const RuleDiffTabReactDiffView = ({ fields, oldRule, newRule }: RuleDiffT
       />
       <EuiSpacer size="m" />
       <CustomStyles>
-        <CompareMethodContext.Provider value={compareMethod}>
-          <WholeObjectDiff
-            oldRule={oldRule}
-            newRule={newRule}
-            openSections={openSections}
-            toggleSection={toggleSection}
-          />
-          <Fields fields={fields} openSections={openSections} toggleSection={toggleSection} />
-        </CompareMethodContext.Provider>
+        <DiffView oldSource={oldSource} newSource={newSource} diffMethod={diffMethod} />
       </CustomStyles>
     </>
   );
