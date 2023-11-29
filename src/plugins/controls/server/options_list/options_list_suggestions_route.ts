@@ -16,9 +16,10 @@ import { schema } from '@kbn/config-schema';
 
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
-import { getExpensiveSuggestionAggregationBuilder } from './options_list_expensive_suggestion_queries';
-import { getCheapSuggestionAggregationBuilder } from './options_list_cheap_suggestion_queries';
+import { getSuggestionAggregationBuilder } from './options_list_suggestion_queries';
 import { OptionsListSuggestionAggregationBuilder } from './types';
+import { genericFetchAllSuggestions } from './options_list_all_suggestions_query';
+import { exactMatchSearchAggregation } from './options_list_exact_match_search_query';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
@@ -51,6 +52,13 @@ export const setupOptionsListSuggestionsRoute = (
                 fieldSpec: schema.maybe(schema.any()),
                 allowExpensiveQueries: schema.boolean(),
                 searchString: schema.maybe(schema.string()),
+                searchTechnique: schema.maybe(
+                  schema.oneOf([
+                    schema.literal('exact'),
+                    schema.literal('prefix'),
+                    schema.literal('wildcard'),
+                  ])
+                ),
                 selectedOptions: schema.maybe(
                   schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(schema.number())])
                 ),
@@ -105,10 +113,15 @@ export const setupOptionsListSuggestionsRoute = (
 
     let suggestionBuilder: OptionsListSuggestionAggregationBuilder;
     const hasSearchString = request.searchString && request.searchString.length > 0;
-    if (allowExpensiveQueries) {
-      suggestionBuilder = getExpensiveSuggestionAggregationBuilder(request);
+    if (!hasSearchString) {
+      // the field type only matters when there is a search string; so, if no search string,
+      // return generic "fetch all" aggregation builder
+      suggestionBuilder = genericFetchAllSuggestions;
+    } else if (!allowExpensiveQueries || request.searchTechnique === 'exact') {
+      // if `allowExpensiveQueries` is false, only support exact match searching
+      suggestionBuilder = exactMatchSearchAggregation;
     } else {
-      suggestionBuilder = getCheapSuggestionAggregationBuilder(request);
+      suggestionBuilder = getSuggestionAggregationBuilder(request);
     }
     const validationBuilder = getValidationAggregationBuilder();
 
@@ -136,7 +149,6 @@ export const setupOptionsListSuggestionsRoute = (
       },
     };
 
-    // console.log('BODY', JSON.stringify(body));
     /**
      * Run ES query
      */

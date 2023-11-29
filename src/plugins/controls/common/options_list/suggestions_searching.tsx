@@ -18,7 +18,7 @@ export const getDefaultSearchTechnique = (type: string): OptionsListSearchTechni
 export const getCompatibleSearchTechniques = (type?: string): OptionsListSearchTechnique[] => {
   switch (type) {
     case 'string': {
-      return ['prefix', 'wildcard'];
+      return ['prefix', 'wildcard', 'exact'];
     }
     case 'ip': {
       return ['prefix', 'exact'];

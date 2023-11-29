@@ -316,7 +316,7 @@ export class OptionsListEmbeddable
           filters,
           dataView,
           timeRange,
-          searchTechnique: allowExpensiveQueries,
+          searchTechnique,
           runPastTimeout,
           selectedOptions,
           allowExpensiveQueries,
