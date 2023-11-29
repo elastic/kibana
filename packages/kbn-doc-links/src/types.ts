@@ -525,6 +525,9 @@ export interface DocLinks {
     agentPolicy: string;
     api: string;
     uninstallAgent: string;
+    installAndUninstallIntegrationAssets: string;
+    elasticAgentInputConfiguration: string;
+    policySecrets: string;
   }>;
   readonly ecs: {
     readonly guide: string;

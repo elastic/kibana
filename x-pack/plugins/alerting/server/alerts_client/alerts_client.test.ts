@@ -1071,6 +1071,22 @@ describe('Alerts Client', () => {
               },
               {
                 index: {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _id: '7',
+                  status: 404,
+                  error: {
+                    type: 'mapper_parsing_exception',
+                    reason:
+                      "failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'. Preview of field's value: 'we don't want this field value to be echoed'",
+                    caused_by: {
+                      type: 'illegal_state_exception',
+                      reason: "Can't get text on a START_OBJECT at 1:3845",
+                    },
+                  },
+                },
+              },
+              {
+                index: {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _id: '1',
                   _version: 1,
@@ -1106,7 +1122,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing alerts: 1 successful, 0 conflicts, 1 errors: Validation Failed: 1: index is missing;2: type is missing;`
+            `Error writing alerts: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`
           );
         });
 
