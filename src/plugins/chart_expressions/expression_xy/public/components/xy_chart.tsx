@@ -30,8 +30,6 @@ import {
   Tooltip,
   XYChartSeriesIdentifier,
   SettingsProps,
-  LEGACY_LIGHT_THEME,
-  LEGACY_CHART_MARGINS,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
@@ -115,6 +113,13 @@ import './xy_chart.scss';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
+
+export const LEGACY_CHART_MARGINS = {
+  left: 10,
+  right: 10,
+  top: 10,
+  bottom: 10,
+};
 
 declare global {
   interface Window {
