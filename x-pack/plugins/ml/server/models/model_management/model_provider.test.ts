@@ -78,7 +78,7 @@ describe('modelsProvider', () => {
         },
         {
           config: { input: { field_names: ['text_field'] } },
-          description: 'E5 multilingual embedding model',
+          description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
           name: '.multilingual-e5-small',
           default: true,
           version: 1,
@@ -87,7 +87,8 @@ describe('modelsProvider', () => {
         {
           arch: 'amd64',
           config: { input: { field_names: ['text_field'] } },
-          description: 'E5 multilingual embedding model, optimized for linux-x86_64',
+          description:
+            'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
           name: '.multilingual-e5-small_linux-x86_64',
           os: 'Linux',
           recommended: true,
@@ -149,7 +150,7 @@ describe('modelsProvider', () => {
         },
         {
           config: { input: { field_names: ['text_field'] } },
-          description: 'E5 multilingual embedding model',
+          description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
           name: '.multilingual-e5-small',
           recommended: true,
           version: 1,
@@ -158,7 +159,8 @@ describe('modelsProvider', () => {
         {
           arch: 'amd64',
           config: { input: { field_names: ['text_field'] } },
-          description: 'E5 multilingual embedding model, optimized for linux-x86_64',
+          description:
+            'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
           name: '.multilingual-e5-small_linux-x86_64',
           os: 'Linux',
           version: 1,
