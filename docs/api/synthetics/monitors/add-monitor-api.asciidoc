@@ -187,7 +187,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 ==== Examples
 
-Here are three examples of creating monitors with different types:
+Here are some examples of creating monitors of different types:
 
 1. **HTTP Monitor**:
 Create an HTTP monitor to check a website's availability.
