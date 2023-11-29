@@ -43,6 +43,7 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { parseQueryParams } from '../../../../shared/query_params';
+import { useLocalStorage } from '../../../../shared/use_local_storage';
 
 import { NEW_INDEX_METHOD_PATH, NEW_INDEX_PATH } from '../../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
@@ -87,6 +88,11 @@ export const SelectConnector: React.FC = () => {
     Array.isArray(serviceType) ? serviceType[0] : serviceType ?? null
   );
 
+  const [calloutDismissed, setCalloutDismissed] = useLocalStorage<boolean>(
+    'search-connectors-callout-dismissed',
+    false
+  );
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, 'Select connector']}
@@ -117,7 +123,7 @@ export const SelectConnector: React.FC = () => {
       >
         <EuiFormFieldset
           legend={{
-            children: (
+            children: !calloutDismissed && (
               <EuiCallOut
                 size="m"
                 title={i18n.translate(
@@ -168,6 +174,14 @@ export const SelectConnector: React.FC = () => {
                     }}
                   />
                 </p>
+                <EuiButton fill onClick={() => setCalloutDismissed(true)}>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.connectorsCallout.dismissButton',
+                    {
+                      defaultMessage: 'Dismiss',
+                    }
+                  )}
+                </EuiButton>
               </EuiCallOut>
             ),
           }}
