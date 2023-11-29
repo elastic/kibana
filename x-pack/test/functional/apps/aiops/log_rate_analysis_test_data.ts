@@ -29,6 +29,16 @@ export const logRateAnalysisTestData: TestData[] = [
     gaps: false,
   }),
   getArtificialLogDataViewTestData({
+    analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
+    textField: false,
+    gaps: false,
+  }),
+  getArtificialLogDataViewTestData({
+    analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
+    textField: true,
+    gaps: false,
+  }),
+  getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: true,
     gaps: true,
@@ -40,12 +50,12 @@ export const logRateAnalysisTestData: TestData[] = [
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
-    textField: false,
-    gaps: false,
+    textField: true,
+    gaps: true,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
-    textField: true,
-    gaps: false,
+    textField: false,
+    gaps: true,
   }),
 ];

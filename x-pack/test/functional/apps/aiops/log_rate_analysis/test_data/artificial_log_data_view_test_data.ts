@@ -88,10 +88,18 @@ export const getArtificialLogDataViewTestData = ({
   }
 
   function getBrushBaselineTargetTimestamp() {
+    if (analysisType === 'dip' && gaps) {
+      return DEVIATION_TS;
+    }
+
     return gaps ? BASELINE_TS - DAY_MS / 2 : BASELINE_TS + DAY_MS / 2;
   }
 
   function getBrushDeviationTargetTimestamp() {
+    if (analysisType === 'dip' && gaps) {
+      return DEVIATION_TS + DAY_MS * 1.5;
+    }
+
     return gaps ? DEVIATION_TS : DEVIATION_TS + DAY_MS / 2;
   }
 

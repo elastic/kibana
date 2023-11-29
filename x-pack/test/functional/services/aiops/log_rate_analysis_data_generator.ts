@@ -295,9 +295,13 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
 
           const dataGeneratorOptions = dataGenerator.split('_');
-          const deviationType = dataGeneratorOptions[3] ?? LOG_RATE_ANALYSIS_TYPE.SPIKE;
+          let deviationType = dataGeneratorOptions[3] ?? LOG_RATE_ANALYSIS_TYPE.SPIKE;
           const textField = dataGeneratorOptions[4] === 'textfield' ?? false;
           const gaps = dataGeneratorOptions[5] === 'gaps' ?? false;
+
+          if (gaps) {
+            deviationType = LOG_RATE_ANALYSIS_TYPE.SPIKE;
+          }
 
           await es.bulk({
             refresh: 'wait_for',
