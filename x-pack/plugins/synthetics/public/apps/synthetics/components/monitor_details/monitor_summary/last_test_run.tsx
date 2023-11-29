@@ -28,7 +28,7 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   EncryptedSyntheticsSavedMonitor,
   Ping,
   SyntheticsJourneyApiResponse,
@@ -122,7 +122,7 @@ export const LastTestRunComponent = ({
 
       <EuiSpacer size="m" />
 
-      {monitor?.type === DataStream.BROWSER ? (
+      {monitor?.type === MonitorTypeEnum.BROWSER ? (
         <BrowserStepsList
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
@@ -156,7 +156,7 @@ const PanelHeader = ({
   const formatter = useDateFormat();
   const lastRunTimestamp = formatter(latestPing?.timestamp);
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
+  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
 
   const TitleNode = (
     <EuiTitle size="xs">

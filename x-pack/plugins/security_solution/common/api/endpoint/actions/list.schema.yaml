@@ -13,7 +13,7 @@ paths:
           in: query
           required: true
           schema:
-            $ref: '#/components/schemas/ListRequestQuery'
+            $ref: '#/components/schemas/EndpointActionListRequestQuery'
       responses:
         '200':
           description: OK
@@ -23,7 +23,7 @@ paths:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 components:
   schemas:
-    ListRequestQuery:
+    EndpointActionListRequestQuery:
       type: object
       properties:
         agentIds:

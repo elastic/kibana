@@ -12,7 +12,7 @@ import {
   EncryptedSyntheticsMonitor,
   ConfigKey,
   FormMonitorType,
-  DataStream,
+  MonitorTypeEnum,
 } from '../../../../../../common/runtime_types';
 
 export function MonitorTypeBadge({
@@ -55,7 +55,7 @@ function getMonitorTypeBadgeTitle(monitor: EncryptedSyntheticsMonitor) {
   }
 
   switch (monitor?.type) {
-    case DataStream.BROWSER:
+    case MonitorTypeEnum.BROWSER:
       return 'Journey';
     default:
       return monitor?.type?.toUpperCase();
