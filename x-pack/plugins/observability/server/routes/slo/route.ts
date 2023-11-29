@@ -211,7 +211,13 @@ const enableSLORoute = createObservabilityServerRoute({
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const manageSLO = new ManageSLO(repository, transformManager);
+    const summaryTransformManager = new DefaultSummaryTransformManager(
+      new DefaultSummaryTransformGenerator(),
+      esClient,
+      logger
+    );
+
+    const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
     const response = await manageSLO.enable(params.path.id);
 
@@ -234,7 +240,13 @@ const disableSLORoute = createObservabilityServerRoute({
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const manageSLO = new ManageSLO(repository, transformManager);
+    const summaryTransformManager = new DefaultSummaryTransformManager(
+      new DefaultSummaryTransformGenerator(),
+      esClient,
+      logger
+    );
+
+    const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
     const response = await manageSLO.disable(params.path.id);
 
