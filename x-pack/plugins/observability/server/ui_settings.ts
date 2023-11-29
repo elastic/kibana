@@ -491,7 +491,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.0425,
     description: i18n.translate(
-      'xpack.observability.profilingPervCPUWattArm64UiSettingDescription',
+      'xpack.observability.profilingCostPervCPUPerHourUiSettingNameDescription',
       {
         defaultMessage: `Default average cost per CPU core per hour (Non-AWS instances only)`,
       }
