@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  AggregationsCustomCategorizeTextAnalyzer,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
@@ -30,6 +33,7 @@ export function createCategoryRequest(
       categorize_text: {
         field,
         size: CATEGORY_LIMIT,
+        categorization_analyzer: categorizationAnalyzer,
       },
       aggs: {
         hit: {
@@ -64,3 +68,61 @@ export function createCategoryRequest(
     },
   };
 }
+
+const categorizationAnalyzer: AggregationsCustomCategorizeTextAnalyzer = {
+  char_filter: ['first_line_with_letters'],
+  tokenizer: 'standard',
+  filter: [
+    // @ts-expect-error filter type in AggregationsCustomCategorizeTextAnalyzer is incorrect
+    {
+      type: 'stop',
+      stopwords: [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+        'Mon',
+        'Tue',
+        'Wed',
+        'Thu',
+        'Fri',
+        'Sat',
+        'Sun',
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+        'GMT',
+        'UTC',
+      ],
+    },
+    // @ts-expect-error filter type in AggregationsCustomCategorizeTextAnalyzer is incorrect
+    {
+      type: 'limit',
+      max_token_count: '100',
+    },
+  ],
+};
