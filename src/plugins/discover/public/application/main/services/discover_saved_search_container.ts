@@ -8,18 +8,24 @@
 
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { isEqual, cloneDeep } from 'lodash';
+import { isEqual, cloneDeep, isFunction } from 'lodash';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { DiscoverAppState } from './discover_app_state_container';
+import { DiscoverAppState, isEqualFilters } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
+
+const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
+  ...COMPARE_ALL_OPTIONS,
+  state: false,
+};
 
 export interface UpdateParams {
   /**
@@ -284,11 +290,13 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   const hasChangesInSearchSource = (
     ['filter', 'query', 'index'] as Array<keyof SearchSourceFields>
   ).some((key) => {
-    const prevValue =
-      key === 'index' ? prevSearchSource.getField(key)?.id : prevSearchSource.getField(key);
-    const nextValue =
-      key === 'index' ? nextSearchSource.getField(key)?.id : nextSearchSource.getField(key);
-    const isSame = isEqual(prevValue, nextValue);
+    const prevValue = getSearchSourceFieldValueForComparison(prevSearchSource, key);
+    const nextValue = getSearchSourceFieldValueForComparison(nextSearchSource, key);
+
+    const isSame =
+      key === 'filter'
+        ? isEqualFilters(prevValue, nextValue, FILTERS_COMPARE_OPTIONS)
+        : isEqual(prevValue, nextValue);
 
     if (!isSame) {
       addLog('[savedSearch] difference between initial and changed version', {
@@ -308,4 +316,20 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   addLog('[savedSearch] no difference between initial and changed version');
 
   return true;
+}
+
+function getSearchSourceFieldValueForComparison(
+  searchSource: SavedSearch['searchSource'],
+  searchSourceFieldName: keyof SearchSourceFields
+) {
+  if (searchSourceFieldName === 'index') {
+    return searchSource.getField('index')?.id;
+  }
+
+  if (searchSourceFieldName === 'filter') {
+    const filterField = searchSource.getField('filter');
+    return isFunction(filterField) ? filterField() : filterField;
+  }
+
+  return searchSource.getField(searchSourceFieldName);
 }
