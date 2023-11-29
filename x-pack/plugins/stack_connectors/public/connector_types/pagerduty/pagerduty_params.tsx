@@ -6,12 +6,23 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionParamsProps,
+  JsonEditorWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { PagerDutyActionParams } from '../types';
+import { LinksList } from './links_list';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
   actionParams,
@@ -20,8 +31,20 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   messageVariables,
   errors,
 }) => {
-  const { eventAction, dedupKey, summary, source, severity, timestamp, component, group } =
-    actionParams;
+  const { euiTheme } = useEuiTheme();
+
+  const {
+    eventAction,
+    dedupKey,
+    summary,
+    source,
+    severity,
+    timestamp,
+    component,
+    group,
+    customDetails,
+    links,
+  } = actionParams;
   const severityOptions = [
     {
       value: 'critical',
@@ -125,7 +148,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
+      <EuiFlexGroup css={{ marginTop: euiTheme.size.s }}>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
@@ -157,7 +180,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isTriggerPagerDutyEvent ? (
+      {isTriggerPagerDutyEvent && (
         <>
           <EuiSpacer size="m" />
           <EuiFormRow
@@ -292,8 +315,38 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               inputTargetValue={actionParams.class}
             />
           </EuiFormRow>
+          <EuiFormRow id="pagerDutyCustomDetails" fullWidth>
+            <JsonEditorWithMessageVariables
+              messageVariables={messageVariables}
+              paramsProperty={'customDetails'}
+              inputTargetValue={customDetails}
+              errors={errors.customDetails as string[]}
+              label={i18n.translate(
+                'xpack.stackConnectors.components.pagerDuty.customDetailsFieldLabel',
+                {
+                  defaultMessage: 'Custom Details (optional)',
+                }
+              )}
+              onDocumentsChange={(json: string) => {
+                editAction('customDetails', json, index);
+              }}
+              onBlur={() => {
+                if (!customDetails) {
+                  editAction('customDetails', '', index);
+                }
+              }}
+              data-test-subj="customDetailsJsonEditor"
+            />
+          </EuiFormRow>
+          <LinksList
+            editAction={editAction}
+            errors={errors}
+            index={index}
+            links={links}
+            messageVariables={messageVariables}
+          />
         </>
-      ) : null}
+      )}
     </>
   );
 };

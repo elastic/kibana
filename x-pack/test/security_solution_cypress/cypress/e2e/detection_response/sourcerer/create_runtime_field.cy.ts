@@ -19,9 +19,9 @@ import { refreshPage } from '../../../tasks/security_header';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { createField } from '../../../tasks/create_runtime_field';
 import { openAlertsFieldBrowser } from '../../../tasks/alerts';
-import { deleteRuntimeField } from '../../../tasks/sourcerer';
 import { GET_DATA_GRID_HEADER } from '../../../screens/common/data_grid';
 import { GET_TIMELINE_HEADER } from '../../../screens/timeline';
+import { deleteRuntimeField } from '../../../tasks/api_calls/sourcerer';
 
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';

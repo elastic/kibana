@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
+import type {
+  CheckPrivilegesDynamically,
+  CheckPrivilegesResponse,
+  CheckPrivilegesPayload,
+} from '@kbn/security-plugin/server';
 import type { RequestHandler } from '@kbn/core/server';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -13,10 +17,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import { coreMock } from '@kbn/core/server/mocks';
-
-import type { CheckPrivilegesPayload } from '@kbn/security-plugin/server';
-
-import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
 
 import { API_VERSIONS } from '../../../common/constants';
 
