@@ -56,9 +56,10 @@ export type GetEventValue = <T extends BaseFieldsLatest>(
 
 export type GetFieldValue = (events: EnrichmentType, path: string) => string | undefined;
 
-export type MakeSingleFieldMatchQuery = <T extends BaseFieldsLatest>(params: {
+export type MakeSingleFieldMatchQuery = (params: {
   values: string[];
   searchByField: string;
+  extraFilter?: {};
 }) => Filter;
 
 export type SearchEnrichments = (params: {
@@ -95,6 +96,8 @@ export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
     /** Specifies which fields should be returned when querying the enrichment index. */
     enrichmentResponseFields: string[];
     createEnrichmentFunction: (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
+    // TODO document
+    extraFilter?: {};
   }
 ) => Promise<EventsMapByEnrichments>;
 

@@ -22,11 +22,15 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
   createEnrichmentFunction,
   name,
   enrichmentResponseFields,
+  extraFilter,
 }) => {
   try {
     logger.debug(`Enrichment ${name}: started`);
 
+    // gets just the events we will enrich
     const eventsWithField = events.filter((event) => getEventValue(event, mappingField.eventField));
+
+    // gets the values for that field, and makes a map of field_value to event
     const eventsMapByFieldValue = eventsWithField.reduce((acc, event) => {
       const eventFieldValue = getEventValue(event, mappingField.eventField);
 
@@ -38,7 +42,10 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
       return acc;
     }, {} as { [key: string]: typeof events });
 
+    // list of e.g. user.name's of host.names
     const uniqueEventsValuesToSearchBy = Object.keys(eventsMapByFieldValue);
+
+    // array of arrays of e.g. user.name's of host.names
     const chunksUniqueEventsValuesToSearchBy = chunk(uniqueEventsValuesToSearchBy, MAX_CLAUSES);
 
     const getAllEnrichment = chunksUniqueEventsValuesToSearchBy
@@ -46,6 +53,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
         makeSingleFieldMatchQuery({
           values: enrichmentValuesChunk,
           searchByField: mappingField.enrichmentField,
+          extraFilter,
         })
       )
       .filter((query) => query.query?.bool?.should?.length > 0)
@@ -63,6 +71,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
       .filter((result) => result.status === 'fulfilled')
       .map((result) => (result as PromiseFulfilledResult<EnrichmentType[]>)?.value);
 
+    // search hits.
     const enrichments = flatten(enrichmentsResults);
 
     if (enrichments.length === 0) {

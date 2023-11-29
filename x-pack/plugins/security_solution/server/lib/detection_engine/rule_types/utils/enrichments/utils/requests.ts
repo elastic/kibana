@@ -7,7 +7,12 @@
 
 import type { MakeSingleFieldMatchQuery } from '../types';
 
-export const makeSingleFieldMatchQuery: MakeSingleFieldMatchQuery = ({ values, searchByField }) => {
+/** makes a query that gets back any documents with the given `values` in the `searchByField` */
+export const makeSingleFieldMatchQuery: MakeSingleFieldMatchQuery = ({
+  values,
+  searchByField,
+  extraFilter,
+}) => {
   const shouldClauses = values.map((value) => ({
     match: {
       [searchByField]: {
@@ -25,6 +30,7 @@ export const makeSingleFieldMatchQuery: MakeSingleFieldMatchQuery = ({ values, s
     query: {
       bool: {
         should: shouldClauses,
+        ...extraFilter,
         minimum_should_match: 1,
       },
     },
