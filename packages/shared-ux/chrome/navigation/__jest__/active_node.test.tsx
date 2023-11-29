@@ -8,36 +8,35 @@
 import './setup_jest_mocks';
 import React from 'react';
 import { type RenderResult, act } from '@testing-library/react';
-import { type Observable, of, BehaviorSubject } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 import type {
-  ChromeNavLink,
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
 
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-
+import { NavigationServices } from '../types';
 import { renderNavigation, errorHandler, TestType } from './utils';
 
 describe('Active node', () => {
   test('should set the active node', async () => {
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      {
+    const deepLinks$: NavigationServices['deepLinks$'] = of({
+      item1: {
         id: 'item1',
         title: 'Item 1',
         baseUrl: '',
         url: '',
         href: '',
       },
-      {
+      item2: {
         id: 'item2',
         title: 'Item 2',
         baseUrl: '',
         url: '',
         href: '',
       },
-    ]);
+    });
 
     let activeNodes$: BehaviorSubject<ChromeProjectNavigationNode[][]>;
 
@@ -47,12 +46,12 @@ describe('Active node', () => {
           {
             id: 'group1',
             title: 'Group 1',
-            path: ['group1'],
+            path: 'group1',
           },
           {
             id: 'item1',
             title: 'Item 1',
-            path: ['group1', 'item1'],
+            path: 'group1.item1',
           },
         ],
       ]);
@@ -75,12 +74,12 @@ describe('Active node', () => {
               {
                 id: 'group1',
                 title: 'Group 1',
-                path: ['group1'],
+                path: 'group1',
               },
               {
                 id: 'item2',
                 title: 'Item 2',
-                path: ['group1', 'item2'],
+                path: 'group1.item2',
               },
             ],
           ]);
@@ -112,7 +111,7 @@ describe('Active node', () => {
 
       const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
-        services: { navLinks$, activeNodes$: getActiveNodes$() },
+        services: { deepLinks$, activeNodes$: getActiveNodes$() },
       });
 
       await runTests('treeDef', renderResult);
@@ -131,7 +130,7 @@ describe('Active node', () => {
             </Navigation.Group>
           </Navigation>
         ),
-        services: { navLinks$, activeNodes$: getActiveNodes$() },
+        services: { deepLinks$, activeNodes$: getActiveNodes$() },
       });
 
       await runTests('uiComponents', renderResult);
@@ -139,15 +138,15 @@ describe('Active node', () => {
   });
 
   test('should override the URL location to set the active node', async () => {
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      {
+    const deepLinks$: NavigationServices['deepLinks$'] = of({
+      item1: {
         id: 'item1',
         title: 'Item 1',
         baseUrl: '',
         url: '',
         href: '',
       },
-    ]);
+    });
 
     let activeNodes$: BehaviorSubject<ChromeProjectNavigationNode[][]>;
 
@@ -197,7 +196,7 @@ describe('Active node', () => {
 
       const renderResult = renderNavigation({
         navTreeDef: { body: navigationBody },
-        services: { navLinks$, activeNodes$: getActiveNodes$() },
+        services: { deepLinks$, activeNodes$: getActiveNodes$() },
         onProjectNavigationChange,
       });
 
@@ -223,7 +222,7 @@ describe('Active node', () => {
           </Navigation>
         ),
         onProjectNavigationChange,
-        services: { navLinks$, activeNodes$: getActiveNodes$() },
+        services: { deepLinks$, activeNodes$: getActiveNodes$() },
       });
 
       await runTests('uiComponents', renderResult);

@@ -19,8 +19,6 @@ import { BaseVisType } from './base_vis_type';
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
 export interface VisualizationListItem {
-  editUrl: string;
-  editApp?: string;
   error?: string;
   icon: string;
   id: string;
@@ -32,6 +30,9 @@ export interface VisualizationListItem {
   typeTitle: string;
   image?: string;
   type?: BaseVisType | string;
+  editor:
+    | { editUrl: string; editApp?: string }
+    | { onEdit: (savedObjectId: string) => Promise<void> };
 }
 
 export interface SerializableAttributes {
@@ -86,8 +87,14 @@ export interface VisualizationsAppExtension {
 }
 
 export interface VisTypeAlias {
-  aliasPath: string;
-  aliasApp: string;
+  /**
+   * Provide `alias` when your visualization has a dedicated app for creation.
+   * TODO: Provide a generic callback to create visualizations inline.
+   */
+  alias?: {
+    app: string;
+    path: string;
+  };
   name: string;
   title: string;
   icon: string;

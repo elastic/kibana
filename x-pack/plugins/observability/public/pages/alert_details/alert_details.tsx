@@ -58,7 +58,7 @@ export function AlertDetails() {
   const [isLoading, alert] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
-  const userCasesPermissions = canUseCases();
+  const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const { rule } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID],
   });
