@@ -20,7 +20,10 @@ import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../tasks/api_calls/prebuilt_rules';
-import { deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../../../tasks/common';
+import {
+  deleteAlertsAndRules,
+  deletePrebuiltRulesAssets,
+} from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import {
   enableAllDisabledRules,
