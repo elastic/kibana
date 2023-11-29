@@ -426,6 +426,9 @@
           "id": "kibNewsfeedPluginApi"
         },
         {
+          "id": "kibNotificationsPluginApi"
+        },
+        {
           "id": "kibObservabilityPluginApi"
         },
         {
