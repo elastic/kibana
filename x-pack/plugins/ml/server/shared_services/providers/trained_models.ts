@@ -52,6 +52,7 @@ export interface TrainedModelsProvider {
       params: estypes.MlPutTrainedModelRequest
     ): Promise<estypes.MlPutTrainedModelResponse>;
     getELSER(params?: GetModelDownloadConfigOptions): Promise<ModelDefinitionResponse>;
+    getCuratedModelConfig(...params: GetCuratedModelConfigParams): Promise<ModelDefinitionResponse>;
   };
 }
 
