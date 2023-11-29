@@ -40,7 +40,7 @@ export interface Props {
   cardsPerRow: number;
 }
 
-const useCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
+export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
   const colors = {
     DEGRADING: useEuiBackgroundColor('warning'),
     VIOLATED: useEuiBackgroundColor('danger'),
@@ -72,7 +72,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
 
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
 
-  const cardColor = useCardColor(slo.summary.status);
+  const cardColor = useSloCardColor(slo.summary.status);
 
   const subTitle = getSubTitle(slo, cardsPerRow);
 

@@ -7,12 +7,13 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useSloCardColor } from '../../../pages/slos/components/card_view/slo_card_item';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
@@ -65,27 +66,8 @@ export function SloOverview({
 
   const sloSummary = slo?.summary;
   const sloStatus = sloSummary?.status;
-  const healthyColor = useEuiBackgroundColor('success');
-  const noDataColor = useEuiBackgroundColor('subdued');
-  const degradingColor = useEuiBackgroundColor('warning');
-  const violatedColor = useEuiBackgroundColor('danger');
-  let color;
-  switch (sloStatus) {
-    case 'HEALTHY':
-      color = healthyColor;
-      break;
-    case 'NO_DATA':
-      color = noDataColor;
-      break;
-    case 'DEGRADING':
-      color = degradingColor;
-      break;
-    case 'VIOLATED':
-      color = violatedColor;
-      break;
-    default:
-      color = noDataColor;
-  }
+
+  const color = useSloCardColor(sloStatus);
 
   if (isRefetching || isLoading) {
     return (
