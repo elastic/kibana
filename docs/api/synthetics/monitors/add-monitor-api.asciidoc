@@ -179,7 +179,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 `screenshots`:: (Optional, string, default: "on"): Screenshot option, either "on",  "off" or "only-on-failure".
 
-`synthetics_args`:: (Optional, array): Synthetics agent cli arguments.
+`synthetics_args`:: (Optional, array): Synthetics agent CLI arguments.
 
 `ignore_https_errors`:: (Optional, boolean, default: false): Whether to ignore HTTPS errors.
 
