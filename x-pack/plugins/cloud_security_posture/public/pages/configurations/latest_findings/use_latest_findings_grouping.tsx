@@ -6,6 +6,7 @@
  */
 import { getGroupingQuery } from '@kbn/securitysolution-grouping';
 import {
+  GroupingAggregation,
   GroupPanelRenderer,
   GroupStatsRenderer,
   isNoneGroup,
@@ -14,8 +15,13 @@ import {
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { Evaluation } from '../../../../common/types';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
-import { FindingsGroupingAggregation, useGroupedFindings } from './use_grouped_findings';
+import {
+  FindingsGroupingAggregation,
+  FindingsRootGroupingAggregation,
+  useGroupedFindings,
+} from './use_grouped_findings';
 import {
   FINDINGS_UNIT,
   groupingTitle,
@@ -24,6 +30,7 @@ import {
   GROUPING_OPTIONS,
 } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
+import { getFilters } from '../utils/get_filters';
 
 const getTermAggregation = (key: keyof FindingsGroupingAggregation, field: string) => ({
   [key]: {
@@ -77,7 +84,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         getTermAggregation('resourceType', 'resource.type'),
       ];
 
-    case GROUPING_OPTIONS.RULE:
+    case GROUPING_OPTIONS.RULE_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
@@ -113,6 +120,18 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 };
 
 /**
+ * Type Guard for checking if the given source is a FindingsRootGroupingAggregation
+ */
+const isFindingsRootGroupingAggregation = (
+  groupData: Record<string, any> | undefined
+): groupData is FindingsRootGroupingAggregation => {
+  return (
+    groupData?.passedFindings?.doc_count !== undefined &&
+    groupData?.failedFindings?.doc_count !== undefined
+  );
+};
+
+/**
  * Utility hook to get the latest findings grouping data
  * for the findings page
  */
@@ -138,6 +157,7 @@ export const useLatestFindingsGrouping = ({
     isNoneSelected,
     onResetFilters,
     error,
+    filters,
   } = useCloudSecurityGrouping({
     dataView,
     groupingTitle,
@@ -184,9 +204,33 @@ export const useLatestFindingsGrouping = ({
   });
 
   const groupData = useMemo(
-    () => parseGroupingQuery(selectedGroup, uniqueValue, data),
+    () =>
+      parseGroupingQuery(
+        selectedGroup,
+        uniqueValue,
+        data as GroupingAggregation<FindingsGroupingAggregation>
+      ),
     [data, selectedGroup, uniqueValue]
   );
+
+  const totalPassedFindings = isFindingsRootGroupingAggregation(groupData)
+    ? groupData?.passedFindings?.doc_count || 0
+    : 0;
+  const totalFailedFindings = isFindingsRootGroupingAggregation(groupData)
+    ? groupData?.failedFindings?.doc_count || 0
+    : 0;
+
+  const onDistributionBarClick = (evaluation: Evaluation) => {
+    setUrlQuery({
+      filters: getFilters({
+        filters,
+        dataView,
+        field: 'result.evaluation',
+        value: evaluation,
+        negate: false,
+      }),
+    });
+  };
 
   return {
     groupData,
@@ -201,6 +245,10 @@ export const useLatestFindingsGrouping = ({
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,
     onResetFilters,
+    filters,
     error,
+    onDistributionBarClick,
+    totalPassedFindings,
+    totalFailedFindings,
   };
 };

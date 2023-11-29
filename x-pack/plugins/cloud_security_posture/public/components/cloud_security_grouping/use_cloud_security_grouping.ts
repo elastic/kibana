@@ -117,5 +117,6 @@ export const useCloudSecurityGrouping = ({
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
     onResetFilters,
+    filters: urlQuery.filters,
   };
 };

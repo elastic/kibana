@@ -47,6 +47,9 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     isGroupLoading,
     onResetFilters,
     error,
+    totalPassedFindings,
+    onDistributionBarClick,
+    totalFailedFindings,
   } = useLatestFindingsGrouping({ dataView, groupPanelRenderer, groupStatsRenderer });
 
   if (error) {
@@ -63,20 +66,16 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     return (
       <>
         <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
-        {isGroupLoading ? (
-          <div>
-            <EuiSpacer size="m" />
-            <FindingsDistributionBar distributionOnClick={() => {}} passed={0} failed={0} />
-            {defaultLoadingRenderer()}
-          </div>
-        ) : (
-          <div>
-            <EuiSpacer size="m" />
-            <FindingsDistributionBar
-              distributionOnClick={() => {}}
-              passed={groupData?.passedFindings?.doc_count}
-              failed={groupData?.failedFindings?.doc_count}
-            />
+        <div>
+          <EuiSpacer size="m" />
+          <FindingsDistributionBar
+            distributionOnClick={onDistributionBarClick}
+            passed={totalPassedFindings}
+            failed={totalFailedFindings}
+          />
+          {isGroupLoading ? (
+            defaultLoadingRenderer()
+          ) : (
             <CloudSecurityGrouping
               data={groupData}
               grouping={grouping}
@@ -89,8 +88,8 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
               selectedGroup={selectedGroup}
               onResetFilters={onResetFilters}
             />
-          </div>
-        )}
+          )}
+        </div>
       </>
     );
   }

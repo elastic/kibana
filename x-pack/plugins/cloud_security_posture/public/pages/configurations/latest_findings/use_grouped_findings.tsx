@@ -7,8 +7,7 @@
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
-import { GroupingAggregation } from '@kbn/securitysolution-grouping';
-import { GenericBuckets, GroupingQuery } from '@kbn/securitysolution-grouping/src';
+import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/securitysolution-grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
@@ -18,6 +17,16 @@ import { showErrorToast } from '../../../common/utils/show_error_toast';
 // Elasticsearch returns `null` when a sub-aggregation cannot be computed
 type NumberOrNull = number | null;
 
+export interface FindingsRootGroupingAggregation
+  extends RootAggregation<FindingsGroupingAggregation> {
+  failedFindings?: {
+    doc_count?: NumberOrNull;
+  };
+  passedFindings?: {
+    doc_count?: NumberOrNull;
+  };
+}
+
 export interface FindingsGroupingAggregation {
   unitsCount?: {
     value?: NumberOrNull;
@@ -26,6 +35,9 @@ export interface FindingsGroupingAggregation {
     value?: NumberOrNull;
   };
   failedFindings?: {
+    doc_count?: NumberOrNull;
+  };
+  passedFindings?: {
     doc_count?: NumberOrNull;
   };
   groupByFields?: {
@@ -81,9 +93,7 @@ export const useGroupedFindings = ({
       } = await lastValueFrom(
         data.search.search<
           {},
-          IKibanaSearchResponse<
-            SearchResponse<{}, GroupingAggregation<FindingsGroupingAggregation>>
-          >
+          IKibanaSearchResponse<SearchResponse<{}, FindingsRootGroupingAggregation>>
         >({
           params: getGroupedFindingsQuery(query),
         })
