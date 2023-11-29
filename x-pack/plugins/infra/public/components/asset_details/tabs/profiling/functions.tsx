@@ -6,14 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt } from '@elastic/eui';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingFunctionsData } from '../../hooks/use_profiling_functions_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
+import { ErrorPrompt } from './error_prompt';
 
 export function Functions() {
   const { asset } = useAssetDetailsRenderPropsContext();
@@ -47,31 +46,6 @@ export function Functions() {
       isLoading={loading}
       rangeFrom={from}
       rangeTo={to}
-    />
-  );
-}
-
-function ErrorPrompt() {
-  return (
-    <EuiEmptyPrompt
-      color="warning"
-      iconType="warning"
-      titleSize="xs"
-      title={
-        <h2>
-          {i18n.translate('xpack.infra.profiling.functions.loadErrorTitle', {
-            defaultMessage: 'Unable to load the Top Functions',
-          })}
-        </h2>
-      }
-      body={
-        <p>
-          {i18n.translate('xpack.infra.profiling.functions.loadErrorBody', {
-            defaultMessage:
-              'There was an error while trying to load top functions data. Try refreshing the page',
-          })}
-        </p>
-      }
     />
   );
 }
