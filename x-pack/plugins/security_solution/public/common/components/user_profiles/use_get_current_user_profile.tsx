@@ -22,6 +22,11 @@ export const getCurrentUserProfile = async ({
   return security.userProfiles.getCurrent({ dataPath: 'avatar' });
 };
 
+/**
+ * Fetches current user profile using `userProfiles` service via `security.userProfiles.getCurrent()`
+ *
+ * NOTE: There is a similar hook `useCurrentUser` which fetches current authenticated user via `security.authc.getCurrentUser()`
+ */
 export const useGetCurrentUserProfile = () => {
   const { security } = useKibana().services;
   const { addError } = useAppToasts();
