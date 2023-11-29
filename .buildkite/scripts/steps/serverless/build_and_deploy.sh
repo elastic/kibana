@@ -105,3 +105,5 @@ EOF
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-observability" && deploy "observability"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
+
+exit 0;
