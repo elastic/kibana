@@ -15,13 +15,15 @@ import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useUrlState } from '../../../../utils/use_url_state';
 
-export const availableControlsPanels = {
+const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
+
+const availableControlsPanels = {
   HOST_OS_NAME: 'host.os.name',
   CLOUD_PROVIDER: 'cloud.provider',
   SERVICE_NAME: 'service.name',
 };
 
-export const helpMessages = {
+const helpMessages = {
   [availableControlsPanels.SERVICE_NAME]: {
     text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLabel', {
       defaultMessage: 'Services detected via',
@@ -36,9 +38,7 @@ export const helpMessages = {
   },
 };
 
-const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
-
-export const controlPanelConfigs: ControlPanels = {
+const controlPanelConfigs: ControlPanels = {
   [availableControlsPanels.HOST_OS_NAME]: {
     order: 0,
     width: 'medium',
