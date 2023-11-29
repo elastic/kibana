@@ -14,6 +14,7 @@ import { HttpLogic } from '../../../shared/http';
 export interface FetchConnectorsApiLogicArgs {
   connectorType: 'crawler' | 'connector';
   from: number;
+  searchQuery?: string;
   size: number;
 }
 export interface FetchConnectorsApiLogicResponse {
@@ -25,9 +26,10 @@ export const fetchConnectors = async ({
   connectorType,
   from,
   size,
+  searchQuery,
 }: FetchConnectorsApiLogicArgs): Promise<FetchConnectorsApiLogicResponse> => {
   const route = '/internal/enterprise_search/connectors';
-  const query = { connector_type: connectorType, from, size };
+  const query = { connector_type: connectorType, from, searchQuery, size };
   const result = await HttpLogic.values.http.get<FetchConnectorsApiLogicResponse>(route, { query });
   return result;
 };

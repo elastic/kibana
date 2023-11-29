@@ -21,9 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Status } from '../../../../../common/types/api';
-
-import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
 import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
@@ -40,20 +37,22 @@ export const baseBreadcrumbs = [
   }),
 ];
 export const Connectors: React.FC = () => {
-  const { makeRequest, onPaginate } = useActions(ConnectorsLogic);
-  const { data, status, searchParams } = useValues(ConnectorsLogic);
+  const { fetchConnectors, onPaginate, setIsFirstRequest } = useActions(ConnectorsLogic);
+  const { data, isLoading, searchParams, isEmpty } = useValues(ConnectorsLogic);
   const [searchQuery, setSearchValue] = useState('');
+
   useEffect(() => {
-    makeRequest(searchParams);
-  }, [searchParams.from, searchParams.size]);
+    setIsFirstRequest();
+  }, []);
+
+  useEffect(() => {
+    fetchConnectors({ ...searchParams, searchQuery });
+  }, [searchParams.from, searchParams.size, searchQuery]);
 
   // TODOS
   // Spinner while loading
   // add docs count
   // add stats
-  // make table searchable
-  const isEmpty = (data?.connectors?.length ?? 0) <= 0;
-  const isLoading = status === Status.IDLE || status === Status.LOADING;
   return (
     <>
       {!isLoading && isEmpty ? (

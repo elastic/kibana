@@ -7,28 +7,32 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Status } from '../../../../../common/types/api';
+
 import { Meta } from '../../../../../common/types/pagination';
 import {
   FetchConnectorsApiLogic,
   FetchConnectorsApiLogicActions,
 } from '../../api/connector/fetch_connectors.api';
-import { ElasticsearchViewIndex } from '../../types';
-import { indexToViewIndex } from '../../utils/indices';
 
 export interface ConnectorsActions {
+  apiError: FetchConnectorsApiLogicActions['apiError'];
   apiSuccess: FetchConnectorsApiLogicActions['apiSuccess'];
   closeDeleteModal(): void;
   fetchConnectors({
     connectorType,
     from,
     size,
+    searchQuery,
   }: {
     connectorType: 'connector' | 'crawler';
     from: number;
+    searchQuery?: string;
     size: number;
   }): {
     connectorType: 'connector' | 'crawler';
     from: number;
+    searchQuery?: string;
     size: number;
   };
   makeRequest: FetchConnectorsApiLogicActions['makeRequest'];
@@ -38,10 +42,9 @@ export interface ConnectorsActions {
 }
 export interface ConnectorsValues {
   data: typeof FetchConnectorsApiLogic.values.data;
-  hasNoIndices: boolean;
-  indices: ElasticsearchViewIndex[];
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
+  isEmpty: boolean;
   isFetchConnectorsDetailsLoading: boolean;
   isFirstRequest: boolean;
   isLoading: boolean;
@@ -49,6 +52,7 @@ export interface ConnectorsValues {
   searchParams: {
     connectorType: 'connector' | 'crawler';
     from: number;
+    searchQuery?: string;
     size: number;
   };
   status: typeof FetchConnectorsApiLogic.values.status;
@@ -57,9 +61,10 @@ export interface ConnectorsValues {
 export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsActions>>({
   actions: {
     closeDeleteModal: true,
-    fetchConnectors: ({ connectorType, from, size }) => ({
+    fetchConnectors: ({ connectorType, from, size, searchQuery }) => ({
       connectorType,
       from,
+      searchQuery,
       size,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
@@ -67,7 +72,7 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
     setIsFirstRequest: true,
   },
   connect: {
-    actions: [FetchConnectorsApiLogic, ['makeRequest', 'apiSuccess']],
+    actions: [FetchConnectorsApiLogic, ['makeRequest', 'apiSuccess', 'apiError']],
     values: [FetchConnectorsApiLogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
@@ -76,18 +81,28 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       actions.makeRequest(input);
     },
   }),
-  path: ['enterprise_search', 'content', 'indices_logic'],
+  path: ['enterprise_search', 'content', 'connectors_logic'],
   reducers: () => ({
+    isFirstRequest: [
+      true,
+      {
+        apiError: () => false,
+        apiSuccess: () => false,
+        setIsFirstRequest: () => true,
+      },
+    ],
     searchParams: [
       {
         connectorType: 'connector',
         from: 0,
+        searchQuery: '',
         size: 10,
       },
       {
-        apiSuccess: ({ connectorType }, { meta }) => ({
+        apiSuccess: ({ connectorType, searchQuery }, { meta }) => ({
           connectorType,
           from: meta.page.from,
+          searchQuery,
           size: meta.page.size,
         }),
         onPaginate: (state, { newPageIndex }) => ({
@@ -98,15 +113,14 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
     ],
   }),
   selectors: ({ selectors }) => ({
-    hasNoIndices: [
-      // We need this to show the landing page on the overview page if there are no indices
-      // We can't rely just on there being no indices, because user might have entered a search query
+    isEmpty: [
       () => [selectors.data],
-      (data) => (data?.isInitialRequest && data?.indices && data.indices.length === 0) ?? false,
+      (data) =>
+        (data?.isInitialRequest && data?.connectors && data.connectors.length === 0) ?? false,
     ],
-    indices: [
-      () => [selectors.data],
-      (data) => (data?.indices ? data.indices.map(indexToViewIndex) : []),
+    isLoading: [
+      () => [selectors.status, selectors.isFirstRequest],
+      (status, isFirstRequest) => [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
     meta: [
       () => [selectors.data],

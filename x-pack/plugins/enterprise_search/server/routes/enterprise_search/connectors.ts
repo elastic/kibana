@@ -33,7 +33,10 @@ import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { isAccessControlDisabledException } from '../../utils/identify_exceptions';
+import {
+  isAccessControlDisabledException,
+  isExpensiveQueriesNotAllowedException,
+} from '../../utils/identify_exceptions';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
@@ -482,13 +485,33 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connector_type, from, size } = request.query;
+      const { connector_type, from, size, searchQuery } = request.query;
 
-      const result = await fetchConnectors(
-        client.asCurrentUser,
-        undefined,
-        connector_type as 'connector' | 'crawler' | undefined
-      );
+      let result;
+      try {
+        result = await fetchConnectors(
+          client.asCurrentUser,
+          undefined,
+          connector_type as 'connector' | 'crawler' | undefined,
+          searchQuery
+        );
+      } catch (error) {
+        if (isExpensiveQueriesNotAllowedException(error)) {
+          return createError({
+            errorCode: ErrorCode.EXPENSIVE_QUERY_NOT_ALLOWED_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.expensive_query_not_allowed_error',
+              {
+                defaultMessage:
+                  'Expensive search queries not allowed. "search.allow_expensive_queries" is set to false ',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
       return response.ok({
         body: {
           connectors: result.slice(from, from + size),
