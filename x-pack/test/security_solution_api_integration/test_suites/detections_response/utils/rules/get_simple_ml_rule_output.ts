@@ -6,8 +6,8 @@
  */
 
 import type { MachineLearningRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getMockSharedResponseSchema } from '../../../../../detection_engine_api_integration/utils/get_simple_rule_output';
-import { removeServerGeneratedProperties } from '../../../../../detection_engine_api_integration/utils/remove_server_generated_properties';
+import { getMockSharedResponseSchema } from './get_simple_rule_output';
+import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
 const getBaseMlRuleOutput = (ruleId = 'rule-1'): MachineLearningRule => {
   return {

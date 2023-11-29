@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSimpleRule } from '../../../../../detection_engine_api_integration/utils/get_simple_rule';
+import { getSimpleRule } from './get_simple_rule';
 
 /**
  * Given an array of rule_id strings this will return a ndjson buffer which is useful

@@ -8,8 +8,8 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 
-import { waitFor } from '../../../../../detection_engine_api_integration/utils/wait_for';
-import { getEventLogExecuteCompleteById } from '../../../../../detection_engine_api_integration/utils/get_event_log_execute_complete_by_id';
+import { waitFor } from '../wait_for';
+import { getEventLogExecuteCompleteById } from './get_event_log_execute_complete_by_id';
 
 /**
  * Waits for the event-log execution completed doc count to be greater than the
