@@ -46,7 +46,7 @@ function navigateToNewMap() {
 const toTableListViewSavedObject = (mapItem: MapItem): MapUserContent => {
   return {
     ...mapItem,
-    namespaces: mapItem.namespaces!,
+    namespaces: mapItem.namespaces ?? [],
     updatedAt: mapItem.updatedAt!,
     attributes: {
       ...mapItem.attributes,
