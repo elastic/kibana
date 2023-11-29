@@ -269,7 +269,19 @@ const resetSLORoute = createObservabilityServerRoute({
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const resetSLO = new ResetSLO(esClient, repository, transformManager);
+    const summaryTransformManager = new DefaultSummaryTransformManager(
+      new DefaultSummaryTransformGenerator(),
+      esClient,
+      logger
+    );
+
+    const resetSLO = new ResetSLO(
+      esClient,
+      repository,
+      transformManager,
+      summaryTransformManager,
+      logger
+    );
 
     const response = await resetSLO.execute(params.path.id);
 
