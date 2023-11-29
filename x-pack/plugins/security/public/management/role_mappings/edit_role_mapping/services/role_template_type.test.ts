@@ -10,7 +10,7 @@ import {
   isInvalidRoleTemplate,
   isStoredRoleTemplate,
 } from './role_template_type';
-import type { RoleTemplate } from '../../../../../common/model';
+import type { RoleTemplate } from '../../../../../common';
 
 describe('#isStoredRoleTemplate', () => {
   it('returns true for stored templates, false otherwise', () => {
