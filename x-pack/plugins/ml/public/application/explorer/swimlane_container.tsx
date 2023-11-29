@@ -409,6 +409,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const noSwimLaneData = !isLoading && !showSwimlane && !!noDataWarning;
 
+  if (noSwimLaneData) {
+    onRenderComplete?.();
+  }
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>

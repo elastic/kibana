@@ -147,7 +147,8 @@ describe('Timelines', (): void => {
     }
   );
 
-  describe('shows the different timeline states', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172031
+  describe.skip('shows the different timeline states', () => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);
