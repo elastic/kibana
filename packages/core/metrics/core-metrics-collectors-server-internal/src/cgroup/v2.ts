@@ -39,7 +39,7 @@ export async function gatherV2CgroupMetrics(group: string): Promise<OsCgroupMetr
       control_group: group,
       usage_nanos: usageNanos,
     },
-    cgroupMemory: {
+    cgroup_memory: {
       current_in_bytes: memoryCurrent,
       swap_current_in_bytes: swapCurrent,
     },

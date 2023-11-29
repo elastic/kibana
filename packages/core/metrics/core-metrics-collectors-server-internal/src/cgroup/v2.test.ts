@@ -29,7 +29,7 @@ throttled_usec 123123`,
     const metrics = await gatherV2CgroupMetrics('/');
     expect(metrics).toMatchInlineSnapshot(`
         Object {
-          "cgroupMemory": Object {
+          "cgroup_memory": Object {
             "current_in_bytes": 9000,
             "swap_current_in_bytes": 42,
           },
@@ -68,7 +68,7 @@ throttled_usec 123123`,
     const metrics = await gatherV2CgroupMetrics('/mypath');
     expect(metrics).toMatchInlineSnapshot(`
         Object {
-          "cgroupMemory": Object {
+          "cgroup_memory": Object {
             "current_in_bytes": 9876,
             "swap_current_in_bytes": 132645,
           },

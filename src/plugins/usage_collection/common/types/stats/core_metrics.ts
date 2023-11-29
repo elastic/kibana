@@ -165,7 +165,7 @@ export interface OpsOsMetrics {
   };
 
   /** memory cgroup metrics, undefined when not running in cgroup v2 */
-  cgroupMemory?: {
+  cgroup_memory?: {
     /** The total amount of memory currently being used by the cgroup and its descendants. */
     current_in_bytes: number;
     /** The total amount of swap currently being used by the cgroup and its descendants. */
