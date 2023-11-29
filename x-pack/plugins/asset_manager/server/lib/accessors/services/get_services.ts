@@ -27,18 +27,18 @@ export async function getServices(
   const filters: QueryDslQueryContainer[] = [];
 
   if (options.filters?.ean) {
-    const ean = Array.isArray(options.filters.ean) ? options.filters.ean[0] : options.filters.ean;
-    const { kind, id } = parseEan(ean);
+    const eans = Array.isArray(options.filters.ean) ? options.filters.ean : [options.filters.ean];
+    const services = eans.map(parseEan).filter(({ kind }) => kind === 'service');
 
-    if (kind !== 'service') {
+    if (services.length === 0) {
       return {
         services: [],
       };
     }
 
     filters.push({
-      term: {
-        'service.name': id,
+      terms: {
+        'service.name': services,
       },
     });
   }

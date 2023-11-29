@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
 import { Asset } from '../../common/types_api';
 import { GetAssetsOptionsPublic } from '../../common/types_client';
 import { getContainers, GetContainersOptions } from './accessors/containers/get_containers';
@@ -50,6 +51,6 @@ export class AssetClient {
     const withInjected = this.injectOptions(options);
     const { hosts } = await getHosts(withInjected);
     const { services } = await getServices(withInjected);
-    return { assets: hosts.concat(services) };
+    return { assets: orderBy(hosts.concat(services), ['@timestamp'], ['desc']) };
   }
 }

@@ -178,7 +178,7 @@ export const assetFiltersSingleKindRT = rt.exact(
 );
 
 export type SingleKindAssetFilters = rt.TypeOf<typeof assetFiltersSingleKindRT>;
-export type MultipleKindAssetFilters = Omit<SingleKindAssetFilters, 'id'>;
+export type MultipleKindAssetFilters = rt.TypeOf<typeof assetFiltersSingleKindRT>;
 
 export const assetFiltersRT = rt.intersection([
   assetFiltersSingleKindRT,
@@ -278,3 +278,21 @@ export const getPodAssetsResponseRT = rt.type({
   pods: rt.array(assetRT),
 });
 export type GetPodAssetsResponse = rt.TypeOf<typeof getPodAssetsResponseRT>;
+
+/**
+ * Assets
+ */
+export const getAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+export type GetAssetsQueryOptions = rt.TypeOf<typeof getAssetsQueryOptionsRT>;
+export const getAssetsResponseRT = rt.type({
+  assets: rt.array(assetRT),
+});
+export type GetAssetsResponse = rt.TypeOf<typeof getAssetsResponseRT>;
