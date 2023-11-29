@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
+import { sortAndStringifyJson } from './sort_stringify_json';
 
 const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
 
@@ -108,9 +109,6 @@ const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectio
     </EuiAccordion>
   );
 };
-
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  JSON.stringify(jsObject, Object.keys(jsObject).sort(), 2);
 
 interface WholeObjectDiffProps {
   oldRule: RuleResponse;

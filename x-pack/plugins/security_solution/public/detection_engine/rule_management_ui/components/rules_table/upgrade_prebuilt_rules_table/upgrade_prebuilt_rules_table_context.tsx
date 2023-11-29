@@ -300,7 +300,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
               </EuiButton>
             }
             getRuleTabs={(rule, defaultTabs) => {
-              const activeRule = filteredRules.find(({ id }) => rule.id);
+              const activeRule = filteredRules.find(({ id }) => id === rule.id);
               const diff = activeRule?.diff;
 
               if (!diff) {

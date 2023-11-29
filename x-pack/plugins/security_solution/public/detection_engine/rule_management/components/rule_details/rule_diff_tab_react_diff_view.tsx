@@ -39,6 +39,7 @@ import {
 import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { markEditsBy, DiffMethod } from './mark_edits_by_word';
+import { sortAndStringifyJson } from './sort_stringify_json';
 
 const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
 
@@ -95,14 +96,7 @@ function UnfoldCollapsed({
       return null;
     }
 
-    return (
-      <>
-        {collapsedLines > 10 && (
-          <Unfold direction="down" start={nextStart} end={nextStart + 10} onExpand={onExpand} />
-        )}
-        <Unfold direction="none" start={nextStart} end={linesCount + 1} onExpand={onExpand} />
-      </>
-    );
+    return <Unfold direction="none" start={nextStart} end={linesCount + 1} onExpand={onExpand} />;
   }
 
   const collapsedLines = getCollapsedLinesCountBetween(previousHunk, currentHunk);
@@ -112,16 +106,7 @@ function UnfoldCollapsed({
       return null;
     }
 
-    const start = Math.max(currentHunk.oldStart - 10, 1);
-
-    return (
-      <>
-        <Unfold direction="none" start={1} end={currentHunk.oldStart} onExpand={onExpand} />
-        {collapsedLines > 10 && (
-          <Unfold direction="up" start={start} end={currentHunk.oldStart} onExpand={onExpand} />
-        )}
-      </>
-    );
+    return <Unfold direction="none" start={1} end={currentHunk.oldStart} onExpand={onExpand} />;
   }
 
   const collapsedStart = previousHunk.oldStart + previousHunk.oldLines;
@@ -133,18 +118,7 @@ function UnfoldCollapsed({
     );
   }
 
-  return (
-    <>
-      <Unfold
-        direction="down"
-        start={collapsedStart}
-        end={collapsedStart + 10}
-        onExpand={onExpand}
-      />
-      <Unfold direction="none" start={collapsedStart} end={collapsedEnd} onExpand={onExpand} />
-      <Unfold direction="up" start={collapsedEnd - 10} end={collapsedEnd} onExpand={onExpand} />
-    </>
-  );
+  return <Unfold direction="none" start={collapsedStart} end={collapsedEnd} onExpand={onExpand} />;
 }
 
 const useExpand = (hunks: HunkData[], oldSource: string, newSource: string) => {
@@ -489,9 +463,6 @@ const renderGutter: RenderGutter = ({ change }) => {
     return null;
   }
 };
-
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  JSON.stringify(jsObject, Object.keys(jsObject).sort(), 2);
 
 interface WholeObjectDiffProps {
   oldRule: RuleResponse;
