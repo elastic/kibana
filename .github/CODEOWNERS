@@ -1326,6 +1326,9 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules @elastic/security-detection-rule-management
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_read @elastic/security-detection-rule-management
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_management @elastic/security-detection-rule-management
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_import_export @elastic/security-detection-rule-management
 
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
@@ -1392,14 +1395,18 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/exceptions @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/overview @elastic/security-detection-engine
+
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions  @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/user_roles  @elastic/security-detection-engine
-/x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine @elastic/security-detection-engine
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/alerts @elastic/security-detection-engine
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_creation @elastic/security-detection-engine
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_edit @elastic/security-detection-engine
+/x-pack/test/security_solution_api_integration/test_suites/value_lists_and_exception_lists @elastic/security-detection-engine
+
 /x-pack/plugins/security_solution/server/lib/detection_engine/scripts/roles_users @elastic/security-detection-engine
-/x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
