@@ -422,23 +422,34 @@ export class TaskRunner<
       );
     }
 
-    const maintenanceWindowIds = activeMaintenanceWindows
-      .filter(({ categoryIds }) => {
-        // If category IDs array doesn't exist: allow all
-        if (!Array.isArray(categoryIds)) {
-          return true;
-        }
-        // If category IDs array exist: check category
-        if ((categoryIds as string[]).includes(ruleType.category)) {
-          return true;
-        }
-        return false;
-      })
-      .map(({ id }) => id);
+    const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
+      // If category IDs array doesn't exist: allow all
+      if (!Array.isArray(categoryIds)) {
+        return true;
+      }
+      // If category IDs array exist: check category
+      if ((categoryIds as string[]).includes(ruleType.category)) {
+        return true;
+      }
+      return false;
+    });
 
-    if (maintenanceWindowIds.length) {
-      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
+    const maintenanceWindowsIds = maintenanceWindows.map(({ id }) => id);
+
+    const maintenanceWindowsWithScopedQuery = maintenanceWindows.filter(
+      ({ scopedQuery }) => scopedQuery
+    );
+    const maintenanceWindowsWithoutScopedQuery = maintenanceWindows.filter(
+      ({ scopedQuery }) => !scopedQuery
+    );
+
+    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindows.map(({ id }) => id);
+
+    if (maintenanceWindows.length) {
+      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowsIds);
     }
+
+    const hasScopedQuery = maintenanceWindowsWithScopedQuery.length > 0;
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -520,7 +531,9 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
-              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
+              ...(maintenanceWindowsWithoutScopedQueryIds.length
+                ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
+                : {}),
               getTimeRange: (timeWindow) =>
                 getTimeRange(this.logger, queryDelaySettings, timeWindow),
             })
@@ -563,20 +576,70 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      alertsClient.processAndLogAlerts({
-        eventLogger: this.alertingEventLogger,
-        ruleRunMetricsStore,
-        shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      alertsClient.processAlerts({
         flappingSettings,
         notifyOnActionGroupChange:
           notifyWhen === RuleNotifyWhen.CHANGE ||
           some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
-        maintenanceWindowIds,
+        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds.length
+          ? maintenanceWindowsWithoutScopedQueryIds
+          : [],
       });
     });
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
       await alertsClient.persistAlerts();
+    });
+
+    if (hasScopedQuery) {
+      // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
+      // indicating the maintenance window has matches a number of alerts with scoped query.
+      const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts?.({
+        ruleId: rule.id,
+        spaceId,
+        executionUuid: this.executionId,
+        maintenanceWindows: maintenanceWindowsWithScopedQuery,
+      });
+
+      const alertsAffectedByScopedQuery = new Set<string>();
+
+      if (result) {
+        const newAlerts = Object.values(alertsClient.getProcessedAlerts('new'));
+
+        for (const [scopedQueryMaintenanceWindowId, alertIds] of Object.entries(result)) {
+          // Go through matched alerts, find the in memory object
+          alertIds.forEach((alertId) => {
+            const newAlert = newAlerts.find((alert) => alert.getUuid() === alertId);
+            if (!newAlert) {
+              return;
+            }
+            // Update in memory alert with new maintenance window IDs
+            newAlert.setMaintenanceWindowIds([
+              ...new Set([
+                // Keep existing Ids
+                ...newAlert.getMaintenanceWindowIds(),
+                // Add the ids that don't have scoped queries
+                ...maintenanceWindowsWithoutScopedQuery.map(({ id }) => id),
+                // Add the scoped query id
+                scopedQueryMaintenanceWindowId,
+              ]),
+            ]);
+
+            alertsAffectedByScopedQuery.add(newAlert.getUuid());
+          });
+        }
+      }
+
+      if (alertsAffectedByScopedQuery.size) {
+        // Update alerts with new maintenance window IDs, await not needed
+        alertsClient.updateAlertMaintenanceWindowIds?.([...alertsAffectedByScopedQuery]);
+      }
+    }
+
+    alertsClient.LogAlerts({
+      eventLogger: this.alertingEventLogger,
+      ruleRunMetricsStore,
+      shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
     });
 
     const executionHandler = new ExecutionHandler({
@@ -593,7 +656,6 @@ export class TaskRunner<
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
-      maintenanceWindowIds,
       alertsClient,
     });
 

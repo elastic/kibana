@@ -6,7 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_UUID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+} from '@kbn/rule-data-utils';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
@@ -15,6 +21,7 @@ import { DeepPartial } from '@kbn/utility-types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   SummarizedAlerts,
+  ScopedQueryAlerts,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAlertData,
@@ -27,7 +34,7 @@ import {
   IIndexPatternString,
 } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, SearchResult } from './types';
+import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
 import {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -37,6 +44,8 @@ import {
   ReportedAlertData,
   UpdateableAlert,
   GetSummarizedAlertsParams,
+  GetMaintenanceWindowScopedQueryAlertsParams,
+  ScopedQueryAggregationResult,
 } from './types';
 import {
   buildNewAlert,
@@ -45,7 +54,9 @@ import {
   buildRecoveredAlert,
   formatRule,
   getHitsWithCount,
+  getScopedQueryHitsWithIds,
   getLifecycleAlertsQueries,
+  getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
@@ -185,20 +196,23 @@ export class AlertsClient<
     }
   }
 
-  public async search(queryBody: SearchRequest['body']): Promise<SearchResult<AlertData>> {
+  public async search<Aggregation = unknown>(
+    queryBody: SearchRequest['body']
+  ): Promise<SearchResult<AlertData, Aggregation>> {
     const esClient = await this.options.elasticsearchClientPromise;
     const index = this.isUsingDataStreams()
       ? this.indexTemplateAndPattern.alias
       : this.indexTemplateAndPattern.pattern;
     const {
       hits: { hits, total },
-    } = await esClient.search<Alert & AlertData>({
+      aggregations,
+    } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
       body: queryBody,
       ignore_unavailable: true,
     });
 
-    return { hits, total };
+    return { hits, total, aggregations };
   }
 
   public report(
@@ -263,6 +277,14 @@ export class AlertsClient<
 
   public checkLimitUsage() {
     return this.legacyAlertsClient.checkLimitUsage();
+  }
+
+  public processAlerts(opts: ProcessAlertsOpts) {
+    this.legacyAlertsClient.processAlerts(opts);
+  }
+
+  public LogAlerts(opts: LogAlertsOpts) {
+    this.legacyAlertsClient.LogAlerts(opts);
   }
 
   public processAndLogAlerts(opts: ProcessAndLogAlertsOpts) {
@@ -470,6 +492,45 @@ export class AlertsClient<
     }
   }
 
+  public async updateAlertMaintenanceWindowIds(idsToUpdate: string[]) {
+    const esClient = await this.options.elasticsearchClientPromise;
+    const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
+
+    const params: Record<string, string[]> = {};
+
+    idsToUpdate.forEach((id) => {
+      const newAlert = newAlerts.find((alert) => alert.getUuid() === id);
+      if (newAlert) {
+        params[id] = newAlert.getMaintenanceWindowIds();
+      }
+    });
+
+    try {
+      const response = await esClient.updateByQuery({
+        query: {
+          terms: {
+            _id: idsToUpdate,
+          },
+        },
+        conflicts: 'proceed',
+        index: this.indexTemplateAndPattern.alias,
+        script: {
+          source: `
+            if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
+              ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params['${ALERT_UUID}'];
+            }
+          `,
+          lang: 'painless',
+          params,
+        },
+      });
+      return response;
+    } catch (err) {
+      this.options.logger.error(`Error updating alert maintenance window IDs: ${err}`);
+      throw err;
+    }
+  }
+
   public getAlertsToSerialize() {
     // The flapping value that is persisted inside the task manager state (and used in the next execution)
     // is different than the value that should be written to the alert document. For this reason, we call
@@ -538,6 +599,31 @@ export class AlertsClient<
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     };
+  }
+
+  public async getMaintenanceWindowScopedQueryAlerts({
+    ruleId,
+    spaceId,
+    executionUuid,
+    maintenanceWindows,
+  }: GetMaintenanceWindowScopedQueryAlertsParams): Promise<ScopedQueryAlerts> {
+    if (!ruleId || !spaceId || !executionUuid) {
+      throw new Error(
+        `Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.`
+      );
+    }
+    const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
+
+    const query = getMaintenanceWindowAlertsQuery({
+      executionUuid,
+      ruleId,
+      maintenanceWindows,
+      action: isLifecycleAlert ? 'open' : undefined,
+    });
+
+    const response = await this.search<ScopedQueryAggregationResult>(query);
+
+    return getScopedQueryHitsWithIds(response.aggregations);
   }
 
   public client() {
