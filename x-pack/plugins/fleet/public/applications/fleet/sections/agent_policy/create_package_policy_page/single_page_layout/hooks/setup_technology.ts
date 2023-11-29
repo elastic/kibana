@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import type { AgentPolicy, NewAgentPolicy } from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
-import { sendGetOneAgentPolicy } from '../../../../../hooks';
+import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 
 const AGENTLESS_POLICY_ID = 'agentless';
@@ -27,6 +27,8 @@ export function useSetupTechnology({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
   const { agentless: isAgentlessEnabled } = ExperimentalFeaturesService.get();
+  const { cloud } = useStartServices();
+  const isServerless = cloud?.isServerlessEnabled ?? false;
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
@@ -42,10 +44,10 @@ export function useSetupTechnology({
       }
     };
 
-    if (isAgentlessEnabled) {
+    if (isAgentlessEnabled && isServerless) {
       fetchAgentlessPolicy();
     }
-  }, [isAgentlessEnabled]);
+  }, [isAgentlessEnabled, isServerless]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology) => {
