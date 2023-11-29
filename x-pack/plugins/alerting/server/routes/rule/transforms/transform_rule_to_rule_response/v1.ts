@@ -63,7 +63,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
       id,
       params,
       connector_type_id: actionTypeId,
-      ...(typeof useAlertDataForTemplate === 'undefined'
+      ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }
         : {}),
       ...(frequency

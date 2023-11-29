@@ -38,7 +38,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
         summary: frequency!.summary,
       },
       alerts_filter: alertsFilter,
-      ...(typeof useAlertDataForTemplate === 'undefined'
+      ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }
         : {}),
     })

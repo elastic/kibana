@@ -22,7 +22,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   id,
   params,
   actionTypeId,
-  ...(typeof useAlertDataForTemplate === 'undefined' ? { useAlertDataForTemplate } : {}),
+  ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
   ...(frequency
     ? {
         frequency: {

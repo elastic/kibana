@@ -24,7 +24,7 @@ export const rewriteActionsReq = (
     }) => {
       return {
         ...action,
-        ...(typeof useAlertDataForTemplate === 'undefined' ? { useAlertDataForTemplate } : {}),
+        ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
         ...(frequency
           ? {
               frequency: {
@@ -49,7 +49,7 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
     ({ actionTypeId, frequency, alertsFilter, useAlertDataForTemplate, ...action }) => ({
       ...action,
       connector_type_id: actionTypeId,
-      ...(typeof useAlertDataForTemplate === 'undefined'
+      ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }
         : {}),
       ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
