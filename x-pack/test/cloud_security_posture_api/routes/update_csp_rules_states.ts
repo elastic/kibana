@@ -36,6 +36,18 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug('CSP plugin is initialized');
     });
 
+  const generateRandomRuleId = (): string => {
+    const majorVersionNumber = Math.floor(Math.random() * 10); // Random major number between 0 and 9
+    const minorVersionNumber = Math.floor(Math.random() * 10);
+    const benchmarksIds = ['cis_aws', 'cis_k8s', 'cis_k8s'];
+    const benchmarksVersions = ['v2.0.0', 'v2.0.1', 'v2.0.3', 'v3.0.0'];
+    const randomBenchmarkId = benchmarksIds[Math.floor(Math.random() * benchmarksIds.length)];
+    const randomBenchmarkVersion =
+      benchmarksVersions[Math.floor(Math.random() * benchmarksVersions.length)];
+
+    return `${randomBenchmarkId};${randomBenchmarkVersion};${majorVersionNumber}.${minorVersionNumber}`;
+  };
+
   describe('Verify update csp rules states API', async () => {
     before(async () => {
       await waitForPluginInitialized();
@@ -44,8 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
     afterEach(async () => {});
 
     it('mute rules successfully', async () => {
-      const rule1 = chance.guid();
-      const rule2 = chance.guid();
+      const rule1 = generateRandomRuleId();
+      const rule2 = generateRandomRuleId();
 
       const { body } = await supertest
         .get(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -70,8 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('unmute rules successfully', async () => {
-      const rule1 = chance.guid();
-      const rule2 = chance.guid();
+      const rule1 = generateRandomRuleId();
+      const rule2 = generateRandomRuleId();
 
       const { body } = await supertest
         .get(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -95,9 +107,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('verify new rules are added and existing rules are set.', async () => {
-      const rule1 = chance.guid();
-      const rule2 = chance.guid();
-      const rule3 = chance.guid();
+      const rule1 = generateRandomRuleId();
+      const rule2 = generateRandomRuleId();
+      const rule3 = generateRandomRuleId();
 
       // unmute rule1 and rule2
       const cspSettingsResponse = await supertest
@@ -149,7 +161,22 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .query({
           action: 'foo',
-          rule_ids: ['rule1', 'rule2'],
+          rule_ids: [generateRandomRuleId()],
+        });
+
+      expect(body.error).to.eql('Bad Request');
+      expect(body.statusCode).to.eql(400);
+    });
+
+    it('set wrong rule ids input', async () => {
+      const { body } = await supertest
+        .get(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'xxxx')
+        .query({
+          action: 'mute',
+          rule_ids: ['invalid_rule_structure'],
         });
 
       expect(body.error).to.eql('Bad Request');

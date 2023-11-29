@@ -131,8 +131,6 @@ export const defineUpdateCspRuleStateRoute = (router: CspRouter) =>
             muteStatesMap[requestBody.action]
           );
 
-          console.log({ newRulesStates });
-
           const newCspSettings = await updateRulesStates(cspContext.soClient, newRulesStates);
 
           return response.ok({

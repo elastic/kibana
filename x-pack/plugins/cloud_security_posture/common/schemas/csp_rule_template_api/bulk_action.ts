@@ -9,13 +9,17 @@ import { schema } from '@kbn/config-schema';
 
 // this pages follows versioning interface strategy https://docs.elastic.dev/kibana-dev-docs/versioning-interfaces
 
+const isValidRuleId = (value: string) => {
+  // Define a regular expression pattern for the expected structure `${benchmark.id};${benchmark.version};${rule.number}`
+  const pattern = /^[^;]+;[^;]+;[^;]+$/;
+  if (!pattern.test(value)) {
+    throw new Error(
+      'Invalid rule_id structure. Each rule_id should follow the pattern: `${benchmark.id};${benchmark.version};${rule.number}`.'
+    );
+  }
+};
+
 export const cspRuleBulkActionRequest = schema.object({
-  /**
-   *  action
-   */
   action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
-  /**
-   *  Fields to retrieve from CspRuleTemplate saved object
-   */
-  rule_ids: schema.arrayOf(schema.string()),
+  rule_ids: schema.arrayOf(schema.string({ validate: isValidRuleId })),
 });
