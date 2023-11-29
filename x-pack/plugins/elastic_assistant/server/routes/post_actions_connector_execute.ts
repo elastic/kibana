@@ -75,14 +75,14 @@ export const postActionsConnectorExecuteRoute = (
           kbResource: ESQL_RESOURCE,
         });
 
-        console.log('THIS SHOULD BE LAST!!!!!!', langChainResponseBody);
+        console.log('WE ARE HERE LAST!!!!!!', langChainResponseBody);
 
         return response.ok({
           body: langChainResponseBody,
           headers: { 'Content-Type': 'application/octet-stream' },
         });
       } catch (err) {
-        console.log('THIS SHOULD BE ERROR?????', err);
+        console.log('WE ARE HERE ERROR?????', err);
         logger.error(err);
         const error = transformError(err);
 

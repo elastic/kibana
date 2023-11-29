@@ -76,6 +76,7 @@ export class ActionsClientLlm extends LLM {
   }
 
   async _call(prompt: string): Promise<string> {
+    console.log('WE ARE HERE at start of _call');
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
@@ -115,6 +116,7 @@ export class ActionsClientLlm extends LLM {
     }
     this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
 
+    console.log('WE ARE HERE at end of _call', content);
     return content; // per the contact of _call, return a string
   }
 }

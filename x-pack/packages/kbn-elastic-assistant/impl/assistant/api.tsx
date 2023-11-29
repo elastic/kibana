@@ -76,7 +76,7 @@ export const fetchConnectorExecuteAction = async ({
       };
 
   try {
-    console.log('ahoy 1');
+    console.log('WE ARE HERE before fetch');
     const response = await http.fetch(
       `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
       {
@@ -87,13 +87,10 @@ export const fetchConnectorExecuteAction = async ({
         rawResponse: true,
       }
     );
-    // for await (const chunk of response?.response?.body) {
-    //   console.log('CHUNKCHUNKCHUNK', chunk);
-    // }
-    console.log('RESPONSE????', response?.response);
+    console.log('WE ARE HERE after fetch with RESPONSE????', response?.response);
 
     const reader = response?.response?.body?.getReader();
-    console.log('reader????', reader);
+    console.log('WE ARE HERE after getReader????', reader);
 
     if (!reader) {
       return {
@@ -110,7 +107,7 @@ export const fetchConnectorExecuteAction = async ({
     // // might need this still???
     //   response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
   } catch (error) {
-    console.log('error 1', error);
+    console.log('WE ARE HERE error 1', error);
     const reader = error?.response?.body?.getReader();
 
     if (!reader) {

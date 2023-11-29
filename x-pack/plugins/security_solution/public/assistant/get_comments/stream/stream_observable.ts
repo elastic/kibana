@@ -47,7 +47,7 @@ export const getStreamObservable = ({
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
-            console.log('reading', { done, value });
+            console.log('WE ARE HERE reading', { done, value });
             if (done) {
               if (openAIBuffer) {
                 chunks.push(getOpenAIChunks([openAIBuffer])[0]);
@@ -62,7 +62,7 @@ export const getStreamObservable = ({
             }
 
             const decoded = decoder.decode(value);
-            console.log('decoded value', decoded);
+            console.log('WE ARE HERE decoded value', decoded);
             let nextChunks;
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
@@ -95,7 +95,7 @@ export const getStreamObservable = ({
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
-            console.log('reading', { done, value });
+            console.log('WE ARE HERE reading', { done, value });
             if (done) {
               observer.next({
                 chunks,

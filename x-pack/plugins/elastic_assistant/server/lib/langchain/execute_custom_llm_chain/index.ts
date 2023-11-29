@@ -90,10 +90,10 @@ export const callAgentExecutor = async ({
     memory,
     verbose: true,
   });
-  console.log('THIS SHOULD BE before stream call');
+  console.log('WE ARE HERE before stream call');
   const resp = await executor.stream({ input: latestMessage[0].content, chat_history: [] });
 
-  console.log('THIS SHOULD BE after stream call ', { resp });
+  console.log('WE ARE HERE after stream call ', { resp });
 
   return resp;
 
