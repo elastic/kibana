@@ -21,12 +21,12 @@ describe('StartModelApiLogic', () => {
       const mockResponseBody = { modelId: 'model_1', deploymentState: 'started' };
       http.post.mockReturnValue(Promise.resolve(mockResponseBody));
 
-      const response = await startModel({ modelId: 'model_1' });
+      const result = startModel({ modelId: 'model_1' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/ml/models/model_1/deploy'
       );
-      expect(response).toEqual(mockResponseBody);
+      await expect(result).resolves.toEqual(mockResponseBody);
     });
   });
 });

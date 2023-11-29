@@ -21,10 +21,10 @@ describe('FetchModelsApiLogic', () => {
       const mockResponseBody = [{ modelId: 'model_1' }, { modelId: 'model_2' }];
       http.get.mockReturnValue(Promise.resolve(mockResponseBody));
 
-      const response = fetchModels();
+      const result = fetchModels();
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/ml/models');
-      expect(response).toEqual(mockResponseBody);
+      await expect(result).resolves.toEqual(mockResponseBody);
     });
   });
 });

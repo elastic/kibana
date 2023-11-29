@@ -21,10 +21,10 @@ describe('CreateModelApiLogic', () => {
       const mockResponseBody = { modelId: 'model_1', deploymentState: '' };
       http.post.mockReturnValue(Promise.resolve(mockResponseBody));
 
-      const response = await createModel({ modelId: 'model_1' });
+      const result = createModel({ modelId: 'model_1' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/ml/models/model_1');
-      expect(response).toEqual(mockResponseBody);
+      await expect(result).resolves.toEqual(mockResponseBody);
     });
   });
 });
