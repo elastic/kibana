@@ -642,6 +642,7 @@ x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-search-api-panels @elastic/enterprise-search-frontend
 packages/kbn-search-connectors @elastic/enterprise-search-frontend
 examples/search_examples @elastic/kibana-data-discovery
+packages/kbn-search-index-documents @elastic/enterprise-search-frontend
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/platform-deployment-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
