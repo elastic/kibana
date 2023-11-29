@@ -32,7 +32,7 @@ import type {
   UploadActionApiRequestBody,
 } from '../../../../common/api/endpoint';
 
-export interface BaseActionsProviderOptions {
+export interface ResponseActionsClientOptions {
   endpointContext: EndpointAppContext;
   esClient: ElasticsearchClient;
   casesClient?: CasesClient;
@@ -46,8 +46,10 @@ export interface BaseActionsProviderOptions {
 export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
 
-  constructor(protected readonly options: BaseActionsProviderOptions) {
-    this.log = options.endpointContext.logFactory.get(this.constructor.name ?? 'ActionsProvider');
+  constructor(protected readonly options: ResponseActionsClientOptions) {
+    this.log = options.endpointContext.logFactory.get(
+      this.constructor.name ?? 'ResponseActionsClient'
+    );
   }
 
   // TODO:PT implement a generic way to update cases without relying on the Attachments being endpoint agents

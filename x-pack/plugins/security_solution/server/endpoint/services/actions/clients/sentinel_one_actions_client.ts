@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import { ResponseActionsClientError } from './errors';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import type {
   ActionDetails,
@@ -27,6 +31,7 @@ import type {
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../common/api/endpoint';
+import type { ResponseActionsClientOptions } from '../../../lib/response_actions/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../../../lib/response_actions/base_response_actions_client';
 
 const createNotSupportedError = () => {
@@ -35,15 +40,46 @@ const createNotSupportedError = () => {
 };
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
-  isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  private readonly connectorActionsClient: ActionsClient;
+  // @ts-expect-error temporary until we can use the property
+  private connector: Promise<ConnectorWithExtraFindData>;
+
+  constructor({
+    connectorActions,
+    ...options
+  }: ResponseActionsClientOptions & { connectorActions: ActionsClient }) {
+    super(options);
+    this.connectorActionsClient = connectorActions;
+    this.connector = this.setup();
+  }
+
+  private async setup(): Promise<ConnectorWithExtraFindData> {
+    const connector = (await this.connectorActionsClient.getAll()).find(
+      ({ actionTypeId, isDeprecated, isMissingSecrets }) => {
+        return actionTypeId === SENTINELONE_CONNECTOR_ID && !isDeprecated && !isMissingSecrets;
+      }
+    );
+
+    if (!connector) {
+      throw new ResponseActionsClientError(`No SentinelOne connector found`, 400);
+    }
+
+    this.log.debug(`Using SentinelOne connector: ${connector.name} (${connector.id})`);
+
+    // TODO:PT can we check authz on API key for this connector? and error is it is not sufficient? Or maybe that should be done for each response actions?
+
+    return connector;
+  }
+
+  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
     throw createNotSupportedError();
   }
 
-  release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
     throw createNotSupportedError();
   }
 
-  killProcess(
+  async killProcess(
     options: KillOrSuspendProcessRequestBody
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
@@ -51,7 +87,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     throw createNotSupportedError();
   }
 
-  suspendProcess(
+  async suspendProcess(
     options: KillOrSuspendProcessRequestBody
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
@@ -59,25 +95,25 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     throw createNotSupportedError();
   }
 
-  runningProcesses(
+  async runningProcesses(
     options: GetProcessesRequestBody
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
     throw createNotSupportedError();
   }
 
-  getFile(
+  async getFile(
     options: ResponseActionGetFileRequestBody
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
     throw createNotSupportedError();
   }
 
-  execute(
+  async execute(
     options: ExecuteActionRequestBody
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
     throw createNotSupportedError();
   }
 
-  upload(
+  async upload(
     options: UploadActionApiRequestBody
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     throw createNotSupportedError();

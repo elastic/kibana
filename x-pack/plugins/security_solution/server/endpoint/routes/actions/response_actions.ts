@@ -310,7 +310,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
-    // const connectorActionsClient = (await context.actions).getActionsClient();
+    const connectorActions = (await context.actions).getActionsClient();
     const agentType = req.body.agent_type ?? 'endpoint';
     let actionsClient: ResponseActionsClient;
 
@@ -329,6 +329,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           casesClient,
           endpointContext,
           username: user?.username ?? 'unknown',
+          connectorActions,
         });
         break;
 
