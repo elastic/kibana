@@ -159,9 +159,6 @@ export const SummarySection = ({
         height: 310px;
       `}
       data-test-subj={DASHBOARD_SUMMARY_CONTAINER}
-      style={{
-        padding: `${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.m}`,
-      }}
     >
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
         <EuiFlexGroup direction="column">
@@ -184,6 +181,9 @@ export const SummarySection = ({
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.third}>
         <ChartPanel
+          styles={{
+            padding: `${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.m}`,
+          }}
           title={i18n.translate(
             'xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle',
             { defaultMessage: 'Compliance By CIS Section' }

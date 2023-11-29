@@ -23,6 +23,7 @@ interface ChartPanelProps {
   isLoading?: boolean;
   isError?: boolean;
   rightSideItems?: ReactNode[];
+  styles?: React.CSSProperties;
 }
 
 const Loading = () => (
@@ -54,6 +55,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   isError,
   children,
   rightSideItems,
+  styles,
 }) => {
   const { euiTheme } = useEuiTheme();
   const renderChart = () => {
