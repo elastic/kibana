@@ -1,0 +1,132 @@
+
+++++
+<div class="tabs" data-tab-group="file-json-tab-group-name">
+  <div role="tablist" aria-label="Request and response to the File Service for a JSON Asset">
+    <button role="tab"
+            aria-selected="true"
+            aria-controls="file-json-tab-group-curl"
+            id="file-json-group-curl"
+            >
+      Curl example
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="file-json-tab-group-request"
+            id="file-json-group-request"
+            tabindex="-1">
+      Request
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="file-json-tab-group-response"
+            id="file-json-group-response"
+            tabindex="-2">
+      Response
+    </button>
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="file-json-tab-group-curl"
+       aria-labelledby="file-json-group-curl">
+++++
+[%collapsible]
+====
+[source,bash,subs="attributes"]
+----------------------------------
+curl -I 'https://vector.maps.elastic.co/v{minor-version}/manifest?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version={version}' \
+-H 'User-Agent: curl/7.81.0' \
+-H 'Accept: */*' \
+-H 'Accept-Encoding: gzip, deflate, br'
+----------------------------------
+
+Server response
+
+[source,regex]
+----------------------------------
+HTTP/2 200 
+x-guploader-uploadid: ABPtcPp_BvMdBDO5jVlutETVHmvpOachwjilw4AkIKwMrOQJ4exR9Eln4g0LkW3V_LLSEpvjYLtUtFmO0Uwr61XXUhoP_A
+x-goog-generation: 1689593295246576
+x-goog-metageneration: 1
+x-goog-stored-content-encoding: gzip
+x-goog-stored-content-length: 108029
+content-encoding: gzip
+x-goog-hash: crc32c=T5gVpw==
+x-goog-hash: md5=6F8KWV8VTdx8FsN2iFehow==
+x-goog-storage-class: MULTI_REGIONAL
+accept-ranges: bytes
+content-length: 108029
+access-control-allow-origin: *
+access-control-expose-headers: Authorization, Content-Length, Content-Type, Date, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, accept, elastic-api-version, kbn-name, kbn-version, origin
+server: UploadServer
+date: Tue, 21 Nov 2023 14:25:07 GMT
+expires: Tue, 21 Nov 2023 15:25:07 GMT
+cache-control: public, max-age=3600,no-transform
+age: 2170
+last-modified: Mon, 17 Jul 2023 11:28:15 GMT
+etag: "e85f0a595f154ddc7c16c3768857a1a3"
+content-type: application/json
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+----------------------------------
+====
+++++
+  </div>
+  <div tabindex="1"
+       role="tabpanel"
+       id="file-json-tab-group-request"
+       aria-labelledby="file-json-group-request"
+       hidden="">
+++++
+[source,regex,subs="attributes"]
+----------------------------------
+Host: vector.maps.elastic.co
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: {ems-headers-url}/app/maps/map
+Origin: {ems-headers-url}
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Pragma: no-cache
+Cache-Control: no-cache
+----------------------------------
+++++
+  </div>
+  <div tabindex="2"
+       role="tabpanel"
+       id="file-json-tab-group-response"
+       aria-labelledby="file-json-group-response"
+       hidden="">
+++++
+[source,regex]
+----------------------------------
+x-guploader-uploadid: ABPtcPoUFrCmjBeebnfRxSZp44ZHsZ-_iQg7794RU1Z7Lb2cNNxXsMRkIDa5s7VBEfyehvo-_9rcm1A3HfYW8geguUxKrw
+x-goog-generation: 1689593295246576
+x-goog-metageneration: 1
+x-goog-stored-content-encoding: gzip
+x-goog-stored-content-length: 108029
+content-encoding: gzip
+x-goog-hash: crc32c=T5gVpw==
+x-goog-hash: md5=6F8KWV8VTdx8FsN2iFehow==
+x-goog-storage-class: MULTI_REGIONAL
+accept-ranges: bytes
+content-length: 108029
+access-control-allow-origin: *
+access-control-expose-headers: Authorization, Content-Length, Content-Type, Date, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, accept, elastic-api-version, kbn-name, kbn-version, origin
+server: UploadServer
+date: Tue, 21 Nov 2023 11:24:45 GMT
+expires: Tue, 21 Nov 2023 12:24:45 GMT
+cache-control: public, max-age=3600,no-transform
+age: 3101
+last-modified: Mon, 17 Jul 2023 11:28:15 GMT
+etag: "e85f0a595f154ddc7c16c3768857a1a3"
+content-type: application/json
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+X-Firefox-Spdy: h2
+----------------------------------
+++++
+  </div>
+</div>
+++++
