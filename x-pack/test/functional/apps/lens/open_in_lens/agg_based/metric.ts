@@ -216,7 +216,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: undefined,
           value: undefined,
-          color: 'rgba(0, 0, 0, 0)',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,

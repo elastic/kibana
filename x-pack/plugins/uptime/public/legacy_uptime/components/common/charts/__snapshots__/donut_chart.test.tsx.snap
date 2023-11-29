@@ -444,6 +444,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {

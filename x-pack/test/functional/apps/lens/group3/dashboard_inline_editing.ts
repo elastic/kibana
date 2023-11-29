@@ -139,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: '',
           value: '5,727.322',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingTrendline: false,
           showingBar: false,
         },
