@@ -135,6 +135,7 @@ export const setupOptionsListSuggestionsRoute = (
       },
     };
 
+    // console.log('BODY', JSON.stringify(body));
     /**
      * Run ES query
      */

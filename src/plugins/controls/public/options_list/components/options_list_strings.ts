@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { i18n } from '@kbn/i18n';
+import { OptionsListSearchTechnique } from '../../../common/options_list/suggestions_searching';
 
 export const OptionsListStrings = {
   control: {
