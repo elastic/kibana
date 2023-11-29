@@ -156,21 +156,12 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             fullWidth
             error={errors.dedupKey}
             isInvalid={isDedupKeyInvalid}
-            label={
-              isDedupeKeyRequired
-                ? i18n.translate(
-                    'xpack.stackConnectors.components.pagerDuty.dedupKeyTextRequiredFieldLabel',
-                    {
-                      defaultMessage: 'DedupKey',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.stackConnectors.components.pagerDuty.dedupKeyTextFieldLabel',
-                    {
-                      defaultMessage: 'DedupKey',
-                    }
-                  )
-            }
+            label={i18n.translate(
+              'xpack.stackConnectors.components.pagerDuty.dedupKeyTextFieldLabel',
+              {
+                defaultMessage: 'DedupKey',
+              }
+            )}
             labelAppend={
               isDedupeKeyRequired ? null : (
                 <EuiText size="xs" color="subdued">
