@@ -156,7 +156,19 @@ const deleteSLORoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
 
-    const deleteSLO = new DeleteSLO(repository, transformManager, esClient, rulesClient);
+    const summaryTransformManager = new DefaultSummaryTransformManager(
+      new DefaultSummaryTransformGenerator(),
+      esClient,
+      logger
+    );
+
+    const deleteSLO = new DeleteSLO(
+      repository,
+      transformManager,
+      summaryTransformManager,
+      esClient,
+      rulesClient
+    );
 
     await deleteSLO.execute(params.path.id);
   },
