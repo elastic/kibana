@@ -84,10 +84,10 @@ export const CategoryTable: FC<Props> = ({
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
 
-  const labels = useMemo(
-    () => getLabels(onAddFilter !== undefined && onClose !== undefined),
-    [onAddFilter, onClose]
-  );
+  const labels = useMemo(() => {
+    const isFlyout = onAddFilter !== undefined && onClose !== undefined;
+    return getLabels(isFlyout && navigateToDiscover === false);
+  }, [navigateToDiscover, onAddFilter, onClose]);
 
   const showSparkline = useMemo(() => {
     return categories.some((category) => category.sparkline !== undefined);

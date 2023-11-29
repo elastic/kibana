@@ -834,7 +834,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.patternAnalysisLabel"
-            defaultMessage="Pattern analysis"
+            defaultMessage="Run pattern analysis"
           />
         </EuiContextMenuItem>
       );
