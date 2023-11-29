@@ -23,7 +23,9 @@ describe('StartModelApiLogic', () => {
 
       const response = await startModel({ modelId: 'model_1' });
       await nextTick();
-      expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/ml/models/model_1/deploy');
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/enterprise_search/ml/models/model_1/deploy'
+      );
       expect(response).toEqual(mockResponseBody);
     });
   });
