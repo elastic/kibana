@@ -37,5 +37,8 @@
     "@kbn/fleet-plugin",
     "@kbn/repo-info",
     "@kbn/securitysolution-es-utils",
+    "@kbn/datemath",
+    "@kbn/safer-lodash-set",
+    "@kbn/stack-connectors-plugin",
   ]
 }
