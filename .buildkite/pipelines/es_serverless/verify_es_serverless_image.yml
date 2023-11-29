@@ -58,10 +58,10 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh 
         env:
-          - TARGET=cypress:run:serverless
-          - CURRENT_WORKING_DIR=x-pack/test/security_solution_cypress
-          - JOB_TITLE=kibana-serverless-security-cypress
-          - MSG="--- Security Serverless Cypress Tests"
+          TARGET: cypress:run:serverless
+          CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+          JOB_TITLE: kibana-serverless-security-cypress
+          MSG: "--- Security Serverless Cypress Tests"
         label: 'Serverless Security Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
@@ -76,10 +76,10 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
         env:
-          - TARGET=cypress:explore:run:serverless
-          - CURRENT_WORKING_DIR=x-pack/test/security_solution_cypress
-          - JOB_TITLE=kibana-security-solution-chrome
-          - MSG="--- Explore - Security Solution Cypress Tests"
+          TARGET: cypress:explore:run:serverless
+          CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+          JOB_TITLE: kibana-security-solution-chrome
+          MSG: "--- Explore - Security Solution Cypress Tests"
         label: 'Serverless Explore - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
@@ -94,10 +94,10 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
         env:
-          - TARGET=cypress:investigations:run:serverless
-          - CURRENT_WORKING_DIR=x-pack/test/security_solution_cypress
-          - JOB_TITLE=kibana-security-solution-chrome
-          - MSG="--- Investigations Cypress Tests on Serverless"
+          TARGET: cypress:investigations:run:serverless
+          CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+          JOB_TITLE: kibana-security-solution-chrome
+          MSG: "--- Investigations Cypress Tests on Serverless"
         label: 'Serverless Investigations - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
@@ -112,10 +112,10 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
         env:
-          - TARGET=cypress:rule_management:run:serverless
-          - CURRENT_WORKING_DIR=x-pack/test/security_solution_cypress
-          - JOB_TITLE=kibana-security-solution-chrome
-          - MSG="--- Rule Management Cypress Tests on Serverless"
+          TARGET: cypress:rule_management:run:serverless
+          CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+          JOB_TITLE: kibana-security-solution-chrome
+          MSG: "--- Rule Management Cypress Tests on Serverless"
         label: 'Serverless Rule Management - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
@@ -130,10 +130,10 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
         env:
-          - TARGET=cypress:rule_management:prebuilt_rules:run:serverless
-          - CURRENT_WORKING_DIR=x-pack/test/security_solution_cypress
-          - JOB_TITLE=kibana-security-solution-chrome
-          - MSG="--- Rule Management - Prebuilt Rules - Cypress Tests on Serverless"
+          TARGET: cypress:rule_management:prebuilt_rules:run:serverless
+          CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+          JOB_TITLE: kibana-security-solution-chrome
+          MSG: "--- Rule Management - Prebuilt Rules - Cypress Tests on Serverless"
         label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
@@ -148,10 +148,10 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_exec.sh
         env:
-          - TARGET=cypress:dw:serverless:run
-          - CURRENT_WORKING_DIR=x-pack/plugins/security_solution
-          - JOB_TITLE=kibana-defend-workflows-serverless-cypress
-          - MSG="--- Defend Workflows Cypress tests on Serverless"
+          TARGET: cypress:dw:serverless:run
+          CURRENT_WORKING_DIR: x-pack/plugins/security_solution
+          JOB_TITLE: kibana-defend-workflows-serverless-cypress
+          MSG: "--- Defend Workflows Cypress tests on Serverless"
         label: 'Defend Workflows Cypress Tests on Serverless'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
