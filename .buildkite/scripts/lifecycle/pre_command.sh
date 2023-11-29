@@ -78,10 +78,10 @@ EOF
   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
   export CI_STATS_BUILD_ID
 
-  CI_STATS_TOKEN="$(vault_get kibana_ci_stats secret/kibana-issues/dev/kibana_ci_stats api_token)"
+  CI_STATS_TOKEN="$(vault_get kibana_ci_stats api_token)"
   export CI_STATS_TOKEN
 
-  CI_STATS_HOST="$(vault_get kibana_ci_stats secret/kibana-issues/dev/kibana_ci_stats api_host)"
+  CI_STATS_HOST="$(vault_get kibana_ci_stats api_host)"
   export CI_STATS_HOST
 
   if [[ "$CI_STATS_BUILD_ID" ]]; then

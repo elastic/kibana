@@ -171,6 +171,7 @@ download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
 }
 
+
 vault_get() {
   path=$1
   field=$2
@@ -180,5 +181,9 @@ vault_get() {
     fullPath="secret/kibana-issues/dev/$path"
   fi
 
-  retry 5 5 vault read -field="$field" "$fullPath"
+  if [[ -z "${2:-}" ]]; then
+    retry 5 5 vault read "$fullPath"
+  else
+    retry 5 5 vault read -field="$field" "$fullPath"
+  fi
 }

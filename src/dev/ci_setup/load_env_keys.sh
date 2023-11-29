@@ -25,13 +25,13 @@ else
   export VAULT_TOKEN
 
   # Set GITHUB_TOKEN for reporting test failures
-  GITHUB_TOKEN=$(retry 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
+  GITHUB_TOKEN=$(vault_get kibanamachine github_token)
   export GITHUB_TOKEN
 
-  KIBANA_CI_REPORTER_KEY=$(retry 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
+  KIBANA_CI_REPORTER_KEY=$(vault_get kibanamachine-reporter value)
   export KIBANA_CI_REPORTER_KEY
 
-  PERCY_TOKEN=$(retry 5 vault read -field=value secret/kibana-issues/dev/percy)
+  PERCY_TOKEN=$(vault_get percy value)
   export PERCY_TOKEN
 
   # remove vault related secrets

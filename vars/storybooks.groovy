@@ -47,7 +47,7 @@ def upload() {
 
     writeFile(file: 'index.html', text: html)
 
-    withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+    withGcpServiceAccount.fromVaultSecret('secret/ci/elastic-kibana/migrated/ci-artifacts-key', 'value') {
       kibanaPipeline.bash("""
         gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${getStorybooksBucket()}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}/'
         gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${getStorybooksBucket()}/${getDestinationDir()}/latest/'

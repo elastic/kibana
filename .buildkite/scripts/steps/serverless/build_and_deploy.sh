@@ -72,7 +72,7 @@ deploy() {
     VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
     VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
     retry 5 30 vault login -no-print "$VAULT_TOKEN"
-    retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$PROJECT_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+    retry 5 5 vault write "secret/ci/elastic-kibana/migrated/cloud-deploy/$PROJECT_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
   else
     echo "Updating project..."
     curl -s \
@@ -93,7 +93,7 @@ Kibana: $PROJECT_KIBANA_LOGIN_URL
 
 Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
-Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$PROJECT_NAME\`
+Credentials: \`vault_get cloud-deploy/$PROJECT_NAME\`
 
 Kibana image: \`$KIBANA_IMAGE\`
 EOF
