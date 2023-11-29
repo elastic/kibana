@@ -233,7 +233,7 @@ POST /api/synthetics/monitors
 --------------------------------------------------
 
 1. **Browser Monitor**:
-Create an ICMP monitor to perform ping checks.
+Create a Browser monitor to check a website.
 
 [source,sh]
 --------------------------------------------------
