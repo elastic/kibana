@@ -154,7 +154,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 *TCP Monitor Fields*:
 
-`host`:: (Required, string): Host to monitor, can be an IP address or a hostname. Port can be appended to the host using a colon (e.g., "example.com:9200").
+`host`:: (Required, string): The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon (e.g., "example.com:9200").
 
 `ssl`:: (Optional, object): The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used. See https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-ssl.html for full SSL Options.
 
