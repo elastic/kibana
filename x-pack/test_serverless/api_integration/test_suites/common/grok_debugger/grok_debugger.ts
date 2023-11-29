@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
 
-  describe('Grok Debugger', function () {
+  describe('Grok Debugger Routes', function () {
     describe('Simulate', () => {
       it('should simulate a valid pattern', async () => {
         const rawEvent = '55.3.244.1 GET /index.html 15824 0.043';
