@@ -545,10 +545,12 @@ export function diffOutputSecretPaths(
     const newPath = newPathsByPath[oldPath.path];
     if (newPath && newPath.value) {
       const newValue = newPath.value;
-      if (typeof newValue === 'string') toCreate.push(newPath);
-      toDelete.push(oldPath);
-    } else {
-      noChange.push(newPath);
+      if (typeof newValue === 'string') {
+        toCreate.push(newPath);
+        toDelete.push(oldPath);
+      } else {
+        noChange.push(newPath);
+      }
     }
     delete newPathsByPath[oldPath.path];
   }
