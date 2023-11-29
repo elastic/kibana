@@ -9,6 +9,7 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool, Tool } from 'langchain/tools';
+import { PassThrough, Readable } from 'stream';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
@@ -83,6 +84,33 @@ export const callAgentExecutor = async ({
     }),
   ];
 
+  // // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
+  // // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  // const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  //
+  // let traceData;
+  //
+  // // Wrap executor call with an APM span for instrumentation
+  // await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
+  //   if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
+  //     traceData = {
+  //       // Transactions ID since this span is the parent
+  //       transaction_id: span.transaction.ids['transaction.id'],
+  //       trace_id: span.ids['trace.id'],
+  //     };
+  //     span.addLabels({ evaluationId: traceOptions?.evaluationId });
+  //   }
+  //
+  //   return executor.call(
+  //     { input: latestMessage[0].content },
+  //     {
+  //       callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+  //       runName: DEFAULT_AGENT_EXECUTOR_ID,
+  //       tags: traceOptions?.tags ?? [],
+  //     }
+  //   );
+  // });
+
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
     agentType: 'chat-conversational-react-description',
     // agentType: 'zero-shot-react-description',
@@ -92,7 +120,44 @@ export const callAgentExecutor = async ({
   });
   console.log('WE ARE HERE before stream call');
   const resp = await executor.stream({ input: latestMessage[0].content, chat_history: [] });
+  const textEncoder = new TextEncoder();
+  async function* generate() {
+    for await (const chunk of resp) {
+      console.log('WE ARE HERE CHUNK', chunk);
+      yield textEncoder.encode(JSON.stringify(chunk));
+    }
+  }
 
+  const readable = Readable.from(generate());
+
+  // // const realStream = new ReadableStream({
+  // //   async start(controller) {
+  // //     for await (const chunk of resp) {
+  // //       console.log('WE ARE HERE CHUNK', chunk);
+  // //       controller.enqueue(textEncoder.encode(chunk.output));
+  // //     }
+  // //     controller.close();
+  // //   },
+  // // });
+  //
+  // const realStream = new Readable({
+  //   async read(size) {
+  //     console.log('WE ARE HERE READ', size);
+  //     for await (const chunk of resp) {
+  //       console.log('WE ARE HERE CHUNK', chunk);
+  //       this.push(Buffer.from(JSON.stringify(chunk)));
+  //     }
+  //     this.push(null); // Signal the end of the stream
+  //   },
+  // });
+
+  console.log('WE ARE HERE readable', readable);
+
+  return readable.pipe(new PassThrough());
+
+  for await (const chunk of resp) {
+    console.log('WE ARE HERE CHUNK', chunk);
+  }
   console.log('WE ARE HERE after stream call ', { resp });
 
   return resp;

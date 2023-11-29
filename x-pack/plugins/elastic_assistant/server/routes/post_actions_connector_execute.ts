@@ -79,7 +79,6 @@ export const postActionsConnectorExecuteRoute = (
 
         return response.ok({
           body: langChainResponseBody,
-          headers: { 'Content-Type': 'application/octet-stream' },
         });
       } catch (err) {
         console.log('WE ARE HERE ERROR?????', err);

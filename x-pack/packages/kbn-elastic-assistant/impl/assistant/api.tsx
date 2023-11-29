@@ -90,7 +90,6 @@ export const fetchConnectorExecuteAction = async ({
     console.log('WE ARE HERE after fetch with RESPONSE????', response?.response);
 
     const reader = response?.response?.body?.getReader();
-    console.log('WE ARE HERE after getReader????', reader);
 
     if (!reader) {
       return {
