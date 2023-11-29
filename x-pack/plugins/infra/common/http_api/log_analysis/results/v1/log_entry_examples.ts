@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
+import { idFormatRT } from '../../id_formats/v1/id_formats';
 import { logEntryExampleRT } from '../../../../log_analysis';
 import {
   badRequestErrorRT,
@@ -31,6 +32,7 @@ export const getLogEntryExamplesRequestPayloadRT = rt.type({
       exampleCount: rt.number,
       // logView
       logView: persistedLogViewReferenceRT,
+      idFormat: idFormatRT,
       // the time range to fetch the log rate examples from
       timeRange: timeRangeRT,
     }),

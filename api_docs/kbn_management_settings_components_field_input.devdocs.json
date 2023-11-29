@@ -117,6 +117,28 @@
             "path": "packages/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputKibanaDependencies.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "{ client: ",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -303,6 +325,55 @@
                 ],
                 "signature": [
                   "string"
+                ],
+                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputServices.validateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "validateChange",
+            "description": [],
+            "signature": [
+              "(key: string, value: any) => Promise<",
+              "ValueValidation",
+              ">"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-input",
+                "id": "def-common.FieldInputServices.validateChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-input",
+                "id": "def-common.FieldInputServices.validateChange.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
                 ],
                 "path": "packages/kbn-management/settings/components/field_input/types.ts",
                 "deprecated": false,

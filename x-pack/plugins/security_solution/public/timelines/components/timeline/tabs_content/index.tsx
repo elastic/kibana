@@ -276,6 +276,10 @@ const StyledEuiTab = styled(EuiTab)`
   }
 `;
 
+const StyledEuiTabs = styled(EuiTabs)`
+  padding-inline: ${(props) => props.theme.eui.euiSizeM};
+`;
+
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   renderCellValue,
   rowRenderers,
@@ -389,7 +393,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   return (
     <>
       {!timelineFullScreen && (
-        <EuiTabs>
+        <StyledEuiTabs className="eui-scrollBar">
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.query}`}
             onClick={setQueryAsActiveTab}
@@ -493,7 +497,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               <span>{i18n.SECURITY_ASSISTANT}</span>
             </StyledEuiTab>
           )}
-        </EuiTabs>
+        </StyledEuiTabs>
       )}
 
       <ActiveTimelineTab

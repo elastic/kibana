@@ -168,7 +168,6 @@ export interface DocLinks {
     readonly machineLearningStart: string;
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
-    readonly mlDocumentEnrichmentUpdateMappings: string;
     readonly searchApplicationsTemplates: string;
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
@@ -350,6 +349,9 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createEsqlRuleType: string;
+    readonly entityAnalytics: {
+      readonly riskScorePrerequisites: string;
+    };
   };
   readonly query: {
     readonly eql: string;
@@ -527,6 +529,8 @@ export interface DocLinks {
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
     elasticAgentInputConfiguration: string;
+    policySecrets: string;
+    remoteESOoutput: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -568,6 +572,7 @@ export interface DocLinks {
     readonly rubyOverview: string;
     readonly rustGuide: string;
     readonly rustOverview: string;
+    readonly eland: string;
   };
   readonly endpoints: {
     readonly troubleshooting: string;

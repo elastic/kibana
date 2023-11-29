@@ -30,14 +30,15 @@ import {
   openFirstAlert,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/169091
+describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });

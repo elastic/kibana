@@ -18,7 +18,7 @@ import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { PreviewPanelKey } from '../../preview';
+import { DocumentDetailsPreviewPanelKey } from '../../preview';
 
 const ruleUuid = {
   category: 'kibana',
@@ -111,6 +111,15 @@ describe('<Description />', () => {
       expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
     });
 
+    it('should render rule preview button as disabled if flyout is in preview', () => {
+      const { getByTestId } = renderDescription({
+        ...panelContextValue([{ ...ruleUuid, values: [] }, ruleName, ruleDescription]),
+        isPreview: true,
+      });
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
+    });
+
     it('should open preview panel when clicking on button', () => {
       const panelContext = panelContextValue([ruleUuid, ruleDescription, ruleName]);
 
@@ -119,7 +128,7 @@ describe('<Description />', () => {
       getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
 
       expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-        id: PreviewPanelKey,
+        id: DocumentDetailsPreviewPanelKey,
         path: { tab: 'rule-preview' },
         params: {
           id: panelContext.eventId,
