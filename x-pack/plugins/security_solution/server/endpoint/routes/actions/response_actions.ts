@@ -293,6 +293,20 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   const logger = endpointContext.logFactory.get('responseActionsHandler');
 
   return async (context, req, res) => {
+    // Note:  because our API schemas are defined as module static properties (as opposed to a
+    //        `getter` function), we need to include this additional validation here, since
+    //        `agent_type` is included in the schema independent of the feature flag
+    if (
+      req.body.agent_type &&
+      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
+    ) {
+      return errorHandler(
+        logger,
+        res,
+        new CustomHttpRequestError(`[request body.agent_type]: feature is disabled`, 400)
+      );
+    }
+
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
