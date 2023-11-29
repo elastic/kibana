@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/observability/get-padded-alert-time-range-util'],
+  roots: ['<rootDir>/x-pack/packages/observability/get_padded_alert_time_range_util'],
 };
