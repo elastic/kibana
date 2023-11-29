@@ -33,6 +33,7 @@ import {
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
+  OUTPUT_HEALTH_DATA_STREAM,
 } from '../constants';
 import {
   SO_SEARCH_LIMIT,
@@ -952,6 +953,31 @@ class OutputService {
       }
     }
   }
+
+  async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
+    const response = await esClient.search({
+      index: OUTPUT_HEALTH_DATA_STREAM,
+      query: { bool: { filter: { term: { output: id } } } },
+      sort: { '@timestamp': 'desc' },
+      size: 1,
+    });
+    if (response.hits.hits.length === 0) {
+      return {
+        state: 'UNKOWN',
+        message: '',
+      };
+    }
+    const latestHit = response.hits.hits[0]._source as any;
+    return {
+      state: latestHit.state,
+      message: latestHit.message ?? '',
+    };
+  }
+}
+
+interface OutputHealth {
+  state: string;
+  message: string;
 }
 
 export const outputService = new OutputService();
