@@ -55,7 +55,7 @@ describe('Exceptions viewer read only', { tags: ['@ess'] }, () => {
     });
 
     login(ROLES.t1_analyst);
-    visitRulesManagementTable(ROLES.t1_analyst);
+    visitRulesManagementTable();
     goToRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
   });
