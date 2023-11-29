@@ -32,8 +32,10 @@ import {
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
+import { ConnectorViewItem } from './connectors_logic';
+
 interface ConnectorsTableProps {
-  items: Connector[];
+  items: ConnectorViewItem[];
   meta?: Meta;
   onChange: (criteria: CriteriaWithPagination<Connector>) => void;
 }
@@ -49,7 +51,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   onChange,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
-  const columns: Array<EuiBasicTableColumn<Connector>> = [
+  const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
     {
       field: 'name',
       name: i18n.translate(
@@ -69,7 +71,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
     },
     {
-      field: 'docs_count',
+      field: 'docsCount',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.docsCount',
         {

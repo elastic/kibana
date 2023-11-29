@@ -19,6 +19,7 @@ export interface FetchConnectorsApiLogicArgs {
 }
 export interface FetchConnectorsApiLogicResponse {
   connectors: Connector[];
+  counts: Record<string, number>;
   meta: Meta;
 }
 

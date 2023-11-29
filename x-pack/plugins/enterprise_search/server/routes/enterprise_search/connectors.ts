@@ -26,6 +26,7 @@ import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
+import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
@@ -487,14 +488,25 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const { connector_type, from, size, searchQuery } = request.query;
 
-      let result;
+      let connectorResult;
+      let connectorCountResult;
       try {
-        result = await fetchConnectors(
+        connectorResult = await fetchConnectors(
           client.asCurrentUser,
           undefined,
           connector_type as 'connector' | 'crawler' | undefined,
           searchQuery
         );
+
+        const indicesSlice = connectorResult
+          .reduce((acc: string[], connector) => {
+            if (connector.index_name) {
+              acc.push(connector.index_name);
+            }
+            return acc;
+          }, [])
+          .slice(from, from + size);
+        connectorCountResult = await fetchIndexCounts(client, indicesSlice);
       } catch (error) {
         if (isExpensiveQueriesNotAllowedException(error)) {
           return createError({
@@ -514,12 +526,13 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
       return response.ok({
         body: {
-          connectors: result.slice(from, from + size),
+          connectors: connectorResult.slice(from, from + size),
+          counts: connectorCountResult,
           meta: {
             page: {
               from,
               size,
-              total: result.length,
+              total: connectorResult.length,
             },
           },
         },

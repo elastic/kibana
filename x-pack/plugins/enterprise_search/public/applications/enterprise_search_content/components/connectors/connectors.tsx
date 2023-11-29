@@ -38,7 +38,7 @@ export const baseBreadcrumbs = [
 ];
 export const Connectors: React.FC = () => {
   const { fetchConnectors, onPaginate, setIsFirstRequest } = useActions(ConnectorsLogic);
-  const { data, isLoading, searchParams, isEmpty } = useValues(ConnectorsLogic);
+  const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
   const [searchQuery, setSearchValue] = useState('');
 
   useEffect(() => {
@@ -49,10 +49,6 @@ export const Connectors: React.FC = () => {
     fetchConnectors({ ...searchParams, searchQuery });
   }, [searchParams.from, searchParams.size, searchQuery]);
 
-  // TODOS
-  // Spinner while loading
-  // add docs count
-  // add stats
   return (
     <>
       {!isLoading && isEmpty ? (
@@ -139,7 +135,7 @@ export const Connectors: React.FC = () => {
               />
             </EuiFlexItem>
             <ConnectorsTable
-              items={data?.connectors || []}
+              items={connectors || []}
               meta={data?.meta}
               onChange={handlePageChange(onPaginate)}
             />

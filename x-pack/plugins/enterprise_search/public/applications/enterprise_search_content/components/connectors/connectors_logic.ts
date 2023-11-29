@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Connector } from '@kbn/search-connectors/types';
+
 import { Status } from '../../../../../common/types/api';
 
 import { Meta } from '../../../../../common/types/pagination';
@@ -15,6 +17,7 @@ import {
   FetchConnectorsApiLogicActions,
 } from '../../api/connector/fetch_connectors.api';
 
+export type ConnectorViewItem = Connector & { docsCount?: number };
 export interface ConnectorsActions {
   apiError: FetchConnectorsApiLogicActions['apiError'];
   apiSuccess: FetchConnectorsApiLogicActions['apiSuccess'];
@@ -39,6 +42,7 @@ export interface ConnectorsActions {
   setIsFirstRequest(): void;
 }
 export interface ConnectorsValues {
+  connectors: ConnectorViewItem[];
   data: typeof FetchConnectorsApiLogic.values.data;
   isEmpty: boolean;
   isFetchConnectorsDetailsLoading: boolean;
@@ -107,6 +111,23 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
     ],
   }),
   selectors: ({ selectors }) => ({
+    connectors: [
+      () => [selectors.data],
+      (data: ConnectorsValues['data']) => {
+        return (
+          data?.connectors.map((connector) => {
+            const indexName = connector.index_name;
+            if (indexName) {
+              return {
+                ...connector,
+                docsCount: data?.counts[indexName],
+              };
+            }
+            return connector;
+          }) || []
+        );
+      },
+    ],
     isEmpty: [
       () => [selectors.data],
       (data) =>
