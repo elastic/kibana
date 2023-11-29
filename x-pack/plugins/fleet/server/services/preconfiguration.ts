@@ -255,10 +255,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       });
 
-      apm.startTransaction(
-        'fleet.preconfiguration.addPackagePolicies.improved.prReview.50',
-        'fleet'
-      );
+      const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
         soClient,
         esClient,
@@ -267,7 +264,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         defaultOutput,
         true
       );
-      apm.endTransaction('fleet.preconfiguration.addPackagePolicies.improved.prReview.50');
+      s?.end();
 
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {

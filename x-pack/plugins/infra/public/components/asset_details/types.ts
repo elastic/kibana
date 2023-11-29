@@ -21,6 +21,7 @@ export enum ContentTabIds {
   OVERVIEW = 'overview',
   METADATA = 'metadata',
   PROCESSES = 'processes',
+  PROFILING = 'profiling',
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
   LOGS = 'logs',

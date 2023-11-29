@@ -6,8 +6,7 @@
  */
 
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
-
-import type { AuthorizationServiceSetup } from './authorization_service';
+import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 
 export function initAPIAuthorization(
   http: HttpServiceSetup,

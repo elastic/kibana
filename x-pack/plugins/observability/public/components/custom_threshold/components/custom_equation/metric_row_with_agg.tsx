@@ -120,7 +120,7 @@ export function MetricRowWithAgg({
               fullWidth
               label={
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} css={{ paddingTop: 2, paddingBottom: 2 }}>
                     {i18n.translate(
                       'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
                       { defaultMessage: 'Aggregation {name}', values: { name } }
