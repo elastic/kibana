@@ -42,25 +42,25 @@ Where to deploy the monitor. Monitors can be deployed in multiple locations so t
 To list available locations you can:
 +
   * Run the https://www.elastic.co/guide/en/observability/current/synthetics-command-reference.html#elastic-synthetics-locations-command[`elastic-synthetics locations`] command
-  with the {kib} URL for the deployment from which to fetch available locations.
+  with the deployment's {kib} URL.
   * Go to *Synthetics* -> *Management* and click *Create monitor*.
     Locations will be listed in _Locations_.
 
 `private_locations` (`Array<string>`)::
 
 The https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html[Private Locations] to which the monitors will be deployed. These Private Locations refer to locations hosted and managed by you, whereas
-`locations` are hosted by Elastic. You can specify a Private Locations using the location's name.
+`locations` are hosted by Elastic. You can specify a Private Location using the location's name.
 +
 To list available Private Locations you can:
 +
   * Run the https://www.elastic.co/guide/en/observability/current/synthetics-command-reference.html#elastic-synthetics-locations-command[`elastic-synthetics locations`] command
-  with the {kib} URL for the deployment from which to fetch available locations.
+  with the deployment's {kib} URL.
   * Go to *Synthetics* -> *Settings* and click *Private locations*.
   Private Locations will be listed in the table.
 
 [NOTE]
 ====
-You may provide either `locations` or `private_locations`, and you may also provide both if needed. At least one of them is required, but providing both is optional.
+You may provide `locations` or `private_locations`, or both. At least one is required.
 ====
 
 
@@ -78,7 +78,7 @@ You may provide either `locations` or `private_locations`, and you may also prov
 
 `params`:: (Optional, string): Monitor parameters.
 
-`retest_on_failure`:: (Optional, boolean, default: true): Enable or disable retesting when a monitor fails. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created, and if configured, an alert sent. Then the monitor will resume running according to the defined schedule. Using retestOnFailure can reduce noise related to transient problems.
+`retest_on_failure`:: (Optional, boolean, default: true): Enable or disable retesting when a monitor fails. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created, and if configured, an alert sent. Then the monitor will resume running according to the defined schedule. Using `retest_on_failure` can reduce noise related to transient problems.
 
 
 *HTTP Monitor Fields*:
@@ -106,14 +106,14 @@ You may provide either `locations` or `private_locations`, and you may also prov
 
 `proxy_url`:: (Optional, string): The URL of the proxy to use for this monitor.
 
-`response`:: (Optional, object): Controls the indexing of the HTTP response body contents to the http.response.body.contents field.
+`response`:: (Optional, object): Controls the indexing of the HTTP response body contents to the `http.response.body.contents` field.
 
-`response.include_body`:: (Optional, boolean, default: true): Controls the indexing of the HTTP response body contents to the http.response.body.contents field.
+`response.include_body`:: (Optional, boolean, default: true): Controls the indexing of the HTTP response body contents to the `http.response.body.contents` field.
   * `include_body` ("on_error" | "never" | "always", default: on_error) Set response.include_body to one of the options listed below.
-         ** on_error: Include the body if an error is encountered during the check. This is the default.
-         ** never: Never include the body.
-         ** always: Always include the body with checks.
-  * `include_body_max_bytes` (Optional, number, default: 1024) Set response.include_body_max_bytes to control the maximum size of the stored body contents.
+         ** `on_error`: Include the body if an error is encountered during the check. This is the default.
+         ** `never`: Never include the body.
+         ** `always`: Always include the body.
+  * `include_body_max_bytes` (Optional, number, default: 1024) Set `response.include_body_max_bytes` to control the maximum size of the stored body contents.
 
 `check`:: (Optional, object): The check request settings.
   * `request` An optional request to send to the remote host. Under check.request, specify these options:
@@ -137,7 +137,7 @@ You may provide either `locations` or `private_locations`, and you may also prov
 }
 --------------------------------------------------
 
-  * `response` The expected response. Under check.response, specify these options:
+  * `response` The expected response. Under `check.response`, specify these options:
       ** `status`  A list of expected status codes. 4xx and 5xx codes are considered down by default. Other codes are considered up.
       ** `headers` (Optional, object): A dictionary of expected HTTP headers. If the header is not found, the check fails.
       ** `body.positive`: A list of regular expressions to match the body output. Only a single expression needs to match.
@@ -147,14 +147,14 @@ You may provide either `locations` or `private_locations`, and you may also prov
           This monitor examines match successfully if there is no bar or Bar at all, examines match failed if there is bar or Bar in the response body:
       ** `json`: A list of expressions executed against the body when parsed as JSON. Body sizes must be less than or equal to 100 MiB. 
           *** `description` (string): A description of the check.
-          *** `expression` (string): The following configuration shows how to check the response using gval expressions when the body contains JSON:
+          *** `expression` (string): The following configuration shows how to check the response using [gval](https://github.com/PaesslerAG/gval) expressions when the body contains JSON:
 
 
 
 
 *TCP Monitor Fields*:
 
-`host`:: (Required, string): Host to monitor, can be an IP address or a hostname. Port can be appended to the host using a colon (e.g., "example.com:9200").
+`host`:: (Required, string): The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon (e.g., "example.com:9200").
 
 `ssl`:: (Optional, object): The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used. See https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-ssl.html for full SSL Options.
 
@@ -163,7 +163,7 @@ You may provide either `locations` or `private_locations`, and you may also prov
     * `send` (Optional, string): check.send: 'Hello World'
     * `receive` (Optional, string): check.receive: 'Hello World'
 
-`proxy_url`:: (Optional, string): The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://. If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client. You can change this behavior by setting the proxy_use_local_resolver option.
+`proxy_url`:: (Optional, string): The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of `socks5://`. If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client. You can change this behavior by setting the `proxy_use_local_resolver` option.
 
 `proxy_use_local_resolver`:: (Optional, boolean, default: false): A Boolean value that determines whether hostnames are resolved locally instead of being resolved on the proxy server. The default value is false, which means that name resolution occurs on the proxy server.
 
@@ -179,7 +179,7 @@ You may provide either `locations` or `private_locations`, and you may also prov
 
 `screenshots`:: (Optional, string, default: "on"): Screenshot option, either "on",  "off" or "only-on-failure".
 
-`synthetics_args`:: (Optional, array): Synthetics agent cli arguments.
+`synthetics_args`:: (Optional, array): Synthetics agent CLI arguments.
 
 `ignore_https_errors`:: (Optional, boolean, default: false): Whether to ignore HTTPS errors.
 
@@ -187,7 +187,7 @@ You may provide either `locations` or `private_locations`, and you may also prov
 
 ==== Examples
 
-Here are three examples of creating monitors with different types:
+Here are some examples of creating monitors of different types:
 
 1. **HTTP Monitor**:
 Create an HTTP monitor to check a website's availability.
@@ -233,7 +233,7 @@ POST /api/synthetics/monitors
 --------------------------------------------------
 
 1. **Browser Monitor**:
-Create an ICMP monitor to perform ping checks.
+Create a Browser monitor to check a website.
 
 [source,sh]
 --------------------------------------------------
@@ -241,7 +241,7 @@ POST /api/synthetics/monitors
 {
   "type": "browser",
   "name": "Example journey",
-  "inline_script": "step('Go to https://google.com.co', async () => {\n  await page.goto('https://www.google.com');\n});"
+  "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))"
 }
 --------------------------------------------------
 
