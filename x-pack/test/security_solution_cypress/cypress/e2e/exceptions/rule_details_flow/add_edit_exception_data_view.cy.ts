@@ -20,7 +20,8 @@ import {
 import { login } from '../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
-  clickEnableDisableSwitch,
+  clickEnableRuleSwitch,
+  clickDisableRuleSwitch,
   goToAlertsTab,
   goToExceptionsTab,
   openEditException,
@@ -78,7 +79,7 @@ describe(
 
     it('Creates an exception item and close all matching alerts', () => {
       // Disables enabled rule
-      clickEnableDisableSwitch();
+      clickDisableRuleSwitch();
 
       goToExceptionsTab();
       // when no exceptions exist, empty component shows with action to add exception
@@ -119,7 +120,7 @@ describe(
       // load more docs
       cy.task('esArchiverLoad', { archiveName: 'exceptions_2' });
       // Enables disabled rule
-      clickEnableDisableSwitch();
+      clickEnableRuleSwitch();
 
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();
