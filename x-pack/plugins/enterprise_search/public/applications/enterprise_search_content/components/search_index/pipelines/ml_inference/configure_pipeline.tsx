@@ -29,11 +29,10 @@ import { IndexViewLogic } from '../../index_view_logic';
 
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
-import { PipelineSelectOption } from './pipeline_select_option';
+import { PipelineSelect } from './pipeline_select';
 import { MODEL_REDACTED_VALUE, MODEL_SELECT_PLACEHOLDER, normalizeModelName } from './utils';
 
 const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';
-const PIPELINE_SELECT_PLACEHOLDER_VALUE = 'pipeline_placeholder$$';
 
 const CREATE_NEW_TAB_NAME = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.tabs.createNew.name',
@@ -54,11 +53,9 @@ export const ConfigurePipeline: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration },
     formErrors,
-    existingInferencePipelines,
     supportedMLModels,
   } = useValues(MLInferenceLogic);
-  const { selectExistingPipeline, setInferencePipelineConfiguration } =
-    useActions(MLInferenceLogic);
+  const { setInferencePipelineConfiguration } = useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
 
@@ -80,22 +77,6 @@ export const ConfigurePipeline: React.FC = () => {
       inputDisplay: model.model_id,
       value: model.model_id,
     })),
-  ];
-  const pipelineOptions: Array<EuiSuperSelectOption<string>> = [
-    {
-      disabled: true,
-      inputDisplay: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.placeholder',
-        { defaultMessage: 'Select one' }
-      ),
-      value: PIPELINE_SELECT_PLACEHOLDER_VALUE,
-    },
-    ...(existingInferencePipelines?.map((pipeline) => ({
-      disabled: pipeline.disabled,
-      dropdownDisplay: <PipelineSelectOption pipeline={pipeline} />,
-      inputDisplay: pipeline.pipelineName,
-      value: pipeline.pipelineName,
-    })) ?? []),
   ];
 
   const inputsDisabled = configuration.existingPipeline !== false;
@@ -202,15 +183,8 @@ export const ConfigurePipeline: React.FC = () => {
                 }
               )}
             >
-              <EuiSuperSelect
-                fullWidth
-                hasDividers
+              <PipelineSelect
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectExistingPipeline`}
-                valueOfSelected={
-                  pipelineName.length > 0 ? pipelineName : PIPELINE_SELECT_PLACEHOLDER_VALUE
-                }
-                options={pipelineOptions}
-                onChange={(value) => selectExistingPipeline(value)}
               />
             </EuiFormRow>
           </EuiForm>
