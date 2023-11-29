@@ -6,7 +6,7 @@
  */
 
 import { format as formatUrl } from 'url';
-import supertest, { SuperTest, Test } from 'supertest';
+import supertest, { SuperAgentTest } from 'supertest';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 /**
@@ -37,7 +37,7 @@ const initSuperAgentTest = (kbnUrl: string, ca?: string[]) => {
       const agent = supertest.agent(kbnUrl, { ca });
       return agent.put(url);
     },
-  } as Partial<SuperTest<Test>>;
+  } as Partial<Pick<SuperAgentTest, 'get' | 'delete' | 'post' | 'patch' | 'put'>>;
 };
 
 export function SupertestProvider({ getService }: FtrProviderContext) {
