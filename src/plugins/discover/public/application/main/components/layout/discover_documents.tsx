@@ -315,6 +315,7 @@ function DiscoverDocumentsComponent({
       }),
     [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">

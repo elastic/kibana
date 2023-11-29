@@ -14,7 +14,7 @@ export interface DiscoverGlobalStateContainer {
   set: (state: QueryState) => Promise<void>;
 }
 
-export const GLOBAL_STATE_URL_KEY = '_g';
+const GLOBAL_STATE_URL_KEY = '_g';
 
 export const getDiscoverGlobalStateContainer = (
   stateStorage: IKbnUrlStateStorage

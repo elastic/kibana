@@ -72,6 +72,9 @@ interface DiscoverStateContainerParams {
    *
    * */
   mode?: DiscoverDisplayMode;
+  /**
+   * a custom url state storage
+   */
   stateStorageContainer?: IKbnUrlStateStorage;
 }
 

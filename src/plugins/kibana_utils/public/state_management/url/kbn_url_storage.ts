@@ -204,7 +204,6 @@ export const createKbnUrlControls = (
   }
 
   function getPendingUrl() {
-    // if (updateQueue.length === 0) return undefined;
     const resultUrl = updateQueue.reduce(
       (url, nextUpdate) => nextUpdate(url) ?? url,
       getCurrentUrl(history)
