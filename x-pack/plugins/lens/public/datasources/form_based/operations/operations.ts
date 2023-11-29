@@ -284,8 +284,3 @@ export function getAvailableOperationsByMetadata(
 
   return Object.values(operationByMetadata);
 }
-// Memoize based on a custom key
-export const memoizedGetAvailableOperationsByMetadata = memoize(
-  getAvailableOperationsByMetadata,
-  (indexPattern, opsMap) => `${indexPattern.id}-${Object.keys(opsMap || {}).join('-')}`
-);
