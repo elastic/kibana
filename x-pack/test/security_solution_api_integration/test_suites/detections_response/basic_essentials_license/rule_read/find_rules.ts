@@ -22,6 +22,8 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess @serverless find_rules', () => {
     beforeEach(async () => {
@@ -45,7 +47,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a single rule when a single rule is loaded from a find with defaults added', async () => {
-      await createRule(supertest, log, getSimpleRule());
+      const rule = getSimpleRule();
+      await createRule(supertest, log, rule);
 
       // query the single rule from _find
       const { body } = await supertest
@@ -57,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
       expect(body).to.eql({
-        data: [getSimpleRuleOutput()],
+        data: [getSimpleRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)],
         page: 1,
         perPage: 20,
         total: 1,
@@ -65,12 +68,13 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a single rule when a single rule is loaded from a find with everything for the rule added', async () => {
+      const rule = getComplexRule();
       // add a single rule
       await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
-        .send(getComplexRule())
+        .send(rule)
         .expect(200);
 
       // query and expect that we get back one record in the find
@@ -83,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
       expect(body).to.eql({
-        data: [getComplexRuleOutput()],
+        data: [getComplexRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)],
         page: 1,
         perPage: 20,
         total: 1,

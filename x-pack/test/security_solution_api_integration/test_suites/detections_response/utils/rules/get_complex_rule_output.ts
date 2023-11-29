@@ -13,10 +13,14 @@ import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/dete
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RuleResponse> => ({
+export const getComplexRuleOutput = (
+  ruleId = 'rule-1',
+  enabled = false,
+  user = 'elastic'
+): Partial<RuleResponse> => ({
   actions: [],
   author: [],
-  created_by: 'elastic',
+  created_by: user,
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
   false_positives: [
@@ -35,7 +39,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RuleResponse> =
       },
     },
   ],
-  enabled: false,
+  enabled,
   index: ['auditbeat-*', 'filebeat-*'],
   immutable: false,
   interval: '5m',
@@ -94,7 +98,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RuleResponse> =
   ],
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
-  updated_by: 'elastic',
+  updated_by: user,
   note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',

@@ -13,9 +13,11 @@ import { RuleWithoutServerGeneratedProperties } from './remove_server_generated_
  * for all the server generated properties such as created_by. Useful for testing end to end tests.
  */
 export const getSimpleRuleOutputWithoutRuleId = (
-  ruleId = 'rule-1'
+  ruleId = 'rule-1',
+  enabled = false,
+  user = 'elastic'
 ): Omit<RuleWithoutServerGeneratedProperties, 'rule_id'> => {
-  const rule = getSimpleRuleOutput(ruleId);
+  const rule = getSimpleRuleOutput(ruleId, enabled, user);
   const { rule_id: rId, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
 };

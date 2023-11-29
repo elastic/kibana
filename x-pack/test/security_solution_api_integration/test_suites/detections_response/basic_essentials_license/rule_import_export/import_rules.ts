@@ -24,6 +24,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess @serverless import_rules', () => {
     describe('importing rules with an index', () => {
@@ -99,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql({
-          ...getSimpleRuleOutput('rule-1', false),
+          ...getSimpleRuleOutput('rule-1', false, ELASTICSEARCH_USERNAME),
           output_index: '',
         });
       });
@@ -375,7 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         const ruleOutput = {
-          ...getSimpleRuleOutput('rule-1'),
+          ...getSimpleRuleOutput('rule-1', false, ELASTICSEARCH_USERNAME),
           output_index: '',
         };
         ruleOutput.name = 'some other name';
@@ -468,7 +470,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should be able to correctly read back a mixed import of different rules even if some cause conflicts', async () => {
         const getRuleOutput = (name: string) => ({
-          ...getSimpleRuleOutput(name),
+          ...getSimpleRuleOutput(name, false, ELASTICSEARCH_USERNAME),
           output_index: '',
         });
         await supertest

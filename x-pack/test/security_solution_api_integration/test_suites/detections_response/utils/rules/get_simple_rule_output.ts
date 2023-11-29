@@ -13,11 +13,12 @@ import { removeServerGeneratedProperties } from './remove_server_generated_prope
 
 export const getMockSharedResponseSchema = (
   ruleId = 'rule-1',
-  enabled = false
+  enabled = false,
+  user = 'elastic'
 ): SharedResponseProps => ({
   actions: [],
   author: [],
-  created_by: 'elastic',
+  created_by: user,
   description: 'Simple Rule Query',
   enabled,
   false_positives: [],
@@ -36,7 +37,7 @@ export const getMockSharedResponseSchema = (
   setup: '',
   severity: 'high' as const,
   severity_mapping: [],
-  updated_by: 'elastic',
+  updated_by: user,
   tags: [],
   to: 'now',
   threat: [],
@@ -63,8 +64,12 @@ export const getMockSharedResponseSchema = (
   investigation_fields: undefined,
 });
 
-const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): RuleResponse => ({
-  ...getMockSharedResponseSchema(ruleId, enabled),
+const getQueryRuleOutput = (
+  ruleId = 'rule-1',
+  enabled = false,
+  user = 'elastic'
+): RuleResponse => ({
+  ...getMockSharedResponseSchema(ruleId, enabled, user),
   index: ['auditbeat-*'],
   language: 'kuery',
   query: 'user.name: root or user.name: admin',
@@ -80,6 +85,6 @@ const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): RuleResponse =>
  * This is the typical output of a simple rule that Kibana will output with all the defaults
  * except for the server generated properties.  Useful for testing end to end tests.
  */
-export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => {
-  return removeServerGeneratedProperties(getQueryRuleOutput(ruleId, enabled));
+export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false, user = 'elastic') => {
+  return removeServerGeneratedProperties(getQueryRuleOutput(ruleId, enabled, user));
 };

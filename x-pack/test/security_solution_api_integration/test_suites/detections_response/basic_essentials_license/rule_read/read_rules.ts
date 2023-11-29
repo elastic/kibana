@@ -26,6 +26,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess @serverless read_rules', () => {
     describe('reading rules', () => {
@@ -39,31 +41,37 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be able to read a single rule using rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        const rule = getSimpleRule();
+        await createRule(supertest, log, rule);
 
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .send(getSimpleRule())
+          .send(rule)
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        expect(bodyToCompare).to.eql(
+          getSimpleRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)
+        );
       });
 
       it('should be able to read a single rule using id', async () => {
-        const createRuleBody = await createRule(supertest, log, getSimpleRule());
+        const rule = getSimpleRule();
+        const createRuleBody = await createRule(supertest, log, rule);
 
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}?id=${createRuleBody.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .send(getSimpleRule())
+          .send(rule)
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        expect(bodyToCompare).to.eql(
+          getSimpleRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)
+        );
       });
 
       it('should be able to read a single rule with an auto-generated rule_id', async () => {
@@ -77,7 +85,13 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+        expect(bodyToCompare).to.eql(
+          getSimpleRuleOutputWithoutRuleId(
+            createRuleBody.rule_id,
+            createRuleBody.enabled,
+            ELASTICSEARCH_USERNAME
+          )
+        );
       });
 
       it('should return 404 if given a fake id', async () => {

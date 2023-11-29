@@ -24,6 +24,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
@@ -50,7 +52,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export a single rule with a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        const rule = getSimpleRule();
+        await createRule(supertest, log, rule);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -63,7 +66,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
         const bodyToTest = removeServerGeneratedProperties(bodySplitAndParsed);
 
-        expect(bodyToTest).to.eql(getSimpleRuleOutput());
+        expect(bodyToTest).to.eql(
+          getSimpleRuleOutput(rule.rule_id, rule.enabled, ELASTICSEARCH_USERNAME)
+        );
       });
 
       it('should export a exported count with a single rule_id', async () => {
@@ -99,8 +104,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export exactly two rules given two rules', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
-        await createRule(supertest, log, getSimpleRule('rule-2'));
+        const rule1 = getSimpleRule('rule-1');
+        const rule2 = getSimpleRule('rule-2');
+        await createRule(supertest, log, rule1);
+        await createRule(supertest, log, rule2);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -116,8 +123,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const secondRule = removeServerGeneratedProperties(secondRuleParsed);
 
         expect([firstRule, secondRule]).to.eql([
-          getSimpleRuleOutput('rule-2'),
-          getSimpleRuleOutput('rule-1'),
+          getSimpleRuleOutput(rule1.rule_id, rule1.enabled, ELASTICSEARCH_USERNAME),
+          getSimpleRuleOutput(rule2.rule_id, rule2.enabled, ELASTICSEARCH_USERNAME),
         ]);
       });
     });

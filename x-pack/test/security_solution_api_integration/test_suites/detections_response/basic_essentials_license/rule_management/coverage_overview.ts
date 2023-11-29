@@ -11,7 +11,7 @@ import {
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   ThreatArray,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../detection_engine_api_integration/common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -19,15 +19,15 @@ import {
   deleteAllRules,
   getSimpleRule,
   installPrebuiltRulesAndTimelines,
-} from '../../../../../detection_engine_api_integration/utils';
-import { createNonSecurityRule } from '../../../../../detection_engine_api_integration/utils/create_non_security_rule';
+  createNonSecurityRule,
+} from '../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless coverage_overview', () => {
+  describe('@ess @serverless @brokenInServerless coverage_overview', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
