@@ -23,7 +23,7 @@ components:
       description: The field representing the ID.
 
   schemas:
-    CreateAssetCriticalityRecord:
+    AssetCriticalityRecordIdParts:
       type: object
       properties:
         id_value:
@@ -33,14 +33,20 @@ components:
           type: string
           example: 'host.name'
           description: The field representing the ID.
-        criticality_level:
-          type: string
-          enum: [very_important, important, normal, not_important]
-          description: The criticality level of the asset.
       required:
         - id_value
         - id_field
-        - criticality_level
+    CreateAssetCriticalityRecord:
+      allOf:
+        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+        - type: object
+          properties:
+            criticality_level:
+              type: string
+              enum: [very_important, important, normal, not_important]
+              description: The criticality level of the asset.
+          required:
+            - criticality_level
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
