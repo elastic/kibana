@@ -169,7 +169,6 @@ export function getTextBasedDatasource({
           },
         },
       };
-      console.dir(updatedState);
 
       return [
         {
