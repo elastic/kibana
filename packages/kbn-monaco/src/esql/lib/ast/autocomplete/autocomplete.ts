@@ -128,8 +128,11 @@ export async function suggest(
   astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ): Promise<AutocompleteCommandDefinition[]> {
-  const innerText = model.getValue();
-  const offset = monacoPositionToOffset(innerText, position);
+  // take the full text but then slice it to the current position
+  const fullText = model.getValue();
+  const offset = monacoPositionToOffset(fullText, position);
+  const innerText = fullText.substring(0, offset);
+
   let finalText = innerText;
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
@@ -141,6 +144,12 @@ export async function suggest(
       (isMathFunction(innerText[offset - 2]) || isComma(innerText[offset - 2])))
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
+  }
+  // check if all brackets are closed, otherwise close them
+  // @TODO: improve this in the future
+  if (innerText.lastIndexOf('(') > innerText.lastIndexOf(')')) {
+    // inject the closing brackets
+    finalText += ')';
   }
 
   const { ast } = await astProvider(finalText);
