@@ -10,18 +10,11 @@ import { SLIClient } from '../sli_client';
 import { SLORepository } from '../slo_repository';
 import { SummaryClient } from '../summary_client';
 import { SummarySearchClient } from '../summary_search_client';
-import { SummaryTransformInstaller } from '../summary_transform_generator/summary_transform_installer';
 import { TransformManager } from '../transform_manager';
 
 const createResourceInstallerMock = (): jest.Mocked<ResourceInstaller> => {
   return {
     ensureCommonResourcesInstalled: jest.fn(),
-  };
-};
-
-const createSummaryTransformInstallerMock = (): jest.Mocked<SummaryTransformInstaller> => {
-  return {
-    installAndStart: jest.fn(),
   };
 };
 
@@ -65,7 +58,6 @@ const createSLIClientMock = (): jest.Mocked<SLIClient> => {
 
 export {
   createResourceInstallerMock,
-  createSummaryTransformInstallerMock,
   createTransformManagerMock,
   createSLORepositoryMock,
   createSummaryClientMock,

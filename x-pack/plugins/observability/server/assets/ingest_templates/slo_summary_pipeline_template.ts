@@ -75,7 +75,7 @@ export const getSLOSummaryPipelineTemplate = (slo: SLO) => {
         set: {
           description: 'Set timeWindow.duration field',
           field: 'slo.timeWindow.duration',
-          value: slo.timeWindow.duration,
+          value: slo.timeWindow.duration.format(),
         },
       },
       {

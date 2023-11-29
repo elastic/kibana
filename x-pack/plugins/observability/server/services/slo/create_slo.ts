@@ -9,6 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { SLO_MODEL_VERSION, SLO_SUMMARY_TEMP_INDEX_NAME } from '../../assets/constants';
+import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 import { SLORepository } from './slo_repository';
@@ -19,7 +20,8 @@ export class CreateSLO {
   constructor(
     private esClient: ElasticsearchClient,
     private repository: SLORepository,
-    private transformManager: TransformManager
+    private transformManager: TransformManager,
+    private summaryTransformManager: TransformManager
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -27,23 +29,40 @@ export class CreateSLO {
     validateSLO(slo);
 
     await this.repository.save(slo, { throwOnConflict: true });
-    let sloTransformId;
+    let transformId;
     try {
-      sloTransformId = await this.transformManager.install(slo);
+      transformId = await this.transformManager.install(slo);
     } catch (err) {
       await this.repository.deleteById(slo.id);
       throw err;
     }
 
     try {
-      await this.transformManager.preview(sloTransformId);
-      await this.transformManager.start(sloTransformId);
+      await this.transformManager.start(transformId);
     } catch (err) {
       await Promise.all([
-        this.transformManager.uninstall(sloTransformId),
+        this.transformManager.uninstall(transformId),
         this.repository.deleteById(slo.id),
       ]);
 
+      throw err;
+    }
+
+    await this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo));
+
+    let summaryTransformId;
+    try {
+      summaryTransformId = await this.summaryTransformManager.install(slo);
+    } catch (err) {
+      // handle rollback
+      throw err;
+    }
+
+    try {
+      await this.transformManager.start(summaryTransformId);
+    } catch (err) {
+      // handle rollback
+      await Promise.all([this.transformManager.uninstall(summaryTransformId)]);
       throw err;
     }
 

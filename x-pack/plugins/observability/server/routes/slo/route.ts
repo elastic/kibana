@@ -26,6 +26,7 @@ import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
   DefaultSummaryClient,
+  DefaultSummaryTransformManager,
   DefaultTransformManager,
   DeleteSLO,
   DeleteSLOInstances,
@@ -44,6 +45,7 @@ import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_su
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { ResetSLO } from '../../services/slo/reset_slo';
 import { DefaultSummarySearchClient } from '../../services/slo/summary_search_client';
+import { DefaultSummaryTransformGenerator } from '../../services/slo/summary_transform_generator/summary_transform_generator';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
@@ -88,7 +90,18 @@ const createSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const createSLO = new CreateSLO(esClient, repository, transformManager);
+    const summaryTransformManager = new DefaultSummaryTransformManager(
+      new DefaultSummaryTransformGenerator(),
+      esClient,
+      logger
+    );
+
+    const createSLO = new CreateSLO(
+      esClient,
+      repository,
+      transformManager,
+      summaryTransformManager
+    );
 
     const response = await createSLO.execute(params.body);
 
