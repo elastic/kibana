@@ -35,7 +35,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildGroupBy(slo, slo.indicator),
-      this.buildAggregations(slo, slo.indicator),
+      this.buildAggregations(slo),
       this.buildSettings(slo)
     );
   }
@@ -50,12 +50,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     // E.g. if environment is not specified in the source query, but we include it in the groupBy,
     // we'll output documents for each environment value
     const extraGroupByFields = {
-      ...(!indicator.params.monitorIds?.find((param) => param.value === ALL_VALUE) && {
-        'monitor.id': { terms: { field: 'monitor.id' } },
-      }),
-      ...(!indicator.params.locations?.find((param) => param.value === ALL_VALUE) && {
-        'observer.name': { terms: { field: 'observer.name' } },
-      }),
+      'observer.name': { terms: { field: 'observer.name' } },
+      'monitor.id': { terms: { field: 'monitor.id' } },
       ...(!indicator.params.tags?.find((param) => param.value === ALL_VALUE) && {
         tags: { terms: { field: 'tags' } },
       }),
@@ -77,20 +73,12 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
         },
       },
     ];
-    const { monitorIds, locations, tags, projects } = buildParamValues(indicator.params);
+    const { monitorIds, tags, projects } = buildParamValues(indicator.params);
 
     if (!monitorIds.includes(ALL_VALUE)) {
       queryFilter.push({
         match: {
-          'monitor.id': monitorIds,
-        },
-      });
-    }
-
-    if (!locations.includes(ALL_VALUE)) {
-      queryFilter.push({
-        match: {
-          'observer.name': locations,
+          'monitor.id': monitorIds[0],
         },
       });
     }
@@ -117,10 +105,12 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
 
     return {
       index: 'synthetics-*',
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: {
+        ...this.buildCommonRuntimeMappings(slo),
+      },
       query: {
         bool: {
-          filter: [{ term: { 'summary.final_attempt': true } }],
+          filter: [{ term: { 'summary.final_attempt': true } }, ...queryFilter],
         },
       },
     };
@@ -133,12 +123,15 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: SyntheticsAvailabilityIndicator) {
+  private buildAggregations(slo: SLO) {
     return {
       'slo.numerator': {
-        range: {
-          field: 'summary.up',
-          gte: '1',
+        filter: {
+          range: {
+            'summary.up': {
+              gte: 1,
+            },
+          },
         },
       },
       'slo.denominator': {
@@ -152,8 +145,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {
-              goodEvents: 'slo.numerator.value',
-              totalEvents: 'slo.denominator.value',
+              goodEvents: 'slo.numerator>_count',
+              totalEvents: 'slo.denominator>_count',
             },
             script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
           },

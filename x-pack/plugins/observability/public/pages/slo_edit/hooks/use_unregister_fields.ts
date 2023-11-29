@@ -14,13 +14,13 @@ import { useFetchApmIndex } from '../../../hooks/slo/use_fetch_apm_indices';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,
-  SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
   BUDGETING_METHOD_OPTIONS,
   CUSTOM_KQL_DEFAULT_VALUES,
   CUSTOM_METRIC_DEFAULT_VALUES,
   HISTOGRAM_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES,
   TIMESLICE_METRIC_DEFAULT_VALUES,
+  SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY,
 } from '../constants';
 import { CreateSLOForm } from '../types';
 
@@ -111,14 +111,9 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
           );
           break;
         case 'sli.synthetics.availability':
-          reset(
-            Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
-              indicator: SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
-            }),
-            {
-              keepDefaultValues: true,
-            }
-          );
+          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY), {
+            keepDefaultValues: true,
+          });
           break;
         default:
           assertNever(indicatorType);

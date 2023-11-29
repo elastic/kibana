@@ -91,6 +91,7 @@ export function FieldSelector({
           )
         }
         isInvalid={getFieldState(name).invalid}
+        fullWidth
       >
         <Controller
           defaultValue=""
@@ -104,6 +105,7 @@ export function FieldSelector({
               async
               data-test-subj={dataTestSubj}
               isClearable
+              fullWidth
               isInvalid={fieldState.invalid}
               isLoading={isLoading}
               onChange={(selected: EuiComboBoxOptionOption[]) => {

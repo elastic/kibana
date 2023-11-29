@@ -119,7 +119,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         .slice(0, pagination.perPage);
 
       const finalTotal = total - (tempSummaryDocuments.length - tempSummaryDocumentsDeduped.length);
-      return {
+      const stuff = {
         total: finalTotal,
         perPage: pagination.perPage,
         page: pagination.page,
@@ -138,6 +138,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           },
         })),
       };
+      return stuff;
     } catch (err) {
       this.logger.error(new Error('Summary search query error', { cause: err }));
       return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };

@@ -188,14 +188,10 @@ export class GetPreviewData {
     indicator: SyntheticsAvailabilityIndicator
   ): Promise<GetPreviewDataResponse> {
     const filter = [];
-    const { monitorIds, locations, tags, projects } = buildParamValues(indicator.params);
+    const { monitorIds, tags, projects } = buildParamValues(indicator.params);
     if (!monitorIds.includes(ALL_VALUE))
       filter.push({
         terms: { 'monitor.id': monitorIds },
-      });
-    if (!locations.includes(ALL_VALUE))
-      filter.push({
-        terms: { 'observer.name': locations },
       });
     if (!tags.includes(ALL_VALUE))
       filter.push({
@@ -212,7 +208,7 @@ export class GetPreviewData {
       query: {
         bool: {
           filter: [
-            { range: { '@timestamp': { gte: 'now-2h' } } },
+            { range: { '@timestamp': { gte: 'now-24h' } } },
             { exists: { field: 'summary.final_attempt' } },
             ...filter,
           ],

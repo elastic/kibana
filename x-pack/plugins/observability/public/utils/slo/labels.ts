@@ -60,6 +60,9 @@ export function toIndicatorTypeLabel(
     case 'sli.apm.transactionErrorRate':
       return INDICATOR_APM_AVAILABILITY;
 
+    case 'sli.synthetics.availability':
+      return INDICATOR_SYNTHETICS_AVAILABILITY;
+
     case 'sli.metric.custom':
       return INDICATOR_CUSTOM_METRIC;
 

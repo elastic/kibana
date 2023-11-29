@@ -183,7 +183,6 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
       isIndicatorSectionValid = (
         [
           'indicator.params.monitorIds',
-          'indicator.params.locations',
           'indicator.params.tags',
           'indicator.params.projects',
         ] as const

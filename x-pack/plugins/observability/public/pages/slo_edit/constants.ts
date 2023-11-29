@@ -197,7 +197,6 @@ export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicator =
 export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndicator = {
   type: 'sli.synthetics.availability' as const,
   params: {
-    locations: [],
     projects: [],
     tags: [],
     monitorIds: [],
@@ -235,6 +234,22 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
     target: 99,
   },
   groupBy: ALL_VALUE,
+};
+
+export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm = {
+  name: '',
+  description: '',
+  indicator: SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
+  timeWindow: {
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    type: 'rolling',
+  },
+  tags: [],
+  budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
+  objective: {
+    target: 99,
+  },
+  groupBy: 'monitor.id',
 };
 
 export const COMPARATOR_GT = i18n.translate(

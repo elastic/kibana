@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import React from 'react';
@@ -16,26 +16,21 @@ import { DataPreviewChart } from '../common/data_preview_chart';
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
-  const [monitorIds = [], projects = [], tags = [], locations = []] = watch([
+  const [monitorIds = [], projects = [], tags = []] = watch([
     'indicator.params.monitorIds',
     'indicator.params.projects',
     'indicator.params.tags',
-    'indicator.params.locations',
   ]);
 
-  // const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
-  //   useFetchIndexPatternFields('synthetics-*');
-  // const partitionByFields = ['project', 'tags', 'location', 'monitor'];
   const filters = {
     monitorIds: monitorIds.map((id) => id.value).filter((id) => id !== '*'),
     projects: projects.map((project) => project.value).filter((id) => id !== '*'),
     tags: tags.map((tag) => tag.value).filter((id) => id !== '*'),
-    locations: locations.map((location) => location.value).filter((id) => id !== '*'),
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="l">
         <FieldSelector
           allowAllOption
           label={i18n.translate('xpack.observability.slo.sloEdit.syntheticsAvailability.monitor', {
@@ -78,9 +73,6 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
           filters={filters}
           dataTestSubj="syntheticsAvailabilityProjectSelector"
         />
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
           label={i18n.translate('xpack.observability.slo.sloEdit.syntheticsAvailability.tags', {
             defaultMessage: 'Tags',
@@ -96,78 +88,13 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
           filters={filters}
           dataTestSubj="syntheticsAvailabilityTagsSelector"
         />
-        <FieldSelector
-          label={i18n.translate('xpack.observability.slo.sloEdit.syntheticsAvailability.location', {
-            defaultMessage: 'Location',
-          })}
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.syntheticsAvailability.location.placeholder',
-            {
-              defaultMessage: 'Select the monitor location',
-            }
-          )}
-          fieldName="locations"
-          name="indicator.params.locations"
-          filters={filters}
-          dataTestSubj="syntheticsAvailabilityLocationSelector"
-        />
       </EuiFlexGroup>
-      {/* 
-      <EuiFlexGroup direction="row" gutterSize="l">
-        <EuiFlexItem>
-          <QueryBuilder
-            dataTestSubj="syntheticsAvailabilityFilterInput"
-            indexPatternString={watch('indicator.params.index')}
-            label={i18n.translate('xpack.observability.slo.sloEdit.syntheticsAvailability.filter', {
-              defaultMessage: 'Query filter',
-            })}
-            name="indicator.params.filter"
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.syntheticsAvailability.filter.placeholder',
-              {
-                defaultMessage: 'Custom filter to apply on the index',
-              }
-            )}
-            tooltip={
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.observability.slo.sloEdit.syntheticsAvailability.filter.tooltip',
-                  {
-                    defaultMessage:
-                      'This KQL query is used to filter the Synthetics data on some relevant criteria for this SLO.',
-                  }
-                )}
-                position="top"
-              />
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup> */}
 
-      {/* <IndexFieldSelector
-        indexFields={partitionByFields}
-        name="groupBy"
-        defaultValue={ALL_VALUE}
-        label={
-          <span>
-            {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
-              defaultMessage: 'Partition by',
-            })}{' '}
-            <EuiIconTip
-              content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
-                defaultMessage: 'Create individual SLOs for each value of the selected field.',
-              })}
-              position="top"
-            />
-          </span>
-        }
-        placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
-          defaultMessage: 'Select an optional field to partition by',
-        })}
-        // isLoading={!!apmIndex && isIndexFieldsLoading}
-        // isDisabled={!apmIndex}
-      /> */}
-
+      <EuiCallOut
+        size="s"
+        title="Synthetics availability SLIs are automatically partitioned by monitor and location"
+        iconType="iInCircle"
+      />
       <DataPreviewChart />
     </EuiFlexGroup>
   );

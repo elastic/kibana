@@ -72,6 +72,13 @@ export const groupBy = {
       field: 'isTempDoc',
     },
   },
+  // optional fields: only specified for Synthetics indicators. Must include missing_bucket:true
+  'observer.name.keyword': {
+    terms: {
+      field: 'observer.name.keyword',
+      missing_bucket: true,
+    },
+  },
   // optional fields: only specified for APM indicators. Must include missing_bucket:true
   'service.name': {
     terms: {

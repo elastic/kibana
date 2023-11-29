@@ -57,7 +57,6 @@ const syntheticsAvailabilityIndicatorSchema = t.type({
     t.partial({
       tags: t.array(syntheticsParamSchema),
       projects: t.array(syntheticsParamSchema),
-      locations: t.array(syntheticsParamSchema),
     }),
   ]),
 });

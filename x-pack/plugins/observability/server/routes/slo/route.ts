@@ -51,6 +51,7 @@ import {
   TransformGenerator,
   TimesliceMetricTransformGenerator,
 } from '../../services/slo/transform_generators';
+import { SyntheticsAvailabilityTransformGenerator } from '../../services/slo/transform_generators/synthetics_availability';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
@@ -61,6 +62,7 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.metric.custom': new MetricCustomTransformGenerator(),
   'sli.histogram.custom': new HistogramTransformGenerator(),
   'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
+  'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(),
 };
 
 const assertPlatinumLicense = async (context: ObservabilityRequestHandlerContext) => {

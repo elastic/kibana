@@ -84,6 +84,7 @@ export function SloListItem({
       slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
     )
   );
+
   const handleViewDetails = () => {
     navigateToUrl(sloDetailsUrl);
   };

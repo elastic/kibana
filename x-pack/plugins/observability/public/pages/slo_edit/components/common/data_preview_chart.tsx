@@ -212,7 +212,10 @@ export function DataPreviewChart({
                 ticks={5}
                 position={Position.Left}
                 tickFormat={(d: any) => Number(d).toFixed(2)}
-                domain={domain}
+                domain={{
+                  ...domain,
+                  max: NaN,
+                }}
               />
 
               <Axis
