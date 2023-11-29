@@ -787,15 +787,17 @@ describe('EPM template', () => {
   subobjects: false
   `;
     const objectFieldWithPropertyReversedMapping = {
-      dynamic_templates: [{
-        "b.labels.*": {
-          path_match: "b.labels.*",
-          match_mapping_type: "string",
-          mapping: {
-            type: "keyword"
-          }
-        }
-      }],
+      dynamic_templates: [
+        {
+          'b.labels.*': {
+            path_match: 'b.labels.*',
+            match_mapping_type: 'string',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
       properties: {
         b: {
           type: 'object',
@@ -805,8 +807,8 @@ describe('EPM template', () => {
               dynamic: true,
               type: 'object',
               subobjects: false,
-            }
-          }
+            },
+          },
         },
       },
     };
@@ -824,15 +826,17 @@ describe('EPM template', () => {
   subobjects: false
   `;
     const objectFieldWithPropertyReversedMapping = {
-      dynamic_templates: [{
-        "d.labels": {
-          path_match: "d.labels.*",
-          match_mapping_type: "string",
-          mapping: {
-            type: "keyword"
-          }
-        }
-      }],
+      dynamic_templates: [
+        {
+          'd.labels': {
+            path_match: 'd.labels.*',
+            match_mapping_type: 'string',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
       properties: {
         d: {
           type: 'object',
@@ -842,8 +846,8 @@ describe('EPM template', () => {
               dynamic: true,
               type: 'object',
               subobjects: false,
-            }
-          }
+            },
+          },
         },
       },
     };

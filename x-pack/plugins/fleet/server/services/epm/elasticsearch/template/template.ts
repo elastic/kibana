@@ -239,7 +239,7 @@ function _generateMappings(
     const fieldProps = {
       type: 'object',
       dynamic: true,
-      ...(field.subobjects !== undefined && { subobjects: field.subobjects })
+      ...(field.subobjects !== undefined && { subobjects: field.subobjects }),
     };
 
     props[field.name] = fieldProps;
@@ -442,7 +442,7 @@ function _generateMappings(
         if (field.subobjects !== undefined) {
           if (path.includes('*')) {
             subobjects = field.subobjects;
-          } 
+          }
         }
 
         if (dynProperties && matchingType) {
@@ -452,7 +452,6 @@ function _generateMappings(
           // index templates not using `"dynamic": true`.
           addParentObjectAsStaticProperty(field);
         }
-
       } else {
         let fieldProps = getDefaultProperties(field);
 
@@ -619,7 +618,12 @@ function _generateMappings(
     });
   }
 
-  return { properties: props, hasNonDynamicTemplateMappings, hasDynamicTemplateMappings, subobjects };
+  return {
+    properties: props,
+    hasNonDynamicTemplateMappings,
+    hasDynamicTemplateMappings,
+    subobjects,
+  };
 }
 
 function generateDynamicAndEnabled(field: Field) {
