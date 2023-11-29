@@ -24,6 +24,7 @@ import { MLInferencePipelineOption } from './ml_inference_logic';
 import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS, MODEL_REDACTED_VALUE } from './utils';
 
 export interface PipelineSelectOptionProps {
+  label: string;
   pipeline: MLInferencePipelineOption;
 }
 
