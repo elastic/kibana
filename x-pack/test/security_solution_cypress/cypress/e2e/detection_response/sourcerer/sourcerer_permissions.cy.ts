@@ -15,12 +15,12 @@ import { login } from '../../../tasks/login';
 
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer permissions', { tags: ['@ess', '@serverless'] }, () => {
+describe('Sourcerer permissions', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
 
-  it(`role(s)  shows error when user does not have permissions`, () => {
+  it(`role Hunter No actions  shows error when user does not have permissions`, () => {
     login(ROLES.hunter_no_actions);
     visit(hostsUrl('allHosts'));
     cy.get(TOASTER).should('have.text', 'Write role required to generate data');
