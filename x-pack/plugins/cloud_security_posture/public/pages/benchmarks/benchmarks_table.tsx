@@ -74,8 +74,6 @@ interface BenchmarksTableProps
 // };
 
 export const getBenchmarkPlurals = (benchmarkId: string, accountEvaluation: number) => {
-  let id: string;
-  let counter: string;
   switch (benchmarkId) {
     case 'cis_k8s':
       return (
@@ -207,7 +205,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     truncateText: true,
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
-    render: (complianceScore: BenchmarkVersion2['benchmark_evaluation'], data) => {
+    render: (complianceScore: BenchmarkVersion2['evaluation'], data) => {
       return getBenchmarkPlurals(data.id, data.evaluation);
     },
   },
