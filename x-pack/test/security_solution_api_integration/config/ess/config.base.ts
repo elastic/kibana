@@ -82,7 +82,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
             'alertSuppressionForThresholdRuleEnabled',
-            'riskEnginePrivilegesRouteEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',
           `--xpack.actions.preconfigured=${JSON.stringify({
