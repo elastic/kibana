@@ -11,7 +11,7 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { RightPanelKey } from '../../flyout/document_details/right';
+import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/right';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
@@ -21,7 +21,7 @@ import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 import {
   APP_ID,
   CASES_PATH,
@@ -56,7 +56,7 @@ const TimelineDetailsPanel = () => {
 const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
@@ -74,7 +74,7 @@ const CaseContainerComponent: React.FC = () => {
       if (isSecurityFlyoutEnabled) {
         openFlyout({
           right: {
-            id: RightPanelKey,
+            id: DocumentDetailsRightPanelKey,
             params: {
               id: alertId,
               indexName: index,

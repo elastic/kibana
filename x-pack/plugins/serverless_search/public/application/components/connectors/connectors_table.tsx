@@ -116,6 +116,7 @@ export const ConnectorsTable: React.FC = () => {
       name: nameLabel,
       render: (name: string, connector: Connector) => (
         <EuiLink
+          data-test-subj="serverlessSearchColumnsLink"
           onClick={() => navigateToUrl(generatePath(EDIT_CONNECTOR_PATH, { id: connector.id }))}
         >
           {name || connector.id}
@@ -235,6 +236,7 @@ export const ConnectorsTable: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
+            data-test-subj="serverlessSearchConnectorsTableSelect"
             onChange={(e) => setFilter(e.currentTarget.value as Filter)}
             options={filterOptions}
           />
@@ -294,6 +296,7 @@ const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connec
       )}
       <EuiToolTip content={DELETE_CONNECTOR_LABEL}>
         <EuiButtonIcon
+          data-test-subj="serverlessSearchDeleteConnectorModalActionButton"
           aria-label={DELETE_CONNECTOR_LABEL}
           onClick={() => setModalIsOpen(true)}
           iconType="trash"

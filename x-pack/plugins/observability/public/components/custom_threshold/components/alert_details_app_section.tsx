@@ -133,7 +133,7 @@ export default function AlertDetailsAppSection({
         <EuiFlexItem key={`criterion-${index}`}>
           <EuiPanel hasBorder hasShadow={false}>
             <EuiTitle size="xs">
-              <h4>{criterion.aggType.toUpperCase()} </h4>
+              <h4>{criterion.label || 'CUSTOM'} </h4>
             </EuiTitle>
             <EuiText size="s" color="subdued">
               <FormattedMessage
