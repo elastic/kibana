@@ -124,7 +124,6 @@ describe('createRuleRoute', () => {
         },
         connector_type_id: 'test',
         uuid: '123-456',
-        use_alert_data_for_template: false,
       },
     ],
   };
