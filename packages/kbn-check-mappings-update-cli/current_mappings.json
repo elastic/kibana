@@ -1967,6 +1967,10 @@
           }
         }
       },
+      "latest_install_failed_attempts": {
+        "type": "object",
+        "enabled": false
+      },
       "installed_kibana": {
         "dynamic": false,
         "properties": {}
