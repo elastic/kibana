@@ -13,15 +13,12 @@ import {
   EuiBadge,
   useEuiTheme,
   EuiButtonIcon,
-  useEuiBackgroundColor,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import classnames from 'classnames';
 import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
-
-import type { GetRuleManagementFiltersResponse } from '@kbn/security-solution-plugin/common';
 
 import type { CardId, OnStepClicked, ToggleTaskCompleteStatus, SectionId, StepId } from '../types';
 import {
@@ -35,14 +32,7 @@ import type { ProductLine } from '../../../common/product';
 import { StepContent } from './step_content';
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
 import { useStepContext } from '../context/step_context';
-
-const HEIGHT_ANIMATION_DURATION = 250;
-
-export const isRulesTableEmpty = (
-  ruleManagementFilters: GetRuleManagementFiltersResponse | undefined
-) =>
-  ruleManagementFilters?.rules_summary.custom_count === 0 &&
-  ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
+import { useCardStepStyles } from '../styles/card_step.styles';
 
 const CardStepComponent: React.FC<{
   activeProducts: Set<ProductLine>;
@@ -66,13 +56,9 @@ const CardStepComponent: React.FC<{
   stepId,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const completeBadgeBackgroundColor = useEuiBackgroundColor('success');
   const { navigateTo } = useNavigateTo();
 
-  const stepContentRef = React.useRef<HTMLDivElement>(null);
-
   const isExpandedStep = expandedSteps.has(stepId);
-  const [panelClassNames, setPanelClassNames] = React.useState('');
   const steps = useMemo(
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
     [activeProducts, cardId, sectionId]
@@ -80,7 +66,6 @@ const CardStepComponent: React.FC<{
   const { title, description, splitPanel, icon, autoCheckIfStepCompleted } =
     steps?.find((step) => step.id === stepId) ?? {};
   const hasStepContent = description != null || splitPanel != null;
-  const expandedStepPanelHeight = `calc(${stepContentRef.current?.offsetHeight}px + ${euiTheme.size.l} + ${euiTheme.size.xxxl})`;
   const { indicesExist } = useStepContext();
 
   useCheckStepCompleted({
@@ -111,32 +96,17 @@ const CardStepComponent: React.FC<{
     [hasStepContent, onStepClicked, stepId, cardId, sectionId, isExpandedStep, navigateTo]
   );
 
-  useEffect(() => {
-    // Handle card expansion transition
-    if (isExpandedCard) {
-      setPanelClassNames(
-        classnames({
-          'step-panel-expanded': isExpandedCard,
-        })
-      );
-    } else {
-      setPanelClassNames(
-        classnames({
-          'step-panel-expanded': true,
-          'step-panel-collapsed': true,
-        })
-      );
+  const {
+    stepPanelStyles,
+    stepIconStyles,
+    stepTitleStyles,
+    allDoneTextStyles,
+    toggleButtonStyles,
+  } = useCardStepStyles();
 
-      setTimeout(() => {
-        setPanelClassNames(
-          classnames({
-            'step-panel-expanded': false,
-            'step-panel-collapsed': true,
-          })
-        );
-      }, HEIGHT_ANIMATION_DURATION);
-    }
-  }, [isExpandedCard, expandedSteps]);
+  const panelClassNames = classnames({
+    'step-panel-collapsed': !isExpandedStep,
+  });
 
   return (
     <EuiPanel
@@ -147,21 +117,7 @@ const CardStepComponent: React.FC<{
       paddingSize="none"
       className={panelClassNames}
       id={stepId}
-      css={css`
-        overflow: hidden;
-        height: ${isExpandedStep ? expandedStepPanelHeight : euiTheme.size.xxxl};
-        transition: height ${HEIGHT_ANIMATION_DURATION}ms ease-out;
-
-        &.step-panel-expanded {
-          height: ${stepContentRef.current?.offsetHeight ? expandedStepPanelHeight : 'auto'};
-          transition: height ${HEIGHT_ANIMATION_DURATION}ms ease-in;
-        }
-
-        &.step-panel-collapsed,
-        &.step-panel-expanded.step-panel-collapsed {
-          height: ${euiTheme.size.xxxl};
-        }
-      `}
+      css={stepPanelStyles}
     >
       <EuiFlexGroup
         gutterSize="none"
@@ -177,16 +133,7 @@ const CardStepComponent: React.FC<{
             align-self: center;
           `}
         >
-          <span
-            className="step-icon"
-            css={css`
-              border-radius: 50%;
-              width: ${euiTheme.size.xxxl};
-              height: ${euiTheme.size.xxxl};
-              padding: ${euiTheme.size.m};
-              background-color: ${euiTheme.colors.body};
-            `}
-          >
+          <span className="step-icon" css={stepIconStyles}>
             {icon && <EuiIcon {...icon} size="l" className="eui-alignMiddle" />}
           </span>
         </EuiFlexItem>
@@ -197,15 +144,7 @@ const CardStepComponent: React.FC<{
             align-self: center;
           `}
         >
-          <span
-            css={css`
-              padding-right: ${euiTheme.size.m};
-              line-height: ${euiTheme.size.xxxl};
-              font-size: ${euiTheme.base * 0.875}px;
-              font-weight: ${euiTheme.font.weight.semiBold};
-              vertical-align: middle;
-            `}
-          >
+          <span className="step-title" css={stepTitleStyles}>
             {title}
           </span>
         </EuiFlexItem>
@@ -217,46 +156,37 @@ const CardStepComponent: React.FC<{
         >
           <div>
             {isDone && (
-              <EuiBadge
-                css={css`
-                  background-color: ${completeBadgeBackgroundColor};
-                  color: ${euiTheme.colors.successText};
-                `}
-                color="success"
-              >
+              <EuiBadge className="all-done-badge" css={allDoneTextStyles} color="success">
                 {ALL_DONE_TEXT}
               </EuiBadge>
             )}
-            {/* Use button here to avoid styles added by EUI*/}
             <EuiButtonIcon
-              className="eui-displayInlineBlock"
+              className="eui-displayInlineBlock toggle-button"
               color="primary"
               onClick={toggleStep}
               iconType={isExpandedStep ? 'arrowUp' : 'arrowDown'}
               aria-label={isExpandedStep ? COLLAPSE_STEP_BUTTON_LABEL : EXPAND_STEP_BUTTON_LABEL}
               size="xs"
-              css={css`
-                margin-left: ${euiTheme.base * 0.375}px;
-              `}
+              css={toggleButtonStyles}
               isDisabled={!hasStepContent}
             />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasStepContent && isExpandedStep && (
-        <div ref={stepContentRef}>
-          <StepContent
-            autoCheckIfStepCompleted={autoCheckIfStepCompleted}
-            cardId={cardId}
-            description={description}
-            hasStepContent={hasStepContent}
-            indicesExist={indicesExist}
-            isExpandedStep={isExpandedStep}
-            sectionId={sectionId}
-            splitPanel={splitPanel}
-            stepId={stepId}
-            toggleTaskCompleteStatus={toggleTaskCompleteStatus}
-          />
+      {hasStepContent && (
+        <div className="stepContentWrapper">
+          <div className="stepContent">
+            <StepContent
+              autoCheckIfStepCompleted={isExpandedStep ? autoCheckIfStepCompleted : undefined}
+              cardId={cardId}
+              description={description}
+              indicesExist={indicesExist}
+              sectionId={sectionId}
+              splitPanel={splitPanel}
+              stepId={stepId}
+              toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+            />
+          </div>
         </div>
       )}
     </EuiPanel>

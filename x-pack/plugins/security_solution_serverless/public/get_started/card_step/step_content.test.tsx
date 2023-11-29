@@ -25,12 +25,6 @@ describe('StepContent', () => {
     toggleTaskCompleteStatus,
   };
 
-  it('renders nothing when hasStepContent is false', () => {
-    const { container } = render(<StepContent {...props} />);
-
-    expect(container.firstChild).toBeNull();
-  });
-
   it('renders step content when hasStepContent is true and isExpandedStep is true', () => {
     const mockProps = { ...props, hasStepContent: true, isExpandedStep: true };
     const { getByTestId, getByText } = render(<StepContent {...mockProps} />);
@@ -42,12 +36,5 @@ describe('StepContent', () => {
 
     expect(splitPanelElement).toBeInTheDocument();
     expect(splitPanelElement).toHaveTextContent('Split Panel Content');
-  });
-
-  it('renders nothing when hasStepContent is true but isExpandedStep is false', () => {
-    const mockProps = { ...props, hasStepContent: true, isExpandedStep: false };
-    const { container } = render(<StepContent {...mockProps} />);
-
-    expect(container.firstChild).toBeNull();
   });
 });

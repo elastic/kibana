@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  useEuiBackgroundColor,
-  useEuiShadow,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import classnames from 'classnames';
 import type {
   CardId,
@@ -27,8 +19,7 @@ import type {
 import { getCard } from './helpers';
 import type { ProductLine } from '../../common/product';
 import { CardStep } from './card_step';
-
-const SHADOW_ANIMATION_DURATION = 350;
+import { useCardItemStyles } from './styles/card_item.styles';
 
 const CardItemComponent: React.FC<{
   activeProducts: Set<ProductLine>;
@@ -49,7 +40,6 @@ const CardItemComponent: React.FC<{
   onStepClicked,
   sectionId,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const isExpandedCard = expandedCardSteps[cardId].isExpanded;
 
   const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
@@ -58,39 +48,18 @@ const CardItemComponent: React.FC<{
     [cardId, expandedCardSteps]
   );
 
-  const shadow = useEuiShadow('l');
-  const cardClassNames = classnames({
+  const cardClassNames = classnames('card-item', {
     'card-expanded': isExpandedCard,
   });
 
-  const iconHoveredBackgroundColor = useEuiBackgroundColor('success');
+  const cardItemPanelStyle = useCardItemStyles();
 
   return cardItem && activeStepIds ? (
     <EuiPanel
       className={cardClassNames}
       hasBorder
       paddingSize="none"
-      css={css`
-        padding: ${euiTheme.size.base};
-        margin-bottom: ${euiTheme.size.xs};
-        border-radius: ${euiTheme.size.s};
-        border: 1px solid ${euiTheme.colors.lightShade};
-        box-sizing: content-box;
-
-        &:hover,
-        &.card-expanded {
-          ${shadow};
-          transition: box-shadow ${SHADOW_ANIMATION_DURATION}ms ease-out;
-
-          & .step-icon {
-            background-color: ${iconHoveredBackgroundColor};
-          }
-        }
-
-        &.card-expanded {
-          border: 2px solid #6092c0;
-        }
-      `}
+      css={cardItemPanelStyle}
       borderRadius="none"
       data-test-subj={cardId}
     >

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme, useEuiShadow, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
+import { useStepContentStyles } from '../styles/step_content.styles';
 import type {
   CardId,
   CheckIfStepCompleted,
@@ -17,17 +17,10 @@ import type {
   ToggleTaskCompleteStatus,
 } from '../types';
 
-const LEFT_CONTENT_PANEL_WIDTH = 486;
-const RIGHT_CONTENT_PANEL_WIDTH = 510;
-const RIGHT_CONTENT_HEIGHT = 270;
-const RIGHT_CONTENT_WIDTH = 480;
-
 const StepContentComponent = ({
   autoCheckIfStepCompleted,
   cardId,
   description,
-  hasStepContent,
-  isExpandedStep,
   indicesExist,
   sectionId,
   splitPanel,
@@ -37,16 +30,19 @@ const StepContentComponent = ({
   autoCheckIfStepCompleted?: CheckIfStepCompleted;
   cardId: CardId;
   description?: React.ReactNode[];
-  hasStepContent: boolean;
-  isExpandedStep: boolean;
   indicesExist: boolean;
   sectionId: SectionId;
   splitPanel?: React.ReactNode;
   stepId: StepId;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const shadow = useEuiShadow('s');
+  const {
+    stepContentGroupStyles,
+    leftContentStyles,
+    descriptionStyles,
+    rightPanelStyles,
+    rightPanelContentStyles,
+  } = useStepContentStyles();
 
   useCheckStepCompleted({
     autoCheckIfStepCompleted,
@@ -57,41 +53,24 @@ const StepContentComponent = ({
     toggleTaskCompleteStatus,
   });
 
-  return hasStepContent && isExpandedStep ? (
+  return (
     <EuiFlexGroup
       color="plain"
-      css={css`
-        justify-content: space-between;
-        margin-top: ${euiTheme.size.l};
-        padding: ${euiTheme.size.l};
-        transition: opacity ${euiTheme.animation.normal};
-        overflow: hidden;
-        border: 1px solid ${euiTheme.colors.lightShade};
-        border-radius: ${euiTheme.border.radius.medium};
-      `}
+      className="step-content-group"
+      css={stepContentGroupStyles}
       data-test-subj={`${stepId}-content`}
       direction="row"
       gutterSize="none"
     >
       {description && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.s};
-            width: ${LEFT_CONTENT_PANEL_WIDTH}px;
-          `}
-        >
+        <EuiFlexItem grow={false} css={leftContentStyles} className="left-panel">
           <EuiText size="s">
             {description?.map((desc, index) => (
               <p
                 data-test-subj={`${stepId}-description-${index}`}
                 key={`${stepId}-description-${index}`}
-                className="eui-displayBlock"
-                css={css`
-                  margin-bottom: ${euiTheme.base * 2}px;
-                  margin-block-end: ${euiTheme.base * 2}px !important;
-                  line-height: ${euiTheme.size.l};
-                `}
+                className="eui-displayBlock step-content-description"
+                css={descriptionStyles}
               >
                 {desc}
               </p>
@@ -103,27 +82,17 @@ const StepContentComponent = ({
         <EuiFlexItem
           grow={false}
           data-test-subj="split-panel"
-          css={css`
-            padding: 0 6px 0 ${euiTheme.size.l};
-            width: ${RIGHT_CONTENT_PANEL_WIDTH}px;
-          `}
+          className="right-panel"
+          css={rightPanelStyles}
         >
           {splitPanel && (
-            <div
-              css={css`
-                height: ${RIGHT_CONTENT_HEIGHT}px;
-                width: ${RIGHT_CONTENT_WIDTH}px;
-                border-radius: ${euiTheme.border.radius.medium};
-                overflow: hidden;
-                box-shadow: ${shadow};
-              `}
-            >
+            <div className="right-content-panel" css={rightPanelContentStyles}>
               {splitPanel}
             </div>
           )}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  ) : null;
+  );
 };
 export const StepContent = React.memo(StepContentComponent);
