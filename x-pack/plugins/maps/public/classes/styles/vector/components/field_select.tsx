@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -116,9 +116,7 @@ export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ..
 
   const options = groupFieldsByOrigin(fields);
 
-  const panelMinWidth = calculateWidthFromCharCount(
-    fields.reduce((acc, curr) => (acc > curr.label.length ? acc : curr.label.length), 0)
-  );
+  const panelMinWidth = calculateWidthFromEntries(fields, ['label']);
 
   return (
     <EuiComboBox

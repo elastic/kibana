@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption, EuiToolTip } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { MIDDLE_TRUNCATION_PROPS } from '../../common/constants';
 
 function fieldsToOptions(
@@ -108,9 +108,7 @@ export function SingleFieldSelect({
 
   const options = fieldsToOptions(fields, isFieldDisabled, getFieldDisabledReason);
 
-  const panelMinWidth = calculateWidthFromCharCount(
-    options.reduce((acc, curr) => (acc > curr.label.length ? acc : curr.label.length), 0)
-  );
+  const panelMinWidth = calculateWidthFromEntries(options, ['label']);
 
   return (
     <EuiComboBox
