@@ -157,6 +157,14 @@ export interface OpsOsMetrics {
       time_throttled_nanos: number;
     };
   };
+
+  /** memory cgroup metrics, undefined when not running in cgroup v2 */
+  cgroupMemory?: {
+    /** The total amount of memory currently being used by the cgroup and its descendants. */
+    current_in_bytes: number;
+    /** The total amount of swap currently being used by the cgroup and its descendants. */
+    swap_current_in_bytes: number;
+  };
 }
 
 /**
