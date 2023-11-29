@@ -5,117 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
-import { get } from 'lodash';
-import {
-  EuiSpacer,
-  EuiAccordion,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiSwitch,
-  EuiHorizontalRule,
-  EuiRadioGroup,
-  useGeneratedHtmlId,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
+import { EuiSpacer, EuiSwitch, EuiRadioGroup, useEuiTheme } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
-
-const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
+import { sortAndStringifyJson } from './json_diff/sort_stringify_json';
 
 const CustomStylesContext = React.createContext({});
-const CompareMethodContext = React.createContext(DiffMethod.CHARS);
-
-interface FieldsProps {
-  fields: Partial<RuleFieldsDiff>;
-  openSections: Record<string, boolean>;
-  toggleSection: (sectionName: string) => void;
-}
-
-const Fields = ({ fields, openSections, toggleSection }: FieldsProps) => {
-  const styles = useContext(CustomStylesContext);
-  const compareMethod = useContext(CompareMethodContext);
-
-  const visibleFields = Object.keys(fields).filter(
-    (fieldName) => !HIDDEN_FIELDS.includes(fieldName)
-  );
-
-  return (
-    <>
-      {visibleFields.map((fieldName) => {
-        const currentVersion: string = get(fields, [fieldName, 'current_version'], '');
-        const mergedVersion: string = get(fields, [fieldName, 'merged_version'], '');
-
-        const oldSource =
-          compareMethod === DiffMethod.JSON && typeof currentVersion === 'object'
-            ? currentVersion
-            : JSON.stringify(currentVersion, null, 2);
-
-        const newSource =
-          compareMethod === DiffMethod.JSON && typeof currentVersion === 'object'
-            ? mergedVersion
-            : JSON.stringify(mergedVersion, null, 2);
-
-        return (
-          <>
-            <ExpandableSection
-              title={fieldName}
-              isOpen={openSections[fieldName]}
-              toggle={() => {
-                toggleSection(fieldName);
-              }}
-            >
-              <ReactDiffViewer
-                oldValue={oldSource}
-                newValue={newSource}
-                splitView={true}
-                hideLineNumbers={true}
-                compareMethod={compareMethod}
-                styles={styles}
-              />
-            </ExpandableSection>
-            <EuiHorizontalRule margin="m" />
-          </>
-        );
-      })}
-    </>
-  );
-};
-
-interface ExpandableSectionProps {
-  title: string;
-  isOpen: boolean;
-  toggle: () => void;
-  children: React.ReactNode;
-}
-
-const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectionProps) => {
-  const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
-
-  return (
-    <EuiAccordion
-      forceState={isOpen ? 'open' : 'closed'}
-      onToggle={toggle}
-      paddingSize="none"
-      id={accordionId}
-      buttonContent={
-        <EuiTitle size="s">
-          <h3>{title}</h3>
-        </EuiTitle>
-      }
-      initialIsOpen={true}
-    >
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none" direction="column">
-        {children}
-      </EuiFlexGroup>
-    </EuiAccordion>
-  );
-};
-
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  JSON.stringify(jsObject, Object.keys(jsObject).sort(), 2);
+const DiffMethodContext = React.createContext(DiffMethod.CHARS);
 
 interface CustomStylesProps {
   children: React.ReactNode;
@@ -161,90 +58,59 @@ const CustomStyles = ({ children }: CustomStylesProps) => {
 interface WholeObjectDiffProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
-  openSections: Record<string, boolean>;
-  toggleSection: (sectionName: string) => void;
 }
 
-const WholeObjectDiff = ({
-  oldRule,
-  newRule,
-  openSections,
-  toggleSection,
-}: WholeObjectDiffProps) => {
-  const compareMethod = useContext(CompareMethodContext);
-
-  const oldSource =
-    compareMethod === DiffMethod.JSON && typeof oldRule === 'object'
-      ? oldRule
-      : sortAndStringifyJson(oldRule);
-
-  const newSource =
-    compareMethod === DiffMethod.JSON && typeof newRule === 'object'
-      ? newRule
-      : sortAndStringifyJson(newRule);
-
+const WholeObjectDiff = ({ oldRule, newRule }: WholeObjectDiffProps) => {
+  const diffMethod = useContext(DiffMethodContext);
   const styles = useContext(CustomStylesContext);
 
+  const [oldSource, newSource] = useMemo(() => {
+    const oldSrc =
+      diffMethod === DiffMethod.JSON && typeof oldRule === 'object'
+        ? oldRule
+        : sortAndStringifyJson(oldRule);
+
+    const newSrc =
+      diffMethod === DiffMethod.JSON && typeof newRule === 'object'
+        ? newRule
+        : sortAndStringifyJson(newRule);
+
+    return [oldSrc, newSrc];
+  }, [oldRule, newRule, diffMethod]);
+
   return (
-    <>
-      <ExpandableSection
-        title={'Whole object diff'}
-        isOpen={openSections.whole}
-        toggle={() => {
-          toggleSection('whole');
-        }}
-      >
-        <ReactDiffViewer
-          /*
-            Passing text for diffing is really easy: just pass two strings.
-            Compare this to "react-diff-view" where you have to first run your
-            strings through a bunch of transformations to extract hunks and tokens.
-          */
-          oldValue={oldSource}
-          newValue={newSource}
-          splitView={true}
-          hideLineNumbers={true}
-          /*
-            Specifying the diffing algorithm is also convenient.
+    <ReactDiffViewer
+      /*
+        Passing text for diffing is really easy: just pass two strings.
+        Compare this to "react-diff-view" where you have to first run your
+        strings through a bunch of transformations to extract hunks and tokens.
+      */
+      oldValue={oldSource}
+      newValue={newSource}
+      splitView={true}
+      hideLineNumbers={true}
+      /*
+        Specifying the diffing algorithm is also convenient.
 
-            Possbile values for "compareMethod":
-            diffChars, diffWords, diffWordsWithSpace, 
-            diffLines, diffTrimmedLines, diffSentences, 
-            diffCss, diffJson.
+        Possbile values for "compareMethod":
+        diffChars, diffWords, diffWordsWithSpace,
+        diffLines, diffTrimmedLines, diffSentences,
+        diffCss, diffJson.
 
-            Much easier compared to DIY approach with "react-diff-view".
-          */
-          compareMethod={compareMethod}
-          styles={styles}
-        />
-      </ExpandableSection>
-      <EuiHorizontalRule margin="m" />
-    </>
+        Much easier compared to DIY approach with "react-diff-view".
+      */
+      compareMethod={diffMethod}
+      styles={styles}
+    />
   );
 };
 
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
-  fields: Partial<RuleFieldsDiff>;
 }
 
-export const RuleDiffTabReactDiffViewerContinued = ({
-  fields,
-  oldRule,
-  newRule,
-}: RuleDiffTabProps) => {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
-    Object.keys(fields).reduce((sections, fieldName) => ({ ...sections, [fieldName]: true }), {})
-  );
-
-  const toggleSection = (sectionName: string) => {
-    setOpenSections((prevOpenSections) => ({
-      ...prevOpenSections,
-      [sectionName]: !prevOpenSections[sectionName],
-    }));
-  };
-
+export const RuleDiffTabReactDiffViewerContinued = ({ oldRule, newRule }: RuleDiffTabProps) => {
   const options = [
     {
       id: DiffMethod.CHARS,
@@ -268,7 +134,7 @@ export const RuleDiffTabReactDiffViewerContinued = ({
     },
   ];
 
-  const [compareMethod, setCompareMethod] = useState<DiffMethod>(DiffMethod.CHARS);
+  const [compareMethod, setCompareMethod] = useState<DiffMethod>(DiffMethod.JSON);
 
   return (
     <>
@@ -284,17 +150,11 @@ export const RuleDiffTabReactDiffViewerContinued = ({
         }}
       />
       <EuiSpacer size="m" />
-      <CompareMethodContext.Provider value={compareMethod}>
+      <DiffMethodContext.Provider value={compareMethod}>
         <CustomStyles>
-          <WholeObjectDiff
-            oldRule={oldRule}
-            newRule={newRule}
-            openSections={openSections}
-            toggleSection={toggleSection}
-          />
-          <Fields fields={fields} openSections={openSections} toggleSection={toggleSection} />
+          <WholeObjectDiff oldRule={oldRule} newRule={newRule} />
         </CustomStyles>
-      </CompareMethodContext.Provider>
+      </DiffMethodContext.Provider>
     </>
   );
 };

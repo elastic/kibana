@@ -32,13 +32,11 @@ import * as i18n from './translations';
 
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 
-// import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { RuleDiffTabAppExperienceTeamPoc } from '../../../../rule_management/components/rule_details/rule_diff_tab_app_experience_team_poc';
 import { RuleDiffTabReactDiffViewerContinued } from '../../../../rule_management/components/rule_details/rule_diff_tab_react_diff_viewer_continued';
 import { RuleDiffTabReactDiffView } from '../../../../rule_management/components/rule_details/rule_diff_tab_react_diff_view';
 import { RuleDiffTabMonaco } from '../../../../rule_management/components/rule_details/rule_diff_tab_monaco';
 import { RuleDiffTabDiff2Html } from '../../../../rule_management/components/rule_details/rule_diff_tab_diff2html';
-// import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations.ts';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -315,7 +313,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                     <RuleDiffTabReactDiffViewerContinued
                       oldRule={activeRule.current_rule}
                       newRule={activeRule.target_rule}
-                      fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
@@ -329,7 +326,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                     <RuleDiffTabReactDiffView
                       oldRule={activeRule.current_rule}
                       newRule={activeRule.target_rule}
-                      fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
@@ -343,7 +339,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                     <RuleDiffTabMonaco
                       oldRule={activeRule.current_rule}
                       newRule={activeRule.target_rule}
-                      fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
@@ -357,7 +352,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                     <RuleDiffTabDiff2Html
                       oldRule={activeRule.current_rule}
                       newRule={activeRule.target_rule}
-                      fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
@@ -371,7 +365,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                     <RuleDiffTabAppExperienceTeamPoc
                       oldRule={activeRule.current_rule}
                       newRule={activeRule.target_rule}
-                      fields={diff.fields}
                     />
                   </TabContentPadding>
                 ),
