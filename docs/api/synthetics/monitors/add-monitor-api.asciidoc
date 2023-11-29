@@ -54,7 +54,7 @@ The https://www.elastic.co/guide/en/observability/current/synthetics-private-loc
 To list available Private Locations you can:
 +
   * Run the https://www.elastic.co/guide/en/observability/current/synthetics-command-reference.html#elastic-synthetics-locations-command[`elastic-synthetics locations`] command
-  with the {kib} URL for the deployment from which to fetch available locations.
+  with the deployment's {kib} URL.
   * Go to *Synthetics* -> *Settings* and click *Private locations*.
   Private Locations will be listed in the table.
 
