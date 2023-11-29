@@ -96,7 +96,9 @@ export function ChangeDataView({
   const { application, data, storage, dataViews, dataViewEditor, appName, usageCollection } =
     kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
+
+  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth, dataViewsList });
+
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );
