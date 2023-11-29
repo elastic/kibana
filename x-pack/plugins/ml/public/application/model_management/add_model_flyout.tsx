@@ -42,6 +42,8 @@ export interface AddModelFlyoutProps {
   onSubmit: (modelId: string) => void;
 }
 
+type FlyoutTabId = 'clickToDownload' | 'manualDownload';
+
 /**
  * Flyout for downloading elastic curated models and showing instructions for importing third-party models.
  */
@@ -49,14 +51,16 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
   const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
   const isElserTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
 
-  const [selectedTabId, setSelectedTabId] = useState(isElserTabVisible ? 'elser' : 'thirdParty');
+  const [selectedTabId, setSelectedTabId] = useState<FlyoutTabId>(
+    isElserTabVisible ? 'clickToDownload' : 'manualDownload'
+  );
 
   const tabs = useMemo(() => {
     return [
       ...(isElserTabVisible
         ? [
             {
-              id: 'elser',
+              id: 'clickToDownload' as const,
               name: (
                 <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
                   <EuiFlexItem grow={false}>
@@ -64,27 +68,30 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.elserTabLabel"
-                      defaultMessage="ELSER"
+                      id="xpack.ml.trainedModels.addModelFlyout.clickToDownloadTabLabel"
+                      defaultMessage="Click to Download"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ),
               content: (
-                <ElserTabContent modelDownloads={modelDownloads} onModelDownload={onSubmit} />
+                <ClickToDownloadTabContent
+                  modelDownloads={modelDownloads}
+                  onModelDownload={onSubmit}
+                />
               ),
             },
           ]
         : []),
       {
-        id: 'thirdParty',
+        id: 'manualDownload' as const,
         name: (
           <FormattedMessage
             id="xpack.ml.trainedModels.addModelFlyout.thirdPartyLabel"
-            defaultMessage="Third-party"
+            defaultMessage="Manual Download"
           />
         ),
-        content: <ThirdPartyTabContent />,
+        content: <ManualDownloadTabContent />,
       },
     ];
   }, [isElserTabVisible, modelDownloads, onSubmit]);
@@ -133,15 +140,18 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
   );
 };
 
-interface ElserTabContentProps {
+interface ClickToDownloadTabContentProps {
   modelDownloads: ModelItem[];
   onModelDownload: (modelId: string) => void;
 }
 
 /**
- * ELSER tab content for selecting a model to download.
+ * Tab content for selecting a model to download.
  */
-const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDownload }) => {
+const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
+  modelDownloads,
+  onModelDownload,
+}) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -161,7 +171,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                   <h3>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.modelsList.elserTitle"
-                      defaultMessage="Elastic Learned Sparse EncodeR (ELSER)"
+                      defaultMessage="ELSER (Elastic Learned Sparse EncodeR)"
                     />
                   </h3>
                 </EuiTitle>
@@ -170,7 +180,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.elserDescription"
-                      defaultMessage="ELSER is designed to efficiently use context in natural language queries with better results than BM25 alone."
+                      defaultMessage="ELSER is Elastic’s NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform."
                     />
                   </EuiText>
                 </p>
@@ -193,7 +203,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                   <h3>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.modelsList.e5Title"
-                      defaultMessage="E5 multilingual embedding model"
+                      defaultMessage="E5 (EmbEddings from bidirEctional Encoder rEpresentations)"
                     />
                   </h3>
                 </EuiTitle>
@@ -202,7 +212,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.e5Description"
-                      defaultMessage="E5 produces dense vector embeddings that can be searched in multiple languages."
+                      defaultMessage="E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model is recommended for non-English language documents and queries."
                     />
                   </EuiText>
                 </p>
@@ -312,9 +322,9 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
 };
 
 /**
- * Third-party tab content for showing instructions for importing third-party models.
+ * Manual download tab content for showing instructions for importing third-party models.
  */
-const ThirdPartyTabContent: FC = () => {
+const ManualDownloadTabContent: FC = () => {
   const {
     services: { docLinks },
   } = useMlKibana();
