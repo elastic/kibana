@@ -48,11 +48,7 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
-  secrets?: {
-    ssl?: {
-      key?: OutputSecret;
-    };
-  };
+  secrets?: {};
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
@@ -63,11 +59,7 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string;
   secrets?: {
-    service_token?:
-      | string
-      | {
-          id: string;
-        };
+    service_token?: OutputSecret;
   };
 }
 
@@ -75,11 +67,7 @@ export interface NewLogstashOutput extends NewBaseOutput {
   type: OutputType['Logstash'];
   secrets?: {
     ssl?: {
-      key?:
-        | string
-        | {
-            id: string;
-          };
+      key?: OutputSecret;
     };
   };
 }
