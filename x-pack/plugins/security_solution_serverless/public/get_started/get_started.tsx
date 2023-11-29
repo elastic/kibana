@@ -20,7 +20,7 @@ import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
 
 export interface GetStartedProps {
-  indicesExist: boolean;
+  indicesExist?: boolean;
   productTypes: SecurityProductTypes;
 }
 
