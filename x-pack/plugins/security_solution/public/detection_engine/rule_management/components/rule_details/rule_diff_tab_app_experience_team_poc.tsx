@@ -5,26 +5,53 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { get } from 'lodash';
 import type { Change } from 'diff';
 import { diffLines } from 'diff';
-import {
-  EuiSpacer,
-  EuiAccordion,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  useGeneratedHtmlId,
-  useEuiBackgroundColor,
-  tint,
-} from '@elastic/eui';
-import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
+import { EuiSpacer, useEuiBackgroundColor, tint } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
+import { sortAndStringifyJson } from './json_diff/sort_stringify_json';
 
-const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
+interface RuleDiffTabProps {
+  oldRule: RuleResponse;
+  newRule: RuleResponse;
+}
+
+export const RuleDiffTabAppExperienceTeamPoc = ({ oldRule, newRule }: RuleDiffTabProps) => {
+  const diff = useDiff(oldRule, newRule);
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      {diff.map((change, i) => (
+        <DiffSegment
+          key={`segment-${i}`}
+          change={change}
+          diffMode={'lines'}
+          showDiffDecorations={true}
+        />
+      ))}
+    </>
+  );
+};
+
+const useDiff = (oldRule: RuleResponse, newRule: RuleResponse) => {
+  const memoizedDiff = useMemo(() => {
+    const oldSource = sortAndStringifyJson(oldRule);
+    const newSource = sortAndStringifyJson(newRule);
+
+    return diffLines(JSON.stringify(oldSource), JSON.stringify(newSource), {
+      ignoreWhitespace: false,
+    });
+  }, [oldRule, newRule]);
+
+  return memoizedDiff;
+};
+
+// -------------------------------------------------------------------------------------------------
+// DiffSegment component
 
 const indicatorCss = css`
   position: absolute;
@@ -123,168 +150,5 @@ const DiffSegment = ({
     >
       {change.value}
     </div>
-  );
-};
-
-interface FieldsProps {
-  fields: Partial<RuleFieldsDiff>;
-  openSections: Record<string, boolean>;
-  toggleSection: (sectionName: string) => void;
-}
-
-const Fields = ({ fields, openSections, toggleSection }: FieldsProps) => {
-  const visibleFields = Object.keys(fields).filter(
-    (fieldName) => !HIDDEN_FIELDS.includes(fieldName)
-  );
-
-  return (
-    <>
-      {visibleFields.map((fieldName) => {
-        const currentVersion: string = get(fields, [fieldName, 'current_version'], '');
-        const mergedVersion: string = get(fields, [fieldName, 'merged_version'], '');
-
-        const oldSource = JSON.stringify(currentVersion, null, 2);
-        const newSource = JSON.stringify(mergedVersion, null, 2);
-
-        const diff = diffLines(oldSource, newSource, { ignoreWhitespace: false });
-
-        return (
-          <>
-            <ExpandableSection
-              title={fieldName}
-              isOpen={openSections[fieldName]}
-              toggle={() => {
-                toggleSection(fieldName);
-              }}
-            >
-              <>
-                <EuiSpacer size="m" />
-                {diff.map((change, i) => (
-                  <DiffSegment
-                    key={`segment-${i}`}
-                    change={change}
-                    diffMode={'lines'}
-                    showDiffDecorations={true}
-                  />
-                ))}
-              </>
-            </ExpandableSection>
-            <EuiHorizontalRule margin="m" />
-          </>
-        );
-      })}
-    </>
-  );
-};
-
-interface ExpandableSectionProps {
-  title: string;
-  isOpen: boolean;
-  toggle: () => void;
-  children: React.ReactNode;
-}
-
-const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectionProps) => {
-  const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
-
-  return (
-    <EuiAccordion
-      forceState={isOpen ? 'open' : 'closed'}
-      onToggle={toggle}
-      paddingSize="none"
-      id={accordionId}
-      buttonContent={
-        <EuiTitle size="s">
-          <h3>{title}</h3>
-        </EuiTitle>
-      }
-      initialIsOpen={true}
-    >
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none" direction="column">
-        {children}
-      </EuiFlexGroup>
-    </EuiAccordion>
-  );
-};
-
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  JSON.stringify(jsObject, Object.keys(jsObject).sort(), 2);
-
-interface WholeObjectDiffProps {
-  oldRule: RuleResponse;
-  newRule: RuleResponse;
-  openSections: Record<string, boolean>;
-  toggleSection: (sectionName: string) => void;
-}
-
-const WholeObjectDiff = ({
-  oldRule,
-  newRule,
-  openSections,
-  toggleSection,
-}: WholeObjectDiffProps) => {
-  const oldSource = sortAndStringifyJson(oldRule);
-  const newSource = sortAndStringifyJson(newRule);
-
-  const diff = diffLines(JSON.stringify(oldSource), JSON.stringify(newSource), {
-    ignoreWhitespace: false,
-  });
-
-  return (
-    <>
-      <ExpandableSection
-        title={'Whole object diff'}
-        isOpen={openSections.whole}
-        toggle={() => {
-          toggleSection('whole');
-        }}
-      >
-        <>
-          <EuiSpacer size="m" />
-          {diff.map((change, i) => (
-            <DiffSegment
-              key={`segment-${i}`}
-              change={change}
-              diffMode={'lines'}
-              showDiffDecorations={true}
-            />
-          ))}
-        </>
-      </ExpandableSection>
-      <EuiHorizontalRule margin="m" />
-    </>
-  );
-};
-
-interface RuleDiffTabProps {
-  oldRule: RuleResponse;
-  newRule: RuleResponse;
-  fields: Partial<RuleFieldsDiff>;
-}
-
-export const RuleDiffTabAppExperienceTeamPoc = ({ fields, oldRule, newRule }: RuleDiffTabProps) => {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
-    Object.keys(fields).reduce((sections, fieldName) => ({ ...sections, [fieldName]: true }), {})
-  );
-
-  const toggleSection = (sectionName: string) => {
-    setOpenSections((prevOpenSections) => ({
-      ...prevOpenSections,
-      [sectionName]: !prevOpenSections[sectionName],
-    }));
-  };
-
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <WholeObjectDiff
-        oldRule={oldRule}
-        newRule={newRule}
-        openSections={openSections}
-        toggleSection={toggleSection}
-      />
-      <Fields fields={fields} openSections={openSections} toggleSection={toggleSection} />
-    </>
   );
 };
