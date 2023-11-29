@@ -21,16 +21,23 @@ import { ProductLine } from '../../../common/product';
 import { ALL_DONE_TEXT } from '../translations';
 import { fetchRuleManagementFilters } from '../apis';
 
-jest.mock('../../common/services');
-jest.mock('../context/step_context');
 jest.mock('./step_content', () => ({
   StepContent: () => <div data-test-subj="mock-step-content" />,
 }));
+
+jest.mock('../context/step_context');
+jest.mock('../apis');
+
 jest.mock('@kbn/security-solution-plugin/public', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
 }));
 
-jest.mock('../apis');
+jest.mock('@kbn/security-solution-navigation', () => ({
+  useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
+  SecurityPageName: {
+    landing: 'landing',
+  },
+}));
 
 describe('CardStepComponent', () => {
   const step = {

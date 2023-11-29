@@ -28,6 +28,13 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ hash: '' }),
 }));
 
+jest.mock('@kbn/security-solution-navigation', () => ({
+  useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
+  SecurityPageName: {
+    landing: 'landing',
+  },
+}));
+
 describe('useTogglePanel', () => {
   const productTypes = [
     { product_line: 'security', product_tier: 'essentials' },
