@@ -26,6 +26,7 @@ jest.mock('./action_status', () => {
 });
 
 // FLAKY: https://github.com/elastic/kibana/issues/171052
+// FLAKY: https://github.com/elastic/kibana/issues/172114
 describe.skip('sendUpgradeAgentsActions (plural)', () => {
   beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
