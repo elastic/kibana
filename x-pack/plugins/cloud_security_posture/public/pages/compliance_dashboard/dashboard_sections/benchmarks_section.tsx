@@ -100,9 +100,9 @@ export const BenchmarksSection = ({
     <EuiPanel hasBorder>
       <EuiFlexGroup
         css={css`
-        border-bottom: ${euiTheme.border.thick};
-        border-bottom-color: ${euiTheme.colors.text};
-        padding-bottom: ${euiTheme.size.s};
+         border-bottom: ${euiTheme.border.thin};
+         border-bottom-color: ${euiTheme.colors.lightShade};
+         padding-bottom: ${euiTheme.size.s};
         .euiTitle {
           font-weight: ${euiTheme.font.weight.semiBold};
         };
@@ -154,8 +154,10 @@ export const BenchmarksSection = ({
           css={css`
             // card height with 3 items in risk table
             height: 200px;
-            border-bottom: ${euiTheme.border.thin};
             padding: ${euiTheme.size.base} 0 ${euiTheme.size.l};
+            &:not(:last-of-type) {
+              border-bottom: ${euiTheme.border.thin};
+            }
           `}
         >
           <EuiFlexItem grow={dashboardColumnsGrow.first}>
