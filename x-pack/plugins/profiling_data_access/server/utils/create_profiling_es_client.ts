@@ -45,7 +45,10 @@ export function createProfilingEsClient({
       durationSeconds,
       co2PerKWH,
       datacenterPUE,
-      perCoreWatt,
+      awsCostDiscountRate,
+      costPervCPUPerHour,
+      pervCPUWattArm64,
+      pervCPUWattX86,
     }) {
       const controller = new AbortController();
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
@@ -57,9 +60,12 @@ export function createProfilingEsClient({
               query,
               sample_size: sampleSize,
               requested_duration: durationSeconds,
-              // default_co2_per_kwh: co2PerKWH,
-              // default_datacenter_pue: datacenterPUE,
-              // default_per_core_watt: perCoreWatt,
+              // co2_per_kwh: co2PerKWH,
+              // per_core_watt: pervCPUWattX86,
+              // per_core_watt_arm64: pervCPUWattArm64,
+              // datacenter_pue: datacenterPUE,
+              // aws_cost_factor: awsCostDiscountRate,
+              // cost_per_core_hour: costPervCPUPerHour,
             },
           },
           {
@@ -100,7 +106,10 @@ export function createProfilingEsClient({
       durationSeconds,
       co2PerKWH,
       datacenterPUE,
-      perCoreWatt,
+      awsCostDiscountRate,
+      costPervCPUPerHour,
+      pervCPUWattArm64,
+      pervCPUWattX86,
     }) {
       const controller = new AbortController();
 
@@ -113,9 +122,12 @@ export function createProfilingEsClient({
               query,
               sample_size: sampleSize,
               requested_duration: durationSeconds,
-              // default_co2_per_kwh: co2PerKWH,
-              // default_datacenter_pue: datacenterPUE,
-              // default_per_core_watt: perCoreWatt,
+              // co2_per_kwh: co2PerKWH,
+              // per_core_watt: pervCPUWattX86,
+              // per_core_watt_arm64: pervCPUWattArm64,
+              // datacenter_pue: datacenterPUE,
+              // aws_cost_factor: awsCostDiscountRate,
+              // cost_per_core_hour: costPervCPUPerHour,
             },
           },
           {

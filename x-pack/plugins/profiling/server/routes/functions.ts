@@ -7,9 +7,12 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
+  profilingAWSCostDiscountRate,
   profilingCo2PerKWH,
+  profilingCostPervCPUPerHour,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattArm64,
+  profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
@@ -43,10 +46,20 @@ export function registerTopNFunctionsSearchRoute({
     async (context, request, response) => {
       try {
         const core = await context.core;
-        const [co2PerKWH, perCoreWatt, datacenterPUE] = await Promise.all([
+        const [
+          co2PerKWH,
+          datacenterPUE,
+          pervCPUWattX86,
+          pervCPUWattArm64,
+          awsCostDiscountRate,
+          costPervCPUPerHour,
+        ] = await Promise.all([
           core.uiSettings.client.get<number>(profilingCo2PerKWH),
-          core.uiSettings.client.get<number>(profilingPerCoreWatt),
           core.uiSettings.client.get<number>(profilingDatacenterPUE),
+          core.uiSettings.client.get<number>(profilingPervCPUWattX86),
+          core.uiSettings.client.get<number>(profilingPervCPUWattArm64),
+          core.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
+          core.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
         ]);
 
         const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
@@ -59,8 +72,11 @@ export function registerTopNFunctionsSearchRoute({
           startIndex,
           endIndex,
           co2PerKWH,
-          perCoreWatt,
           datacenterPUE,
+          pervCPUWattX86,
+          pervCPUWattArm64,
+          awsCostDiscountRate,
+          costPervCPUPerHour,
         });
 
         return response.ok({

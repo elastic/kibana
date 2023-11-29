@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { createTopNFunctions } from '@kbn/profiling-utils';
+import { percentToFactor } from '../../utils/percent_to_factor';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { RegisterServicesParams } from '../register_services';
 import { searchStackTraces } from '../search_stack_traces';
@@ -19,8 +20,11 @@ export interface FetchFunctionsParams {
   startIndex: number;
   endIndex: number;
   co2PerKWH: number;
-  perCoreWatt: number;
   datacenterPUE: number;
+  pervCPUWattX86: number;
+  pervCPUWattArm64: number;
+  awsCostDiscountRate: number;
+  costPervCPUPerHour: number;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -35,7 +39,10 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
     endIndex,
     co2PerKWH,
     datacenterPUE,
-    perCoreWatt,
+    pervCPUWattX86,
+    pervCPUWattArm64,
+    awsCostDiscountRate,
+    costPervCPUPerHour,
   }: FetchFunctionsParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
@@ -53,7 +60,10 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         durationSeconds: totalSeconds,
         co2PerKWH,
         datacenterPUE,
-        perCoreWatt,
+        pervCPUWattX86,
+        pervCPUWattArm64,
+        awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
+        costPervCPUPerHour,
       }
     );
 

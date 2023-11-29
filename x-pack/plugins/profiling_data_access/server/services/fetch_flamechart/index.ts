@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { percentToFactor } from '../../utils/percent_to_factor';
 import { kqlQuery } from '../../utils/query';
 import { RegisterServicesParams } from '../register_services';
 
@@ -15,14 +16,28 @@ export interface FetchFlamechartParams {
   rangeToMs: number;
   kuery: string;
   co2PerKWH: number;
-  perCoreWatt: number;
   datacenterPUE: number;
+  pervCPUWattX86: number;
+  pervCPUWattArm64: number;
+  awsCostDiscountRate: number;
+  costPervCPUPerHour: number;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
-  return async ({ esClient, rangeFromMs, rangeToMs, kuery }: FetchFlamechartParams) => {
+  return async ({
+    esClient,
+    rangeFromMs,
+    rangeToMs,
+    kuery,
+    co2PerKWH,
+    datacenterPUE,
+    pervCPUWattX86,
+    pervCPUWattArm64,
+    awsCostDiscountRate,
+    costPervCPUPerHour,
+  }: FetchFlamechartParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
 
@@ -47,6 +62,12 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       },
       sampleSize: targetSampleSize,
       durationSeconds: totalSeconds,
+      co2PerKWH,
+      datacenterPUE,
+      pervCPUWattX86,
+      pervCPUWattArm64,
+      awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
+      costPervCPUPerHour,
     });
     return { ...flamegraph, TotalSeconds: totalSeconds };
   };

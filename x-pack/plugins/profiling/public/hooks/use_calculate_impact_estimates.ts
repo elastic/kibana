@@ -8,7 +8,7 @@
 import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
@@ -33,7 +33,7 @@ export function useCalculateImpactEstimate() {
     start: { core },
   } = useProfilingDependencies();
 
-  const perCoreWatts = core.uiSettings.get<number>(profilingPerCoreWatt);
+  const perCoreWatts = core.uiSettings.get<number>(profilingPervCPUWattX86);
   const co2PerTonKWH = core.uiSettings.get<number>(profilingCo2PerKWH);
   const datacenterPUE = core.uiSettings.get<number>(profilingDatacenterPUE);
 

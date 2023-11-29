@@ -154,8 +154,11 @@ export interface UsageStats {
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
-  'observability:profilingPerCoreWatt': number;
+  'observability:profilingPerVCPUWattX86': number;
+  'observability:profilingPervCPUWattArm64': number;
   'observability:profilingCo2PerKWH': number;
   'observability:profilingDatacenterPUE': number;
   'observability:profilingUseLegacyCo2Calculation': boolean;
+  'observability:profilingCostPervCPUPerHour': number;
+  'observability:profilingAWSCostDiscountRate': number;
 }

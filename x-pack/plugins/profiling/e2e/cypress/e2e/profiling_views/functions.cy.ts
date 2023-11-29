@@ -7,7 +7,7 @@
 import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 
 describe('Functions page', () => {
@@ -179,7 +179,7 @@ describe('Functions page', () => {
       cy.updateAdvancedSettings({
         [profilingCo2PerKWH]: 0.000379069,
         [profilingDatacenterPUE]: 1.7,
-        [profilingPerCoreWatt]: 7,
+        [profilingPervCPUWattX86]: 7,
       });
     });
 
@@ -199,7 +199,7 @@ describe('Functions page', () => {
       cy.get(`[data-test-subj="advancedSetting-editField-${profilingDatacenterPUE}"]`)
         .clear()
         .type('2.4');
-      cy.get(`[data-test-subj="advancedSetting-editField-${profilingPerCoreWatt}"]`)
+      cy.get(`[data-test-subj="advancedSetting-editField-${profilingPervCPUWattX86}"]`)
         .clear()
         .type('20');
       cy.contains('Save changes').click();

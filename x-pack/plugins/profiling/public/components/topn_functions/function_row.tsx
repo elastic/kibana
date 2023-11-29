@@ -82,26 +82,31 @@ export function FunctionRow({
 
   if (
     columnId === TopNFunctionSortField.AnnualizedCo2 &&
-    functionRow.impactEstimates?.selfCPU?.annualizedCo2
+    functionRow.impactEstimates?.totalCPU?.annualizedCo2
   ) {
     return (
       <div>
-        {shouldUseLegacyCo2Calculation
-          ? asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2, 'kgs')
-          : asWeight(functionRow.totalAnnualCO2kg, 'kgs')}
+        {asWeight(
+          shouldUseLegacyCo2Calculation
+            ? functionRow.impactEstimates.totalCPU.annualizedCo2
+            : functionRow.totalAnnualCO2kgs,
+          'kgs'
+        )}
       </div>
     );
   }
 
   if (
     columnId === TopNFunctionSortField.AnnualizedDollarCost &&
-    functionRow.impactEstimates?.selfCPU?.annualizedDollarCost
+    functionRow.impactEstimates?.totalCPU?.annualizedDollarCost
   ) {
     return (
       <div>
-        {shouldUseLegacyCo2Calculation
-          ? asCost(functionRow.impactEstimates.selfCPU.annualizedDollarCost)
-          : asCost(functionRow.totalAnnualCostUsd)}
+        {asCost(
+          shouldUseLegacyCo2Calculation
+            ? functionRow.impactEstimates.totalCPU.annualizedDollarCost
+            : functionRow.totalAnnualCostUSD
+        )}
       </div>
     );
   }

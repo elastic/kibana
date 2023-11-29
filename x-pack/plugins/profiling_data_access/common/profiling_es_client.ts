@@ -25,7 +25,10 @@ export interface ProfilingESClient {
     durationSeconds: number;
     co2PerKWH?: number;
     datacenterPUE?: number;
-    perCoreWatt?: number;
+    pervCPUWattX86?: number;
+    pervCPUWattArm64?: number;
+    awsCostDiscountRate?: number;
+    costPervCPUPerHour?: number;
   }): Promise<StackTraceResponse>;
   profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
@@ -35,6 +38,9 @@ export interface ProfilingESClient {
     durationSeconds: number;
     co2PerKWH?: number;
     datacenterPUE?: number;
-    perCoreWatt?: number;
+    pervCPUWattX86?: number;
+    pervCPUWattArm64?: number;
+    awsCostDiscountRate?: number;
+    costPervCPUPerHour?: number;
   }): Promise<BaseFlameGraph>;
 }

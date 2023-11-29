@@ -79,6 +79,7 @@ export function createProfilingEsClient({
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
+        console.log('### caue  promise  sampleSize:', sampleSize);
         return cancelEsRequestOnAbort(
           esClient.transport.request(
             {

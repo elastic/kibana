@@ -553,7 +553,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:profilingPerCoreWatt': {
+  'observability:profilingPerVCPUWattX86': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingPervCPUWattArm64': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -591,6 +595,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingUseLegacyCo2Calculation': {
     type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingCostPervCPUPerHour': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingAWSCostDiscountRate': {
+    type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
 };

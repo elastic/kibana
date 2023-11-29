@@ -32,8 +32,11 @@ import {
   apmEnableProfilingIntegration,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
   profilingUseLegacyCo2Calculation,
+  profilingPervCPUWattArm64,
+  profilingAWSCostDiscountRate,
+  profilingCostPervCPUPerHour,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -378,15 +381,30 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.boolean(),
     requiresPageReload: false,
   },
-  [profilingPerCoreWatt]: {
+  [profilingPervCPUWattX86]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingPerCoreWattUiSettingName', {
-      defaultMessage: 'Per Core Watts',
+    name: i18n.translate('xpack.observability.profilingPervCPUWattX86UiSettingName', {
+      defaultMessage: 'Per vCPU Watts - x86',
     }),
     value: 7,
-    description: i18n.translate('xpack.observability.profilingPerCoreWattUiSettingDescription', {
-      defaultMessage: `The average amortized per-core power consumption (based on 100% CPU utilization).`,
+    description: i18n.translate('xpack.observability.profilingPervCPUWattX86UiSettingDescription', {
+      defaultMessage: `The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.`,
     }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingPervCPUWattArm64]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingPervCPUWattArm64UiSettingName', {
+      defaultMessage: 'Per vCPU Watts - arm64',
+    }),
+    value: 2.8,
+    description: i18n.translate(
+      'xpack.observability.profilingPervCPUWattArm64UiSettingDescription',
+      {
+        defaultMessage: `The average amortized per-core power consumption (based on 100% CPU utilization) for arm64 architecture.`,
+      }
+    ),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
   },
@@ -449,6 +467,30 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     schema: schema.boolean(),
+  },
+  [profilingAWSCostDiscountRate]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingAWSCostDiscountRateUiSettingName', {
+      defaultMessage: 'AWS cost discount rate (%)',
+    }),
+    value: 6,
+    schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
+  },
+  [profilingCostPervCPUPerHour]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingCostPervCPUPerHourUiSettingName', {
+      defaultMessage: 'Cost per vCPU per hour ($)',
+    }),
+    value: 0.0425,
+    description: i18n.translate(
+      'xpack.observability.profilingPervCPUWattArm64UiSettingDescription',
+      {
+        defaultMessage: `Default average cost per CPU core per hour (Non-AWS instances only)`,
+      }
+    ),
+    schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
   },
 };
 

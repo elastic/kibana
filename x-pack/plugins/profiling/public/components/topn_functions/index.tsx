@@ -21,7 +21,9 @@ import { getCalleeFunction, TopNFunctions, TopNFunctionSortField } from '@kbn/pr
 import { last, orderBy } from 'lodash';
 import React, { forwardRef, Ref, useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
+import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
@@ -69,6 +71,12 @@ export const TopNFunctionsGrid = forwardRef(
     }: Props,
     ref: Ref<EuiDataGridRefProps> | undefined
   ) => {
+    const {
+      start: { core },
+    } = useProfilingDependencies();
+    const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
+      profilingUseLegacyCo2Calculation
+    );
     const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
     const trackProfilingEvent = useUiTracker({ app: 'profiling' });
     const calculateImpactEstimates = useCalculateImpactEstimate();
@@ -115,17 +123,27 @@ export const TopNFunctionsGrid = forwardRef(
         case TopNFunctionSortField.TotalCPU:
           return orderBy(rows, (row) => row.totalCPUPerc, sortDirection);
         case TopNFunctionSortField.AnnualizedCo2:
-          return orderBy(rows, (row) => row.impactEstimates?.selfCPU.annualizedCo2, sortDirection);
+          return orderBy(
+            rows,
+            (row) =>
+              shouldUseLegacyCo2Calculation
+                ? row.impactEstimates?.totalCPU.annualizedCo2
+                : row.totalAnnualCO2kgs,
+            sortDirection
+          );
         case TopNFunctionSortField.AnnualizedDollarCost:
           return orderBy(
             rows,
-            (row) => row.impactEstimates?.selfCPU.annualizedDollarCost,
+            (row) =>
+              shouldUseLegacyCo2Calculation
+                ? row.impactEstimates?.totalCPU.annualizedDollarCost
+                : row.totalAnnualCostUSD,
             sortDirection
           );
         default:
           return orderBy(rows, sortField, sortDirection);
       }
-    }, [rows, sortDirection, sortField]);
+    }, [rows, shouldUseLegacyCo2Calculation, sortDirection, sortField]);
 
     const { columns, leadingControlColumns } = useMemo(() => {
       const gridColumns: EuiDataGridColumn[] = [
