@@ -911,8 +911,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `[data-test-subj^="lnsXY_axisSide_groups_"]`
       );
       for (const axisSideGroup of axisSideGroups) {
-        const input = await axisSideGroup.findByTagName('input');
-        const isSelected = await input.isSelected();
+        const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
+        const isSelected = ariaPressed === 'true';
         if (isSelected) {
           return axisSideGroup?.getVisibleText();
         }
@@ -1431,7 +1431,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedField(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../../..');
+      const fieldAncestor = await input.findByXpath('./../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
       expect(focusedElementText).to.eql(name);
