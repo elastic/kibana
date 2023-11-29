@@ -8,8 +8,8 @@
 import React, { useState, useContext, useMemo } from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 import { EuiSpacer, EuiSwitch, EuiRadioGroup, useEuiTheme } from '@elastic/eui';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
-import { sortAndStringifyJson } from './json_diff/sort_stringify_json';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
+import { sortAndStringifyJson } from './sort_stringify_json';
 
 const CustomStylesContext = React.createContext({});
 const DiffMethodContext = React.createContext(DiffMethod.CHARS);
