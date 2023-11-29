@@ -41,19 +41,19 @@ Where to deploy the monitor. Monitors can be deployed in multiple locations so t
 +
 To list available locations you can:
 +
-  * Run the https://www.elastic.co/guide/en/observability/current/synthetics-command-reference.html#elastic-synthetics-locations-command[`elastic-synthetics locations`] command
+  * Run the {locations-command}[`elastic-synthetics locations`] command
   with the deployment's {kib} URL.
   * Go to *Synthetics* -> *Management* and click *Create monitor*.
     Locations will be listed in _Locations_.
 
 `private_locations` (`Array<string>`)::
 
-The {private-locations-url} [Private Locations] to which the monitors will be deployed. These Private Locations refer to locations hosted and managed by you, whereas
+The {private-locations-url}[Private Locations] to which the monitors will be deployed. These Private Locations refer to locations hosted and managed by you, whereas
 `locations` are hosted by Elastic. You can specify a Private Location using the location's name.
 +
 To list available Private Locations you can:
 +
-  * Run the https://www.elastic.co/guide/en/observability/current/synthetics-command-reference.html#elastic-synthetics-locations-command[`elastic-synthetics locations`] command
+  * Run the {locations-command}[`elastic-synthetics locations`] command
   with the deployment's {kib} URL.
   * Go to *Synthetics* -> *Settings* and click *Private locations*.
   Private Locations will be listed in the table.
