@@ -272,25 +272,15 @@ export class WebElementWrapper {
         await setTimeoutAsync(100);
       }
     } else {
-      if (this.isChromium) {
-        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
-        await this.retryCall(async function clearValueWithKeyboard(wrapper) {
-          await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
-        });
-        await this.pressKeys(this.Keys.BACK_SPACE);
-      } else {
-        const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-        await this.pressKeys([selectionKey, 'a']);
-        await this.pressKeys(this.Keys.NULL); // Release modifier keys
-
-        // Insert space to replace all selected characters then immediately delete it
-        // to ensure all characters are actually removed.
-        // This fixes a bug in recent selenium versions where just the backspace press doesn't
-        // delete selected characters.
-        await this.pressKeys([this.Keys.SPACE, this.Keys.BACK_SPACE]);
-        await this.pressKeys(this.Keys.BACK_SPACE);
-      }
+      await this.selectValueWithKeyboard();
+      await this.pressKeys(this.Keys.BACK_SPACE);
     }
+  }
+
+  async selectValueWithKeyboard() {
+    const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await this.pressKeys([selectionKey, 'a']);
+    await this.pressKeys(this.Keys.NULL); // Release modifier keys
   }
 
   /**

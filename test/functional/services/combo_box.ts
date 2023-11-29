@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
@@ -84,6 +85,7 @@ export class ComboBoxService extends FtrService {
     const isOptionSelected = await this.isOptionSelected(comboBoxElement, trimmedValue);
 
     if (isOptionSelected) {
+      this.log.debug(`value is already selected. returning`);
       return;
     }
 
@@ -183,17 +185,22 @@ export class ComboBoxService extends FtrService {
   ): Promise<void> {
     const input = await comboBoxElement.findByTagName('input');
 
-    await input.click();
+    await this.retry.try(async () => {
+      // Wait for the input to not be disabled before typing into it (otherwise
+      // typing will sometimes trigger the global search bar instead)
+      expect(await input.isEnabled()).to.equal(true);
 
-    await input.clearValue({ withJS: true });
-    await this.waitForOptionsListLoading(comboBoxElement);
+      // Some Kibana comboboxes force state to not be clearable, so we can't use `input.clearValue()`.
+      // This is not-great production UX and shouldn't be happening, but for now we're going to
+      // work around it in FTR tests by selecting all existing text and typing to replace
+      if (!!(await input.getAttribute('value'))) {
+        await input.selectValueWithKeyboard();
+      }
+      await input.type(filterValue);
+      await this.waitForOptionsListLoading(comboBoxElement);
 
-    // Use all the tricks here to ensure the input is actually empty
-    await input._webElement.getDriver().executeScript(`arguments[0].select()`, input._webElement);
-    await this.common.sleep(1000);
-
-    await input.type(filterValue);
-    await this.waitForOptionsListLoading(comboBoxElement);
+      expect(await input.getAttribute('value')).to.equal(filterValue);
+    });
   }
 
   /**
@@ -250,16 +257,26 @@ export class ComboBoxService extends FtrService {
     const comboBox = await this.testSubjects.find(comboBoxSelector);
     const $ = await comboBox.parseDomContent();
 
-    // Single selection combo box values are rendered as inputs
-    const inputOption = $('input[aria-invalid="false"]');
+    if (await this.isSingleSelectionPlainText(comboBox)) {
+      const input = $('[data-test-subj="comboBoxSearchInput"]');
+      this.log.debug('Single selection value: ', input.val());
+
+      const isValid = input.attr('aria-invalid') !== 'true';
+
+      if (isValid) {
+        const value = input.val();
+        return value ? [value] : []; // Don't return empty strings
+      } else {
+        this.log.debug(
+          'Single selection value is not valid and thus not selected - returning empty array'
+        );
+        return [];
+      }
+    }
 
     const options = $('.euiComboBoxPill')
       .toArray()
       .map((option) => $(option).text());
-
-    if (inputOption && inputOption.val()) {
-      options.push(inputOption.val());
-    }
 
     return options;
   }
@@ -333,8 +350,8 @@ export class ComboBoxService extends FtrService {
 
     if (!isOptionsListOpen) {
       await this.retry.try(async () => {
-        const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxInput');
-        await toggleBtn.click();
+        const inputWrapper = await this.getComboBoxInputWrapper(comboBoxElement);
+        await inputWrapper.click();
       });
     }
   }
@@ -352,15 +369,14 @@ export class ComboBoxService extends FtrService {
     this.log.debug(`comboBox.isOptionSelected, value: ${value}`);
     const $ = await comboBoxElement.parseDomContent();
 
-    const inputWrapper = $('[data-test-subj="comboBoxInput"]');
-    const input = $('input[role="combobox"]');
+    if (await this.isSingleSelectionPlainText(comboBoxElement)) {
+      const input = $('input[role="combobox"]');
 
-    const hasValidPlainTextValue =
-      inputWrapper.hasClass('euiComboBox__inputWrap--plainText') &&
-      input.attr('aria-invalid') === 'false' &&
-      value.toLowerCase().trim() === input.val().toLowerCase().trim();
-    if (hasValidPlainTextValue) {
-      return true;
+      const hasValidValue =
+        input.attr('aria-invalid') !== 'true' &&
+        value.toLowerCase().trim() === input.val().toLowerCase().trim(); // Normalizing text here for Firefox driver shenanigans
+
+      return !!hasValidValue;
     }
 
     const selectedOptions = $('.euiComboBoxPill')
@@ -399,5 +415,27 @@ export class ComboBoxService extends FtrService {
     const isDisabled = await toggleListButton.getAttribute('disabled');
     this.log.debug(`isDisabled:${isDisabled}`);
     return isDisabled?.toLowerCase() === 'true';
+  }
+
+  /**
+   * Single selection plain text comboboxes do not render pill text, but instead render
+   * selected as well as search values in the child <input>
+   */
+  private async isSingleSelectionPlainText(comboBoxElement: WebElementWrapper): Promise<boolean> {
+    const inputWrapper = await this.getComboBoxInputWrapper(comboBoxElement);
+    return await inputWrapper.elementHasClass('euiComboBox__inputWrap--plainText');
+  }
+
+  /**
+   * Kibana devs sometimes pass in the `comboBoxInput` element and not the parent wrapper 🤷
+   * This util accounts for that and returns the `data-test-subj="comboBoxInput"` element no matter what
+   */
+  private async getComboBoxInputWrapper(
+    comboBoxElement: WebElementWrapper
+  ): Promise<WebElementWrapper> {
+    const isInputWrapper = await comboBoxElement.elementHasClass('euiComboBox__inputWrap');
+    return isInputWrapper
+      ? comboBoxElement
+      : await comboBoxElement.findByTestSubject('comboBoxInput');
   }
 }

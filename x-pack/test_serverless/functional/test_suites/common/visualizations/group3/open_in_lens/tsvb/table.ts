@@ -22,6 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
+  const comboBox = getService('comboBox');
 
   describe('Table', function describeIndexTests() {
     const fixture =
@@ -83,8 +84,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-advanced-accordion');
-      const reducedTimeRange = await testSubjects.find('indexPattern-dimension-reducedTimeRange');
-      expect(await reducedTimeRange.getVisibleText()).to.be('1 minute (1m)');
+      expect(
+        await comboBox.getComboBoxSelectedOptions('indexPattern-dimension-reducedTimeRange')
+      ).to.eql(['1 minute (1m)']);
+
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
         expect(layerCount).to.be(1);
