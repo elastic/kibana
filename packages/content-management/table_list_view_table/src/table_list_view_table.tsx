@@ -289,12 +289,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     );
   }
 
-  if (getDetailViewLink && onClickTitle) {
-    throw new Error(
-      `[TableListView] Either "getDetailViewLink" or "onClickTitle" can be provided. Not both.`
-    );
-  }
-
   if (contentEditor.isReadonly === false && contentEditor.onSave === undefined) {
     throw new Error(
       `[TableListView] A value for [contentEditor.onSave()] must be provided when [contentEditor.isReadonly] is false.`

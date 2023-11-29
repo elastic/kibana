@@ -31,7 +31,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 import {
   createRule,
   deleteAllRules,
@@ -71,7 +71,8 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  describe('@ess @serverless Machine learning type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/171426
+  describe.skip('@ess @serverless Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start

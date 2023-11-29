@@ -33,6 +33,7 @@ export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFac
 }
 
 export interface IFunctionRow {
+  id: string;
   rank: number;
   frame: StackFrameMetadata;
   samples: number;
@@ -106,6 +107,7 @@ export function getFunctionsRows({
         const scaledDiffSamples = scaledSelfCPU - comparisonScaledSelfCPU;
 
         return {
+          id: comparisonRow.Id,
           rank: topN.Rank - comparisonRow.Rank,
           samples: scaledDiffSamples,
           selfCPU: comparisonRow.CountExclusive,
@@ -120,6 +122,7 @@ export function getFunctionsRows({
     }
 
     return {
+      id: topN.Id,
       rank: topN.Rank,
       frame: topN.Frame,
       samples: scaledSelfCPU,

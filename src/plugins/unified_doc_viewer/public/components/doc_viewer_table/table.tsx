@@ -109,6 +109,7 @@ export const DocViewerTable = ({
   columnTypes,
   hit,
   dataView,
+  hideActionsColumn,
   filter,
   onAddColumn,
   onRemoveColumn,
@@ -118,7 +119,6 @@ export const DocViewerTable = ({
   const { fieldFormats, storage, uiSettings } = useUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
-  const isSingleDocView = !filter;
 
   const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
@@ -283,7 +283,7 @@ export const DocViewerTable = ({
   );
 
   const headers = [
-    !isSingleDocView && (
+    !hideActionsColumn && (
       <EuiTableHeaderCell
         key="header-cell-actions"
         align="left"
@@ -332,7 +332,7 @@ export const DocViewerTable = ({
         }: FieldRecord) => {
           return (
             <EuiTableRow key={field} className="kbnDocViewer__tableRow" isSelected={pinned}>
-              {!isSingleDocView && (
+              {!hideActionsColumn && (
                 <EuiTableRowCell
                   key={field + '-actions'}
                   align={showActionsInsideTableCell ? 'left' : 'center'}
@@ -347,7 +347,7 @@ export const DocViewerTable = ({
                     pinned={pinned}
                     fieldMapping={fieldMapping}
                     flattenedField={flattenedField}
-                    onFilter={onFilter!}
+                    onFilter={onFilter}
                     onToggleColumn={onToggleColumn}
                     ignoredValue={!!ignored}
                     onTogglePinned={onTogglePinned}
@@ -392,7 +392,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell, searchText]
+    [hideActionsColumn, showActionsInsideTableCell, onToggleColumn, onTogglePinned, searchText]
   );
 
   const rowElements = [

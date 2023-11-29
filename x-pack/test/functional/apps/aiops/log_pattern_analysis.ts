@@ -36,20 +36,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await ml.testResources.createIndexPatternIfNeeded('logstash-*', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('logstash-*', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('logstash-*');
+      await ml.testResources.deleteDataViewByTitle('logstash-*');
     });
 
     it(`loads the log pattern analysis page and filters in patterns in discover`, async () => {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.logPatternAnalysisPage.navigateToIndexPatternSelection();
+      await aiops.logPatternAnalysisPage.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForLogPatternAnalysisDetection('logstash-*');
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
 
@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.logPatternAnalysisPage.navigateToIndexPatternSelection();
+      await aiops.logPatternAnalysisPage.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForLogPatternAnalysisDetection('logstash-*');
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
 

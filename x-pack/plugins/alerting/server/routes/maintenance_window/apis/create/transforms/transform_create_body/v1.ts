@@ -16,5 +16,6 @@ export const transformCreateBody = (
     duration: createBody.duration,
     rRule: createBody.r_rule,
     categoryIds: createBody.category_ids,
+    scopedQuery: createBody.scoped_query,
   };
 };
