@@ -15,7 +15,6 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -71,9 +70,6 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
   return (
     <EuiPanel color="subdued">
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="check" />
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
