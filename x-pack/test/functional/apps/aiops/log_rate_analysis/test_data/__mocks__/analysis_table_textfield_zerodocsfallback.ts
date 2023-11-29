@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const analysisTableTextfieldGaps = [
+export const analysisTableTextfieldZerodocsfallback = [
   {
     fieldName: 'message',
     fieldValue: 'Paul [11/19/2022, 9:00:34 AM] "GET /home.php HTTP/1.1" 200',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const analysisTableNotextfieldNogaps = [
+export const analysisTable = [
   {
     fieldName: 'url',
     fieldValue: 'home.php',

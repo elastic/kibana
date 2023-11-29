@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const analysisGroupsTableNotextfieldGaps = [
+export const analysisGroupsTableZerodocsfallback = [
   { group: 'response_code: 500url: home.phpuser: Maryversion: v1.0.0', docCount: '47' },
   { group: 'response_code: 500url: home.phpuser: Paulversion: v1.0.0', docCount: '59' },
   { group: 'response_code: 500url: login.phpuser: Maryversion: v1.0.0', docCount: '35' },

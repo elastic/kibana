@@ -21,41 +21,41 @@ export const logRateAnalysisTestData: TestData[] = [
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: false,
-    gaps: false,
+    zeroDocsFallback: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: true,
-    gaps: false,
+    zeroDocsFallback: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: false,
-    gaps: false,
+    zeroDocsFallback: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: true,
-    gaps: false,
+    zeroDocsFallback: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: true,
-    gaps: true,
+    zeroDocsFallback: true,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: false,
-    gaps: true,
+    zeroDocsFallback: true,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: true,
-    gaps: true,
+    zeroDocsFallback: true,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: false,
-    gaps: true,
+    zeroDocsFallback: true,
   }),
 ];

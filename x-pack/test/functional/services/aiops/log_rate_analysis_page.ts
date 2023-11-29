@@ -248,7 +248,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       dataGenerator: LogRateAnalysisDataGenerator
     ) {
       const dataGeneratorParts = dataGenerator.split('_');
-      const includeGaps = dataGeneratorParts[5] === 'gaps';
+      const zeroDocsFallback = dataGeneratorParts.includes('zerodocsfallback');
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail('aiopsAnalysisComplete');
         const currentProgressTitle = await testSubjects.getVisibleText('aiopsAnalysisComplete');
@@ -259,11 +259,11 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
           'aiopsAnalysisTypeCalloutTitle'
         );
 
-        if (includeGaps && analysisType === 'spike') {
+        if (zeroDocsFallback && analysisType === 'spike') {
           expect(currentAnalysisTypeCalloutTitle).to.be(
             'Analysis type: Top items for deviation time range'
           );
-        } else if (includeGaps && analysisType === 'dip') {
+        } else if (zeroDocsFallback && analysisType === 'dip') {
           expect(currentAnalysisTypeCalloutTitle).to.be(
             'Analysis type: Top items for baseline time range'
           );

@@ -11,18 +11,18 @@ import type { TestData } from '../../types';
 
 import type { LogRateAnalysisDataGenerator } from '../../../../services/aiops/log_rate_analysis_data_generator';
 
-import { analysisGroupsTableTextfieldGaps } from './__mocks__/analysis_groups_table_textfield_gaps';
-import { analysisGroupsTableNotextfieldGaps } from './__mocks__/analysis_groups_table_notextfield_gaps';
-import { analysisGroupsTableTextfieldNogaps } from './__mocks__/analysis_groups_table_textfield_nogaps';
-import { analysisGroupsTableNotextfieldNogaps } from './__mocks__/analysis_groups_table_notextfield_nogaps';
-import { filteredAnalysisGroupsTableTextfieldGaps } from './__mocks__/filtered_analysis_groups_table_textfield_gaps';
-import { filteredAnalysisGroupsTableNotextfieldGaps } from './__mocks__/filtered_analysis_groups_table_notextfield_gaps';
-import { filteredAnalysisGroupsTableTextfieldNogaps } from './__mocks__/filtered_analysis_groups_table_textfield_nogaps';
-import { filteredAnalysisGroupsTableNotextfieldNogaps } from './__mocks__/filtered_analysis_groups_table_notextfield_nogaps';
-import { analysisTableTextfieldGaps } from './__mocks__/analysis_table_textfield_gaps';
-import { analysisTableNotextfieldGaps } from './__mocks__/analysis_table_notextfield_gaps';
-import { analysisTableTextfieldNogaps } from './__mocks__/analysis_table_textfield_nogaps';
-import { analysisTableNotextfieldNogaps } from './__mocks__/analysis_table_notextfield_nogaps';
+import { analysisGroupsTableTextfieldZerodocsfallback } from './__mocks__/analysis_groups_table_textfield_zerodocsfallback';
+import { analysisGroupsTableZerodocsfallback } from './__mocks__/analysis_groups_table_zerodocsfallback';
+import { analysisGroupsTableTextfield } from './__mocks__/analysis_groups_table_textfield';
+import { analysisGroupsTable } from './__mocks__/analysis_groups_table';
+import { filteredAnalysisGroupsTableTextfieldZerodocsfallback } from './__mocks__/filtered_analysis_groups_table_textfield_zerodocsfallback';
+import { filteredAnalysisGroupsTableZerodocsfallback } from './__mocks__/filtered_analysis_groups_table_zerodocsfallback';
+import { filteredAnalysisGroupsTableTextfield } from './__mocks__/filtered_analysis_groups_table_textfield';
+import { filteredAnalysisGroupsTable } from './__mocks__/filtered_analysis_groups_table';
+import { analysisTableTextfieldZerodocsfallback } from './__mocks__/analysis_table_textfield_zerodocsfallback';
+import { analysisTableZerodocsfallback } from './__mocks__/analysis_table_zerodocsfallback';
+import { analysisTableTextfield } from './__mocks__/analysis_table_textfield';
+import { analysisTable } from './__mocks__/analysis_table';
 
 const REFERENCE_TS = 1669018354793;
 const DAY_MS = 86400000;
@@ -33,43 +33,43 @@ const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 interface GetArtificialLogDataViewTestDataOptions {
   analysisType: LogRateAnalysisType;
   textField: boolean;
-  gaps: boolean;
+  zeroDocsFallback: boolean;
 }
 
 export const getArtificialLogDataViewTestData = ({
   analysisType,
   textField,
-  gaps,
+  zeroDocsFallback,
 }: GetArtificialLogDataViewTestDataOptions): TestData => {
   function getAnalysisGroupsTable() {
-    if (gaps) {
-      return textField ? analysisGroupsTableTextfieldGaps : analysisGroupsTableNotextfieldGaps;
+    if (zeroDocsFallback) {
+      return textField
+        ? analysisGroupsTableTextfieldZerodocsfallback
+        : analysisGroupsTableZerodocsfallback;
     }
-    return textField ? analysisGroupsTableTextfieldNogaps : analysisGroupsTableNotextfieldNogaps;
+    return textField ? analysisGroupsTableTextfield : analysisGroupsTable;
   }
 
   function getFilteredAnalysisGroupsTable() {
-    if (gaps) {
+    if (zeroDocsFallback) {
       return textField
-        ? filteredAnalysisGroupsTableTextfieldGaps
-        : filteredAnalysisGroupsTableNotextfieldGaps;
+        ? filteredAnalysisGroupsTableTextfieldZerodocsfallback
+        : filteredAnalysisGroupsTableZerodocsfallback;
     }
 
-    return textField
-      ? filteredAnalysisGroupsTableTextfieldNogaps
-      : filteredAnalysisGroupsTableNotextfieldNogaps;
+    return textField ? filteredAnalysisGroupsTableTextfield : filteredAnalysisGroupsTable;
   }
 
   function getAnalysisTable() {
-    if (gaps) {
-      return textField ? analysisTableTextfieldGaps : analysisTableNotextfieldGaps;
+    if (zeroDocsFallback) {
+      return textField ? analysisTableTextfieldZerodocsfallback : analysisTableZerodocsfallback;
     }
 
-    return textField ? analysisTableTextfieldNogaps : analysisTableNotextfieldNogaps;
+    return textField ? analysisTableTextfield : analysisTable;
   }
 
   function getFieldSelectorPopover() {
-    if (gaps) {
+    if (zeroDocsFallback) {
       return [...(textField ? ['message'] : []), 'response_code', 'url', 'user', 'version'];
     }
     return [...(textField ? ['message'] : []), 'response_code', 'url', 'user'];
@@ -78,29 +78,29 @@ export const getArtificialLogDataViewTestData = ({
   function getSuiteTitle() {
     return `artificial logs with ${analysisType} and ${
       textField ? 'text field' : 'no text field'
-    } and ${gaps ? 'gaps' : 'no gaps'}`;
+    } and ${zeroDocsFallback ? 'zero docs fallback' : 'no zero docs fallback'}`;
   }
 
   function getDataGenerator(): LogRateAnalysisDataGenerator {
-    return `artificial_logs_with_${analysisType}_${textField ? 'textfield' : 'notextfield'}_${
-      gaps ? 'gaps' : 'nogaps'
+    return `artificial_logs_with_${analysisType}${textField ? '_textfield' : ''}${
+      zeroDocsFallback ? '_zerodocsfallback' : ''
     }`;
   }
 
   function getBrushBaselineTargetTimestamp() {
-    if (analysisType === 'dip' && gaps) {
+    if (analysisType === 'dip' && zeroDocsFallback) {
       return DEVIATION_TS;
     }
 
-    return gaps ? BASELINE_TS - DAY_MS / 2 : BASELINE_TS + DAY_MS / 2;
+    return zeroDocsFallback ? BASELINE_TS - DAY_MS / 2 : BASELINE_TS + DAY_MS / 2;
   }
 
   function getBrushDeviationTargetTimestamp() {
-    if (analysisType === 'dip' && gaps) {
+    if (analysisType === 'dip' && zeroDocsFallback) {
       return DEVIATION_TS + DAY_MS * 1.5;
     }
 
-    return gaps ? DEVIATION_TS : DEVIATION_TS + DAY_MS / 2;
+    return zeroDocsFallback ? DEVIATION_TS : DEVIATION_TS + DAY_MS / 2;
   }
 
   return {
@@ -111,12 +111,12 @@ export const getArtificialLogDataViewTestData = ({
     sourceIndexOrSavedSearch: getDataGenerator(),
     brushBaselineTargetTimestamp: getBrushBaselineTargetTimestamp(),
     brushDeviationTargetTimestamp: getBrushDeviationTargetTimestamp(),
-    brushIntervalFactor: gaps ? 1 : 10,
+    brushIntervalFactor: zeroDocsFallback ? 1 : 10,
     chartClickCoordinates: [-200, 30],
     fieldSelectorSearch: 'user',
     fieldSelectorApplyAvailable: true,
     expected: {
-      totalDocCountFormatted: gaps ? '9,482' : '8,400',
+      totalDocCountFormatted: zeroDocsFallback ? '9,482' : '8,400',
       analysisGroupsTable: getAnalysisGroupsTable(),
       filteredAnalysisGroupsTable: getFilteredAnalysisGroupsTable(),
       analysisTable: getAnalysisTable(),

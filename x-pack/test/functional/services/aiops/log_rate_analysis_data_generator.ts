@@ -14,14 +14,16 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
   FAREQUOTE_WITH_SPIKE: 'farequote_with_spike',
-  ARTIFICIAL_LOGS_WITH_SPIKE_NOTEXTFIELD_GAPS: 'artificial_logs_with_spike_notextfield_gaps',
-  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD_GAPS: 'artificial_logs_with_spike_textfield_gaps',
-  ARTIFICIAL_LOGS_WITH_DIP_NOTEXTFIELD_GAPS: 'artificial_logs_with_dip_notextfield_gaps',
-  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD_GAPS: 'artificial_logs_with_dip_textfield_gaps',
-  ARTIFICIAL_LOGS_WITH_SPIKE_NOTEXTFIELD_NOGAPS: 'artificial_logs_with_spike_notextfield_nogaps',
-  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD_NOGAPS: 'artificial_logs_with_spike_textfield_nogaps',
-  ARTIFICIAL_LOGS_WITH_DIP_NOTEXTFIELD_NOGAPS: 'artificial_logs_with_dip_notextfield_nogaps',
-  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD_NOGAPS: 'artificial_logs_with_dip_textfield_nogaps',
+  ARTIFICIAL_LOGS_WITH_SPIKE_ZERODOCSFALLBACK: 'artificial_logs_with_spike_zerodocsfallback',
+  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD_ZERODOCSFALLBACK:
+    'artificial_logs_with_spike_textfield_zerodocsfallback',
+  ARTIFICIAL_LOGS_WITH_DIP_ZERODOCSFALLBACK: 'artificial_logs_with_dip_zerodocsfallback',
+  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD_ZERODOCSFALLBACK:
+    'artificial_logs_with_dip_textfield_zerodocsfallback',
+  ARTIFICIAL_LOGS_WITH_SPIKE: 'artificial_logs_with_spike',
+  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD: 'artificial_logs_with_spike_textfield',
+  ARTIFICIAL_LOGS_WITH_DIP: 'artificial_logs_with_dip',
+  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
 } as const;
 export type LogRateAnalysisDataGenerator =
   typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
@@ -257,14 +259,14 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
           break;
 
-        case 'artificial_logs_with_spike_notextfield_nogaps':
-        case 'artificial_logs_with_spike_textfield_nogaps':
-        case 'artificial_logs_with_dip_notextfield_nogaps':
-        case 'artificial_logs_with_dip_textfield_nogaps':
-        case 'artificial_logs_with_spike_notextfield_gaps':
-        case 'artificial_logs_with_spike_textfield_gaps':
-        case 'artificial_logs_with_dip_notextfield_gaps':
-        case 'artificial_logs_with_dip_textfield_gaps':
+        case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_spike_textfield':
+        case 'artificial_logs_with_dip':
+        case 'artificial_logs_with_dip_textfield':
+        case 'artificial_logs_with_spike_zerodocsfallback':
+        case 'artificial_logs_with_spike_textfield_zerodocsfallback':
+        case 'artificial_logs_with_dip_zerodocsfallback':
+        case 'artificial_logs_with_dip_textfield_zerodocsfallback':
           try {
             const indexExists = await es.indices.exists({
               index: dataGenerator,
@@ -295,17 +297,26 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
 
           const dataGeneratorOptions = dataGenerator.split('_');
-          let deviationType = dataGeneratorOptions[3] ?? LOG_RATE_ANALYSIS_TYPE.SPIKE;
-          const textField = dataGeneratorOptions[4] === 'textfield' ?? false;
-          const gaps = dataGeneratorOptions[5] === 'gaps' ?? false;
 
-          if (gaps) {
+          let deviationType = dataGeneratorOptions.includes(LOG_RATE_ANALYSIS_TYPE.SPIKE)
+            ? LOG_RATE_ANALYSIS_TYPE.SPIKE
+            : LOG_RATE_ANALYSIS_TYPE.DIP;
+
+          const textField = dataGeneratorOptions.includes('textfield');
+          const zeroDocsFallback = dataGeneratorOptions.includes('zerodocsfallback');
+
+          if (zeroDocsFallback) {
             deviationType = LOG_RATE_ANALYSIS_TYPE.SPIKE;
           }
 
           await es.bulk({
             refresh: 'wait_for',
-            body: getArtificialLogsWithDeviation(dataGenerator, deviationType, textField, gaps),
+            body: getArtificialLogsWithDeviation(
+              dataGenerator,
+              deviationType,
+              textField,
+              zeroDocsFallback
+            ),
           });
           break;
 
@@ -324,14 +335,14 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
           break;
 
-        case 'artificial_logs_with_spike_notextfield_nogaps':
-        case 'artificial_logs_with_spike_textfield_nogaps':
-        case 'artificial_logs_with_dip_notextfield_nogaps':
-        case 'artificial_logs_with_dip_textfield_nogaps':
-        case 'artificial_logs_with_spike_notextfield_gaps':
-        case 'artificial_logs_with_spike_textfield_gaps':
-        case 'artificial_logs_with_dip_notextfield_gaps':
-        case 'artificial_logs_with_dip_textfield_gaps':
+        case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_spike_textfield':
+        case 'artificial_logs_with_dip':
+        case 'artificial_logs_with_dip_textfield':
+        case 'artificial_logs_with_spike_zerodocsfallback':
+        case 'artificial_logs_with_spike_textfield_zerodocsfallback':
+        case 'artificial_logs_with_dip_zerodocsfallback':
+        case 'artificial_logs_with_dip_textfield_zerodocsfallback':
           try {
             await es.indices.delete({
               index: dataGenerator,

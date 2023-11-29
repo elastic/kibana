@@ -5,33 +5,26 @@
  * 2.0.
  */
 
-export const analysisTableNotextfieldGaps = [
+export const analysisTableTextfield = [
+  {
+    fieldName: 'message',
+    fieldValue: 'an unexpected error occured',
+    logRate: 'Chart type:bar chart',
+    pValue: '0.00000100',
+    impact: 'Medium',
+  },
   {
     fieldName: 'response_code',
     fieldValue: '500',
     logRate: 'Chart type:bar chart',
-    pValue: '1.00',
-    impact: '',
+    pValue: '3.61e-12',
+    impact: 'High',
   },
   {
     fieldName: 'url',
     fieldValue: 'home.php',
+    impact: 'Low',
     logRate: 'Chart type:bar chart',
-    pValue: '1.00',
-    impact: '',
-  },
-  {
-    fieldName: 'user',
-    fieldValue: 'Paul',
-    logRate: 'Chart type:bar chart',
-    pValue: '1.00',
-    impact: '',
-  },
-  {
-    fieldName: 'version',
-    fieldValue: 'v1.0.0',
-    logRate: 'Chart type:bar chart',
-    pValue: '1.00',
-    impact: '',
+    pValue: '0.00974',
   },
 ];

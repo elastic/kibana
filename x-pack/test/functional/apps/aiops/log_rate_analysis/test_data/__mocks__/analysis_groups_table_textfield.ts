@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export const analysisGroupsTableNotextfieldNogaps = [
+export const analysisGroupsTableTextfield = [
   {
-    group: 'response_code: 500url: home.php',
-    docCount: '792',
+    group: 'message: an unexpected error occuredurl: home.phpresponse_code: 500',
+    docCount: '634',
   },
   {
-    group: 'url: login.phpresponse_code: 500',
-    docCount: '790',
+    group: 'message: an unexpected error occuredurl: login.phpresponse_code: 500',
+    docCount: '632',
   },
   {
     docCount: '636',

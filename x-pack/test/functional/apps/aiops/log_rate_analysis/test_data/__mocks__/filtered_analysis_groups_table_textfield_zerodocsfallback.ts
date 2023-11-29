@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const filteredAnalysisGroupsTableTextfieldGaps = [
+export const filteredAnalysisGroupsTableTextfieldZerodocsfallback = [
   {
     group: 'message: an unexpected error occuredurl: home.phpresponse_code: 500version: v1.0.0',
     docCount: '58',

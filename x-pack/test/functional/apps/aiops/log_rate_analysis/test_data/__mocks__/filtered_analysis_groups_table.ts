@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const filteredAnalysisGroupsTableNotextfieldNogaps = [
+export const filteredAnalysisGroupsTable = [
   { group: '* url: home.phpresponse_code: 500', docCount: '792' },
   { group: '* url: login.phpresponse_code: 500', docCount: '790' },
 ];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const filteredAnalysisGroupsTableTextfieldNogaps = [
+export const filteredAnalysisGroupsTableTextfield = [
   {
     group: '* url: home.phpmessage: an unexpected error occuredresponse_code: 500',
     docCount: '634',
