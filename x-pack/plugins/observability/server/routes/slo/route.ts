@@ -125,7 +125,19 @@ const updateSLORoute = createObservabilityServerRoute({
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const updateSLO = new UpdateSLO(repository, transformManager, esClient);
+    const summaryTransformManager = new DefaultSummaryTransformManager(
+      new DefaultSummaryTransformGenerator(),
+      esClient,
+      logger
+    );
+
+    const updateSLO = new UpdateSLO(
+      repository,
+      transformManager,
+      summaryTransformManager,
+      esClient,
+      logger
+    );
 
     const response = await updateSLO.execute(params.path.id, params.body);
 
