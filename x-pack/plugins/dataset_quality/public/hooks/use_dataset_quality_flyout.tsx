@@ -16,8 +16,8 @@ export const useDatasetQualityFlyout = ({ datasetQuery }: GetDataStreamsStatsQue
   } = useKibanaContextForPlugin();
   const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
   const { data = [], loading } = useFetcher(
-    async () => client.getDataStreamsStats({ datasetQuery }),
-    []
+    async () => client.getDataStreamsStats({ datasetQuery, type: 'logs' }),
+    [datasetQuery]
   );
 
   return { dataStreamStat: data[0], loading, fieldFormats };
