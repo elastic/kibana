@@ -30,7 +30,9 @@ export const EmptyState = ({
         && > .euiEmptyPrompt__main {
           gap: ${euiTheme.size.xl};
         }
-        margin-top: ${euiTheme.size.xxxl}};
+        && {
+          margin-top: ${euiTheme.size.xxxl}};
+        }
       `}
       data-test-subj={EMPTY_STATE_TEST_SUBJ}
       icon={
