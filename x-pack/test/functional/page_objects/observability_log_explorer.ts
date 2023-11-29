@@ -127,13 +127,6 @@ export function ObservabilityLogExplorerPageObject({
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
-  type NavigateToAppOptions = Omit<
-    Parameters<typeof PageObjects['common']['navigateToApp']>[1],
-    'search'
-  > & {
-    pageState?: urlSchemaV1.UrlSchema;
-  };
-
   return {
     uninstallPackage: ({ name, version }: IntegrationPackage) => {
       return supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -216,9 +209,11 @@ export function ObservabilityLogExplorerPageObject({
       };
     },
 
-    async navigateTo(options: NavigateToAppOptions = {}) {
-      const { pageState, ...extraOptions } = options;
-
+    async navigateTo({
+      pageState,
+    }: {
+      pageState?: urlSchemaV1.UrlSchema;
+    } = {}) {
       const queryStringParams = querystring.stringify({
         [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: rison.encode(
           urlSchemaV1.urlSchemaRT.encode({
