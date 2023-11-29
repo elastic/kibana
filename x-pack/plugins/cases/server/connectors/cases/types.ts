@@ -55,17 +55,15 @@ export interface OracleRecordCreateRequest {
 
 export type BulkGetOracleRecordsResponse = Array<OracleRecord | SavedObjectError>;
 
+export type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
+
 export type BulkCreateOracleRecordRequest = Array<{
   recordId: string;
   payload: OracleRecordCreateRequest;
 }>;
 
-export type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
-
-export interface OracleRecordUpsertRequest {
+export type BulkUpdateOracleRecordRequest = Array<{
   recordId: string;
-  updateDatePayload: OracleRecordAttributes & { version: string };
-  createPayload: OracleRecordCreateRequest;
-}
-
-export type BulkUpsertOracleRecordRequest = OracleRecordUpsertRequest[];
+  version: string;
+  payload: Pick<OracleRecordAttributes, 'counter'>;
+}>;

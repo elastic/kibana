@@ -11,7 +11,7 @@ import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } fr
 export const isRecordError = (so: OracleRecord | OracleRecordError): so is OracleRecordError =>
   (so as OracleRecordError).error != null;
 
-export const partitionRecords = (
+export const partitionRecordsByError = (
   res: BulkGetOracleRecordsResponse
 ): [OracleRecord[], OracleRecordError[]] => {
   const [errors, validRecords] = partition(res, isRecordError) as [

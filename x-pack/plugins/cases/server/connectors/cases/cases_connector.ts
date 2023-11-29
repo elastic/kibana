@@ -6,16 +6,17 @@
  */
 
 import stringify from 'json-stable-stringify';
+import pMap from 'p-map';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
-import { pick } from 'lodash';
+import { partition, pick } from 'lodash';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core/server';
-import pMap from 'p-map';
+import dateMath from '@kbn/datemath';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
-import { CASES_CONNECTOR_SUB_ACTION, MAX_CONCURRENT_REQUEST_ATTACH_ALERTS } from './constants';
+import { CASES_CONNECTOR_SUB_ACTION, MAX_CONCURRENT_ES_REQUEST } from './constants';
 import type {
   BulkCreateOracleRecordRequest,
   CasesConnectorConfig,
@@ -26,7 +27,7 @@ import type {
 } from './types';
 import { CasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
-import { partitionRecords } from './utils';
+import { partitionRecordsByError } from './utils';
 import { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
@@ -107,7 +108,8 @@ export class CasesConnector extends SubActionConnector<
     /**
      * Add circuit breakers to the number of oracles they can be created or retrieved
      */
-    const oracleRecords = await this.bulkGetOrCreateOracleRecords(
+    const oracleRecords = await this.upsertOracleRecords(
+      params,
       Array.from(groupedAlertsWithOracleKey.values())
     );
 
@@ -182,17 +184,24 @@ export class CasesConnector extends SubActionConnector<
     return oracleMap;
   }
 
-  private async bulkGetOrCreateOracleRecords(
+  private async upsertOracleRecords(
+    params: CasesConnectorRunParams,
     groupedAlertsWithOracleKey: GroupedAlertsWithOracleKey[]
   ): Promise<OracleRecord[]> {
+    const { timeWindow } = params;
     const bulkCreateReq: BulkCreateOracleRecordRequest = [];
 
     const ids = groupedAlertsWithOracleKey.map(({ oracleKey }) => oracleKey);
 
     const bulkGetRes = await this.casesOracleService.bulkGetRecords(ids);
-    const [bulkGetValidRecords, bulkGetRecordsErrors] = partitionRecords(bulkGetRes);
+    const [bulkGetValidRecords, bulkGetRecordsErrors] = partitionRecordsByError(bulkGetRes);
 
-    if (bulkGetRecordsErrors.length === 0) {
+    const [recordsToIncreaseCounter, recordsWithoutIncreasedCounter] = partition(
+      bulkGetValidRecords,
+      (req) => this.isTimeWindowPassed(timeWindow, req.updatedAt ?? req.createdAt)
+    );
+
+    if (bulkGetRecordsErrors.length === 0 && recordsToIncreaseCounter.length === 0) {
       return bulkGetValidRecords;
     }
 
@@ -218,14 +227,55 @@ export class CasesConnector extends SubActionConnector<
       }
     }
 
+    const bulkUpdateReq = recordsToIncreaseCounter.map((record) => ({
+      recordId: record.id,
+      version: record.version,
+      /**
+       * TODO: Add new cases or any other related info
+       */
+      payload: { counter: record.counter + 1 },
+    }));
+
     const bulkCreateRes = await this.casesOracleService.bulkCreateRecord(bulkCreateReq);
+    const bulkUpdateRes = await this.casesOracleService.bulkUpdateRecord(bulkUpdateReq);
 
     /**
      * TODO: Throw/Retry on errors
      */
-    const [bulkCreateValidRecords, _] = partitionRecords(bulkCreateRes);
+    const [bulkCreateValidRecords, _bulkCreateErrors] = partitionRecordsByError(bulkCreateRes);
+    const [bulkUpdateValidRecords, _bulkUpdateErrors] = partitionRecordsByError(bulkUpdateRes);
 
-    return [...bulkGetValidRecords, ...bulkCreateValidRecords];
+    /**
+     * TODO: Should we check if the records in the
+     * arrays are unique?
+     */
+    return [
+      ...recordsWithoutIncreasedCounter,
+      ...bulkCreateValidRecords,
+      ...bulkUpdateValidRecords,
+    ];
+  }
+
+  private isTimeWindowPassed(timeWindow: string, counterLastUpdatedAt: string) {
+    const parsedDate = dateMath.parse(`now-${timeWindow}`);
+
+    /**
+     * TODO: Should we throw?
+     */
+    if (!parsedDate || !parsedDate.isValid()) {
+      return false;
+    }
+
+    const counterLastUpdatedAtAsDate = new Date(counterLastUpdatedAt);
+
+    /**
+     * TODO: Should we throw?
+     */
+    if (isNaN(counterLastUpdatedAtAsDate.getTime())) {
+      return false;
+    }
+
+    return counterLastUpdatedAtAsDate < parsedDate.toDate();
   }
 
   private generateCaseIds(
@@ -392,7 +442,7 @@ export class CasesConnector extends SubActionConnector<
       bulkCreateAlertsRequest,
       (req: BulkCreateAlertsReq) => casesClient.attachments.bulkCreate(req),
       {
-        concurrency: MAX_CONCURRENT_REQUEST_ATTACH_ALERTS,
+        concurrency: MAX_CONCURRENT_ES_REQUEST,
       }
     );
   }
