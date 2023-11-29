@@ -112,6 +112,16 @@ async function executeClaimAvailableTasks(
   const docs =
     tasksUpdated > 0 ? await sweepForClaimedTasks(taskStore, taskTypes, size, definitions) : [];
 
+  if (docs.length > 0) {
+    console.log(
+      `Claimed the following tasks in order: ${JSON.stringify(
+        docs.map((a) => `${a.taskType} => ${a.id}`),
+        null,
+        2
+      )}`
+    );
+  }
+
   emitEvents(
     events$,
     docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc)))

@@ -154,6 +154,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
+                // TODO - provide currentTimeOverride so kibana.alert.start gets set correctly
+                // for backfill runs. This will also set kibana.alert.last_detected to the historical
+                // time...is that what we want?
                 const augmentedAlerts = augmentAlerts({
                   alerts: enrichedAlerts,
                   options,

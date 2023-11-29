@@ -6,9 +6,9 @@
  */
 
 import pMap from 'p-map';
-import { flatten } from 'lodash';
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { SavedObjectsFindResult } from '@kbn/core/server';
 import { RuleAttributes } from '../../../../../data/rule/types';
 import { findRulesSo } from '../../../../../data/rule';
 import {
@@ -126,7 +126,7 @@ export async function scheduleBackfill(
       }
     );
 
-  const scheduleResponses = [];
+  let rulesToSchedule: Array<SavedObjectsFindResult<RuleAttributes>> = [];
   for await (const response of rulesFinder.find()) {
     const anyDisabledRules = response.saved_objects.filter(({ attributes }) => !attributes.enabled);
     if (anyDisabledRules.length > 0) {
@@ -136,24 +136,25 @@ export async function scheduleBackfill(
           .join(',')}] - rule is disabled`
       );
     }
-    const scheduleResponse = await context.backfillClient.bulkQueue({
-      unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
-      ruleTypeRegistry: context.ruleTypeRegistry,
-      rules: response.saved_objects.map(({ id, attributes, references }) => {
-        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-        return transformRuleAttributesToRuleDomain(attributes as RuleAttributes, {
-          id,
-          logger: context.logger,
-          ruleType,
-          references,
-          omitGeneratedValues: false,
-        });
-      }),
-      spaceId: context.spaceId,
-      options,
-    });
-    scheduleResponses.push([...scheduleResponse]);
+    rulesToSchedule = [...response.saved_objects];
   }
 
-  return flatten(scheduleResponses);
+  const scheduleResponses = await context.backfillClient.bulkQueue({
+    unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+    ruleTypeRegistry: context.ruleTypeRegistry,
+    rules: rulesToSchedule.map(({ id, attributes, references }) => {
+      const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+      return transformRuleAttributesToRuleDomain(attributes as RuleAttributes, {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      });
+    }),
+    spaceId: context.spaceId,
+    options,
+  });
+
+  return scheduleResponses;
 }

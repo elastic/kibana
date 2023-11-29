@@ -49,6 +49,7 @@ interface ConstructorOpts {
 
 export interface AdHocRuleTaskRunResult {
   state: {};
+  runAt?: Date;
 }
 
 interface RunRuleParams {
@@ -111,7 +112,7 @@ export class AdHocTaskRunner {
     ruleRunParams,
     validatedParams: params,
   }: RunRuleParams): Promise<void> {
-    const { rule, duration, start } = ruleRunParams;
+    const { rule, duration, currentStart, end } = ruleRunParams;
     const {
       params: { ruleId, spaceId },
     } = this.taskInstance;
@@ -196,7 +197,16 @@ export class AdHocTaskRunner {
       },
     });
 
-    const nowDate = new Date(new Date(start).valueOf() + parseDuration(duration));
+    const nowDate = new Date(new Date(currentStart).valueOf() + parseDuration(duration));
+    const calculatedTimeRange = getTimeRange({
+      logger: this.logger,
+      nowDate: nowDate.toISOString(),
+      window: duration,
+    });
+
+    if (end && new Date(calculatedTimeRange.dateEnd).valueOf() > new Date(end).valueOf()) {
+      calculatedTimeRange.dateEnd = end;
+    }
 
     await this.ruleRunner.run({
       alertingEventLogger: this.alertingEventLogger,
@@ -204,16 +214,14 @@ export class AdHocTaskRunner {
       executionId: this.executionId,
       executorServices: {
         ...services,
-        getTimeRangeFn: () =>
-          getTimeRange({
-            logger: this.logger,
-            nowDate: nowDate.toISOString(),
-            window: duration,
-          }),
+        getTimeRangeFn: () => ({
+          dateStart: calculatedTimeRange.dateStart,
+          dateEnd: calculatedTimeRange.dateEnd,
+        }),
       },
       fakeRequest,
       rule: {
-        id: ruleId,
+        id: rule.id,
         name: rule.name,
         tags: rule.tags,
         consumer: rule.consumer,
@@ -241,6 +249,7 @@ export class AdHocTaskRunner {
   }
 
   public async loadIndirectParams(): Promise<AdHocRuleRunParamResult<AdHocRuleRunData>> {
+    // Used by task manager to validate ad hoc params before running
     try {
       const {
         params: { adHocRuleRunParamsId, spaceId },
@@ -336,7 +345,7 @@ export class AdHocTaskRunner {
       }
     }
 
-    return { state: {} };
+    return { state: {}, ...(this.shouldDeleteTask ? {} : { runAt: new Date() }) };
 
     // Other options
     // If we want to always use the latest changes to the rule, we could

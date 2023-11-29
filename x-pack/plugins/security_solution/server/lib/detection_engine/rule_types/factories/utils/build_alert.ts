@@ -42,6 +42,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { isString } from 'lodash';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
@@ -151,6 +152,7 @@ export const buildAlert = (
   }
 ): BaseFieldsLatest => {
   const parents = docs.map(buildParent);
+
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce(
     (acc: AncestorLatest[], doc) => acc.concat(buildAncestors(doc)),
@@ -186,6 +188,8 @@ export const buildAlert = (
     primaryTimestamp: TIMESTAMP,
   });
 
+  // if we don't set an alertTimestampOverride, Date.now() will be set for alert timestamp,
+  // otherwise we can set an override for the backfill startedAt date
   const timestamp = alertTimestampOverride?.toISOString() ?? new Date().toISOString();
 
   const alertUrl = getAlertDetailsUrl({
@@ -213,7 +217,7 @@ export const buildAlert = (
     [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
     [ALERT_RULE_ACTIONS]: actions.map(transformAlertToRuleAction),
     [ALERT_RULE_AUTHOR]: params.author,
-    [ALERT_RULE_CREATED_AT]: createdAt.toISOString(),
+    [ALERT_RULE_CREATED_AT]: isString(createdAt) ? createdAt : createdAt.toISOString(),
     [ALERT_RULE_CREATED_BY]: createdBy ?? '',
     [ALERT_RULE_DESCRIPTION]: params.description,
     [ALERT_RULE_ENABLED]: enabled,
@@ -241,7 +245,7 @@ export const buildAlert = (
     [ALERT_RULE_TIMESTAMP_OVERRIDE]: params.timestampOverride,
     [ALERT_RULE_TO]: params.to,
     [ALERT_RULE_TYPE]: params.type,
-    [ALERT_RULE_UPDATED_AT]: updatedAt.toISOString(),
+    [ALERT_RULE_UPDATED_AT]: isString(updatedAt) ? updatedAt : updatedAt.toISOString(),
     [ALERT_RULE_UPDATED_BY]: updatedBy ?? '',
     [ALERT_RULE_UUID]: completeRule.alertId,
     [ALERT_RULE_VERSION]: params.version,

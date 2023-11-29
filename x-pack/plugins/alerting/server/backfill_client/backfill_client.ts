@@ -110,7 +110,7 @@ export class BackfillClient {
             so.attributes.rule.alertTypeId
           ).ruleTaskTimeout;
           return {
-            id: this.backfillTaskType,
+            id: so.id,
             taskType: this.backfillTaskType,
             ...(ruleTypeTimeout ? { timeoutOverride: ruleTypeTimeout } : {}),
             state: {},

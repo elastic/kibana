@@ -165,6 +165,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       }
 
       opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
+      opts.logger.info(`results for query - ${JSON.stringify(result)}`);
       return result;
     } catch (e) {
       if (opts.abortController.signal.aborted) {
