@@ -167,7 +167,7 @@ export class InternalFileService {
     const { total, files } = await this.metadataClient.find(args);
     return {
       total,
-      files: files.map(({ id, metadata, namespaces }) => toJSON(id, metadata, namespaces)),
+      files: files.map(({ id, metadata }) => toJSON(id, metadata)),
     };
   }
 

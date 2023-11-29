@@ -58,7 +58,6 @@ export const App: FunctionComponent = () => {
               hits: files.map((file) => ({
                 id: file.id,
                 updatedAt: file.updated,
-                namespaces: file.namespaces ?? [],
                 references: [],
                 type: 'file',
                 attributes: {

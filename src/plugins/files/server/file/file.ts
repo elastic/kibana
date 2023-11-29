@@ -42,8 +42,7 @@ export class File<M = unknown> implements IFile {
     public readonly id: string,
     private metadata: FileJSON<M>,
     private readonly fileClient: FileClientImpl,
-    private readonly logger: Logger,
-    public readonly namespaces?: string[]
+    private readonly logger: Logger
   ) {}
 
   private async updateFileState(action: Action): Promise<void> {

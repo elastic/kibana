@@ -37,7 +37,6 @@ export interface FileDescriptor<M = unknown> {
    * The file's metadata.
    */
   metadata: FileMetadata<M>;
-  namespaces?: string[];
 }
 
 /**

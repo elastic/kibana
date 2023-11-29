@@ -43,11 +43,7 @@ export function serializeJSON<M = unknown>(attrs: Partial<FileJSON>): Partial<Fi
   );
 }
 
-export function toJSON<M = unknown>(
-  id: string,
-  attrs: FileMetadata<M>,
-  namespaces?: string[]
-): FileJSON<M> {
+export function toJSON<M = unknown>(id: string, attrs: FileMetadata<M>): FileJSON<M> {
   const {
     name,
     mime_type: mimeType,
@@ -65,7 +61,6 @@ export function toJSON<M = unknown>(
   return pickBy<FileJSON<M>>(
     {
       id,
-      namespaces,
       user,
       name,
       mimeType,

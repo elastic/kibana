@@ -110,11 +110,7 @@ export class FileClientImpl implements FileClient {
     FileClientImpl.usageCounter?.incrementCounter({ counterName: this.getCounters()[counter] });
   }
 
-  private instantiateFile<M = unknown>(
-    id: string,
-    metadata: FileMetadata<M>,
-    namespaces?: string[]
-  ): File<M> {
+  private instantiateFile<M = unknown>(id: string, metadata: FileMetadata<M>): File<M> {
     return new FileImpl(
       id,
       toJSON(id, {
@@ -122,8 +118,7 @@ export class FileClientImpl implements FileClient {
         ...metadata,
       }),
       this,
-      this.logger,
-      namespaces
+      this.logger
     );
   }
 
@@ -158,8 +153,8 @@ export class FileClientImpl implements FileClient {
   }
 
   public async get<M = unknown>(arg: P1<FileMetadataClient['get']>): Promise<File<M>> {
-    const { id, namespaces, metadata } = await this.metadataClient.get(arg);
-    return this.instantiateFile(id, metadata as FileMetadata<M>, namespaces);
+    const { id, metadata } = await this.metadataClient.get(arg);
+    return this.instantiateFile(id, metadata as FileMetadata<M>);
   }
 
   public async internalUpdate(id: string, metadata: Partial<FileJSON>): Promise<void> {
@@ -178,8 +173,8 @@ export class FileClientImpl implements FileClient {
     const result = await this.metadataClient.find(arg);
     return {
       total: result.total,
-      files: result.files.map(({ id, namespaces, metadata }) =>
-        this.instantiateFile(id, metadata as FileMetadata<M>, namespaces)
+      files: result.files.map(({ id, metadata }) =>
+        this.instantiateFile(id, metadata as FileMetadata<M>)
       ),
     };
   }

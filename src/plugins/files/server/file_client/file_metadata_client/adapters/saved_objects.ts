@@ -61,7 +61,6 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     const result = await this.soClient.get(this.soType, id);
     return {
       id: result.id,
-      namespaces: result.namespaces,
       metadata: result.attributes as FileDescriptor['metadata'],
     };
   }
@@ -79,7 +78,6 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
 
       return {
         id: so.id,
-        namespaces: so.namespaces,
         metadata: so.attributes as FileDescriptor['metadata'],
       };
     });
@@ -100,7 +98,6 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     return {
       files: result.saved_objects.map((so) => ({
         id: so.id,
-        namespaces: so.namespaces,
         metadata: so.attributes as FileMetadata,
       })),
       total: result.total,

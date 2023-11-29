@@ -230,10 +230,6 @@ export interface FileJSON<Meta = unknown> {
    * File hash information
    */
   hash?: BaseFileMetadata['hash'];
-  /**
-   * The Spaces to which this saved object is shared
-   */
-  namespaces?: string[];
 }
 
 export interface FileKindBase {
