@@ -202,8 +202,8 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         soDoc = await this.getCurrentKeyPairObj();
       },
       {
-        startingDelay: 300, // 0.3 second
-        maxDelay: 1000, // 1 second
+        startingDelay: 1000, // 1 second
+        maxDelay: 3000, // 3 seconds
         jitter: 'full',
         numOfAttempts: 10,
         retry: (_err: Error, attempt: number) => {
