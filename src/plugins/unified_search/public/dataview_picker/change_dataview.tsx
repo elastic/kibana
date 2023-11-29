@@ -340,6 +340,10 @@ export function ChangeDataView({
         <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
         <EuiPanel color="transparent" paddingSize="none" key="try-esql">
           <EuiButton
+            css={css`
+              border-top-right-radius: unset;
+              border-top-left-radius: unset;
+            `}
             color="success"
             size="s"
             fullWidth
@@ -352,16 +356,14 @@ export function ChangeDataView({
               },
             }}
           >
-            <span className="eui-textLeft">
-              {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
-                defaultMessage: 'Try ES|QL',
+            {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
+              defaultMessage: 'Try ES|QL',
+            })}
+            <EuiBadge color="hollow">
+              {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTechPreviewLabel', {
+                defaultMessage: 'Technical preview',
               })}
-              <EuiBadge color="hollow">
-                {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTechPreviewLabel', {
-                  defaultMessage: 'Technical preview',
-                })}
-              </EuiBadge>
-            </span>
+            </EuiBadge>
           </EuiButton>
         </EuiPanel>
       );
