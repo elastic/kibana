@@ -15,6 +15,9 @@ import type { SavedObjectsTypeMappingDefinitions } from '../mappings';
 
 export type FieldListMap = Record<string, string[]>;
 
+/**
+ * Return the list of fields present in each individual type mappings present in the definition.
+ */
 export const getFieldListMapFromMappingDefinitions = (
   mappings: SavedObjectsTypeMappingDefinitions
 ): FieldListMap => {
@@ -31,6 +34,25 @@ interface QueueItem {
   fieldDef: AnyFieldMapping;
 }
 
+/**
+ * Return the list of fields present in the provided mappings.
+ * Note that fields only containing properties are still considered fields by this function.
+ *
+ * @example
+ * ```
+ * getFieldListFromTypeMapping({
+ *   properties: {
+ *     foo: {
+ *       properties: {
+ *         hello: { type: 'text' },
+ *         dolly: { type: 'text' },
+ *       },
+ *     },
+ *   },
+ * });
+ * // ['foo', 'foo.dolly', 'foo.hello']
+ * ```
+ */
 export const getFieldListFromTypeMapping = (
   typeMappings: SavedObjectsTypeMappingDefinition
 ): string[] => {

@@ -15,7 +15,7 @@ import type {
 import { getFieldListFromTypeMapping } from '../utils/get_field_list';
 
 /**
- * Return the mapping that were introduced in the given version.
+ * Return the mappings that were introduced in the given version.
  * If multiple 'mappings_addition' changes are present for the version,
  * they will be deep-merged.
  */
