@@ -5,4 +5,5 @@ enum:
   - delete
   - push_to_service
   - update
-example: create
+examples:
+  - create

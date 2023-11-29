@@ -26,4 +26,5 @@ export const mockContextValue: RightPanelContext = {
   searchHit: mockSearchHit,
   investigationFields: [],
   refetchFlyoutData: jest.fn(),
+  isPreview: false,
 };
