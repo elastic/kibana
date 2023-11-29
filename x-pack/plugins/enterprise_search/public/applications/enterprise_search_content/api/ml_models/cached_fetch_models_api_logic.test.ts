@@ -8,15 +8,15 @@
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { HttpError, Status } from '../../../../../common/types/api';
-import { MlModel } from '../../../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../../../common/types/ml';
 
-import { FetchModelsApiLogic } from './fetch_models_api_logic';
+import { MlModel } from '../../../../../common/types/ml';
 
 import {
   CachedFetchModelsApiLogic,
   CachedFetchModelsApiLogicValues,
 } from './cached_fetch_models_api_logic';
-import { MlModelDeploymentState } from '@kbn/enterprise-search-plugin/common/types/ml';
+import { FetchModelsApiLogic } from './fetch_models_api_logic';
 
 const DEFAULT_VALUES: CachedFetchModelsApiLogicValues = {
   data: [],
