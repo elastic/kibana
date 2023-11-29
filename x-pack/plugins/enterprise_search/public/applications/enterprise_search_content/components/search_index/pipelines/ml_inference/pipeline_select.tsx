@@ -42,6 +42,7 @@ export const PipelineSelect: React.FC = () => {
   return (
     // TODO: Make list scrollable
     // TODO: Fix selection highlighting when using keyboard to select
+    // TODO: Show selection icons
     <EuiSelectable
       options={getPipelineOptions(existingInferencePipelines)}
       listProps={{
@@ -50,12 +51,18 @@ export const PipelineSelect: React.FC = () => {
         showIcons: false,
         onFocusBadge: false,
       }}
+      searchable
       height={360}
       singleSelection="always"
       onChange={onChange}
       renderOption={renderPipelineOption}
     >
-      {(list) => list}
+      {(list, search) => (
+        <>
+          {search}
+          {list}
+        </>
+      )}
     </EuiSelectable>
   );
 };

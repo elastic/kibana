@@ -49,6 +49,7 @@ export enum ConfigurePipelineTabId {
   USE_EXISTING = 'use_existing',
 }
 
+// TODO: Fix bug when going back to configure step after selecting an existing pipeline
 export const ConfigurePipeline: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration },
