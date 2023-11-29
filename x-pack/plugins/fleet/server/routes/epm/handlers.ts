@@ -88,6 +88,9 @@ import type {
 import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
+import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_packages';
+import { pkgToPkgKey } from '../../services/epm/registry';
+import { unpackBufferEntries } from '../../services/epm/archive';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -214,9 +217,9 @@ export const getFileHandler: FleetRequestHandler<
     const savedObjectsClient = (await context.fleet).internalSoClient;
     const installation = await getInstallation({ savedObjectsClient, pkgName });
     const useLocalFile = pkgVersion === installation?.version;
+    const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
 
     if (useLocalFile) {
-      const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
       const fileBuffer = getArchiveEntry(assetPath);
       // only pull local installation if we don't have it cached
       const storedAsset = !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
@@ -242,6 +245,45 @@ export const getFileHandler: FleetRequestHandler<
             contentType: mime.contentType(path.extname(assetPath)),
             buffer: fileBuffer,
           };
+
+      if (!contentType) {
+        return response.custom({
+          body: `unknown content type for file: ${filePath}`,
+          statusCode: 400,
+        });
+      }
+
+      return response.custom({
+        body: buffer,
+        statusCode: 200,
+        headers: {
+          ...CACHE_CONTROL_10_MINUTES_HEADER,
+          'content-type': contentType,
+        },
+      });
+    }
+
+    const bundledPackage = await getBundledPackageByPkgKey(
+      pkgToPkgKey({ name: pkgName, version: pkgVersion })
+    );
+    if (bundledPackage) {
+      const bufferEntries = await unpackBufferEntries(bundledPackage.buffer, 'application/zip');
+
+      const fileBuffer = bufferEntries.find((entry) => entry.path === assetPath)?.buffer;
+
+      if (!fileBuffer) {
+        return response.custom({
+          body: `installed package file not found: ${filePath}`,
+          statusCode: 404,
+        });
+      }
+
+      // if storedAsset is not available, fileBuffer *must* be
+      // b/c we error if we don't have at least one, and storedAsset is the least likely
+      const { buffer, contentType } = {
+        contentType: mime.contentType(path.extname(assetPath)),
+        buffer: fileBuffer,
+      };
 
       if (!contentType) {
         return response.custom({
