@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type { User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
@@ -478,20 +479,50 @@ export const deleteFileAttachments = async ({
   });
 };
 
+export type FeatureIdsResponse = estypes.SearchResponse<
+  unknown,
+  {
+    consumer: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+    producer: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+  }
+>;
+
 export const getFeatureIds = async ({
   query,
   signal,
 }: {
-  query: { registrationContext: string[] };
+  query: {
+    ids: {
+      values: string[];
+    };
+  };
   signal?: AbortSignal;
-}): Promise<ValidFeatureId[]> => {
-  return KibanaServices.get().http.fetch<ValidFeatureId[]>(
-    `${BASE_RAC_ALERTS_API_PATH}/_feature_ids`,
-    {
-      signal,
+}): Promise<FeatureIdsResponse> => {
+  return KibanaServices.get().http.post<FeatureIdsResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+    method: 'POST',
+    body: JSON.stringify({
+      aggs: {
+        consumer: {
+          terms: {
+            field: ALERT_RULE_CONSUMER,
+            size: 100,
+          },
+        },
+        producer: {
+          terms: {
+            field: ALERT_RULE_PRODUCER,
+            size: 100,
+          },
+        },
+      },
       query,
-    }
-  );
+    }),
+    signal,
+  });
 };
 
 export const getCaseConnectors = async (

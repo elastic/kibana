@@ -38,8 +38,6 @@ export interface AlertActionsProps {
   setFlyoutAlert: React.Dispatch<React.SetStateAction<any | undefined>>;
 }
 
-const CASES_ACTIONS_ENABLED = false;
-
 export function AlertActions({
   alert,
   ecsData,
@@ -57,7 +55,7 @@ export function AlertActions({
       basePath: { prepend },
     },
   } = useMlKibana().services;
-  const casesPrivileges = cases?.helpers.canUseCases();
+  const casesPrivileges = cases?.helpers?.canUseCases() ?? false;
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
@@ -93,8 +91,8 @@ export function AlertActions({
     refresh();
   }, [refresh]);
 
-  const createCaseFlyout = cases!.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = cases!.hooks.useCasesAddToExistingCaseModal({ onSuccess });
+  const createCaseFlyout = cases?.hooks?.useCasesAddToNewCaseFlyout({ onSuccess });
+  const selectCaseModal = cases?.hooks?.useCasesAddToExistingCaseModal({ onSuccess });
 
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
@@ -105,12 +103,12 @@ export function AlertActions({
   };
 
   const handleAddToNewCaseClick = () => {
-    createCaseFlyout.open({ attachments: caseAttachments });
+    createCaseFlyout?.open({ attachments: caseAttachments });
     closeActionsPopover();
   };
 
   const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
+    selectCaseModal?.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
 
@@ -123,7 +121,7 @@ export function AlertActions({
   }, [untrackAlerts, alertId, ecsData, onSuccess]);
 
   const actionsMenuItems = [
-    ...(CASES_ACTIONS_ENABLED && casesPrivileges?.create && casesPrivileges.read
+    ...(casesPrivileges && casesPrivileges?.create && casesPrivileges.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"
