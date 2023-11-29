@@ -120,11 +120,11 @@ describe('Public assets client', () => {
       });
     });
 
-    it('should include specified "parent" parameter in http.get query', async () => {
+    it('should include specified "parentEan" parameter in http.get query', async () => {
       const client = new PublicAssetsClient(http);
       await client.getServices({ from: 'x', to: 'y', filters: { parentEan: 'container:123' } });
       expect(http.get).toBeCalledWith(routePaths.GET_SERVICES, {
-        query: { from: 'x', to: 'y', parent: 'container:123' },
+        query: { from: 'x', to: 'y', parentEan: 'container:123' },
       });
     });
 
