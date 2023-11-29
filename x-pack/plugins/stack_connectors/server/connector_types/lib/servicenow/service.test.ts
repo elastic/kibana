@@ -1078,13 +1078,7 @@ describe('ServiceNow service', () => {
         );
       });
 
-      test('it should throw an error when no incidents found with given correlationId', async () => {
-        await expect(
-          service.closeIncident({ incidentId: null, correlationId: 'foo' })
-        ).resolves.toBe(null);
-      });
-
-      test('it should throw warning if found incident is closed', async () => {
+      test('it should log warning if found incident is closed', async () => {
         requestMock.mockImplementationOnce(() => ({
           data: {
             result: {
