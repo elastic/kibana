@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { CustomThresholdExpressionMetric } from './types';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { CustomThresholdExpressionMetric } from './types';
 
 export const getViewInAppUrl = async (
   metrics: CustomThresholdExpressionMetric[],

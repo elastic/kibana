@@ -1100,6 +1100,8 @@
       "@kbn/observability-alerting-test-data/*": ["x-pack/packages/observability/alerting_test_data/*"],
       "@kbn/observability-fixtures-plugin": ["x-pack/test/cases_api_integration/common/plugins/observability"],
       "@kbn/observability-fixtures-plugin/*": ["x-pack/test/cases_api_integration/common/plugins/observability/*"],
+      "@kbn/observability-get-padded-alert-time-range-util": ["x-pack/packages/observability/get_padded_alert_time_range_util"],
+      "@kbn/observability-get-padded-alert-time-range-util/*": ["x-pack/packages/observability/get_padded_alert_time_range_util/*"],
       "@kbn/observability-log-explorer-plugin": ["x-pack/plugins/observability_log_explorer"],
       "@kbn/observability-log-explorer-plugin/*": ["x-pack/plugins/observability_log_explorer/*"],
       "@kbn/observability-onboarding-plugin": ["x-pack/plugins/observability_onboarding"],
