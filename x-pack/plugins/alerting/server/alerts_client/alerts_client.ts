@@ -283,8 +283,8 @@ export class AlertsClient<
     this.legacyAlertsClient.processAlerts(opts);
   }
 
-  public LogAlerts(opts: LogAlertsOpts) {
-    this.legacyAlertsClient.LogAlerts(opts);
+  public logAlerts(opts: LogAlertsOpts) {
+    this.legacyAlertsClient.logAlerts(opts);
   }
 
   public processAndLogAlerts(opts: ProcessAndLogAlertsOpts) {

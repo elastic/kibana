@@ -182,7 +182,7 @@ export class LegacyAlertsClient<
     this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
   }
 
-  public LogAlerts({ eventLogger, ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
+  public logAlerts({ eventLogger, ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
     logAlerts({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
@@ -210,7 +210,7 @@ export class LegacyAlertsClient<
       maintenanceWindowIds,
     });
 
-    this.LogAlerts({
+    this.logAlerts({
       eventLogger,
       ruleRunMetricsStore,
       shouldLogAlerts,

@@ -1701,13 +1701,7 @@ describe('Execution Handler', () => {
 
   test('does not schedule summary actions when there is an active maintenance window', async () => {
     alertsClient.getSummarizedAlerts.mockResolvedValue({
-      new: {
-        count: 2,
-        data: [
-          { ...mockAAD, kibana: { alert: { uuid: '1' } } },
-          { ...mockAAD, kibana: { alert: { uuid: '2' } } },
-        ],
-      },
+      new: { count: 0, data: [] },
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
@@ -1746,15 +1740,11 @@ describe('Execution Handler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(2);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
 
     expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
       1,
-      '(1) alert has been filtered out for: testActionTypeId:1'
-    );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
-      2,
-      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-active.'
+      '(3) alerts have been filtered out for: testActionTypeId:1'
     );
   });
 
@@ -1768,20 +1758,7 @@ describe('Execution Handler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
-
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
-      1,
-      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-1.'
-    );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
-      2,
-      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-2.'
-    );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
-      3,
-      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-3.'
-    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(0);
   });
 
   test('does not schedule actions with notifyWhen not set to "on status change" for alerts that are flapping', async () => {

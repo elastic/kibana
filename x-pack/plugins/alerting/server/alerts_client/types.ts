@@ -76,7 +76,7 @@ export interface IAlertsClient<
   checkLimitUsage(): void;
   processAndLogAlerts(opts: ProcessAndLogAlertsOpts): void;
   processAlerts(opts: ProcessAlertsOpts): void;
-  LogAlerts(opts: LogAlertsOpts): void;
+  logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
