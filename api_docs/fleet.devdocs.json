@@ -20639,6 +20639,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.latest_install_failed_attempts",
+            "type": "Array",
+            "tags": [],
+            "label": "latest_install_failed_attempts",
+            "description": [],
+            "signature": [
+              "InstallFailedAttempt",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
