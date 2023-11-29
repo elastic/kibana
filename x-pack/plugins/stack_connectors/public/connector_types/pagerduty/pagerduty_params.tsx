@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +24,7 @@ import {
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { PagerDutyActionParams } from '../types';
 import { LinksList } from './links_list';
+import { OPTIONAL_LABEL } from './translations';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
   actionParams,
@@ -165,9 +167,16 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 : i18n.translate(
                     'xpack.stackConnectors.components.pagerDuty.dedupKeyTextFieldLabel',
                     {
-                      defaultMessage: 'DedupKey (optional)',
+                      defaultMessage: 'DedupKey',
                     }
                   )
+            }
+            labelAppend={
+              isDedupeKeyRequired ? null : (
+                <EuiText size="xs" color="subdued">
+                  {OPTIONAL_LABEL}
+                </EuiText>
+              )
             }
           >
             <TextFieldWithMessageVariables
@@ -209,9 +218,14 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 label={i18n.translate(
                   'xpack.stackConnectors.components.pagerDuty.severitySelectFieldLabel',
                   {
-                    defaultMessage: 'Severity (optional)',
+                    defaultMessage: 'Severity',
                   }
                 )}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {OPTIONAL_LABEL}
+                  </EuiText>
+                }
               >
                 <EuiSelect
                   fullWidth
@@ -233,9 +247,14 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 label={i18n.translate(
                   'xpack.stackConnectors.components.pagerDuty.timestampTextFieldLabel',
                   {
-                    defaultMessage: 'Timestamp (optional)',
+                    defaultMessage: 'Timestamp',
                   }
                 )}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {OPTIONAL_LABEL}
+                  </EuiText>
+                }
               >
                 <TextFieldWithMessageVariables
                   index={index}
@@ -254,9 +273,14 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             label={i18n.translate(
               'xpack.stackConnectors.components.pagerDuty.componentTextFieldLabel',
               {
-                defaultMessage: 'Component (optional)',
+                defaultMessage: 'Component',
               }
             )}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {OPTIONAL_LABEL}
+              </EuiText>
+            }
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -271,9 +295,14 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             label={i18n.translate(
               'xpack.stackConnectors.components.pagerDuty.groupTextFieldLabel',
               {
-                defaultMessage: 'Group (optional)',
+                defaultMessage: 'Group',
               }
             )}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {OPTIONAL_LABEL}
+              </EuiText>
+            }
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -288,9 +317,14 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             label={i18n.translate(
               'xpack.stackConnectors.components.pagerDuty.sourceTextFieldLabel',
               {
-                defaultMessage: 'Source (optional)',
+                defaultMessage: 'Source',
               }
             )}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {OPTIONAL_LABEL}
+              </EuiText>
+            }
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -304,8 +338,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             id="pagerDutyClass"
             fullWidth
             label={i18n.translate('xpack.stackConnectors.components.pagerDuty.classFieldLabel', {
-              defaultMessage: 'Class (optional)',
+              defaultMessage: 'Class',
             })}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {OPTIONAL_LABEL}
+              </EuiText>
+            }
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -315,7 +354,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               inputTargetValue={actionParams.class}
             />
           </EuiFormRow>
-          <EuiFormRow id="pagerDutyCustomDetails" fullWidth>
+          <EuiFormRow
+            id="pagerDutyCustomDetails"
+            fullWidth
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {OPTIONAL_LABEL}
+              </EuiText>
+            }
+          >
             <JsonEditorWithMessageVariables
               messageVariables={messageVariables}
               paramsProperty={'customDetails'}
@@ -324,7 +371,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               label={i18n.translate(
                 'xpack.stackConnectors.components.pagerDuty.customDetailsFieldLabel',
                 {
-                  defaultMessage: 'Custom Details (optional)',
+                  defaultMessage: 'Custom details',
                 }
               )}
               onDocumentsChange={(json: string) => {
