@@ -40,7 +40,7 @@ export const PipelineSelect: React.FC = () => {
   };
 
   return (
-    // TODO: Make list scrollable
+    // TODO: Is there a way to make EuiSelectable's border shrink when less than 4 options are available?
     // TODO: Fix selection highlighting when using keyboard to select
     // TODO: Show selection icons
     <EuiSelectable
@@ -50,6 +50,7 @@ export const PipelineSelect: React.FC = () => {
         rowHeight: 90,
         showIcons: false,
         onFocusBadge: false,
+        isVirtualized: true,
       }}
       searchable
       height={360}
