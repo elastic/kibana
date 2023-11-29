@@ -50,10 +50,6 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     this.updateInput({ title });
   }
 
-  public reportsEmbeddableLoad() {
-    return true;
-  }
-
   public onRenderComplete() {
     this.renderComplete.dispatchComplete();
   }

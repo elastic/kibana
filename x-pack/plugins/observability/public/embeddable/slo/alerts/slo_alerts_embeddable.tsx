@@ -76,11 +76,6 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     this.subscription = new Subscription();
     this.subscription.add(this.getInput$().subscribe(() => this.reload()));
   }
-
-  public reportsEmbeddableLoad() {
-    return true;
-  }
-
   public onRenderComplete() {
     this.renderComplete.dispatchComplete();
   }

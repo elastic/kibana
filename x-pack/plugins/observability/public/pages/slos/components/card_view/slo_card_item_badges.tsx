@@ -18,6 +18,7 @@ import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 
 interface Props {
+  isEmbeddable?: boolean;
   hasGroupBy: boolean;
   activeAlerts?: number;
   slo: SLOWithSummaryResponse;
@@ -25,13 +26,12 @@ interface Props {
   handleCreateRule: () => void;
 }
 
-const Container = styled.div<{ hasGroupBy: boolean }>`
+const Container = styled.div<{ topPosition: string }>`
   position: absolute;
   display: inline-block;
-  top: ${({ hasGroupBy }) => (hasGroupBy ? '55px' : '35px')};
+  top: ${({ topPosition }) => topPosition};
   left: 7px;
   z-index: 1;
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
 `;
 
 export function SloCardItemBadges({
@@ -40,9 +40,12 @@ export function SloCardItemBadges({
   rules,
   handleCreateRule,
   hasGroupBy,
+  isEmbeddable,
 }: Props) {
+  const topPosition =
+    hasGroupBy && isEmbeddable ? '75px' : hasGroupBy || isEmbeddable ? '55px' : '35px';
   return (
-    <Container hasGroupBy={hasGroupBy}>
+    <Container topPosition={topPosition}>
       <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
         {!slo.summary ? (
           <LoadingBadges />
