@@ -19,7 +19,7 @@ import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
 import { defineFindCspRuleTemplateRoute } from './csp_rule_template/get_csp_rule_template';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
-import { defineUpdateCspRuleStateRoute } from './csp_rule_template/update_csp_rule_state';
+import { defineUpdateCspRuleStateRoute } from './csp_rule_template/update_csp_rules_states';
 
 /**
  * 1. Registers routes

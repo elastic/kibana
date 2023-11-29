@@ -50,7 +50,7 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
-import { getCspSettingObjectSafe } from './routes/csp_rule_template/update_csp_rule_state';
+import { getCspSettingObjectSafe } from './routes/csp_rule_template/update_csp_rules_states';
 
 export class CspPlugin
   implements

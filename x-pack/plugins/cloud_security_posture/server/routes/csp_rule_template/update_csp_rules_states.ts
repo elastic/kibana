@@ -32,29 +32,28 @@ export const updateRulesStates = async (
   soClient: SavedObjectsClientContract,
   newRulesStates: CspRulesStates
 ) => {
-  soClient.update(
+  return await soClient.update<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
-    newRulesStates
+    { rules_states: newRulesStates }
   );
 };
 
 export const setRulesStates = (
-  currentRulesStates: CspRulesStates,
+  rulesStates: CspRulesStates,
   ruleIds: string[],
   state: boolean
 ): CspRulesStates => {
-  const updatedCspRulesStates: CspRulesStates = { ...currentRulesStates };
   ruleIds.forEach((ruleId) => {
-    if (updatedCspRulesStates[ruleId]) {
+    if (rulesStates[ruleId]) {
       // Rule exists, set entry
-      updatedCspRulesStates[ruleId] = { muted: state };
+      rulesStates[ruleId] = { muted: state };
     } else {
       // Rule does not exist, create an entry
-      updatedCspRulesStates[ruleId] = { muted: state };
+      rulesStates[ruleId] = { muted: state };
     }
   });
-  return updatedCspRulesStates;
+  return rulesStates;
 };
 
 export const createCspSettingObject = async (soClient: SavedObjectsClientContract) => {
@@ -132,10 +131,13 @@ export const defineUpdateCspRuleStateRoute = (router: CspRouter) =>
             muteStatesMap[requestBody.action]
           );
 
-          await updateRulesStates(cspContext.soClient, newRulesStates);
+          console.log({ newRulesStates });
+
+          const newCspSettings = await updateRulesStates(cspContext.soClient, newRulesStates);
 
           return response.ok({
             body: {
+              new_csp_settings: newCspSettings,
               message: 'The bulk operation has been executed successfully.',
             },
           });

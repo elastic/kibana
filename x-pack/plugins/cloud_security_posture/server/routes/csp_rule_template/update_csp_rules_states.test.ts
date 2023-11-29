@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import expect from 'expect';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import {
   setRulesStates,
   createCspSettingObject,
   getCspSettingObjectSafe,
-} from './update_csp_rule_state';
+} from './update_csp_rules_states';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import {
