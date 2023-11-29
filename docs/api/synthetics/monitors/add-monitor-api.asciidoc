@@ -60,7 +60,7 @@ To list available Private Locations you can:
 
 [NOTE]
 ====
-You may provide either `locations` or `private_locations`, and you may also provide both if needed. At least one of them is required, but providing both is optional.
+You may provide `locations` or `private_locations`, or both. At least one is required.
 ====
 
 
