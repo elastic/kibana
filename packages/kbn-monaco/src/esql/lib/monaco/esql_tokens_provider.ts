@@ -24,10 +24,16 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
     return new ESQLState();
   }
 
-  tokenize(line: string, state: monaco.languages.IState): monaco.languages.ILineTokens {
+  tokenize(line: string, prevState: ESQLState): monaco.languages.ILineTokens {
     const errorStartingPoints: number[] = [];
     const errorListener = new ANTLREErrorListener();
-    const inputStream = CharStreams.fromString(line);
+    // This has the drawback of not styling any ESQL wrong query as
+    // | from ...
+    const cleanedLine =
+      prevState.getLineNumber() && line.trimStart()[0] === '|'
+        ? line.trimStart().substring(1)
+        : line;
+    const inputStream = CharStreams.fromString(cleanedLine);
     const lexer = getLexer(inputStream, errorListener);
 
     let done = false;
@@ -63,6 +69,6 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
 
     myTokens.sort((a, b) => a.startIndex - b.startIndex);
 
-    return new ESQLLineTokens(myTokens);
+    return new ESQLLineTokens(myTokens, prevState.getLineNumber() + 1);
   }
 }
