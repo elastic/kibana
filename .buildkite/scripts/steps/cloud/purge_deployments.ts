@@ -68,7 +68,7 @@ for (const deployment of deploymentsToPurge) {
   console.log(`Scheduling deployment for deletion: ${deployment.name} / ${deployment.id}`);
   try {
     execSync(`ecctl deployment shutdown --force '${deployment.id}'`, { stdio: 'inherit' });
-    execSync(`vault delete secret/kibana-issues/dev/cloud-deploy/${deployment.name}`, {
+    execSync(`vault delete secret/ci/elastic-kibana/migrated/cloud-deploy/${deployment.name}`, {
       stdio: 'inherit',
     });
   } catch (ex) {

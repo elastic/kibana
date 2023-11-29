@@ -86,7 +86,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
   VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
   retry 5 30 vault login -no-print "$VAULT_TOKEN"
-  retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+  retry 5 5 vault write "secret/ci/elastic-kibana/migrated/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
 
   echo "Enabling Stack Monitoring..."
   jq '
@@ -128,7 +128,7 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 
   Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-  Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
+  Credentials: \`vault_get cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
 
   Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 
