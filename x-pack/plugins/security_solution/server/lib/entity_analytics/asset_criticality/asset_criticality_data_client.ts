@@ -6,6 +6,7 @@
  */
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/asset_criticality';
 import { assetCriticalityFieldMap } from './configurations';
@@ -16,17 +17,10 @@ interface AssetCriticalityClientOpts {
   namespace: string;
 }
 
-interface AssetCriticalityDoc {
-  id_field: string;
-  id_value: string;
-  criticality: string;
-  '@timestamp': string;
-}
-
 interface AssetCriticalityUpsert {
-  idField: string;
-  idValue: string;
-  criticality: string;
+  idField: AssetCriticalityRecord['id_field'];
+  idValue: AssetCriticalityRecord['id_value'];
+  criticalityLevel: AssetCriticalityRecord['criticality_level'];
 }
 
 type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue'>;
@@ -72,16 +66,16 @@ export class AssetCriticalityDataClient {
     };
   }
 
-  public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityDoc | undefined> {
+  public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityRecord | undefined> {
     const id = createId(idParts);
 
     try {
-      const body = await this.options.esClient.get<AssetCriticalityDoc>({
+      const body = await this.options.esClient.get<AssetCriticalityRecord>({
         id,
         index: this.getIndex(),
       });
 
-      return body._source as AssetCriticalityDoc;
+      return body._source;
     } catch (err) {
       if (err.statusCode === 404) {
         return undefined;
@@ -91,12 +85,12 @@ export class AssetCriticalityDataClient {
     }
   }
 
-  public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityDoc> {
+  public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityRecord> {
     const id = createId(record);
     const doc = {
       id_field: record.idField,
       id_value: record.idValue,
-      criticality: record.criticality,
+      criticality_level: record.criticalityLevel,
       '@timestamp': new Date().toISOString(),
     };
 

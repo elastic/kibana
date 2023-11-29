@@ -44,7 +44,7 @@ export const assetCriticalityUpsertRoute = (
           const assetCriticalityRecord = {
             idField: request.body.id_field,
             idValue: request.body.id_value,
-            criticality: request.body.criticality,
+            criticalityLevel: request.body.criticality_level,
           };
 
           const result = await assetCriticalityClient.upsert(assetCriticalityRecord);

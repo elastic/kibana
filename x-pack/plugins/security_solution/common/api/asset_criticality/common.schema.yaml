@@ -14,14 +14,14 @@ components:
           type: string
           example: 'host.name'
           description: The field representing the ID.
-        criticality:
+        criticality_level:
           type: string
           enum: [very_important, important, normal, not_important]
           description: The criticality level of the asset.
       required:
         - id_value
         - id_field
-        - criticality
+        - criticality_level
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'

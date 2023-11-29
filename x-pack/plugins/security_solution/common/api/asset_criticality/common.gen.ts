@@ -25,7 +25,7 @@ export const CreateAssetCriticalityRecord = z.object({
   /**
    * The criticality level of the asset.
    */
-  criticality: z.enum(['very_important', 'important', 'normal', 'not_important']),
+  criticality_level: z.enum(['very_important', 'important', 'normal', 'not_important']),
 });
 
 export type AssetCriticalityRecord = z.infer<typeof AssetCriticalityRecord>;
