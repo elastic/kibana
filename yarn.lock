@@ -4993,11 +4993,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-creation-wizard-utils@link:x-pack/packages/ml/creation_wizard_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-data-frame-analytics-utils@link:x-pack/packages/ml/data_frame_analytics_utils":
   version "0.0.0"
   uid ""
 
 "@kbn/ml-data-grid@link:x-pack/packages/ml/data_grid":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-data-view-utils@link:x-pack/packages/ml/data_view_utils":
   version "0.0.0"
   uid ""
 
@@ -5158,6 +5166,10 @@
   uid ""
 
 "@kbn/open-telemetry-instrumented-plugin@link:test/common/plugins/otel_metrics":
+  version "0.0.0"
+  uid ""
+
+"@kbn/openapi-bundler@link:packages/kbn-openapi-bundler":
   version "0.0.0"
   uid ""
 
