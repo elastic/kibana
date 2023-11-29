@@ -559,6 +559,7 @@ x-pack/plugins/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
+packages/kbn-openapi-bundler @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
@@ -566,6 +567,7 @@ packages/kbn-osquery-io-ts-types @elastic/security-asset-management
 x-pack/plugins/osquery @elastic/security-defend-workflows
 examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/plugins/painless_lab @elastic/platform-deployment-management
+packages/kbn-panel-loader @elastic/kibana-presentation
 packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
