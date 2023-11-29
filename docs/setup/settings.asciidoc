@@ -585,8 +585,9 @@ system for the {kib} UI notification center. Set to `false` to disable the
 newsfeed system. *Default: `true`*
 
 [[path-data]] `path.data`::
-The path where {kib} stores persistent data
-not saved in {es}. *Default: `data`*
+The path where {kib} stores persistent data not saved in {es}.
+Can be a relative or absolute path.
+Relative paths are resolved starting from the installation directory. *Default: `data`*
 
 `pid.file`::
 Specifies the path where {kib} creates the process ID file.
