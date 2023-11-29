@@ -8,8 +8,8 @@
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 
 import { schema } from '@kbn/config-schema';
+import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '@kbn/search-index-documents/types';
 
-import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchSearchResults } from '../../lib/fetch_search_results';

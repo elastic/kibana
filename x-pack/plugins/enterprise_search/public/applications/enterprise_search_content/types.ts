@@ -5,16 +5,12 @@
  * 2.0.
  */
 
+import { IngestionMethod } from '@kbn/search-index-documents';
+
 import { ConnectorIndex, CrawlerIndex, ElasticsearchIndex } from '../../../common/types/indices';
 
 export interface Crawler {
   domains: [];
-}
-
-export enum IngestionMethod {
-  CONNECTOR = 'connector',
-  CRAWLER = 'crawler',
-  API = 'api',
 }
 
 export enum IngestionStatus {
@@ -24,7 +20,6 @@ export enum IngestionStatus {
   SYNC_ERROR,
   INCOMPLETE,
 }
-
 interface ElasticsearchViewIndexExtension {
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;

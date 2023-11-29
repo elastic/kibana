@@ -6,8 +6,7 @@
  */
 
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
-
-import { Meta } from '../../../../../common/types';
+import { Meta } from '@kbn/search-index-documents';
 
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';

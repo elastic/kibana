@@ -17,11 +17,12 @@ import {
   EuiResizeObserver,
 } from '@elastic/eui';
 
+import { IngestionMethod } from '@kbn/search-index-documents';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../../../common/types/api';
 
-import { IngestionMethod, IngestionStatus } from '../../../../types';
+import { IngestionStatus } from '../../../../types';
 
 import { SyncsContextMenu } from './syncs_context_menu';
 

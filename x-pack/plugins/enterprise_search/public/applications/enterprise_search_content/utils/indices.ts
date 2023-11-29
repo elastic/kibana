@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import { SyncStatus, ConnectorStatus } from '@kbn/search-connectors';
 
+import { IngestionMethod } from '@kbn/search-index-documents';
+
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 import {
   ConnectorIndex,
@@ -24,7 +26,6 @@ import {
   ConnectorViewIndex,
   CrawlerViewIndex,
   ElasticsearchViewIndex,
-  IngestionMethod,
   IngestionStatus,
 } from '../types';
 

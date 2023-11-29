@@ -8,7 +8,7 @@
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../common/constants';
+import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '@kbn/search-index-documents';
 
 import { fetchSearchResults } from './fetch_search_results';
 

@@ -11,7 +11,9 @@ import moment from 'moment';
 
 import { ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
 
-import { IngestionMethod, IngestionStatus } from '../types';
+import { IngestionMethod } from '@kbn/search-index-documents';
+
+import { IngestionStatus } from '../types';
 
 import {
   getIngestionMethod,
