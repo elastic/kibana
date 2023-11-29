@@ -317,6 +317,23 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.allCasesPermissions",
+        "type": "Function",
+        "tags": [],
+        "label": "allCasesPermissions",
+        "description": [],
+        "signature": [
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/utils/cases_permissions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.createEsParams",
         "type": "Function",
         "tags": [],
@@ -786,7 +803,7 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -1512,30 +1529,6 @@
             ]
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-public.useGetUserCasesPermissions",
-        "type": "Function",
-        "tags": [],
-        "label": "useGetUserCasesPermissions",
-        "description": [],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CasesPermissions",
-            "text": "CasesPermissions"
-          }
-        ],
-        "path": "x-pack/plugins/observability_shared/public/hooks/use_get_user_cases_permissions.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

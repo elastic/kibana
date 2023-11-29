@@ -14,7 +14,6 @@ import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
-import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import {
   useGetAppUrl,
   useNavigateTo,
@@ -22,11 +21,7 @@ import {
   type GetAppUrl,
   type NavigateTo,
 } from '@kbn/security-solution-navigation';
-import {
-  CASES_FEATURE_ID,
-  DEFAULT_DATE_FORMAT,
-  DEFAULT_DATE_FORMAT_TZ,
-} from '../../../../common/constants';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
@@ -151,44 +146,6 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return user;
-};
-
-export const useGetUserCasesPermissions = () => {
-  const [casesPermissions, setCasesPermissions] = useState<CasesPermissions>({
-    all: false,
-    create: false,
-    read: false,
-    update: false,
-    delete: false,
-    push: false,
-    connectors: false,
-  });
-  const uiCapabilities = useKibana().services.application.capabilities;
-  const casesCapabilities = useKibana().services.cases.helpers.getUICapabilities(
-    uiCapabilities[CASES_FEATURE_ID]
-  );
-
-  useEffect(() => {
-    setCasesPermissions({
-      all: casesCapabilities.all,
-      create: casesCapabilities.create,
-      read: casesCapabilities.read,
-      update: casesCapabilities.update,
-      delete: casesCapabilities.delete,
-      push: casesCapabilities.push,
-      connectors: casesCapabilities.connectors,
-    });
-  }, [
-    casesCapabilities.all,
-    casesCapabilities.create,
-    casesCapabilities.read,
-    casesCapabilities.update,
-    casesCapabilities.delete,
-    casesCapabilities.push,
-    casesCapabilities.connectors,
-  ]);
-
-  return casesPermissions;
 };
 
 export const useAppUrl = useGetAppUrl;
