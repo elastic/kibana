@@ -24,11 +24,11 @@ export const availableControlsPanels = {
 export const helpMessages = {
   [availableControlsPanels.SERVICE_NAME]: {
     text: `${i18n.translate('xpack.infra.hostsViewPage.table.tooltip.documentationLabel', {
-      defaultMessage: 'services only',
+      defaultMessage: 'Services detected via',
     })}`,
     link: {
       text: `${i18n.translate('xpack.infra.hostsViewPage.table.tooltip.documentationLink', {
-        defaultMessage: 'APM-instrumented',
+        defaultMessage: 'APM',
       })}`,
       href: 'https://ela.st/docs-infra-apm',
       ['data-test-subj']: 'hostsViewTooltipDocumentationLink',

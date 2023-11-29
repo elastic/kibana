@@ -50,14 +50,14 @@ const TitleWithPopoverMessage = ({
         >
           {helpMessage?.link ? (
             <>
+              {helpMessage.text}{' '}
               <EuiLink
                 data-test-subj={helpMessage.link['data-test-subj']}
                 href={helpMessage.link.href}
                 target="_blank"
               >
                 {helpMessage.link.text}
-              </EuiLink>{' '}
-              <>{helpMessage.text}</>
+              </EuiLink>
             </>
           ) : (
             <>{helpMessage.text}</>
