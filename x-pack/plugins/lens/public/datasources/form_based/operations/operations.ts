@@ -284,3 +284,5 @@ export function getAvailableOperationsByMetadata(
 
   return Object.values(operationByMetadata);
 }
+
+export const memoizedGetAvailableOperationsByMetadata = memoize(getAvailableOperationsByMetadata);

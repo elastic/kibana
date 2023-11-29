@@ -8,7 +8,7 @@
 import memoizeOne from 'memoize-one';
 import { DatasourceDimensionProps, IndexPatternMap, OperationMetadata } from '../../../types';
 import { OperationType } from '../form_based';
-import { getAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
+import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
 import { FormBasedPrivateState } from '../types';
 
 export interface OperationSupportMatrix {
@@ -65,6 +65,6 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
   const layerId = props.layerId;
   const currentIndexPattern = props.indexPatterns[props.state.layers[layerId].indexPatternId];
 
-  const operationsByMetadata = getAvailableOperationsByMetadata(currentIndexPattern);
+  const operationsByMetadata = memoizedGetAvailableOperationsByMetadata(currentIndexPattern);
   return memoizedComputeOperationsMatrix(operationsByMetadata, props.filterOperations);
 };
