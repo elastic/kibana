@@ -82,6 +82,10 @@ export interface OpsProcessMetrics {
     };
     /** node rss */
     resident_set_size_in_bytes: number;
+    /** memory usage of C++ objects bound to JavaScript objects managed by V8 */
+    external_in_bytes: number;
+    /** memory allocated for array buffers. This is also included in the external value*/
+    array_buffers_in_bytes: number;
   };
   /** mean event loop delay since last collection*/
   event_loop_delay: number;
