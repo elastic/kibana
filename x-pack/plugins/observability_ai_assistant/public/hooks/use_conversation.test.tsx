@@ -270,7 +270,7 @@ describe('useConversation', () => {
   });
 
   describe('when chat completes without an initial conversation id', () => {
-    const subject: Subject<PendingMessage> = new Subject();
+    let subject: Subject<PendingMessage>;
     const expectedMessages = [
       {
         '@timestamp': expect.any(String),
@@ -309,6 +309,7 @@ describe('useConversation', () => {
       },
     ];
     beforeEach(() => {
+      subject = new Subject();
       mockService.callApi.mockImplementation(async (endpoint, request) =>
         merge(
           {
@@ -348,9 +349,7 @@ describe('useConversation', () => {
       mockChatService.chat.mockImplementationOnce(() => {
         return subject;
       });
-    });
 
-    it('the conversation is created including the initial messages', async () => {
       act(() => {
         hookResult.result.current.next(
           hookResult.result.current.messages.concat({
@@ -361,41 +360,70 @@ describe('useConversation', () => {
             },
           })
         );
-        subject.next({
-          message: {
-            role: MessageRole.Assistant,
-            content: 'Goodbye again',
-          },
+      });
+    });
+
+    describe('when chat completes with an error', () => {
+      beforeEach(async () => {
+        mockService.callApi.mockClear();
+        act(() => {
+          subject.next({
+            message: {
+              role: MessageRole.Assistant,
+              content: 'Goodbye',
+            },
+            error: new Error(),
+          });
+          subject.complete();
         });
-        subject.complete();
+        await act(async () => {});
       });
 
-      await act(async () => {});
+      it('does not store the conversation', () => {
+        expect(mockService.callApi).not.toHaveBeenCalled();
+      });
+    });
 
-      expect(mockService.callApi.mock.calls[0]).toEqual([
-        'POST /internal/observability_ai_assistant/conversation',
-        {
-          params: {
-            body: {
-              conversation: {
-                '@timestamp': expect.any(String),
+    describe('when chat completes without an error', () => {
+      beforeEach(async () => {
+        act(() => {
+          subject.next({
+            message: {
+              role: MessageRole.Assistant,
+              content: 'Goodbye again',
+            },
+          });
+          subject.complete();
+        });
+
+        await act(async () => {});
+      });
+      it('the conversation is created including the initial messages', async () => {
+        expect(mockService.callApi.mock.calls[0]).toEqual([
+          'POST /internal/observability_ai_assistant/conversation',
+          {
+            params: {
+              body: {
                 conversation: {
-                  title: EMPTY_CONVERSATION_TITLE,
+                  '@timestamp': expect.any(String),
+                  conversation: {
+                    title: EMPTY_CONVERSATION_TITLE,
+                  },
+                  messages: expectedMessages,
+                  labels: {},
+                  numeric_labels: {},
+                  public: false,
                 },
-                messages: expectedMessages,
-                labels: {},
-                numeric_labels: {},
-                public: false,
               },
             },
+            signal: null,
           },
-          signal: null,
-        },
-      ]);
+        ]);
 
-      expect(hookResult.result.current.conversation.error).toBeUndefined();
+        expect(hookResult.result.current.conversation.error).toBeUndefined();
 
-      expect(hookResult.result.current.messages).toEqual(expectedMessages);
+        expect(hookResult.result.current.messages).toEqual(expectedMessages);
+      });
     });
   });
 
