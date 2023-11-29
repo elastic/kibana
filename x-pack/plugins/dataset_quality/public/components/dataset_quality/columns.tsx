@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import React, { Dispatch, SetStateAction } from 'react';
+import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import loggingIcon from '../../icons/logging.svg';
+import { IntegrationIcon } from '../common';
+import { useLinkToLogExplorer } from '../../hooks';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
@@ -26,10 +26,20 @@ const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivity
   defaultMessage: 'Last Activity',
 });
 
+const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
+  defaultMessage: 'Actions',
+});
+
+const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
+  defaultMessage: 'Open',
+});
+
 export const getDatasetQualitTableColumns = ({
   fieldFormats,
+  setSelectedDatasetName,
 }: {
   fieldFormats: FieldFormatsStart;
+  setSelectedDatasetName: Dispatch<SetStateAction<string>>;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -42,19 +52,9 @@ export const getDatasetQualitTableColumns = ({
         return (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              {integration ? (
-                <PackageIcon
-                  packageName={integration.name}
-                  version={integration.version!}
-                  icons={integration.icons}
-                  size="m"
-                  tryApi
-                />
-              ) : (
-                <EuiIcon type={loggingIcon} size="m" />
-              )}
+              <IntegrationIcon integration={integration} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+            <EuiLink onClick={() => setSelectedDatasetName(title)}>{title}</EuiLink>
           </EuiFlexGroup>
         );
       },
@@ -73,5 +73,17 @@ export const getDatasetQualitTableColumns = ({
           .convert(timestamp),
       sortable: true,
     },
+    {
+      name: actionsColumnName,
+      render: (dataStreamStat: DataStreamStat) => (
+        <LinkToLogExplorer dataStreamStat={dataStreamStat} />
+      ),
+      width: '100px',
+    },
   ];
+};
+
+const LinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat }) => {
+  const url = useLinkToLogExplorer({ dataStreamStat });
+  return <EuiLink href={url}>{openActionName}</EuiLink>;
 };

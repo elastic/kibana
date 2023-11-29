@@ -6,7 +6,7 @@
  */
 
 import { Integration } from './integration';
-import { DataStreamStatType, IntegrationType } from './types';
+import { DataStreamStatType } from './types';
 
 export class DataStreamStat {
   name: DataStreamStatType['name'];
@@ -14,7 +14,7 @@ export class DataStreamStat {
   size?: DataStreamStatType['size'];
   sizeBytes?: DataStreamStatType['size_bytes'];
   lastActivity?: DataStreamStatType['last_activity'];
-  integration?: IntegrationType;
+  integration?: Integration;
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.name = dataStreamStat.name;

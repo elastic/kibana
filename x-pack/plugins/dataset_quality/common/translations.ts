@@ -34,3 +34,53 @@ export const tableSummaryAllText = i18n.translate('xpack.datasetQuality.tableSum
 export const tableSummaryOfText = i18n.translate('xpack.datasetQuality.tableSummaryOfText', {
   defaultMessage: 'of',
 });
+
+export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCancelText', {
+  defaultMessage: 'Cancel',
+});
+
+export const flyoutOpenInLogExplorerText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInLogExplorerText',
+  {
+    defaultMessage: 'Open in Logs Explorer',
+  }
+);
+
+export const flyoutDatasetDetailsText = i18n.translate(
+  'xpack.datasetQuality.flyoutDatasetDetailsText',
+  {
+    defaultMessage: 'Dataset details',
+  }
+);
+
+export const flyoutDatasetTypeText = i18n.translate('xpack.datasetQuality.flyoutDatasetTypeText', {
+  defaultMessage: 'Type',
+});
+
+export const flyoutDatasetLastActivityText = i18n.translate(
+  'xpack.datasetQuality.flyoutDatasetLastActivityText',
+  {
+    defaultMessage: 'Last Activity',
+  }
+);
+
+export const flyoutIntegrationDetailsText = i18n.translate(
+  'xpack.datasetQuality.flyoutIntegrationDetailsText',
+  {
+    defaultMessage: 'Integration details',
+  }
+);
+
+export const flyoutIntegrationVersionText = i18n.translate(
+  'xpack.datasetQuality.flyoutIntegrationVersionText',
+  {
+    defaultMessage: 'Version',
+  }
+);
+
+export const flyoutIntegrationTypeText = i18n.translate(
+  'xpack.datasetQuality.flyoutIntegrationTypeText',
+  {
+    defaultMessage: 'Type',
+  }
+);

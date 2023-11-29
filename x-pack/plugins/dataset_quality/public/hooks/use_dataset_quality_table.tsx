@@ -27,6 +27,7 @@ export const useDatasetQualityTable = () => {
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
+  const [selectedDatasetName, setSelectedDatasetName] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
@@ -35,7 +36,10 @@ export const useDatasetQualityTable = () => {
   const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
 
-  const columns = useMemo(() => getDatasetQualitTableColumns({ fieldFormats }), [fieldFormats]);
+  const columns = useMemo(
+    () => getDatasetQualitTableColumns({ fieldFormats, setSelectedDatasetName }),
+    [fieldFormats]
+  );
 
   const pagination = {
     pageIndex,
@@ -84,5 +88,17 @@ export const useDatasetQualityTable = () => {
     );
   }, [data.length, pageIndex, pageSize, renderedItems.length]);
 
-  return { sort, onTableChange, pagination, renderedItems, columns, loading, resultsCount };
+  const closeFlyout = useCallback(() => setSelectedDatasetName(''), []);
+
+  return {
+    sort,
+    onTableChange,
+    pagination,
+    renderedItems,
+    columns,
+    loading,
+    resultsCount,
+    closeFlyout,
+    selectedDatasetName,
+  };
 };
