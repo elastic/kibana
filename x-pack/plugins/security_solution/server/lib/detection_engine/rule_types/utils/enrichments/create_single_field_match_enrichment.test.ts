@@ -125,7 +125,7 @@ describe('createSingleFieldMatchEnrichment', () => {
     expect(
       mockSearchEnrichments.mock.calls[mockSearchEnrichments.mock.calls.length - 1][0].query.query
         .bool.should
-    ).toEqual([{ match: { 'host.name': { query: 'host name 1' } } }]);
+    ).toEqual([{ match: { 'host.name': { minimum_should_match: 1, query: 'host name 1' } } }]);
   });
 
   it('return empty object if there some exception happen', async () => {
