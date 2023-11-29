@@ -36,9 +36,10 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    defaultInputField?: string
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, defaultInputField);
     // @ts-expect-error mask_token is missing in type
     const maskToken = model.inference_config?.[this.inferenceType]?.mask_token;
     if (maskToken) {

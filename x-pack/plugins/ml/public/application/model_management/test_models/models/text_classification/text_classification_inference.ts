@@ -31,9 +31,10 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    defaultSelectedField?: string
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, defaultSelectedField);
 
     this.initialize();
   }

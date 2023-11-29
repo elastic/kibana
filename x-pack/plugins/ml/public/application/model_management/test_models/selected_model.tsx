@@ -48,7 +48,7 @@ export const SelectedModel: FC<Props> = ({
 }) => {
   const { trainedModels } = useMlApiContext();
   const {
-    currentContext: { createPipelineFlyoutOpen, pipelineConfig },
+    currentContext: { createPipelineFlyoutOpen, pipelineConfig, defaultSelectedField },
   } = useTestTrainedModelsContext();
   const pipeline = (createPipelineFlyoutOpen && pipelineConfig) || undefined;
 
@@ -58,26 +58,74 @@ export const SelectedModel: FC<Props> = ({
 
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
-          return new NerInference(trainedModels, model, inputType, deploymentId);
+          return new NerInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            defaultSelectedField
+          );
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
-          return new TextClassificationInference(trainedModels, model, inputType, deploymentId);
+          return new TextClassificationInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            defaultSelectedField
+          );
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
-          return new ZeroShotClassificationInference(trainedModels, model, inputType, deploymentId);
+          return new ZeroShotClassificationInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            defaultSelectedField
+          );
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
-          return new TextEmbeddingInference(trainedModels, model, inputType, deploymentId);
+          return new TextEmbeddingInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            defaultSelectedField
+          );
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
-          return new FillMaskInference(trainedModels, model, inputType, deploymentId);
+          return new FillMaskInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            defaultSelectedField
+          );
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
-          return new QuestionAnsweringInference(trainedModels, model, inputType, deploymentId);
+          return new QuestionAnsweringInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            defaultSelectedField
+          );
         case SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION:
-          return new TextExpansionInference(trainedModels, model, inputType, deploymentId);
+          return new TextExpansionInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            defaultSelectedField
+          );
         default:
           break;
       }
     } else if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-      return new LangIdentInference(trainedModels, model, inputType, deploymentId);
+      return new LangIdentInference(
+        trainedModels,
+        model,
+        inputType,
+        deploymentId,
+        defaultSelectedField
+      );
     }
-  }, [inputType, model, trainedModels, deploymentId]);
+  }, [inputType, model, trainedModels, deploymentId, defaultSelectedField]);
 
   const updatedPipeline = useObservable(
     inferrer?.getPipeline$() ?? DEFAULT_PIPELINE_OBS,

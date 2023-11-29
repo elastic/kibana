@@ -43,9 +43,10 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    defaultInputField?: string
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, defaultInputField);
 
     this.initialize();
   }

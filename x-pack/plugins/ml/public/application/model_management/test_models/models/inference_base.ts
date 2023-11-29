@@ -58,6 +58,8 @@ export enum INPUT_TYPE {
 }
 
 export abstract class InferenceBase<TInferResponse> {
+  static defaultInputField?: string;
+
   protected abstract readonly inferenceType: InferenceType;
   protected abstract readonly inferenceTypeLabel: string;
   protected readonly modelInputField: string;
@@ -82,10 +84,14 @@ export abstract class InferenceBase<TInferResponse> {
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     protected readonly model: estypes.MlTrainedModelConfig,
     protected readonly inputType: INPUT_TYPE,
-    protected readonly deploymentId: string
+    protected readonly deploymentId: string,
+    defaultInputField?: string
   ) {
+    if (InferenceBase.defaultInputField === undefined) {
+      InferenceBase.defaultInputField = defaultInputField;
+    }
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
-    this.inputField$.next(this.modelInputField);
+    this.inputField$.next(InferenceBase.defaultInputField ?? this.modelInputField);
   }
 
   public destroy() {
@@ -175,6 +181,8 @@ export abstract class InferenceBase<TInferResponse> {
   public setInputField(field: string | undefined) {
     // if the field is not set, change to be the same as the model input field
     this.inputField$.next(field === undefined ? this.modelInputField : field);
+    // persist the last selected field
+    InferenceBase.defaultInputField = field;
   }
 
   public getInputField() {

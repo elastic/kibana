@@ -35,12 +35,13 @@ interface Props {
 }
 
 export const IndexInputForm: FC<Props> = ({ inferrer }) => {
-  const { currentContext } = useTestTrainedModelsContext();
+  const {
+    currentContext: { defaultSelectedDataViewId },
+  } = useTestTrainedModelsContext();
 
   const data = useIndexInput({
     inferrer,
-    defaultSelectedDataViewId: currentContext.defaultSelectedDataViewId,
-    defaultSelectedField: currentContext.defaultSelectedField,
+    defaultSelectedDataViewId,
   });
   const { reloadExamples, selectedField } = data;
 
@@ -70,7 +71,7 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
       <InferenceInputFormIndexControls
         inferrer={inferrer}
         data={data}
-        disableIndexSelection={currentContext.defaultSelectedDataViewId !== undefined}
+        disableIndexSelection={defaultSelectedDataViewId !== undefined}
       />
 
       <EuiSpacer size="m" />
