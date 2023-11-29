@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
+import { TemplateDeserialized, TemplateSerialized } from '@kbn/index-management-plugin/common';
 import { API_BASE_PATH } from '../constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -45,6 +45,12 @@ export function templatesApi(getService: FtrProviderContext['getService']) {
     }
   };
 
+  const simulateTemplate = (payload: TemplateSerialized) =>
+    supertest
+      .post(`${API_BASE_PATH}/index_templates/simulate`)
+      .set('kbn-xsrf', 'xxx')
+      .send(payload);
+
   return {
     getAllTemplates,
     getOneTemplate,
@@ -52,5 +58,6 @@ export function templatesApi(getService: FtrProviderContext['getService']) {
     updateTemplate,
     deleteTemplates,
     cleanUpTemplates,
+    simulateTemplate,
   };
 }

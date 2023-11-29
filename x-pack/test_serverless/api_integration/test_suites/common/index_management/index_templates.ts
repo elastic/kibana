@@ -18,17 +18,19 @@ export default function ({ getService }: FtrProviderContext) {
   const indexManagementService = getService('indexManagement');
   let getTemplatePayload: typeof indexManagementService['templates']['helpers']['getTemplatePayload'];
   let catTemplate: typeof indexManagementService['templates']['helpers']['catTemplate'];
+  let getSerializedTemplate: typeof indexManagementService['templates']['helpers']['getSerializedTemplate'];
   let createTemplate: typeof indexManagementService['templates']['api']['createTemplate'];
   let updateTemplate: typeof indexManagementService['templates']['api']['updateTemplate'];
   let deleteTemplates: typeof indexManagementService['templates']['api']['deleteTemplates'];
+  let simulateTemplate: typeof indexManagementService['templates']['api']['simulateTemplate'];
 
   let getRandomString: () => string;
   describe('Index templates', function () {
     before(async () => {
       ({
         templates: {
-          helpers: { getTemplatePayload, catTemplate },
-          api: { createTemplate, updateTemplate, deleteTemplates },
+          helpers: { getTemplatePayload, catTemplate, getSerializedTemplate },
+          api: { createTemplate, updateTemplate, deleteTemplates, simulateTemplate },
         },
       } = indexManagementService);
       getRandomString = () => randomness.string({ casing: 'lower', alpha: true });
@@ -261,6 +263,17 @@ export default function ({ getService }: FtrProviderContext) {
         expect(catTemplateResponse.find((template) => template.name === payload.name)).to.equal(
           undefined
         );
+      });
+    });
+
+    describe('simulate', () => {
+      it('should simulate an index template', async () => {
+        const payload = getSerializedTemplate([getRandomString()]);
+
+        const { body } = await simulateTemplate(payload)
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(200);
+        expect(body.template).to.be.ok();
       });
     });
   });

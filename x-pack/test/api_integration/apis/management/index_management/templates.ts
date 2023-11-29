@@ -15,7 +15,7 @@ import { getRandomString } from './lib/random';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const { catTemplate, getTemplatePayload } = templatesHelpers(getService);
+  const { catTemplate, getTemplatePayload, getSerializedTemplate } = templatesHelpers(getService);
   const {
     getAllTemplates,
     getOneTemplate,
@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
     deleteTemplates,
     updateTemplate,
     cleanUpTemplates,
+    simulateTemplate,
   } = templatesApi(getService);
 
   describe('index templates', () => {
@@ -413,6 +414,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(catTemplateResponse.find((template) => template.name === payload.name)).to.equal(
           undefined
         );
+      });
+    });
+
+    describe('simulate', () => {
+      it('should simulate an index template', async () => {
+        const payload = getSerializedTemplate([getRandomString()]);
+
+        const { body } = await simulateTemplate(payload).expect(200);
+        expect(body.template).to.be.ok();
       });
     });
   });
