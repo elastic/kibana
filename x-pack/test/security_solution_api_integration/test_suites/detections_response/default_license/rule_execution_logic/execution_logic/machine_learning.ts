@@ -31,7 +31,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 import {
   createRule,
   deleteAllRules,
