@@ -368,6 +368,20 @@ paths:
       description: ''
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/zip:
@@ -516,6 +530,20 @@ paths:
           name: pkgkey
           in: path
           required: true
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/json:
@@ -689,6 +717,20 @@ paths:
       description: ''
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/json:
@@ -772,11 +814,17 @@ paths:
       operationId: delete-package
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: boolean
+          name: force
+          description: delete package even if policies used by agents
+          in: query
       requestBody:
         content:
           application/json:
             schema:
               type: object
+              deprecated: true
               properties:
                 force:
                   type: boolean
@@ -846,6 +894,37 @@ paths:
         name: pkgName
         in: path
         required: true
+  /epm/templates/{pkgName}/{pkgVersion}/inputs:
+    get:
+      summary: Get inputs template
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-inputs-template
+      security:
+        - basicAuth: []
+    parameters:
+      - schema:
+          type: string
+        name: pkgName
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: pkgVersion
+        in: path
+        required: true
+      - schema:
+          type: string
+          enum:
+            - json
+            - yaml
+            - yml
+        name: format
+        description: Format of response - json or yaml
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info
@@ -1671,12 +1750,6 @@ paths:
             schema:
               type: object
               properties:
-                revoke:
-                  type: boolean
-                  description: Revokes API keys of agents
-                force:
-                  type: boolean
-                  description: Unenroll hosted agents too
                 agents:
                   oneOf:
                     - type: string
@@ -1685,6 +1758,17 @@ paths:
                       items:
                         type: string
                       description: list of agent IDs
+                revoke:
+                  type: boolean
+                  description: Revokes API keys of agents
+                force:
+                  type: boolean
+                  description: Unenrolls hosted agents too
+                includeInactive:
+                  type: boolean
+                  description: >-
+                    When passing agents by KQL query, unenrolls inactive agents
+                    too
               required:
                 - agents
             example:
@@ -2774,7 +2858,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/output_create_request'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output_create_request'
         '400':
           $ref: '#/components/responses/error'
       operationId: get-output
@@ -2821,7 +2908,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/output_update_request'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output_update_request'
         '400':
           $ref: '#/components/responses/error'
       parameters:
@@ -3321,6 +3411,104 @@ paths:
           name: enrolToken
           in: query
           required: false
+  /uninstall_tokens:
+    get:
+      summary: List metadata for latest uninstall tokens per agent policy
+      tags:
+        - Uninstall tokens
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        policy_id:
+                          type: string
+                        created_at:
+                          type: string
+                      required:
+                        - id
+                        - policy_id
+                        - created_at
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-uninstall-tokens
+      parameters:
+        - name: perPage
+          in: query
+          description: The number of items to return
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 5
+        - $ref: '#/components/parameters/page_index'
+        - name: policyId
+          in: query
+          description: Partial match filtering for policy IDs
+          required: false
+          schema:
+            type: string
+  /uninstall_tokens/{uninstallTokenId}:
+    get:
+      summary: Get one decrypted uninstall token by its ID
+      tags:
+        - Uninstall tokens
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      token:
+                        type: string
+                      policy_id:
+                        type: string
+                      created_at:
+                        type: string
+                    required:
+                      - id
+                      - token
+                      - policy_id
+                      - created_at
+                required:
+                  - item
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-uninstall-token
+      parameters:
+        - name: uninstallTokenId
+          in: path
+          required: true
+          schema:
+            type: string
 components:
   securitySchemes:
     basicAuth:
@@ -3636,6 +3824,25 @@ components:
           type: string
         install_format_schema_version:
           type: string
+        latest_install_failed_attempts:
+          description: Latest failed install errors
+          type: array
+          items:
+            type: object
+            properties:
+              created_at:
+                type: string
+              target_version:
+                type: string
+              error:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  message:
+                    type: string
+                  stack:
+                    type: string
         verification_status:
           type: string
           enum:
@@ -3675,6 +3882,7 @@ components:
         - install_started_at
         - install_source
         - verification_status
+        - latest_install_failed_attempts
     search_result:
       title: Search result
       type: object
@@ -4308,6 +4516,12 @@ components:
             enum:
               - metrics
               - logs
+        keep_monitoring_alive:
+          description: >-
+            When set to true, monitoring will be enabled but logs/metrics
+            collection will be disabled
+          type: boolean
+          nullable: true
         data_output_id:
           type: string
           nullable: true
@@ -5051,6 +5265,16 @@ components:
           type: number
         required_acks:
           type: number
+        secrets:
+          type: object
+          properties:
+            password:
+              type: string
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - type
@@ -5115,22 +5339,61 @@ components:
               type: number
             loadbalance:
               type: boolean
+        secrets:
+          type: object
+          properties:
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - hosts
         - type
+    output_create_request_remote_elasticsearch:
+      title: remote_elasticsearch
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - remote_elasticsearch
+        hosts:
+          type: array
+          items:
+            type: string
+        service_token:
+          type: string
+        secrets:
+          type: object
+          properties:
+            service_token:
+              type: string
+      required:
+        - name
     output_create_request:
       title: Output
       oneOf:
         - $ref: '#/components/schemas/output_create_request_elasticsearch'
         - $ref: '#/components/schemas/output_create_request_kafka'
         - $ref: '#/components/schemas/output_create_request_logstash'
+        - $ref: '#/components/schemas/output_create_request_remote_elasticsearch'
       discriminator:
         propertyName: type
         mapping:
           elasticsearch: '#/components/schemas/output_create_request_elasticsearch'
           kafka: '#/components/schemas/output_create_request_kafka'
           logstash: '#/components/schemas/output_create_request_logstash'
+          remote_elasticsearch: '#/components/schemas/output_create_request_remote_elasticsearch'
     output_update_request_elasticsearch:
       title: elasticsearch
       type: object

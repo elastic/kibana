@@ -32,10 +32,15 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldTypeKnown } from '@kbn/discover-utils/types';
-import { getFieldTypeName, isKnownFieldType, KNOWN_FIELD_TYPE_LIST } from '@kbn/discover-utils';
-import { FieldIcon } from '../field_icon';
-import { getFieldIconType, getFieldTypeDescription } from '../../utils/field_types';
+import {
+  type FieldTypeKnown,
+  getFieldIconType,
+  getFieldTypeDescription,
+  getFieldTypeName,
+  isKnownFieldType,
+  KNOWN_FIELD_TYPE_LIST,
+  FieldIcon,
+} from '@kbn/field-utils';
 import type { FieldListItem, GetCustomFieldType } from '../../types';
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
@@ -102,12 +107,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   const itemStyle = useMemo(
     () => css`
       font-size: ${euiTheme.size.m};
-
-      // Specificity needed to override Sass styles
-      // EUI TODO: Remove this selector once EuiContextMenu has been converted to Emotion
-      &.euiContextMenuItem {
-        padding: ${euiTheme.size.s} ${euiTheme.size.m};
-      }
+      padding: ${euiTheme.size.s} ${euiTheme.size.m};
 
       & + & {
         border-top: 1px solid ${euiTheme.colors.lightestShade};

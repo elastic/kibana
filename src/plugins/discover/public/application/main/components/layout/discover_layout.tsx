@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +31,7 @@ import {
 } from '@kbn/discover-utils';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -52,6 +53,8 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
+import { DiscoverResizableLayout } from './discover_resizable_layout';
+import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -71,6 +74,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     history,
     spaces,
     inspector,
+    docLinks,
   } = useDiscoverServices();
   const { euiTheme } = useEuiTheme();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
@@ -110,8 +114,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
-    [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
+    [dataState.fetchStatus, dataState.foundDocuments]
   );
 
   const onOpenInspector = useInspector({
@@ -182,7 +186,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
   }, [dataState.error, isPlainRecord]);
 
-  const resizeRef = useRef<HTMLDivElement>(null);
+  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
+  const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
 
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
@@ -203,6 +208,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
     return (
       <>
+        {/* Temporarily display a tech preview callout for ES|QL*/}
+        {isPlainRecord && <ESQLTechPreviewCallout docLinks={docLinks} />}
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
           dataView={dataView}
@@ -211,7 +218,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           viewMode={viewMode}
           onAddFilter={onAddFilter as DocViewFilterFn}
           onFieldEdited={onFieldEdited}
-          resizeRef={resizeRef}
+          container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
         />
         {resultState === 'loading' && <LoadingSpinner />}
@@ -220,14 +227,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [
     currentColumns,
     dataView,
+    docLinks,
     isPlainRecord,
+    mainContainer,
     onAddFilter,
+    onDropFieldToTable,
     onFieldEdited,
     resultState,
     stateContainer,
     viewMode,
-    onDropFieldToTable,
   ]);
+
+  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
+    useState<UnifiedFieldListSidebarContainerApi | null>(null);
 
   return (
     <EuiPage
@@ -265,73 +277,98 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onFieldEdited={onFieldEdited}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
-        <SavedSearchURLConflictCallout
-          savedSearch={savedSearch}
-          spaces={spaces}
-          history={history}
-        />
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <SidebarMemoized
-              documents$={stateContainer.dataState.data$.documents$}
-              onAddField={onAddColumn}
-              columns={currentColumns}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              onRemoveField={onRemoveColumn}
-              onChangeDataView={stateContainer.actions.onChangeDataView}
-              selectedDataView={dataView}
-              trackUiMetric={trackUiMetric}
-              onFieldEdited={onFieldEdited}
-              onDataViewCreated={stateContainer.actions.onDataViewCreated}
-              availableFields$={stateContainer.dataState.data$.availableFields$}
-            />
-          </EuiFlexItem>
-          <EuiHideFor sizes={['xs', 's']}>
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                border-right: ${euiTheme.border.thin};
-              `}
-            />
-          </EuiHideFor>
-          <EuiFlexItem className="dscPageContent__wrapper">
-            {resultState === 'none' ? (
-              dataState.error ? (
-                <ErrorCallout
-                  title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
-                    defaultMessage: 'Unable to retrieve search results',
-                  })}
-                  error={dataState.error}
-                  data-test-subj="discoverNoResultsError"
-                />
-              ) : (
-                <DiscoverNoResults
-                  stateContainer={stateContainer}
-                  isTimeBased={isTimeBased}
-                  query={globalQueryState.query}
-                  filters={globalQueryState.filters}
-                  dataView={dataView}
-                  onDisableFilters={onDisableFilters}
-                />
-              )
-            ) : (
-              <EuiPanel
-                role="main"
-                panelRef={resizeRef}
-                paddingSize="none"
-                borderRadius="none"
-                hasShadow={false}
-                hasBorder={false}
-                color="transparent"
-                className={classNames('dscPageContent', {
-                  'dscPageContent--centered': contentCentered,
-                })}
+        <div
+          ref={setSidebarContainer}
+          css={css`
+            width: 100%;
+            height: 100%;
+          `}
+        >
+          <SavedSearchURLConflictCallout
+            savedSearch={savedSearch}
+            spaces={spaces}
+            history={history}
+          />
+          <DiscoverResizableLayout
+            container={sidebarContainer}
+            unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
+            sidebarPanel={
+              <EuiFlexGroup
+                gutterSize="none"
+                css={css`
+                  height: 100%;
+                `}
               >
-                {mainDisplay}
-              </EuiPanel>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                <EuiFlexItem>
+                  <SidebarMemoized
+                    documents$={stateContainer.dataState.data$.documents$}
+                    onAddField={onAddColumn}
+                    columns={currentColumns}
+                    onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                    onRemoveField={onRemoveColumn}
+                    onChangeDataView={stateContainer.actions.onChangeDataView}
+                    selectedDataView={dataView}
+                    trackUiMetric={trackUiMetric}
+                    onFieldEdited={onFieldEdited}
+                    onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                    availableFields$={stateContainer.dataState.data$.availableFields$}
+                    unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
+                    setUnifiedFieldListSidebarContainerApi={setUnifiedFieldListSidebarContainerApi}
+                  />
+                </EuiFlexItem>
+                <EuiHideFor sizes={['xs', 's']}>
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      border-right: ${euiTheme.border.thin};
+                    `}
+                  />
+                </EuiHideFor>
+              </EuiFlexGroup>
+            }
+            mainPanel={
+              <div className="dscPageContent__wrapper">
+                {resultState === 'none' ? (
+                  dataState.error ? (
+                    <ErrorCallout
+                      title={i18n.translate(
+                        'discover.noResults.searchExamples.noResultsErrorTitle',
+                        {
+                          defaultMessage: 'Unable to retrieve search results',
+                        }
+                      )}
+                      error={dataState.error}
+                    />
+                  ) : (
+                    <DiscoverNoResults
+                      stateContainer={stateContainer}
+                      isTimeBased={isTimeBased}
+                      query={globalQueryState.query}
+                      filters={globalQueryState.filters}
+                      dataView={dataView}
+                      onDisableFilters={onDisableFilters}
+                    />
+                  )
+                ) : (
+                  <EuiPanel
+                    role="main"
+                    panelRef={setMainContainer}
+                    paddingSize="none"
+                    borderRadius="none"
+                    hasShadow={false}
+                    hasBorder={false}
+                    color="transparent"
+                    className={classNames('dscPageContent', {
+                      'dscPageContent--centered': contentCentered,
+                    })}
+                  >
+                    {mainDisplay}
+                  </EuiPanel>
+                )}
+              </div>
+            }
+          />
+        </div>
       </EuiPageBody>
     </EuiPage>
   );

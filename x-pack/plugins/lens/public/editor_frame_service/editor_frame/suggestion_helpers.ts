@@ -6,12 +6,11 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { PaletteOutput } from '@kbn/coloring';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
-import type {
+import {
   Visualization,
   Datasource,
   TableSuggestion,
@@ -21,6 +20,7 @@ import type {
   VisualizeEditorContext,
   Suggestion,
   DatasourceLayers,
+  SuggestionRequest,
 } from '../../types';
 import type { LayerType } from '../../../common/types';
 import {
@@ -64,7 +64,7 @@ export function getSuggestions({
   visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext;
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
-  mainPalette?: PaletteOutput;
+  mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
@@ -150,6 +150,7 @@ export function getSuggestions({
           return filteredCount || filteredCount === datasourceSuggestion.keptLayerIds.length;
         })
         .flatMap((datasourceSuggestion) => {
+          const datasourceId = datasourceSuggestion.datasourceId;
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualization?.id ? visualizationState : undefined;
@@ -170,7 +171,8 @@ export function getSuggestions({
             palette,
             visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
             activeData,
-            allowMixed
+            allowMixed,
+            datasourceId
           );
         });
     })
@@ -237,10 +239,11 @@ function getVisualizationSuggestions(
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown,
   subVisualizationId?: string,
-  mainPalette?: PaletteOutput,
+  mainPalette?: SuggestionRequest['mainPalette'],
   isFromContext?: boolean,
   activeData?: Record<string, Datatable>,
-  allowMixed?: boolean
+  allowMixed?: boolean,
+  datasourceId?: string
 ) {
   try {
     return visualization
@@ -253,6 +256,7 @@ function getVisualizationSuggestions(
         isFromContext,
         activeData,
         allowMixed,
+        datasourceId,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,

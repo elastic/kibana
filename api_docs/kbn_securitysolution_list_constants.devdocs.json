@@ -301,14 +301,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
           },
           {
@@ -869,6 +861,14 @@
             "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
           },
           {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
@@ -891,22 +891,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
           {
             "plugin": "securitySolution",

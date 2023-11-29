@@ -55,8 +55,14 @@ export function IngestPipelinesAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async createIndex(index: { index: string; id: string; body: object }) {
-      log.debug(`Creating index: '${index.index}'`);
+      const indexExists = await es.indices.exists({ index: index.index });
 
+      // Index should not exist, but in the case that it already does, we bypass the create request
+      if (indexExists) {
+        return;
+      }
+
+      log.debug(`Creating index: '${index.index}'`);
       return await es.index(index);
     },
 

@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SettingType } from '@kbn/management-settings-types';
+import {
+  FieldDefinition,
+  OnInputChangeFn,
+  SettingType,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { KnownTypeToValue } from '@kbn/management-settings-types';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 
 /**
  * Contextual services used by a {@link FieldInput} component.
@@ -19,6 +25,7 @@ export interface FieldInputServices {
    * @param value The message to display.
    */
   showDanger: (value: string) => void;
+  validateChange: (key: string, value: any) => Promise<ValueValidation>;
 }
 
 /**
@@ -27,38 +34,24 @@ export interface FieldInputServices {
  */
 export interface FieldInputKibanaDependencies {
   /** The portion of the {@link ToastsStart} contract used by this component. */
-  toasts: Pick<ToastsStart, 'addDanger'>;
+  notifications: {
+    toasts: Pick<ToastsStart, 'addDanger'>;
+  };
+  settings: {
+    client: IUiSettingsClient;
+  };
 }
 
 /**
  * Props passed to a {@link FieldInput} component.
  */
-export interface InputProps<T extends SettingType, V = KnownTypeToValue<T> | null> {
-  id: string;
-  ariaDescribedBy?: string;
-  ariaLabel: string;
-  isDisabled?: boolean;
-  isInvalid?: boolean;
-  value?: V;
-  name: string;
-  /** The `onChange` handler. */
-  onChange: OnChangeFn<T>;
+export interface InputProps<T extends SettingType> {
+  field: Pick<
+    FieldDefinition<T>,
+    'ariaAttributes' | 'defaultValue' | 'id' | 'name' | 'savedValue' | 'type' | 'isOverridden'
+  >;
+  unsavedChange?: UnsavedFieldChange<T>;
+  isSavingEnabled: boolean;
+  /** The `onInputChange` handler. */
+  onInputChange: OnInputChangeFn<T>;
 }
-
-/**
- * Parameters for the {@link OnChangeFn} handler.
- */
-export interface OnChangeParams<T extends SettingType> {
-  /** The value provided to the handler. */
-  value?: KnownTypeToValue<T> | null;
-  /** An error message, if one occurred. */
-  error?: string;
-  /** True if the format of a change is not valid, false otherwise. */
-  isInvalid?: boolean;
-}
-
-/**
- * A function that is called when the value of a {@link FieldInput} changes.
- * @param params The {@link OnChangeParams} parameters passed to the handler.
- */
-export type OnChangeFn<T extends SettingType> = (params: OnChangeParams<T>) => void;

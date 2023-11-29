@@ -25,6 +25,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EventFiltersForm } from './form';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
+import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -464,6 +465,37 @@ describe('Event filter form', () => {
       ];
       rerender();
       expect(renderResult.findByTestId('duplicate-fields-warning-message')).not.toBeNull();
+    });
+  });
+
+  describe('Errors', () => {
+    beforeEach(() => {
+      render();
+    });
+
+    it('should not show warning text when unique fields are added', async () => {
+      rerender();
+
+      const commentInput = renderResult.getByLabelText('Comment Input');
+
+      expect(
+        renderResult.queryByText(
+          `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`
+        )
+      ).toBeNull();
+      act(() => {
+        fireEvent.change(commentInput, {
+          target: {
+            value: [...new Array(MAX_COMMENT_LENGTH + 1).keys()].map((_) => 'a').join(''),
+          },
+        });
+        fireEvent.blur(commentInput);
+      });
+      expect(
+        renderResult.queryByText(
+          `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`
+        )
+      ).not.toBeNull();
     });
   });
 });

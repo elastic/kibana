@@ -83,7 +83,7 @@ export const APIGettingStarted = () => {
     ingestPipeline: indexPipelineParameters.name,
     url: cloudContext.elasticsearchUrl || DEFAULT_URL,
   };
-  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/client_libraries/`);
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/client_libraries`);
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
   return (

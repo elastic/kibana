@@ -9,7 +9,8 @@
 import { Entity } from '../entity';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import { ApmFields, SpanParams, GeoLocation, ApmApplicationMetricFields } from './apm_fields';
+import { Event } from './event';
+import { ApmApplicationMetricFields, ApmFields, GeoLocation, SpanParams } from './apm_fields';
 import { generateLongId } from '../utils/generate_id';
 import { Metricset } from './metricset';
 import { ApmError } from './apm_error';
@@ -143,6 +144,10 @@ export class MobileDevice extends Entity<ApmFields> {
     return this;
   }
 
+  event(): Event {
+    return new Event({ ...this.fields });
+  }
+
   transaction(
     ...options:
       | [{ transactionName: string; frameworkName?: string; frameworkVersion?: string }]
@@ -254,6 +259,7 @@ export class MobileDevice extends Entity<ApmFields> {
     return new ApmError({
       ...this.fields,
       'error.type': 'crash',
+      'error.id': generateLongId(message),
       'error.exception': [{ message, ...{ type: 'crash' } }],
       'error.grouping_name': groupingName || message,
     });

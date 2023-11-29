@@ -73,6 +73,9 @@
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-table-list-view",
     "@kbn/serverless",
+    "@kbn/logging",
+    "@kbn/search-response-warnings",
+    "@kbn/calculate-width-from-char-count",
   ],
   "exclude": [
     "target/**/*",

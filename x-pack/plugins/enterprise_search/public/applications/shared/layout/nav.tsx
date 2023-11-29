@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiIcon, EuiSideNavItemType } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiSideNavItemType, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -19,7 +19,7 @@ import {
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  ESRE_PLUGIN,
+  AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
@@ -35,44 +35,19 @@ export const useEnterpriseSearchNav = () => {
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
-      id: 'es_overview',
-      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
-        defaultMessage: 'Overview',
-      }),
+      id: 'home',
+      name: (
+        <EuiText size="s">
+          {i18n.translate('xpack.enterpriseSearch.nav.homeTitle', {
+            defaultMessage: 'Home',
+          })}
+        </EuiText>
+      ),
       ...generateNavLink({
         shouldNotCreateHref: true,
+        shouldShowActiveForSubroutes: true,
         to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       }),
-      items: [
-        {
-          id: 'elasticsearch',
-          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
-            defaultMessage: 'Elasticsearch',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ELASTICSEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'vectorSearch',
-          name: VECTOR_SEARCH_PLUGIN.NAME,
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: VECTOR_SEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'esre',
-          name: i18n.translate('xpack.enterpriseSearch.nav.esreTitle', {
-            defaultMessage: 'ESRE',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ESRE_PLUGIN.URL,
-          }),
-        },
-      ],
     },
     {
       id: 'content',
@@ -118,7 +93,7 @@ export const useEnterpriseSearchNav = () => {
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
-            to: APPLICATIONS_PLUGIN.URL,
+            to: APPLICATIONS_PLUGIN.URL + SEARCH_APPLICATIONS_PATH,
           }),
         },
         {
@@ -134,6 +109,42 @@ export const useEnterpriseSearchNav = () => {
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
         defaultMessage: 'Applications',
+      }),
+    },
+    {
+      id: 'es_getting_started',
+      items: [
+        {
+          id: 'elasticsearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
+            defaultMessage: 'Elasticsearch',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ELASTICSEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'vectorSearch',
+          name: VECTOR_SEARCH_PLUGIN.NAME,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: VECTOR_SEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'aiSearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.aiSearchTitle', {
+            defaultMessage: 'AI Search',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: AI_SEARCH_PLUGIN.URL,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
+        defaultMessage: 'Getting started',
       }),
     },
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess

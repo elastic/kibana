@@ -7,7 +7,6 @@
 
 import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
@@ -16,6 +15,7 @@ import {
   APM_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
+  UNIVERSAL_PROFILING_APP,
   UPTIME_APP,
   UX_APP,
 } from '../constants';
@@ -54,6 +54,7 @@ const apps: DataContextApps[] = [
   INFRA_METRICS_APP,
   UX_APP,
   ALERT_APP,
+  UNIVERSAL_PROFILING_APP,
 ];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
@@ -63,80 +64,81 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
-  const isExploratoryView = useRouteMatch('/exploratory-view');
-
   useEffect(
     () => {
-      if (!isExploratoryView)
-        asyncForEach(apps, async (app) => {
-          try {
-            const updateState = ({
-              hasData,
-              indices,
-              serviceName,
-            }: {
-              hasData?: boolean;
-              serviceName?: string;
-              indices?: string | ApmIndicesConfig;
-            }) => {
-              setHasDataMap((prevState) => ({
-                ...prevState,
-                [app]: {
-                  hasData,
-                  ...(serviceName ? { serviceName } : {}),
-                  ...(indices ? { indices } : {}),
-                  status: FETCH_STATUS.SUCCESS,
-                },
-              }));
-            };
-            switch (app) {
-              case UX_APP:
-                const params = { absoluteTime: { start: absoluteStart!, end: absoluteEnd! } };
-                const resultUx = await getDataHandler(app)?.hasData(params);
-                updateState({
-                  hasData: resultUx?.hasData,
-                  indices: resultUx?.indices,
-                  serviceName: resultUx?.serviceName as string,
-                });
-                break;
-              case UPTIME_APP:
-                const resultSy = await getDataHandler(app)?.hasData();
-                updateState({ hasData: resultSy?.hasData, indices: resultSy?.indices });
-
-                break;
-              case APM_APP:
-                const resultApm = await getDataHandler(app)?.hasData();
-                updateState({ hasData: resultApm?.hasData, indices: resultApm?.indices });
-
-                break;
-              case INFRA_LOGS_APP:
-                const resultInfraLogs = await getDataHandler(app)?.hasData();
-                updateState({
-                  hasData: resultInfraLogs?.hasData,
-                  indices: resultInfraLogs?.indices,
-                });
-                break;
-              case INFRA_METRICS_APP:
-                const resultInfraMetrics = await getDataHandler(app)?.hasData();
-                updateState({
-                  hasData: resultInfraMetrics?.hasData,
-                  indices: resultInfraMetrics?.indices,
-                });
-                break;
-            }
-          } catch (e) {
+      asyncForEach(apps, async (app) => {
+        try {
+          const updateState = ({
+            hasData,
+            indices,
+            serviceName,
+          }: {
+            hasData?: boolean;
+            serviceName?: string;
+            indices?: string | ApmIndicesConfig;
+          }) => {
             setHasDataMap((prevState) => ({
               ...prevState,
               [app]: {
-                hasData: undefined,
-                status: FETCH_STATUS.FAILURE,
+                hasData,
+                ...(serviceName ? { serviceName } : {}),
+                ...(indices ? { indices } : {}),
+                status: FETCH_STATUS.SUCCESS,
               },
             }));
+          };
+          switch (app) {
+            case UX_APP:
+              const params = { absoluteTime: { start: absoluteStart!, end: absoluteEnd! } };
+              const resultUx = await getDataHandler(app)?.hasData(params);
+              updateState({
+                hasData: resultUx?.hasData,
+                indices: resultUx?.indices,
+                serviceName: resultUx?.serviceName as string,
+              });
+              break;
+            case UPTIME_APP:
+              const resultSy = await getDataHandler(app)?.hasData();
+              updateState({ hasData: resultSy?.hasData, indices: resultSy?.indices });
+
+              break;
+            case APM_APP:
+              const resultApm = await getDataHandler(app)?.hasData();
+              updateState({ hasData: resultApm?.hasData, indices: resultApm?.indices });
+
+              break;
+            case INFRA_LOGS_APP:
+              const resultInfraLogs = await getDataHandler(app)?.hasData();
+              updateState({
+                hasData: resultInfraLogs?.hasData,
+                indices: resultInfraLogs?.indices,
+              });
+              break;
+            case INFRA_METRICS_APP:
+              const resultInfraMetrics = await getDataHandler(app)?.hasData();
+              updateState({
+                hasData: resultInfraMetrics?.hasData,
+                indices: resultInfraMetrics?.indices,
+              });
+              break;
+            case UNIVERSAL_PROFILING_APP:
+              // Profiling only shows the empty section for now
+              updateState({ hasData: false });
+              break;
           }
-        });
+        } catch (e) {
+          setHasDataMap((prevState) => ({
+            ...prevState,
+            [app]: {
+              hasData: undefined,
+              status: FETCH_STATUS.FAILURE,
+            },
+          }));
+        }
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isExploratoryView]
+    []
   );
 
   useEffect(() => {

@@ -14,20 +14,20 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
-import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { getMlGlobalServices } from '../../../application/app';
 
+export interface FlyoutComponentProps {
+  onClose: () => void;
+}
+
 export function createFlyout(
   FlyoutComponent: React.FunctionComponent<any>,
-  embeddable: MapEmbeddable | Embeddable,
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
   dashboardService: DashboardStart,
-  isServerless: boolean,
   lens?: LensPublicStart
 ): Promise<void> {
   const {
@@ -54,11 +54,10 @@ export function createFlyout(
               data,
               lens,
               dashboardService,
-              mlServices: getMlGlobalServices(http, isServerless),
+              mlServices: getMlGlobalServices(http),
             }}
           >
             <FlyoutComponent
-              embeddable={embeddable}
               onClose={() => {
                 onFlyoutClose();
                 resolve();

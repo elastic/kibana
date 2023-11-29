@@ -9,6 +9,7 @@
     "server/**/*",
     "scripts/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "common/**/*.json",
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
@@ -17,7 +18,6 @@
   "exclude": [
     "target/**/*",
     "**/cypress/**",
-    "public/management/cypress_endpoint.config.ts",
     "public/management/cypress.config.ts"
   ],
   "kbn_references": [
@@ -157,9 +157,10 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
-    "@kbn/cloud-chat-plugin",
     "@kbn/alerts-ui-shared",
+    "@kbn/text-based-editor",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
@@ -171,7 +172,17 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
     "@kbn/security-solution-features",
-    "@kbn/handlebars",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/discover-utils",
+    "@kbn/core-application-common",
+    "@kbn/openapi-generator",
+    "@kbn/openapi-bundler",
+    "@kbn/es",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-styled",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/zod-helpers",
+    "@kbn/core-http-common"
   ]
 }

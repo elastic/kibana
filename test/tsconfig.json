@@ -68,6 +68,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/discover-plugin",
     "@kbn/core-http-common",
-    "@kbn/event-annotation-plugin"
+    "@kbn/event-annotation-plugin",
+    "@kbn/event-annotation-common",
+    "@kbn/links-plugin",
   ]
 }

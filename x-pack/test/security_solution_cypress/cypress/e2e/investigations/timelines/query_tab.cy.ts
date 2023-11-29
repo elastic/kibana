@@ -14,16 +14,13 @@ import {
   TIMELINE_QUERY,
   NOTE_CARD_CONTENT,
 } from '../../../screens/timeline';
-import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
-import { cleanKibana } from '../../../tasks/common';
-
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   addFilter,
   openTimelineById,
-  persistNoteToFirstEvent,
   pinFirstEvent,
   refreshTimelinesUntilTimeLinePresent,
 } from '../../../tasks/timeline';
@@ -32,9 +29,8 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     createTimeline(getTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {
@@ -44,14 +40,16 @@ describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
           .then(() => cy.wrap(timelineId).as('timelineId'))
           // eslint-disable-next-line cypress/no-unnecessary-waiting
           .then(() => cy.wait(1000))
-          .then(() =>
-            addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
-              expect(response.status).to.equal(200)
-            )
-          )
+          // TO-DO: Issue 163398
+          // .then(() =>
+          //   addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
+          //     expect(response.status).to.equal(200)
+          //   )
+          // )
           .then(() => openTimelineById(timelineId))
           .then(() => pinFirstEvent())
-          .then(() => persistNoteToFirstEvent('event note'))
+          // TO-DO: Issue 163398
+          // .then(() => persistNoteToFirstEvent('event note'))
           .then(() => addFilter(getTimeline().filter));
       });
   });
@@ -59,7 +57,7 @@ describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('Query tab', () => {
     beforeEach(function () {
       login();
-      visitWithoutDateRange(TIMELINES_URL);
+      visit(TIMELINES_URL);
       openTimelineById(this.timelineId).then(() => addFilter(getTimeline().filter));
     });
 
@@ -67,7 +65,8 @@ describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(TIMELINE_QUERY).should('have.text', `${getTimeline().query}`);
     });
 
-    it('should be able to add event note', () => {
+    // TO-DO: Issue 163398
+    it.skip('should be able to add event note', () => {
       cy.get(NOTE_CARD_CONTENT).should('contain', 'event note');
     });
 

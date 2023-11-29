@@ -10,6 +10,7 @@ import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { switchMap } from 'rxjs';
 import { useSavedSearchInitial } from '../services/discover_state_provider';
 import type { DiscoverStateContainer } from '../services/discover_state';
 import { getValidViewMode } from '../utils/get_valid_view_mode';
@@ -51,86 +52,90 @@ export function useTextBasedQueryLanguage({
   }, []);
 
   useEffect(() => {
-    const subscription = stateContainer.dataState.data$.documents$.subscribe(async (next) => {
-      const { query, recordRawType } = next;
-      if (!query || next.fetchStatus === FetchStatus.ERROR) {
-        return;
-      }
-      const sendComplete = () => {
-        stateContainer.dataState.data$.documents$.next({
-          ...next,
-          fetchStatus: FetchStatus.COMPLETE,
-        });
-      };
-      const { index, viewMode } = stateContainer.appState.getState();
-      let nextColumns: string[] = [];
-      const isTextBasedQueryLang =
-        recordRawType === 'plain' &&
-        isOfAggregateQueryType(query) &&
-        ('sql' in query || 'esql' in query);
-      const hasResults = Boolean(next.result?.length);
-      let queryHasTransformationalCommands = 'sql' in query;
-      if ('esql' in query) {
-        TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
-          if (query.esql.toLowerCase().includes(command)) {
-            queryHasTransformationalCommands = true;
+    const subscription = stateContainer.dataState.data$.documents$
+      .pipe(
+        switchMap(async (next) => {
+          const { query, recordRawType } = next;
+          if (!query || next.fetchStatus === FetchStatus.ERROR) {
             return;
           }
-        });
-      }
-
-      if (isTextBasedQueryLang) {
-        const language = getAggregateQueryMode(query);
-        if (next.fetchStatus !== FetchStatus.PARTIAL) {
-          return;
-        }
-        const dataViewObj = stateContainer.internalState.getState().dataView!;
-
-        if (hasResults) {
-          // check if state needs to contain column transformation due to a different columns in the resultset
-          const firstRow = next.result![0];
-          const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-          if (!queryHasTransformationalCommands) {
-            nextColumns = [];
-            initialFetch.current = false;
-          } else {
-            nextColumns = firstRowColumns;
-            if (
-              initialFetch.current &&
-              !prev.current.columns.length &&
-              Boolean(dataViewObj?.id === index)
-            ) {
-              prev.current.columns = firstRowColumns;
-            }
+          const sendComplete = () => {
+            stateContainer.dataState.data$.documents$.next({
+              ...next,
+              fetchStatus: FetchStatus.COMPLETE,
+            });
+          };
+          const { index, viewMode } = stateContainer.appState.getState();
+          let nextColumns: string[] = [];
+          const isTextBasedQueryLang =
+            recordRawType === 'plain' &&
+            isOfAggregateQueryType(query) &&
+            ('sql' in query || 'esql' in query);
+          const hasResults = Boolean(next.result?.length);
+          let queryHasTransformationalCommands = 'sql' in query;
+          if ('esql' in query) {
+            TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
+              if (query.esql.toLowerCase().includes(command)) {
+                queryHasTransformationalCommands = true;
+                return;
+              }
+            });
           }
-        }
-        const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
-        const queryChanged = query[language] !== prev.current.query;
-        // no need to reset index to state if it hasn't changed
-        const addDataViewToState = Boolean(dataViewObj?.id !== index);
-        if (!queryChanged || (!addDataViewToState && !addColumnsToState)) {
-          sendComplete();
-          return;
-        }
 
-        if (queryChanged) {
-          prev.current.query = query[language];
-          prev.current.columns = nextColumns;
-        }
-        const nextState = {
-          ...(addDataViewToState && { index: dataViewObj.id }),
-          ...(addColumnsToState && { columns: nextColumns }),
-          ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
-            viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
-          }),
-        };
-        await stateContainer.appState.replaceUrlState(nextState);
-        sendComplete();
-      } else {
-        // cleanup for a "regular" query
-        cleanup();
-      }
-    });
+          if (isTextBasedQueryLang) {
+            const language = getAggregateQueryMode(query);
+            if (next.fetchStatus !== FetchStatus.PARTIAL) {
+              return;
+            }
+            const dataViewObj = stateContainer.internalState.getState().dataView!;
+
+            if (hasResults) {
+              // check if state needs to contain column transformation due to a different columns in the resultset
+              const firstRow = next.result![0];
+              const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+              if (!queryHasTransformationalCommands) {
+                nextColumns = [];
+                initialFetch.current = false;
+              } else {
+                nextColumns = firstRowColumns;
+                if (
+                  initialFetch.current &&
+                  !prev.current.columns.length &&
+                  Boolean(dataViewObj?.id === index)
+                ) {
+                  prev.current.columns = firstRowColumns;
+                }
+              }
+            }
+            const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
+            const queryChanged = query[language] !== prev.current.query;
+            // no need to reset index to state if it hasn't changed
+            const addDataViewToState = Boolean(dataViewObj?.id !== index);
+            if (!queryChanged || (!addDataViewToState && !addColumnsToState)) {
+              sendComplete();
+              return;
+            }
+
+            if (queryChanged) {
+              prev.current.query = query[language];
+              prev.current.columns = nextColumns;
+            }
+            const nextState = {
+              ...(addDataViewToState && { index: dataViewObj.id }),
+              ...((addColumnsToState || queryChanged) && { columns: nextColumns }),
+              ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
+                viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
+              }),
+            };
+            await stateContainer.appState.replaceUrlState(nextState);
+            sendComplete();
+          } else {
+            // cleanup for a "regular" query
+            cleanup();
+          }
+        })
+      )
+      .subscribe();
     return () => {
       // cleanup for e.g. when savedSearch is switched
       cleanup();

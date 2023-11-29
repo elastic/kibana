@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const deleteIndex = (index: string) => {
   rootRequest({
     method: 'DELETE',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}?refresh=wait_for`,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}`,
     failOnStatusCode: false,
   });
 };
@@ -19,12 +18,13 @@ export const deleteDataStream = (dataStreamName: string) => {
   rootRequest({
     method: 'DELETE',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/_data_stream/${dataStreamName}`,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
 
-export const deleteAllDocuments = (target: string) =>
+export const deleteAllDocuments = (target: string) => {
+  refreshIndex(target);
+
   rootRequest({
     method: 'POST',
     url: `${Cypress.env(
@@ -36,6 +36,7 @@ export const deleteAllDocuments = (target: string) =>
       },
     },
   });
+};
 
 export const createIndex = (indexName: string, properties: Record<string, unknown>) =>
   rootRequest({
@@ -61,7 +62,6 @@ export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocu
       rootRequest<{ hits: { hits: unknown[] } }>({
         method: 'GET',
         url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
-        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
         failOnStatusCode: false,
       }).then((response) => {
         if (response.status !== 200) {
@@ -80,7 +80,6 @@ export const refreshIndex = (index: string) => {
       rootRequest({
         method: 'POST',
         url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_refresh`,
-        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
         failOnStatusCode: false,
       }).then((response) => {
         if (response.status !== 200) {

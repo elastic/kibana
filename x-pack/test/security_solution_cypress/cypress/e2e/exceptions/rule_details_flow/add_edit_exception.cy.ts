@@ -14,7 +14,7 @@ import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
   goToAlertsTab,
@@ -23,6 +23,7 @@ import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   removeException,
   searchForExceptionItem,
+  visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 import {
@@ -36,8 +37,7 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { ruleDetailsUrl } from '../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -63,12 +63,11 @@ describe(
   'Add/edit exception from rule details',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
-    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
+    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
     const ITEM_FIELD = 'unique_value.test';
 
     before(() => {
-      cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     });
 
@@ -79,6 +78,7 @@ describe(
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
+      deleteExceptionLists();
 
       const exceptionList = getExceptionList();
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
@@ -121,7 +121,7 @@ describe(
               ],
               rule_id: '2',
             })
-          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+          ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
         });
       });
 
@@ -259,7 +259,7 @@ describe(
             interval: '10s',
             rule_id: 'rule_testing',
           })
-        ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+        ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
       });
 
       afterEach(() => {
@@ -276,8 +276,8 @@ describe(
         // add exception item conditions
         addExceptionConditions({
           field: 'agent.name',
-          operator: 'is',
-          values: ['foo'],
+          operator: 'is one of',
+          values: ['foo', 'FOO', 'bar'],
         });
 
         // Name is required so want to check that submit is still disabled

@@ -16,18 +16,23 @@ import {
   kibanaTestSuperuserServerless,
   getDockerFileMountPath,
 } from '@kbn/test';
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-plugin/common';
 import { services } from './services';
 
 export default async () => {
   const servers = {
     kibana: {
       ...kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless),
+      protocol: process.env.TEST_CLOUD ? 'https' : 'http',
+      certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
+    },
+    elasticsearch: {
+      ...esTestConfig.getUrlParts(),
       protocol: 'https',
       certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
     },
-    elasticsearch: { ...esTestConfig.getUrlParts(), protocol: 'https' },
   };
 
   // "Fake" SAML provider
@@ -64,16 +69,6 @@ export default async () => {
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
         `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
-
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=urn:oid:0.0.7',
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.order=101',
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${getDockerFileMountPath(
-          idpPath
-        )}`,
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${servers.kibana.port}/api/security/saml/callback`,
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${servers.kibana.port}`,
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${servers.kibana.port}/logout`,
       ],
       ssl: true, // SSL is required for SAML realm
     },
@@ -85,10 +80,6 @@ export default async () => {
       },
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
-        '--server.ssl.enabled=true',
-        `--server.ssl.key=${KBN_KEY_PATH}`,
-        `--server.ssl.certificate=${KBN_CERT_PATH}`,
-        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--server.restrictInternalApis=true`,
         `--server.port=${servers.kibana.port}`,
         '--status.allowAnonymous=true',
@@ -117,13 +108,33 @@ export default async () => {
             appenders: ['deprecation'],
           },
         ])}`,
+        // Add meta info to the logs so FTR logs are more actionable
+        `--logging.appenders.default=${JSON.stringify({
+          type: 'console',
+          layout: {
+            type: 'pattern',
+            pattern: '[%date][%level][%logger] %message %meta',
+          },
+        })}`,
+        `--logging.appenders.console=${JSON.stringify({
+          type: 'console',
+          layout: {
+            type: 'pattern',
+            pattern: '[%date][%level][%logger] %message %meta',
+          },
+        })}`,
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
         `--plugin-path=${samlIdPPlugin}`,
         '--xpack.cloud.id=ftr_fake_cloud_id',
+        // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
+        // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
+        // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
+        // order, we indicate that basic authentication can still be used, but only if explicitly requested when the
+        // user navigates to `/login` page directly and enters username and password in the login form.
         '--xpack.security.authc.selector.enabled=false',
         `--xpack.security.authc.providers=${JSON.stringify({
-          saml: { 'cloud-saml-kibana': { order: 0, realm: 'cloud-saml-kibana' } },
+          saml: { 'cloud-saml-kibana': { order: 0, realm: MOCK_IDP_REALM_NAME } },
           basic: { 'cloud-basic': { order: 1 } },
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',

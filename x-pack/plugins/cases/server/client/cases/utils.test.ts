@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import {
   comment as commentObj,
   userActions,
@@ -27,8 +29,17 @@ import {
   mapCaseFieldsToExternalSystemFields,
   formatComments,
   addKibanaInformationToDescription,
+  fillMissingCustomFields,
+  normalizeCreateCaseRequest,
 } from './utils';
-import { CaseStatuses, UserActionActions } from '../../../common/types/domain';
+import type { CaseCustomFields } from '../../../common/types/domain';
+import {
+  CaseStatuses,
+  CustomFieldTypes,
+  UserActionActions,
+  CaseSeverity,
+  ConnectorTypes,
+} from '../../../common/types/domain';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
@@ -253,8 +264,11 @@ describe('utils', () => {
 
       expect(res).toEqual({
         incident: {
-          externalId: null,
           description: 'This is a brand new case of a bad meanie defacing data',
+          externalId: null,
+          id: 'mock-id-1',
+          severity: 'low',
+          status: 'open',
           tags: ['defacement'],
           title: 'Super Bad Security Issue',
         },
@@ -1339,6 +1353,223 @@ describe('utils', () => {
           userProfilesMapNoFullNames
         )
       ).toEqual(userProfiles[0].user.username);
+    });
+  });
+
+  describe('fillMissingCustomFields', () => {
+    const customFields: CaseCustomFields = [
+      {
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        value: 'this is a text field value',
+      },
+    ];
+
+    const customFieldsConfiguration = [
+      {
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'foo',
+        required: false,
+      },
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.TOGGLE,
+        label: 'foo',
+        required: false,
+      },
+    ];
+
+    it('adds missing custom fields correctly', () => {
+      expect(
+        fillMissingCustomFields({
+          customFields,
+          customFieldsConfiguration,
+        })
+      ).toEqual([
+        customFields[0],
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ]);
+    });
+
+    it('does not set to null custom fields that exists', () => {
+      expect(
+        fillMissingCustomFields({
+          customFields: [
+            customFields[0],
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+          customFieldsConfiguration,
+        })
+      ).toEqual([
+        customFields[0],
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: true,
+        },
+      ]);
+    });
+
+    it('returns all custom fields if they are more than the configuration', () => {
+      expect(
+        fillMissingCustomFields({
+          customFields: [
+            customFields[0],
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+            {
+              key: 'third_key',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+          customFieldsConfiguration,
+        })
+      ).toEqual([
+        customFields[0],
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: true,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: true,
+        },
+      ]);
+    });
+
+    it('adds missing custom fields if the customFields is undefined', () => {
+      expect(
+        fillMissingCustomFields({
+          customFieldsConfiguration,
+        })
+      ).toEqual([
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          value: null,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ]);
+    });
+
+    it('does not add missing fields if the customFieldsConfiguration is undefined', () => {
+      expect(
+        fillMissingCustomFields({
+          customFields,
+        })
+      ).toEqual(customFields);
+    });
+  });
+});
+
+describe('normalizeCreateCaseRequest', () => {
+  const theCase = {
+    title: 'My Case',
+    tags: [],
+    description: 'testing sir',
+    connector: {
+      id: '.none',
+      name: 'None',
+      type: ConnectorTypes.none,
+      fields: null,
+    },
+    settings: { syncAlerts: true },
+    severity: CaseSeverity.LOW,
+    owner: SECURITY_SOLUTION_OWNER,
+    assignees: [{ uid: '1' }],
+    category: 'my category',
+    customFields: [],
+  };
+
+  it('should trim title', async () => {
+    expect(normalizeCreateCaseRequest({ ...theCase, title: 'title with spaces      ' })).toEqual({
+      ...theCase,
+      title: 'title with spaces',
+    });
+  });
+
+  it('should trim description', async () => {
+    expect(
+      normalizeCreateCaseRequest({
+        ...theCase,
+        description: 'this is a description with spaces!!      ',
+      })
+    ).toEqual({
+      ...theCase,
+      description: 'this is a description with spaces!!',
+    });
+  });
+
+  it('should trim tags', async () => {
+    expect(
+      normalizeCreateCaseRequest({
+        ...theCase,
+        tags: ['pepsi     ', 'coke'],
+      })
+    ).toEqual({
+      ...theCase,
+      tags: ['pepsi', 'coke'],
+    });
+  });
+
+  it('should trim category', async () => {
+    expect(
+      normalizeCreateCaseRequest({
+        ...theCase,
+        category: 'reporting       ',
+      })
+    ).toEqual({
+      ...theCase,
+      category: 'reporting',
+    });
+  });
+
+  it('should set the category to null if missing', async () => {
+    expect(normalizeCreateCaseRequest(omit(theCase, 'category'))).toEqual({
+      ...theCase,
+      category: null,
+    });
+  });
+
+  it('should fill out missing custom fields', async () => {
+    expect(
+      normalizeCreateCaseRequest(omit(theCase, 'customFields'), [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'foo',
+          required: false,
+        },
+      ])
+    ).toEqual({
+      ...theCase,
+      customFields: [{ key: 'first_key', type: CustomFieldTypes.TEXT, value: null }],
+    });
+  });
+
+  it('should set the customFields to an empty array if missing', async () => {
+    expect(normalizeCreateCaseRequest(omit(theCase, 'customFields'))).toEqual({
+      ...theCase,
+      customFields: [],
     });
   });
 });

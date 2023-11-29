@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { SettingType } from '@kbn/management-settings-types';
+import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
-import { CodeEditor } from '../code_editor';
-import type { InputProps, OnChangeFn } from '../types';
+import { debounce } from 'lodash';
+import { useServices } from '../services';
+import { CodeEditor, CodeEditorProps } from '../code_editor';
+import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 type Type = Extract<SettingType, 'json' | 'markdown'>;
@@ -23,11 +25,6 @@ type Type = Extract<SettingType, 'json' | 'markdown'>;
 export interface CodeEditorInputProps extends InputProps<Type> {
   /** The default value of the {@link CodeEditor} component. */
   defaultValue?: string;
-  /**
-   * The `onChange` event handler, expanded to include both `markdown`
-   * and `json`
-   */
-  onChange: OnChangeFn<Type>;
   /**
    * The {@link UiSettingType}, expanded to include both `markdown`
    * and `json`
@@ -41,52 +38,55 @@ export interface CodeEditorInputProps extends InputProps<Type> {
  * TODO: clintandrewhall - `kibana_react` `CodeEditor` does not support `disabled`.
  */
 export const CodeEditorInput = ({
-  ariaDescribedBy,
-  ariaLabel,
-  defaultValue,
-  id,
-  isDisabled = false,
-  onChange: onChangeProp,
+  field,
+  unsavedChange,
   type,
-  value: valueProp = '',
+  isSavingEnabled,
+  defaultValue,
+  onInputChange,
 }: CodeEditorInputProps) => {
-  const onChange = (newValue: string) => {
-    let newUnsavedValue;
-    let errorParams = {};
+  // @ts-expect-error
+  const [inputValue] = getFieldInputValue(field, unsavedChange);
+  const [value, setValue] = useState(inputValue);
+  const { validateChange } = useServices();
+  const onUpdate = useUpdate({ onInputChange, field });
 
-    switch (type) {
-      case 'json':
-        const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
-        newUnsavedValue = newValue || (isJsonArray ? '[]' : '{}');
+  const updateValue = useCallback(
+    async (newValue: string, onUpdateFn) => {
+      const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
+      const parsedValue = newValue || (isJsonArray ? '[]' : '{}');
+      const validationResponse = await validateChange(field.id, parsedValue);
+      if (validationResponse.successfulValidation && !validationResponse.valid) {
+        onUpdateFn({
+          type: field.type,
+          unsavedValue: newValue,
+          isInvalid: !validationResponse.valid,
+          error: validationResponse.errorMessage,
+        });
+      } else {
+        onUpdateFn({ type: field.type, unsavedValue: newValue });
+      }
+    },
+    [validateChange, field.id, field.type, defaultValue]
+  );
 
-        try {
-          JSON.parse(newUnsavedValue);
-        } catch (e) {
-          errorParams = {
-            error: i18n.translate('management.settings.field.codeEditorSyntaxErrorMessage', {
-              defaultMessage: 'Invalid JSON syntax',
-            }),
-            isInvalid: true,
-          };
-        }
-        break;
-      default:
-        newUnsavedValue = newValue;
-    }
+  const debouncedUpdateValue = useMemo(() => {
+    // Trigger update 1000 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 1000);
+  }, [updateValue]);
 
-    // TODO: clintandrewhall - should we make this onBlur instead of onChange?
-    onChangeProp({
-      value: newUnsavedValue,
-      ...errorParams,
-    });
+  const onChange: CodeEditorProps['onChange'] = async (newValue) => {
+    // @ts-expect-error
+    setValue(newValue);
+    await debouncedUpdateValue(newValue, onUpdate);
   };
 
-  // nit: we have to do this because, while the `UiSettingsService` might return
-  // `null`, the {@link CodeEditor} component doesn't accept `null` as a value.
-  //
-  // @see packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts
-  //
-  const value = valueProp === null ? '' : valueProp;
+  useEffect(() => {
+    setValue(inputValue);
+  }, [inputValue]);
+
+  const { id, ariaAttributes } = field;
+  const { ariaLabel, ariaDescribedBy } = ariaAttributes;
 
   return (
     <div>
@@ -94,7 +94,7 @@ export const CodeEditorInput = ({
         aria-describedby={ariaDescribedBy}
         aria-label={ariaLabel}
         data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
-        isReadOnly={isDisabled}
+        isReadOnly={!isSavingEnabled}
         name={`${TEST_SUBJ_PREFIX_FIELD}-${id}-editor`}
         {...{ onChange, type, value }}
       />

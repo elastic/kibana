@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
 
+import { getFieldInputValue } from '@kbn/management-settings-utilities';
+import { useUpdate } from '@kbn/management-settings-utilities';
+
+import { debounce } from 'lodash';
+import { useServices } from '../services';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
@@ -23,40 +28,63 @@ const REGEX = /,\s+/g;
  * Component for manipulating an `array` field.
  */
 export const ArrayInput = ({
-  id,
-  name,
-  onChange: onChangeProp,
-  ariaLabel,
-  isDisabled = false,
-  value: valueProp,
-  ariaDescribedBy,
+  field,
+  unsavedChange,
+  isSavingEnabled,
+  onInputChange,
 }: ArrayInputProps) => {
-  const [value, setValue] = useState(valueProp?.join(', '));
+  const [inputValue] = getFieldInputValue(field, unsavedChange) || [];
+  const [value, setValue] = useState(inputValue?.join(', '));
+  const { validateChange } = useServices();
+  const onUpdate = useUpdate({ onInputChange, field });
+
+  const updateValue = useCallback(
+    async (newValue: string, onUpdateFn) => {
+      const parsedValue = newValue
+        .replace(REGEX, ',')
+        .split(',')
+        .filter((v) => v !== '');
+      const validationResponse = await validateChange(field.id, parsedValue);
+      if (validationResponse.successfulValidation && !validationResponse.valid) {
+        onUpdateFn({
+          type: field.type,
+          unsavedValue: parsedValue,
+          isInvalid: !validationResponse.valid,
+          error: validationResponse.errorMessage,
+        });
+      } else {
+        onUpdateFn({ type: field.type, unsavedValue: parsedValue });
+      }
+    },
+    [validateChange, field.id, field.type]
+  );
+
+  const debouncedUpdateValue = useMemo(() => {
+    // Trigger update 1000 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 1000);
+  }, [updateValue]);
+
+  const onChange: EuiFieldTextProps['onChange'] = async (event) => {
+    const newValue = event.target.value;
+    setValue(newValue);
+    await debouncedUpdateValue(newValue, onUpdate);
+  };
 
   useEffect(() => {
-    setValue(valueProp?.join(', '));
-  }, [valueProp]);
+    setValue(inputValue?.join(', '));
+  }, [inputValue]);
 
-  // In the past, each keypress would invoke the `onChange` callback.  This
-  // is likely wasteful, so we've switched it to `onBlur` instead.
-  const onBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const blurValue = event.target.value
-      .replace(REGEX, ',')
-      .split(',')
-      .filter((v) => v !== '');
-    onChangeProp({ value: blurValue });
-    setValue(blurValue.join(', '));
-  };
+  const { id, name, ariaAttributes } = field;
+  const { ariaLabel, ariaDescribedBy } = ariaAttributes;
 
   return (
     <EuiFieldText
       fullWidth
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
-      disabled={isDisabled}
+      disabled={!isSavingEnabled}
       aria-label={ariaLabel}
       aria-describedby={ariaDescribedBy}
-      onChange={(event) => setValue(event.target.value)}
-      {...{ name, onBlur, value }}
+      {...{ name, onChange, value }}
     />
   );
 };

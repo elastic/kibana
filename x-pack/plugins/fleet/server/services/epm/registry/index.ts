@@ -43,6 +43,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageFailedVerificationError,
+  PackageUnsupportedMediaTypeError,
 } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
@@ -73,8 +74,7 @@ export async function fetchList(
     }
   }
 
-  setKibanaVersion(url);
-  setCapabilities(url);
+  setConstraints(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -106,8 +106,7 @@ async function _fetchFindLatestPackage(
     );
 
     if (!ignoreConstraints) {
-      setKibanaVersion(url);
-      setCapabilities(url);
+      setConstraints(url);
     }
 
     try {
@@ -223,8 +222,12 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
+  const config = appContextService.getConfig();
+
   const disableVersionCheck =
-    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
+    (config?.developer?.disableRegistryVersionCheck ?? false) ||
+    config?.internal?.registry?.kibanaVersionCheckEnabled === false;
+
   if (disableVersionCheck) {
     return;
   }
@@ -236,11 +239,29 @@ function setKibanaVersion(url: URL) {
   }
 }
 
+function setSpecVersion(url: URL) {
+  const specMin = appContextService.getConfig()?.internal?.registry?.spec?.min;
+  const specMax = appContextService.getConfig()?.internal?.registry?.spec?.max;
+
+  if (specMin) {
+    url.searchParams.set('spec.min', specMin);
+  }
+  if (specMax) {
+    url.searchParams.set('spec.max', specMax);
+  }
+}
+
 function setCapabilities(url: URL) {
-  const capabilities = appContextService.getConfig()?.internal?.capabilities;
+  const capabilities = appContextService.getConfig()?.internal?.registry?.capabilities;
   if (capabilities && capabilities.length > 0) {
     url.searchParams.set('capabilities', capabilities.join(','));
   }
+}
+
+function setConstraints(url: URL) {
+  setKibanaVersion(url);
+  setCapabilities(url);
+  setSpecVersion(url);
 }
 
 export async function fetchCategories(
@@ -257,8 +278,7 @@ export async function fetchCategories(
     }
   }
 
-  setKibanaVersion(url);
-  setCapabilities(url);
+  setConstraints(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -345,8 +365,11 @@ export async function getPackage(
 
 function ensureContentType(archivePath: string) {
   const contentType = mime.lookup(archivePath);
+
   if (!contentType) {
-    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+    throw new PackageUnsupportedMediaTypeError(
+      `Unknown compression format for '${archivePath}'. Please use .zip or .gz`
+    );
   }
   return contentType;
 }

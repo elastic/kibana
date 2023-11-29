@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FirstLastSeenRequestOptions } from '../../../../../../common/search_strategy';
+import type { FirstLastSeenRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { Direction, FirstLastSeenQuery } from '../../../../../../common/search_strategy';
 
-export const mockOptions: FirstLastSeenRequestOptions = {
+export const mockOptions: FirstLastSeenRequestOptionsInput = {
   defaultIndex: [
     'apm-*-transaction*',
     'traces-apm*',

@@ -113,10 +113,7 @@ import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboa
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
-import {
-  EmbeddableComponentProps,
-  getEmbeddableComponent,
-} from './embeddable/embeddable_component';
+import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
@@ -129,6 +126,8 @@ import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+
+export type { SaveProps } from './app_plugin';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -209,7 +208,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
+  EmbeddableComponent: EmbeddableComponent;
   /**
    * React component which can be used to embed a Lens Visualization Save Modal Component.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.

@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
-import { chunk, flatMap, isEmpty, keys } from 'lodash';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
+import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -48,6 +48,8 @@ import {
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
 } from './lib';
+import { isValidAlertIndexName } from '../alerts_service';
+import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -84,7 +86,8 @@ export class AlertsClient<
     primaryTerm: Record<string, number | undefined>;
   };
 
-  private rule: AlertRule = {};
+  private startedAtString: string | null = null;
+  private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
   private indexTemplateAndPattern: IIndexPatternString;
@@ -112,6 +115,7 @@ export class AlertsClient<
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
+    this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
     await this.legacyAlertsClient.initializeExecution(opts);
 
     if (!this.ruleType.alerts?.shouldWrite) {
@@ -165,8 +169,8 @@ export class AlertsClient<
 
       for (const hit of results.flat()) {
         const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
-        const alertUuid = alertHit.kibana.alert.uuid;
-        const alertId = alertHit.kibana.alert.instance.id;
+        const alertUuid = get(alertHit, ALERT_UUID);
+        const alertId = get(alertHit, ALERT_INSTANCE_ID);
 
         // Keep track of existing alert document so we can copy over data if alert is ongoing
         this.fetchedAlerts.data[alertId] = alertHit;
@@ -225,7 +229,7 @@ export class AlertsClient<
 
     return {
       uuid: legacyAlert.getUuid(),
-      start: legacyAlert.getStart(),
+      start: legacyAlert.getStart() ?? this.startedAtString,
     };
   }
 
@@ -278,7 +282,7 @@ export class AlertsClient<
       );
       return;
     }
-    const currentTime = new Date().toISOString();
+    const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
     const { alertsToReturn, recoveredAlertsToReturn } =
@@ -297,7 +301,7 @@ export class AlertsClient<
       if (!!activeAlerts[id]) {
         if (
           this.fetchedAlerts.data.hasOwnProperty(id) &&
-          this.fetchedAlerts.data[id].kibana.alert.status === 'active'
+          get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
         ) {
           activeAlertsToIndex.push(
             buildOngoingAlert<
@@ -369,7 +373,7 @@ export class AlertsClient<
               })
         );
       } else {
-        this.options.logger.warn(
+        this.options.logger.debug(
           `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[
             id
           ].getUuid()}`
@@ -377,24 +381,41 @@ export class AlertsClient<
       }
     }
 
-    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex];
+    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
+      (alert: Alert & AlertData) => {
+        const alertUuid = get(alert, ALERT_UUID);
+        const alertIndex = this.fetchedAlerts.indices[alertUuid];
+        if (!alertIndex) {
+          return true;
+        } else if (!isValidAlertIndexName(alertIndex)) {
+          this.options.logger.warn(
+            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported.`
+          );
+          return false;
+        }
+        return true;
+      }
+    );
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(
-        [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert: Alert & AlertData) => [
-          getBulkMeta(
-            alert.kibana.alert.uuid,
-            this.fetchedAlerts.indices[alert.kibana.alert.uuid],
-            this.fetchedAlerts.seqNo[alert.kibana.alert.uuid],
-            this.fetchedAlerts.primaryTerm[alert.kibana.alert.uuid],
-            this.isUsingDataStreams()
-          ),
-          alert,
-        ])
+        alertsToIndex.map((alert: Alert & AlertData) => {
+          const alertUuid = get(alert, ALERT_UUID);
+          return [
+            getBulkMeta(
+              alertUuid,
+              this.fetchedAlerts.indices[alertUuid],
+              this.fetchedAlerts.seqNo[alertUuid],
+              this.fetchedAlerts.primaryTerm[alertUuid],
+              this.isUsingDataStreams()
+            ),
+            alert,
+          ];
+        })
       );
 
       try {
         const response = await esClient.bulk({
-          refresh: 'wait_for',
+          refresh: true,
           index: this.indexTemplateAndPattern.alias,
           require_alias: !this.isUsingDataStreams(),
           body: bulkBody,
@@ -402,15 +423,17 @@ export class AlertsClient<
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
-          const errorsInResponse = (response.items ?? [])
-            .map((item) => item?.index?.error || item?.create?.error)
-            .filter((item) => item != null);
-
-          this.options.logger.error(
-            `Error writing ${errorsInResponse.length} out of ${
-              alertsToIndex.length
-            } alerts - ${JSON.stringify(errorsInResponse)}`
-          );
+          await resolveAlertConflicts({
+            logger: this.options.logger,
+            esClient,
+            bulkRequest: {
+              refresh: 'wait_for',
+              index: this.indexTemplateAndPattern.alias,
+              require_alias: !this.isUsingDataStreams(),
+              operations: bulkBody,
+            },
+            bulkResponse: response,
+          });
         }
       } catch (err) {
         this.options.logger.error(

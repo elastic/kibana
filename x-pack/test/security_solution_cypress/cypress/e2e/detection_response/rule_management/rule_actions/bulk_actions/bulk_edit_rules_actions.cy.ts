@@ -20,7 +20,7 @@ import {
 } from '../../../../../screens/rules_bulk_actions';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
@@ -49,7 +49,8 @@ import {
   openBulkEditRuleActionsForm,
   openBulkActionsMenu,
 } from '../../../../../tasks/rules_bulk_actions';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
@@ -73,17 +74,14 @@ const ruleNameToAssert = 'Custom rule name with actions';
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, bulk edit of rule actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless', '@brokenInServerlessQA'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       deleteAlertsAndRules();
       deleteConnectors();
-      cy.task('esArchiverResetKibana');
 
       createSlackConnector().then(({ body }) => {
         const actions: RuleActionArray = [
@@ -144,13 +142,13 @@ describe(
         rule_id: 'rule_2',
       });
 
-      createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
+      createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
     });
 
     context('Restricted action privileges', () => {
       it("User with no privileges can't add rule actions", () => {
         login(ROLES.hunter_no_actions);
-        visitSecurityDetectionRulesPage(ROLES.hunter_no_actions);
+        visitRulesManagementTable();
 
         expectManagementTableRules([
           ruleNameToAssert,
@@ -176,7 +174,7 @@ describe(
     context('All actions privileges', () => {
       beforeEach(() => {
         login();
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
 
         expectManagementTableRules([

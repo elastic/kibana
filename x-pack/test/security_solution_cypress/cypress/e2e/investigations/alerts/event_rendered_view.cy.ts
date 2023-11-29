@@ -24,8 +24,8 @@ import {
   waitForAlerts,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
   TOP_N_ALERT_HISTOGRAM,
@@ -33,11 +33,7 @@ import {
   XY_CHART,
 } from '../../../screens/shared';
 
-describe(`Event Rendered View`, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     createRule(getNewRule());
@@ -59,7 +55,7 @@ describe(`Event Rendered View`, () => {
     cy.get(SHOW_TOP_N_HEADER).first().should('have.text', 'Top host.name');
     cy.get(XY_CHART).should('be.visible');
     cy.get(TOP_N_CONTAINER_CLOSE_BTN).trigger('click');
-    cy.get(XY_CHART).should('not.be.visible');
+    cy.get(XY_CHART).should('not.exist');
   });
 
   /*

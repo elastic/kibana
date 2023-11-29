@@ -1,10 +1,38 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Metric Custom Transform Generator aggregates using doc_count for the denominator equation with filter 1`] = `
+Object {
+  "bucket_script": Object {
+    "buckets_path": Object {
+      "A": "_total_A>_count",
+    },
+    "script": Object {
+      "lang": "painless",
+      "source": "params.A / 100",
+    },
+  },
+}
+`;
+
+exports[`Metric Custom Transform Generator aggregates using doc_count the numerator equation with filter 1`] = `
+Object {
+  "bucket_script": Object {
+    "buckets_path": Object {
+      "A": "_good_A>_count",
+    },
+    "script": Object {
+      "lang": "painless",
+      "source": "params.A * 100",
+    },
+  },
+}
+`;
+
 exports[`Metric Custom Transform Generator aggregates using the denominator equation 1`] = `
 Object {
   "bucket_script": Object {
     "buckets_path": Object {
-      "A": "_total_A>sum",
+      "A": "_total_A>metric",
     },
     "script": Object {
       "lang": "painless",
@@ -18,7 +46,7 @@ exports[`Metric Custom Transform Generator aggregates using the denominator equa
 Object {
   "bucket_script": Object {
     "buckets_path": Object {
-      "A": "_total_A>sum",
+      "A": "_total_A>metric",
     },
     "script": Object {
       "lang": "painless",
@@ -32,7 +60,7 @@ exports[`Metric Custom Transform Generator aggregates using the numerator equati
 Object {
   "bucket_script": Object {
     "buckets_path": Object {
-      "A": "_good_A>sum",
+      "A": "_good_A>metric",
     },
     "script": Object {
       "lang": "painless",
@@ -46,7 +74,7 @@ exports[`Metric Custom Transform Generator aggregates using the numerator equati
 Object {
   "bucket_script": Object {
     "buckets_path": Object {
-      "A": "_good_A>sum",
+      "A": "_good_A>metric",
     },
     "script": Object {
       "lang": "painless",
@@ -59,11 +87,24 @@ Object {
 exports[`Metric Custom Transform Generator filters the source using the kql query 1`] = `
 Object {
   "bool": Object {
-    "minimum_should_match": 1,
-    "should": Array [
+    "filter": Array [
       Object {
-        "match": Object {
-          "labels.groupId": "group-4",
+        "range": Object {
+          "log_timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "match": Object {
+                "labels.groupId": "group-4",
+              },
+            },
+          ],
         },
       },
     ],
@@ -88,7 +129,7 @@ Object {
     "aggregations": Object {
       "_good_A": Object {
         "aggs": Object {
-          "sum": Object {
+          "metric": Object {
             "sum": Object {
               "field": "total",
             },
@@ -100,7 +141,7 @@ Object {
       },
       "_good_B": Object {
         "aggs": Object {
-          "sum": Object {
+          "metric": Object {
             "sum": Object {
               "field": "processed",
             },
@@ -112,7 +153,7 @@ Object {
       },
       "_total_A": Object {
         "aggs": Object {
-          "sum": Object {
+          "metric": Object {
             "sum": Object {
               "field": "total",
             },
@@ -125,7 +166,7 @@ Object {
       "slo.denominator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "A": "_total_A>sum",
+            "A": "_total_A>metric",
           },
           "script": Object {
             "lang": "painless",
@@ -145,8 +186,8 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "A": "_good_A>sum",
-            "B": "_good_B>sum",
+            "A": "_good_A>metric",
+            "B": "_good_B>metric",
           },
           "script": Object {
             "lang": "painless",
@@ -231,6 +272,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": Array [
@@ -239,11 +281,24 @@ Object {
     ],
     "query": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "labels.groupId": "group-3",
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
             },
           },
         ],
@@ -357,7 +412,7 @@ Object {
     "aggregations": Object {
       "_good_A": Object {
         "aggs": Object {
-          "sum": Object {
+          "metric": Object {
             "sum": Object {
               "field": "total",
             },
@@ -369,7 +424,7 @@ Object {
       },
       "_good_B": Object {
         "aggs": Object {
-          "sum": Object {
+          "metric": Object {
             "sum": Object {
               "field": "processed",
             },
@@ -381,7 +436,7 @@ Object {
       },
       "_total_A": Object {
         "aggs": Object {
-          "sum": Object {
+          "metric": Object {
             "sum": Object {
               "field": "total",
             },
@@ -394,7 +449,7 @@ Object {
       "slo.denominator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "A": "_total_A>sum",
+            "A": "_total_A>metric",
           },
           "script": Object {
             "lang": "painless",
@@ -405,8 +460,8 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "A": "_good_A>sum",
-            "B": "_good_B>sum",
+            "A": "_good_A>metric",
+            "B": "_good_B>metric",
           },
           "script": Object {
             "lang": "painless",
@@ -486,6 +541,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": Array [
@@ -494,11 +550,24 @@ Object {
     ],
     "query": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "labels.groupId": "group-3",
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
             },
           },
         ],
@@ -586,5 +655,19 @@ Object {
     },
   },
   "transform_id": Any<String>,
+}
+`;
+
+exports[`Metric Custom Transform Generator support the same field used twice in the equation 1`] = `
+Object {
+  "bucket_script": Object {
+    "buckets_path": Object {
+      "A": "_good_A>metric",
+    },
+    "script": Object {
+      "lang": "painless",
+      "source": "params.A + params.A * 100",
+    },
+  },
 }
 `;

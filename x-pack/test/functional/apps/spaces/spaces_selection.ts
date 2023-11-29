@@ -171,7 +171,7 @@ export default function spaceSelectorFunctionalTests({
 
       describe('displays separate data for each space', () => {
         it('in the default space', async () => {
-          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.navigateToApp();
           await expectDashboardRenders('[Logs] Web Traffic');
         });
 

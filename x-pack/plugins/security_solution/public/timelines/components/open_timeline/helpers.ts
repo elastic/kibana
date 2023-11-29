@@ -327,6 +327,7 @@ export interface QueryTimelineById<TCache> {
     isLoading: boolean;
   }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
+  savedSearchId?: string;
 }
 
 export const queryTimelineById = <TCache>({
@@ -340,6 +341,7 @@ export const queryTimelineById = <TCache>({
   openTimeline = true,
   updateIsLoading,
   updateTimeline,
+  savedSearchId,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
   if (timelineId == null) {
@@ -355,6 +357,7 @@ export const queryTimelineById = <TCache>({
         activeTab: activeTimelineTab,
         show: openTimeline,
         initialized: true,
+        savedSearchId: savedSearchId ?? null,
       },
     })();
     updateIsLoading({ id: TimelineId.active, isLoading: false });
@@ -395,8 +398,13 @@ export const queryTimelineById = <TCache>({
               graphEventId,
               show: openTimeline,
               dateRange: { start: from, end: to },
+              savedSearchId: timeline.savedSearchId,
             },
             to,
+            // The query has already been resolved before
+            // when the response was mapped to a model.
+            // No need to do that again.
+            preventSettingQuery: true,
           })();
         }
       })
@@ -424,6 +432,7 @@ export const dispatchUpdateTimeline =
     to,
     ruleNote,
     ruleAuthor,
+    preventSettingQuery,
   }: UpdateTimeline): (() => void) =>
   () => {
     if (!isEmpty(timeline.indexNames)) {
@@ -455,6 +464,7 @@ export const dispatchUpdateTimeline =
       dispatchAddTimeline({ id, timeline, resolveTimelineConfig, savedTimeline: duplicate })
     );
     if (
+      !preventSettingQuery &&
       timeline.kqlQuery != null &&
       timeline.kqlQuery.filterQuery != null &&
       timeline.kqlQuery.filterQuery.kuery != null &&

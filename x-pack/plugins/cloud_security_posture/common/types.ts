@@ -30,6 +30,18 @@ export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];
 };
 
+export type AzureCredentialsType =
+  | 'arm_template'
+  | 'service_principal_with_client_secret'
+  | 'service_principal_with_client_certificate'
+  | 'service_principal_with_client_username_and_password'
+  | 'managed_identity'
+  | 'manual';
+
+export type AzureCredentialsTypeFieldMap = {
+  [key in AzureCredentialsType]: string[];
+};
+
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
@@ -122,6 +134,7 @@ export interface Benchmark {
 
 export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];
 export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
+export type RuleSection = CspRuleTemplateMetadata['section'];
 
 // Fleet Integration types
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];

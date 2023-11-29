@@ -19,7 +19,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { AiopsPluginStartDeps } from '../../types';
-import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
@@ -29,7 +29,8 @@ export async function showCategorizeFlyout(
   field: DataViewField,
   dataView: DataView,
   coreStart: CoreStart,
-  plugins: AiopsPluginStartDeps
+  plugins: AiopsPluginStartDeps,
+  originatingApp: string
 ): Promise<void> {
   const { http, theme, overlays, application, notifications, uiSettings, i18n } = coreStart;
 
@@ -40,7 +41,7 @@ export async function showCategorizeFlyout(
         resolve();
       };
 
-      const appDependencies = {
+      const appDependencies: AiopsAppDependencies = {
         notifications,
         uiSettings,
         http,
@@ -70,6 +71,7 @@ export async function showCategorizeFlyout(
                     savedSearch={null}
                     selectedField={field}
                     onClose={onFlyoutClose}
+                    embeddingOrigin={originatingApp}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>

@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './filtering_rule_helpers';
 export * from './is_category_entry';
+export * from './page_to_pagination';
+export * from './sync_status_to_text';

@@ -21,6 +21,8 @@ post:
         schema:
           $ref: '../components/schemas/create_rule_request.yaml' 
         examples:
+          createEsQueryEsqlRuleRequest:
+            $ref: '../components/examples/create_es_query_esql_rule_request.yaml'
           createEsQueryRuleRequest:
             $ref: '../components/examples/create_es_query_rule_request.yaml'
           createEsQueryKqlRuleRequest:
@@ -35,6 +37,8 @@ post:
           schema:
             $ref: '../components/schemas/rule_response_properties.yaml' 
           examples:
+            createEsQueryEsqlRuleResponse:
+              $ref: '../components/examples/create_es_query_esql_rule_response.yaml'
             createEsQueryRuleResponse:
               $ref: '../components/examples/create_es_query_rule_response.yaml'
             createEsQueryKqlRuleResponse:
@@ -53,7 +57,3 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

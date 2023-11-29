@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { DataViewId } from '../../api/detection_engine';
 import { afterKeysSchema } from '../after_keys';
 import { identifierTypeSchema } from '../identifier_types';
 import { riskWeightsSchema } from '../risk_weights/schema';
@@ -14,7 +13,7 @@ import { riskWeightsSchema } from '../risk_weights/schema';
 export const riskScoreCalculationRequestSchema = t.exact(
   t.intersection([
     t.type({
-      data_view_id: DataViewId,
+      data_view_id: t.string,
       identifier_type: identifierTypeSchema,
       range: t.type({
         start: t.string,

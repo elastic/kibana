@@ -9,6 +9,7 @@ import React from 'react';
 import { MessageText } from '../message_panel/message_text';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { MessageRole, type Message } from '../../../common';
+import { ChatActionClickHandler } from './types';
 
 interface Props {
   content: string | undefined;
@@ -21,7 +22,8 @@ interface Props {
     | undefined;
   loading: boolean;
   editing: boolean;
-  onSubmit: (message: Message) => Promise<void>;
+  onSubmit: (message: Message) => void;
+  onActionClick: ChatActionClickHandler;
 }
 export function ChatItemContentInlinePromptEditor({
   content,
@@ -29,9 +31,10 @@ export function ChatItemContentInlinePromptEditor({
   editing,
   loading,
   onSubmit,
+  onActionClick,
 }: Props) {
   return !editing ? (
-    <MessageText content={content || ''} loading={loading} />
+    <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
   ) : (
     <ChatPromptEditor
       disabled={false}

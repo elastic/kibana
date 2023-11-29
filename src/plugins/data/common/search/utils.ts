@@ -10,26 +10,20 @@ import moment from 'moment-timezone';
 import { AggTypesDependencies } from '..';
 import type { IKibanaSearchResponse } from './types';
 
+// TODO - investigate if this check is still needed
+// There are no documented work flows where response or rawResponse is not returned
+// Leaving check to prevent breaking changes until full investigation can be completed.
 /**
- * @returns true if response had an error while executing in ES
+ * @returns true if response is abort
  */
-export const isErrorResponse = (response?: IKibanaSearchResponse) => {
-  return !response || !response.rawResponse || (!response.isRunning && !!response.isPartial);
+export const isAbortResponse = (response?: IKibanaSearchResponse) => {
+  return !response || !response.rawResponse;
 };
 
 /**
- * @returns true if response is completed successfully
+ * @returns true if request is still running
  */
-export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && !response.isRunning && !response.isPartial);
-};
-
-/**
- * @returns true if request is still running an/d response contains partial results
- */
-export const isPartialResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && response.isRunning && response.isPartial);
-};
+export const isRunningResponse = (response?: IKibanaSearchResponse) => response?.isRunning ?? false;
 
 export const getUserTimeZone = (
   getConfig: AggTypesDependencies['getConfig'],

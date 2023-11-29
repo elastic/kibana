@@ -21,6 +21,8 @@ import {
   MAX_BULK_GET_CASES,
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -28,6 +30,7 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
+import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -40,10 +43,30 @@ import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
+const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
+  fieldName: 'value',
+  min: 1,
+  max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+});
+
+const CaseCustomFieldTextWithValidationRt = rt.strict({
+  key: rt.string,
+  type: CustomFieldTextTypeRt,
+  value: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
+});
+
+const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
+
+const CustomFieldsRt = limitedArraySchema({
+  codec: CustomFieldRt,
+  fieldName: 'customFields',
+  min: 0,
+  max: MAX_CUSTOM_FIELDS_PER_CASE,
+});
+
 /**
  * Create case
  */
-
 export const CasePostRequestRt = rt.intersection([
   rt.strict({
     /**
@@ -104,9 +127,34 @@ export const CasePostRequestRt = rt.intersection([
         limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
         rt.null,
       ]),
+      /**
+       * The list of custom field values of the case.
+       */
+      customFields: CustomFieldsRt,
     })
   ),
 ]);
+
+/**
+ * Bulk create cases
+ */
+
+const CaseCreateRequestWithOptionalId = rt.intersection([
+  CasePostRequestRt,
+  rt.exact(rt.partial({ id: rt.string })),
+]);
+
+export const BulkCreateCasesRequestRt = rt.strict({
+  cases: rt.array(CaseCreateRequestWithOptionalId),
+});
+
+export const BulkCreateCasesResponseRt = rt.strict({
+  cases: rt.array(CaseRt),
+});
+
+/**
+ * Find cases
+ */
 
 export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
@@ -235,6 +283,21 @@ export const CasesFindRequestRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
 ]);
 
+export const CasesSearchRequestRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      /**
+       * custom fields of the case
+       */
+      customFields: rt.record(
+        rt.string,
+        rt.array(rt.union([rt.string, rt.boolean, rt.number, rt.null]))
+      ),
+    })
+  ),
+  CasesFindRequestRt,
+]);
+
 export const CasesFindResponseRt = rt.intersection([
   rt.strict({
     cases: rt.array(CaseRt),
@@ -358,6 +421,10 @@ export const CasePatchRequestRt = rt.intersection([
         limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
         rt.null,
       ]),
+      /**
+       * Custom fields of the case
+       */
+      customFields: CustomFieldsRt,
     })
   ),
   /**
@@ -435,6 +502,7 @@ export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
@@ -448,3 +516,6 @@ export type GetReportersResponse = rt.TypeOf<typeof GetReportersResponseRt>;
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
+export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
+export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
+export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;

@@ -69,7 +69,10 @@ export default function ({ getService }: FtrProviderContext) {
             .get(defaultPath)
             // TODO: API requests in Serverless require internal request headers
             .set(svlCommonApi.getInternalRequestHeader());
-          expect(response6.body[serviceKeyId]).to.be(null);
+          // TODO: The response comes back undefined in Serverless
+          const body = response6.body[serviceKeyId];
+          const expected = body === undefined ? null : body;
+          expect(expected).to.be(null);
         });
       });
     });

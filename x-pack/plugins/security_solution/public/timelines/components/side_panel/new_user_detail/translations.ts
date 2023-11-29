@@ -46,20 +46,6 @@ export const OBSERVED_DATA_TITLE = i18n.translate(
   }
 );
 
-export const HIDE_OBSERVED_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.hideObservedDataButton',
-  {
-    defaultMessage: 'Hide observed data',
-  }
-);
-
-export const SHOW_OBSERVED_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.showObservedDataButton',
-  {
-    defaultMessage: 'Show observed data',
-  }
-);
-
 export const HIDE_AZURE_DATA_BUTTON = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.hideManagedDataButton',
   {
@@ -166,7 +152,7 @@ export const PHONE = i18n.translate('xpack.securitySolution.timeline.userDetails
 export const NO_ACTIVE_INTEGRATION_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noActiveIntegrationTitle',
   {
-    defaultMessage: 'You don’t have any active integrations',
+    defaultMessage: 'You don’t have any active asset repository integrations',
   }
 );
 
@@ -174,14 +160,14 @@ export const NO_ACTIVE_INTEGRATION_TEXT = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noActiveIntegrationText',
   {
     defaultMessage:
-      'External integrations can provide additional metadata and help you manage users.',
+      'Additional metadata from integrations may help you to manage and identify risky entities.',
   }
 );
 
 export const ADD_EXTERNAL_INTEGRATION_BUTTON = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.addExternalIntegrationButton',
   {
-    defaultMessage: 'Add external integrations',
+    defaultMessage: 'Add asset repository integrations',
   }
 );
 

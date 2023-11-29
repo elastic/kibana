@@ -12,7 +12,6 @@ import type {
   FieldInputServices,
   FieldInputKibanaDependencies,
 } from '@kbn/management-settings-components-field-input';
-import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
 /**
  * Contextual services used by a {@link FieldRow} component.
@@ -43,10 +42,3 @@ export interface KibanaDependencies {
  * render a {@link FieldRow} component and its dependents.
  */
 export type FieldRowKibanaDependencies = KibanaDependencies & FieldInputKibanaDependencies;
-
-/**
- * An `onChange` handler for a {@link FieldRow} component.
- * @param id A unique id corresponding to the particular setting being changed.
- * @param change The {@link UnsavedFieldChange} corresponding to any unsaved change to the field.
- */
-export type OnChangeFn<T extends SettingType> = (id: string, change: UnsavedFieldChange<T>) => void;

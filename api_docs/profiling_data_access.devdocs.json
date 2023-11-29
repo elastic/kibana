@@ -37,7 +37,7 @@
         "label": "ProfilingDataAccessPluginStart",
         "description": [],
         "signature": [
-          "{ services: { fetchFlamechartData: ({ esClient, rangeFromMs, rangeToMs, kuery }: ",
+          "{ services: { fetchFlamechartData: ({ esClient, rangeFromMs, rangeToMs, kuery, useLegacyFlamegraphAPI, }: ",
           "FetchFlamechartParams",
           ") => Promise<",
           {
@@ -46,6 +46,32 @@
             "docId": "kibKbnProfilingUtilsPluginApi",
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
+          },
+          ">; getStatus: ({ esClient, soClient, spaceId }: ",
+          "HasSetupParams",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.ProfilingStatus",
+            "text": "ProfilingStatus"
+          },
+          ">; getSetupState: ({ esClient, soClient, spaceId }: ",
+          "SetupStateParams",
+          ") => Promise<",
+          "CloudSetupStateType",
+          " | ",
+          "SetupStateType",
+          ">; fetchFunction: ({ esClient, rangeFromMs, rangeToMs, kuery, startIndex, endIndex, }: ",
+          "FetchFunctionsParams",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctions",
+            "text": "TopNFunctions"
           },
           ">; }; }"
         ],
@@ -75,10 +101,414 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.getApmPolicy",
+        "type": "Function",
+        "tags": [],
+        "label": "getApmPolicy",
+        "description": [],
+        "signature": [
+          "({\n  packagePolicyClient,\n  soClient,\n}: { packagePolicyClient: ",
+          {
+            "pluginId": "fleet",
+            "scope": "server",
+            "docId": "kibFleetPluginApi",
+            "section": "def-server.PackagePolicyClient",
+            "text": "PackagePolicyClient"
+          },
+          "; soClient: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
+          "; }) => Promise<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackagePolicy",
+            "text": "PackagePolicy"
+          },
+          " | null>"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.getApmPolicy.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  packagePolicyClient,\n  soClient,\n}",
+            "description": [],
+            "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "profilingDataAccess",
+                "id": "def-common.getApmPolicy.$1.packagePolicyClient",
+                "type": "Object",
+                "tags": [],
+                "label": "packagePolicyClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "server",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-server.PackagePolicyClient",
+                    "text": "PackagePolicyClient"
+                  }
+                ],
+                "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "profilingDataAccess",
+                "id": "def-common.getApmPolicy.$1.soClient",
+                "type": "Object",
+                "tags": [],
+                "label": "soClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.getCollectorPolicy",
+        "type": "Function",
+        "tags": [],
+        "label": "getCollectorPolicy",
+        "description": [],
+        "signature": [
+          "({\n  soClient,\n  packagePolicyClient,\n}: { packagePolicyClient: ",
+          {
+            "pluginId": "fleet",
+            "scope": "server",
+            "docId": "kibFleetPluginApi",
+            "section": "def-server.PackagePolicyClient",
+            "text": "PackagePolicyClient"
+          },
+          "; soClient: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
+          "; }) => Promise<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackagePolicy",
+            "text": "PackagePolicy"
+          },
+          " | undefined>"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.getCollectorPolicy.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  soClient,\n  packagePolicyClient,\n}",
+            "description": [],
+            "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "profilingDataAccess",
+                "id": "def-common.getCollectorPolicy.$1.packagePolicyClient",
+                "type": "Object",
+                "tags": [],
+                "label": "packagePolicyClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "server",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-server.PackagePolicyClient",
+                    "text": "PackagePolicyClient"
+                  }
+                ],
+                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "profilingDataAccess",
+                "id": "def-common.getCollectorPolicy.$1.soClient",
+                "type": "Object",
+                "tags": [],
+                "label": "soClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.getSymbolizerPolicy",
+        "type": "Function",
+        "tags": [],
+        "label": "getSymbolizerPolicy",
+        "description": [],
+        "signature": [
+          "({\n  soClient,\n  packagePolicyClient,\n}: { packagePolicyClient: ",
+          {
+            "pluginId": "fleet",
+            "scope": "server",
+            "docId": "kibFleetPluginApi",
+            "section": "def-server.PackagePolicyClient",
+            "text": "PackagePolicyClient"
+          },
+          "; soClient: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
+          "; }) => Promise<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackagePolicy",
+            "text": "PackagePolicy"
+          },
+          " | undefined>"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.getSymbolizerPolicy.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  soClient,\n  packagePolicyClient,\n}",
+            "description": [],
+            "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "profilingDataAccess",
+                "id": "def-common.getSymbolizerPolicy.$1.packagePolicyClient",
+                "type": "Object",
+                "tags": [],
+                "label": "packagePolicyClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "server",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-server.PackagePolicyClient",
+                    "text": "PackagePolicyClient"
+                  }
+                ],
+                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "profilingDataAccess",
+                "id": "def-common.getSymbolizerPolicy.$1.soClient",
+                "type": "Object",
+                "tags": [],
+                "label": "soClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.ProfilingCloudSetupOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProfilingCloudSetupOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "profilingDataAccess",
+            "scope": "common",
+            "docId": "kibProfilingDataAccessPluginApi",
+            "section": "def-common.ProfilingCloudSetupOptions",
+            "text": "ProfilingCloudSetupOptions"
+          },
+          " extends ",
+          "ProfilingSetupOptions"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.ProfilingCloudSetupOptions.packagePolicyClient",
+            "type": "Object",
+            "tags": [],
+            "label": "packagePolicyClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.PackagePolicyClient",
+                "text": "PackagePolicyClient"
+              }
+            ],
+            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.ProfilingCloudSetupOptions.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.COLLECTOR_PACKAGE_POLICY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "COLLECTOR_PACKAGE_POLICY_NAME",
+        "description": [],
+        "signature": [
+          "\"elastic-universal-profiling-collector\""
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.ELASTIC_CLOUD_APM_POLICY",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_CLOUD_APM_POLICY",
+        "description": [],
+        "signature": [
+          "\"elastic-cloud-apm\""
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.MAX_BUCKETS",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_BUCKETS",
+        "description": [],
+        "signature": [
+          "150000"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/cluster_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.SYMBOLIZER_PACKAGE_POLICY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SYMBOLIZER_PACKAGE_POLICY_NAME",
+        "description": [],
+        "signature": [
+          "\"elastic-universal-profiling-symbolizer\""
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

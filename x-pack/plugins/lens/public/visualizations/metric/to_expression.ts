@@ -90,6 +90,10 @@ export const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
+  const isMetricNumeric = Boolean(
+    state.metricAccessor &&
+      datasource?.getOperationForColumnId(state.metricAccessor)?.dataType === 'number'
+  );
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
@@ -142,15 +146,16 @@ export const toExpression = (
     trendline: trendlineExpression ? [trendlineExpression] : [],
     subtitle: state.subtitle ?? undefined,
     progressDirection: state.progressDirection as LayoutDirection,
-    color: state.color || getDefaultColor(state),
+    color: state.color || getDefaultColor(state, isMetricNumeric),
     icon: state.icon,
-    palette: state.palette?.params
-      ? [
-          paletteService
-            .get(CUSTOM_PALETTE)
-            .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
-        ]
-      : [],
+    palette:
+      isMetricNumeric && state.palette?.params
+        ? [
+            paletteService
+              .get(CUSTOM_PALETTE)
+              .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
+          ]
+        : [],
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,

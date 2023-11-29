@@ -235,7 +235,8 @@ export class CaseUserActionService {
   }
 
   public async getMostRecentUserAction(
-    caseId: string
+    caseId: string,
+    isCasesWebhook = false
   ): Promise<UserActionSavedObjectTransformed | undefined> {
     try {
       this.context.log.debug(
@@ -251,6 +252,12 @@ export class CaseUserActionService {
           UserActionTypes.description,
           UserActionTypes.tags,
           UserActionTypes.title,
+          /**
+           * TODO: Remove when all connectors support the status and
+           * the severity user actions or if there is a mechanism to
+           * define supported user actions per connector type
+           */
+          ...(isCasesWebhook ? [UserActionTypes.severity, UserActionTypes.status] : []),
         ],
         field: 'type',
         operator: 'or',

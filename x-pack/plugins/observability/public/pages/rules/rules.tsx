@@ -18,6 +18,7 @@ import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
 
@@ -45,6 +46,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         defaultMessage: 'Alerts',
       }),
       href: http.basePath.prepend('/app/observability/alerts'),
+      deepLinkId: 'observability-overview:alerts',
     },
     {
       text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
@@ -141,6 +143,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         <AddRuleFlyout
           consumer={ALERTS_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
+          validConsumers={observabilityRuleCreationValidConsumers}
           onClose={() => {
             setAddRuleFlyoutVisibility(false);
           }}
@@ -148,6 +151,8 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
             setRefresh(new Date());
             return Promise.resolve();
           }}
+          hideGrouping
+          useRuleProducer
         />
       )}
     </ObservabilityPageTemplate>

@@ -144,6 +144,70 @@ export const CREATE_FORM_FREQUENCY_WEEKLY = i18n.translate(
   }
 );
 
+export const CREATE_FORM_TIMEFRAME_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.frequency.title',
+  {
+    defaultMessage: 'Timeframe',
+  }
+);
+
+export const CREATE_FORM_TIMEFRAME_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.frequency.description',
+  {
+    defaultMessage: 'Define the start and end time when events should be affected by the window.',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_IDS_REQUIRED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoryIds.required',
+  {
+    defaultMessage: 'A category is required.',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_SELECTION_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.title',
+  {
+    defaultMessage: 'Category specific maintenance window',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_SELECTION_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.description',
+  {
+    defaultMessage:
+      'Only rules associated with the selected categories are affected by the maintenance window.',
+  }
+);
+
+export const CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categorySelection.checkboxGroupTitle',
+  {
+    defaultMessage: 'Select the categories this should affect',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_OBSERVABILITY_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoryIds.observabilityRules',
+  {
+    defaultMessage: 'Observability rules',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_SECURITY_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoryIds.securityRules',
+  {
+    defaultMessage: 'Security rules',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_STACK_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoryIds.stackRules',
+  {
+    defaultMessage: 'Stack rules',
+  }
+);
+
 export const CREATE_FORM_FREQUENCY_WEEKLY_ON = (dayOfWeek: string) =>
   i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.weeklyOnWeekday', {
     defaultMessage: 'Weekly on {dayOfWeek}',
@@ -582,7 +646,7 @@ export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.badge.experimentalDescription',
   {
     defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
   }
 );
 

@@ -197,7 +197,7 @@ export const EsQueryExpression: React.FC<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
-            defaultMessage="Select an index and time field"
+            defaultMessage="Select indices"
           />
         </h5>
       </EuiTitle>
@@ -351,6 +351,7 @@ export const EsQueryExpression: React.FC<
           (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
+        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
       />
 
       <EuiSpacer />

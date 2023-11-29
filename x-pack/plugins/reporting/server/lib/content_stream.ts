@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { defaults, get } from 'lodash';
+import { Duplex } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { defaults, get } from 'lodash';
-import Puid from 'puid';
-import { Duplex } from 'stream';
+import type { ReportSource } from '@kbn/reporting-common/types';
 import type { ReportingCore } from '..';
-import type { ReportSource } from '../../common/types';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -74,7 +76,6 @@ export class ContentStream extends Duplex {
   private jobSize?: number;
   private maxChunkSize?: number;
   private parameters: Required<ContentStreamParameters>;
-  private puid = new Puid();
   private primaryTerm?: number;
   private seqNo?: number;
 
@@ -233,7 +234,7 @@ export class ContentStream extends Duplex {
 
   private async writeChunk(content: string) {
     const { id: parentId, index } = this.document;
-    const id = this.puid.generate();
+    const id = uuidv4();
 
     this.logger.debug(`Writing chunk #${this.chunksWritten} (${id}).`);
 

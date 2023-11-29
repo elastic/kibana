@@ -10,6 +10,7 @@ import React, { useEffect, useState, ChangeEvent } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +26,6 @@ import {
   ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
 } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
-import { stripSearchPrefix } from '../../../../../common/utils/strip_search_prefix';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -68,13 +68,13 @@ export const SearchIndexDocuments: React.FC = () => {
   const indexToShow =
     selectedIndexType === 'content-index'
       ? indexName
-      : stripSearchPrefix(indexName, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+      : `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexName}`;
   const mappingLogic = mappingsWithPropsApiLogic(indexToShow);
   const documentLogic = searchDocumentsApiLogic(indexToShow);
 
   const { makeRequest: getDocuments } = useActions(documentLogic);
   const { makeRequest: getMappings } = useActions(mappingLogic);
-  const { data, status } = useValues(documentLogic);
+  const { data, status, error } = useValues(documentLogic);
   const { data: mappingData, status: mappingStatus } = useValues(mappingLogic);
 
   const docs = data?.results?.hits.hits ?? [];
@@ -84,6 +84,8 @@ export const SearchIndexDocuments: React.FC = () => {
 
   const shouldShowAccessControlSwitcher =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
+  const isAccessControlIndexNotFound =
+    shouldShowAccessControlSwitcher && error?.body?.statusCode === 404;
 
   useEffect(() => {
     getDocuments({
@@ -141,11 +143,29 @@ export const SearchIndexDocuments: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          {docs.length === 0 &&
+          {isAccessControlIndexNotFound && (
+            <EuiCallOut
+              size="m"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.content.searchIndex.documents.noIndex.title',
+                { defaultMessage: 'Access Control Index not found' }
+              )}
+              iconType="iInCircle"
+            >
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noIndex', {
+                  defaultMessage:
+                    "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
+                })}
+              </p>
+            </EuiCallOut>
+          )}
+          {!isAccessControlIndexNotFound &&
+            docs.length === 0 &&
             i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
               defaultMessage: 'No documents found for index',
             })}
-          {docs.length > 0 && (
+          {!isAccessControlIndexNotFound && docs.length > 0 && (
             <DocumentList
               docs={docs}
               docsPerPage={pagination.pageSize}

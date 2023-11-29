@@ -8,8 +8,11 @@
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { openExceptionFlyoutFromEmptyViewerPrompt } from '../../../tasks/rule_details';
+import { login } from '../../../tasks/login';
+import {
+  openExceptionFlyoutFromEmptyViewerPrompt,
+  visitRuleDetailsPage,
+} from '../../../tasks/rule_details';
 import {
   addExceptionFlyoutItemName,
   addTwoAndedConditions,
@@ -22,19 +25,13 @@ import {
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../screens/exceptions';
 
-import { ruleDetailsUrl } from '../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-// FLAKY: https://github.com/elastic/kibana/issues/165651
-// FLAKY: https://github.com/elastic/kibana/issues/165734
-// FLAKY: https://github.com/elastic/kibana/issues/165652
 describe(
   'Add multiple conditions and validate the generated exceptions',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cy.task('esArchiverResetKibana');
       login();
       deleteAlertsAndRules();
       // At least create Rule with exceptions_list to be able to view created exceptions
@@ -44,7 +41,7 @@ describe(
         index: ['exceptions*'],
         exceptions_list: [],
         rule_id: '2',
-      }).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+      }).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     });
 
     after(() => {

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type DrilldownConfig = {
+import { type DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+
+export type DashboardDrilldownConfig = {
   dashboardId?: string;
-  useCurrentFilters: boolean;
-  useCurrentDateRange: boolean;
-  openInNewTab: boolean;
-};
+} & DashboardDrilldownOptions;

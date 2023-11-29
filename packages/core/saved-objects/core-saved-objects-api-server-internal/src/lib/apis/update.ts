@@ -83,7 +83,7 @@ export const executeUpdate = async <T>(
     validation: validationHelper,
   } = helpers;
   const { securityExtension } = extensions;
-
+  const typeDefinition = registry.getType(type)!;
   const {
     version,
     references,
@@ -106,7 +106,7 @@ export const executeUpdate = async <T>(
     preflightDocResult,
   });
 
-  const existingNamespaces = preflightDocNSResult?.savedObjectNamespaces ?? [];
+  const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
     object: { type, id, existingNamespaces },
@@ -246,10 +246,18 @@ export const executeUpdate = async <T>(
     // at this point, we already know 1. the document exists 2. we're not doing an upsert
     // therefor we can safely process with the "standard" update sequence.
 
-    const updatedAttributes = mergeForUpdate(
-      { ...migrated!.attributes },
-      await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, attributes)
-    );
+    const updatedAttributes = mergeForUpdate({
+      targetAttributes: {
+        ...migrated!.attributes,
+      },
+      updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
+        type,
+        id,
+        namespace,
+        attributes
+      ),
+      typeMappings: typeDefinition.mappings,
+    });
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
       id,

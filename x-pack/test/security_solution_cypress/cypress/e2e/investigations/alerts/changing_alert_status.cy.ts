@@ -32,20 +32,21 @@ import {
   parseAlertsCountToInt,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
+// Iusse tracked in: https://github.com/elastic/kibana/issues/167809
 describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
-    cleanKibana();
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_big');
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   context('Opening alerts', () => {
@@ -62,7 +63,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       selectCountTable();
     });
 
-    it('Open one alert when more than one closed alerts are selected', () => {
+    it.skip('Open one alert when more than one closed alerts are selected', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -119,13 +120,14 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
   });
   context('Marking alerts as acknowledged', () => {
     beforeEach(() => {
+      login();
       deleteAlertsAndRules();
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
     });
-    it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
@@ -138,6 +140,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
           cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
           markAcknowledgedFirstAlert();
+          waitForAlerts();
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
           sumAlertCountFromAlertCountTable((sumAlerts) => {
@@ -164,7 +167,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       waitForAlertsToPopulate();
       selectCountTable();
     });
-    it('Closes and opens alerts', () => {
+    it.skip('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -227,7 +230,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
         });
     });
 
-    it.skip('Closes one alert when more than one opened alerts are selected', () => {
+    it('Closes one alert when more than one opened alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
@@ -307,8 +310,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     });
   });
 
-  // TODO: Are you sure that read only role should be able to close alerts?
-  context.skip('Changing alert status with read only role', () => {
+  context('Changing alert status with read only role', () => {
     beforeEach(() => {
       login(ROLES.t2_analyst);
       deleteAlertsAndRules();
@@ -318,12 +320,11 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       selectCountTable();
     });
 
-    it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
           const numberOfAlerts = alertNumberString.split(' ')[0];
-          const numberOfAlertsToBeMarkedAcknowledged = 1;
           const numberOfAlertsToBeSelected = 3;
 
           cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
@@ -331,19 +332,10 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
           cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
           markAcknowledgedFirstAlert();
-          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
-          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`); // user with read only role cannot mark alerts as acknowledged
 
           sumAlertCountFromAlertCountTable((sumAlerts) => {
-            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlerts));
-          });
-          goToAcknowledgedAlerts();
-          waitForAlerts();
-
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
-
-          sumAlertCountFromAlertCountTable((sumAlerts) => {
-            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlertsToBeMarkedAcknowledged));
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlerts));
           });
         });
     });
@@ -368,16 +360,11 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
           closeAlerts();
           waitForAlerts();
 
-          const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlertsAfterClosing} alerts`);
+          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`); // user with read only role cannot mark alerts as acknowledged
 
           sumAlertCountFromAlertCountTable((sumAlerts) => {
-            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlertsAfterClosing));
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlerts));
           });
-          goToClosedAlerts();
-          waitForAlerts();
-
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alerts`);
         });
     });
   });

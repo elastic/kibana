@@ -72,6 +72,8 @@ NOTE: If you use the default settings, you can still create a custom role that g
 +
 Access to data is an index-level privilege. For each index that contains the data you want to include in reports, add a line, then give each index `read` and `view_index_metadata` privileges.
 +
+NOTE: If you use index aliases, you must also grant `read` and `view_index_metadata` privileges to underlying indices to generate CSV reports.
++
 For more information, refer to {ref}/security-privileges.html[Security privileges].
 
 . Add the {kib} privileges.
@@ -111,7 +113,7 @@ Granting the privilege to generate reports also grants the user the privilege to
 ==== Grant access with the role API
 With <<grant-user-access, {kib} application privileges>> enabled in Reporting, you can also use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
 
-NOTE: this [API request](https://www.elastic.co/guide/en/kibana/current/role-management-api-put.html) needs to be executed against the Kibana API endpoint
+NOTE: This link:https://www.elastic.co/guide/en/kibana/current/role-management-api-put.html[API request] needs to be executed against the link:https://www.elastic.co/guide/en/kibana/current/api.html[Kibana API endpoint].
 [source, sh]
 ---------------------------------------------------------------
 POST <kibana host>:<port>/api/_security/role/custom_reporting_user
@@ -227,3 +229,5 @@ For more information, see {ref}/notification-settings.html#ssl-notification-sett
 . Add one or more users who have access to the {report-features}.
 +
 Once you've enabled SSL for {kib}, all requests to the reporting endpoints must include valid credentials.
+
+For more information on sharing reports, direct links, and more, refer to <<reporting-getting-started, Reporting and sharing>>.

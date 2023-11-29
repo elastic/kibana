@@ -28,7 +28,6 @@
     "@kbn/alerting-plugin",
     "@kbn/cloud-plugin",
     "@kbn/features-plugin",
-    "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
     "@kbn/license-management-plugin",
     "@kbn/maps-plugin",
@@ -96,11 +95,17 @@
     "@kbn/discover-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/apm-data-access-plugin",
+    "@kbn/metrics-data-access-plugin",
     "@kbn/profiling-data-access-plugin",
     "@kbn/profiling-utils",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/shared-svg",
+    "@kbn/deeplinks-observability",
+    "@kbn/custom-icons",
+    "@kbn/elastic-agent-utils",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": ["target/**/*"]
 }

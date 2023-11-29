@@ -258,12 +258,7 @@ describe('CpuUsageRule', () => {
 
     it('should fire actions when resource limits are missing', async () => {
       (fetchCpuUsageNodeStats as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...stat,
-            missingLimits: true,
-          },
-        ];
+        return [stat];
       });
 
       const rule = new CpuUsageRule();
@@ -287,14 +282,39 @@ describe('CpuUsageRule', () => {
               nodeId,
               nodeName,
               threshold,
-              missingLimits: true,
             },
             nodeId,
             nodeName,
             ui: {
               isFiring: true,
               message: {
-                text: `Kibana is configured for containerized workloads but node #start_linkmyNodeName#end_link does not have resource limits configured. Fallback metric reports usage of ${cpuUsage}%. Last checked at #absolute`,
+                text: `Node #start_link${nodeName}#end_link is reporting CPU usage of ${cpuUsage}% which is above the configured threshold of ${threshold}%. Last checked at #absolute`,
+                nextSteps: [
+                  {
+                    text: '#start_linkCheck hot threads#end_link',
+                    tokens: [
+                      {
+                        startToken: '#start_link',
+                        endToken: '#end_link',
+                        type: 'docLink',
+                        partialUrl:
+                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
+                      },
+                    ],
+                  },
+                  {
+                    text: '#start_linkCheck long running tasks#end_link',
+                    tokens: [
+                      {
+                        startToken: '#start_link',
+                        endToken: '#end_link',
+                        type: 'docLink',
+                        partialUrl:
+                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
+                      },
+                    ],
+                  },
+                ],
                 tokens: [
                   {
                     startToken: '#start_link',
@@ -319,8 +339,8 @@ describe('CpuUsageRule', () => {
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `CPU usage alert for node ${nodeName} in cluster ${clusterName} faced issues while evaluating the usage. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
-        internalShortMessage: `CPU usage alert for node ${nodeName} in cluster ${clusterName} faced issues while evaluating the usage. Verify CPU usage of node.`,
+        internalFullMessage: `CPU usage alert is firing for node ${nodeName} in cluster ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+        internalShortMessage: `CPU usage alert is firing for node ${nodeName} in cluster ${clusterName}. Verify CPU usage of node.`,
         action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
         actionPlain: 'Verify CPU usage of node.',
         clusterName,

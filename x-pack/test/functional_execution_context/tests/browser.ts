@@ -13,6 +13,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
 
   describe('Browser apps', () => {
+    let logs: Ecs[];
+    const retry = getService('retry');
+
+    const logContains = async ({
+      predicate,
+      description,
+    }: {
+      predicate: (record: Ecs) => boolean;
+      description: string;
+    }) => {
+      return retry.try(async () => {
+        try {
+          await assertLogContains({ logs, predicate, description });
+        } catch (err) {
+          // if we did not find our predicate in the logs, wait a bit and parse them again
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+          logs = await readLogFile();
+          throw err;
+        }
+      });
+    };
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -30,8 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('discover app', () => {
-      let logs: Ecs[];
-
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
@@ -52,16 +71,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('propagates context for Discover', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: (record) =>
               Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
-            logs,
           });
         });
 
         it('propagates to Kibana logs (fetch documents)', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Kibana logs (fetch documents)',
             predicate: checkExecutionContextEntry({
               type: 'application',
@@ -76,12 +94,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 description: 'fetch documents',
               },
             }),
-            logs,
           });
         });
 
         it('propagates to Kibana logs (fetch chart data and total hits)', async () => {
-          await assertLogContains({
+          await logContains({
             description:
               'execution context propagates to Kibana logs (fetch chart data and total hits)',
             predicate: checkExecutionContextEntry({
@@ -104,15 +121,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            logs,
           });
         });
       });
     });
 
     describe('dashboard app', () => {
-      let logs: Ecs[];
-
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
@@ -169,17 +183,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('propagates context for Lens visualizations', () => {
         describe('lnsXY', () => {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-            await assertLogContains({
+            await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
                 'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsXY:086ac2e9-dd16-4b45-92b8-1e43ff7e3f65'
               ),
-              logs,
             });
           });
 
           it('propagates to Kibana logs', async () => {
-            await assertLogContains({
+            await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({
                 type: 'application',
@@ -201,24 +214,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   },
                 },
               }),
-              logs,
             });
           });
         });
 
-        describe.skip('lnsMetric', () => {
+        describe('lnsMetric', () => {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-            await assertLogContains({
+            await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsLegacyMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
+                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
               ),
-              logs,
             });
           });
 
           it('propagates to Kibana logs', async () => {
-            await assertLogContains({
+            await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({
                 name: 'dashboards',
@@ -233,31 +244,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   description: '[Flights] Global Flight Dashboard',
                   child: {
                     type: 'lens',
-                    name: 'lnsLegacyMetric',
+                    name: 'lnsMetric',
                     id: 'b766e3b8-4544-46ed-99e6-9ecc4847e2a2',
                     description: '',
                     url: '/app/lens#/edit_by_value',
                   },
                 },
               }),
-              logs,
             });
           });
         });
 
         describe('lnsDatatable', () => {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-            await assertLogContains({
+            await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
                 'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsDatatable:fb86b32f-fb7a-45cf-9511-f366fef51bbd'
               ),
-              logs,
             });
           });
 
           it('propagates to Kibana logs', async () => {
-            await assertLogContains({
+            await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({
                 name: 'dashboards',
@@ -279,24 +288,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   },
                 },
               }),
-              logs,
             });
           });
         });
 
         describe('lnsPie', () => {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-            await assertLogContains({
+            await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
                 'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsPie:5d53db36-2d5a-4adc-af7b-cec4c1a294e0'
               ),
-              logs,
             });
           });
 
           it('propagates to Kibana logs', async () => {
-            await assertLogContains({
+            await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({
                 name: 'dashboards',
@@ -318,7 +325,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   },
                 },
               }),
-              logs,
             });
           });
         });
@@ -326,17 +332,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('propagates context for built-in Discover', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: checkHttpRequestId(
               'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'
             ),
-            logs,
           });
         });
 
         it('propagates to Kibana logs', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Kibana logs',
             predicate: checkExecutionContextEntry({
               type: 'application',
@@ -358,22 +363,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            logs,
           });
         });
       });
 
       describe.skip('propagates context for TSVB visualizations', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: checkHttpRequestId('agg_based:metrics:bcb63b50-4c89-11e8-b3d7-01146121b73d'),
-            logs,
           });
         });
 
         it('propagates to Kibana logs', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Kibana logs',
             predicate: checkExecutionContextEntry({
               name: 'dashboards',
@@ -389,24 +392,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
               },
             }),
-            logs,
           });
         });
       });
 
       describe('propagates context for Vega visualizations', () => {
+        // CHECKPOINT this is the test that failed and caused the global .skip()
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: checkHttpRequestId(
               'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
             ),
-            logs,
           });
         });
 
         it('propagates to Kibana logs', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Kibana logs',
             predicate: checkExecutionContextEntry({
               name: 'dashboards',
@@ -428,24 +430,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            logs,
           });
         });
       });
 
       describe.skip('propagates context for Tag Cloud visualization', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: checkHttpRequestId(
               'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:tagcloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
             ),
-            logs,
           });
         });
 
         it('propagates to Kibana logs', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Kibana logs',
             predicate: checkExecutionContextEntry({
               name: 'dashboards',
@@ -467,24 +467,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            logs,
           });
         });
       });
 
       describe.skip('propagates context for Vertical bar visualization', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: checkHttpRequestId(
               'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:histogram:9886b410-4c8b-11e8-b3d7-01146121b73d'
             ),
-            logs,
           });
         });
 
         it('propagates to Kibana logs', async () => {
-          await assertLogContains({
+          await logContains({
             description: 'execution context propagates to Kibana logs',
             predicate: checkExecutionContextEntry({
               type: 'application',
@@ -506,7 +504,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            logs,
           });
         });
       });

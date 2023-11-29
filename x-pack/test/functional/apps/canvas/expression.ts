@@ -15,7 +15,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['canvas', 'common']);
+  const PageObjects = getPageObjects(['canvas']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -27,9 +27,8 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       await kibanaServer.importExport.load(archive);
 
       // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-      });
+      await PageObjects.canvas.goToListingPage();
+      await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
     });
 
     after(async () => {

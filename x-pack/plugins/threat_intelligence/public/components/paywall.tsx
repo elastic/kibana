@@ -15,15 +15,12 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../hooks/use_kibana';
 
-interface PaywallProps {
-  /**
-   * Can be obtained using `http.basePath.prepend('/app/management/stack/license_management')`
-   */
-  licenseManagementHref: string;
-}
-
-export const Paywall: VFC<PaywallProps> = ({ licenseManagementHref }) => {
+export const Paywall: VFC = () => {
+  const {
+    services: { application },
+  } = useKibana();
   return (
     <EuiEmptyPrompt
       icon={<EuiIcon type="logoSecurity" size="xl" />}
@@ -59,7 +56,13 @@ export const Paywall: VFC<PaywallProps> = ({ licenseManagementHref }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
-              <EuiButtonEmpty href={licenseManagementHref}>
+              <EuiButtonEmpty
+                onClick={() =>
+                  application.navigateToApp('management', {
+                    path: 'stack/license_management/home',
+                  })
+                }
+              >
                 <FormattedMessage
                   id="xpack.threatIntelligence.paywall.trial"
                   defaultMessage="Start a free trial"

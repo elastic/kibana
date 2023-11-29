@@ -14,8 +14,10 @@ import { registerElasticsearchFunction } from './elasticsearch';
 import { registerKibanaFunction } from './kibana';
 import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
+import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerSummarizationFunction } from './summarize';
 import { registerAlertsFunction } from './alerts';
+import { registerEsqlFunction } from './esql';
 
 export async function registerFunctions({
   registerFunction,
@@ -41,18 +43,23 @@ export async function registerFunctions({
 
       let description = dedent(
         `You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.
-        
+
         It's very important to not assume what the user is meaning. Ask them for clarification if needed.
-        
-        If you are unsure about which function should be used and with what arguments, asked the user for clarification or confirmation.
+
+        If you are unsure about which function should be used and with what arguments, ask the user for clarification or confirmation.
 
         In KQL, escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\
         /\". Always put a field value in double quotes. Best: service.name:\"opbeans-go\". Wrong: service.name:opbeans-go. This is very important!
 
         You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.
-        
+
         If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than Lens.
-        `
+
+        If a function call fails, DO NOT UNDER ANY CIRCUMSTANCES execute it again. Ask the user for guidance and offer them options.
+
+        Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
+        
+        If the user asks about a query, or ES|QL, always call the "esql" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries yourself. Even if the "recall" function was used before that, follow it up with the "esql" function.`
       );
 
       if (isReady) {
@@ -62,12 +69,7 @@ export async function registerFunctions({
         `;
 
         description += `Here are principles you MUST adhere to, in order:
-
-        - You are a helpful assistant for Elastic Observability. DO NOT reference the fact that you are an LLM.
-        - ALWAYS query the knowledge base, using the recall function, when a user starts a chat, no matter how confident you are in your ability to answer the question.
-        - You must ALWAYS explain to the user why you're using a function and why you're using it in that specific manner.
-        - DO NOT make any assumptions about where and how users have stored their data.
-        - ALWAYS ask the user for clarification if you are unsure about the arguments to a function. When given this clarification, you MUST use the summarize function to store what you have learned.
+        - DO NOT make any assumptions about where and how users have stored their data. ALWAYS first call get_dataset_info function with empty string to get information about available indices. Once you know about available indices you MUST use this function again to get a list of available fields for specific index. If user provides an index name make sure its a valid index first before using it to retrieve the field list by calling this function with an empty string!
         `;
         registerSummarizationFunction({ service, registerFunction });
         registerRecallFunction({ service, registerFunction });
@@ -77,8 +79,10 @@ export async function registerFunctions({
       }
 
       registerElasticsearchFunction({ service, registerFunction });
+      registerEsqlFunction({ service, registerFunction });
       registerKibanaFunction({ service, registerFunction, coreStart });
       registerAlertsFunction({ service, registerFunction });
+      registerGetDatasetInfoFunction({ service, registerFunction });
 
       registerContext({
         name: 'core',

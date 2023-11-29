@@ -9,9 +9,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { StartPlugins } from '../../../types';
 
 type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'uiSettings' | 'notifications'> &
-  Pick<StartPlugins, 'data' | 'unifiedSearch'>;
+  Pick<StartPlugins, 'data' | 'unifiedSearch' | 'expressions'>;
 
 export class KibanaServices {
+  private static buildFlavor?: string;
   private static kibanaBranch?: string;
   private static kibanaVersion?: string;
   private static prebuiltRulesPackageVersion?: string;
@@ -24,17 +25,29 @@ export class KibanaServices {
     unifiedSearch,
     kibanaBranch,
     kibanaVersion,
+    buildFlavor,
     prebuiltRulesPackageVersion,
     uiSettings,
     notifications,
+    expressions,
   }: GlobalServices & {
     kibanaBranch: string;
     kibanaVersion: string;
+    buildFlavor: string;
     prebuiltRulesPackageVersion?: string;
   }) {
-    this.services = { application, data, http, uiSettings, unifiedSearch, notifications };
+    this.services = {
+      application,
+      data,
+      http,
+      uiSettings,
+      unifiedSearch,
+      notifications,
+      expressions,
+    };
     this.kibanaBranch = kibanaBranch;
     this.kibanaVersion = kibanaVersion;
+    this.buildFlavor = buildFlavor;
     this.prebuiltRulesPackageVersion = prebuiltRulesPackageVersion;
   }
 
@@ -64,6 +77,13 @@ export class KibanaServices {
 
   public static getPrebuiltRulesPackageVersion(): string | undefined {
     return this.prebuiltRulesPackageVersion;
+  }
+
+  public static getBuildFlavor(): string {
+    if (!this.buildFlavor) {
+      this.throwUninitializedError();
+    }
+    return this.buildFlavor;
   }
 
   private static throwUninitializedError(): never {

@@ -14,11 +14,18 @@ export async function collectContainers({
   from,
   to,
   sourceIndices,
+  filters = [],
   afterKey,
 }: CollectorOptions) {
+  if (!sourceIndices?.metrics || !sourceIndices?.logs) {
+    throw new Error('missing required metrics/logs indices');
+  }
+
+  const musts = [...filters, { exists: { field: 'container.id' } }];
+
   const { metrics, logs } = sourceIndices;
   const dsl: estypes.SearchRequest = {
-    index: [logs, metrics],
+    index: [metrics, logs],
     size: QUERY_MAX_SIZE,
     collapse: {
       field: 'container.id',
@@ -44,6 +51,7 @@ export async function collectContainers({
             },
           },
         ],
+        must: musts,
         should: [
           { exists: { field: 'kubernetes.container.id' } },
           { exists: { field: 'kubernetes.pod.uid' } },

@@ -9,12 +9,14 @@ import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { useAlertDataView } from '../../hooks/use_alert_data_view';
 import { TriggersAndActionsUiServices } from '../../..';
 import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
+import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
@@ -44,15 +46,22 @@ export function AlertsSearchBar({
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-  const { value: dataView, loading, error } = useAlertDataView(featureIds);
-  const {
-    value: aadFields,
-    loading: fieldsLoading,
-    error: fieldsError,
-  } = useRuleAADFields(ruleTypeId);
+  const { dataviews, loading } = useAlertDataView(featureIds ?? []);
+  const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns =
-    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataView;
+    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataviews;
+
+  const ruleType = useLoadRuleTypesQuery({
+    filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
+    enabled: ruleTypeId !== undefined,
+  });
+
+  const isSecurity =
+    (featureIds && featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM)) ||
+    (ruleType &&
+      ruleTypeId &&
+      ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);
 
   const onSearchQuerySubmit = useCallback(
     ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
@@ -86,9 +95,7 @@ export function AlertsSearchBar({
       appName={appName}
       disableQueryLanguageSwitcher={disableQueryLanguageSwitcher}
       // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
-      indexPatterns={
-        loading || error || fieldsLoading || fieldsError ? NO_INDEX_PATTERNS : indexPatterns
-      }
+      indexPatterns={loading || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}
@@ -101,11 +108,11 @@ export function AlertsSearchBar({
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
       showQueryInput={true}
-      showSaveQuery={true}
+      saveQueryMenuVisibility="allowed_by_app_privilege"
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
       onQueryChange={onSearchQueryChange}
-      suggestionsAbstraction={SA_ALERTS}
+      suggestionsAbstraction={isSecurity ? undefined : SA_ALERTS}
     />
   );
 }

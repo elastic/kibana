@@ -6,34 +6,16 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { createEndpointDockerConfig, getRegistryUrlAsArray } from './registry';
+import { generateConfig } from './config.base';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  return {
-    ...xPackAPITestsConfig.getAll(),
-    testFiles: [require.resolve('./apis')],
-    dockerServers: createEndpointDockerConfig(),
+  return generateConfig({
+    baseConfig: xPackAPITestsConfig,
+    junitReportName: 'X-Pack Endpoint API Integration Tests against ESS',
+    target: 'ess',
     services,
-    junit: {
-      reportName: 'X-Pack Endpoint API Integration Tests',
-    },
-    kbnTestServer: {
-      ...xPackAPITestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        // if you return an empty string here the kibana server will not start properly but an empty array works
-        ...getRegistryUrlAsArray(),
-        // always install Endpoint package by default when Fleet sets up
-        `--xpack.fleet.packages.0.name=endpoint`,
-        `--xpack.fleet.packages.0.version=latest`,
-        // this will be removed in 8.7 when the file upload feature is released
-        `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
-        // set any experimental feature flags for testing
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
-      ],
-    },
-  };
+  });
 }

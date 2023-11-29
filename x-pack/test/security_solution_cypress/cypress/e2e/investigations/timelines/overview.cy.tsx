@@ -17,17 +17,14 @@ import {
   sharedTimelineTitleFragment,
 } from '../../../objects/timeline';
 
-import { cleanKibana } from '../../../tasks/common';
-
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
   before(() => {
-    cleanKibana();
-
     createTimeline(getFavoritedTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
@@ -36,7 +33,7 @@ describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     cy.get(TIMELINES_OVERVIEW_SEARCH).clear();
   });
 

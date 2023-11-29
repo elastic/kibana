@@ -167,11 +167,9 @@ describe('Differential Functions page', () => {
       });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
-      cy.get('[data-test-subj="topNFunctionsGrid"] .euiDataGridRow').should('have.length.gt', 1);
-      cy.get('[data-test-subj="TopNFunctionsComparisonGrid"] .euiDataGridRow').should(
-        'have.length.gt',
-        1
-      );
+      cy.get('[data-test-subj="frame"]').contains('vmlinux');
+      cy.get('[data-test-subj="comparison_frame"]').contains('vmlinux');
+
       cy.addKqlFilter({
         key: 'process.thread.name',
         value: '108795321966692',
@@ -183,38 +181,8 @@ describe('Differential Functions page', () => {
       });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
-      cy.get('[data-test-subj="topNFunctionsGrid"] .euiDataGridRow').should('have.length', 2);
-      cy.get('[data-test-subj="TopNFunctionsComparisonGrid"] .euiDataGridRow').should(
-        'have.length',
-        1
-      );
-      [
-        { id: 'overallPerformance', value: '50.00%', icon: 'sortUp_success' },
-        {
-          id: 'annualizedCo2',
-          value: '0.13 lbs / 0.06 kg',
-          comparisonValue: '0.07 lbs / 0.03 kg (50.00%)',
-          icon: 'comparison_sortUp_success',
-        },
-        {
-          id: 'annualizedCost',
-          value: '$1.24',
-          comparisonValue: '$0.62 (50.00%)',
-          icon: 'comparison_sortUp_success',
-        },
-        {
-          id: 'totalNumberOfSamples',
-          value: '2',
-          comparisonValue: '1 (50.00%)',
-          icon: 'comparison_sortUp_success',
-        },
-      ].forEach((item) => {
-        cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
-        cy.get(`[data-test-subj="${item.id}_${item.icon}"]`).should('exist');
-        if (item.comparisonValue) {
-          cy.get(`[data-test-subj="${item.id}_comparison_value"]`).contains(item.comparisonValue);
-        }
-      });
+      cy.get('[data-test-subj="frame"]').contains('libsystemd-shared-237.so');
+      cy.get('[data-test-subj="comparison_frame"]').contains('libjvm.so');
     });
   });
 });

@@ -13,7 +13,9 @@ import {
   DefaultNamespaceArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { NonEmptyStringArray } from '@kbn/securitysolution-io-ts-types';
-import { RuleName, RuleObjectId, RuleSignatureId } from '../../model';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
+import { RuleName, RuleObjectId, RuleSignatureId } from '../../model/rule_schema_legacy';
 
 // If ids and list_ids are undefined, route will fetch all lists matching the
 // specified namespace type

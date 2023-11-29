@@ -7,11 +7,9 @@
 
 import { omit } from 'lodash';
 import { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { filterBy, openTable } from '../../../../tasks/rule_details_flyout';
 import { generateEvent } from '../../../../objects/event';
 import { createDocument, deleteDataStream } from '../../../../tasks/api_calls/elasticsearch';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
-import { FIELD } from '../../../../screens/alerts_details';
 import { INTEGRATION_LINK, INTEGRATION_STATUS } from '../../../../screens/rule_details';
 import {
   INTEGRATIONS_POPOVER,
@@ -28,27 +26,26 @@ import {
   disableRelatedIntegrations,
   enableRelatedIntegrations,
 } from '../../../../tasks/api_calls/kibana_advanced_settings';
-import { deleteAlertsAndRules } from '../../../../tasks/common';
-import {
-  login,
-  visitSecurityDetectionRulesPage,
-  visitWithoutDateRange,
-} from '../../../../tasks/login';
-import { expandFirstAlert } from '../../../../tasks/alerts';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
   PackagePolicyWithoutAgentPolicyId,
-} from '../../../../tasks/integrations';
+} from '../../../../tasks/api_calls/integrations';
 import {
   disableAutoRefresh,
   openIntegrationsPopover,
 } from '../../../../tasks/alerts_detection_rules';
-import { ruleDetailsUrl } from '../../../../urls/navigation';
-import { enablesRule, waitForPageToBeLoaded } from '../../../../tasks/rule_details';
+import { fetchRuleAlerts } from '../../../../tasks/api_calls/alerts';
+import {
+  enablesRule,
+  visitRuleDetailsPage,
+  waitForPageToBeLoaded,
+} from '../../../../tasks/rule_details';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
   const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [
@@ -87,7 +84,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
   describe('integrations not installed', () => {
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 
@@ -155,7 +152,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
 
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 
@@ -190,12 +187,10 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
       });
     });
 
-    // TODO: https://github.com/elastic/kibana/issues/161540
-    // Flaky in serverless tests
-    // @brokenInServerless tag is not working so a skip was needed
-    describe.skip('rule details', { tags: ['@brokenInServerless'] }, () => {
+    describe('rule details', () => {
       beforeEach(() => {
         visitFirstInstalledPrebuiltRuleDetailsPage();
+        waitForPageToBeLoaded(PREBUILT_RULE_NAME);
       });
 
       it('should display the integrations in the definition section', () => {
@@ -212,42 +207,26 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
         });
       });
 
-      it('the alerts generated should have a "kibana.alert.rule.parameters.related_integrations" field containing the integrations', () => {
-        const RELATED_INTEGRATION_FIELD = 'kibana.alert.rule.parameters.related_integrations';
+      const RELATED_INTEGRATION_FIELD = 'kibana.alert.rule.parameters.related_integrations';
 
+      it(`the alerts generated should have a "${RELATED_INTEGRATION_FIELD}" field containing the integrations`, () => {
         deleteDataStream(DATA_STREAM_NAME);
         createDocument(DATA_STREAM_NAME, generateEvent());
 
-        waitForPageToBeLoaded(PREBUILT_RULE_NAME);
         enablesRule();
         waitForAlertsToPopulate();
-        expandFirstAlert();
-        openTable();
-        filterBy(RELATED_INTEGRATION_FIELD);
 
-        cy.get(FIELD(RELATED_INTEGRATION_FIELD))
-          .invoke('text')
-          .then((stringValue) => {
-            // Integrations are displayed in the flyout as a string with a format like so:
-            // '{"package":"aws","version":"1.17.0","integration":"unknown"}{"package":"mock","version":"1.1.0"}{"package":"system","version":"1.17.0"}'
-            // We need to parse it to an array of valid objects before we can compare it to the expected value
-            // Otherwise, the test might fail because of the order of the properties in the objects in the string
-            const jsonStringArray = stringValue.split('}{');
-
-            const validJsonStringArray = createValidJsonStringArray(jsonStringArray);
-
-            const parsedIntegrations = validJsonStringArray.map((jsonString) =>
-              JSON.parse(jsonString)
-            );
-
-            RULE_RELATED_INTEGRATIONS.forEach((integration) => {
-              expect(parsedIntegrations).to.deep.include({
-                package: integration.package,
-                version: integration.version,
-                ...(integration.integration ? { integration: integration.integration } : {}),
-              });
-            });
+        fetchRuleAlerts({
+          ruleId: 'rule_1',
+          fields: [RELATED_INTEGRATION_FIELD],
+          size: 1,
+        }).then((alertsResponse) => {
+          expect(alertsResponse.body.hits.hits[0].fields).to.deep.equal({
+            [RELATED_INTEGRATION_FIELD]: RULE_RELATED_INTEGRATIONS.map((x) =>
+              omit(x, ['installed', 'enabled'])
+            ),
           });
+        });
       });
     });
   });
@@ -263,7 +242,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
 
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 
@@ -303,7 +282,7 @@ function addAndInstallPrebuiltRules(rules: Array<typeof SAMPLE_PREBUILT_RULE>): 
 function visitFirstInstalledPrebuiltRuleDetailsPage(): void {
   cy.get<Cypress.Response<PerformRuleInstallationResponseBody>>(
     `@${INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS}`
-  ).then((response) => visitWithoutDateRange(ruleDetailsUrl(response.body.results.created[0].id)));
+  ).then((response) => visitRuleDetailsPage(response.body.results.created[0].id));
 }
 
 interface IntegrationDefinition {
@@ -426,14 +405,3 @@ const AWS_PACKAGE_POLICY: PackagePolicyWithoutAgentPolicyId = {
     },
   },
 };
-
-const createValidJsonStringArray = (jsonStringArray: string[]) =>
-  jsonStringArray.map((jsonString, index) => {
-    if (index === 0) {
-      return `${jsonString}}`;
-    } else if (index === jsonStringArray.length - 1) {
-      return `{${jsonString}`;
-    } else {
-      return `{${jsonString}}`;
-    }
-  });

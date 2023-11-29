@@ -50,6 +50,13 @@ export interface SpacesApi {
   getActiveSpace(): Promise<Space>;
 
   /**
+   * Determines whether Kibana supports multiple spaces or only the default space.
+   *
+   * When `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden.
+   */
+  hasOnlyDefaultSpace: boolean;
+
+  /**
    * UI components and services to add spaces capabilities to an application.
    */
   ui: SpacesApiUi;

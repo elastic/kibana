@@ -6,6 +6,7 @@
  */
 
 import type { Exception } from '../objects/exception';
+import { TOASTER_CLOSE_ICON } from '../screens/alerts_detection_rules';
 import {
   FIELD_INPUT,
   OPERATOR_INPUT,
@@ -44,7 +45,10 @@ import {
   EXCEPTION_ITEM_HEADER_ACTION_MENU,
   EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT,
   EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE,
+  EXCEPTIONS_ITEM_ERROR_CALLOUT,
+  EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON,
 } from '../screens/exceptions';
+import { closeErrorToast } from './alerts_detection_rules';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', numberOfItems);
@@ -114,8 +118,10 @@ export const addExceptionEntryFieldValueValue = (value: string, index = 0) => {
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
-export const addExceptionEntryFieldMatchAnyValue = (value: string, index = 0) => {
-  cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+export const addExceptionEntryFieldMatchAnyValue = (values: string[], index = 0) => {
+  values.forEach((value) => {
+    cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+  });
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 export const addExceptionEntryFieldMatchIncludedValue = (value: string, index = 0) => {
@@ -164,9 +170,13 @@ export const selectCloseSingleAlerts = () => {
 export const addExceptionConditions = (exception: Exception) => {
   cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
+  if (exception.operator === 'is one of') {
+    addExceptionEntryFieldMatchAnyValue(exception.values, 0);
+  } else {
+    exception.values.forEach((value) => {
+      cy.get(VALUES_INPUT).type(`${value}{enter}`);
+    });
+  }
 };
 
 export const validateExceptionConditionField = (value: string) => {
@@ -177,8 +187,25 @@ export const validateEmptyExceptionConditionField = () => {
 };
 export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).should('exist');
+  /* Sometimes a toaster error message unrelated with the test performed is displayed.
+   The toaster is blocking the confirm button we have to click. Using force true would solve the issue, but should not be used.
+   There are some tests that use the closeErrorToast() method to close error toasters before continuing with the interactions with the page. 
+   In this case we check if a toaster is displayed and if so, close it to continue with the test.
+   */
+  cy.root().then(($page) => {
+    const element = $page.find(TOASTER_CLOSE_ICON);
+    if (element.length > 0) {
+      closeErrorToast();
+    }
+  });
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
+};
+
+export const submitNewExceptionItemWithFailure = () => {
+  cy.get(CONFIRM_BTN).should('exist');
+  cy.get(CONFIRM_BTN).click();
+  cy.get(CONFIRM_BTN).should('exist');
 };
 
 export const submitEditedExceptionItem = () => {
@@ -204,6 +231,20 @@ export const selectOs = (os: string) => {
 
 export const addExceptionComment = (comment: string) => {
   cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`${comment}`);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
+};
+
+export const addExceptionHugeComment = (comment: string) => {
+  cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(` {backspace}`);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).invoke('val', comment);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(` {backspace}`);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
+};
+
+export const editExceptionComment = (comment: string) => {
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).clear();
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`${comment}`);
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
 };
@@ -292,4 +333,14 @@ export const validateHighlightedFieldsPopulatedAsExceptionConditions = (
   highlightedFields: string[]
 ) => {
   return highlightedFields.every((field) => validateExceptionConditionField(field));
+};
+
+export const dismissExceptionItemErrorCallOut = () => {
+  cy.get(EXCEPTIONS_ITEM_ERROR_CALLOUT).should(
+    'include.text',
+    'An error occured submitting exception'
+  );
+
+  // Click dismiss button
+  cy.get(EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON).click();
 };

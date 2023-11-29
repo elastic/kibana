@@ -11,23 +11,22 @@ import {
   importRules,
   importRulesWithOverwriteAll,
 } from '../../../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules, reload } from '../../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../../tasks/login';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { deleteExceptionList } from '../../../../../tasks/api_calls/exceptions';
+import { login } from '../../../../../tasks/login';
+import { visit } from '../../../../../tasks/navigation';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
+const IMPORTED_EXCEPTION_ID = 'b8dfd17f-1e11-41b0-ae7e-9e7f8237de49';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-describe('Import rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('Import rules', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
+    deleteExceptionList(IMPORTED_EXCEPTION_ID, 'single');
     cy.intercept('POST', '/api/detection_engine/rules/_import*').as('import');
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    visit(RULES_MANAGEMENT_URL);
   });
 
   it('Imports a custom rule with exceptions', function () {
@@ -51,7 +50,7 @@ describe('Import rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
       cy.wrap(response?.statusCode).should('eql', 200);
     });
 
-    reload();
+    cy.reload();
     importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
@@ -67,7 +66,7 @@ describe('Import rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
       cy.wrap(response?.statusCode).should('eql', 200);
     });
 
-    reload();
+    cy.reload();
     importRulesWithOverwriteAll(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {

@@ -12,7 +12,8 @@ import {
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
 } from '../../screens/overview';
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import { OVERVIEW_URL } from '../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539

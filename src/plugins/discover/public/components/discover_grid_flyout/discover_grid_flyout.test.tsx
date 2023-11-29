@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { EuiFlexItem } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
@@ -23,6 +24,17 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
+import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
+
+const mockFlyoutCustomization: FlyoutCustomization = {
+  id: 'flyout',
+  actions: {},
+};
+
+jest.mock('../../customizations', () => ({
+  ...jest.requireActual('../../customizations'),
+  useDiscoverCustomization: jest.fn(),
+}));
 
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -57,6 +69,9 @@ describe('Discover flyout', function () {
       },
       contextLocator: { getRedirectUrl: jest.fn(() => 'mock-context-redirect-url') },
       singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
+      toastNotifications: {
+        addSuccess: jest.fn(),
+      },
     } as unknown as DiscoverServices;
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -91,8 +106,16 @@ describe('Discover flyout', function () {
     const component = mountWithIntl(<Proxy {...props} />);
     await waitNextUpdate(component);
 
-    return { component, props };
+    return { component, props, services };
   };
+
+  beforeEach(() => {
+    mockFlyoutCustomization.actions.defaultActions = undefined;
+    mockFlyoutCustomization.Content = undefined;
+    jest.clearAllMocks();
+
+    (useDiscoverCustomization as jest.Mock).mockImplementation(() => mockFlyoutCustomization);
+  });
 
   it('should be rendered correctly using an data view without timefield', async () => {
     const { component, props } = await mountComponent({});
@@ -205,5 +228,113 @@ describe('Discover flyout', function () {
     expect(singleDocumentView.length).toBeFalsy();
     const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
     expect(flyoutTitle.text()).toBe('Expanded row');
+  });
+
+  describe('with applied customizations', () => {
+    describe('when title is customized', () => {
+      it('should display the passed string as title', async () => {
+        const customTitle = 'Custom flyout title';
+        mockFlyoutCustomization.title = customTitle;
+
+        const { component } = await mountComponent({});
+
+        const titleNode = findTestSubject(component, 'docTableRowDetailsTitle');
+
+        expect(titleNode.text()).toBe(customTitle);
+      });
+    });
+
+    describe('when actions are customized', () => {
+      it('should display actions added by getActionItems', async () => {
+        mockFlyoutCustomization.actions = {
+          getActionItems: jest.fn(() => [
+            {
+              id: 'action-item-1',
+              enabled: true,
+              Content: () => <EuiFlexItem data-test-subj="customActionItem1">Action 1</EuiFlexItem>,
+            },
+            {
+              id: 'action-item-2',
+              enabled: true,
+              Content: () => <EuiFlexItem data-test-subj="customActionItem2">Action 2</EuiFlexItem>,
+            },
+          ]),
+        };
+
+        const { component } = await mountComponent({});
+
+        const action1 = findTestSubject(component, 'customActionItem1');
+        const action2 = findTestSubject(component, 'customActionItem2');
+
+        expect(action1.text()).toBe('Action 1');
+        expect(action2.text()).toBe('Action 2');
+      });
+
+      it('should allow disabling default actions', async () => {
+        mockFlyoutCustomization.actions = {
+          defaultActions: {
+            viewSingleDocument: { disabled: true },
+            viewSurroundingDocument: { disabled: true },
+          },
+        };
+
+        const { component } = await mountComponent({});
+
+        const singleDocumentView = findTestSubject(component, 'docTableRowAction');
+        expect(singleDocumentView.length).toBeFalsy();
+      });
+    });
+
+    describe('when content is customized', () => {
+      it('should display the component passed to the Content customization', async () => {
+        mockFlyoutCustomization.Content = () => (
+          <span data-test-subj="flyoutCustomContent">Custom content</span>
+        );
+
+        const { component } = await mountComponent({});
+
+        const customContent = findTestSubject(component, 'flyoutCustomContent');
+
+        expect(customContent.text()).toBe('Custom content');
+      });
+
+      it('should provide a doc property to display details about the current document overview', async () => {
+        mockFlyoutCustomization.Content = ({ doc }) => {
+          return (
+            <span data-test-subj="flyoutCustomContent">{doc.flattened.message as string}</span>
+          );
+        };
+
+        const { component } = await mountComponent({});
+
+        const customContent = findTestSubject(component, 'flyoutCustomContent');
+
+        expect(customContent.text()).toBe('test1');
+      });
+
+      it('should provide an actions prop collection to optionally update the grid content', async () => {
+        mockFlyoutCustomization.Content = ({ actions }) => (
+          <>
+            <button data-test-subj="addColumn" onClick={() => actions.addColumn('message')} />
+            <button data-test-subj="removeColumn" onClick={() => actions.removeColumn('message')} />
+            <button
+              data-test-subj="addFilter"
+              onClick={() => actions.addFilter?.('_exists_', 'message', '+')}
+            />
+          </>
+        );
+
+        const { component, props, services } = await mountComponent({});
+
+        findTestSubject(component, 'addColumn').simulate('click');
+        findTestSubject(component, 'removeColumn').simulate('click');
+        findTestSubject(component, 'addFilter').simulate('click');
+
+        expect(props.onAddColumn).toHaveBeenCalled();
+        expect(props.onRemoveColumn).toHaveBeenCalled();
+        expect(services.toastNotifications.addSuccess).toHaveBeenCalledTimes(2);
+        expect(props.onFilter).toHaveBeenCalled();
+      });
+    });
   });
 });

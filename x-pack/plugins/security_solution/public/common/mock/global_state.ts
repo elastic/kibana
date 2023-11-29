@@ -7,11 +7,11 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
   FlowTarget,
-  HostsFields,
   NetworkDnsFields,
   NetworkTopTablesFields,
   NetworkTlsFields,
@@ -308,10 +308,6 @@ export const mockGlobalState: State = {
   dragAndDrop: { dataProviders: {} },
   timeline: {
     showCallOutUnauthorizedMsg: false,
-    autoSavedWarningMsg: {
-      timelineId: null,
-      newTimelineModel: null,
-    },
     timelineById: {
       [TimelineId.test]: {
         activeTab: TimelineTabs.query,
@@ -374,6 +370,9 @@ export const mockGlobalState: State = {
         filters: [],
         isSaving: false,
         itemsPerPageOptions: [10, 25, 50, 100],
+        savedSearchId: null,
+        isDiscoverSavedSearchLoaded: false,
+        isDataProviderVisible: true,
       },
     },
     insertTimeline: null,

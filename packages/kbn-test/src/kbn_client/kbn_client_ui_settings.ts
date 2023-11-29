@@ -10,7 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import { KbnClientRequester, pathWithSpace } from './kbn_client_requester';
 
-export type UiSettingValues = Record<string, string | number | boolean>;
+export type UiSettingValues = Record<string, string | number | boolean | string[]>;
 interface UiSettingsApiResponse {
   settings: {
     [key: string]: {

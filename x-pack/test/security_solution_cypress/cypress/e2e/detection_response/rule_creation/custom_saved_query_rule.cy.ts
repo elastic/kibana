@@ -24,7 +24,7 @@ import {
 
 import { editFirstRule, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -34,17 +34,18 @@ import {
   checkLoadQueryDynamically,
   uncheckLoadQueryDynamically,
 } from '../../../tasks/create_new_rule';
-import { saveEditedRule } from '../../../tasks/edit_rule';
-import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
-import { assertDetailsNotExist, getDetails } from '../../../tasks/rule_details';
-import { createRule } from '../../../tasks/api_calls/rules';
-
+import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
-  ruleDetailsUrl,
-  ruleEditUrl,
-  RULE_CREATION,
-  SECURITY_DETECTIONS_RULES_URL,
-} from '../../../urls/navigation';
+  assertDetailsNotExist,
+  getDetails,
+  visitRuleDetailsPage,
+} from '../../../tasks/rule_details';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
@@ -52,10 +53,6 @@ const savedQueryFilterKey = 'testAgent.value';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   describe('Custom saved_query detection rule creation', () => {
     beforeEach(() => {
       login();
@@ -66,7 +63,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
     it('Creates saved query rule', function () {
       const rule = getSavedQueryRule();
       createSavedQuery(savedQueryName, savedQueryQuery, savedQueryFilterKey);
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
 
       selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
 
@@ -86,6 +83,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
       fillScheduleRuleAndContinue(rule);
       cy.intercept('POST', '/api/detection_engine/rules').as('savedQueryRule');
       createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.wait('@savedQueryRule').then(({ response }) => {
         // created rule should have saved_query type
@@ -113,7 +111,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
               saved_id: 'non-existent',
               query: undefined,
             })
-          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
+          ).then((rule) => visitRuleDetailsPage(rule.body.id));
         });
 
         it('Shows error toast on details page when saved query can not be loaded', function () {
@@ -128,7 +126,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
               saved_id: 'non-existent',
               query: undefined,
             })
-          ).then((rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id)));
+          ).then((rule) => visitEditRulePage(rule.body.id));
         });
 
         it('Shows validation error on rule edit when saved query can not be loaded', function () {
@@ -157,7 +155,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
     context('Editing', () => {
       it('Allows to update query rule as saved_query rule type', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createRule(getNewRule()).then((rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id)));
+        createRule(getNewRule()).then((rule) => visitEditRulePage(rule.body.id));
 
         selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
         checkLoadQueryDynamically();
@@ -181,7 +179,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
         createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
           cy.log(JSON.stringify(response.body, null, 2));
           createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined })).then(
-            (rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id))
+            (rule) => visitEditRulePage(rule.body.id)
           );
         });
 
@@ -206,7 +204,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
       it('Allows to update saved_query rule with non-existent query by adding custom query', () => {
         const expectedCustomTestQuery = 'random test query';
         createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
-          visitWithoutDateRange(ruleEditUrl(rule.body.id))
+          visitEditRulePage(rule.body.id)
         );
 
         uncheckLoadQueryDynamically();
@@ -229,10 +227,10 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
       it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
         createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
-          visitWithoutDateRange(ruleEditUrl(rule.body.id))
+          visitEditRulePage(rule.body.id)
         );
 
-        visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(RULES_MANAGEMENT_URL);
 
         editFirstRule();
         uncheckLoadQueryDynamically();

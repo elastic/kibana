@@ -11,11 +11,10 @@ import { getSimpleCustomQueryRule } from '../../../objects/rule';
 import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { deleteIndex, waitForNewDocumentToBeIndexed } from '../../../tasks/api_calls/elasticsearch';
 import {
-  cleanKibana,
   deleteAlertsAndRules,
   deleteConnectors,
   deleteDataView,
-} from '../../../tasks/common';
+} from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -23,9 +22,10 @@ import {
   fillRuleAction,
   fillScheduleRuleAndContinue,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
-
-import { RULE_CREATION } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
@@ -33,10 +33,6 @@ describe(
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const indexConnector = getIndexConnector();
-
-    before(() => {
-      cleanKibana();
-    });
 
     beforeEach(() => {
       login();
@@ -53,12 +49,13 @@ describe(
     const expectedJson = JSON.parse(actions.connectors[0].document);
 
     it('Indexes a new document after the index action is triggered', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       fillRuleAction(actions);
       createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
       goToRuleDetailsOf(rule.name);
 

@@ -12,10 +12,11 @@ import {
   ChromeProjectNavigation,
   SideNavComponent,
   ChromeProjectBreadcrumb,
+  ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
   BehaviorSubject,
   Observable,
@@ -29,15 +30,15 @@ import {
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
-import classnames from 'classnames';
 
-import { createHomeBreadcrumb } from './home_breadcrumbs';
 import { findActiveNodes, flattenNav, stripQueryParams } from './utils';
+import { buildBreadcrumbs } from './breadcrumbs';
 
 interface StartDeps {
   application: InternalApplicationStart;
   navLinks: ChromeNavLinks;
-  http: HttpStart;
+  http: InternalHttpStart;
+  chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
 }
 
 export class ProjectNavigationService {
@@ -46,6 +47,8 @@ export class ProjectNavigationService {
   }>({ current: null });
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
+  private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private projectUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
@@ -56,10 +59,10 @@ export class ProjectNavigationService {
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
   private application?: InternalApplicationStart;
-  private http?: HttpStart;
+  private http?: InternalHttpStart;
   private unlistenHistory?: () => void;
 
-  public start({ application, navLinks, http }: StartDeps) {
+  public start({ application, navLinks, http, chromeBreadcrumbs$ }: StartDeps) {
     this.application = application;
     this.http = http;
     this.onHistoryLocationChange(application.history.location);
@@ -98,6 +101,15 @@ export class ProjectNavigationService {
       getProjectsUrl$: () => {
         return this.projectsUrl$.asObservable();
       },
+      setProjectName: (projectName: string) => {
+        this.projectName$.next(projectName);
+      },
+      getProjectName$: () => {
+        return this.projectName$.asObservable();
+      },
+      setProjectUrl: (projectUrl: string) => {
+        this.projectUrl$.next(projectUrl);
+      },
       setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
         this.projectNavigation$.next(projectNavigation);
         this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
@@ -128,35 +140,30 @@ export class ProjectNavigationService {
         return combineLatest([
           this.projectBreadcrumbs$,
           this.activeNodes$,
-          this.projectHome$.pipe(map((homeHref) => homeHref ?? '/')),
+          chromeBreadcrumbs$,
+          this.projectsUrl$,
+          this.projectUrl$,
+          this.projectName$,
         ]).pipe(
-          map(([breadcrumbs, activeNodes, homeHref]) => {
-            const homeBreadcrumb = createHomeBreadcrumb({
-              homeHref: this.http?.basePath.prepend?.(homeHref) ?? homeHref,
-            });
-
-            if (breadcrumbs.params.absolute) {
-              return [homeBreadcrumb, ...breadcrumbs.breadcrumbs];
-            } else {
-              // breadcrumbs take the first active path
-              const activePath: ChromeProjectNavigationNode[] = activeNodes[0] ?? [];
-              const navBreadcrumbs = activePath
-                .filter((n) => Boolean(n.title) && n.breadcrumbStatus !== 'hidden')
-                .map(
-                  (node): ChromeProjectBreadcrumb => ({
-                    href: node.deepLink?.url ?? node.href,
-                    text: node.title,
-                    'data-test-subj': classnames({
-                      [`breadcrumb-deepLinkId-${node.deepLink?.id}`]: !!node.deepLink,
-                    }),
-                  })
-                );
-
-              const result = [homeBreadcrumb, ...navBreadcrumbs, ...breadcrumbs.breadcrumbs];
-
-              return result;
+          map(
+            ([
+              projectBreadcrumbs,
+              activeNodes,
+              chromeBreadcrumbs,
+              projectsUrl,
+              projectUrl,
+              projectName,
+            ]) => {
+              return buildBreadcrumbs({
+                projectUrl,
+                projectName,
+                projectsUrl,
+                projectBreadcrumbs,
+                activeNodes,
+                chromeBreadcrumbs,
+              });
             }
-          })
+          )
         );
       },
     };

@@ -141,6 +141,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
@@ -152,6 +153,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     context: 'test',
     mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
   },
+  validLegacyConsumers: [],
 };
 
 export const mockRunNowResponse = {
@@ -353,7 +355,7 @@ export const generateRunnerResult = ({
   alertInstances = {},
   alertRecoveredInstances = {},
   summaryActions = {},
-  hasError = false,
+  taskRunError,
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -386,7 +388,7 @@ export const generateRunnerResult = ({
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
     },
-    hasError,
+    taskRunError,
   };
 };
 

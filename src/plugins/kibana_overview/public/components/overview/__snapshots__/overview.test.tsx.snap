@@ -711,6 +711,7 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
     dataViewEditor={
       Object {
         "IndexPatternEditorComponent": [MockFunction],
+        "dataViewEditorServiceFactory": [MockFunction],
         "openEditor": [MockFunction],
         "userPermissions": Object {
           "editDataView": [MockFunction],

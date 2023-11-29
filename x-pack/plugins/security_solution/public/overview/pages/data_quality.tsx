@@ -29,7 +29,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import useObservable from 'react-use/lib/useObservable';
 
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
@@ -39,15 +38,9 @@ import { HeaderPage } from '../../common/components/header_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
+import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import {
-  KibanaServices,
-  useGetUserCasesPermissions,
-  useKibana,
-  useToasts,
-  useUiSetting$,
-} from '../../common/lib/kibana';
+import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
@@ -142,9 +135,7 @@ const DataQualityComponent: React.FC = () => {
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
-  const {
-    services: { telemetry },
-  } = useKibana();
+
   const addSuccessToast = useCallback(
     (toast: { title: string }) => {
       toasts.addSuccess(toast);
@@ -157,8 +148,8 @@ const DataQualityComponent: React.FC = () => {
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
-  const { isILMAvailable$, cases } = useKibana().services;
-  const isILMAvailable = useObservable(isILMAvailable$);
+  const { configSettings, cases, telemetry } = useKibana().services;
+  const isILMAvailable = configSettings.ILMEnabled;
 
   const [startDate, setStartTime] = useState<string>();
   const [endDate, setEndTime] = useState<string>();
@@ -172,7 +163,7 @@ const DataQualityComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isILMAvailable != null && isILMAvailable === false) {
+    if (!isILMAvailable) {
       setStartTime(DEFAULT_START_TIME);
       setEndTime(DEFAULT_END_TIME);
     }
@@ -211,7 +202,7 @@ const DataQualityComponent: React.FC = () => {
     key: LOCAL_STORAGE_KEY,
   });
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canUserCreateAndReadCases = useCallback(
     () => userCasesPermissions.create && userCasesPermissions.read,
     [userCasesPermissions.create, userCasesPermissions.read]
@@ -255,7 +246,7 @@ const DataQualityComponent: React.FC = () => {
 
   return (
     <>
-      {indicesExist && isILMAvailable != null ? (
+      {indicesExist ? (
         <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
           <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
             {isILMAvailable && (
@@ -282,6 +273,7 @@ const DataQualityComponent: React.FC = () => {
                   onTimeChange={onTimeChange}
                   showUpdateButton={false}
                   isDisabled={true}
+                  data-test-subj="dataQualityDatePicker"
                 />
               </EuiToolTip>
             )}

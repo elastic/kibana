@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getExceptionList } from '../../../../objects/exception';
 import { assertNumberOfExceptionItemsExists } from '../../../../tasks/exceptions';
@@ -14,7 +15,8 @@ import {
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
 } from '../../../../tasks/exceptions_table';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
   createExceptionList,
@@ -40,13 +42,11 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-// Flaky in serverless tests
-describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    cy.task('esArchiverResetKibana');
     login();
-
+    deleteAlertsAndRules();
+    deleteExceptionLists();
     createRule(getNewRule({ name: 'Another rule' }));
 
     // Create exception list associated with a rule
@@ -106,7 +106,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] 
       ],
       expire_time: futureDate,
     });
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
   });
 

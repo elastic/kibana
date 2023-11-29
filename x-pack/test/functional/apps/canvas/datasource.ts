@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasExpressionTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['canvas', 'common']);
+  const PageObjects = getPageObjects(['canvas']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
@@ -35,7 +35,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       });
 
       // create new test workpad
-      await PageObjects.common.navigateToApp('canvas');
+      await PageObjects.canvas.goToListingPage();
       await PageObjects.canvas.createNewWorkpad();
     });
 

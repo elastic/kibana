@@ -29,6 +29,7 @@ export interface ConfigPanelWrapperProps {
   uiActions: UiActionsStart;
   getUserMessages?: UserMessagesGetter;
   hideLayerHeader?: boolean;
+  setIsInlineFlyoutVisible?: (status: boolean) => void;
 }
 
 export interface LayerPanelProps {

@@ -14,7 +14,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -109,7 +109,9 @@ export async function getServiceInstanceMetadataDetails({
           size: 1,
           query: {
             bool: {
-              filter: filter.concat(getDocumentTypeFilterForTransactions(true)),
+              filter: filter.concat(
+                getBackwardCompatibleDocumentTypeFilter(true)
+              ),
             },
           },
         },

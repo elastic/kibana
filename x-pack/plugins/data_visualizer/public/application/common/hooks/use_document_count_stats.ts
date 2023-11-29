@@ -10,7 +10,7 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { Query } from '@kbn/es-query';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SignificantTerm } from '@kbn/ml-agg-utils';
+import { SignificantItem } from '@kbn/ml-agg-utils';
 import {
   createRandomSamplerWrapper,
   RandomSampler,
@@ -50,8 +50,8 @@ export interface DocumentStatsSearchStrategyParams {
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
-  selectedSignificantTerm?: SignificantTerm;
-  includeSelectedSignificantTerm?: boolean;
+  selectedSignificantItem?: SignificantItem;
+  includeSelectedSignificantItem?: boolean;
   trackTotalHits?: boolean;
 }
 
@@ -167,8 +167,8 @@ export interface DocumentStatsSearchStrategyParams {
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
-  selectedSignificantTerm?: SignificantTerm;
-  includeSelectedSignificantTerm?: boolean;
+  selectedSignificantItem?: SignificantItem;
+  includeSelectedSignificantItem?: boolean;
   trackTotalHits?: boolean;
 }
 
@@ -236,6 +236,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
             totalNumDocs: totalCount,
             seed: RANDOM_SAMPLER_SEED,
           });
+
       const resp = await lastValueFrom(
         data.search.search(
           {

@@ -6,30 +6,26 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-navigation';
+import { type NavigationLink } from '@kbn/security-solution-navigation';
 import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
-import {
-  SolutionSideNavItemPosition,
-  type SolutionSideNavItem,
-} from '@kbn/security-solution-side-nav';
+import { SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
 import { useNavLinks } from '../../common/hooks/use_nav_links';
-import { ExternalPageName } from '../links/constants';
+import type { ProjectSideNavItem } from './types';
+import type { ProjectNavigationLink, ProjectPageName } from '../links/types';
+import { isBottomNavItemId } from '../links/util';
 
 type GetLinkProps = (link: NavigationLink) => {
-  href: string & Partial<SolutionSideNavItem>;
+  href: string & Partial<ProjectSideNavItem>;
 };
-
-const isBottomNavItem = (id: string) =>
-  id === SecurityPageName.landing ||
-  id === SecurityPageName.projectSettings ||
-  id === ExternalPageName.devTools;
-const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
 
 /**
  * Formats generic navigation links into the shape expected by the `SolutionSideNav`
  */
-const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): SolutionSideNavItem => {
-  const items = navLink.links?.reduce<SolutionSideNavItem[]>((acc, current) => {
+const formatLink = (
+  navLink: NavigationLink<ProjectPageName>,
+  getLinkProps: GetLinkProps
+): ProjectSideNavItem => {
+  const items = navLink.links?.reduce<ProjectSideNavItem[]>((acc, current) => {
     if (!current.disabled) {
       acc.push({
         id: current.id,
@@ -47,7 +43,7 @@ const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): Soluti
     id: navLink.id,
     label: navLink.title,
     iconType: navLink.sideNavIcon,
-    position: isBottomNavItem(navLink.id)
+    position: isBottomNavItemId(navLink.id)
       ? SolutionSideNavItemPosition.bottom
       : SolutionSideNavItemPosition.top,
     ...getLinkProps(navLink),
@@ -57,25 +53,19 @@ const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): Soluti
 };
 
 /**
- * Formats the get started navigation links into the shape expected by the `SolutionSideNav`
+ * Returns all the formatted SideNavItems, including external links
  */
-const formatGetStartedLink = (
-  navLink: NavigationLink,
-  getLinkProps: GetLinkProps
-): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  iconType: navLink.sideNavIcon,
-  position: SolutionSideNavItemPosition.bottom,
-  ...getLinkProps(navLink),
-  appendSeparator: true,
-});
+export const useSideNavItems = (): ProjectSideNavItem[] => {
+  const navLinks = useNavLinks();
+  return useFormattedSideNavItems(navLinks);
+};
 
 /**
  * Returns all the formatted SideNavItems, including external links
  */
-export const useSideNavItems = (): SolutionSideNavItem[] => {
-  const navLinks = useNavLinks();
+export const useFormattedSideNavItems = (
+  navLinks: ProjectNavigationLink[]
+): ProjectSideNavItem[] => {
   const getKibanaLinkProps = useGetLinkProps();
 
   const getLinkProps = useCallback<GetLinkProps>(
@@ -94,13 +84,8 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
 
   return useMemo(
     () =>
-      navLinks.reduce<SolutionSideNavItem[]>((items, navLink) => {
-        if (navLink.disabled) {
-          return items;
-        }
-        if (isGetStartedNavItem(navLink.id)) {
-          items.push(formatGetStartedLink(navLink, getLinkProps));
-        } else {
+      navLinks.reduce<ProjectSideNavItem[]>((items, navLink) => {
+        if (!navLink.disabled) {
           items.push(formatLink(navLink, getLinkProps));
         }
         return items;

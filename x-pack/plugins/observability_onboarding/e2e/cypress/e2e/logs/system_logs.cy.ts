@@ -11,6 +11,19 @@ describe('[Logs onboarding] System logs', () => {
       cy.deleteIntegration('system');
     });
 
+    describe('when user clicks on back button', () => {
+      beforeEach(() => {
+        cy.loginAsViewerUser();
+        cy.visitKibana('/app/observabilityOnboarding/systemLogs');
+      });
+
+      it('navigates to observability logs onboarding page', () => {
+        cy.getByTestSubj('observabilityOnboardingBackButtonBackButton').click();
+
+        cy.url().should('include', '/app/observabilityOnboarding');
+      });
+    });
+
     describe('when user is missing privileges', () => {
       beforeEach(() => {
         cy.loginAsViewerUser();
@@ -644,14 +657,48 @@ describe('[Logs onboarding] System logs', () => {
         .contains('Logs are being shipped!')
         .should('exist');
     });
+  });
 
-    it('when user clicks on Explore Logs it navigates to discover', () => {
-      cy.wait('@systemIntegrationInstall');
-      cy.wait('@checkOnboardingProgress');
-      cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
-      cy.url().should('include', '/app/discover');
+  describe('Explore Logs', () => {
+    describe('when integration installation fails', () => {
+      beforeEach(() => {
+        cy.deleteIntegration('system');
+        cy.intercept('GET', '/api/fleet/epm/packages/system', {
+          statusCode: 500,
+          body: {
+            message: 'Internal error',
+          },
+        }).as('systemIntegrationInstall');
+        cy.loginAsLogMonitoringUser();
+        cy.visitKibana('/app/observabilityOnboarding/systemLogs');
+      });
 
-      cy.get('button[title="logs-*"]').should('exist');
+      it('when users clicks on Explore logs they navigate to log explorer - All logs', () => {
+        cy.wait('@systemIntegrationInstall');
+        cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
+
+        cy.url().should('include', '/app/observability-log-explorer');
+        cy.get('button').contains('All logs').should('exist');
+      });
+    });
+
+    describe('when integration installation succeed', () => {
+      beforeEach(() => {
+        cy.deleteIntegration('system');
+        cy.intercept('GET', '/api/fleet/epm/packages/system').as(
+          'systemIntegrationInstall'
+        );
+        cy.loginAsLogMonitoringUser();
+        cy.visitKibana('/app/observabilityOnboarding/systemLogs');
+      });
+
+      it('when users clicks on Explore logs they navigate to log explorer and System integration is selected', () => {
+        cy.wait('@systemIntegrationInstall');
+        cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
+
+        cy.url().should('include', '/app/observability-log-explorer');
+        cy.get('button').contains('[System] syslog').should('exist');
+      });
     });
   });
 });

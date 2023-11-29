@@ -6,23 +6,29 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { rRuleResponseSchemaV1 } from '../../../r_rule';
+import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
   ruleNotifyWhen as ruleNotifyWhenV1,
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
   ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
-} from '../constants/v1';
+} from '../../common/constants/v1';
+import { validateNotifyWhenV1 } from '../../validation';
 
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
-const notifyWhenSchema = schema.oneOf([
-  schema.literal(ruleNotifyWhenV1.CHANGE),
-  schema.literal(ruleNotifyWhenV1.ACTIVE),
-  schema.literal(ruleNotifyWhenV1.THROTTLE),
-]);
+export const notifyWhenSchema = schema.oneOf(
+  [
+    schema.literal(ruleNotifyWhenV1.CHANGE),
+    schema.literal(ruleNotifyWhenV1.ACTIVE),
+    schema.literal(ruleNotifyWhenV1.THROTTLE),
+  ],
+  { validate: validateNotifyWhenV1 }
+);
 
 const intervalScheduleSchema = schema.object({
   interval: schema.string(),
@@ -35,18 +41,7 @@ const actionFrequencySchema = schema.object({
 });
 
 const actionAlertsFilterSchema = schema.object({
-  query: schema.maybe(
-    schema.object({
-      kql: schema.string(),
-      filters: schema.arrayOf(
-        schema.object({
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          meta: schema.recordOf(schema.string(), schema.any()),
-          state$: schema.maybe(schema.object({ store: schema.string() })),
-        })
-      ),
-    })
-  ),
+  query: schema.maybe(alertsFilterQuerySchemaV1),
   timeframe: schema.maybe(
     schema.object({
       days: schema.arrayOf(
@@ -180,49 +175,10 @@ export const monitoringSchema = schema.object({
   }),
 });
 
-export const rRuleSchema = schema.object({
-  dtstart: schema.string(),
-  tzid: schema.string(),
-  freq: schema.maybe(
-    schema.oneOf([
-      schema.literal(0),
-      schema.literal(1),
-      schema.literal(2),
-      schema.literal(3),
-      schema.literal(4),
-      schema.literal(5),
-      schema.literal(6),
-    ])
-  ),
-  until: schema.maybe(schema.string()),
-  count: schema.maybe(schema.number()),
-  interval: schema.maybe(schema.number()),
-  wkst: schema.maybe(
-    schema.oneOf([
-      schema.literal('MO'),
-      schema.literal('TU'),
-      schema.literal('WE'),
-      schema.literal('TH'),
-      schema.literal('FR'),
-      schema.literal('SA'),
-      schema.literal('SU'),
-    ])
-  ),
-  byweekday: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-  bymonth: schema.maybe(schema.arrayOf(schema.number())),
-  bysetpos: schema.maybe(schema.arrayOf(schema.number())),
-  bymonthday: schema.arrayOf(schema.number()),
-  byyearday: schema.arrayOf(schema.number()),
-  byweekno: schema.arrayOf(schema.number()),
-  byhour: schema.arrayOf(schema.number()),
-  byminute: schema.arrayOf(schema.number()),
-  bysecond: schema.arrayOf(schema.number()),
-});
-
 export const ruleSnoozeScheduleSchema = schema.object({
-  duration: schema.number(),
-  rRule: rRuleSchema,
   id: schema.maybe(schema.string()),
+  duration: schema.number(),
+  rRule: rRuleResponseSchemaV1,
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -259,3 +215,5 @@ export const ruleResponseSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   view_in_app_relative_url: schema.maybe(schema.nullable(schema.string())),
 });
+
+export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

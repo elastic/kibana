@@ -9,6 +9,7 @@ import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
 import { SECURITY_UI_APP_ID } from './constants';
 import { useNavigationContext } from './context';
+import { getAppIdsFromId } from './links';
 
 export type GetAppUrl = (param: {
   appId?: string;
@@ -34,6 +35,11 @@ export type NavigateTo = (
   param: {
     url?: string;
     appId?: string;
+    /**
+     * Browsers will reset the scroll position to 0 when navigating to a new page.
+     * This option will prevent that from happening.
+     */
+    restoreScroll?: boolean;
   } & NavigateToAppOptions
 ) => void;
 /**
@@ -44,7 +50,10 @@ export const useNavigateTo = () => {
   const { navigateToApp, navigateToUrl } = useNavigationContext().application;
 
   const navigateTo = useCallback<NavigateTo>(
-    ({ url, appId = SECURITY_UI_APP_ID, ...options }) => {
+    ({ url, appId = SECURITY_UI_APP_ID, restoreScroll, ...options }) => {
+      if (restoreScroll) {
+        addScrollRestoration();
+      }
       if (url) {
         navigateToUrl(url);
       } else {
@@ -57,10 +66,34 @@ export const useNavigateTo = () => {
 };
 
 /**
+ * Expects the browser scroll reset event to be fired after the navigation,
+ * then restores the previous scroll position.
+ */
+const addScrollRestoration = () => {
+  const scrollY = window.scrollY;
+  const handler = () => window.scrollTo(0, scrollY);
+  window.addEventListener('scroll', handler, { once: true });
+};
+
+/**
  * Returns `navigateTo` and `getAppUrl` navigation hooks
  */
 export const useNavigation = () => {
   const { navigateTo } = useNavigateTo();
   const { getAppUrl } = useGetAppUrl();
   return { navigateTo, getAppUrl };
+};
+
+/**
+ * Returns the appId, deepLinkId, and path from a given navigation id
+ */
+export const getNavigationPropsFromId = (
+  id: string
+): {
+  appId: string;
+  deepLinkId?: string;
+  path?: string;
+} => {
+  const { appId = SECURITY_UI_APP_ID, ...options } = getAppIdsFromId(id);
+  return { appId, ...options };
 };

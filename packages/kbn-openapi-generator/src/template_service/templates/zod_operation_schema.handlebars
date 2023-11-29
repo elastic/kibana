@@ -1,0 +1,79 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from "zod";
+import { requiredOptional, isValidDateMath, ArrayFromString, BooleanFromString } from "@kbn/zod-helpers"
+
+{{> disclaimer}}
+
+{{#each imports}}
+import { 
+  {{#each this}}{{.}},{{/each}} 
+} from "{{@key}}"
+{{/each}}
+
+{{#each components.schemas}}
+{{#description}}
+/**
+  * {{{.}}}
+  */
+{{/description}}
+export type {{@key}} = z.infer<typeof {{@key}}>;
+export const {{@key}} = {{> zod_schema_item}};
+{{#if enum}}
+{{#unless (isSingle enum)}}
+export type {{@key}}Enum = typeof {{@key}}.enum;
+export const {{@key}}Enum = {{@key}}.enum;
+{{/unless}}
+{{/if}}
+
+{{/each}}
+
+{{#each operations}}
+{{#if requestQuery}}
+{{#if requestQuery.description}}
+/**
+* {{{requestQuery.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestQuery = z.infer<typeof {{operationId}}RequestQuery>;
+export const {{operationId}}RequestQuery = {{> zod_query_item requestQuery }};
+export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}RequestQuery>;
+{{/if}}
+
+{{#if requestParams}}
+{{#if requestParams.description}}
+/**
+* {{{requestParams.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestParams = z.infer<typeof {{operationId}}RequestParams>;
+export const {{operationId}}RequestParams = {{> zod_schema_item requestParams }};
+export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}RequestParams>;
+{{/if}}
+
+{{#if requestBody}}
+{{#if requestBody.description}}
+/**
+* {{{requestBody.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestBody = z.infer<typeof {{operationId}}RequestBody>;
+export const {{operationId}}RequestBody = {{> zod_schema_item requestBody }};
+export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}RequestBody>;
+{{/if}}
+
+{{#if response}}
+{{#if response.description}}
+/**
+* {{{response.description}}}
+*/
+{{/if}}
+export type {{operationId}}Response = z.infer<typeof {{operationId}}Response>;
+export const {{operationId}}Response = {{> zod_schema_item response }};
+{{/if}}
+{{/each}}

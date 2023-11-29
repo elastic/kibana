@@ -58,7 +58,7 @@ export function AlertDetails() {
   const [isLoading, alert] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
-  const userCasesPermissions = canUseCases();
+  const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const { rule } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID],
   });
@@ -75,6 +75,7 @@ export function AlertDetails() {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
         defaultMessage: 'Alerts',
       }),
+      deepLinkId: 'observability-overview:alerts',
     },
     {
       text: alert ? pageTitleContent(alert.fields[ALERT_RULE_CATEGORY]) : defaultBreadcrumb,

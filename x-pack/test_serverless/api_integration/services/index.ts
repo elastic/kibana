@@ -6,23 +6,26 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { services as xpackApiIntegrationServices } from '../../../test/api_integration/services';
+import { services as deploymentAgnosticSharedServices } from '../../shared/services/deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
 
 import { AlertingApiProvider } from './alerting_api';
 import { SamlToolsProvider } from './saml_tools';
 import { DataViewApiProvider } from './data_view_api';
 import { SvlCasesServiceProvider } from './svl_cases';
+import { SloApiProvider } from './slo_api';
 
 export const services = {
-  ...xpackApiIntegrationServices,
-  ...svlSharedServices,
+  // deployment agnostic FTR services
+  ...deploymentAgnosticSharedServices,
 
+  // serverless FTR services
+  ...svlSharedServices,
   alertingApi: AlertingApiProvider,
   samlTools: SamlToolsProvider,
   dataViewApi: DataViewApiProvider,
   svlCases: SvlCasesServiceProvider,
+  sloApi: SloApiProvider,
 };
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

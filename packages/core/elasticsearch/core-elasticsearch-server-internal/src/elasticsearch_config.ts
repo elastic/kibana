@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
@@ -40,7 +40,7 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
-  maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  maxSockets: schema.number({ defaultValue: 800, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
   idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),
@@ -57,7 +57,7 @@ export const configSchema = schema.object({
       },
     })
   ),
-  password: schema.maybe(schema.string()),
+  password: schema.maybe(schema.string({ coerceFromNumber: true })),
   serviceAccountToken: schema.maybe(
     schema.conditional(
       schema.siblingRef('username'),
@@ -145,20 +145,22 @@ export const configSchema = schema.object({
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
-  ignoreVersionMismatch: schema.conditional(
-    schema.contextRef('dev'),
-    false,
-    schema.boolean({
-      validate: (rawValue) => {
-        if (rawValue === true) {
-          return '"ignoreVersionMismatch" can only be set to true in development mode';
-        }
-      },
-      // When running in serverless mode, default to `true`
-      defaultValue: schema.contextRef('serverless'),
-    }),
-    schema.boolean({ defaultValue: false })
-  ),
+  ignoreVersionMismatch: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: true }),
+    traditional: schema.conditional(
+      schema.contextRef('dev'),
+      false,
+      schema.boolean({
+        validate: (rawValue) => {
+          if (rawValue === true) {
+            return '"ignoreVersionMismatch" can only be set to true in development mode';
+          }
+        },
+        defaultValue: false,
+      }),
+      schema.boolean({ defaultValue: false })
+    ),
+  }),
   skipStartupConnectionCheck: schema.conditional(
     // Using dist over dev because integration_tests run with dev: false,
     // and this config is solely introduced to allow some of the integration tests to run without an ES server.

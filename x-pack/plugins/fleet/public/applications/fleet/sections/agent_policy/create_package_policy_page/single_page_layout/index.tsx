@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -29,7 +30,7 @@ import {
 
 import { useCancelAddPackagePolicy } from '../hooks';
 
-import { splitPkgKey } from '../../../../../../../common/services';
+import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
 import type { NewAgentPolicy } from '../../../../types';
 import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
 import {
@@ -61,6 +62,7 @@ import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from '.
 import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
+import { PostInstallAzureArmTemplateModal } from './components/post_install_azure_arm_template_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -415,6 +417,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
             />
           )}
+        {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' && agentPolicy && savedPackagePolicy && (
+          <PostInstallAzureArmTemplateModal
+            agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+          />
+        )}
         {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
           <PostInstallCloudFormationModal
             agentPolicy={agentPolicy}
@@ -438,6 +448,26 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             integration={integrationInfo?.name}
           />
         )}
+        {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
+          <>
+            <EuiCallOut
+              size="s"
+              color="warning"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.requireRootCalloutTitle"
+                  defaultMessage="Requires root privileges"
+                />
+              }
+            >
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.requireRootCalloutDescription"
+                defaultMessage="Elastic Agent needs to be run with root/administrator privileges for this integration."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         {numTransformAssets > 0 ? (
           <>
             <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
@@ -462,7 +492,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 <EuiFlexItem grow={false}>
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButtonEmpty
-                    color="ghost"
+                    color="text"
                     href={cancelUrl}
                     onClick={cancelClickHandler}
                     data-test-subj="createPackagePolicyCancelButton"
@@ -479,7 +509,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                       request={devtoolRequest}
                       description={devtoolRequestDescription}
                       btnProps={{
-                        color: 'ghost',
+                        color: 'text',
                       }}
                     />
                   </EuiFlexItem>

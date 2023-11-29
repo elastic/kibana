@@ -7,6 +7,7 @@
  */
 
 import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
+import type { Observable } from 'rxjs';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -14,10 +15,14 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableComponentProps, Suggestion } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type {
+  EmbeddableComponentProps,
+  Suggestion,
+  LensEmbeddableOutput,
+} from '@kbn/lens-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -68,8 +73,11 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   isOnHistogramMode?: boolean;
+  histogramQuery?: AggregateQuery;
+  isChartLoading?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -105,8 +113,11 @@ export function Chart({
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  lensTablesAdapter,
+  lensAdapters,
+  lensEmbeddableOutput$,
   isOnHistogramMode,
+  histogramQuery,
+  isChartLoading,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -207,7 +218,7 @@ export function Chart({
       getLensAttributes({
         title: chart?.title,
         filters,
-        query,
+        query: histogramQuery ?? query,
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
@@ -221,6 +232,7 @@ export function Chart({
       dataView,
       filters,
       query,
+      histogramQuery,
     ]
   );
 
@@ -416,6 +428,14 @@ export function Chart({
             })}
             css={histogramCss}
           >
+            {isChartLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="unifiedHistogramProgressBar"
+              />
+            )}
             <HistogramMemoized
               services={services}
               dataView={dataView}
@@ -452,8 +472,8 @@ export function Chart({
           {...{
             services,
             lensAttributesContext,
-            dataView,
-            lensTablesAdapter,
+            lensAdapters,
+            lensEmbeddableOutput$,
             currentSuggestion,
             isFlyoutVisible,
             setIsFlyoutVisible,

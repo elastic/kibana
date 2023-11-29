@@ -11,7 +11,7 @@
         "label": "ColorPicker",
         "description": [],
         "signature": [
-          "({ overwriteColor, defaultColor, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabledMessage?: string | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
+          "({ overwriteColor, defaultColor, isClearable, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; isClearable?: boolean | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabledMessage?: string | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.ColorPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  overwriteColor,\n  defaultColor,\n  setConfig,\n  label,\n  disableHelpTooltip,\n  disabledMessage,\n  showAlpha,\n}",
+            "label": "{\n  overwriteColor,\n  defaultColor,\n  isClearable,\n  setConfig,\n  label,\n  disableHelpTooltip,\n  disabledMessage,\n  showAlpha,\n}",
             "description": [],
             "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
             "deprecated": false,
@@ -51,6 +51,20 @@
                 "description": [],
                 "signature": [
                   "string | null | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.isClearable",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isClearable",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
@@ -390,7 +404,7 @@
         "label": "DragDropBuckets",
         "description": [],
         "signature": [
-          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | \"plain\" | undefined; }) => JSX.Element"
+          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
         "deprecated": false,
@@ -502,7 +516,7 @@
                 "label": "bgColor",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | \"plain\" | undefined"
+                  "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "deprecated": false,
@@ -702,7 +716,7 @@
         "label": "FieldPicker",
         "description": [],
         "signature": [
-          "({\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}: ",
+          "(props: ",
           "FieldPickerProps",
           "<T>) => JSX.Element"
         ],
@@ -715,7 +729,7 @@
             "id": "def-public.FieldPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "FieldPickerProps",
@@ -1962,38 +1976,6 @@
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/visualization-ui-components",
-        "id": "def-public.TruncatedLabel",
-        "type": "Function",
-        "tags": [],
-        "label": "TruncatedLabel",
-        "description": [],
-        "signature": [
-          "React.NamedExoticComponent<{ label: string; search: string; width: number; font: string; }>"
-        ],
-        "path": "packages/kbn-visualization-ui-components/components/field_picker/truncated_label.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.TruncatedLabel.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {

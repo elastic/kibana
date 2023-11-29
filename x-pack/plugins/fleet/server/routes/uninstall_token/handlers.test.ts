@@ -184,7 +184,8 @@ describe('uninstall token handlers', () => {
     });
   });
 
-  describe('Agent Tamper Protection feature flag', () => {
+  // TODO: remove it when agentTamperProtectionEnabled FF is removed
+  describe.skip('Agent Tamper Protection feature flag', () => {
     let config: { enableExperimental: string[] };
     let fakeRouter: jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
     let fleetAuthzRouter: FleetAuthzRouter;

@@ -5,10 +5,7 @@
  * 2.0.
  */
 import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -18,33 +15,44 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
-
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+
+import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+
+import {
+  type LogCategorizationPageUrlState,
+  getDefaultLogCategorizationAppState,
+} from '../../application/url_state/log_pattern_analysis';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
-import { useCategorizeRequest } from './use_categorize_request';
-import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
-import { CategoryTable } from './category_table';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+
+import { useCategorizeRequest } from './use_categorize_request';
+import type { EventRate } from './use_categorize_request';
+import { CategoryTable } from './category_table';
 import { InformationText } from './information_text';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { SamplingMenu } from './sampling_menu';
 import { TechnicalPreviewBadge } from './technical_preview_badge';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
-import {
-  type LogCategorizationPageUrlState,
-  getDefaultLogCategorizationAppState,
-} from '../../application/utils/url_state';
 import { FieldValidationCallout } from './category_validation_callout';
+import { CreateCategorizationJobButton } from './create_categorization_job';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
   onClose: () => void;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 const BAR_TARGET = 20;
@@ -54,6 +62,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   savedSearch,
   selectedField,
   onClose,
+  embeddingOrigin,
 }) => {
   const {
     notifications: { toasts },
@@ -147,7 +156,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           timeField,
           earliest,
           latest,
-          searchQuery
+          searchQuery,
+          { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
         ),
         runCategorizeRequest(
           index,
@@ -189,6 +199,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     runCategorizeRequest,
     intervalMs,
     toasts,
+    embeddingOrigin,
   ]);
 
   const onAddFilter = useCallback(
@@ -251,17 +262,21 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
+        <CreateCategorizationJobButton
+          dataView={dataView}
+          field={selectedField}
+          query={searchQuery}
+          earliest={earliest}
+          latest={latest}
+        />
         <FieldValidationCallout validationResults={fieldValidationResult} />
-
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
-
         <InformationText
           loading={loading}
           categoriesLength={data?.categories?.length ?? null}
           eventRateLength={eventRate.length}
           fieldSelected={selectedField !== null}
         />
-
         {loading === false && data !== null && data.categories.length > 0 ? (
           <CategoryTable
             categories={data.categories}

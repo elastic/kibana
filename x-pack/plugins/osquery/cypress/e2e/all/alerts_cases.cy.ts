@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { initializeDataViews } from '../../tasks/login';
+import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
   cleanupCase,
   cleanupPack,
@@ -18,39 +19,33 @@ import {
 import {
   addToCase,
   checkActionItemsInResults,
-  clickRuleName,
   loadRuleAlerts,
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
-import { ServerlessRoleName } from '../../support/roles';
+
 describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
-  let ruleName: string;
   let packId: string;
   let packName: string;
   const packData = packFixture();
-
   before(() => {
+    initializeDataViews();
+  });
+
+  beforeEach(() => {
     loadPack(packData).then((data) => {
       packId = data.saved_object_id;
       packName = data.name;
     });
     loadRule(true).then((data) => {
       ruleId = data.id;
-      ruleName = data.name;
       loadRuleAlerts(data.name);
     });
   });
 
-  beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
-    cy.visit('/app/security/rules');
-    clickRuleName(ruleName);
-  });
-
-  after(() => {
+  afterEach(() => {
     cleanupPack(packId);
     cleanupRule(ruleId);
   });
@@ -70,30 +65,28 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
 
     it('runs osquery against alert and creates a new case', () => {
       const [caseName, caseDescription] = generateRandomStringName(2);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains(/^\d+ agen(t|ts) selected/);
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.wait(1000);
       cy.contains('Run a set of queries in a pack').click();
-      cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+      cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
       submitQuery();
       cy.get('[aria-label="Add to Case"]').first().click();
       cy.getBySel('cases-table-add-case-filter-bar').click();
       cy.getBySel('create-case-flyout').should('be.visible');
-      cy.getBySel('caseTitle').within(() => {
-        cy.getBySel('input').type(caseName);
-      });
-      cy.getBySel('caseDescription').within(() => {
-        cy.getBySel('euiMarkdownEditorTextArea').type(caseDescription);
-      });
+      cy.get('input[aria-describedby="caseTitle"]').type(caseName);
+      cy.get('textarea[aria-label="caseDescription"]').type(caseDescription);
       cy.getBySel('create-case-submit').click();
       cy.contains(`An alert was added to "${caseName}"`);
     });
   });
 
-  // verify why calling new action doesnt add to response actions list
-  describe.skip('Case', () => {
+  describe('Case', () => {
     let caseId: string;
 
     before(() => {
@@ -108,8 +101,8 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
 
     it('sees osquery results from last action and add to a case', () => {
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
-      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
+      cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
       cy.contains('select * from users;');
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
@@ -127,7 +120,6 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
             // Result tab was rendered successfully
             cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
           }
-          // }
         });
       });
       checkActionItemsInResults({

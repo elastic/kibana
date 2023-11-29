@@ -6,7 +6,6 @@
  */
 
 import { createTestConfig } from '../../config.base';
-
 const enabledActionTypes = ['.index', '.server-log', '.tines'];
 
 export default createTestConfig({
@@ -16,4 +15,8 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Search Screenshot Creation',
   },
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
+  esServerArgs: [],
 });

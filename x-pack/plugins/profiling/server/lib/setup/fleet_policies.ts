@@ -5,53 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
+import {
+  COLLECTOR_PACKAGE_POLICY_NAME,
+  ELASTIC_CLOUD_APM_POLICY,
+  getApmPolicy,
+  SYMBOLIZER_PACKAGE_POLICY_NAME,
+} from '@kbn/profiling-data-access-plugin/common';
 import { omit } from 'lodash';
 import { PackageInputType } from '../..';
-import { PartialSetupState } from '../../../common/setup';
-import { ELASTIC_CLOUD_APM_POLICY, getApmPolicy } from './get_apm_policy';
-import { ProfilingSetupOptions } from './types';
+import { ProfilingCloudSetupOptions } from './types';
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
-const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
-const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
-
-async function getPackagePolicy({
-  soClient,
-  packagePolicyClient,
-  packageName,
-}: {
-  packagePolicyClient: PackagePolicyClient;
-  soClient: SavedObjectsClientContract;
-  packageName: string;
-}) {
-  const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return packagePolicies.items.find((pkg) => pkg.name === packageName);
-}
-
-export async function getCollectorPolicy({
-  soClient,
-  packagePolicyClient,
-}: {
-  packagePolicyClient: PackagePolicyClient;
-  soClient: SavedObjectsClientContract;
-}) {
-  return getPackagePolicy({
-    soClient,
-    packagePolicyClient,
-    packageName: COLLECTOR_PACKAGE_POLICY_NAME,
-  });
-}
-
-export async function validateCollectorPackagePolicy({
-  soClient,
-  packagePolicyClient,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const collectorPolicy = await getCollectorPolicy({ soClient, packagePolicyClient });
-  return { policies: { collector: { installed: !!collectorPolicy } } };
-}
 
 export function generateSecretToken() {
   let result = '';
@@ -95,7 +60,7 @@ export async function createCollectorPackagePolicy({
   soClient,
   packagePolicyClient,
   config,
-}: ProfilingSetupOptions) {
+}: ProfilingCloudSetupOptions) {
   const packageName = 'profiler_collector';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
@@ -126,34 +91,12 @@ export async function createCollectorPackagePolicy({
   });
 }
 
-export async function getSymbolizerPolicy({
-  soClient,
-  packagePolicyClient,
-}: {
-  packagePolicyClient: PackagePolicyClient;
-  soClient: SavedObjectsClientContract;
-}) {
-  return getPackagePolicy({
-    soClient,
-    packagePolicyClient,
-    packageName: SYMBOLIZER_PACKAGE_POLICY_NAME,
-  });
-}
-
-export async function validateSymbolizerPackagePolicy({
-  soClient,
-  packagePolicyClient,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const symbolizerPackagePolicy = await getSymbolizerPolicy({ soClient, packagePolicyClient });
-  return { policies: { symbolizer: { installed: !!symbolizerPackagePolicy } } };
-}
-
 export async function createSymbolizerPackagePolicy({
   client,
   soClient,
   packagePolicyClient,
   config,
-}: ProfilingSetupOptions) {
+}: ProfilingCloudSetupOptions) {
   const packageName = 'profiler_symbolizer';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
@@ -185,34 +128,11 @@ export async function createSymbolizerPackagePolicy({
   });
 }
 
-export async function validateProfilingInApmPackagePolicy({
-  soClient,
-  packagePolicyClient,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
-  try {
-    const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-    return {
-      policies: {
-        apm: {
-          profilingEnabled: !!(
-            apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
-          ),
-        },
-      },
-    };
-  } catch (e) {
-    // In case apm integration is not available ignore the error and return as profiling is not enabled on the integration
-    return {
-      policies: { apm: { profilingEnabled: false } },
-    };
-  }
-}
-
 export async function removeProfilingFromApmPackagePolicy({
   client,
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions) {
+}: ProfilingCloudSetupOptions) {
   const apmPackagePolicy = await getApmPolicy({ packagePolicyClient, soClient });
   if (!apmPackagePolicy) {
     throw new Error(`Could not find APM package policy`);

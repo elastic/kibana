@@ -8,17 +8,27 @@
 import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
-import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
+
+import React from 'react';
+
+import { IndexDetailsSection, IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
+import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
+
 import {
-  testIndexEditableSettings,
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
+import { humanizeTimeStamp } from '../../../public/application/sections/home/data_stream_list/humanize_time_stamp';
+import { createDataStreamPayload } from '../home/data_streams_tab.helpers';
+import {
+  testIndexEditableSettingsAll,
+  testIndexEditableSettingsLimited,
   testIndexMappings,
   testIndexMock,
   testIndexName,
   testIndexSettings,
   testIndexStats,
 } from './mocks';
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
-import React from 'react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -37,10 +47,17 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const requestOptions = {
+  asSystemRequest: undefined,
+  body: undefined,
+  query: undefined,
+  version: undefined,
+};
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
@@ -52,10 +69,13 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
 
     await act(async () => {
-      testBed = await setup(httpSetup, {
-        url: {
-          locators: {
-            get: () => ({ navigate: jest.fn() }),
+      testBed = await setup({
+        httpSetup,
+        dependencies: {
+          url: {
+            locators: {
+              get: () => ({ navigate: jest.fn() }),
+            },
           },
         },
       });
@@ -70,7 +90,7 @@ describe('<IndexDetailsPage />', () => {
         message: `Data for index ${testIndexName} was not found`,
       });
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
 
       testBed.component.update();
@@ -86,17 +106,35 @@ describe('<IndexDetailsPage />', () => {
       await testBed.actions.errorSection.clickReloadButton();
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
     });
+
+    it('renders an error section when no index name is provided', async () => {
+      // already sent 2 requests while setting up the component
+      const numberOfRequests = 2;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+      await act(async () => {
+        testBed = await setup({ httpSetup, initialEntry: '/indices/index_details' });
+      });
+      testBed.component.update();
+      expect(testBed.actions.errorSection.noIndexNameMessageIsDisplayed()).toBe(true);
+      // no extra http request was sent
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+    });
   });
 
   describe('Stats tab', () => {
+    it('updates the breadcrumbs to index details stats', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsStats
+      );
+    });
+
     it('loads index stats from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/stats/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/stats/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('renders index stats', async () => {
@@ -126,7 +164,7 @@ describe('<IndexDetailsPage />', () => {
       );
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 
@@ -136,8 +174,11 @@ describe('<IndexDetailsPage />', () => {
 
     it('hides index stats tab if enableIndexStats===false', async () => {
       await act(async () => {
-        testBed = await setup(httpSetup, {
-          config: { enableIndexStats: false },
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            config: { enableIndexStats: false },
+          },
         });
       });
       testBed.component.update();
@@ -152,7 +193,7 @@ describe('<IndexDetailsPage />', () => {
           message: 'Error',
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
@@ -176,7 +217,7 @@ describe('<IndexDetailsPage />', () => {
   it('loads index details from the API', async () => {
     expect(httpSetup.get).toHaveBeenLastCalledWith(
       `${INTERNAL_API_BASE_PATH}/indices/${testIndexName}`,
-      { asSystemRequest: undefined, body: undefined, query: undefined, version: undefined }
+      requestOptions
     );
   });
 
@@ -187,40 +228,235 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Overview tab', () => {
-    it('renders index details', () => {
-      expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
-      expect(testBed.actions.overview.indexStatsContentExists()).toBe(true);
-      expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
+    it('updates the breadcrumbs to index details overview', async () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsOverview
+      );
     });
 
-    it('hides index stats from detail panels if enableIndexStats===false', async () => {
+    it('renders storage details', () => {
+      const storageDetails = testBed.actions.overview.getStorageDetailsContent();
+      expect(storageDetails).toBe(
+        `Storage${testIndexMock.primary_size}Primary${testIndexMock.size}TotalShards${testIndexMock.primary} Primary / ${testIndexMock.replica} Replicas `
+      );
+    });
+
+    it('renders status details', () => {
+      const statusDetails = testBed.actions.overview.getStatusDetailsContent();
+      expect(statusDetails).toBe(
+        `Status${'Open'}${'Healthy'}${testIndexMock.documents} Document / ${
+          testIndexMock.documents_deleted
+        } Deleted`
+      );
+    });
+
+    describe('aliases', () => {
+      it('not rendered when no aliases', async () => {
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(false);
+      });
+
+      it('renders less than 3 aliases', async () => {
+        const aliases = ['test_alias1', 'test_alias2'];
+        const testWith2Aliases = {
+          ...testIndexMock,
+          aliases,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWith2Aliases);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(true);
+
+        const aliasesContent = testBed.actions.overview.getAliasesDetailsContent();
+        expect(aliasesContent).toBe(
+          `Aliases${aliases.length}AliasesView all aliases${aliases.join('')}`
+        );
+      });
+
+      it('renders more than 3 aliases', async () => {
+        const aliases = ['test_alias1', 'test_alias2', 'test_alias3', 'test_alias4', 'test_alias5'];
+        const testWith5Aliases = {
+          ...testIndexMock,
+          aliases,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWith5Aliases);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(true);
+
+        const aliasesContent = testBed.actions.overview.getAliasesDetailsContent();
+        expect(aliasesContent).toBe(
+          `Aliases${aliases.length}AliasesView all aliases${aliases.slice(0, 3).join('')}+${2}`
+        );
+      });
+    });
+
+    describe('data stream', () => {
+      it('not rendered when no data stream', async () => {
+        const aliasesExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(aliasesExist).toBe(false);
+      });
+
+      it('renders data stream details', async () => {
+        const dataStreamName = 'test_data_stream';
+        const testWithDataStream: Index = {
+          ...testIndexMock,
+          data_stream: dataStreamName,
+        };
+        const dataStreamDetails = createDataStreamPayload({
+          name: dataStreamName,
+          generation: 5,
+          maxTimeStamp: 1696600607689,
+        });
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWithDataStream);
+        httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamName, dataStreamDetails);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const dataStreamDetailsExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(dataStreamDetailsExist).toBe(true);
+
+        const dataStreamContent = testBed.actions.overview.getDataStreamDetailsContent();
+        expect(dataStreamContent).toBe(
+          `Data stream${
+            dataStreamDetails.generation
+          }GenerationsSee detailsRelated templateLast update${humanizeTimeStamp(
+            dataStreamDetails.maxTimeStamp!
+          )}`
+        );
+      });
+
+      it('renders error message if the request fails', async () => {
+        const dataStreamName = 'test_data_stream';
+        const testWithDataStream: Index = {
+          ...testIndexMock,
+          data_stream: dataStreamName,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWithDataStream);
+        httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamName, undefined, {
+          statusCode: 400,
+          message: `Unable to load data stream details`,
+        });
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const dataStreamDetailsExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(dataStreamDetailsExist).toBe(true);
+
+        const dataStreamContent = testBed.actions.overview.getDataStreamDetailsContent();
+        expect(dataStreamContent).toBe(
+          `Data streamUnable to load data stream detailsReloadLast update`
+        );
+
+        // already sent 3 requests while setting up the component
+        const numberOfRequests = 3;
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+        await testBed.actions.overview.reloadDataStreamDetails();
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+      });
+    });
+
+    it('hides storage and status details if enableIndexStats===false', async () => {
       await act(async () => {
-        testBed = await setup(httpSetup, {
-          config: { enableIndexStats: false },
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            config: { enableIndexStats: false },
+          },
         });
       });
       testBed.component.update();
 
-      expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
-      expect(testBed.actions.overview.indexStatsContentExists()).toBe(false);
+      expect(testBed.actions.overview.statusDetailsExist()).toBe(false);
+      expect(testBed.actions.overview.storageDetailsExist()).toBe(false);
+    });
+
+    it('renders code block', () => {
+      expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
+    });
+
+    it('renders index name badges from the extensions service', async () => {
+      const testBadges = ['testBadge1', 'testBadge2'];
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _badges: testBadges.map((badge) => ({
+                  matchIndex: () => true,
+                  label: badge,
+                  color: 'primary',
+                })),
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      const header = testBed.actions.getHeader();
+      expect(header).toEqual(`${testIndexName} ${testBadges.join(' ')}`);
+    });
+
+    describe('extension service overview content', () => {
+      it('renders the content instead of the default code block', async () => {
+        const extensionsServiceOverview = 'Test content via extensions service';
+        await act(async () => {
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              services: {
+                extensionsService: {
+                  _indexOverviewContent: {
+                    renderContent: () => extensionsServiceOverview,
+                  },
+                },
+              },
+            },
+          });
+        });
+        testBed.component.update();
+
+        expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(false);
+        const content = testBed.actions.getActiveTabContent();
+        expect(content).toContain(extensionsServiceOverview);
+      });
     });
   });
 
-  it('documents tab', async () => {
-    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Documents);
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Documents');
-  });
-
   describe('Mappings tab', () => {
+    it('updates the breadcrumbs to index details mappings', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsMappings
+      );
+    });
     it('loads mappings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/mapping/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('displays the mappings in the code block', async () => {
@@ -246,7 +482,7 @@ describe('<IndexDetailsPage />', () => {
           message: `Was not able to load mappings`,
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
@@ -265,17 +501,44 @@ describe('<IndexDetailsPage />', () => {
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
       });
     });
+
+    it('renders the content set via the extensions service', async () => {
+      const mappingsContent = 'test mappings extension';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _indexMappingsContent: {
+                  renderContent: () => mappingsContent,
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toContain(mappingsContent);
+    });
   });
 
   describe('Settings tab', () => {
+    it('updates the breadcrumbs to index details settings', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsSettings
+      );
+    });
+
     it('loads settings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/settings/${testIndexName}`, {
-        asSystemRequest: undefined,
-        body: undefined,
-        query: undefined,
-        version: undefined,
-      });
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${testIndexName}`,
+        requestOptions
+      );
     });
 
     it('displays the settings in the code block', async () => {
@@ -301,7 +564,7 @@ describe('<IndexDetailsPage />', () => {
           message: `Was not able to load settings`,
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
@@ -327,13 +590,30 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.settings.clickEditModeSwitch();
       });
 
-      it('displays the editable settings (flattened and filtered)', () => {
+      it('displays all editable settings (flattened and filtered)', () => {
         const editorContent = testBed.actions.settings.getCodeEditorContent();
-        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
+      });
+
+      it('displays limited editable settings (flattened and filtered)', async () => {
+        await act(async () => {
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              config: { editableIndexSettings: 'limited' },
+            },
+          });
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+        await testBed.actions.settings.clickEditModeSwitch();
+        const editorContent = testBed.actions.settings.getCodeEditorContent();
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsLimited, null, 2));
       });
 
       it('updates the settings', async () => {
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.saveSettings();
         expect(httpSetup.put).toHaveBeenLastCalledWith(
@@ -350,35 +630,24 @@ describe('<IndexDetailsPage />', () => {
       it('reloads the settings after an update', async () => {
         const numberOfRequests = 2;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.saveSettings();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
         expect(httpSetup.get).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/settings/${testIndexName}`,
-          {
-            asSystemRequest: undefined,
-            body: undefined,
-            query: undefined,
-            version: undefined,
-          }
+          requestOptions
         );
       });
 
       it('resets the changes in the editor', async () => {
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.resetChanges();
         const editorContent = testBed.actions.settings.getCodeEditorContent();
-        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
       });
     });
-  });
-
-  it('pipelines tab', async () => {
-    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Pipelines);
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Pipelines');
   });
 
   it('navigates back to indices', async () => {
@@ -420,7 +689,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 
@@ -513,7 +782,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 
@@ -527,6 +796,126 @@ describe('<IndexDetailsPage />', () => {
         body: JSON.stringify({ indices: [testIndexName] }),
       });
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+  });
+
+  describe('index name with a percent sign', () => {
+    const percentSignName = 'test%';
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(encodeURIComponent(percentSignName), {
+        ...testIndexMock,
+        name: percentSignName,
+      });
+      httpRequestsMockHelpers.setLoadIndexSettingsResponse(
+        encodeURIComponent(percentSignName),
+        testIndexSettings
+      );
+
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          initialEntry: `/indices/index_details?indexName=${encodeURIComponent(percentSignName)}`,
+        });
+      });
+      testBed.component.update();
+    });
+    it('loads the index details with the encoded index name', () => {
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('loads mappings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/mapping/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('loads settings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+    it('updates settings with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      await testBed.actions.settings.clickEditModeSwitch();
+      const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
+      await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
+      await testBed.actions.settings.saveSettings();
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${encodeURIComponent(percentSignName)}`,
+        {
+          asSystemRequest: undefined,
+          body: JSON.stringify({ 'index.priority': '2' }),
+          query: undefined,
+          version: undefined,
+        }
+      );
+    });
+    it('loads stats with the encoded index name', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/stats/${encodeURIComponent(percentSignName)}`,
+        requestOptions
+      );
+    });
+  });
+
+  describe('extension service tabs', () => {
+    const testTabId = 'testTab' as IndexDetailsTabId;
+    const testContent = 'Test content';
+    const additionalTab: IndexDetailsTab = {
+      id: testTabId,
+      name: 'Test tab',
+      renderTabContent: () => {
+        return <span>{testContent}</span>;
+      },
+      order: 1,
+    };
+    beforeAll(async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [additionalTab],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+    });
+
+    it('renders an additional tab', async () => {
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toEqual(testContent);
+    });
+
+    it('additional tab is the first in the order', () => {
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Test tab', 'Overview', 'Mappings', 'Settings', 'Statistics']);
+    });
+
+    it('additional tab is the last in the order', async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [{ ...additionalTab, order: 100 }],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Overview', 'Mappings', 'Settings', 'Statistics', 'Test tab']);
     });
   });
 });

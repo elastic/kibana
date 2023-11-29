@@ -83,7 +83,7 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages } from './epm/packages';
-import { getAgentsByKuery, getLatestAvailableVersion } from './agents';
+import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
@@ -512,6 +512,7 @@ class AgentPolicyService {
     }
 
     this.checkTamperProtectionLicense(agentPolicy);
+    await this.checkForValidUninstallToken(agentPolicy, id);
 
     const logger = appContextService.getLogger();
 
@@ -1029,6 +1030,7 @@ class AgentPolicyService {
   public async getFullAgentConfigMap(
     soClient: SavedObjectsClientContract,
     id: string,
+    agentVersion: string,
     options?: { standalone: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
@@ -1048,7 +1050,6 @@ class AgentPolicyService {
         },
       };
 
-      const agentVersion = await getLatestAvailableVersion();
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
@@ -1060,9 +1061,9 @@ class AgentPolicyService {
 
   public async getFullAgentManifest(
     fleetServer: string,
-    enrolToken: string
+    enrolToken: string,
+    agentVersion: string
   ): Promise<string | null> {
-    const agentVersion = await getLatestAvailableVersion();
     const updateManifestVersion = elasticAgentManagedManifest.replace('VERSION', agentVersion);
     let updateManifest = updateManifestVersion;
     if (fleetServer !== '') {
@@ -1210,6 +1211,20 @@ class AgentPolicyService {
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
     if (agentPolicy?.is_protected && !licenseService.isPlatinum()) {
       throw new FleetUnauthorizedError('Tamper protection requires Platinum license');
+    }
+  }
+  private async checkForValidUninstallToken(
+    agentPolicy: { is_protected?: boolean },
+    policyId: string
+  ): Promise<void> {
+    if (agentPolicy?.is_protected) {
+      const uninstallTokenService = appContextService.getUninstallTokenService();
+
+      try {
+        await uninstallTokenService?.checkTokenValidityForPolicy(policyId);
+      } catch (e) {
+        throw new Error(`Cannot enable Agent Tamper Protection: ${e.message}`);
+      }
     }
   }
 }

@@ -33,11 +33,13 @@ import {
 import {
   asTaskMarkRunningEvent,
   asTaskRunEvent,
+  asTaskManagerStatEvent,
   startTaskTimerWithEventLoopMonitoring,
   TaskMarkRunning,
   TaskPersistence,
   TaskRun,
   TaskTiming,
+  TaskManagerStat,
 } from '../task_events';
 import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
 import {
@@ -101,7 +103,7 @@ type Opts = {
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+  onTaskEvent?: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
@@ -149,7 +151,7 @@ export class TaskManagerRunner implements TaskRunner {
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
-  private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
@@ -309,6 +311,13 @@ export class TaskManagerRunner implements TaskRunner {
     });
 
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
+
+    this.onTaskEvent(
+      asTaskManagerStatEvent(
+        'runDelay',
+        asOk(getTaskDelayInSeconds(this.instance.task.scheduledAt))
+      )
+    );
 
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
@@ -655,12 +664,12 @@ export class TaskManagerRunner implements TaskRunner {
           skipAttempts,
         }: SuccessfulRunResult & { attempts: number; skipAttempts: number }) => {
           const { startedAt, schedule, numSkippedRuns } = this.instance.task;
-          const { hasError } = unwrap(result);
+          const { taskRunError } = unwrap(result);
           let requeueInvalidTaskAttempts = skipAttempts || numSkippedRuns || 0;
 
           // Alerting TaskRunner returns SuccessResult even though there is an error
-          // therefore we use "hasError" to be sure that there wasn't any error
-          if (isUndefined(skipAttempts) && !hasError) {
+          // therefore we use "taskRunError" to be sure that there wasn't any error
+          if (isUndefined(skipAttempts) && taskRunError === undefined) {
             requeueInvalidTaskAttempts = 0;
           }
 
@@ -738,7 +747,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     await eitherAsync(
       result,
-      async ({ runAt, schedule, hasError }: SuccessfulRunResult) => {
+      async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
         const processedResult = {
           task,
           persistence:
@@ -748,10 +757,11 @@ export class TaskManagerRunner implements TaskRunner {
             : this.processResultWhenDone()),
         };
 
-        // Alerting task runner returns SuccessfulRunResult with hasError=true
+        // Alerting task runner returns SuccessfulRunResult with taskRunError
         // when the alerting task fails, so we check for this condition in order
         // to emit the correct task run event for metrics collection
-        const taskRunEvent = hasError
+        // taskRunError contains the "source" (TaskErrorSource) data
+        const taskRunEvent = !!taskRunError
           ? asTaskRunEvent(
               this.id,
               asErr({
@@ -795,7 +805,6 @@ export class TaskManagerRunner implements TaskRunner {
         }
       );
     }
-
     return result;
   }
 
@@ -892,4 +901,9 @@ export function calculateDelay(attempts: number) {
     const defaultBackoffPerFailure = 5 * 60 * 1000;
     return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
   }
+}
+
+export function getTaskDelayInSeconds(scheduledAt: Date) {
+  const now = new Date();
+  return (now.valueOf() - scheduledAt.valueOf()) / 1000;
 }

@@ -265,7 +265,6 @@ describe('alert actions', () => {
     // jest carries state between mocked implementations when using
     // spyOn. So now we're doing all three of these.
     // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
     jest.clearAllMocks();
     mockGetExceptionFilter = jest.fn().mockResolvedValue(undefined);
 
@@ -452,9 +451,11 @@ describe('alert actions', () => {
             templateTimelineId: null,
             templateTimelineVersion: null,
             version: null,
+            savedSearchId: null,
+            isDiscoverSavedSearchLoaded: false,
+            isDataProviderVisible: false,
           },
           to: '2018-11-05T19:03:25.937Z',
-          resolveTimelineConfig: undefined,
           ruleNote: '# this is some markdown documentation',
           ruleAuthor: ['elastic'],
         };

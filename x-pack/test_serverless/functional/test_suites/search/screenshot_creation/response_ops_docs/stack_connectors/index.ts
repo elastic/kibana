@@ -18,14 +18,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('stack connectors', function () {
     before(async () => {
       await browser.setWindowSize(1920, 1080);
-      await actions.api.createConnector({
-        name: 'server-log-connector',
-        config: {},
-        secrets: {},
-        connectorTypeId: '.server-log',
-        additionalRequestHeaders: svlCommonApi.getInternalRequestHeader(),
-      });
-
       await es.indices.create({
         index: testIndex,
         body: {

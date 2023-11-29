@@ -19,7 +19,7 @@ export type {
 } from './types';
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { DataViewsServerPlugin } from './plugin';
+import type { DataViewsServerPlugin } from './plugin';
 import { DataViewsServerPluginSetup, DataViewsServerPluginStart } from './types';
 export type { dataViewsServiceFactory } from './data_views_service_factory';
 
@@ -28,7 +28,8 @@ export type { dataViewsServiceFactory } from './data_views_service_factory';
  * @public
  */
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { DataViewsServerPlugin } = await import('./plugin');
   return new DataViewsServerPlugin(initializerContext);
 }
 
@@ -36,7 +37,7 @@ export type {
   DataViewsServerPluginSetup as PluginSetup,
   DataViewsServerPluginStart as PluginStart,
 };
-export { DataViewsServerPlugin as Plugin };
+export type { DataViewsServerPlugin as Plugin };
 
 const configSchema = schema.object({
   scriptedFieldsEnabled: schema.conditional(

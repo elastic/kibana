@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { backOff } from 'exponential-backoff';
+
 import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
 
+import type { LoggerFactory, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SavedObjectsClientContract,
@@ -39,8 +42,11 @@ export interface MessageSigningServiceInterface {
 
 export class MessageSigningService implements MessageSigningServiceInterface {
   private _soClient: SavedObjectsClientContract | undefined;
+  private logger: Logger;
 
-  constructor(private esoClient: EncryptedSavedObjectsClient) {}
+  constructor(loggerFactory: LoggerFactory, private esoClient: EncryptedSavedObjectsClient) {
+    this.logger = loggerFactory.get('messageSigningService');
+  }
 
   public get isEncryptionAvailable(): MessageSigningServiceInterface['isEncryptionAvailable'] {
     return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
@@ -188,6 +194,30 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return this._soClient;
   }
 
+  private async getCurrentKeyPairObjWithRetry() {
+    let soDoc: SavedObjectsFindResult<MessageSigningKeys> | undefined;
+
+    await backOff(
+      async () => {
+        soDoc = await this.getCurrentKeyPairObj();
+      },
+      {
+        maxDelay: 60 * 60 * 1000, // 1 hour in milliseconds
+        startingDelay: 1000, // 1 second
+        jitter: 'full',
+        numOfAttempts: Infinity,
+        retry: (_err: Error, attempt: number) => {
+          // not logging the error since we don't control what's in the error and it might contain sensitive data
+          // ESO already logs specific caught errors before passing the error along
+          this.logger.warn(`failed to get message signing key pair. retrying attempt: ${attempt}`);
+          return true;
+        },
+      }
+    );
+
+    return soDoc;
+  }
+
   private async getCurrentKeyPairObj(): Promise<
     SavedObjectsFindResult<MessageSigningKeys> | undefined
   > {
@@ -205,6 +235,10 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     }
     finder.close();
 
+    if (soDoc?.error) {
+      throw soDoc.error;
+    }
+
     return soDoc;
   }
 
@@ -216,7 +250,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       }
     | undefined
   > {
-    const currentKeyPair = await this.getCurrentKeyPairObj();
+    const currentKeyPair = await this.getCurrentKeyPairObjWithRetry();
     if (!currentKeyPair) {
       return;
     }

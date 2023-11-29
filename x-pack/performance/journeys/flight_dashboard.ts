@@ -20,5 +20,5 @@ export const journey = new Journey({
 
   .step('Go to Flights Dashboard', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
-    await kibanaPage.waitForVisualizations(14);
+    await kibanaPage.waitForVisualizations({ count: 14 });
   });

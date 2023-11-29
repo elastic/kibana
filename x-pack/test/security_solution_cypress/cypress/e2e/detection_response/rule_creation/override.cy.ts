@@ -47,7 +47,7 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import {
   createAndEnableRule,
@@ -56,13 +56,13 @@ import {
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
-import { RULE_CREATION } from '../../../urls/navigation';
-
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Rules override', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewOverrideRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
@@ -76,11 +76,12 @@ describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   it('Creates and enables a new custom rule with override option', function () {
-    visitWithoutDateRange(RULE_CREATION);
+    visit(CREATE_RULE_URL);
     fillDefineCustomRuleAndContinue(rule);
     fillAboutRuleWithOverrideAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
     createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -145,8 +146,8 @@ describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .should('match', /^[1-9].+$/); // Any number of alerts
-    cy.get(ALERT_GRID_CELL).contains('auditbeat');
-    cy.get(ALERT_GRID_CELL).contains('critical');
+    cy.get(ALERT_GRID_CELL).contains('winlogbeat');
+    cy.get(ALERT_GRID_CELL).contains('high');
     cy.get(ALERT_GRID_CELL).contains('80');
   });
 });

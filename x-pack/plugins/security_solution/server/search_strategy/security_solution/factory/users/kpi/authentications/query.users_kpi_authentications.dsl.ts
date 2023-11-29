@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { UsersKpiAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy';
+import type { AuthenticationsKpiRequestOptions } from '../../../../../../../common/api/search_strategy/users/kpi/authentications';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildUsersKpiAuthenticationsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: UsersKpiAuthenticationsRequestOptions) => {
+}: AuthenticationsKpiRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {

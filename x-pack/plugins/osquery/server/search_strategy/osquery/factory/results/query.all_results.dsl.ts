@@ -7,6 +7,7 @@
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { isEmpty } from 'lodash';
+import moment from 'moment/moment';
 import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
@@ -16,6 +17,7 @@ export const buildResultsQuery = ({
   agentId,
   kuery,
   sort,
+  startDate,
   pagination: { activePage, querySize },
 }: ResultsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
@@ -25,9 +27,22 @@ export const buildResultsQuery = ({
     filter = filter + ` AND ${kuery}`;
   }
 
-  const filterQuery = getQueryFilter({ filter });
+  const timeRangeFilter =
+    startDate && !isEmpty(startDate)
+      ? [
+          {
+            range: {
+              '@timestamp': {
+                gte: startDate,
+                lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
+              },
+            },
+          },
+        ]
+      : [];
+  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
 
-  const dslQuery = {
+  return {
     allow_no_indices: true,
     index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
     ignore_unavailable: true,
@@ -58,6 +73,4 @@ export const buildResultsQuery = ({
         })) ?? [],
     },
   };
-
-  return dslQuery;
 };

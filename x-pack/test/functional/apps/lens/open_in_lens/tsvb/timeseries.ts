@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('navigates back to TSVB when the Back button is clicked', async () => {
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should preserve app filters in lens', async () => {
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await filterBar.hasFilter('extension', 'css')).to.be(true);
@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
@@ -89,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
@@ -114,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -151,7 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setMetricsGroupByTerms('extension.raw');
 
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
 
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
@@ -174,7 +174,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setMetricsGroupByTerms('extension.raw');
 
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
 
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
@@ -192,7 +192,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.clickSeriesOption();
       await visualBuilder.setIgnoreFilters(true);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
@@ -201,7 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.clickPanelOptions('timeSeries');
       await visualBuilder.setIgnoreFilters(true);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });

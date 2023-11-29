@@ -13,6 +13,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  RuleAction,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -24,12 +25,12 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
 } from '../../../../../../common/constants';
 import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
-import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   PreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
-import { previewRulesSchema } from '../../../../../../common/api/detection_engine';
+import { PreviewRulesSchema } from '../../../../../../common/api/detection_engine';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -39,7 +40,7 @@ import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logge
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -53,6 +54,7 @@ import type {
 } from '../../../rule_types/types';
 import {
   createEqlAlertType,
+  createEsqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
@@ -89,7 +91,7 @@ export const previewRulesRoute = async (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidation(previewRulesSchema) } },
+        validate: { request: { body: buildRouteValidationWithZod(PreviewRulesSchema) } },
       },
       async (context, request, response): Promise<IKibanaResponse<PreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
@@ -243,6 +245,10 @@ export const previewRulesRoute = async (
               updatedBy: username ?? 'preview-updated-by',
               muteAll: false,
               snoozeSchedule: [],
+              // In Security Solution, action params are typed as Record<string,
+              // unknown>, which is a correct type for action params, but we
+              // need to cast here to comply with the alerting types
+              actions: internalRule.actions as RuleAction[],
             };
 
             let invocationStartTime;
@@ -283,14 +289,18 @@ export const previewRulesRoute = async (
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
+                getTimeRange: () => {
+                  const date = startedAt.toISOString();
+                  return { dateStart: date, dateEnd: date };
+                },
               })) as { state: TState });
 
               const errors = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+                .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
                 .map((item) => item.message ?? 'Unknown Error');
 
               const warnings = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
+                .filter((item) => item.newStatus === RuleExecutionStatusEnum['partial failure'])
                 .map((item) => item.message ?? 'Unknown Warning');
 
               logs.push({
@@ -407,6 +417,27 @@ export const previewRulesRoute = async (
                 eqlAlertType.executor,
                 eqlAlertType.id,
                 eqlAlertType.name,
+                previewRuleParams,
+                () => true,
+                {
+                  create: alertInstanceFactoryStub,
+                  alertLimit: {
+                    getValue: () => 1000,
+                    setLimitReached: () => {},
+                  },
+                  done: () => ({ getRecoveredAlerts: () => [] }),
+                }
+              );
+              break;
+            case 'esql':
+              if (!config.settings.ESQLEnabled || config.experimentalFeatures.esqlRulesDisabled) {
+                throw Error('ES|QL rule type is not supported');
+              }
+              const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));
+              await runExecutors(
+                esqlAlertType.executor,
+                esqlAlertType.id,
+                esqlAlertType.name,
                 previewRuleParams,
                 () => true,
                 {

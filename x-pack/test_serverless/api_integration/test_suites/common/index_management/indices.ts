@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import expect from 'expect';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const API_BASE_PATH = '/api/index_management';
 const INTERNAL_API_BASE_PATH = '/internal/index_management';
 const expectedKeys = ['aliases', 'hidden', 'isFrozen', 'primary', 'replica', 'name'].sort();
 
@@ -16,15 +15,27 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+  const indexManagementService = getService('indexManagement');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165565
-  describe.skip('Indices', function () {
-    const indexName = `index-${Math.random()}`;
+  describe('Indices', function () {
+    let indexName: string;
+    let reload: typeof indexManagementService['indices']['api']['reload'];
+    let list: typeof indexManagementService['indices']['api']['list'];
+    let deleteIndex: typeof indexManagementService['indices']['api']['deleteIndex'];
+    let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
+    let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
+    let catIndex: typeof indexManagementService['indices']['helpers']['catIndex'];
 
     before(async () => {
-      // Create a new index to test against
+      ({
+        indices: {
+          api: { reload, list, deleteIndex },
+          helpers: { createIndex, deleteAllIndices, catIndex },
+        },
+      } = indexManagementService);
+      log.debug(`Creating index: '${indexName}'`);
       try {
-        await es.indices.create({ index: indexName });
+        indexName = await createIndex();
       } catch (err) {
         log.debug('[Setup error] Error creating index');
         throw err;
@@ -34,28 +45,27 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       // Cleanup index created for testing purposes
       try {
-        await es.indices.delete({
-          index: indexName,
-        });
+        await deleteAllIndices();
       } catch (err) {
         log.debug('[Cleanup error] Error deleting index');
         throw err;
       }
     });
 
-    describe('get all', () => {
-      it('should list indices with the expected parameters', async () => {
-        const { body: indices } = await supertest
-          .get(`${API_BASE_PATH}/indices`)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
-          .expect(200);
+    describe('list', () => {
+      it('should list all the indices with the expected properties', async function () {
+        // Create an index that we can assert against
+        await createIndex('test_index');
 
-        const indexFound = indices.find((index: { name: string }) => index.name === indexName);
+        // Verify indices request
+        const { body: indices } = await list().set('x-elastic-internal-origin', 'xxx').expect(200);
 
-        expect(indexFound).toBeTruthy();
+        // Find the "test_index" created to verify expected keys
+        const indexCreated = indices.find((index: { name: string }) => index.name === 'test_index');
 
-        expect(Object.keys(indexFound).sort()).toEqual(expectedKeys);
+        const sortedReceivedKeys = Object.keys(indexCreated).sort();
+
+        expect(sortedReceivedKeys).to.eql(expectedKeys);
       });
     });
 
@@ -67,9 +77,9 @@ export default function ({ getService }: FtrProviderContext) {
           .set('x-elastic-internal-origin', 'xxx')
           .expect(200);
 
-        expect(index).toBeTruthy();
+        expect(index).to.be.ok();
 
-        expect(Object.keys(index).sort()).toEqual(expectedKeys);
+        expect(Object.keys(index).sort()).to.eql(expectedKeys);
       });
 
       it('throws 404 for a non-existent index', async () => {
@@ -99,6 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             indexName: createIndexName,
           })
@@ -110,19 +121,62 @@ export default function ({ getService }: FtrProviderContext) {
           .set('x-elastic-internal-origin', 'xxx')
           .expect(200);
 
-        expect(index).toBeTruthy();
+        expect(index).to.be.ok();
 
-        expect(Object.keys(index).sort()).toEqual(expectedKeys);
+        expect(Object.keys(index).sort()).to.eql(expectedKeys);
       });
 
       it('fails to re-create the same index', async () => {
         await supertest
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             indexName: createIndexName,
           })
           .expect(400);
+      });
+    });
+
+    describe('reload', function () {
+      it('should list all the indices with the expected properties', async function () {
+        // create an index to assert against, otherwise the test is flaky
+        await createIndex('reload-test-index');
+        const { body } = await reload().set('x-elastic-internal-origin', 'xxx').expect(200);
+
+        const indexCreated = body.find(
+          (index: { name: string }) => index.name === 'reload-test-index'
+        );
+        const sortedReceivedKeys = Object.keys(indexCreated).sort();
+        expect(sortedReceivedKeys).to.eql(expectedKeys);
+        expect(body.length > 1).to.be(true); // to contrast it with the next test
+      });
+
+      it('should allow reloading only certain indices', async () => {
+        const index = await createIndex();
+        const { body } = await reload([index]).set('x-elastic-internal-origin', 'xxx');
+
+        expect(body.length === 1).to.be(true);
+        expect(body[0].name).to.be(index);
+      });
+    });
+
+    describe('delete indices', () => {
+      it('should delete an index', async () => {
+        const index = await createIndex();
+
+        const { body: indices1 } = await catIndex(undefined, 'i');
+        expect(indices1.map((indexItem) => indexItem.i)).to.contain(index);
+
+        await deleteIndex(index).set('x-elastic-internal-origin', 'xxx').expect(200);
+
+        const { body: indices2 } = await catIndex(undefined, 'i');
+        expect(indices2.map((indexItem) => indexItem.i)).not.to.contain(index);
+      });
+
+      it('should require index or indices to be provided', async () => {
+        const { body } = await deleteIndex().set('x-elastic-internal-origin', 'xxx').expect(400);
+        expect(body.message).to.contain('expected value of type [string]');
       });
     });
   });

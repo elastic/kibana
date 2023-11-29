@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const retry = getService('retry');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
 
   describe('maps full screen mode', () => {
     before(async () => {
@@ -36,6 +37,10 @@ export default function ({ getService, getPageObjects }) {
         const isChromeHidden = await PageObjects.common.isChromeHidden();
         expect(isChromeHidden).to.be(true);
       });
+    });
+
+    it('layer control is visible', async () => {
+      expect(await testSubjects.isDisplayed('addLayerButton')).to.be(true);
     });
 
     it('displays exit full screen logo button', async () => {

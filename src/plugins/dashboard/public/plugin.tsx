@@ -229,7 +229,7 @@ export class DashboardPlugin
 
     const app: App = {
       id: DASHBOARD_APP_ID,
-      title: 'Dashboard',
+      title: 'Dashboards',
       order: 2500,
       euiIconType: 'logoKibana',
       defaultPath: `#${LANDING_PAGE_PATH}`,
@@ -282,7 +282,7 @@ export class DashboardPlugin
 
     if (home) {
       home.featureCatalogue.register({
-        id: LEGACY_DASHBOARD_APP_ID,
+        id: DASHBOARD_APP_ID,
         title: dashboardAppTitle,
         subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
           defaultMessage: 'Analyze data in dashboards.',
@@ -291,7 +291,7 @@ export class DashboardPlugin
           defaultMessage: 'Display and share a collection of visualizations and saved searches.',
         }),
         icon: 'dashboardApp',
-        path: `/app/dashboards#${LANDING_PAGE_PATH}`,
+        path: `/app/${DASHBOARD_APP_ID}#${LANDING_PAGE_PATH}`,
         showOnHomePage: false,
         category: 'data',
         solutionId: 'kibana',

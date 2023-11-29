@@ -8,11 +8,7 @@ import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import type { BuildThreatDescription } from './types';
-import type {
-  MitreSubtechniquesOptions,
-  MitreTacticsOptions,
-  MitreTechniquesOptions,
-} from '../../../mitre/types';
+import type { MitreSubTechnique, MitreTactic, MitreTechnique } from '../../../mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
 const lazyMitreConfiguration = () => {
@@ -44,22 +40,26 @@ const TechniqueLinkItem = styled(EuiButtonEmpty)`
   align-self: flex-start;
 `;
 
-export const ThreatEuiFlexGroup = ({ label, threat }: BuildThreatDescription) => {
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechniquesOptions[]>([]);
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTacticsOptions[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>([]);
+export const ThreatEuiFlexGroup = ({
+  threat,
+  'data-test-subj': dataTestSubj = 'threat',
+}: BuildThreatDescription) => {
+  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
+  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
+  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
-      setTechniquesOptions(mitreConfig.techniquesOptions);
-      setTacticsOptions(mitreConfig.tacticsOptions);
+      setSubtechniquesOptions(mitreConfig.subtechniques);
+      setTechniquesOptions(mitreConfig.techniques);
+      setTacticsOptions(mitreConfig.tactics);
     }
     getMitre();
   }, []);
+
   return (
-    <ThreatEuiFlexGroupStyles direction="column">
+    <ThreatEuiFlexGroupStyles direction="column" data-test-subj={dataTestSubj}>
       {threat.map((singleThreat, index) => {
         const tactic = tacticsOptions.find((t) => t.id === singleThreat.tactic.id);
         return (
@@ -70,7 +70,7 @@ export const ThreatEuiFlexGroup = ({ label, threat }: BuildThreatDescription) =>
               target="_blank"
             >
               {tactic != null
-                ? tactic.text
+                ? tactic.label
                 : `${singleThreat.tactic.name} (${singleThreat.tactic.id})`}
             </EuiLink>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">

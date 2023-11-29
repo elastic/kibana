@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": "@elastic/apm-ui",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "description": "The user interface for Elastic APM",
   "plugin": {
     "id": "apm",
@@ -18,6 +18,7 @@
       "logsShared",
       "inspector",
       "licensing",
+      "metricsDataAccess",
       "observability",
       "observabilityShared",
       "exploratoryView",
@@ -40,7 +41,6 @@
       "discover",
       "fleet",
       "fieldFormats",
-      "infra",
       "home",
       "ml",
       "security",
@@ -49,7 +49,6 @@
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
       "licenseManagement",
-      "profiling",
       "profilingDataAccess"
     ],
     "requiredBundles": [

@@ -14,7 +14,7 @@ import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule
 import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import { manifestType } from './endpoint/lib/artifacts/saved_object_mappings';
-import { riskEngineConfigurationType } from './lib/risk_engine/saved_object';
+import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
 
 const types = [
   noteType,

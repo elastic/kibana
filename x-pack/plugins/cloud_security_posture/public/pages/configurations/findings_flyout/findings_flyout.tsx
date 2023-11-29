@@ -22,6 +22,7 @@ import {
   EuiIcon,
   EuiPagination,
   EuiFlyoutFooter,
+  EuiToolTip,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -76,9 +77,9 @@ type FindingsTab = typeof tabs[number];
 interface FindingFlyoutProps {
   onClose(): void;
   findings: CspFinding;
-  flyoutIndex: number;
-  findingsCount: number;
-  onPaginate: (pageIndex: number) => void;
+  flyoutIndex?: number;
+  findingsCount?: number;
+  onPaginate?: (pageIndex: number) => void;
 }
 
 export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
@@ -98,7 +99,9 @@ export const CisKubernetesIcons = ({
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiIcon type={cisLogoIcon} size="xxl" />
+      <EuiToolTip content="Center for Internet Security">
+        <EuiIcon type={cisLogoIcon} size="xxl" />
+      </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <CISBenchmarkIcon type={benchmarkId} name={benchmarkName} />
@@ -166,16 +169,22 @@ export const FindingsRuleFlyout = ({
         <FindingsTab tab={tab} findings={findings} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiPagination
-              aria-label={PAGINATION_LABEL}
-              pageCount={findingsCount}
-              activePage={flyoutIndex}
-              onPageClick={onPaginate}
-              compressed
-            />
-          </EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="center"
+          justifyContent={onPaginate ? 'spaceBetween' : 'flexEnd'}
+        >
+          {onPaginate && (
+            <EuiFlexItem grow={false}>
+              <EuiPagination
+                aria-label={PAGINATION_LABEL}
+                pageCount={findingsCount}
+                activePage={flyoutIndex}
+                onPageClick={onPaginate}
+                compressed
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <TakeAction createRuleFn={createMisconfigurationRuleFn} />
           </EuiFlexItem>

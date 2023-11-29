@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   EuiButton,
@@ -72,10 +72,6 @@ export interface FullTimeRangeSelectorProps {
    * @param value - The time field range response.
    */
   apiPath?: SetFullTimeRangeApiPath;
-  /**
-   * Optional flag to disable the frozen data tier choice.
-   */
-  hideFrozenDataTierChoice?: boolean;
 }
 
 /**
@@ -96,12 +92,12 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     disabled,
     callback,
     apiPath,
-    hideFrozenDataTierChoice = false,
   } = props;
+
   const {
     http,
     notifications: { toasts },
-    isServerless,
+    showFrozenDataTierChoice,
   } = useDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
@@ -113,7 +109,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         toasts,
         http,
         query,
-        isServerless || hideFrozenDataTierChoice
+        showFrozenDataTierChoice === false
           ? false
           : frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
         apiPath
@@ -137,8 +133,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     toasts,
     http,
     query,
-    isServerless,
-    hideFrozenDataTierChoice,
+    showFrozenDataTierChoice,
     frozenDataPreference,
     apiPath,
     callback,
@@ -199,9 +194,16 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     [sortOptions, frozenDataPreference, setPreference]
   );
 
-  const buttonTooltip = useMemo(
-    () =>
-      frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
+  const buttonTooltip = useMemo(() => {
+    if (showFrozenDataTierChoice === false) {
+      return (
+        <FormattedMessage
+          id="xpack.ml.datePicker.fullTimeRangeSelector.useFullData"
+          defaultMessage="Use full range of data."
+        />
+      );
+    } else {
+      return frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
         <FormattedMessage
           id="xpack.ml.datePicker.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
           defaultMessage="Use full range of data excluding frozen data tier."
@@ -211,9 +213,9 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           id="xpack.ml.datePicker.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
           defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
         />
-      ),
-    [frozenDataPreference]
-  );
+      );
+    }
+  }, [frozenDataPreference, showFrozenDataTierChoice]);
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs">
@@ -229,7 +231,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           />
         </EuiButton>
       </EuiToolTip>
-      {isServerless || hideFrozenDataTierChoice ? null : (
+      {showFrozenDataTierChoice === false ? null : (
         <EuiFlexItem grow={false}>
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}

@@ -25,7 +25,8 @@ import * as utils from '../utils';
 
 import { populateContext } from './engine';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
-import { URL_PATH_END_MARKER } from './components';
+import { URL_PATH_END_MARKER, ConstantComponent } from './components';
+import { looksLikeTypingIn } from './looks_like_typing_in';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -980,10 +981,39 @@ export default function ({
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
-    const components = getTopLevelUrlCompleteComponents(context.method);
-    populateContext(ret.urlTokenPath, context, editor, true, components);
 
-    context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet!, 'endpoint');
+    const components = getTopLevelUrlCompleteComponents(context.method);
+    let urlTokenPath = context.urlTokenPath;
+    let predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => boolean = () => true;
+
+    const tokenIter = createTokenIterator({ editor, position: pos });
+    const currentTokenType = tokenIter.getCurrentToken()?.type;
+    const previousTokenType = tokenIter.stepBackward()?.type;
+    if (!Array.isArray(urlTokenPath)) {
+      // skip checks for url.comma
+    } else if (previousTokenType === 'url.comma' && currentTokenType === 'url.comma') {
+      predicate = () => false; // two consecutive commas empty the autocomplete
+    } else if (
+      (previousTokenType === 'url.part' && currentTokenType === 'url.comma') ||
+      (previousTokenType === 'url.slash' && currentTokenType === 'url.comma') ||
+      (previousTokenType === 'url.comma' && currentTokenType === 'url.part')
+    ) {
+      const lastUrlTokenPath = _.last(urlTokenPath) || []; // ['c', 'd'] from 'GET /a/b/c,d,'
+      const constantComponents = _.filter(components, (c) => c instanceof ConstantComponent);
+      const constantComponentNames = _.map(constantComponents, 'name');
+
+      // check if neither 'c' nor 'd' is a constant component name such as '_search'
+      if (_.every(lastUrlTokenPath, (token) => !_.includes(constantComponentNames, token))) {
+        urlTokenPath = urlTokenPath.slice(0, -1); // drop the last 'c,d,' part from the url path
+        predicate = (term) => term.meta === 'index'; // limit the autocomplete to indices only
+      }
+    }
+
+    populateContext(urlTokenPath, context, editor, true, components);
+    context.autoCompleteSet = _.filter(
+      addMetaToTermsList(context.autoCompleteSet!, 'endpoint'),
+      predicate
+    );
   }
 
   function addUrlParamsAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
@@ -1109,44 +1139,8 @@ export default function ({
       return; // wait for the next typing.
     }
 
-    if (
-      lastEvaluatedToken.position.column + 1 === currentToken.position.column &&
-      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      lastEvaluatedToken.type === 'url.slash' &&
-      currentToken.type === 'url.part' &&
-      currentToken.value.length === 1
-    ) {
-      // do not suppress autocomplete for a single character immediately following a slash in URL
-    } else if (
-      lastEvaluatedToken.position.column < currentToken.position.column &&
-      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      lastEvaluatedToken.type === 'method' &&
-      currentToken.type === 'url.part' &&
-      currentToken.value.length === 1
-    ) {
-      // do not suppress autocomplete for a single character following method in URL
-    } else if (
-      lastEvaluatedToken.position.column < currentToken.position.column &&
-      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      !lastEvaluatedToken.type &&
-      currentToken.type === 'method' &&
-      currentToken.value.length === 1
-    ) {
-      // do not suppress autocompletion for the first character of method
-    } else if (
-      // if the column or the line number have changed for the last token or
-      // user did not provided a new value, then we should not show autocomplete
-      // this guards against triggering autocomplete when clicking around the editor
-      lastEvaluatedToken.position.column !== currentToken.position.column ||
-      lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
-      lastEvaluatedToken.value === currentToken.value
-    ) {
-      tracer(
-        'not starting autocomplete since the change looks like a click',
-        lastEvaluatedToken,
-        '->',
-        currentToken
-      );
+    if (!looksLikeTypingIn(lastEvaluatedToken, currentToken, editor)) {
+      tracer('not starting autocomplete', lastEvaluatedToken, '->', currentToken);
       // not on the same place or nothing changed, cache and wait for the next time
       lastEvaluatedToken = currentToken;
       return;

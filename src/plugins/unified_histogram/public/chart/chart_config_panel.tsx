@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { Observable } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
-import type { UnifiedHistogramServices } from '../types';
+import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../types';
 import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export function ChartConfigPanel({
   services,
   lensAttributesContext,
-  dataView,
-  lensTablesAdapter,
+  lensAdapters,
+  lensEmbeddableOutput$,
   currentSuggestion,
   isFlyoutVisible,
   setIsFlyoutVisible,
@@ -29,10 +29,10 @@ export function ChartConfigPanel({
 }: {
   services: UnifiedHistogramServices;
   lensAttributesContext: LensAttributesContext;
-  dataView: DataView;
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   currentSuggestion?: Suggestion;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
@@ -49,26 +49,26 @@ export function ChartConfigPanel({
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       } as Suggestion;
-      if (!isEqual(updatedSuggestion, currentSuggestion)) {
-        onSuggestionChange?.(updatedSuggestion);
-      }
+      onSuggestionChange?.(updatedSuggestion);
     },
     [currentSuggestion, onSuggestionChange]
   );
 
   useEffect(() => {
+    const tablesAdapters = lensAdapters?.tables?.tables;
     const dataHasChanged =
-      Boolean(lensTablesAdapter) &&
-      !isEqual(previousAdapters.current, lensTablesAdapter) &&
+      Boolean(tablesAdapters) &&
+      !isEqual(previousAdapters.current, tablesAdapters) &&
       query !== previousQuery?.current;
     async function fetchLensConfigComponent() {
       const Component = await services.lens.EditLensConfigPanelApi();
       const panel = (
         <Component
           attributes={lensAttributesContext.attributes}
-          dataView={dataView}
-          adaptersTables={lensTablesAdapter}
-          updateAll={updateSuggestion}
+          updatePanelState={updateSuggestion}
+          lensAdapters={lensAdapters}
+          output$={lensEmbeddableOutput$}
+          displayFlyoutHeader
           closeFlyout={() => {
             setIsFlyoutVisible(false);
           }}
@@ -78,7 +78,7 @@ export function ChartConfigPanel({
       );
       setEditLensConfigPanel(panel);
       previousSuggestion.current = currentSuggestion;
-      previousAdapters.current = lensTablesAdapter;
+      previousAdapters.current = tablesAdapters;
       if (dataHasChanged) {
         previousQuery.current = query;
       }
@@ -92,14 +92,14 @@ export function ChartConfigPanel({
   }, [
     lensAttributesContext.attributes,
     services.lens,
-    dataView,
     updateSuggestion,
     isPlainRecord,
     currentSuggestion,
     query,
     isFlyoutVisible,
-    lensTablesAdapter,
     setIsFlyoutVisible,
+    lensAdapters,
+    lensEmbeddableOutput$,
   ]);
 
   return isPlainRecord ? editLensConfigPanel : null;

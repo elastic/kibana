@@ -8,6 +8,7 @@
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
@@ -18,6 +19,7 @@ describe('maybeAddCloudLinks', () => {
     maybeAddCloudLinks({
       core,
       security,
+      share: sharePluginMock.createStartContract(),
       cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
     });
     // Since there's a promise, let's wait for the next tick
@@ -35,6 +37,7 @@ describe('maybeAddCloudLinks', () => {
     maybeAddCloudLinks({
       security,
       core,
+      share: sharePluginMock.createStartContract(),
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
     });
     // Since there's a promise, let's wait for the next tick
@@ -89,6 +92,12 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
             "title": "Give feedback",
+          },
+          Object {
+            "dataTestSubj": "connectionDetailsHelpLink",
+            "iconType": "console",
+            "onClick": [Function],
+            "title": "Connection details",
           },
         ],
       ]
@@ -103,6 +112,7 @@ describe('maybeAddCloudLinks', () => {
     maybeAddCloudLinks({
       security,
       core,
+      share: sharePluginMock.createStartContract(),
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
     });
     // Since there's a promise, let's wait for the next tick
@@ -156,6 +166,12 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
             "title": "Give feedback",
+          },
+          Object {
+            "dataTestSubj": "connectionDetailsHelpLink",
+            "iconType": "console",
+            "onClick": [Function],
+            "title": "Connection details",
           },
         ],
       ]
@@ -172,6 +188,7 @@ describe('maybeAddCloudLinks', () => {
     maybeAddCloudLinks({
       security,
       core,
+      share: sharePluginMock.createStartContract(),
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
     });
     // Since there's a promise, let's wait for the next tick

@@ -15,18 +15,20 @@
     "requiredPlugins": [
       "cloud",
       "console",
+      "dataViews",
       "dashboard",
       "devTools",
       "discover",
       "management",
-      "ml",
       "searchprofiler",
       "security",
       "serverless",
       "share",
       "visualizations"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "indexManagement",
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

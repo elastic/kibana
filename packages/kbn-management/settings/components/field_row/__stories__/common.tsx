@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiPanel } from '@elastic/eui';
-import { SettingType } from '@kbn/management-settings-types';
+import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
-import { KnownTypeToMetadata, UiSettingMetadata } from '@kbn/management-settings-types/metadata';
 import {
-  useFieldDefinition,
-  getDefaultValue,
-  getUserValue,
-} from '@kbn/management-settings-field-definition/storybook';
+  KnownTypeToMetadata,
+  UiSettingMetadata,
+  OnFieldChangeFn,
+} from '@kbn/management-settings-types';
+import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
+import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { FieldRow as Component, FieldRow } from '../field_row';
 import { FieldRowProvider } from '../services';
-import { OnChangeFn } from '../types';
 
 /**
  * Props for a {@link FieldInput} Storybook story.
@@ -78,6 +78,13 @@ export const getStory = (
         <FieldRowProvider
           showDanger={action('showDanger')}
           links={{ deprecationKey: 'link/to/deprecation/docs' }}
+          validateChange={async (key, value) => {
+            action(`validateChange`)({
+              key,
+              value,
+            });
+            return { successfulValidation: true, valid: true };
+          }}
         >
           <EuiPanel>
             <Story />
@@ -106,10 +113,7 @@ export const storyArgs = {
  * @param type The type of the UiSetting for this {@link FieldRow}.
  * @returns A Storybook Story.
  */
-export const getFieldRowStory = (
-  type: SettingType,
-  settingFields: Partial<UiSettingMetadata<SettingType>>
-) => {
+export const getFieldRowStory = (type: SettingType, settingFields?: Partial<UiSettingMetadata>) => {
   const Story = ({
     isCustom,
     isDeprecated,
@@ -118,33 +122,61 @@ export const getFieldRowStory = (
     userValue,
     value,
   }: StoryProps<typeof type>) => {
+    const [unsavedChange, setUnsavedChange] = useState<
+      UnsavedFieldChange<typeof type> | undefined
+    >();
+
     const setting: UiSettingMetadata<typeof type> = {
       type,
       value,
-      userValue,
+      userValue: userValue === '' ? null : userValue,
       name: `Some ${type} setting`,
+      deprecation: isDeprecated
+        ? { message: 'This setting is deprecated', docLinksKey: 'storybook' }
+        : undefined,
+      category: ['categoryOne', 'categoryTwo'],
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eu odio velit. Integer et mauris quis ligula elementum commodo. Morbi eu ipsum diam. Nulla auctor orci eget egestas vehicula. Aliquam gravida, dolor eu posuere vulputate, neque enim viverra odio, id viverra ipsum quam et ipsum.',
+      requiresPageReload: false,
       ...settingFields,
     };
 
-    const [field, unsavedChange, onChangeFn] = useFieldDefinition(setting, {
-      isCustom,
-      isDeprecated,
-      isOverridden,
+    const field = getFieldDefinition({
+      id: setting.name?.split(' ').join(':').toLowerCase() || setting.type,
+      setting,
+      params: {
+        isCustom,
+        isOverridden,
+      },
     });
 
-    const onChange: OnChangeFn<typeof type> = (_key, change) => {
-      const { error, isInvalid, unsavedValue } = change;
-      onChangeFn({ error: error === null ? undefined : error, isInvalid, value: unsavedValue });
+    const onFieldChange: OnFieldChangeFn<typeof type> = (_id, newChange) => {
+      setUnsavedChange(newChange);
+
+      action('onFieldChange')({
+        type,
+        unsavedValue: newChange?.unsavedValue,
+        savedValue: field.savedValue,
+      });
     };
 
-    return <FieldRow {...{ field, unsavedChange, isSavingEnabled, onChange }} />;
+    return <FieldRow {...{ field, unsavedChange, isSavingEnabled, onFieldChange }} />;
   };
 
-  Story.args = {
-    userValue: getUserValue(type),
-    value: getDefaultValue(type),
-    ...storyArgs,
-  };
+  // In Kibana, the image default value is never anything other than null.  There would be a number
+  // of issues if it was anything but, so, in Storybook, we want to remove the default value argument.
+  if (type === 'image') {
+    Story.args = {
+      userValue: getUserValue(type),
+      ...storyArgs,
+    };
+  } else {
+    Story.args = {
+      userValue: getUserValue(type),
+      value: getDefaultValue(type),
+      ...storyArgs,
+    };
+  }
 
   return Story;
 };

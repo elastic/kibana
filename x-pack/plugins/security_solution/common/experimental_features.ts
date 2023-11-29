@@ -62,11 +62,6 @@ export const allowedExperimentalValues = Object.freeze({
   endpointResponseActionsEnabled: true,
 
   /**
-   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
-   */
-  alertDetailsPageEnabled: false,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
@@ -75,13 +70,24 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
+  /**
+   * Enables the alert type column in KPI visualizations on Alerts Page
+   */
   alertTypeEnabled: false,
-
+  /**
+   * Enables expandable flyout in create rule page, alert preview
+   */
+  expandableFlyoutInCreateRuleEnabled: false,
   /*
    * Enables new Set of filters on the Alerts page.
    *
    **/
   alertsPageFiltersEnabled: true,
+
+  /**
+   * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
+   */
+  assistantModelEvaluation: false,
 
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
@@ -92,23 +98,39 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
    */
-  riskScoringPersistence: false,
+  riskScoringPersistence: true,
 
   /**
    * Enables experimental Entity Analytics HTTP endpoints
    */
-  riskScoringRoutesEnabled: false,
-  /*
-   *
-   * Enables Discover embedded within timeline
-   *
-   * */
-  discoverInTimeline: false,
+  riskScoringRoutesEnabled: true,
+
+  /**
+   * disables ES|QL rules
+   */
+  esqlRulesDisabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
+
+  /**
+   * Disables the timeline save tour.
+   * This flag is used to disable the tour in cypress tests.
+   */
+  disableTimelineSaveTour: false,
+
+  /**
+   * Enables the risk engine privileges route
+   * and associated callout in the UI
+   */
+  riskEnginePrivilegesRouteEnabled: false,
+
+  /*
+   * Enables experimental Entity Analytics Asset Criticality feature
+   */
+  entityAnalyticsAssetCriticalityEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

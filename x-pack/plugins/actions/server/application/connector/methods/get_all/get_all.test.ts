@@ -41,7 +41,7 @@ jest.mock('../../../../authorization/get_authorization_mode_by_source', () => {
     getAuthorizationModeBySource: jest.fn(() => {
       return 1;
     }),
-    getBulkAuthorizationModeBySource: jest.fn(() => {
+    bulkGetAuthorizationModeBySource: jest.fn(() => {
       return 1;
     }),
     AuthorizationMode: {

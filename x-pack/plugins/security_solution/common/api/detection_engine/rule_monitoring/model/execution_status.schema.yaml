@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: Execution Status Schema
+  version: not applicable
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleExecutionStatus:
+      type: string
+      description: |-
+        Custom execution status of Security rules that is different from the status used in the Alerting Framework. We merge our custom status with the Framework's status to determine the resulting status of a rule.
+        - going to run - @deprecated Replaced by the 'running' status but left for backwards compatibility with rule execution events already written to Event Log in the prior versions of Kibana. Don't use when writing rule status changes.
+        - running - Rule execution started but not reached any intermediate or final status.
+        - partial failure - Rule can partially fail for various reasons either in the middle of an execution (in this case we update its status right away) or in the end of it. So currently this status can be both intermediate and final at the same time. A typical reason for a partial failure: not all the indices that the rule searches over actually exist.
+        - failed - Rule failed to execute due to unhandled exception or a reason defined in the business logic of its executor function.
+        - succeeded - Rule executed successfully without any issues. Note: this status is just an indication of a rule's "health". The rule might or might not generate any alerts despite of it.
+
+      enum:
+        - going to run
+        - running
+        - partial failure
+        - failed
+        - succeeded
+
+    RuleExecutionStatusOrder:
+      type: integer

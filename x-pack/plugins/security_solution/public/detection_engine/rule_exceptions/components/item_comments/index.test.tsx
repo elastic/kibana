@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiTextArea } from '@elastic/eui';
 
@@ -13,6 +14,7 @@ import { ExceptionItemComments } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { shallow } from 'enzyme';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -38,6 +40,7 @@ describe('ExceptionItemComments', () => {
       <ExceptionItemComments
         newCommentValue={'This is a new comment'}
         newCommentOnChange={jest.fn()}
+        setCommentError={jest.fn()}
       />
     );
 
@@ -65,6 +68,7 @@ describe('ExceptionItemComments', () => {
       <ExceptionItemComments
         newCommentValue={'This is a new comment'}
         newCommentOnChange={jest.fn()}
+        setCommentError={jest.fn()}
       />
     );
 
@@ -92,6 +96,7 @@ describe('ExceptionItemComments', () => {
       <ExceptionItemComments
         newCommentValue={'This is a new comment'}
         newCommentOnChange={jest.fn()}
+        setCommentError={jest.fn()}
       />
     );
 
@@ -106,6 +111,7 @@ describe('ExceptionItemComments', () => {
         <ExceptionItemComments
           newCommentValue={'This is a new comment'}
           newCommentOnChange={jest.fn()}
+          setCommentError={jest.fn()}
         />
       </TestProviders>
     );
@@ -122,6 +128,7 @@ describe('ExceptionItemComments', () => {
         <ExceptionItemComments
           newCommentValue="This is a new comment"
           newCommentOnChange={mockOnCommentChange}
+          setCommentError={jest.fn()}
         />
       </TestProviders>
     );
@@ -152,10 +159,53 @@ describe('ExceptionItemComments', () => {
           ]}
           newCommentValue={''}
           newCommentOnChange={mockOnCommentChange}
+          setCommentError={jest.fn()}
         />
       </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="exceptionItemCommentsAccordion"]').exists()).toBeTruthy();
+  });
+
+  it('it calls setCommentError on comment error update change', async () => {
+    const mockSetCommentError = jest.fn();
+    const { getByLabelText, queryByText } = render(
+      <TestProviders>
+        <ExceptionItemComments
+          newCommentValue="This is a new comment"
+          newCommentOnChange={jest.fn()}
+          setCommentError={mockSetCommentError}
+        />
+      </TestProviders>
+    );
+
+    const commentInput = getByLabelText('Comment Input');
+
+    const commentErrorMessage = `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`;
+    expect(queryByText(commentErrorMessage)).toBeNull();
+
+    // Put comment with the length above maximum allowed
+    act(() => {
+      fireEvent.change(commentInput, {
+        target: {
+          value: [...new Array(MAX_COMMENT_LENGTH + 1).keys()].map((_) => 'a').join(''),
+        },
+      });
+      fireEvent.blur(commentInput);
+    });
+    expect(queryByText(commentErrorMessage)).not.toBeNull();
+    expect(mockSetCommentError).toHaveBeenCalledWith(true);
+
+    // Put comment with the allowed length
+    act(() => {
+      fireEvent.change(commentInput, {
+        target: {
+          value: 'Updating my new comment',
+        },
+      });
+      fireEvent.blur(commentInput);
+    });
+    expect(queryByText(commentErrorMessage)).toBeNull();
+    expect(mockSetCommentError).toHaveBeenCalledWith(false);
   });
 });

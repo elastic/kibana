@@ -188,6 +188,7 @@ describe('mappingFromFieldMap', () => {
       dynamic: 'strict',
       properties: {
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         event: {
@@ -241,6 +242,11 @@ describe('mappingFromFieldMap', () => {
                 },
                 reason: {
                   type: 'keyword',
+                  fields: {
+                    text: {
+                      type: 'match_only_text',
+                    },
+                  },
                 },
                 rule: {
                   properties: {

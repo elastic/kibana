@@ -6,16 +6,22 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { FlyoutError } from './flyout_error';
-import { ERROR_MESSAGE, ERROR_TITLE, FLYOUT_ERROR } from '../translations';
-import { FLYOUT_ERROR_TEST_ID } from '../test_ids';
+import { FLYOUT_ERROR_TEST_ID } from './test_ids';
 
 describe('<FlyoutError />', () => {
   it('should render error title and body', () => {
-    const { getByTestId } = render(<FlyoutError />);
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <FlyoutError />
+      </IntlProvider>
+    );
     expect(getByTestId(FLYOUT_ERROR_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_ERROR_TEST_ID)).toHaveTextContent(ERROR_TITLE(FLYOUT_ERROR));
-    expect(getByTestId(FLYOUT_ERROR_TEST_ID)).toHaveTextContent(ERROR_MESSAGE(FLYOUT_ERROR));
+    expect(getByTestId(FLYOUT_ERROR_TEST_ID)).toHaveTextContent('Unable to display data');
+    expect(getByTestId(FLYOUT_ERROR_TEST_ID)).toHaveTextContent(
+      'There was an error displaying data.'
+    );
   });
 });

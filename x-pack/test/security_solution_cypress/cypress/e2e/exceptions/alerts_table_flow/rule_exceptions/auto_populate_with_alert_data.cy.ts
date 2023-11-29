@@ -23,11 +23,10 @@ import {
   validateHighlightedFieldsPopulatedAsExceptionConditions,
   validateEmptyExceptionConditionField,
 } from '../../../../tasks/exceptions';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { goToExceptionsTab } from '../../../../tasks/rule_details';
+import { login } from '../../../../tasks/login';
+import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../tasks/rule_details';
 
-import { ruleDetailsUrl } from '../../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   ADD_AND_BTN,
   ENTRY_DELETE_BTN,
@@ -49,12 +48,9 @@ describe.skip(
 
     beforeEach(() => {
       cy.task('esArchiverUnload', 'endpoint');
-      cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
-      createRule(getEndpointRule()).then((rule) =>
-        visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
-      );
+      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 
       waitForAlertsToPopulate();
     });

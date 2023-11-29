@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
+import { executeAsyncByChunks } from './helpers';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
@@ -22,13 +23,14 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
       const { indices = [] } = request.body as typeof bodySchema.type;
 
       const params = {
-        expand_wildcards: 'none' as const,
         format: 'json',
+        expand_wildcards: 'none' as const,
         index: indices,
       };
 
       try {
-        await client.asCurrentUser.indices.delete(params);
+        await executeAsyncByChunks(params, client, 'delete');
+
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

@@ -30,6 +30,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             id: DEFAULT_OUTPUT_ID,
             hosts: config?.agents.elasticsearch.hosts,
             ca_sha256: config?.agents.elasticsearch.ca_sha256,
+            ca_trusted_fingerprint: config?.agents.elasticsearch.ca_trusted_fingerprint,
             is_preconfigured: true,
           } as PreconfiguredOutput,
         ]
@@ -81,7 +82,7 @@ export async function createOrUpdatePreconfiguredOutputs(
         ca_sha256: outputData.ca_sha256 ?? null,
         ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
         ssl: outputData.ssl ?? null,
-      };
+      } as NewOutput;
 
       if (!data.hosts || data.hosts.length === 0) {
         data.hosts = outputService.getDefaultESHosts();

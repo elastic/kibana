@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiFieldNumber } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
+
+import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
+
+import { debounce } from 'lodash';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
+import { useServices } from '../services';
 
 /**
  * Props for a {@link NumberInput} component.
@@ -20,24 +25,50 @@ export type NumberInputProps = InputProps<'number'>;
  * Component for manipulating a `number` field.
  */
 export const NumberInput = ({
-  ariaDescribedBy,
-  ariaLabel,
-  id,
-  isDisabled: disabled = false,
-  name,
-  onChange: onChangeProp,
-  value: valueProp,
+  field,
+  unsavedChange,
+  isSavingEnabled,
+  onInputChange,
 }: NumberInputProps) => {
-  const onChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-    onChangeProp({ value: Number(event.target.value) });
+  const [inputValue] = getFieldInputValue(field, unsavedChange) || undefined;
+  const [value, setValue] = useState(inputValue);
+  const { validateChange } = useServices();
+  const onUpdate = useUpdate({ onInputChange, field });
 
-  // nit: we have to do this because, while the `UiSettingsService` might return
-  // `null`, the {@link EuiFieldNumber} component doesn't accept `null` as a
-  // value.
-  //
-  // @see packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts
-  //
-  const value = valueProp === null ? undefined : valueProp;
+  const updateValue = useCallback(
+    async (newValue: number, onUpdateFn) => {
+      const validationResponse = await validateChange(field.id, newValue);
+      if (validationResponse.successfulValidation && !validationResponse.valid) {
+        onUpdateFn({
+          type: field.type,
+          unsavedValue: newValue,
+          isInvalid: !validationResponse.valid,
+          error: validationResponse.errorMessage,
+        });
+      } else {
+        onUpdateFn({ type: field.type, unsavedValue: newValue });
+      }
+    },
+    [validateChange, field.id, field.type]
+  );
+
+  const debouncedUpdateValue = useMemo(() => {
+    // Trigger update 500 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 500);
+  }, [updateValue]);
+
+  const onChange: EuiFieldNumberProps['onChange'] = async (event) => {
+    const newValue = Number(event.target.value);
+    setValue(newValue);
+    await debouncedUpdateValue(newValue, onUpdate);
+  };
+
+  useEffect(() => {
+    setValue(inputValue);
+  }, [inputValue]);
+
+  const { id, name, ariaAttributes } = field;
+  const { ariaLabel, ariaDescribedBy } = ariaAttributes;
 
   return (
     <EuiFieldNumber
@@ -45,7 +76,8 @@ export const NumberInput = ({
       aria-label={ariaLabel}
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
       fullWidth
-      {...{ disabled, name, value, onChange }}
+      disabled={!isSavingEnabled}
+      {...{ name, value, onChange }}
     />
   );
 };

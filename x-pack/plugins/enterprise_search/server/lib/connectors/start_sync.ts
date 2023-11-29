@@ -23,7 +23,6 @@ import {
 } from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
-import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 
 export const startSync = async (
   client: IScopedClusterClient,
@@ -50,6 +49,12 @@ export const startSync = async (
         }
       : config;
     const { index_name } = connector;
+    if (
+      jobType === SyncJobType.ACCESS_CONTROL &&
+      !configuration.use_document_level_security?.value
+    ) {
+      throw new Error(ErrorCode.ACCESS_CONTROL_DISABLED);
+    }
 
     if (connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
       return await client.asCurrentUser.update({
@@ -64,10 +69,9 @@ export const startSync = async (
       });
     }
 
-    const indexNameWithoutSearchPrefix = index_name ? stripSearchPrefix(index_name) : '';
     const targetIndexName =
       jobType === SyncJobType.ACCESS_CONTROL
-        ? `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexNameWithoutSearchPrefix}`
+        ? `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${index_name}`
         : index_name ?? undefined;
 
     return await startConnectorSync(client.asCurrentUser, {

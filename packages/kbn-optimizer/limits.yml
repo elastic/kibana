@@ -4,6 +4,7 @@ pageLoadAssetSize:
   aiops: 10000
   alerting: 106936
   apm: 64385
+  assetManager: 25000
   banners: 17946
   bfetch: 22837
   canvas: 1066647
@@ -11,7 +12,6 @@ pageLoadAssetSize:
   charts: 55000
   cloud: 21076
   cloudChat: 19894
-  cloudChatProvider: 17114
   cloudDataMigration: 19170
   cloudDefend: 18697
   cloudExperiments: 59358
@@ -28,10 +28,11 @@ pageLoadAssetSize:
   dashboard: 82025
   dashboardEnhanced: 65646
   data: 454087
+  datasetQuality: 35000
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
-  dataViewManagement: 5000
-  dataViews: 47300
+  dataViewManagement: 5100
+  dataViews: 48300
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
@@ -40,7 +41,8 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
   esUiShared: 326654
-  eventAnnotation: 48565
+  eventAnnotation: 30000
+  eventAnnotationListing: 25841
   exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000
@@ -49,13 +51,13 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 26338
+  expressionPartitionVis: 28000
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
   expressionShape: 34008
   expressionTagcloud: 27505
-  expressionXY: 39500
+  expressionXY: 45000
   features: 21723
   fieldFormats: 65209
   files: 22673
@@ -82,16 +84,18 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 38000
+  lens: 39000
   licenseManagement: 41817
   licensing: 29004
+  links: 44490
   lists: 22900
-  logExplorer: 39045
+  logExplorer: 54342
   logsShared: 281060
   logstash: 53548
   management: 46112
   maps: 90000
   mapsEms: 26072
+  metricsDataAccess: 60000
   ml: 82187
   monitoring: 80000
   navigation: 37269
@@ -99,7 +103,7 @@ pageLoadAssetSize:
   noDataPage: 5000
   observability: 115443
   observabilityAIAssistant: 25000
-  observabilityLogExplorer: 23686
+  observabilityLogExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090
@@ -120,9 +124,9 @@ pageLoadAssetSize:
   screenshotting: 22870
   searchprofiler: 67080
   security: 81771
-  securitySolution: 66738
+  securitySolution: 67584
   securitySolutionEss: 16573
-  securitySolutionServerless: 45000
+  securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747
   serverlessSearch: 71995

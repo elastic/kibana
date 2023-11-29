@@ -33,9 +33,15 @@ const configSchema = schema.object({
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
   serverless: schema.maybe(
-    schema.object({
-      project_id: schema.string(),
-    })
+    schema.object(
+      {
+        project_id: schema.maybe(schema.string()),
+        project_name: schema.maybe(schema.string()),
+        project_type: schema.maybe(schema.string()),
+      },
+      // avoid future chicken-and-egg situation with the component populating the config
+      { unknowns: 'ignore' }
+    )
   ),
 });
 
@@ -57,6 +63,8 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     is_elastic_staff_owned: true,
     serverless: {
       project_id: true,
+      project_name: true,
+      project_type: true,
     },
   },
   schema: configSchema,

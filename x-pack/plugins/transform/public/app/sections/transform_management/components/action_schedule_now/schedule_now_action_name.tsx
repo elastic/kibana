@@ -11,6 +11,8 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { missingTransformStats } from '../../../../common/transform_list';
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
 import { useTransformCapabilities } from '../../../../hooks';
@@ -35,7 +37,8 @@ export const isScheduleNowActionDisabled = (
     !canScheduleNowTransform ||
     completedBatchTransform ||
     items.length === 0 ||
-    transformNodes === 0
+    transformNodes === 0 ||
+    missingTransformStats(items)
   );
 };
 
@@ -92,6 +95,11 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
       content = createCapabilityFailureMessage('canScheduleNowTransform');
     } else if (completedBatchTransform) {
       content = completedBatchTransformMessage;
+    } else if (missingTransformStats(items)) {
+      content = createNoStatsTooltipMessage({
+        actionName: scheduleNowActionNameText,
+        count: items.length,
+      });
     }
   }
 

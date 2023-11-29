@@ -5,32 +5,23 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import {
-  EuiButton,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPageTemplate,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { RouteComponentProps } from 'react-router-dom';
+import React, { FunctionComponent, useEffect } from 'react';
+import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
-import { useLoadIndexMappings, documentationService } from '../../../../services';
 
-export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexName: string }>> = ({
-  match: {
-    params: { indexName },
-  },
-}) => {
-  const { isLoading, data, error, resendRequest } = useLoadIndexMappings(indexName);
+import { DetailsPageMappingsContent } from './details_page_mappings_content';
+import { Index } from '../../../../../../common';
+import { useLoadIndexMappings } from '../../../../services';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
+
+export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index }) => {
+  const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index.name);
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsMappings);
+  }, []);
 
   if (isLoading) {
     return (
@@ -61,10 +52,9 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.mappings.errorDescription"
-                defaultMessage="There was an error loading mappings for index {indexName}: {error}"
+                defaultMessage="We encountered an error loading mappings for index {indexName}. Make sure that the index name in the URL is correct and try again."
                 values={{
-                  indexName,
-                  error: error.error,
+                  indexName: index.name,
                 }}
               />
             </EuiText>
@@ -87,82 +77,5 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
     );
   }
 
-  return (
-    // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
-    <EuiFlexGroup
-      wrap
-      direction="rowReverse"
-      css={css`
-        height: 100%;
-      `}
-    >
-      <EuiFlexItem
-        grow={1}
-        css={css`
-          min-width: 400px;
-        `}
-      >
-        <EuiPanel grow={false} paddingSize="l">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="iInCircle" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.docsCardTitle"
-                    defaultMessage="About index mappings"
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
-                defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
-              (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
-              available in your relevance tuning and search experience."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiLink
-            data-test-subj="indexDetailsMappingsDocsLink"
-            href={documentationService.getMappingDocumentationLink()}
-            target="_blank"
-            external
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
-              defaultMessage="Learn more"
-            />
-          </EuiLink>
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem
-        grow={3}
-        css={css`
-          min-width: 600px;
-        `}
-      >
-        <EuiPanel>
-          <EuiCodeBlock
-            language="json"
-            isCopyable
-            data-test-subj="indexDetailsMappingsCodeBlock"
-            css={css`
-              height: 100%;
-            `}
-          >
-            {JSON.stringify(data, null, 2)}
-          </EuiCodeBlock>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return <DetailsPageMappingsContent index={index} data={data} />;
 };

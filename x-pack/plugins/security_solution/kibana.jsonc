@@ -28,7 +28,6 @@
       "eventLog",
       "features",
       "fieldFormats",
-      "guidedOnboarding",
       "inspector",
       "kubernetesSecurity",
       "lens",
@@ -47,9 +46,14 @@
       "files",
       "controls",
       "dataViewEditor",
+      "savedObjectsManagement",
+      "expressions",
       "stackConnectors",
       "discover",
-      "notifications"
+      "notifications",
+      "savedObjects",
+      "savedSearch",
+      "unifiedDocViewer",
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -64,7 +68,8 @@
       "telemetry",
       "dataViewFieldEditor",
       "osquery",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -74,8 +79,7 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch",
-      "cloudChat"
+      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"

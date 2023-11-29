@@ -97,12 +97,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
     });
 
+    it('should show the the grid toolbar', async () => {
+      await testSubjects.existOrFail('dscGridToolbar');
+    });
+
     it('navigates to context view from embeddable', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 

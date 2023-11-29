@@ -22,7 +22,7 @@ import {
   ABOUT_INVESTIGATION_NOTES,
   ABOUT_RULE_DESCRIPTION,
   ADDITIONAL_LOOK_BACK_DETAILS,
-  CUSTOM_QUERY_DETAILS,
+  EQL_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   removeExternalLinkText,
@@ -43,7 +43,7 @@ import {
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -52,16 +52,12 @@ import {
   selectEqlRuleType,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
-
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
@@ -75,15 +71,16 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
     const mitreAttack = rule.threat;
     const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
     const expectedNumberOfRules = 1;
-    const expectedNumberOfAlerts = '2 alerts';
+    const expectedNumberOfAlerts = '1 alert';
 
     it('Creates and enables a new EQL rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -114,7 +111,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
+        getDetails(EQL_QUERY_DETAILS).should('have.text', rule.query);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Event Correlation');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       });
@@ -146,21 +143,23 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
 
     const rule = getEqlSequenceRule();
 
-    beforeEach(() => {
-      cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
+    before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     });
-    afterEach(() => {
-      cy.task('esArchiverUnload', 'auditbeat_big');
+
+    after(() => {
+      cy.task('esArchiverUnload', 'auditbeat_multiple');
     });
 
     it('Creates and enables a new EQL rule with a sequence', function () {
       login();
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
       goToRuleDetailsOf(rule.name);
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
