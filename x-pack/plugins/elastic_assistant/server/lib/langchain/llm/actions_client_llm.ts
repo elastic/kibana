@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { LLM } from 'langchain/llms/base';
@@ -15,12 +16,22 @@ import { RequestBody } from '../types';
 
 const LLM_TYPE = 'ActionsClientLlm';
 
+interface ActionsClientLlmParams {
+  actions: ActionsPluginStart;
+  connectorId: string;
+  llmType?: string;
+  logger: Logger;
+  request: KibanaRequest<unknown, unknown, RequestBody>;
+  traceId?: string;
+}
+
 export class ActionsClientLlm extends LLM {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, RequestBody>;
   #actionResultData: string;
+  #traceId: string;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -29,20 +40,16 @@ export class ActionsClientLlm extends LLM {
   constructor({
     actions,
     connectorId,
+    traceId = uuidv4(),
     llmType,
     logger,
     request,
-  }: {
-    actions: ActionsPluginStart;
-    connectorId: string;
-    llmType?: string;
-    logger: Logger;
-    request: KibanaRequest<unknown, unknown, RequestBody>;
-  }) {
+  }: ActionsClientLlmParams) {
     super({});
 
     this.#actions = actions;
     this.#connectorId = connectorId;
+    this.#traceId = traceId;
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
@@ -68,7 +75,9 @@ export class ActionsClientLlm extends LLM {
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
-      `ActionsClientLlm#_call assistantMessage:\n${JSON.stringify(assistantMessage)} `
+      `ActionsClientLlm#_call\ntraceId: ${this.#traceId}\nassistantMessage:\n${JSON.stringify(
+        assistantMessage
+      )} `
     );
     // create a new connector request body with the assistant message:
     const requestBody = {

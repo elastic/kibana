@@ -35,12 +35,12 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logExplorer"
+      "logExplorer",
+      "licensing"
     ],
     "optionalPlugins": [
       "discover",
       "home",
-      "licensing",
       "usageCollection",
       "cloud",
       "spaces",
