@@ -83,7 +83,6 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
-import type { SourcererData } from './common/components/sourcerer/sourcerer_updater';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -184,7 +183,6 @@ export interface PluginSetup {
 }
 
 export interface PluginStart {
-  getSourcerer$: () => Observable<SourcererData>;
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
   setComponents: SetComponents;

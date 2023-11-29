@@ -6,7 +6,7 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 import { TogglePanel } from './toggle_panel';
@@ -18,13 +18,13 @@ import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
-import { useKibana } from '../common/services';
 
 export interface GetStartedProps {
+  indicesExist: boolean;
   productTypes: SecurityProductTypes;
 }
 
-export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes }) => {
+export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, indicesExist }) => {
   const { euiTheme } = useEuiTheme();
   const {
     onStepClicked,
@@ -41,14 +41,6 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
   const productTier = productTypes.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
-  const [isIndicesExist, setIsIndicesExist] = useState<boolean | null>();
-  const { securitySolution } = useKibana().services;
-
-  useEffect(() => {
-    securitySolution.getSourcerer$().subscribe(({ indicesExist }) => {
-      setIsIndicesExist(indicesExist);
-    });
-  }, [securitySolution, setIsIndicesExist]);
 
   return (
     <KibanaPageTemplate
@@ -103,7 +95,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         <StepContextProvider
           expandedCardSteps={expandedCardSteps}
           finishedSteps={finishedSteps}
-          indicesExist={!!isIndicesExist}
+          indicesExist={!!indicesExist}
           toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         >
           <TogglePanel

@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useContractComponents } from '../../hooks/use_contract_component';
-import { updateSourcererData } from '../sourcerer/sourcerer_updater';
 
 export const LandingPageComponent = memo(() => {
   const { GetStarted } = useContractComponents();
   const { indicesExist } = useSourcererDataView();
 
-  useEffect(() => {
-    updateSourcererData({ indicesExist });
-  }, [indicesExist]);
-
-  return GetStarted ? <GetStarted /> : null;
+  return GetStarted ? <GetStarted indicesExist={indicesExist} /> : null;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

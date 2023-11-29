@@ -28,7 +28,6 @@ const setupMock = (): PluginSetup => ({
 });
 
 const startMock = (): PluginStart => ({
-  getSourcerer$: jest.fn(() => new BehaviorSubject({ indicesExist: false })),
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
   setComponents: jest.fn(),
   getBreadcrumbsNav$: jest.fn(
