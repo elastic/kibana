@@ -26,9 +26,8 @@ import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths } from '../../../../common/locators/paths';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
-import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { parseAlert } from '../helpers/parse_alert';
-import type { ObservabilityRuleTypeRegistry } from '../../..';
+import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
 
@@ -45,7 +44,7 @@ export function AlertActions({
   const { alert, refresh } = customActionsProps;
   const {
     cases: {
-      helpers: { getRuleIdFromEvent },
+      helpers: { getRuleIdFromEvent, canUseCases },
       hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
     },
     http: {
@@ -53,7 +52,6 @@ export function AlertActions({
     },
     triggersActionsUi,
   } = useKibana().services;
-  const userCasesPermissions = useGetUserCasesPermissions();
 
   const data = useMemo(
     () =>
@@ -71,6 +69,7 @@ export function AlertActions({
     }),
     [alert._id, alert._index]
   );
+  const userCasesPermissions = canUseCases([observabilityFeatureId]);
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
