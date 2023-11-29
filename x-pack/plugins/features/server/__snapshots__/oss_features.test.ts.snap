@@ -558,6 +558,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -710,6 +711,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1032,6 +1034,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1169,6 +1172,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1321,6 +1325,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1643,6 +1648,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [

@@ -3145,6 +3145,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/calculate-width-from-char-count@link:packages/kbn-calculate-width-from-char-count":
+  version "0.0.0"
+  uid ""
+
 "@kbn/canvas-plugin@link:x-pack/plugins/canvas":
   version "0.0.0"
   uid ""
@@ -5182,6 +5186,10 @@
   uid ""
 
 "@kbn/painless-lab-plugin@link:x-pack/plugins/painless_lab":
+  version "0.0.0"
+  uid ""
+
+"@kbn/panel-loader@link:packages/kbn-panel-loader":
   version "0.0.0"
   uid ""
 
