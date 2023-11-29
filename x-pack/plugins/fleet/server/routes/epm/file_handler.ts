@@ -14,8 +14,7 @@ import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/co
 import type { GetFileRequestSchema, FleetRequestHandler } from '../../types';
 import { getFile, getInstallation } from '../../services/epm/packages';
 import { defaultFleetErrorHandler } from '../../errors';
-import { getArchiveEntry } from '../../services/epm/archive/cache';
-import { getAsset } from '../../services/epm/archive/storage';
+import { getArchiveEntry, getAsset } from '../../services/epm/archive';
 import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_packages';
 import { pkgToPkgKey } from '../../services/epm/registry';
 import { unpackBufferEntries } from '../../services/epm/archive';
