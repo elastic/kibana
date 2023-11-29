@@ -10,7 +10,7 @@ import { MlModel } from '@kbn/enterprise-search-plugin/common/types/ml';
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export type FetchModelsArgs = {};
+export interface FetchModelsArgs {};
 export type FetchModelsApiResponse = MlModel[];
 
 export const fetchModels = async () => {

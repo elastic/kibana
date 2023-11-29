@@ -7,6 +7,7 @@
 
 import { MlModel } from '@kbn/enterprise-search-plugin/common/types/ml';
 import { kea, MakeLogicType } from 'kea';
+
 import { isEqual } from 'lodash';
 
 import { Status } from '../../../../../common/types/api';
