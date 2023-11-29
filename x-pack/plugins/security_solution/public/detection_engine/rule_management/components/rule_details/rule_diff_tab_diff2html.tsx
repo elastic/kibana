@@ -151,7 +151,7 @@ const WholeObjectDiff = ({
           toggleSection('whole');
         }}
       >
-        <div id="code-diff" dangerouslySetInnerHTML={{ __html: diffHtml }}></div>
+        <div id="code-diff" dangerouslySetInnerHTML={{ __html: diffHtml }} />
       </ExpandableSection>
       <EuiHorizontalRule margin="m" />
     </>
