@@ -23,15 +23,15 @@ export const availableControlsPanels = {
 
 export const helpMessages = {
   [availableControlsPanels.SERVICE_NAME]: {
-    text: `${i18n.translate('xpack.infra.hostsViewPage.table.tooltip.documentationLabel', {
+    text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLabel', {
       defaultMessage: 'Services detected via',
     })}`,
     link: {
-      text: `${i18n.translate('xpack.infra.hostsViewPage.table.tooltip.documentationLink', {
+      text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLink', {
         defaultMessage: 'APM',
       })}`,
       href: 'https://ela.st/docs-infra-apm',
-      ['data-test-subj']: 'hostsViewTooltipDocumentationLink',
+      ['data-test-subj']: 'hostsViewServiceNameControlPopoverHelpLink',
     },
   },
 };
@@ -179,14 +179,16 @@ const PanelRT = rt.type({
       fieldName: rt.string,
       title: rt.union([rt.string, rt.undefined]),
       selectedOptions: rt.array(rt.string),
-      helpMessage: rt.partial({
-        text: rt.string,
-        link: rt.partial({
-          href: rt.string,
-          'data-test-subj': rt.string,
-          text: rt.string,
+      helpMessage: rt.intersection([
+        rt.type({ text: rt.string }),
+        rt.partial({
+          link: rt.type({
+            href: rt.string,
+            'data-test-subj': rt.string,
+            text: rt.string,
+          }),
         }),
-      }),
+      ]),
     }),
   ]),
 });
