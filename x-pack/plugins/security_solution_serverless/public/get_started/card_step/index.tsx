@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import classnames from 'classnames';
-import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
 
 import type { GetRuleManagementFiltersResponse } from '@kbn/security-solution-plugin/public';
 
