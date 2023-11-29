@@ -18,7 +18,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import DashboardLink from '../lib/gen_ai/dashboard_link';
+import DashboardLink from './dashboard_link';
 import { OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
 import {

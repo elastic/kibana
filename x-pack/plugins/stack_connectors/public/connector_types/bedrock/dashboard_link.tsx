@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
-import { useGetDashboard } from './use_get_dashboard';
+import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 
 interface Props {
   connectorId: string;
@@ -20,7 +20,7 @@ interface Props {
 export const DashboardLink: React.FC<Props> = ({
   connectorId,
   connectorName,
-  selectedProvider = '',
+  selectedProvider = 'Bedrock',
 }) => {
   const { dashboardUrl } = useGetDashboard({ connectorId, selectedProvider });
   const {

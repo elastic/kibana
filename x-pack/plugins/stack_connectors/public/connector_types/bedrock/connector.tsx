@@ -11,7 +11,7 @@ import {
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import DashboardLink from '../lib/gen_ai/dashboard_link';
+import DashboardLink from './dashboard_link';
 import { BEDROCK } from './translations';
 import { bedrockConfig, bedrockSecrets } from './constants';
 

@@ -21,7 +21,10 @@ export interface UseGetDashboard {
   isLoading: boolean;
 }
 
-const getDashboardId = (spaceId: string): string => `generative-ai-token-usage-${spaceId}`;
+const getDashboardId = (selectedProvider: string, spaceId: string): string =>
+  `generative-ai-token-usage-${
+    selectedProvider.toLowerCase().includes('openai') ? 'openai' : 'bedrock'
+  }-${spaceId}`;
 
 export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGetDashboard => {
   const {
@@ -106,7 +109,7 @@ export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGe
 
     if (spaceId != null && connectorId.length > 0 && !dashboardCheckComplete) {
       abortCtrl.current.abort();
-      fetchData(getDashboardId(`${selectedProvider}-${spaceId}`));
+      fetchData(getDashboardId(selectedProvider, spaceId));
     }
 
     return () => {
