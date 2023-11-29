@@ -228,10 +228,11 @@ export function ObservabilityLogExplorerPageObject({
         ),
       });
 
-      return await PageObjects.common.navigateToApp('observabilityLogExplorer', {
-        search: queryStringParams,
-        ...extraOptions,
-      });
+      return await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'observabilityLogExplorer',
+        '/',
+        queryStringParams
+      );
     },
 
     getDatasetSelector() {
