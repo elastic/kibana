@@ -18,6 +18,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./burn_rate_rule/burn_rate_rule'));
     loadTestFile(require.resolve('./es_query_rule/es_query_rule'));
-    loadTestFile(require.resolve('./painless_lab/painless_lab'));
   });
 }

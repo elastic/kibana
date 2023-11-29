@@ -16,6 +16,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./fleet/fleet'));
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./cloud_security_posture'));
-    loadTestFile(require.resolve('./painless_lab/painless_lab'));
   });
 }

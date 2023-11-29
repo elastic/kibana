@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
 
-  describe('Painless Lab', function () {
+  describe('Painless Lab Routes', function () {
     describe('Execute', () => {
       it('should execute a valid painless script', async () => {
         const script =
