@@ -103,6 +103,10 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; value: string };
   };
+  noWildcardSupportAsArg: {
+    message: string;
+    type: { name: string };
+  };
   ccsNotSupportedForCommand: {
     message: string;
     type: { value: string };
