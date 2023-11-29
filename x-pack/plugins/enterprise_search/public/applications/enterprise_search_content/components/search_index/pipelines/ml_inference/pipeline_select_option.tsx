@@ -7,15 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 
 import { MLModelTypeBadge } from '../ml_model_type_badge';
 
@@ -24,6 +16,7 @@ import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS, MODEL_REDACTED_VALUE 
 
 export interface PipelineSelectOptionProps {
   checked?: 'on';
+  disabled?: boolean;
   label: string;
   pipeline: MLInferencePipelineOption;
 }
@@ -32,22 +25,16 @@ export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }>
   disabledReason,
 }) => {
   return (
-    <>
-      <EuiSpacer size="xs" />
-      <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="warning" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTextColor color="warning">
-              {disabledReason ?? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS}
-            </EuiTextColor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="warning" color="warning" />
       </EuiFlexItem>
-      <EuiSpacer size="xs" />
-    </>
+      <EuiFlexItem>
+        <EuiTextColor color="warning">
+          {disabledReason ?? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS}
+        </EuiTextColor>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -57,8 +44,6 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
     // TODO: Verify text size
     // TODO: Add status & action menu
     // TODO: Test rendering when pipeline.modelType.length == 0
-    // TODO: Need to hide source fields when pipeline is disabled?
-    // TODO: How to handle when a pipeline is disabled?
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiTitle size="xxs">
@@ -79,7 +64,11 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText size="s">{pipeline.sourceFields.join(', ')}</EuiText>
+        {pipeline.disabled ? (
+          <PipelineSelectOptionDisabled disabledReason={pipeline.disabledReason} />
+        ) : (
+          <EuiText size="s">{pipeline.sourceFields.join(', ')}</EuiText>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
 

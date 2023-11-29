@@ -22,14 +22,14 @@ export const PipelineSelect: React.FC = () => {
     pipelineOptions: MLInferencePipelineOption[]
   ): PipelineSelectOptionProps[] => {
     return pipelineOptions.map((pipelineOption) => ({
+      disabled: pipelineOption.disabled,
       label: pipelineOption.pipelineName,
       pipeline: pipelineOption,
     }));
   };
 
   const renderPipelineOption = (option: PipelineSelectOptionProps) => {
-    // TODO: Remove explicitly passing label
-    return <PipelineSelectOption label={option.label} pipeline={option.pipeline} />;
+    return <PipelineSelectOption {...option} />;
   };
 
   const onChange = (options: PipelineSelectOptionProps[]) => {
