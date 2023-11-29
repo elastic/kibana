@@ -466,7 +466,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         searchAfter = lastHit?.sort;
       }
 
-      fetchMore = numOfHits > 0 && numOfHits < 1_000;
+      fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
     } catch (e) {
       tlog(this.logger, e);
       fetchMore = false;
