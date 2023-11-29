@@ -23,9 +23,9 @@ import 'react-diff-view/style/index.css';
 import type { RenderGutter, HunkData, DecorationProps, TokenizeOptions } from 'react-diff-view';
 import unidiff from 'unidiff';
 import { EuiSpacer, EuiIcon, EuiLink, useEuiTheme, EuiSwitch, EuiRadioGroup } from '@elastic/eui';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { markEditsBy, DiffMethod } from './mark_edits_by_word';
-import { sortAndStringifyJson } from './json_diff/sort_stringify_json';
+import { sortAndStringifyJson } from './sort_stringify_json';
 
 interface UnfoldProps extends Omit<DecorationProps, 'children'> {
   start: number;
