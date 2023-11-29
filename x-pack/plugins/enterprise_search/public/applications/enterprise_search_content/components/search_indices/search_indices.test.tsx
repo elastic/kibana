@@ -14,8 +14,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCallOut } from '@elastic/eui';
-
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
@@ -75,7 +73,6 @@ describe('SearchIndices', () => {
     expect(wrapper.find(ElasticsearchResources)).toHaveLength(0);
 
     expect(mockActions.fetchIndices).toHaveBeenCalled();
-    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 
   // Move this test to the indices table when writing tests there
