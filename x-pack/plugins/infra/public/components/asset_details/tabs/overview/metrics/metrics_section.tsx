@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
 import {
   MetricsSectionTitle,
   KubernetesMetricsSectionTitle,
@@ -28,23 +29,22 @@ interface Props {
 export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
   const model = findInventoryModel('host');
 
+  const { value } = useAsync(() => {
+    return model.metrics.getDashboards();
+  });
+
   const dashboards = useMemo(
     () => ({
-      hosts: model.metrics.dashboards?.assetDetails.get({
+      hosts: value?.assetDetails.get({
         metricsDataView,
         logsDataView,
       }),
-      kubernetes: model.metrics.dashboards?.assetDetailsKubernetesNode.get({
+      kubernetes: value?.assetDetailsKubernetesNode.get({
         metricsDataView,
       }),
     }),
 
-    [
-      logsDataView,
-      metricsDataView,
-      model.metrics.dashboards?.assetDetails,
-      model.metrics.dashboards?.assetDetailsKubernetesNode,
-    ]
+    [logsDataView, metricsDataView, value?.assetDetails, value?.assetDetailsKubernetesNode]
   );
 
   return (
@@ -78,14 +78,17 @@ export const MetricsSectionCompact = ({
   dateRange,
 }: Props) => {
   const model = findInventoryModel('host');
+  const { value } = useAsync(() => {
+    return model.metrics.getDashboards();
+  });
 
   const charts = useMemo(
     () =>
-      model.metrics.dashboards?.assetDetailsFlyout.get({
+      value?.assetDetailsFlyout.get({
         metricsDataView,
         logsDataView,
       }).charts ?? [],
-    [metricsDataView, logsDataView, model.metrics.dashboards?.assetDetailsFlyout]
+    [metricsDataView, logsDataView, value?.assetDetailsFlyout]
   );
 
   return (

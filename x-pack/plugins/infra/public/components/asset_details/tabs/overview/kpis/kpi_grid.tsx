@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
 import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 import { Kpi } from './kpi';
 
@@ -20,18 +21,22 @@ interface Props {
 }
 
 export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
-  const inventoryModel = findInventoryModel('host');
+  const model = findInventoryModel('host');
   const { euiTheme } = useEuiTheme();
+
+  const { value: dashboards } = useAsync(() => {
+    return model.metrics.getDashboards();
+  });
 
   const charts = useMemo(
     () =>
-      inventoryModel.metrics.dashboards?.kpi.get({
+      dashboards?.kpi.get({
         metricsDataView: dataView,
         options: {
           backgroundColor: euiTheme.colors.lightestShade,
         },
       }).charts ?? [],
-    [dataView, euiTheme.colors.lightestShade, inventoryModel.metrics.dashboards?.kpi]
+    [dataView, euiTheme.colors.lightestShade, dashboards?.kpi]
   );
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">

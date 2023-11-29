@@ -4,33 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { snapshot } from './snapshot';
 import { tsvb } from './tsvb';
-import { formulas } from './formulas';
-import {
-  assetDetails,
-  assetDetailsKubernetesNode,
-  assetDetailsFlyout,
-  hostsView,
-  kpi,
-} from './dashboards';
-import { InventoryMetrics } from '../../types';
+import { InventoryMetricsWithDashboards } from '../../types';
+import { type HostFormulas } from './formulas';
+import { type HostDashboards } from './dashboards';
 
 // not sure why this is the only model with "count"
 const { count, ...exposedHostSnapshotMetrics } = snapshot;
-
-const dashboards = { assetDetails, assetDetailsKubernetesNode, assetDetailsFlyout, hostsView, kpi };
 
 export const hostSnapshotMetricTypes = Object.keys(exposedHostSnapshotMetrics) as Array<
   keyof typeof exposedHostSnapshotMetrics
 >;
 
-export const metrics: InventoryMetrics<typeof formulas, typeof dashboards> = {
+export const metrics: InventoryMetricsWithDashboards<HostFormulas, HostDashboards> = {
   tsvb,
   snapshot,
-  formulas,
-  dashboards,
+  getFormulas: async () => await import('./formulas').then(({ formulas }) => ({ ...formulas })),
+  getDashboards: async () =>
+    await import('./dashboards').then(({ dashboards }) => ({ ...dashboards })),
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

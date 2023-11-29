@@ -6,18 +6,18 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ChartModel, XYLayerModel, XYLayerOptions } from '@kbn/lens-embeddable-utils';
+import { XYChartModel, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
 export const hostsView = {
   get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonVisualOptions: Partial<ChartModel<XYLayerModel>>['visualOptions'] = {
+    const commonVisualOptions: XYChartModel['visualOptions'] = {
       showDottedLine: true,
       missingValues: 'Linear',
     };
 
-    const options: XYLayerOptions = {
+    const layerOptions: XYLayerOptions = {
       breakdown: {
         type: 'top_values',
         field: 'host.name',
@@ -55,18 +55,14 @@ export const hostsView = {
         'tx',
       ],
       dataView: metricsDataView,
-      extra: {
-        options,
-      },
+      layerOptions,
       visualOptions: commonVisualOptions,
     });
 
     const { cpuUsage, normalizedLoad1m } = createBasicCharts({
       visualizationType: 'lnsXY',
       formulaIds: ['cpuUsage', 'normalizedLoad1m'],
-      extra: {
-        options,
-      },
+      layerOptions,
       visualOptions: {
         ...commonVisualOptions,
         yLeftExtent: {

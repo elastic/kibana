@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-export { assetDetails } from './asset_details';
-export { assetDetailsFlyout } from './asset_details_flyout';
-export { hostsView } from './hosts_view';
-export { kpi } from './kpi';
-export { assetDetailsKubernetesNode } from './asset_details_kubernetes_node';
+import { assetDetails } from './asset_details';
+import { assetDetailsFlyout } from './asset_details_flyout';
+import { hostsView } from './hosts_view';
+import { kpi } from './kpi';
+import { assetDetailsKubernetesNode } from './asset_details_kubernetes_node';
+
+export const dashboards = {
+  assetDetails,
+  assetDetailsFlyout,
+  hostsView,
+  kpi,
+  assetDetailsKubernetesNode,
+};
+
+export type HostDashboards = typeof dashboards;

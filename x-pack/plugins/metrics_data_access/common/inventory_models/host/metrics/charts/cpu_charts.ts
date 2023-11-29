@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { StaticValueConfig, ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
+import type { StaticValueConfig, XYChartModel } from '@kbn/lens-embeddable-utils';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
@@ -22,7 +22,7 @@ export const REFERENCE_LINE: StaticValueConfig = {
 };
 
 export const cpuUsageBreakdown = {
-  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): XYChartModel => ({
     id: 'cpuUsageBreakdown',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
@@ -50,7 +50,7 @@ export const cpuUsageBreakdown = {
 };
 
 export const normalizedLoad1m = {
-  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): XYChartModel => ({
     id: 'normalizedLoad1m',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.normalizedLoad1m', {
       defaultMessage: 'Normalized Load',
@@ -65,7 +65,7 @@ export const normalizedLoad1m = {
 };
 
 export const loadBreakdown = {
-  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): XYChartModel => ({
     id: 'loadBreakdown',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
       defaultMessage: 'Load',

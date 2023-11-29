@@ -5,77 +5,60 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
 import {
   type ChartModel,
-  type XYLayerModel,
-  type MetricsLayerModel,
+  type XYChartModel,
+  type MetricChartModel,
   type XYLayerOptions,
   type MetricLayerOptions,
   type ChartTypes,
-  type XYChartModel,
+  type XYVisualOptions,
   XY_ID,
-  LayerModel,
 } from '@kbn/lens-embeddable-utils';
-
+import type { HostFormulaNames } from '../formulas';
 import { formulas } from '../formulas';
 
-type ChartByFormula<TLayer extends LayerModel> = Record<keyof typeof formulas, ChartModel<TLayer>>;
+type ChartByFormula<TType extends ChartTypes> = Record<
+  HostFormulaNames,
+  TType extends typeof XY_ID ? XYChartModel : MetricChartModel
+>;
 
-interface CreateBasicChartBase<TType extends ChartTypes> {
-  formulaIds: Array<keyof typeof formulas>;
-  dataView?: DataView;
+type BaseArgs<TType extends ChartTypes> = Pick<ChartModel, 'dataView'> & {
+  formulaIds: HostFormulaNames[];
   visualizationType: TType;
-  extra?: {
-    options?: TType extends typeof XY_ID ? XYLayerOptions : MetricLayerOptions;
-  };
-}
+  layerOptions?: TType extends typeof XY_ID ? XYLayerOptions : MetricLayerOptions;
+  visualOptions?: TType extends typeof XY_ID ? XYVisualOptions : never;
+};
 
-type CreateBasicXyChart = CreateBasicChartBase<typeof XY_ID> & Pick<XYChartModel, 'visualOptions'>;
-
-type CreateBasicChartArgs<TType extends ChartTypes> = TType extends typeof XY_ID
-  ? CreateBasicXyChart
-  : CreateBasicChartBase<TType>;
-
-export const createBasicCharts = <
-  TType extends ChartTypes,
-  TReturn extends TType extends typeof XY_ID ? XYLayerModel : MetricsLayerModel
->({
+export const createBasicCharts = <TType extends ChartTypes>({
   formulaIds,
   visualizationType,
-  extra,
   dataView,
+  layerOptions,
   ...rest
-}: CreateBasicChartArgs<TType>): ChartByFormula<TReturn> =>
-  formulaIds.reduce((acc, curr) => {
+}: BaseArgs<TType>): ChartByFormula<TType> => {
+  return formulaIds.reduce((acc, curr) => {
+    const layers = {
+      data: visualizationType === XY_ID ? [formulas[curr]] : formulas[curr],
+      layerType: visualizationType === XY_ID ? 'data' : 'metricTrendline',
+      options: layerOptions,
+    };
+
+    const chartModel = {
+      id: curr,
+      title: formulas[curr].label,
+      dataView,
+      visualizationType,
+      layers: visualizationType === XY_ID ? [layers] : layers,
+      ...rest,
+    } as TType extends typeof XY_ID ? XYChartModel : MetricChartModel;
+
     return {
       ...acc,
-      [curr]: {
-        id: curr,
-        title: formulas[curr].label,
-        dataView,
-        visualizationType,
-        ...(visualizationType === XY_ID
-          ? {
-              layers: [
-                {
-                  data: [formulas[curr]],
-                  layerType: 'data',
-                  options: extra?.options,
-                },
-              ],
-              ...rest,
-            }
-          : {
-              layers: {
-                data: formulas[curr],
-                layerType: 'metricTrendline',
-                options: extra?.options,
-              },
-            }),
-      } as ChartModel<TReturn>,
+      [curr]: chartModel,
     };
-  }, {} as ChartByFormula<TReturn>);
+  }, {} as ChartByFormula<TType>);
+};
 
 // custom charts
 export { cpuUsageBreakdown, normalizedLoad1m, loadBreakdown } from './cpu_charts';

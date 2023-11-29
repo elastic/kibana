@@ -13,6 +13,7 @@ import {
   type EuiBasicTable,
 } from '@elastic/eui';
 import createContainer from 'constate';
+import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import { CloudProvider } from '@kbn/custom-icons';
@@ -128,6 +129,8 @@ export const useHostsTable = () => {
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
 
+  const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
+
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
     services: {
@@ -242,7 +245,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={METRICS_TOOLTIP.cpuUsage}
-            formula={inventoryModel.metrics.formulas?.cpuUsage.value}
+            formula={formulas?.cpuUsage.value}
           />
         ),
         field: 'cpu',
@@ -256,7 +259,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={METRICS_TOOLTIP.normalizedLoad1m}
-            formula={inventoryModel.metrics.formulas?.normalizedLoad1m.value}
+            formula={formulas?.normalizedLoad1m.value}
           />
         ),
         field: 'normalizedLoad1m',
@@ -270,7 +273,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={METRICS_TOOLTIP.memoryUsage}
-            formula={inventoryModel.metrics.formulas?.memoryUsage.value}
+            formula={formulas?.memoryUsage.value}
           />
         ),
         field: 'memory',
@@ -284,7 +287,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={METRICS_TOOLTIP.memoryFree}
-            formula={inventoryModel.metrics.formulas?.memoryFree.value}
+            formula={formulas?.memoryFree.value}
           />
         ),
         field: 'memoryFree',
@@ -298,7 +301,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={METRICS_TOOLTIP.diskUsage}
-            formula={inventoryModel.metrics.formulas?.diskUsage.value}
+            formula={formulas?.diskUsage.value}
           />
         ),
         field: 'diskSpaceUsage',
@@ -312,7 +315,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={METRICS_TOOLTIP.rx}
-            formula={inventoryModel.metrics.formulas?.rx.value}
+            formula={formulas?.rx.value}
           />
         ),
         field: 'rx',
@@ -327,7 +330,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={METRICS_TOOLTIP.tx}
-            formula={inventoryModel.metrics.formulas?.tx.value}
+            formula={formulas?.tx.value}
           />
         ),
         field: 'tx',
@@ -340,13 +343,13 @@ export const useHostsTable = () => {
     ],
     [
       detailsItemId,
-      inventoryModel.metrics.formulas?.cpuUsage.value,
-      inventoryModel.metrics.formulas?.diskUsage.value,
-      inventoryModel.metrics.formulas?.memoryFree.value,
-      inventoryModel.metrics.formulas?.memoryUsage.value,
-      inventoryModel.metrics.formulas?.normalizedLoad1m.value,
-      inventoryModel.metrics.formulas?.rx.value,
-      inventoryModel.metrics.formulas?.tx.value,
+      formulas?.cpuUsage.value,
+      formulas?.diskUsage.value,
+      formulas?.memoryFree.value,
+      formulas?.memoryUsage.value,
+      formulas?.normalizedLoad1m.value,
+      formulas?.rx.value,
+      formulas?.tx.value,
       reportHostEntryClick,
       setProperties,
     ]

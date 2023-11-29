@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
+import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import {
   createBasicCharts,
@@ -27,12 +27,12 @@ export const assetDetails = {
     metricsDataView?: DataView;
     logsDataView?: DataView;
   }) => {
-    const commonVisualOptions: Partial<ChartModel<XYLayerModel>>['visualOptions'] = {
+    const commonVisualOptions: XYVisualOptions = {
       showDottedLine: true,
       missingValues: 'Linear',
     };
 
-    const legend: Partial<ChartModel<XYLayerModel>>['visualOptions'] = {
+    const legend: XYVisualOptions = {
       legend: {
         isVisible: true,
         position: 'bottom',

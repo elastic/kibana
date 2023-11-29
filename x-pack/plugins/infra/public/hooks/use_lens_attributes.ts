@@ -17,21 +17,18 @@ import {
   type LensVisualizationState,
   type Chart,
   type LensAttributes,
-  type XYLayerModel,
   type ChartModel,
-  type LayerModel,
+  type XYLayerConfig,
   LensAttributesBuilder,
   XYChart,
   MetricChart,
   MetricLayer,
   XYDataLayer,
   XYReferenceLinesLayer,
-  XY_ID,
-  METRIC_ID,
 } from '@kbn/lens-embeddable-utils';
 import { InfraClientSetupDeps } from '../types';
 
-export type UseLensAttributesParams = Omit<ChartModel<LayerModel>, 'id'>;
+export type UseLensAttributesParams = Omit<ChartModel, 'id'>;
 
 export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesParams) => {
   const {
@@ -155,12 +152,12 @@ const chartFactory = ({
   formulaAPI: FormulaPublicApi;
 } & UseLensAttributesParams): Chart<LensVisualizationState> => {
   switch (params.visualizationType) {
-    case XY_ID:
+    case 'lnsXY':
       if (!Array.isArray(params.layers)) {
         throw new Error(`Invalid layers type. Expected an array of layers.`);
       }
 
-      const xyLayerFactory = (layer: XYLayerModel[number]) => {
+      const xyLayerFactory = (layer: XYLayerConfig) => {
         switch (layer.layerType) {
           case 'data': {
             return new XYDataLayer(layer);
@@ -183,7 +180,7 @@ const chartFactory = ({
         ...rest,
       });
 
-    case METRIC_ID:
+    case 'lnsMetric':
       if (Array.isArray(params.layers)) {
         throw new Error(`Invalid layer type. Expected a single layer object.`);
       }

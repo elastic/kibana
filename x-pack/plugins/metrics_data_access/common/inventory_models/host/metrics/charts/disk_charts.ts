@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
+import type { XYChartModel } from '@kbn/lens-embeddable-utils';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
 const TOP_VALUES_SIZE = 5;
 
 export const diskSpaceUsageAvailable = {
-  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): XYChartModel => ({
     id: 'diskSpaceUsageAvailable',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsage', {
       defaultMessage: 'Disk Usage',
@@ -52,7 +52,7 @@ export const diskSpaceUsageAvailable = {
 };
 
 export const diskUsageByMountPoint = {
-  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): XYChartModel => ({
     id: 'DiskUsageByMountPoint',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsageByMountingPoint', {
       defaultMessage: 'Disk Usage by Mount Point',
@@ -100,7 +100,7 @@ export const diskUsageByMountPoint = {
   }),
 };
 export const diskThroughputReadWrite = {
-  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): XYChartModel => ({
     id: 'diskThroughputReadWrite',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskIOPS', {
       defaultMessage: 'Disk IOPS',
@@ -146,7 +146,7 @@ export const diskThroughputReadWrite = {
 };
 
 export const diskIOReadWrite = {
-  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): XYChartModel => ({
     id: 'diskIOReadWrite',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskThroughput', {
       defaultMessage: 'Disk Throughput',

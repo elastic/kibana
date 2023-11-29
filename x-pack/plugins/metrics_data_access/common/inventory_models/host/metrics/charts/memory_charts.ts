@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
+import type { XYChartModel } from '@kbn/lens-embeddable-utils';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
 export const memoryUsageBreakdown = {
-  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): XYChartModel => ({
     id: 'memoryUsageBreakdown',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.memoryUsage', {
       defaultMessage: 'Memory Usage',

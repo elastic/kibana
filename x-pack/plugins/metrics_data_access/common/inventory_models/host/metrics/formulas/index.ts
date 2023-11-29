@@ -64,3 +64,6 @@ export const formulas = {
   rx,
   tx,
 };
+
+export type HostFormulas = typeof formulas;
+export type HostFormulaNames = keyof HostFormulas;

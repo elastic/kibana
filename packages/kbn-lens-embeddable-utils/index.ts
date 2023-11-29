@@ -15,13 +15,11 @@ export type {
   XYDataLayerConfig,
   XYReferenceLinesLayerConfig,
   XYVisualOptions,
-  XYLayerModel,
-  MetricsLayerModel,
-  LayerModel,
+  XYLayerConfig,
+  ChartTypes,
+  ChartModel,
   XYChartModel,
   MetricChartModel,
-  ChartModel,
-  ChartTypes,
 } from './attribute_builder/visualization_types';
 
 export {

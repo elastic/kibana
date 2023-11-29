@@ -6,7 +6,7 @@
  */
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { MetricLayerOptions } from '@kbn/lens-embeddable-utils';
+import type { MetricLayerOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
@@ -25,12 +25,10 @@ export const kpi = {
     const { cpuUsage, diskUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
       visualizationType: 'lnsMetric',
       formulaIds: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
-      extra: {
-        options: {
-          showTrendLine: true,
-          subtitle: AVERAGE,
-          ...options,
-        },
+      layerOptions: {
+        showTrendLine: true,
+        subtitle: AVERAGE,
+        ...options,
       },
       dataView: metricsDataView,
     });

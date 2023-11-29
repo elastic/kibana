@@ -10,6 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useAsync from 'react-use/lib/useAsync';
 import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 import { HostMetricsDocsLink } from '../../../../../components/lens';
 import { Kpi } from './kpi';
@@ -25,6 +26,10 @@ export const KPIGrid = () => {
   const { dataView } = useMetricsDataViewContext();
   const { data: hostCountData } = useHostCountContext();
 
+  const { value: dashboards } = useAsync(() => {
+    return model.metrics.getDashboards();
+  });
+
   const subtitle =
     searchCriteria.limit < (hostCountData?.count.value ?? 0)
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
@@ -37,14 +42,14 @@ export const KPIGrid = () => {
 
   const charts = useMemo(
     () =>
-      model.metrics.dashboards?.kpi.get({
+      dashboards?.kpi.get({
         metricsDataView: dataView,
         options: {
           backgroundColor: euiTheme.colors.lightestShade,
           ...(subtitle ? { subtitle } : {}),
         },
       }).charts ?? [],
-    [dataView, euiTheme.colors.lightestShade, model.metrics.dashboards?.kpi, subtitle]
+    [dashboards?.kpi, dataView, euiTheme.colors.lightestShade, subtitle]
   );
 
   return (

@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   METRIC_ID,
   XY_ID,
@@ -14,44 +13,29 @@ import {
   XY_DATA_ID,
   XY_REFERENCE_LINE_ID,
 } from './constants';
-import {
-  MetricLayerConfig,
-  MetricLayerOptions,
-  XYDataLayerConfig,
-  XYLayerOptions,
-  XYReferenceLinesLayerConfig,
-} from './layers';
 import type { XYVisualOptions } from './xy_chart';
+import type { MetricLayerConfig, XYDataLayerConfig, XYReferenceLinesLayerConfig } from './layers';
 
 export { XYChart, type XYVisualOptions } from './xy_chart';
 export { MetricChart } from './metric_chart';
-
 export * from './layers';
+export type XYLayerConfig = XYDataLayerConfig | XYReferenceLinesLayerConfig;
 
-export type LayerConfigOptions = XYLayerOptions | MetricLayerOptions;
-export type XYLayerModel = Array<XYDataLayerConfig | XYReferenceLinesLayerConfig>;
-export type MetricsLayerModel = MetricLayerConfig;
-export type LayerModel = XYLayerModel | MetricsLayerModel;
-
-interface ChartModelBase<TLayer extends LayerModel = LayerModel> {
+interface ChartModelBase {
   id: string;
-  title: string;
-  layers: TLayer;
-  visualizationType: ChartTypes;
+  title?: string;
   dataView?: DataView;
 }
-
-export interface XYChartModel extends ChartModelBase<XYLayerModel> {
+export interface XYChartModel extends ChartModelBase {
   visualOptions?: XYVisualOptions;
   visualizationType: typeof XY_ID;
+  layers: XYLayerConfig[];
 }
-export interface MetricChartModel extends ChartModelBase<MetricsLayerModel> {
+export interface MetricChartModel extends ChartModelBase {
   visualizationType: typeof METRIC_ID;
+  layers: MetricLayerConfig;
 }
 
-export type ChartModel<TLayer extends LayerModel = LayerModel> = TLayer extends XYLayerModel
-  ? XYChartModel
-  : MetricChartModel;
-
+export type ChartModel = XYChartModel | MetricChartModel;
 export type ChartTypes = typeof XY_ID | typeof METRIC_ID;
 export { METRIC_ID, XY_ID, METRIC_TREND_LINE_ID, XY_DATA_ID, XY_REFERENCE_LINE_ID };

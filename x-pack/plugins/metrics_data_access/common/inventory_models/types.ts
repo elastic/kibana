@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import type { ChartModel, FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 import * as rt from 'io-ts';
 
 export const ItemTypeRT = rt.keyof({
@@ -377,19 +377,25 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
-export interface InventoryMetrics<TFormula = Record<string, FormulaValueConfig>, TDashboard = {}> {
+export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
   snapshot: { [name: string]: MetricsUIAggregation | undefined };
-  formulas?: TFormula;
-  dashboards?: TDashboard;
   defaultSnapshot: SnapshotMetricType;
   /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;
 }
 
+export interface InventoryMetricsWithDashboards<
+  TFormula extends Record<string, FormulaValueConfig>,
+  TDashboard extends Record<string, DashboardFn>
+> extends InventoryMetrics {
+  getFormulas: () => Promise<TFormula>;
+  getDashboards: () => Promise<TDashboard>;
+}
+
 type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
 
-export interface InventoryModel<TMetrics extends InventoryMetrics = InventoryMetrics> {
+export interface InventoryModel<TMetrics = InventoryMetrics> {
   id: string;
   displayName: string;
   singularDisplayName: string;
@@ -411,4 +417,13 @@ export interface InventoryModel<TMetrics extends InventoryMetrics = InventoryMet
   requiredMetrics: InventoryMetric[];
   tooltipMetrics: SnapshotMetricType[];
   nodeFilter?: object[];
+}
+
+export interface DashboardFn {
+  get: (...args: any[]) => DashboardModel;
+}
+
+export interface DashboardModel {
+  charts: ChartModel[];
+  dependsOn?: string[];
 }

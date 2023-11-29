@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { ChartModel, LayerModel } from '@kbn/lens-embeddable-utils';
+import { DashboardModel } from './types';
 
-export const createDashboardModel = <TLayer extends LayerModel>({
+export const createDashboardModel = ({
   charts,
   dependsOn = [],
-}: {
-  charts: Array<ChartModel<TLayer>>;
-  dependsOn?: string[];
-}) => {
+}: DashboardModel): DashboardModel => {
   return {
     dependsOn,
     charts,

@@ -8,10 +8,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
 import { TooltipContent } from '../../../../../components/lens';
 
@@ -20,6 +20,8 @@ export const HostCountKpi = ({ height }: { height: number }) => {
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const euiTheme = useTheme();
+
+  const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
 
   const hostsCountChart: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
     id: 'hostsViewKPI-hostsCount',
@@ -48,7 +50,7 @@ export const HostCountKpi = ({ height }: { height: number }) => {
       subtitle={getSubtitle()}
       toolTip={
         <TooltipContent
-          formula={inventoryModel.metrics.formulas?.hostCount.value}
+          formula={formulas?.hostCount.value}
           description={METRICS_TOOLTIP.hostCount}
         />
       }

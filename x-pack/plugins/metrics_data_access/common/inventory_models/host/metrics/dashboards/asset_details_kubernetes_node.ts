@@ -6,13 +6,13 @@
  */
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
+import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { formulas } from '../../../kubernetes/node/metrics';
 
 export const assetDetailsKubernetesNode = {
   get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonVisualOptions: Partial<ChartModel<XYLayerModel>>['visualOptions'] = {
+    const commonVisualOptions: XYVisualOptions = {
       showDottedLine: true,
       missingValues: 'Linear',
       legend: {
