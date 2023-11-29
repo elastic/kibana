@@ -111,7 +111,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 `response.include_body`:: (Optional, boolean, default: true): Controls the indexing of the HTTP response body contents to the http.response.body.contents field.
   * `include_body` ("on_error" | "never" | "always", default: on_error) Set response.include_body to one of the options listed below.
          ** `on_error`: Include the body if an error is encountered during the check. This is the default.
-         ** never: Never include the body.
+         ** `never`: Never include the body.
          ** always: Always include the body with checks.
   * `include_body_max_bytes` (Optional, number, default: 1024) Set response.include_body_max_bytes to control the maximum size of the stored body contents.
 
