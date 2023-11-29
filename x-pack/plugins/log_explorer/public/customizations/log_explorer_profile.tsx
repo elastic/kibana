@@ -123,6 +123,7 @@ export const createLogExplorerProfileCustomizations =
      */
     customizations.set({
       id: 'flyout',
+      size: '60%',
       title: i18n.translate('xpack.logExplorer.flyoutDetail.title', {
         defaultMessage: 'Log details',
       }),

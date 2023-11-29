@@ -20,6 +20,7 @@ export function getSuggestions({
   table,
   state,
   keptLayerIds,
+  datasourceId,
 }: SuggestionRequest<LegacyMetricState>): Array<VisualizationSuggestion<LegacyMetricState>> {
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
@@ -36,6 +37,11 @@ export function getSuggestions({
 
   // don't suggest current table if visualization is active
   if (state && table.changeType === 'unchanged') {
+    return [];
+  }
+
+  // do not return the legacy metric vis for the textbased mode (i.e. ES|QL)
+  if (datasourceId === 'textBased') {
     return [];
   }
 

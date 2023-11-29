@@ -22,6 +22,7 @@ export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResp
         : { content: response as string }),
       timestamp: dateTimeString,
       isError,
+      traceData: rawResponse.traceData,
     };
   } else {
     return {
