@@ -216,6 +216,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
     revision: esRule.revision,
     running: esRule.running,
+    typeVersion: esRule.typeVersion,
   };
 
   // Bad casts, but will fix once we fix all rule types
