@@ -48,7 +48,7 @@ To list available locations you can:
 
 `private_locations` (`Array<string>`)::
 
-The https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html[Private Locations] to which the monitors will be deployed. These Private Locations refer to locations hosted and managed by you, whereas
+The {private-locations-url} [Private Locations] to which the monitors will be deployed. These Private Locations refer to locations hosted and managed by you, whereas
 `locations` are hosted by Elastic. You can specify a Private Location using the location's name.
 +
 To list available Private Locations you can:
