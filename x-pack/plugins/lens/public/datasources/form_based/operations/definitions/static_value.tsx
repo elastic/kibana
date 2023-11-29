@@ -163,7 +163,7 @@ export const staticValueOperation: OperationDefinition<
     const onChange = useCallback(
       (newValue) => {
         // even if debounced it's triggering for empty string with the previous valid value
-        if (currentColumn.params.value === newValue) {
+        if (currentColumn.params.value === newValue || !isValidNumber(newValue)) {
           return;
         }
         // Because of upstream specific UX flows, we need fresh layer state here
@@ -209,13 +209,26 @@ export const staticValueOperation: OperationDefinition<
     const onChangeHandler = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.currentTarget.value;
-        handleInputChange(isValidNumber(value) ? value : undefined);
+        handleInputChange(value);
       },
       [handleInputChange]
     );
 
+    const inputValueIsValid = isValidNumber(inputValue);
+
     return (
-      <EuiFormRow label={paramEditorCustomProps?.labels?.[0] || defaultLabel} fullWidth>
+      <EuiFormRow
+        label={paramEditorCustomProps?.labels?.[0] || defaultLabel}
+        fullWidth
+        isInvalid={!isValidNumber(inputValue)}
+        error={
+          !inputValueIsValid &&
+          i18n.translate('xpack.lens.indexPattern.staticValueError', {
+            defaultMessage: 'The static value of {value} is not a valid number',
+            values: { value: inputValue ?? "''" },
+          })
+        }
+      >
         <EuiFieldNumber
           fullWidth
           data-test-subj="lns-indexPattern-static_value-input"
