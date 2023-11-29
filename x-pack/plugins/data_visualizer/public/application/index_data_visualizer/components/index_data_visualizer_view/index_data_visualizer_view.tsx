@@ -34,6 +34,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
@@ -59,7 +60,6 @@ import {
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
-import { OMIT_FIELDS } from '../../../../../common/constants';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
