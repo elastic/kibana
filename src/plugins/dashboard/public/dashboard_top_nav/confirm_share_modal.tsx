@@ -15,13 +15,16 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
+  EuiPagination,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+
+const ROWS_PER_PAGE = 5;
 
 export const ConfirmShareModal = ({
   canSave,
@@ -44,14 +47,13 @@ export const ConfirmShareModal = ({
   onClose: () => void;
   onSave: () => void;
 }) => {
+  let message;
+  const [activePage, setActivePage] = useState(0);
   const SpacesContextWrapper = spacesApi.ui.components.getSpacesContextProvider;
-
   const LazySpaceList = useMemo(
     () => spacesApi.ui.components.getSpaceList,
     [spacesApi.ui.components.getSpaceList]
   );
-
-  let message;
 
   if (canSave) {
     message = i18n.translate('xpack.spaces.confirmShareModal.shareableChangesDescription', {
@@ -67,6 +69,15 @@ export const ConfirmShareModal = ({
       values: { spacesCount: namespaces.length, noun },
     });
   }
+
+  const visibleSpaces = namespaces.slice(
+    activePage * ROWS_PER_PAGE,
+    Math.min(namespaces.length + 1, (activePage + 1) * ROWS_PER_PAGE)
+  );
+
+  const pageCount = Math.ceil(namespaces.length / ROWS_PER_PAGE);
+
+  console.log({ visibleSpaces });
 
   return (
     <SpacesContextWrapper>
@@ -87,10 +98,15 @@ export const ConfirmShareModal = ({
         </EuiModalHeader>
         <EuiModalBody>
           <LazySpaceList
-            namespaces={namespaces}
+            namespaces={visibleSpaces}
             behaviorContext="outside-space"
             direction="vertical"
-            displayLimit={4}
+            displayLimit={ROWS_PER_PAGE}
+          />
+          <EuiPagination
+            pageCount={pageCount}
+            activePage={activePage}
+            onPageClick={setActivePage}
           />
         </EuiModalBody>
         <EuiModalFooter>

@@ -311,6 +311,12 @@ export function InternalDashboardTopNav({
         saveOptions: {},
       });
 
+      const shareableSpaces = await spacesManager.getSpaces({
+        purpose: 'shareSavedObjectsIntoSpace',
+      });
+
+      console.log({ spacesPermissions });
+
       const shareableReferences = (
         await spacesManager.getShareableReferences([
           {
