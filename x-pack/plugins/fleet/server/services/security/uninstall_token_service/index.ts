@@ -401,23 +401,31 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     await this.soClient.bulkUpdate(bulkUpdateObjects);
   }
 
-  private async getPolicyIdsBatch(
+  /**
+   * Returns the policy ids of all non-managed policies
+   */
+  private async getNonManagedPolicyIdsBatch(
     batchSize: number = SO_SEARCH_LIMIT,
     page: number = 1
   ): Promise<string[]> {
     return (
       await agentPolicyService.list(this.soClient, { page, perPage: batchSize, fields: ['id'] })
-    ).items.map((policy) => policy.id);
+    ).items.reduce((acc, policy) => {
+      if (!policy.is_managed) {
+        acc.push(policy.id);
+      }
+      return acc;
+    }, [] as string[]);
   }
 
   private async getAllPolicyIds(): Promise<string[]> {
     const batchSize = SO_SEARCH_LIMIT;
-    let policyIdsBatch = await this.getPolicyIdsBatch(batchSize);
+    let policyIdsBatch = await this.getNonManagedPolicyIdsBatch(batchSize);
     let policyIds = policyIdsBatch;
     let page = 2;
 
     while (policyIdsBatch.length === batchSize) {
-      policyIdsBatch = await this.getPolicyIdsBatch(batchSize, page);
+      policyIdsBatch = await this.getNonManagedPolicyIdsBatch(batchSize, page);
       policyIds = [...policyIds, ...policyIdsBatch];
       page++;
     }
