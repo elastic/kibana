@@ -82,7 +82,6 @@ export function getEventAnnotationService(
     return {
       id: savedObject.id,
       references: savedObject.references,
-      namespaces: savedObject.namespaces ?? [],
       type: savedObject.type,
       updatedAt: savedObject.updatedAt ? savedObject.updatedAt : '',
       attributes: {
