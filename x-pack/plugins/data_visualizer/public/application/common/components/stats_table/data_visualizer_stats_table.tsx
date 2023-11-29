@@ -252,6 +252,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             );
           }
 
+          // @TODO: remove
+          console.log(`--@@Documents (% totalCount`, totalCount);
+
           return (
             <DocumentStat config={item} showIcon={dimensions.showIcon} totalCount={totalCount} />
           );

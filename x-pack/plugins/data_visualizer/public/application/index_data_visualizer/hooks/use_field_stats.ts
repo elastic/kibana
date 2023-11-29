@@ -73,8 +73,7 @@ export function useFieldStatsSearchStrategy(
   } = useDataVisualizerKibana();
 
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
-  // @TODO: remove
-  console.log(`--@@useFieldStatsSearchStrategy fieldStats`, fieldStats);
+
   const [fetchState, setFetchState] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()

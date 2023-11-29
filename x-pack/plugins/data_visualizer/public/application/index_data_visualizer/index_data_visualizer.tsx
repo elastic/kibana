@@ -86,8 +86,6 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
   IndexDataVisualizerComponent,
   getAdditionalLinks,
 }) => {
-  // @TODO: remove
-  console.log(`--@@DataVisualizerStateContextProvider`, DataVisualizerStateContextProvider);
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },

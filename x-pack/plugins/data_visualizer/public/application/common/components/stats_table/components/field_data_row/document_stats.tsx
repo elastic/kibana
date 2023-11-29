@@ -29,6 +29,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   if (stats === undefined) return null;
 
   const { count, sampleCount } = stats;
+
   const total = sampleCount ?? totalCount;
 
   // If field exists is docs but we don't have count stats then don't show

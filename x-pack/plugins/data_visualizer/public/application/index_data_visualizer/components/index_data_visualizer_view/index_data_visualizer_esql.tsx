@@ -53,6 +53,7 @@ import type {
   FieldStats,
   FieldStatsCommonRequestParams,
   OverallStatsSearchStrategyParams,
+  StringFieldStats,
 } from '../../../../../common/types/field_stats';
 import { getInitialProgress, getReducer } from '../../progress_utils';
 // import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
@@ -113,6 +114,7 @@ import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/
 
 const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
   KBN_FIELD_TYPES.GEO_SHAPE,
+  KBN_FIELD_TYPES.GEO_POINT,
   KBN_FIELD_TYPES.HISTOGRAM,
 ]);
 
@@ -212,6 +214,7 @@ export const useESQLFieldStatsData = ({
           error: undefined,
         });
         try {
+          // GETTING STATS FOR NUMERIC FIELDS
           const esqlBaseQuery = searchQuery.esql;
 
           const numericFields = columns
@@ -257,7 +260,6 @@ export const useESQLFieldStatsData = ({
             },
             { strategy: 'esql' }
           );
-          console.log(`--@@DISTRIBUTION QUERY`, esqlBaseQuery + fieldStatsQuery);
 
           if (!unmounted && fieldStatsResp) {
             const values = fieldStatsResp.rawResponse.values[0];
@@ -285,6 +287,127 @@ export const useESQLFieldStatsData = ({
             });
 
             setFieldStats(processedFieldStats);
+
+            // GETTING STATS FOR KEYWORD FIELDS
+            const keywordFields = columns
+              .filter((f) => f.secondaryType === 'keyword')
+              .map((field) => {
+                return {
+                  field,
+                  query: `| STATS ${field.name}_terms = count(${field.name}) by ${field.name} | LIMIT 10`,
+                };
+              });
+
+            const keywordTopTermsResp = await Promise.all(
+              keywordFields.map(({ query }) =>
+                runRequest(
+                  {
+                    params: {
+                      query: esqlBaseQuery + query,
+                      time_zone: 'UTC',
+                      locale: 'en',
+                      filter: {
+                        bool: {
+                          must: [],
+                          filter: [],
+                          should: [],
+                          must_not: [],
+                        },
+                      },
+                    },
+                  },
+                  { strategy: 'esql' }
+                )
+              )
+            );
+            if (keywordTopTermsResp) {
+              keywordFields.forEach(({ field }, idx) => {
+                const results = keywordTopTermsResp[idx].rawResponse.values;
+                const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
+
+                const terms = results.map((row) => ({
+                  key: row[1],
+                  doc_count: row[0],
+                  percent: row[0] / topValuesSampleSize,
+                }));
+
+                processedFieldStats.set(field.name, {
+                  fieldName: field.name,
+                  topValues: terms,
+                  topValuesSampleSize,
+                  // @TODO: replace topValuesSamplerShardSize
+                  topValuesSamplerShardSize: topValuesSampleSize,
+                  isTopValuesSampled: false,
+                } as StringFieldStats);
+              });
+            }
+
+            // GETTING STATS FOR BOOLEAN FIELDS
+            const booleanFields = columns
+              .filter((f) => f.secondaryType === 'boolean')
+              .map((field) => {
+                return {
+                  field,
+                  query: `| STATS ${field.name}_terms = count(${field.name}) by ${field.name} | LIMIT 3`,
+                };
+              });
+
+            const booleanTopTermsResp = await Promise.all(
+              booleanFields.map(({ query }) =>
+                runRequest(
+                  {
+                    params: {
+                      query: esqlBaseQuery + query,
+                      time_zone: 'UTC',
+                      locale: 'en',
+                      filter: {
+                        bool: {
+                          must: [],
+                          filter: [],
+                          should: [],
+                          must_not: [],
+                        },
+                      },
+                    },
+                  },
+                  { strategy: 'esql' }
+                )
+              )
+            );
+            if (booleanTopTermsResp) {
+              booleanFields.forEach(({ field }, idx) => {
+                const results = booleanTopTermsResp[idx].rawResponse.values;
+                const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
+
+                let falseCount = 0;
+                let trueCount = 0;
+                const terms = results.map((row) => {
+                  if (row[1] === false) {
+                    falseCount = row[0];
+                  }
+                  if (row[1] === true) {
+                    trueCount = row[0];
+                  }
+                  return {
+                    key_as_string: row[1].toString(),
+                    doc_count: row[0],
+                    percent: row[0] / topValuesSampleSize,
+                  };
+                });
+
+                processedFieldStats.set(field.name, {
+                  fieldName: field.name,
+                  topValues: terms,
+                  topValuesSampleSize,
+                  // @TODO: replace topValuesSamplerShardSize
+                  topValuesSamplerShardSize: topValuesSampleSize,
+                  isTopValuesSampled: false,
+                  trueCount,
+                  falseCount,
+                } as StringFieldStats);
+              });
+            }
+
             setFetchState({
               loaded: 100,
               isRunning: false,
@@ -399,6 +522,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
         ...c,
         secondaryType: getSupportedFieldType(c.type),
       })) as Column[];
+
       const timeFields = columns.filter((d) => d.type === 'date');
       // If a date field '@timestamp' exists, set that as default time field, else set the first date field as default
       const timeFieldName =
@@ -427,9 +551,12 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
         [];
       const nonAggregatableFields: Array<{ name: string; type: string }> = [];
 
-      const fields = columns.map((field) => {
-        return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
-      });
+      // @TODO: swap type and secondary type
+      const fields = columns
+        .filter((c) => c.type !== 'unsupported')
+        .map((field) => {
+          return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
+        });
 
       // @TODO: Update fields to fetch to reflect pagination & visible field types/names only
       const fieldsToFetch = fields;
@@ -461,8 +588,9 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
       setTableData({ aggregatableFields, nonAggregatableFields });
 
       if (fields.length > 0) {
+        const aggregatableFieldsToQuery = fields.filter((f) => f.aggregatable);
         let countQuery = '| STATS ';
-        countQuery += fields
+        countQuery += aggregatableFieldsToQuery
           .map((field) => {
             return `${field.name}_count = count(${field.name}), ${field.name}_cardinality = count_distinct(${field.name})`;
           })
@@ -488,7 +616,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
           nonAggregatableNotExistsFields: [] as NonAggregatableField[],
         };
 
-        fields.forEach((field, idx) => {
+        aggregatableFieldsToQuery.forEach((field, idx) => {
           const count = esqlResults.rawResponse.values[0][idx * 2];
           const cardinality = esqlResults.rawResponse.values[0][idx * 2 + 1];
 
@@ -499,7 +627,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
                 fieldName: field.name,
                 existsInDocs: true,
                 stats: {
-                  sampleCount: count,
+                  sampleCount: totalCount,
                   count,
                   cardinality,
                 },
@@ -525,8 +653,6 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
           }
         });
 
-        console.log(`--@@stats`, stats);
-
         setTableData({ overallStats: stats });
         setOverallStatsProgress({
           loaded: 100,
@@ -539,10 +665,6 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
     }
   }, [data.search, JSON.stringify({ fieldStatsRequest, lastRefresh })]);
 
-  useEffect(() => {
-    // @TODO: remove
-    console.log(`--@@fieldStatsRequest updated`);
-  }, [data.search, JSON.stringify({ fieldStatsRequest, lastRefresh })]);
   // auto-update
   useEffect(() => {
     startFetch();
@@ -661,8 +783,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
       const update = async () => {
         const dv = await getDataViewByIndexPattern(data.dataViews, indexPattern, currentDataView);
-        // @TODO: remove
-        console.log(`--@@dv`, dv);
         if (dv) {
           setCurrentDataView(dv);
         }
@@ -709,8 +829,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       }
 
       const aggInterval = buckets.getInterval();
-      // @TODO: remove
-      console.log(`--@@aggInterval`, aggInterval);
 
       return {
         earliest,
