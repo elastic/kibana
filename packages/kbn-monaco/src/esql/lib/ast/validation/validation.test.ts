@@ -219,18 +219,18 @@ describe('validation logic', () => {
     ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
       (command) =>
         testErrorsAndWarnings(command, [
-          `SyntaxError: expected {FROM, ROW, SHOW} but found "${command}"`,
+          `SyntaxError: expected {EXPLAIN, FROM, ROW, SHOW} but found "${command}"`,
         ])
     );
   });
 
   describe('from', () => {
-    testErrorsAndWarnings('f', ['SyntaxError: expected {FROM, ROW, SHOW} but found "f"']);
+    testErrorsAndWarnings('f', ['SyntaxError: expected {EXPLAIN, FROM, ROW, SHOW} but found "f"']);
     testErrorsAndWarnings(`from `, [
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {FROM_UNQUOTED_IDENTIFIER, FROM_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from index,`, [
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {FROM_UNQUOTED_IDENTIFIER, FROM_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from assignment = 1`, [
       'Unknown index [assignment]',
@@ -487,7 +487,10 @@ describe('validation logic', () => {
     testErrorsAndWarnings('show functions', []);
     testErrorsAndWarnings('show info', []);
     testErrorsAndWarnings('show functions blah', [
-      "SyntaxError: extraneous input 'blah' expecting <EOF>",
+      "SyntaxError: token recognition error at: 'b'",
+      "SyntaxError: token recognition error at: 'l'",
+      "SyntaxError: token recognition error at: 'a'",
+      "SyntaxError: token recognition error at: 'h'",
     ]);
   });
 
@@ -513,17 +516,22 @@ describe('validation logic', () => {
 
   describe('keep', () => {
     testErrorsAndWarnings('from index | keep ', [
-      `SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'`,
+      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
     ]);
     testErrorsAndWarnings('from index | keep stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | keep `stringField`, `numberField`, `dateField`', []);
-    testErrorsAndWarnings('from index | keep 4.5', ['Unknown column [4.5]']);
+    testErrorsAndWarnings('from index | keep 4.5', [
+      'Unknown column [4.5]',
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '.'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+    ]);
+    testErrorsAndWarnings('from index | keep `4.5`', ['Unknown column [4.5]']);
     testErrorsAndWarnings('from index | keep missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from index | keep `any#Char$ field`', []);
     testErrorsAndWarnings('from index | project ', [
-      `SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'`,
+      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
     ]);
     testErrorsAndWarnings('from index | project stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
@@ -541,16 +549,20 @@ describe('validation logic', () => {
 
   describe('drop', () => {
     testErrorsAndWarnings('from index | drop ', [
-      `SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'`,
+      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
     ]);
     testErrorsAndWarnings('from index | drop stringField, numberField, dateField', []);
-    testErrorsAndWarnings('from index | drop 4.5', ['Unknown column [4.5]']);
+    testErrorsAndWarnings('from index | drop 4.5', [
+      'Unknown column [4.5]',
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '.'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+    ]);
     testErrorsAndWarnings('from index | drop missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from index | drop `any#Char$ field`', []);
     testErrorsAndWarnings('from index | project ', [
-      `SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'`,
+      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
     ]);
     testErrorsAndWarnings('from index | project stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
@@ -582,7 +594,7 @@ describe('validation logic', () => {
 
   describe('mv_expand', () => {
     testErrorsAndWarnings('from a | mv_expand ', [
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | mv_expand stringField', [
       'Mv_expand only supports list type values, found [stringField] of type string',
@@ -602,21 +614,21 @@ describe('validation logic', () => {
 
   describe('rename', () => {
     testErrorsAndWarnings('from a | rename', [
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename stringField', [
-      'SyntaxError: expected {AS} but found "<EOF>"',
+      'SyntaxError: expected {DOT, AS} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | rename a', [
       'Unknown column [a]',
-      'SyntaxError: expected {AS} but found "<EOF>"',
+      'SyntaxError: expected {DOT, AS} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | rename stringField as', [
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename missingField as', [
       'Unknown column [missingField]',
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename stringField as b', []);
     testErrorsAndWarnings('from a | rename stringField AS b', []);
@@ -632,7 +644,7 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as ', [
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename s* as strings', [
       'Using wildcards (*) in rename is not allowed [s*]',
@@ -1246,23 +1258,23 @@ describe('validation logic', () => {
 
   describe('enrich', () => {
     testErrorsAndWarnings(`from a | enrich`, [
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from a | enrich policy `, []);
     testErrorsAndWarnings(`from a | enrich missing-policy `, ['Unknown policy [missing-policy]']);
     testErrorsAndWarnings(`from a | enrich policy on `, [
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from a | enrich policy on b `, ['Unknown column [b]']);
     testErrorsAndWarnings(`from a | enrich policy on numberField with `, [
-      'SyntaxError: expected {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} but found "<EOF>"',
+      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 `, [
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = `, [
       'Unknown column [var0]',
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = c `, [
       'Unknown column [var0]',
@@ -1274,8 +1286,8 @@ describe('validation logic', () => {
     // ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = , `, [
       'Unknown column [var0]',
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at ','",
-      'SyntaxError: expected {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} but found "<EOF>"',
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at ','",
+      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 `, [
       'Unknown column [var1]',
@@ -1287,7 +1299,7 @@ describe('validation logic', () => {
     );
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 = `, [
       'Unknown column [var1]',
-      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
 
     testErrorsAndWarnings(
@@ -1295,7 +1307,7 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings(`from a | enrich policy with `, [
-      'SyntaxError: expected {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} but found "<EOF>"',
+      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
     testErrorsAndWarnings(`from a | enrich policy with otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy | eval otherField`, []);

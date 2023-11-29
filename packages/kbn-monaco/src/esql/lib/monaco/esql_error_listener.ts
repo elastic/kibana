@@ -22,7 +22,10 @@ export class ESQLErrorListener implements ANTLRErrorListener<any> {
     error: RecognitionException | undefined
   ): void {
     const higherLevelError = error ? createError(error) : undefined;
-    const textMessage = higherLevelError ? higherLevelError.text : `SyntaxError: ${message}`;
+    const textMessage =
+      higherLevelError?.text && higherLevelError.text !== error?.message
+        ? higherLevelError.text
+        : `SyntaxError: ${message}`;
 
     let endColumn = column + 1;
     let startColumn = column;

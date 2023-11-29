@@ -62,7 +62,7 @@ function addToVariables(
     } else if (oldArg.quoted) {
       // a last attempt in case the user tried to rename an expression:
       // trim every space and try a new hit
-      const expressionTrimmedRef = oldArg.text.replace(/\s/g, '');
+      const expressionTrimmedRef = oldArg.name.replace(/\s/g, '');
       oldRef = variables.get(expressionTrimmedRef);
       if (oldRef) {
         addToVariableOccurrencies(variables, newVariable);
