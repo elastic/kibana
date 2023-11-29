@@ -454,11 +454,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 <> {i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION}</>
               </EuiToolTip>
             ),
-            disabled: isThresholdRule,
+            disabled: !isAlertSuppressionLicenseValid || isThresholdRule,
           },
           {
             id: GroupByOptions.PerTimePeriod,
-            disabled: isThresholdRule && !enableThresholdSuppression,
+            disabled:
+              !isAlertSuppressionLicenseValid || (isThresholdRule && !enableThresholdSuppression),
             label: (
               <>
                 {i18n.ALERT_SUPPRESSION_PER_TIME_PERIOD}
