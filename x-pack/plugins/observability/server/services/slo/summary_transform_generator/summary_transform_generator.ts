@@ -18,11 +18,11 @@ export interface SummaryTransformGenerator {
 export class DefaultSummaryTransformGenerator implements SummaryTransformGenerator {
   public generate(slo: SLO): TransformPutTransformRequest {
     if (slo.budgetingMethod === 'occurrences') {
-      return generateTransformForOccurrences(slo) as TransformPutTransformRequest;
+      return generateTransformForOccurrences(slo);
     } else if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'rolling') {
-      return generateTransformForTimeslicesAndRolling(slo) as TransformPutTransformRequest;
+      return generateTransformForTimeslicesAndRolling(slo);
     } else if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
-      return generateTransformForTimeslicesAndCalendarAligned(slo) as TransformPutTransformRequest;
+      return generateTransformForTimeslicesAndCalendarAligned(slo);
     }
 
     throw new Error('Not supported SLO');
