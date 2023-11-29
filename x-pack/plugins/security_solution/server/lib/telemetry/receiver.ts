@@ -71,7 +71,6 @@ import type {
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
-import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 
 export interface ITelemetryReceiver {
   start(
@@ -137,11 +136,6 @@ export interface ITelemetryReceiver {
     searchAfter: SortResults | undefined;
     alerts: TelemetryEvent[];
   }>;
-
-  fetchDiagnosticAlerts(
-    executeFrom: string,
-    executeTo: string
-  ): Promise<SearchResponse<TelemetryEvent, Record<string, AggregationsAggregate>>>;
 
   fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
 
@@ -423,38 +417,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
 
     return this.esClient.search(query, { meta: true });
-  }
-
-  public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
-    }
-
-    const query = {
-      expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${DEFAULT_DIAGNOSTIC_INDEX}-*`,
-      ignore_unavailable: true,
-      size: telemetryConfiguration.telemetry_max_buffer_size,
-      body: {
-        query: {
-          range: {
-            'event.ingested': {
-              gte: executeFrom,
-              lt: executeTo,
-            },
-          },
-        },
-        sort: [
-          {
-            'event.ingested': {
-              order: 'desc' as const,
-            },
-          },
-        ],
-      },
-    };
-
-    return this.esClient.search<TelemetryEvent>(query);
   }
 
   public async fetchDiagnosticAlertsBatch(
