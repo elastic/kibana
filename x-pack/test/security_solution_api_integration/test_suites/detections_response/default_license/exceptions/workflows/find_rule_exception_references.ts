@@ -30,7 +30,7 @@ import {
   deleteAllAlerts,
   createAlertsIndex,
 } from '../../../utils';
-import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
+import { deleteAllExceptions } from '../../../../value_lists_and_exception_lists/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

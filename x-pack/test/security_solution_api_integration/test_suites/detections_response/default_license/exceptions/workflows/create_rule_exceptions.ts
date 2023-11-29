@@ -31,7 +31,7 @@ import {
 import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,
-} from '../../../../lists_and_exception_lists/utils';
+} from '../../../../value_lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({

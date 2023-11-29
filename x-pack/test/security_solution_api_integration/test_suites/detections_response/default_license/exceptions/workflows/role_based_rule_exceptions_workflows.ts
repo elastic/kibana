@@ -60,7 +60,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../../lists_and_exception_lists/utils';
+} from '../../../../value_lists_and_exception_lists/utils';
 import {
   createUserAndRole,
   deleteUserAndRole,
