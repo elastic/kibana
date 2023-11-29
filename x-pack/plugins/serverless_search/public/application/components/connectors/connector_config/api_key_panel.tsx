@@ -58,6 +58,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ connector }) => {
       <EuiSpacer />
       <span>
         <EuiButton
+          data-test-subj="serverlessSearchApiKeyPanelNewApiKeyButton"
           isDisabled={!connector.index_name}
           isLoading={isLoading}
           iconType="plusInCircle"

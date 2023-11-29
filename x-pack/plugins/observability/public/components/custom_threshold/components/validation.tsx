@@ -27,14 +27,9 @@ export function validateCustomThreshold({
   const validationResult = { errors: {} };
   const errors: {
     [id: string]: {
-      aggField: string[];
       timeSizeUnit: string[];
       timeWindowSize: string[];
       critical: {
-        threshold0: string[];
-        threshold1: string[];
-      };
-      warning: {
         threshold0: string[];
         threshold1: string[];
       };
@@ -91,23 +86,9 @@ export function validateCustomThreshold({
         threshold0: [],
         threshold1: [],
       },
-      warning: {
-        threshold0: [],
-        threshold1: [],
-      },
       metric: [],
       metrics: {},
     };
-    if (!c.aggType) {
-      errors[id].aggField.push(
-        i18n.translate(
-          'xpack.observability.customThreshold.rule.alertFlyout.error.aggregationRequired',
-          {
-            defaultMessage: 'Aggregation is required.',
-          }
-        )
-      );
-    }
 
     if (!c.threshold || !c.threshold.length) {
       errors[id].critical.threshold0.push(
@@ -120,8 +101,30 @@ export function validateCustomThreshold({
       );
     }
 
-    if (c.warningThreshold && !c.warningThreshold.length) {
-      errors[id].warning.threshold0.push(
+    // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
+    // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
+    const { comparator, threshold } = { comparator: c.comparator, threshold: c.threshold } as {
+      comparator?: Comparator;
+      threshold?: number[];
+    };
+    if (threshold && threshold.length && ![...threshold].every(isNumber)) {
+      [...threshold].forEach((v, i) => {
+        if (!isNumber(v)) {
+          const key = i === 0 ? 'threshold0' : 'threshold1';
+          errors[id].critical[key].push(
+            i18n.translate(
+              'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdTypeRequired',
+              {
+                defaultMessage: 'Thresholds must contain a valid number.',
+              }
+            )
+          );
+        }
+      });
+    }
+
+    if (comparator === Comparator.BETWEEN && (!threshold || threshold.length < 2)) {
+      errors[id].critical.threshold1.push(
         i18n.translate(
           'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdRequired',
           {
@@ -129,45 +132,6 @@ export function validateCustomThreshold({
           }
         )
       );
-    }
-
-    for (const props of [
-      { comparator: c.comparator, threshold: c.threshold, type: 'critical' },
-      { comparator: c.warningComparator, threshold: c.warningThreshold, type: 'warning' },
-    ]) {
-      // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
-      // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
-      const { comparator, threshold, type } = props as {
-        comparator?: Comparator;
-        threshold?: number[];
-        type: 'critical' | 'warning';
-      };
-      if (threshold && threshold.length && ![...threshold].every(isNumber)) {
-        [...threshold].forEach((v, i) => {
-          if (!isNumber(v)) {
-            const key = i === 0 ? 'threshold0' : 'threshold1';
-            errors[id][type][key].push(
-              i18n.translate(
-                'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdTypeRequired',
-                {
-                  defaultMessage: 'Thresholds must contain a valid number.',
-                }
-              )
-            );
-          }
-        });
-      }
-
-      if (comparator === Comparator.BETWEEN && (!threshold || threshold.length < 2)) {
-        errors[id][type].threshold1.push(
-          i18n.translate(
-            'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdRequired',
-            {
-              defaultMessage: 'Threshold is required.',
-            }
-          )
-        );
-      }
     }
 
     if (!c.timeSize) {

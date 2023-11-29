@@ -75,7 +75,10 @@
     "@kbn/chart-icons",
     "@kbn/advanced-settings-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/custom-icons"
+    "@kbn/custom-icons",
+    "@kbn/profiling-utils",
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/core-http-request-handler-context-server"
   ],
   "exclude": ["target/**/*"]
 }

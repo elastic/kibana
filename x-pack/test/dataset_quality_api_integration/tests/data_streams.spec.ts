@@ -64,11 +64,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns stats correctly', async () => {
           const stats = await callApiAs('datasetQualityLogsUser');
 
-          expect(stats.body.items.length).to.be(1);
-          expect(stats.body.items[0].integration).to.be(integration);
-          expect(stats.body.items[0].size).not.empty();
-          expect(stats.body.items[0].size_bytes).greaterThan(0);
-          expect(stats.body.items[0].last_activity).greaterThan(0);
+          expect(stats.body.dataStreamsStats.length).to.be(1);
+          expect(stats.body.dataStreamsStats[0].integration).to.be(integration);
+          expect(stats.body.dataStreamsStats[0].size).not.empty();
+          expect(stats.body.dataStreamsStats[0].size_bytes).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].last_activity).greaterThan(0);
         });
 
         after(async () => {
@@ -94,11 +94,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns stats correctly', async () => {
           const stats = await callApiAs('datasetQualityLogsUser');
 
-          expect(stats.body.items.length).to.be(1);
-          expect(stats.body.items[0].integration).not.ok();
-          expect(stats.body.items[0].size).not.empty();
-          expect(stats.body.items[0].size_bytes).greaterThan(0);
-          expect(stats.body.items[0].last_activity).greaterThan(0);
+          expect(stats.body.dataStreamsStats.length).to.be(1);
+          expect(stats.body.dataStreamsStats[0].integration).not.ok();
+          expect(stats.body.dataStreamsStats[0].size).not.empty();
+          expect(stats.body.dataStreamsStats[0].size_bytes).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].last_activity).greaterThan(0);
         });
 
         after(async () => {

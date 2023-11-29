@@ -360,7 +360,7 @@
               "\nGets the Lens embeddable's datasource and visualization states\nupdates the embeddable input"
             ],
             "signature": [
-              "(datasourceState: unknown, visualizationState: unknown) => Promise<void>"
+              "(datasourceState: unknown, visualizationState: unknown, visualizationType?: string | undefined) => Promise<void>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -390,6 +390,67 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateVisualization.$3",
+                "type": "string",
+                "tags": [],
+                "label": "visualizationType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.updateSuggestion",
+            "type": "Function",
+            "tags": [],
+            "label": "updateSuggestion",
+            "description": [],
+            "signature": [
+              "(attrs: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensSavedObjectAttributes",
+                "text": "LensSavedObjectAttributes"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateSuggestion.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attrs",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.LensSavedObjectAttributes",
+                    "text": "LensSavedObjectAttributes"
+                  }
                 ],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
@@ -5131,6 +5192,20 @@
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SuggestionRequest.datasourceId",
+            "type": "string",
+            "tags": [],
+            "label": "datasourceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5218,6 +5293,20 @@
             ],
             "signature": [
               "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.TableSuggestion.notAssignedMetrics",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "notAssignedMetrics",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,

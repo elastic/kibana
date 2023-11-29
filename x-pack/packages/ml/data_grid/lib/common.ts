@@ -83,7 +83,7 @@ export const euiDataGridToolbarSettings = {
  * @param {DataView} dataView - The Kibana data view.
  * @returns {string[]} - The array of field names from the data view.
  */
-export const getFieldsFromKibanaIndexPattern = (dataView: DataView): string[] => {
+export const getFieldsFromKibanaDataView = (dataView: DataView): string[] => {
   const allFields = dataView.fields.map((f) => f.name);
   const dataViewFields: string[] = allFields.filter((f) => {
     if (dataView.metaFields.includes(f)) {

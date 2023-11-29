@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   goToRuleDetailsOf,
   expectManagementTableRules,
@@ -21,7 +22,7 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { resetRulesTableState, deleteAlertsAndRules } from '../../../../../tasks/common';
+import { resetRulesTableState } from '../../../../../tasks/common';
 
 import { getNewRule } from '../../../../../objects/rule';
 
