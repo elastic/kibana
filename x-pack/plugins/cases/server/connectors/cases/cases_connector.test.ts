@@ -342,11 +342,32 @@ describe('CasesConnector', () => {
           expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
             { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
           ]);
+        });
+      });
 
-          /**
-           * By checking the getCaseId function we ensure
-           * that no errors are being returned to the next steps
-           */
+      describe('Cases', () => {
+        it('generates the case ids correctly', async () => {
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+
+          expect(mockGetCaseId).toHaveBeenCalledTimes(3);
+
+          for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
+            expect(mockGetCaseId).nthCalledWith(index + 1, {
+              ruleId: rule.id,
+              grouping,
+              owner,
+              spaceId: 'default',
+              counter: 1,
+            });
+          }
+        });
+
+        it('generates the case ids correctly when the time window has passed', async () => {
+          dateMathMock.parse.mockImplementation(() => moment('2023-10-11T10:23:42.769Z'));
+
+          mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
 
           expect(mockGetCaseId).toBeCalledTimes(3);
 
@@ -385,24 +406,6 @@ describe('CasesConnector', () => {
             ruleId: 'rule-test-id',
             spaceId: 'default',
           });
-        });
-      });
-
-      describe('Cases', () => {
-        it('generates the case ids correctly', async () => {
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
-
-          expect(mockGetCaseId).toHaveBeenCalledTimes(3);
-
-          for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
-            expect(mockGetCaseId).nthCalledWith(index + 1, {
-              ruleId: rule.id,
-              grouping,
-              owner,
-              spaceId: 'default',
-              counter: 1,
-            });
-          }
         });
 
         it('gets the cases correctly', async () => {

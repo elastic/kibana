@@ -119,7 +119,7 @@ export class CasesConnector extends SubActionConnector<
       oracleRecords
     );
 
-    const groupedAlertsWithCases = await this.bulkGetOrCreateCases(
+    const groupedAlertsWithCases = await this.upsertCases(
       params,
       casesClient,
       groupedAlertsWithCaseId
@@ -312,7 +312,7 @@ export class CasesConnector extends SubActionConnector<
     return casesMap;
   }
 
-  private async bulkGetOrCreateCases(
+  private async upsertCases(
     params: CasesConnectorRunParams,
     casesClient: CasesClient,
     groupedAlertsWithCaseId: Map<string, GroupedAlertsWithCaseId>
