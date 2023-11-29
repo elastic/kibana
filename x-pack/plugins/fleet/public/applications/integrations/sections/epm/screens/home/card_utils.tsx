@@ -14,7 +14,7 @@
 
 import React from 'react';
 import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react';
-import { EuiBadge, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import semverLt from 'semver/functions/lt';
 
 import type {
@@ -144,15 +144,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
       <EuiFlexItem key="update_failed_badge" grow={false}>
         <EuiSpacer size="xs" />
         <span>
-          <EuiBadge color="danger" iconType="error">
-            <FormattedMessage
-              id="xpack.fleet.packageCard.updateFailed"
-              defaultMessage="Update failed"
-            />
-          </EuiBadge>
-          &nbsp;
-          <EuiIconTip
-            type="iInCircle"
+          <EuiToolTip
             title={
               <FormattedMessage
                 id="xpack.fleet.packageCard.updateFailedTooltipTitle"
@@ -160,7 +152,14 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
               />
             }
             content={upgradelFailedAttempt ? formatAttempt(upgradelFailedAttempt) : undefined}
-          />
+          >
+            <EuiBadge color="danger" iconType="error">
+              <FormattedMessage
+                id="xpack.fleet.packageCard.updateFailed"
+                defaultMessage="Update failed"
+              />
+            </EuiBadge>
+          </EuiToolTip>
         </span>
       </EuiFlexItem>
     );
@@ -175,15 +174,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
       <EuiFlexItem key="install_failed_badge" grow={false}>
         <EuiSpacer size="xs" />
         <span>
-          <EuiBadge color="danger" iconType="error">
-            <FormattedMessage
-              id="xpack.fleet.packageCard.installFailed"
-              defaultMessage="Install failed"
-            />
-          </EuiBadge>
-          &nbsp;
-          <EuiIconTip
-            type="iInCircle"
+          <EuiToolTip
             title={
               <FormattedMessage
                 id="xpack.fleet.packageCard.installFailedTooltipTitle"
@@ -191,7 +182,14 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
               />
             }
             content={installFailedAttempt ? formatAttempt(installFailedAttempt) : undefined}
-          />
+          >
+            <EuiBadge color="danger" iconType="error">
+              <FormattedMessage
+                id="xpack.fleet.packageCard.installFailed"
+                defaultMessage="Install failed"
+              />
+            </EuiBadge>
+          </EuiToolTip>
         </span>
       </EuiFlexItem>
     );
