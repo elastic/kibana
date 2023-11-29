@@ -38,15 +38,26 @@ describe('useFilterConfig', () => {
     getCaseConfigureMock.mockReturnValue(() => {
       return [];
     });
-    const deactivateCb = jest.fn();
+    const onFilterOptionsChange = jest.fn();
+    const getEmptyOptions = jest.fn().mockReturnValue({ severity: [] });
     const filters: FilterConfig[] = [
       {
         key: 'severity',
         label: 'Severity',
         isActive: true,
         isAvailable: true,
-        deactivate: deactivateCb,
-        render: ({ filterOptions, onChange }: FilterConfigRenderParams) => null,
+        getEmptyOptions,
+        render: ({ filterOptions }: FilterConfigRenderParams) => null,
+      },
+      {
+        key: 'tags',
+        label: 'Tags',
+        isActive: true,
+        isAvailable: true,
+        getEmptyOptions() {
+          return { tags: ['initialValue'] };
+        },
+        render: ({ filterOptions }: FilterConfigRenderParams) => null,
       },
     ];
 
@@ -54,13 +65,18 @@ describe('useFilterConfig', () => {
       wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
       initialProps: {
         systemFilterConfig: filters,
-        onFilterOptionChange: () => {},
+        onFilterOptionsChange,
         isSelectorView: false,
       },
     });
 
-    expect(deactivateCb).not.toHaveBeenCalled();
-    rerender({ systemFilterConfig: [], onFilterOptionChange: () => {}, isSelectorView: false });
-    expect(deactivateCb).toHaveBeenCalled();
+    expect(onFilterOptionsChange).not.toHaveBeenCalled();
+    rerender({ systemFilterConfig: [], onFilterOptionsChange, isSelectorView: false });
+    expect(getEmptyOptions).toHaveBeenCalledTimes(1);
+    expect(onFilterOptionsChange).toHaveBeenCalledTimes(1);
+    expect(onFilterOptionsChange).toHaveBeenCalledWith({
+      severity: [],
+      tags: ['initialValue'],
+    });
   });
 });

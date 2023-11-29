@@ -18,14 +18,14 @@ interface CustomFieldFilterOptionFactoryProps {
   buttonLabel: string;
   customFieldOptions: Array<{ key: string; label: string }>;
   fieldKey: string;
-  onFilterOptionChange: FilterChangeHandler;
+  onFilterOptionsChange: FilterChangeHandler;
   type: CustomFieldTypes;
 }
 const customFieldFilterOptionFactory = ({
   buttonLabel,
   customFieldOptions,
   fieldKey,
-  onFilterOptionChange,
+  onFilterOptionsChange,
   type,
 }: CustomFieldFilterOptionFactoryProps) => {
   return {
@@ -33,14 +33,17 @@ const customFieldFilterOptionFactory = ({
     isActive: false,
     isAvailable: true,
     label: buttonLabel,
-    deactivate: () => {
-      onFilterOptionChange({
-        filterId: fieldKey,
-        selectedOptionKeys: [],
-        customFieldType: type,
-      });
+    getEmptyOptions: () => {
+      return {
+        customFields: {
+          [fieldKey]: {
+            type,
+            options: [],
+          },
+        },
+      };
     },
-    render: ({ filterOptions, onChange }: FilterConfigRenderParams) => {
+    render: ({ filterOptions }: FilterConfigRenderParams) => {
       const onCustomFieldChange = ({
         filterId,
         selectedOptionKeys,
@@ -48,10 +51,13 @@ const customFieldFilterOptionFactory = ({
         filterId: string;
         selectedOptionKeys: string[];
       }) => {
-        onChange({
-          filterId: filterId.replace(CUSTOM_FIELD_KEY_PREFIX, ''),
-          selectedOptionKeys,
-          customFieldType: type,
+        onFilterOptionsChange({
+          customFields: {
+            [filterId.replace(CUSTOM_FIELD_KEY_PREFIX, '')]: {
+              options: selectedOptionKeys,
+              type,
+            },
+          },
         });
       };
 
@@ -73,10 +79,10 @@ const customFieldFilterOptionFactory = ({
 
 export const useCustomFieldsFilterConfig = ({
   isSelectorView,
-  onFilterOptionChange,
+  onFilterOptionsChange,
 }: {
   isSelectorView: boolean;
-  onFilterOptionChange: FilterChangeHandler;
+  onFilterOptionsChange: FilterChangeHandler;
 }) => {
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
 
@@ -98,7 +104,7 @@ export const useCustomFieldsFilterConfig = ({
               buttonLabel,
               customFieldOptions,
               fieldKey,
-              onFilterOptionChange,
+              onFilterOptionsChange,
               type,
             })
           );
@@ -107,7 +113,7 @@ export const useCustomFieldsFilterConfig = ({
     }
 
     setFilterConfig(customFieldsFilterConfig);
-  }, [customFields, isSelectorView, onFilterOptionChange]);
+  }, [customFields, isSelectorView, onFilterOptionsChange]);
 
   return { customFieldsFilterConfig: filterConfig };
 };

@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { isEqual } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
+import { mergeWith } from 'lodash';
 import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
@@ -19,7 +20,6 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
 import { useFilterConfig } from './table_filter_config/use_filter_config';
-import type { FilterChangeHandler } from './table_filter_config/types';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -30,10 +30,17 @@ interface CasesTableFiltersProps {
   availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
+  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
 }
+
+const mergeCustomizer = (objValue: string | string[], srcValue: string | string[], key: string) => {
+  if (Array.isArray(objValue)) {
+    return srcValue;
+  }
+};
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
@@ -44,6 +51,7 @@ const CasesTableFiltersComponent = ({
   availableSolutions,
   isSelectorView = false,
   onCreateCasePressed,
+  initialFilterOptions,
   isLoading,
   currentUserProfile,
   filterOptions,
@@ -66,26 +74,11 @@ const CasesTableFiltersComponent = ({
     [selectedAssignees, onFilterChanged]
   );
 
-  const onFilterOptionChange: FilterChangeHandler = useCallback(
-    ({ filterId, selectedOptionKeys, customFieldType }) => {
-      const newFilters = customFieldType
-        ? {
-            ...filterOptions,
-            customFields: {
-              ...filterOptions.customFields,
-              [filterId]: {
-                type: customFieldType,
-                options: selectedOptionKeys,
-              },
-            },
-          }
-        : {
-            ...filterOptions,
-            [filterId]: selectedOptionKeys,
-          };
-
-      if (!isEqual(newFilters, filterOptions)) {
-        onFilterChanged(newFilters);
+  const onFilterOptionsChange = useCallback(
+    (partialFilterOptions: Partial<FilterOptions>) => {
+      const newFilterOptions = mergeWith({}, filterOptions, partialFilterOptions, mergeCustomizer);
+      if (!isEqual(newFilterOptions, filterOptions)) {
+        onFilterChanged(newFilterOptions);
       }
     },
     [filterOptions, onFilterChanged]
@@ -101,9 +94,10 @@ const CasesTableFiltersComponent = ({
     currentUserProfile,
     handleSelectedAssignees,
     hiddenStatuses,
+    initialFilterOptions,
     isLoading,
     isSelectorView,
-    onFilterOptionChange,
+    onFilterOptionsChange,
     selectedAssignees,
     tags,
   });
@@ -113,7 +107,7 @@ const CasesTableFiltersComponent = ({
     selectableOptions,
     activeSelectableOptionKeys,
     onFilterConfigChange,
-  } = useFilterConfig({ systemFilterConfig, onFilterOptionChange, isSelectorView });
+  } = useFilterConfig({ systemFilterConfig, onFilterOptionsChange, isSelectorView });
 
   const handleOnSearch = useCallback(
     (newSearch) => {
@@ -159,9 +153,7 @@ const CasesTableFiltersComponent = ({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup data-test-subj="cases-table-filters-group">
           {activeFilters.map((filter) => (
-            <React.Fragment key={filter.key}>
-              {filter.render({ filterOptions, onChange: onFilterOptionChange })}
-            </React.Fragment>
+            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
           ))}
           {isSelectorView || (
             <MoreFiltersSelectable

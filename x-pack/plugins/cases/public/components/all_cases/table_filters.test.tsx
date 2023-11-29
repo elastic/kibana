@@ -48,6 +48,7 @@ const props = {
   filterOptions: DEFAULT_FILTER_OPTIONS,
   availableSolutions: [],
   isLoading: false,
+  initialFilterOptions: DEFAULT_FILTER_OPTIONS,
   currentUserProfile: undefined,
 };
 
@@ -252,6 +253,25 @@ describe('CasesTableFilters ', () => {
       expect(screen.getByTestId('options-filter-popover-button-owner')).not.toHaveAttribute(
         'hasActiveFilters'
       );
+    });
+
+    it('should reset the filter setting all available solutions when deactivated', async () => {
+      appMockRender.render(
+        <CasesTableFilters
+          {...props}
+          initialFilterOptions={{ owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER] }}
+          availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+        />
+      );
+
+      userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await waitForEuiPopoverOpen();
+      userEvent.click(screen.getByRole('option', { name: 'Solution' }));
+
+      expect(onFilterChanged).toHaveBeenCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
+      });
     });
   });
 
@@ -578,6 +598,12 @@ describe('CasesTableFilters ', () => {
       expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
         status: [],
+        customFields: {
+          toggle: {
+            type: CustomFieldTypes.TOGGLE,
+            options: [],
+          },
+        },
       });
     });
 

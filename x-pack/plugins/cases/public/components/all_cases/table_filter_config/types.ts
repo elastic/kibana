@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CustomFieldTypes } from '../../../../common/types/domain';
 import type { FilterOptions } from '../../../../common/ui';
 
 export interface FilterConfigState {
@@ -13,15 +12,10 @@ export interface FilterConfigState {
   isActive: boolean;
 }
 
-export type FilterChangeHandler = (params: {
-  filterId: string;
-  selectedOptionKeys: string[];
-  customFieldType?: CustomFieldTypes;
-}) => void;
+export type FilterChangeHandler = (params: Partial<FilterOptions>) => void;
 
 export interface FilterConfigRenderParams {
   filterOptions: FilterOptions;
-  onChange: FilterChangeHandler;
 }
 
 export interface FilterConfig {
@@ -29,6 +23,6 @@ export interface FilterConfig {
   label: string;
   isActive: boolean;
   isAvailable: boolean;
-  deactivate: () => void;
+  getEmptyOptions: () => Partial<FilterOptions>;
   render: (params: FilterConfigRenderParams) => React.ReactNode;
 }

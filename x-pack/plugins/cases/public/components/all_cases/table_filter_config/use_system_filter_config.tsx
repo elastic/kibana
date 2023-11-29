@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 
+import type { FilterOptions } from '../../../../common/ui';
 import type { CaseStatuses } from '../../../../common/types/domain';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../multi_select_filter';
@@ -29,9 +30,10 @@ interface UseFilterConfigProps {
   currentUserProfile: CurrentUserProfile;
   handleSelectedAssignees: (newAssignees: AssigneesFilteringSelection[]) => void;
   hiddenStatuses?: CaseStatuses[];
+  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   isSelectorView?: boolean;
-  onFilterOptionChange: FilterChangeHandler;
+  onFilterOptionsChange: FilterChangeHandler;
   selectedAssignees: AssigneesFilteringSelection[];
   tags: string[];
 }
@@ -46,23 +48,40 @@ export const getSystemFilterConfig = ({
   currentUserProfile,
   handleSelectedAssignees,
   hiddenStatuses,
+  initialFilterOptions,
   isLoading,
   isSelectorView,
-  onFilterOptionChange,
+  onFilterOptionsChange,
   selectedAssignees,
   tags,
 }: UseFilterConfigProps): FilterConfig[] => {
+  const onSystemFilterChange = ({
+    filterId,
+    selectedOptionKeys,
+  }: {
+    filterId: string;
+    selectedOptionKeys: string[];
+  }) => {
+    onFilterOptionsChange({
+      [filterId]: selectedOptionKeys,
+    });
+  };
   return [
     {
       key: 'severity',
       label: i18n.SEVERITY,
       isActive: true,
       isAvailable: true,
-      deactivate: () => {
-        onFilterOptionChange({ filterId: 'severity', selectedOptionKeys: [] });
+      getEmptyOptions: () => {
+        return {
+          severity: initialFilterOptions.severity,
+        };
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
-        <SeverityFilter selectedOptionKeys={filterOptions.severity} onChange={onChange} />
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
+        <SeverityFilter
+          selectedOptionKeys={filterOptions.severity}
+          onChange={onSystemFilterChange}
+        />
       ),
     },
     {
@@ -70,13 +89,15 @@ export const getSystemFilterConfig = ({
       label: i18n.STATUS,
       isActive: true,
       isAvailable: true,
-      deactivate: () => {
-        onFilterOptionChange({ filterId: 'status', selectedOptionKeys: [] });
+      getEmptyOptions: () => {
+        return {
+          status: initialFilterOptions.status,
+        };
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
         <StatusFilter
           selectedOptionKeys={filterOptions?.status}
-          onChange={onChange}
+          onChange={onSystemFilterChange}
           hiddenStatuses={hiddenStatuses}
           countClosedCases={countClosedCases}
           countInProgressCases={countInProgressCases}
@@ -89,10 +110,12 @@ export const getSystemFilterConfig = ({
       label: i18n.ASSIGNEES,
       isActive: true,
       isAvailable: caseAssignmentAuthorized && !isSelectorView,
-      deactivate: () => {
-        handleSelectedAssignees([]);
+      getEmptyOptions: () => {
+        return {
+          assignees: initialFilterOptions.assignees,
+        };
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => {
+      render: ({ filterOptions }: FilterConfigRenderParams) => {
         return (
           <AssigneesFilterPopover
             selectedAssignees={selectedAssignees}
@@ -108,17 +131,18 @@ export const getSystemFilterConfig = ({
       label: i18n.TAGS,
       isActive: true,
       isAvailable: true,
-
-      deactivate: () => {
-        onFilterOptionChange({ filterId: 'tags', selectedOptionKeys: [] });
+      getEmptyOptions: () => {
+        return {
+          tags: initialFilterOptions.tags,
+        };
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
         <MultiSelectFilter
           buttonLabel={i18n.TAGS}
           id={'tags'}
           limit={MAX_TAGS_FILTER_LENGTH}
           limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
-          onChange={onChange}
+          onChange={onSystemFilterChange}
           options={mapToMultiSelectOption(tags)}
           selectedOptionKeys={filterOptions?.tags}
         />
@@ -129,16 +153,18 @@ export const getSystemFilterConfig = ({
       label: i18n.CATEGORIES,
       isActive: true,
       isAvailable: true,
-      deactivate: () => {
-        onFilterOptionChange({ filterId: 'category', selectedOptionKeys: [] });
+      getEmptyOptions: () => {
+        return {
+          category: initialFilterOptions.category,
+        };
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
         <MultiSelectFilter
           buttonLabel={i18n.CATEGORIES}
           id={'category'}
           limit={MAX_CATEGORY_FILTER_LENGTH}
           limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_CATEGORY_FILTER_LENGTH, 'categories')}
-          onChange={onChange}
+          onChange={onSystemFilterChange}
           options={mapToMultiSelectOption(categories)}
           selectedOptionKeys={filterOptions?.category}
         />
@@ -149,18 +175,20 @@ export const getSystemFilterConfig = ({
       label: i18n.SOLUTION,
       isActive: true,
       isAvailable: availableSolutions.length > 1,
-      deactivate: () => {
-        onFilterOptionChange({ filterId: 'owner', selectedOptionKeys: availableSolutions });
+      getEmptyOptions: () => {
+        return {
+          owner: initialFilterOptions.owner,
+        };
       },
-      render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
         <SolutionFilter
-          onChange={onChange}
+          onChange={onSystemFilterChange}
           selectedOptionKeys={filterOptions?.owner}
           availableSolutions={availableSolutions}
         />
       ),
     },
-  ].filter((filter) => filter.isAvailable) as FilterConfig[];
+  ];
 };
 
 export const useSystemFilterConfig = ({
@@ -173,9 +201,10 @@ export const useSystemFilterConfig = ({
   currentUserProfile,
   handleSelectedAssignees,
   hiddenStatuses,
+  initialFilterOptions,
   isLoading,
   isSelectorView,
-  onFilterOptionChange,
+  onFilterOptionsChange,
   selectedAssignees,
   tags,
 }: UseFilterConfigProps) => {
@@ -190,9 +219,10 @@ export const useSystemFilterConfig = ({
       currentUserProfile,
       handleSelectedAssignees,
       hiddenStatuses,
+      initialFilterOptions,
       isLoading,
       isSelectorView,
-      onFilterOptionChange,
+      onFilterOptionsChange,
       selectedAssignees,
       tags,
     })
@@ -210,9 +240,10 @@ export const useSystemFilterConfig = ({
         currentUserProfile,
         handleSelectedAssignees,
         hiddenStatuses,
+        initialFilterOptions,
         isLoading,
         isSelectorView,
-        onFilterOptionChange,
+        onFilterOptionsChange,
         selectedAssignees,
         tags,
       })
@@ -227,9 +258,10 @@ export const useSystemFilterConfig = ({
     currentUserProfile,
     handleSelectedAssignees,
     hiddenStatuses,
+    initialFilterOptions,
     isLoading,
     isSelectorView,
-    onFilterOptionChange,
+    onFilterOptionsChange,
     selectedAssignees,
     tags,
   ]);

@@ -7,8 +7,10 @@
 
 import { useEffect, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { merge } from 'lodash';
+import type { FilterOptions } from '../../../../common/ui';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
-import type { FilterChangeHandler, FilterConfig, FilterConfigState } from './types';
+import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
@@ -30,17 +32,17 @@ const mergeSystemAndCustomFieldConfigs = ({
 
 export const useFilterConfig = ({
   isSelectorView,
-  onFilterOptionChange,
+  onFilterOptionsChange,
   systemFilterConfig,
 }: {
   isSelectorView: boolean;
-  onFilterOptionChange: FilterChangeHandler;
+  onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
   systemFilterConfig: FilterConfig[];
 }) => {
   const { appId } = useCasesContext();
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
-    onFilterOptionChange,
     isSelectorView,
+    onFilterOptionsChange,
   });
   const [filterConfigs, setFilterConfigs] = useState<Map<string, FilterConfig>>(
     () => new Map([...systemFilterConfig].map((filter) => [filter.key, filter]))
@@ -64,12 +66,18 @@ export const useFilterConfig = ({
       customFieldsFilterConfig,
     });
 
+    const emptyOptions: Array<Partial<FilterOptions>> = [];
     filterConfigs.forEach((filter) => {
       if (!newFilterConfig.has(filter.key)) {
-        filter.deactivate();
+        emptyOptions.push(filter.getEmptyOptions());
       }
     });
-  }, [filterConfigs, systemFilterConfig, customFieldsFilterConfig]);
+
+    if (emptyOptions.length > 0) {
+      const mergedEmptyOptions = merge({}, ...emptyOptions);
+      onFilterOptionsChange(mergedEmptyOptions);
+    }
+  }, [filterConfigs, systemFilterConfig, customFieldsFilterConfig, onFilterOptionsChange]);
 
   /**
    * As custom fields are loaded by fetching an API and they might also be removed
@@ -127,9 +135,14 @@ export const useFilterConfig = ({
       }
     });
 
-    deactivatedFilters
+    const emptyOptions = deactivatedFilters
       .filter((key) => filterConfigs.has(key))
-      .forEach((key) => (filterConfigs.get(key) as FilterConfig).deactivate());
+      .map((key) => (filterConfigs.get(key) as FilterConfig).getEmptyOptions());
+
+    if (emptyOptions.length > 0) {
+      const mergedEmptyOptions = merge({}, ...emptyOptions);
+      onFilterOptionsChange(mergedEmptyOptions);
+    }
 
     setActiveByFilterKey(newActiveByFilterKey);
   };
