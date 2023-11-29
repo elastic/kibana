@@ -6,31 +6,19 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { RulesTableContextProvider } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useContractComponents } from '../../hooks/use_contract_component';
 import { updateSourcererData } from '../sourcerer/sourcerer_updater';
 
-const LandingPageContextComponent: React.FC = ({ children }) => {
+export const LandingPageComponent = memo(() => {
+  const { GetStarted } = useContractComponents();
   const { indicesExist } = useSourcererDataView();
 
   useEffect(() => {
     updateSourcererData({ indicesExist });
   }, [indicesExist]);
 
-  return <RulesTableContextProvider>{children}</RulesTableContextProvider>;
-};
-
-export const LandingPageComponent = memo(() => {
-  const { GetStarted } = useContractComponents();
-
-  return GetStarted ? (
-    <RulesTableContextProvider>
-      <LandingPageContextComponent>
-        <GetStarted />
-      </LandingPageContextComponent>
-    </RulesTableContextProvider>
-  ) : null;
+  return GetStarted ? <GetStarted /> : null;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';
