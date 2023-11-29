@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
 
-import type { GetRuleManagementFiltersResponse } from '@kbn/security-solution-plugin/public';
+import type { GetRuleManagementFiltersResponse } from '@kbn/security-solution-plugin/common';
 
 import type { CardId, OnStepClicked, ToggleTaskCompleteStatus, SectionId, StepId } from '../types';
 import {

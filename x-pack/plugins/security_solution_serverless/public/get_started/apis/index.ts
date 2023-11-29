@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetRuleManagementFiltersResponse } from '@kbn/security-solution-plugin/public';
-import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/public';
+import type { GetRuleManagementFiltersResponse } from '@kbn/security-solution-plugin/common';
+import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common';
 import type { HttpSetup } from '@kbn/core/public';
 
 export const fetchRuleManagementFilters = async ({
