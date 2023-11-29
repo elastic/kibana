@@ -148,7 +148,7 @@ export const ConfigurePipeline: React.FC = () => {
                 onChange={(e) =>
                   setInferencePipelineConfiguration({
                     ...configuration,
-                    isPipelineNameUserSupplied: true,
+                    isPipelineNameUserSupplied: e.target.value.length > 0,
                     pipelineName: e.target.value,
                   })
                 }
@@ -167,23 +167,17 @@ export const ConfigurePipeline: React.FC = () => {
                 hasDividers
                 disabled={inputsDisabled}
                 itemLayoutAlign="top"
-                onChange={(value) => {
-                  const newConfiguration = {
+                onChange={(value) =>
+                  setInferencePipelineConfiguration({
                     ...configuration,
                     inferenceConfig: undefined,
-                    isPipelineNameUserSupplied: false,
                     modelID: value,
                     fieldMappings: undefined,
-                    pipelineName: indexName + '-' + normalizeModelName(value),
-                  };
-
-                  if (pipelineName && isPipelineNameUserSupplied) {
-                    newConfiguration.pipelineName = pipelineName;
-                    newConfiguration.isPipelineNameUserSupplied = true;
-                  }
-
-                  setInferencePipelineConfiguration(newConfiguration);
-                }}
+                    pipelineName: isPipelineNameUserSupplied
+                      ? pipelineName
+                      : indexName + '-' + normalizeModelName(value),
+                  })
+                }
                 options={modelOptions}
                 valueOfSelected={modelID === '' ? MODEL_SELECT_PLACEHOLDER_VALUE : modelID}
               />
