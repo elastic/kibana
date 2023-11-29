@@ -56,6 +56,8 @@ export interface TopNFunctions {
   SamplingRate: number;
   selfCPU: number;
   totalCPU: number;
+  totalAnnualCO2Kgs: number;
+  totalAnnualCostUSD: number;
 }
 
 export function createTopNFunctions({
@@ -203,6 +205,8 @@ export function createTopNFunctions({
 
   const sumSelfCPU = sumBy(framesAndCountsAndIds, 'CountExclusive');
   const sumTotalCPU = sumBy(framesAndCountsAndIds, 'CountInclusive');
+  const totalAnnualCO2Kgs = sumBy(framesAndCountsAndIds, 'totalAnnualCO2kgs');
+  const totalAnnualCostUSD = sumBy(framesAndCountsAndIds, 'totalAnnualCostUSD');
 
   return {
     TotalCount: totalCount,
@@ -210,6 +214,8 @@ export function createTopNFunctions({
     SamplingRate: samplingRate,
     selfCPU: sumSelfCPU,
     totalCPU: sumTotalCPU,
+    totalAnnualCO2Kgs,
+    totalAnnualCostUSD,
   };
 }
 
