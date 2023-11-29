@@ -182,6 +182,7 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/monaco"
   ]
 }
