@@ -312,11 +312,11 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
     const agentType = req.body.agent_type ?? 'endpoint';
-    let actionsClient: ResponseActionsClient;
+    let responseActionsClient: ResponseActionsClient;
 
     switch (agentType) {
       case 'endpoint':
-        actionsClient = new EndpointActionsClient({
+        responseActionsClient = new EndpointActionsClient({
           esClient,
           casesClient,
           endpointContext,
@@ -324,7 +324,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         });
         break;
       case 'sentinel_one':
-        actionsClient = new SentinelOneActionsClient({
+        responseActionsClient = new SentinelOneActionsClient({
           esClient,
           casesClient,
           endpointContext,
@@ -346,35 +346,41 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
       switch (command) {
         case 'isolate':
-          action = await actionsClient.isolate(req.body);
+          action = await responseActionsClient.isolate(req.body);
           break;
 
         case 'unisolate':
-          action = await actionsClient.release(req.body);
+          action = await responseActionsClient.release(req.body);
           break;
 
         case 'running-processes':
-          action = await actionsClient.runningProcesses(req.body);
+          action = await responseActionsClient.runningProcesses(req.body);
           break;
 
         case 'execute':
-          action = await actionsClient.execute(req.body as ExecuteActionRequestBody);
+          action = await responseActionsClient.execute(req.body as ExecuteActionRequestBody);
           break;
 
         case 'suspend-process':
-          action = await actionsClient.suspendProcess(req.body as KillOrSuspendProcessRequestBody);
+          action = await responseActionsClient.suspendProcess(
+            req.body as KillOrSuspendProcessRequestBody
+          );
           break;
 
         case 'kill-process':
-          action = await actionsClient.killProcess(req.body as KillOrSuspendProcessRequestBody);
+          action = await responseActionsClient.killProcess(
+            req.body as KillOrSuspendProcessRequestBody
+          );
           break;
 
         case 'get-file':
-          action = await actionsClient.getFile(req.body as ResponseActionGetFileRequestBody);
+          action = await responseActionsClient.getFile(
+            req.body as ResponseActionGetFileRequestBody
+          );
           break;
 
         case 'upload':
-          action = await actionsClient.upload(req.body as UploadActionApiRequestBody);
+          action = await responseActionsClient.upload(req.body as UploadActionApiRequestBody);
           break;
 
         default:
