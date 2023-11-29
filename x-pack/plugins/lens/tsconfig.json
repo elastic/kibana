@@ -90,11 +90,15 @@
     "@kbn/search-response-warnings",
     "@kbn/logging",
     "@kbn/core-plugins-server",
+    "@kbn/text-based-languages",
     "@kbn/field-utils",
+    "@kbn/panel-loader",
     "@kbn/shared-ux-button-toolbar",
-    "@kbn/cell-actions"
+    "@kbn/cell-actions",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/discover-utils"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
@@ -23,6 +22,8 @@ import {
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 export interface CrashRateTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
@@ -70,7 +71,12 @@ async function getMobileCrashTimeseries({
 
   const response = await apmEventClient.search('get_mobile_crash_rate', {
     apm: {
-      events: [ProcessorEvent.error],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,

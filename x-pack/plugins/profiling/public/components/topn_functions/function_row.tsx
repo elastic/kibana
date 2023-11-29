@@ -139,7 +139,7 @@ function DiffColumn({ diff, setCellProps }: DiffColumnProps) {
   const dangerColor = useEuiBackgroundColor('danger');
 
   useEffect(() => {
-    if (diff && diff.rank > 0) {
+    if (diff && diff.rank !== 0) {
       const color = diff.rank > 0 ? 'success' : 'danger';
       setCellProps({
         style: { backgroundColor: color === 'success' ? successColor : dangerColor },

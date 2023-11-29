@@ -26,7 +26,7 @@ import {
 import { login } from '../../../../tasks/login';
 import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../tasks/rule_details';
 
-import { deleteAlertsAndRules } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   ADD_AND_BTN,
   ENTRY_DELETE_BTN,

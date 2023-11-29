@@ -20,12 +20,15 @@ export interface UsePerformEvaluationParams {
 
 export interface PerformEvaluationParams {
   agents: string[];
-  dataset: string;
+  dataset: string | undefined;
+  datasetName: string | undefined;
   evalModel: string[];
   evalPrompt: string;
   evaluationType: string[];
   models: string[];
   outputIndex: string;
+  projectName: string | undefined;
+  runName: string | undefined;
 }
 
 /**

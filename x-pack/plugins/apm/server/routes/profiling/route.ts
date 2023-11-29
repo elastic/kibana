@@ -8,12 +8,24 @@
 import { toNumberRt } from '@kbn/io-ts-utils';
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import * as t from 'io-ts';
+import {
+  profilingAWSCostDiscountRate,
+  profilingCo2PerKWH,
+  profilingCostPervCPUPerHour,
+  profilingDatacenterPUE,
+  profilingPervCPUWattArm64,
+  profilingPervCPUWattX86,
+} from '@kbn/observability-plugin/common';
 import { HOST_NAME } from '../../../common/es_fields/apm';
-import { toKueryFilterFormat } from '../../../common/utils/to_kuery_filter_format';
+import {
+  mergeKueries,
+  toKueryFilterFormat,
+} from '../../../common/utils/kuery_utils';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
+  kueryRt,
   rangeRt,
   serviceTransactionDataSourceRt,
 } from '../default_api_types';
@@ -27,6 +39,7 @@ const profilingFlamegraphRoute = createApmServerRoute({
       rangeRt,
       environmentRt,
       serviceTransactionDataSourceRt,
+      kueryRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -36,14 +49,30 @@ const profilingFlamegraphRoute = createApmServerRoute({
     { flamegraph: BaseFlameGraph; hostNames: string[] } | undefined
   > => {
     const { context, plugins, params } = resources;
+    const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] =
       await Promise.all([
-        (await context.core).elasticsearch.client,
+        core.elasticsearch.client,
         await getApmEventClient(resources),
         await plugins.profilingDataAccess?.start(),
       ]);
     if (profilingDataAccessStart) {
-      const { start, end, environment, documentType, rollupInterval } =
+      const [
+        co2PerKWH,
+        datacenterPUE,
+        pervCPUWattX86,
+        pervCPUWattArm64,
+        awsCostDiscountRate,
+        costPervCPUPerHour,
+      ] = await Promise.all([
+        core.uiSettings.client.get<number>(profilingCo2PerKWH),
+        core.uiSettings.client.get<number>(profilingDatacenterPUE),
+        core.uiSettings.client.get<number>(profilingPervCPUWattX86),
+        core.uiSettings.client.get<number>(profilingPervCPUWattArm64),
+        core.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
+        core.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
+      ]);
+      const { start, end, environment, documentType, rollupInterval, kuery } =
         params.query;
       const { serviceName } = params.path;
 
@@ -66,7 +95,16 @@ const profilingFlamegraphRoute = createApmServerRoute({
           esClient: esClient.asCurrentUser,
           rangeFromMs: start,
           rangeToMs: end,
-          kuery: toKueryFilterFormat(HOST_NAME, serviceHostNames),
+          kuery: mergeKueries([
+            `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
+            kuery,
+          ]),
+          co2PerKWH,
+          datacenterPUE,
+          pervCPUWattX86,
+          pervCPUWattArm64,
+          awsCostDiscountRate,
+          costPervCPUPerHour,
         });
 
       return { flamegraph, hostNames: serviceHostNames };
@@ -85,6 +123,7 @@ const profilingFunctionsRoute = createApmServerRoute({
       environmentRt,
       serviceTransactionDataSourceRt,
       t.type({ startIndex: toNumberRt, endIndex: toNumberRt }),
+      kueryRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -92,9 +131,10 @@ const profilingFunctionsRoute = createApmServerRoute({
     resources
   ): Promise<{ functions: TopNFunctions; hostNames: string[] } | undefined> => {
     const { context, plugins, params } = resources;
+    const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] =
       await Promise.all([
-        (await context.core).elasticsearch.client,
+        core.elasticsearch.client,
         await getApmEventClient(resources),
         await plugins.profilingDataAccess?.start(),
       ]);
@@ -107,8 +147,25 @@ const profilingFunctionsRoute = createApmServerRoute({
         endIndex,
         documentType,
         rollupInterval,
+        kuery,
       } = params.query;
       const { serviceName } = params.path;
+
+      const [
+        co2PerKWH,
+        datacenterPUE,
+        pervCPUWattX86,
+        pervCPUWattArm64,
+        awsCostDiscountRate,
+        costPervCPUPerHour,
+      ] = await Promise.all([
+        core.uiSettings.client.get<number>(profilingCo2PerKWH),
+        core.uiSettings.client.get<number>(profilingDatacenterPUE),
+        core.uiSettings.client.get<number>(profilingPervCPUWattX86),
+        core.uiSettings.client.get<number>(profilingPervCPUWattArm64),
+        core.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
+        core.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
+      ]);
 
       const serviceHostNames = await getServiceHostNames({
         apmEventClient,
@@ -128,9 +185,18 @@ const profilingFunctionsRoute = createApmServerRoute({
         esClient: esClient.asCurrentUser,
         rangeFromMs: start,
         rangeToMs: end,
-        kuery: toKueryFilterFormat(HOST_NAME, serviceHostNames),
+        kuery: mergeKueries([
+          `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
+          kuery,
+        ]),
         startIndex,
         endIndex,
+        co2PerKWH,
+        datacenterPUE,
+        pervCPUWattX86,
+        pervCPUWattArm64,
+        awsCostDiscountRate,
+        costPervCPUPerHour,
       });
       return { functions, hostNames: serviceHostNames };
     }

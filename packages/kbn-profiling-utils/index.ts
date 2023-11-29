@@ -29,6 +29,8 @@ export {
   createTopNFunctions,
   TopNFunctionSortField,
   topNFunctionSortFieldRt,
+  TopNComparisonFunctionSortField,
+  topNComparisonFunctionSortFieldRt,
 } from './common/functions';
 export { convertTonsToKgs } from './common/utils';
 

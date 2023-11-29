@@ -10,7 +10,6 @@ import {
   kqlQuery,
   rangeQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
@@ -19,6 +18,8 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getDeviceOSApp({
@@ -42,7 +43,12 @@ export async function getDeviceOSApp({
 }) {
   return await apmEventClient.search('get_mobile_device_os_app', {
     apm: {
-      events: [ProcessorEvent.transaction],
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,
