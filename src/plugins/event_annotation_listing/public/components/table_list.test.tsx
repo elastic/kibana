@@ -135,7 +135,6 @@ describe('annotation list view', () => {
       wrapper.find(TableListViewTable).prop('deleteItems')!([
         {
           id: 'some-id-1',
-          namespaces: ['default'],
           references: [
             {
               type: 'index-pattern',
@@ -151,7 +150,6 @@ describe('annotation list view', () => {
         },
         {
           id: 'some-id-2',
-          namespaces: ['default'],
           references: [],
           type: EVENT_ANNOTATION_GROUP_TYPE,
           updatedAt: '',

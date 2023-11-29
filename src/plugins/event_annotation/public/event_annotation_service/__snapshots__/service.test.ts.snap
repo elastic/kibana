@@ -11,9 +11,6 @@ Object {
         "title": undefined,
       },
       "id": "nonExistingGroup",
-      "namespaces": Array [
-        "default",
-      ],
       "references": Array [],
       "type": undefined,
       "updatedAt": "",
@@ -26,9 +23,6 @@ Object {
         "title": "groupTitle",
       },
       "id": undefined,
-      "namespaces": Array [
-        "default",
-      ],
       "references": Array [
         Object {
           "id": "ipid",
@@ -52,9 +46,6 @@ Object {
         "title": "groupTitle",
       },
       "id": "multiAnnotations",
-      "namespaces": Array [
-        "default",
-      ],
       "references": Array [
         Object {
           "id": "ipid",
@@ -75,9 +66,6 @@ Object {
         "title": "groupTitle",
       },
       "id": "multiAnnotations",
-      "namespaces": Array [
-        "default",
-      ],
       "references": Array [],
       "type": "event-annotation-group",
       "updatedAt": "",

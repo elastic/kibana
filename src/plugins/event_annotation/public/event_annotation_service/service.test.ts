@@ -24,7 +24,6 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
     attributes: {} as EventAnnotationGroupSavedObjectAttributes,
     references: [],
     id: 'nonExistingGroup',
-    namespaces: ['default'],
     error: {
       error: 'Saved object not found',
       statusCode: 404,
@@ -41,7 +40,6 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
       dataViewSpec: null,
     },
     type: 'event-annotation-group',
-    namespaces: ['default'],
     references: [
       {
         id: 'ipid',
@@ -61,7 +59,6 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
     },
     id: 'multiAnnotations',
     type: 'event-annotation-group',
-    namespaces: ['default'],
     references: [
       {
         id: 'ipid',
@@ -79,7 +76,6 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
     } as Partial<EventAnnotationGroupSavedObjectAttributes>,
     id: 'multiAnnotations',
     type: 'event-annotation-group',
-    namespaces: ['default'],
     references: [],
   } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
 };
