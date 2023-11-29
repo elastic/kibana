@@ -15,7 +15,6 @@ export const ALL_SPACES_ID = '*';
  */
 export const UNKNOWN_SPACE = '?';
 
-export const GLOBAL_RESOURCE = '*';
 export const APPLICATION_PREFIX = 'kibana-';
 
 /**

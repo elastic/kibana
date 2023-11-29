@@ -17,7 +17,7 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  indexPattern: 'ft_bank_marketing',
+  indexName: 'ft_bank_marketing',
   queryEntityFieldNames: ['day'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };
@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'y',
         trainingPercent: 20,
         modelMemory: '60mb',
-        createIndexPattern: true,
+        createDataView: true,
         fieldStatsEntries: [
           {
             fieldName: 'age',
@@ -339,9 +339,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('sets the create data view switch');
           await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(
-            testData.createIndexPattern
-          );
+          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./containers'));
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./services'));
+    loadTestFile(require.resolve('./pods'));
     loadTestFile(require.resolve('./sample_assets'));
   });
 }

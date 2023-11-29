@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { CUSTOM_AGGREGATOR } from '../../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
 import { CustomThresholdAlert, CustomThresholdRule } from '../components/alert_details_app_section';
@@ -60,7 +59,6 @@ export const buildCustomThresholdRule = (
     params: {
       criteria: [
         {
-          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
           metrics: [
             {
@@ -73,7 +71,6 @@ export const buildCustomThresholdRule = (
           timeUnit: 'm',
         },
         {
-          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
           metrics: [
             {
@@ -89,7 +86,6 @@ export const buildCustomThresholdRule = (
           warningThreshold: [2.2],
         },
         {
-          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
           metrics: [
             {
@@ -155,7 +151,6 @@ export const buildCustomThresholdAlert = (
       'kibana.alert.rule.parameters': {
         criteria: [
           {
-            aggType: CUSTOM_AGGREGATOR,
             comparator: Comparator.GT,
             metrics: [
               {
@@ -169,7 +164,6 @@ export const buildCustomThresholdAlert = (
             timeUnit: 'm',
           },
           {
-            aggType: CUSTOM_AGGREGATOR,
             comparator: Comparator.GT,
             metrics: [
               {

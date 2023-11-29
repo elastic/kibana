@@ -50,7 +50,10 @@ export const ConnectorIngestionPanel: React.FC<{ assetBasePath: string }> = ({ a
       </EuiFlexItem>
       <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiLink onClick={() => createConnector()}>
+          <EuiLink
+            data-test-subj="serverlessSearchConnectorIngestionPanelSetUpAConnectorLink"
+            onClick={() => createConnector()}
+          >
             {i18n.translate(
               'xpack.serverlessSearch.ingestData.alternativeOptions.setupConnectorLabel',
               {
@@ -74,6 +77,7 @@ export const ConnectorIngestionPanel: React.FC<{ assetBasePath: string }> = ({ a
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <EuiLink
+                  data-test-subj="serverlessSearchConnectorIngestionPanelDockerLink"
                   target="_blank"
                   href="https://github.com/elastic/connectors-python/blob/main/docs/DOCKER.md"
                 >
