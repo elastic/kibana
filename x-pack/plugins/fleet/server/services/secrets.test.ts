@@ -21,7 +21,12 @@ import { createAppContextStartContractMock } from '../mocks';
 import type { NewPackagePolicy, PackageInfo } from '../types';
 
 import { appContextService } from './app_context';
-import { getPolicySecretPaths, diffSecretPaths, diffOutputSecretPaths, extractAndWriteSecrets } from './secrets';
+import {
+  getPolicySecretPaths,
+  diffSecretPaths,
+  diffOutputSecretPaths,
+  extractAndWriteSecrets,
+} from './secrets';
 
 describe('secrets', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
