@@ -16,8 +16,8 @@ export interface FlyoutProps extends FlyoutContentProps {
 export interface LogDocument extends DataTableRecord {
   flattened: {
     '@timestamp': string;
-    'log.level'?: string;
-    message?: string;
+    'log.level'?: [string];
+    message?: [string];
 
     'host.name'?: string;
     'service.name'?: string;
@@ -38,8 +38,8 @@ export interface LogDocument extends DataTableRecord {
 
 export interface FlyoutDoc {
   '@timestamp': string;
-  'log.level'?: string;
-  message?: string;
+  'log.level'?: [string];
+  message?: [string];
 
   'host.name'?: string;
   'service.name'?: string;

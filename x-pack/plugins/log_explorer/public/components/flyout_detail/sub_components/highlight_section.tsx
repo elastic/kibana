@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiFlexGrid,
@@ -13,36 +13,51 @@ import {
   EuiTitle,
   EuiFlexItem,
   useGeneratedHtmlId,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 interface HighlightSectionProps {
   title: string;
   children: React.ReactNode;
-  showBottomRule?: boolean;
   columns: 1 | 2 | 3;
 }
 
-export function HighlightSection({
-  title,
-  children,
-  showBottomRule = true,
-  columns,
-}: HighlightSectionProps) {
+const CHILDREN_PER_SECTION: 3 | 6 | 9 = 6;
+
+export function HighlightSection({ title, children, columns }: HighlightSectionProps) {
   const validChildren = React.Children.toArray(children).filter(Boolean);
-  const shouldRenderSection = validChildren.length > 0;
+  const childLength = validChildren.length;
+  const shouldRenderSection = childLength > 0;
+  const limitedChildren = validChildren.slice(0, CHILDREN_PER_SECTION - 1);
+  const [showMore, setShowMore] = useState(childLength > CHILDREN_PER_SECTION);
+
+  const accordionId = useGeneratedHtmlId({
+    prefix: title,
+  });
+
+  const hiddenCount = childLength - limitedChildren.length;
+  const showMoreButton = (
+    <EuiButtonEmpty
+      size="xs"
+      flush="left"
+      css={{ width: '80px' }}
+      onClick={() => {
+        setShowMore(false);
+      }}
+    >{`+ ${hiddenCount} more`}</EuiButtonEmpty>
+  );
+
+  limitedChildren.push(showMoreButton);
+
   const accordionTitle = (
     <EuiTitle size="xs">
       <p>{title}</p>
     </EuiTitle>
   );
 
-  const flexChildren = validChildren.map((child, idx) => (
+  const flexChildren = (showMore ? limitedChildren : validChildren).map((child, idx) => (
     <EuiFlexItem key={idx}>{child}</EuiFlexItem>
   ));
-
-  const accordionId = useGeneratedHtmlId({
-    prefix: title,
-  });
 
   return shouldRenderSection ? (
     <>
@@ -53,9 +68,11 @@ export function HighlightSection({
         initialIsOpen={true}
         data-test-subj={`logExplorerFlyoutHighlightSection${title}`}
       >
-        <EuiFlexGrid columns={columns}>{flexChildren}</EuiFlexGrid>
+        <EuiFlexGrid columns={columns} alignItems="start">
+          {flexChildren}
+        </EuiFlexGrid>
       </EuiAccordion>
-      {showBottomRule && <EuiHorizontalRule margin="xs" />}
+      <EuiHorizontalRule margin="xs" />
     </>
   ) : null;
 }

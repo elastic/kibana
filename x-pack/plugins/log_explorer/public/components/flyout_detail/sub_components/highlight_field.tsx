@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard, EuiTextTruncate } from '@elastic/eui';
 import React, { ReactNode, useMemo, useState } from 'react';
-import { HoverAction, HoverActionType } from './hover_action';
 import {
   flyoutHoverActionFilterForText,
   flyoutHoverActionFilterOutText,
@@ -16,6 +15,7 @@ import {
   flyoutHoverActionCopyToClipboardText,
 } from '../translations';
 import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
+import { HoverActionPopover, HoverActionType } from './hover_popover_action';
 
 interface HighlightFieldProps {
   field: string;
@@ -89,6 +89,7 @@ export function HighlightField({
     ],
     [filterForText, filterOutText, actions, field, value, columnAdded]
   );
+
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
@@ -97,7 +98,7 @@ export function HighlightField({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <HoverAction actions={hoverActions}>
+        <HoverActionPopover actions={hoverActions} title={formattedValue}>
           <EuiFlexGroup
             responsive={false}
             alignItems="center"
@@ -116,7 +117,7 @@ export function HighlightField({
               </EuiTextTruncate>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </HoverAction>
+        </HoverActionPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;

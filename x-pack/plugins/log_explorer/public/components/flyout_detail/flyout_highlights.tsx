@@ -50,7 +50,6 @@ export function FlyoutHighlights({
 }) {
   const [ref, dimensions] = useMeasure<HTMLDivElement>();
   const { columns, fieldWidth } = useFlyoutColumnWidth(dimensions.width);
-
   return (
     <DiscoverActionsProvider value={actions}>
       <HighlightContainer ref={ref}>
@@ -176,7 +175,7 @@ export function FlyoutHighlights({
           )}
         </HighlightSection>
         {/* Other highlights */}
-        <HighlightSection title={otherAccordionTitle} showBottomRule={false} columns={columns}>
+        <HighlightSection title={otherAccordionTitle} columns={columns}>
           {formattedDoc[constants.LOG_FILE_PATH_FIELD] && (
             <HighlightField
               data-test-subj="logExplorerFlyoutLogPathFile"
