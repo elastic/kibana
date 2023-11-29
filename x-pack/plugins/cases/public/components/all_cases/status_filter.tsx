@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { CaseStatuses } from '../../../common/types/domain';
-import { statuses } from '../status';
+
 import type { MultiSelectFilterOption } from './multi_select_filter';
-import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
+import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
@@ -23,7 +23,11 @@ interface Props {
   selectedOptionKeys: string[];
 }
 
-const caseStatuses = Object.keys(statuses) as CaseStatuses[];
+const caseStatuses = [
+  { key: CaseStatuses.open, label: i18n.STATUS_OPEN },
+  { key: CaseStatuses['in-progress'], label: i18n.STATUS_IN_PROGRESS },
+  { key: CaseStatuses.closed, label: i18n.STATUS_CLOSED },
+];
 
 export const StatusFilterComponent = ({
   countClosedCases,
@@ -43,13 +47,13 @@ export const StatusFilterComponent = ({
   );
   const options = useMemo(
     () =>
-      mapToMultiSelectOption(
-        [...caseStatuses].filter((status) => !hiddenStatuses.includes(status))
-      ),
+      [...caseStatuses].filter((status) => !hiddenStatuses.includes(status.key)) as Array<
+        MultiSelectFilterOption<string, CaseStatuses>
+      >,
     [hiddenStatuses]
   );
-  const renderOption = (option: MultiSelectFilterOption<CaseStatuses>) => {
-    const selectedStatus = option.label;
+  const renderOption = (option: MultiSelectFilterOption<string, CaseStatuses>) => {
+    const selectedStatus = option.key;
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={1}>
@@ -62,7 +66,7 @@ export const StatusFilterComponent = ({
     );
   };
   return (
-    <MultiSelectFilter<CaseStatuses>
+    <MultiSelectFilter
       buttonLabel={i18n.STATUS}
       id={'status'}
       onChange={onChange}

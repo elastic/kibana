@@ -22,8 +22,8 @@ import {
 import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
 
-type FilterOption<T extends string> = EuiSelectableOption<{
-  key: string;
+type FilterOption<T extends string, K extends string = string> = EuiSelectableOption<{
+  key: K;
   label: T;
 }>;
 
@@ -38,12 +38,12 @@ export const mapToMultiSelectOption = <T extends string>(options: T[]) => {
   });
 };
 
-const fromRawOptionsToEuiSelectableOptions = <T extends string>(
-  options: Array<FilterOption<T>>,
+const fromRawOptionsToEuiSelectableOptions = <T extends string, K extends string>(
+  options: Array<FilterOption<T, K>>,
   selectedOptionKeys: string[]
-): Array<FilterOption<T>> => {
+): Array<FilterOption<T, K>> => {
   return options.map(({ key, label }) => {
-    const selectableOption: FilterOption<T> = { label, key };
+    const selectableOption: FilterOption<T, K> = { label, key };
     if (selectedOptionKeys.includes(key)) {
       selectableOption.checked = 'on';
     }
@@ -52,16 +52,17 @@ const fromRawOptionsToEuiSelectableOptions = <T extends string>(
   });
 };
 
-const fromEuiSelectableOptionToRawOption = <T extends string>(
-  options: Array<FilterOption<T>>
+const fromEuiSelectableOptionToRawOption = <T extends string, K extends string>(
+  options: Array<FilterOption<T, K>>
 ): string[] => {
   return options.map((option) => option.key);
 };
 
-const getEuiSelectableCheckedOptions = <T extends string>(options: Array<FilterOption<T>>) =>
-  options.filter((option) => option.checked === 'on');
+const getEuiSelectableCheckedOptions = <T extends string, K extends string>(
+  options: Array<FilterOption<T, K>>
+) => options.filter((option) => option.checked === 'on') as Array<FilterOption<T, K>>;
 
-interface UseFilterParams<T extends string> {
+interface UseFilterParams<T extends string, K extends string = string> {
   buttonLabel?: string;
   buttonIconType?: string;
   hideActiveOptionsNumber?: boolean;
@@ -69,11 +70,11 @@ interface UseFilterParams<T extends string> {
   limit?: number;
   limitReachedMessage?: string;
   onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
-  options: Array<FilterOption<T>>;
+  options: Array<FilterOption<T, K>>;
   selectedOptionKeys?: string[];
-  renderOption?: (option: FilterOption<T>) => React.ReactNode;
+  renderOption?: (option: FilterOption<T, K>) => React.ReactNode;
 }
-export const MultiSelectFilter = <T extends string>({
+export const MultiSelectFilter = <T extends string, K extends string = string>({
   buttonLabel,
   buttonIconType,
   hideActiveOptionsNumber,
@@ -84,16 +85,13 @@ export const MultiSelectFilter = <T extends string>({
   options: rawOptions,
   selectedOptionKeys = [],
   renderOption,
-}: UseFilterParams<T>) => {
+}: UseFilterParams<T, K>) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
   const showActiveOptionsNumber = !hideActiveOptionsNumber;
   const isInvalid = Boolean(limit && limitReachedMessage && selectedOptionKeys.length >= limit);
-  const options: Array<FilterOption<T>> = fromRawOptionsToEuiSelectableOptions(
-    rawOptions,
-    selectedOptionKeys
-  );
+  const options = fromRawOptionsToEuiSelectableOptions(rawOptions, selectedOptionKeys);
 
   useEffect(() => {
     const newSelectedOptions = selectedOptionKeys.filter((selectedOptionKey) =>
@@ -107,7 +105,7 @@ export const MultiSelectFilter = <T extends string>({
     }
   }, [selectedOptionKeys, rawOptions, id, onChange]);
 
-  const _onChange = (newOptions: Array<FilterOption<T>>) => {
+  const _onChange = (newOptions: Array<FilterOption<T, K>>) => {
     const newSelectedOptions = getEuiSelectableCheckedOptions(newOptions);
     if (isInvalid && limit && newSelectedOptions.length >= limit) {
       return;
@@ -153,7 +151,7 @@ export const MultiSelectFilter = <T extends string>({
           <EuiHorizontalRule margin="none" />
         </>
       )}
-      <EuiSelectable<FilterOption<T>>
+      <EuiSelectable<FilterOption<T, K>>
         options={options}
         searchable
         searchProps={{ placeholder: buttonLabel, compressed: false }}

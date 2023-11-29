@@ -203,17 +203,22 @@ describe('utils', () => {
           },
           'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': {
             type: CustomFieldTypes.TOGGLE,
-            options: ['off', 'unset'],
+            options: ['off'],
           },
           'c1f0c0a0-2aaf-11ec-8d3d-0242ac130003': {
             type: CustomFieldTypes.TOGGLE,
             options: [],
           },
+          'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4': {
+            type: CustomFieldTypes.TOGGLE,
+            options: ['on', 'off'],
+          },
         })
       ).toEqual({
         customFields: {
           '957846f4-a792-45a2-bc9a-c028973dfdde': [true],
-          'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': [false, null],
+          'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': [false],
+          'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4': [true, false],
         },
       });
     });
