@@ -18,9 +18,31 @@ export const FINDINGS_UNIT = (totalCount: number) =>
 
 export const GROUPING_OPTIONS = {
   RESOURCE: 'resource.name',
-  RULE: 'rule.name',
+  RULE_NAME: 'rule.name',
   CLOUD_ACCOUNT: 'cloud.account.name',
   KUBERNETES: 'orchestrator.cluster.name',
+};
+
+export const NULL_GROUPING_UNIT = i18n.translate('xpack.csp.findings.grouping.nullGroupUnit', {
+  defaultMessage: 'findings',
+});
+
+export const NULL_GROUPING_MESSAGES = {
+  RESOURCE: i18n.translate('xpack.csp.findings.grouping.resource.nullGroupTitle', {
+    defaultMessage: 'No resource',
+  }),
+  RULE_NAME: i18n.translate('xpack.csp.findings.grouping.rule.nullGroupTitle', {
+    defaultMessage: 'No rule',
+  }),
+  CLOUD_ACCOUNT: i18n.translate('xpack.csp.findings.grouping.cloudAccount.nullGroupTitle', {
+    defaultMessage: 'No cloud account',
+  }),
+  KUBERNETES: i18n.translate('xpack.csp.findings.grouping.kubernetes.nullGroupTitle', {
+    defaultMessage: 'No Kubernetes cluster',
+  }),
+  GENERIC_MESSAGE: i18n.translate('xpack.csp.findings.grouping.kubernetes.nullGroupTitle', {
+    defaultMessage: 'No grouping',
+  }),
 };
 
 export const defaultGroupingOptions: GroupOption[] = [
@@ -34,7 +56,7 @@ export const defaultGroupingOptions: GroupOption[] = [
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByRuleName', {
       defaultMessage: 'Rule name',
     }),
-    key: GROUPING_OPTIONS.RULE,
+    key: GROUPING_OPTIONS.RULE_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByCloudAccount', {
