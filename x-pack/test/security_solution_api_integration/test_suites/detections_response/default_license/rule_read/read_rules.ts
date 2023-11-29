@@ -160,7 +160,6 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
 
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput(),
