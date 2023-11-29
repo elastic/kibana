@@ -37,7 +37,7 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { TimelineHeader } from '../header';
+import { QueryTabHeader } from './header';
 import { calculateTotalPages } from '../helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
@@ -74,10 +74,13 @@ import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
+`;
+
+const QueryTabHeaderContainer = styled.div`
   width: 100%;
 `;
 
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
+QueryTabHeaderContainer.displayName = 'TimelineHeaderContainer';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   align-items: stretch;
@@ -86,8 +89,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   flex-direction: column;
 
   &.euiFlyoutHeader {
-    ${({ theme }) =>
-      `padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
   }
 `;
 
@@ -364,10 +366,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [isSourcererLoading, timelineId, dispatch, dataLoadingState, isQueryLoading]);
 
-  const isDatePickerDisabled = useMemo(() => {
-    return (combinedQueries && combinedQueries.kqlError != null) || false;
-  }, [combinedQueries]);
-
   const leadingControlColumns = useMemo(
     () =>
       getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
@@ -376,6 +374,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       })),
     [ACTION_BUTTON_COUNT]
   );
+  const isDatePickerDisabled = useMemo(() => {
+    return (combinedQueries && combinedQueries.kqlError != null) || false;
+  }, [combinedQueries]);
 
   const header = useMemo(
     () => (
@@ -404,7 +405,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           </SourcererFlex>
         </EuiFlexGroup>
         <TimelineHeaderContainer data-test-subj="timelineHeader">
-          <TimelineHeader
+          <QueryTabHeader
             filterManager={filterManager}
             show={show && activeTab === TimelineTabs.query}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}

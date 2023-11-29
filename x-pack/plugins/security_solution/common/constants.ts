@@ -263,6 +263,7 @@ export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
 export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
 export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
+export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
 
 /**
  * Public Risk Score routes
@@ -433,6 +434,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.11',
+  TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -453,8 +455,8 @@ export const RISKY_HOSTS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
 export const RISKY_USERS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
-export const DETECTION_ENTITY_DASHBOARD =
-  'https://www.elastic.co/guide/en/security/current/detection-entity-dashboard.html';
+export const RISKY_ENTITY_SCORE_DOC_LINK =
+  'https://www.elastic.co/guide/en/security/current/advanced-entity-analytics-overview.html#entity-risk-scoring';
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 

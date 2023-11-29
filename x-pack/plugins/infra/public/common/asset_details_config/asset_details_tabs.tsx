@@ -28,6 +28,12 @@ export const commonFlyoutTabs: Tab[] = [
     }),
   },
   {
+    id: ContentTabIds.PROFILING,
+    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.profiling', {
+      defaultMessage: 'Universal Profiling',
+    }),
+  },
+  {
     id: ContentTabIds.LOGS,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.logs.title', {
       defaultMessage: 'Logs',

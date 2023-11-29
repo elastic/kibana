@@ -289,4 +289,9 @@ export const updateSampleSize = actionCreator<{
   sampleSize: number;
 }>('UPDATE_SAMPLE_SIZE');
 
+export const setDataProviderVisibility = actionCreator<{
+  id: string;
+  isDataProviderVisible: boolean;
+}>('SET_DATA_PROVIDER_VISIBLITY');
+
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');

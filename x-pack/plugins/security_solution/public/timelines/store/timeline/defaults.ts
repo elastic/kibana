@@ -80,8 +80,9 @@ export const timelineDefaults: SubsetTimelineModel &
   filters: [],
   savedSearchId: null,
   isDiscoverSavedSearchLoaded: false,
-  sampleSize: 550,
-  rowHeight: 2,
+  sampleSize: 500,
+  rowHeight: 1,
+  isDataProviderVisible: false,
 };
 
 export const getTimelineManageDefaults = (id: string) => ({

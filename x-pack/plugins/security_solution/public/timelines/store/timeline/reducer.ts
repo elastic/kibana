@@ -62,6 +62,7 @@ import {
   updateColumnWidth,
   updateSavedSearchId,
   setIsDiscoverSavedSearchLoaded,
+  setDataProviderVisibility,
   setChanged,
 } from './actions';
 
@@ -553,6 +554,18 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
+  .case(setDataProviderVisibility, (state, { id, isDataProviderVisible }) => {
+    return {
+      ...state,
+      timelineById: {
+        ...state.timelineById,
+        [id]: {
+          ...state.timelineById[id],
+          isDataProviderVisible,
+        },
+      },
+    };
+  })
   .case(setChanged, (state, { id, changed }) => ({
     ...state,
     timelineById: {
