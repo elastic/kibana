@@ -119,7 +119,6 @@ export class ExecutionHandler<
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
-  private maintenanceWindowIds: string[] = [];
   private alertsClient: IAlertsClient<
     AlertData,
     State,
@@ -142,8 +141,8 @@ export class ExecutionHandler<
     ruleLabel,
     previousStartedAt,
     actionsClient,
-    maintenanceWindowIds,
     alertsClient,
+    activeMaintenanceWindows,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -172,7 +171,6 @@ export class ExecutionHandler<
     );
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
-    this.maintenanceWindowIds = maintenanceWindowIds ?? [];
     this.alertsClient = alertsClient;
   }
 
@@ -579,7 +577,10 @@ export class ExecutionHandler<
     const executables = [];
 
     for (const action of this.rule.actions) {
-      const alertsArray = Object.entries(alerts);
+      const alertsArray = Object.entries(alerts).filter(([_, alert]) => {
+        return alert.getMaintenanceWindowIds().length === 0;
+      });
+
       let summarizedAlerts = null;
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
         summarizedAlerts = await this.getSummarizedAlerts({
@@ -596,16 +597,12 @@ export class ExecutionHandler<
         }
       }
 
-      // By doing that we are not cancelling the summary action but just waiting
-      // for the window maintenance to be over before sending the summary action
-      if (isSummaryAction(action) && this.maintenanceWindowIds.length > 0) {
-        this.logger.debug(
-          `no scheduling of summary actions "${action.id}" for rule "${
-            this.taskInstance.params.alertId
-          }": has active maintenance windows ${this.maintenanceWindowIds.join()}.`
-        );
+      // Nothing in the alerts array, likely due to maintenance window, so do nothing
+      if (alertsArray.length === 0) {
         continue;
-      } else if (isSummaryAction(action)) {
+      }
+
+      if (isSummaryAction(action)) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
@@ -614,15 +611,6 @@ export class ExecutionHandler<
 
       for (const [alertId, alert] of alertsArray) {
         if (alert.isFilteredOut(summarizedAlerts)) {
-          continue;
-        }
-
-        if (alert.getMaintenanceWindowIds().length > 0) {
-          this.logger.debug(
-            `no scheduling of actions "${action.id}" for rule "${
-              this.taskInstance.params.alertId
-            }": has active maintenance windows ${alert.getMaintenanceWindowIds().join()}.`
-          );
           continue;
         }
 
