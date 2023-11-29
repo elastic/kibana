@@ -20,10 +20,11 @@ export interface Props {
   loading: boolean;
   error: boolean;
   cardsPerRow?: string;
+  listViewMode?: 'compact' | 'default';
   sloView: string;
 }
 
-export function SlosView({ cardsPerRow, sloList, loading, error, sloView }: Props) {
+export function SlosView({ cardsPerRow, listViewMode, sloList, loading, error, sloView }: Props) {
   const sloIdsAndInstanceIds = sloList.map(
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
@@ -57,6 +58,9 @@ export function SlosView({ cardsPerRow, sloList, loading, error, sloView }: Prop
         sloList={sloList}
         activeAlertsBySlo={activeAlertsBySlo}
         rulesBySlo={rulesBySlo}
+        error={error}
+        loading={loading}
+        viewMode={listViewMode}
       />
     </EuiFlexItem>
   );

@@ -17,11 +17,15 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { CardsPerRow } from './card_view/cards_per_row';
+import { SLOListViewSettings } from './compact_view/slo_list_view_settings';
 
 export type SLOViewType = 'cardView' | 'listView';
 
 interface Props {
   setCardsPerRow: (gridSize?: string) => void;
+  cardsPerRow?: string;
+  toggleListViewMode: () => void;
+  listViewMode?: 'compact' | 'default';
   setSLOView: (view: SLOViewType) => void;
   sloView: SLOViewType;
 }
@@ -40,7 +44,14 @@ const toggleButtonsIcons = [
   },
 ];
 
-export function ToggleSLOView({ sloView, setSLOView, setCardsPerRow }: Props) {
+export function ToggleSLOView({
+  sloView,
+  setSLOView,
+  setCardsPerRow,
+  cardsPerRow = '4',
+  toggleListViewMode,
+  listViewMode = 'compact',
+}: Props) {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -54,16 +65,24 @@ export function ToggleSLOView({ sloView, setSLOView, setCardsPerRow }: Props) {
           isIconOnly
         />
       </EuiFlexItem>
-      {sloView === 'cardView' && (
-        <EuiFlexItem grow={false}>
-          <ViewSettings setCardsPerRow={setCardsPerRow} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <ViewSettings>
+          {sloView === 'cardView' && (
+            <CardsPerRow setCardsPerRow={setCardsPerRow} cardsPerRow={cardsPerRow} />
+          )}
+          {sloView === 'listView' && (
+            <SLOListViewSettings
+              toggleCompactView={toggleListViewMode}
+              listViewMode={listViewMode}
+            />
+          )}
+        </ViewSettings>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function ViewSettings({ setCardsPerRow }: { setCardsPerRow: (cardsPerRow?: string) => void }) {
+function ViewSettings({ children }: { children: React.ReactNode }) {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   return (
@@ -89,9 +108,7 @@ function ViewSettings({ setCardsPerRow }: { setCardsPerRow: (cardsPerRow?: strin
           defaultMessage="View settings"
         />
       </EuiPopoverTitle>
-      <div style={{ width: '300px' }}>
-        <CardsPerRow setCardsPerRow={setCardsPerRow} />
-      </div>
+      <div style={{ width: '300px' }}>{children}</div>
     </EuiPopover>
   );
 }

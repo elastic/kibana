@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -31,7 +29,6 @@ export interface Props {
   initialState: SearchState;
   onChangeQuery: (query: string) => void;
   onChangeSort: (sort: SortField) => void;
-  onChangeViewMode: (viewMode: ViewMode) => void;
 }
 
 export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
@@ -69,30 +66,9 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
   },
 ];
 
-const VIEW_MODE_OPTIONS: Array<EuiComboBoxOptionOption<ViewMode>> = [
-  {
-    value: 'default',
-    label: i18n.translate('xpack.observability.slo.list.viewMode.default', {
-      defaultMessage: 'Default',
-    }),
-  },
-  {
-    value: 'compact',
-    label: i18n.translate('xpack.observability.slo.list.viewMode.compact', {
-      defaultMessage: 'Compact',
-    }),
-  },
-];
-
 export type ViewMode = 'default' | 'compact';
 
-export function SloListSearchBar({
-  loading,
-  onChangeQuery,
-  onChangeSort,
-  onChangeViewMode,
-  initialState,
-}: Props) {
+export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initialState }: Props) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
   const { dataView } = useCreateDataView({ indexPatternString: '.slo-observability.summary-*' });
@@ -106,10 +82,6 @@ export function SloListSearchBar({
     }))
   );
   const selectedSort = sortOptions.find((option) => option.checked === 'on');
-
-  const [viewModeOption, setViewModeOption] = useState<EuiComboBoxOptionOption<ViewMode>>(
-    VIEW_MODE_OPTIONS.find((opt) => opt.value === initialState.viewMode)!
-  );
 
   const handleToggleSortButton = () => setSortPopoverOpen(!isSortPopoverOpen);
   const handleChangeSort = (newOptions: Array<Item<SortField>>) => {
@@ -192,23 +164,6 @@ export function SloListSearchBar({
                 </div>
               </EuiPopover>
             </EuiFilterGroup>
-          </EuiFlexItem>
-          <EuiFlexItem style={{ maxWidth: 200 }}>
-            <EuiComboBox<ViewMode>
-              aria-label={i18n.translate(
-                'xpack.observability.sloListSearchBar.euiComboBox.viewModeLabel',
-                { defaultMessage: 'View mode' }
-              )}
-              placeholder="Select a single option"
-              singleSelection={{ asPlainText: true }}
-              options={VIEW_MODE_OPTIONS}
-              isClearable={false}
-              selectedOptions={[viewModeOption]}
-              onChange={(selectedOptions: Array<EuiComboBoxOptionOption<ViewMode>>) => {
-                setViewModeOption(selectedOptions[0]);
-                onChangeViewMode(selectedOptions[0].value!);
-              }}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

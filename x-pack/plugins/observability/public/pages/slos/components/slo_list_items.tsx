@@ -11,38 +11,56 @@ import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { UseFetchRulesForSloResponse } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloListItem } from './slo_list_item';
+import { SloListCompactView } from './compact_view/slo_list_compact_view';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
   activeAlertsBySlo: ActiveAlerts;
   rulesBySlo?: UseFetchRulesForSloResponse['data'];
+  loading: boolean;
+  error: boolean;
+  viewMode?: 'compact' | 'default';
 }
 
-export function SloListItems({ sloList, activeAlertsBySlo, rulesBySlo }: Props) {
+export function SloListItems({
+  sloList,
+  activeAlertsBySlo,
+  rulesBySlo,
+  loading,
+  error,
+  viewMode = 'compact',
+}: Props) {
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
       list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
     });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {sloList.map((slo) => (
-        <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? ALL_VALUE}`}>
-          <SloListItem
-            activeAlerts={activeAlertsBySlo.get(slo)}
-            rules={rulesBySlo?.[slo.id]}
-            historicalSummary={
-              historicalSummaries.find(
-                (historicalSummary) =>
-                  historicalSummary.sloId === slo.id &&
-                  historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
-              )?.data
-            }
-            historicalSummaryLoading={historicalSummaryLoading}
-            slo={slo}
-          />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <EuiFlexItem>
+      {viewMode === 'compact' && (
+        <SloListCompactView sloList={sloList} loading={loading} error={error} />
+      )}
+      {viewMode === 'default' && (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {sloList.map((slo) => (
+            <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? ALL_VALUE}`}>
+              <SloListItem
+                activeAlerts={activeAlertsBySlo.get(slo)}
+                rules={rulesBySlo?.[slo.id]}
+                historicalSummary={
+                  historicalSummaries.find(
+                    (historicalSummary) =>
+                      historicalSummary.sloId === slo.id &&
+                      historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+                  )?.data
+                }
+                historicalSummaryLoading={historicalSummaryLoading}
+                slo={slo}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      )}
+    </EuiFlexItem>
   );
 }
