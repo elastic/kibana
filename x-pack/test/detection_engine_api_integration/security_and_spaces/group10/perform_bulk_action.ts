@@ -23,7 +23,6 @@ import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/com
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
   binaryToString,
   createLegacyRuleAction,
@@ -44,6 +43,7 @@ import {
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  deleteAllExceptions,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 

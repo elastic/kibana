@@ -10,6 +10,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
@@ -26,7 +27,6 @@ interface PhraseValueInputProps extends PhraseSuggestorProps {
 }
 
 class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
-  comboBoxWrapperRef = React.createRef<HTMLDivElement>();
   inputRef: HTMLInputElement | null = null;
 
   public render() {
@@ -59,43 +59,39 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
     // there are cases when the value is a number, this would cause an exception
     const valueAsStr = String(value);
     const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
+    const panelMinWidth = calculateWidthFromEntries(options);
     return (
-      <div ref={this.comboBoxWrapperRef}>
-        <StringComboBox
-          async
-          isLoading={isLoading}
-          inputRef={(ref) => {
-            this.inputRef = ref;
-          }}
-          isDisabled={this.props.disabled}
-          fullWidth={fullWidth}
-          compressed={this.props.compressed}
-          placeholder={intl.formatMessage({
-            id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
-            defaultMessage: 'Select a value',
-          })}
-          aria-label={intl.formatMessage({
-            id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
-            defaultMessage: 'Select a value',
-          })}
-          options={options}
-          getLabel={(option) => option}
-          selectedOptions={value ? [valueAsStr] : []}
-          onChange={([newValue = '']) => {
-            onChange(newValue);
-            setTimeout(() => {
-              // Note: requires a tick skip to correctly blur element focus
-              this.inputRef?.blur();
-            });
-          }}
-          onSearchChange={this.onSearchChange}
-          onCreateOption={onChange}
-          isClearable={false}
-          data-test-subj="filterParamsComboBox phraseParamsComboxBox"
-          singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
-          truncationProps={MIDDLE_TRUNCATION_PROPS}
-        />
-      </div>
+      <StringComboBox
+        async
+        isLoading={isLoading}
+        inputRef={(ref) => {
+          this.inputRef = ref;
+        }}
+        isDisabled={this.props.disabled}
+        fullWidth={fullWidth}
+        compressed={this.props.compressed}
+        placeholder={intl.formatMessage({
+          id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
+          defaultMessage: 'Select a value',
+        })}
+        aria-label={intl.formatMessage({
+          id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
+          defaultMessage: 'Select a value',
+        })}
+        options={options}
+        getLabel={(option) => option}
+        selectedOptions={value ? [valueAsStr] : []}
+        onChange={([newValue = '']) => {
+          onChange(newValue);
+        }}
+        onSearchChange={this.onSearchChange}
+        onCreateOption={onChange}
+        isClearable={false}
+        data-test-subj="filterParamsComboBox phraseParamsComboxBox"
+        singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+        truncationProps={MIDDLE_TRUNCATION_PROPS}
+        inputPopoverProps={{ panelMinWidth, anchorPosition: 'downRight' }}
+      />
     );
   }
 }

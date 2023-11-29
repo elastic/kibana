@@ -74,16 +74,21 @@ jest.mock('../../../../common/lib/kibana', () => {
         application: {
           capabilities: { siem: { crud_alerts: true, read_alerts: true } },
         },
-        cases: mockCasesContract(),
+        cases: {
+          ...mockCasesContract(),
+          helpers: {
+            canUseCases: jest.fn().mockReturnValue({
+              all: true,
+              create: true,
+              read: true,
+              update: true,
+              delete: true,
+              push: true,
+            }),
+            getRuleIdFromEvent: jest.fn(),
+          },
+        },
       },
-    }),
-    useGetUserCasesPermissions: jest.fn().mockReturnValue({
-      all: true,
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-      push: true,
     }),
   };
 });
