@@ -8,24 +8,24 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALL_VALUE,
-  apmTransactionErrorRateIndicatorSchema,
+  syntheticsAvailabilityIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { TransformGenerator } from '.';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
 } from '../../../../common/slo/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
+import { SyntheticsAvailabilityIndicator, SLO } from '../../../domain/models';
 import { InvalidTransformError } from '../../../errors';
-import { parseIndex } from './common';
+// import { parseIndex } from './common';
 import { Query } from './types';
 
-export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
+export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
-    if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
+    if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -44,30 +44,26 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildGroupBy(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
+  private buildGroupBy(slo: SLO, indicator: SyntheticsAvailabilityIndicator) {
     // These groupBy fields must match the fields from the source query, otherwise
     // the transform will create permutations for each value present in the source.
     // E.g. if environment is not specified in the source query, but we include it in the groupBy,
     // we'll output documents for each environment value
     const extraGroupByFields = {
-      ...(indicator.params.service !== ALL_VALUE && {
-        'service.name': { terms: { field: 'service.name' } },
+      'observer.name': { terms: { field: 'observer.name' } },
+      'monitor.id': { terms: { field: 'monitor.id' } },
+      ...(!indicator.params.tags?.find((param) => param.value === ALL_VALUE) && {
+        tags: { terms: { field: 'tags' } },
       }),
-      ...(indicator.params.environment !== ALL_VALUE && {
-        'service.environment': { terms: { field: 'service.environment' } },
-      }),
-      ...(indicator.params.transactionName !== ALL_VALUE && {
-        'transaction.name': { terms: { field: 'transaction.name' } },
-      }),
-      ...(indicator.params.transactionType !== ALL_VALUE && {
-        'transaction.type': { terms: { field: 'transaction.type' } },
+      ...(!indicator.params.projects?.find((param) => param.value === ALL_VALUE) && {
+        'monitor.project.id': { terms: { field: 'monitor.project.id' } },
       }),
     };
 
     return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
   }
 
-  private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
+  private buildSource(slo: SLO, indicator: SyntheticsAvailabilityIndicator) {
     const queryFilter: Query[] = [
       {
         range: {
@@ -77,53 +73,44 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
         },
       },
     ];
+    const { monitorIds, tags, projects } = buildParamValues(indicator.params);
 
-    if (indicator.params.service !== ALL_VALUE) {
+    if (!monitorIds.includes(ALL_VALUE)) {
       queryFilter.push({
         match: {
-          'service.name': indicator.params.service,
+          'monitor.id': monitorIds[0],
         },
       });
     }
 
-    if (indicator.params.environment !== ALL_VALUE) {
+    if (!tags.includes(ALL_VALUE)) {
       queryFilter.push({
         match: {
-          'service.environment': indicator.params.environment,
+          tags,
         },
       });
     }
 
-    if (indicator.params.transactionName !== ALL_VALUE) {
+    if (!projects.includes(ALL_VALUE)) {
       queryFilter.push({
         match: {
-          'transaction.name': indicator.params.transactionName,
+          'monitor.project.id': projects,
         },
       });
     }
 
-    if (indicator.params.transactionType !== ALL_VALUE) {
-      queryFilter.push({
-        match: {
-          'transaction.type': indicator.params.transactionType,
-        },
-      });
-    }
-
-    if (indicator.params.filter) {
-      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
-    }
+    // if (!!indicator.params.filter) {
+    //   queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
+    // }
 
     return {
-      index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      index: 'synthetics-*',
+      runtime_mappings: {
+        ...this.buildCommonRuntimeMappings(slo),
+      },
       query: {
         bool: {
-          filter: [
-            { term: { 'metricset.name': 'transaction' } },
-            { terms: { 'event.outcome': ['success', 'failure'] } },
-            ...queryFilter,
-          ],
+          filter: [{ term: { 'summary.final_attempt': true } }, ...queryFilter],
         },
       },
     };
@@ -140,18 +127,18 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     return {
       'slo.numerator': {
         filter: {
-          bool: {
-            should: {
-              match: {
-                'event.outcome': 'success',
-              },
+          range: {
+            'summary.up': {
+              gte: 1,
             },
           },
         },
       },
       'slo.denominator': {
         filter: {
-          match_all: {},
+          exists: {
+            field: 'summary.final_attempt',
+          },
         },
       },
       ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
@@ -168,3 +155,17 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     };
   }
 }
+
+export const buildParamValues = (
+  params: SyntheticsAvailabilityIndicator['params']
+): Record<keyof SyntheticsAvailabilityIndicator['params'], string[]> => {
+  return (Object.keys(params) as Array<keyof SyntheticsAvailabilityIndicator['params']>).reduce(
+    (acc, key) => {
+      return {
+        ...acc,
+        [key]: params[key]?.map((p) => p.value),
+      };
+    },
+    {} as Record<keyof SyntheticsAvailabilityIndicator['params'], string[]>
+  );
+};
