@@ -128,7 +128,7 @@ export function Settings() {
               ),
               text: i18n.translate('xpack.profiling.settings.co2.text', {
                 defaultMessage:
-                  'For all other configurations, Universal Profiling uses the following default configurations. You can update these configurations as needed',
+                  'For all other configurations, Universal Profiling uses the following default configurations. You can update these configurations as needed.',
               }),
             },
             settings: co2Settings,
@@ -157,10 +157,6 @@ export function Settings() {
                   }}
                 />
               ),
-              subtitle: i18n.translate('xpack.profiling.settings.cost.subtitle', {
-                defaultMessage:
-                  "If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.",
-              }),
             },
             settings: costSettings,
           },

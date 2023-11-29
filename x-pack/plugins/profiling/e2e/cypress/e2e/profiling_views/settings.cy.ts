@@ -35,7 +35,10 @@ describe('Settings page', () => {
     cy.contains('CO2');
     cy.contains('Regional Carbon Intensity (ton/kWh)');
     cy.contains('Data Center PUE');
-    cy.contains('Per Core Watts');
+    cy.contains('Per vCPU Watts - x86');
+    cy.contains('Per vCPU Watts - arm64');
+    cy.contains('AWS EDP discount rate (%)');
+    cy.contains('Cost per vCPU per hour ($)');
   });
 
   it('updates values', () => {

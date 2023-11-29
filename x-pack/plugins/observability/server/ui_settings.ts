@@ -471,11 +471,18 @@ export const uiSettings: Record<string, UiSettings> = {
   [profilingAWSCostDiscountRate]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.profilingAWSCostDiscountRateUiSettingName', {
-      defaultMessage: 'AWS cost discount rate (%)',
+      defaultMessage: 'AWS EDP discount rate (%)',
     }),
     value: 6,
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
+    description: i18n.translate(
+      'xpack.observability.profilingAWSCostDiscountRateUiSettingDescription',
+      {
+        defaultMessage:
+          "If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.",
+      }
+    ),
   },
   [profilingCostPervCPUPerHour]: {
     category: [observabilityFeatureId],
