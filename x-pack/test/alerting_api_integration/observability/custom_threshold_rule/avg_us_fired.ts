@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATE_VIEW = 'traces-apm*,metrics-apm*,logs-apm*';
     const DATA_VIEW_ID = 'data-view-id';
+    const DATA_VIEW_NAME = 'test-data-view-name';
 
     let synthtraceEsClient: ApmSynthtraceEsClient;
     let actionId: string;
@@ -54,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       await generateData({ synthtraceEsClient, start, end });
       await createDataView({
         supertest,
-        name: 'test-data-view',
+        name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
         title: DATE_VIEW,
       });
@@ -96,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
+                aggType: 'custom',
                 comparator: Comparator.GT,
                 threshold: [7500000],
                 timeSize: 5,
@@ -218,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average span.self_time.sum.us is 10,000,000, above the threshold of 7,500,000. (duration: 5 mins, data view: ${DATE_VIEW})`
+          `Average span.self_time.sum.us is 10,000,000, above the threshold of 7,500,000. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('10,000,000');
       });

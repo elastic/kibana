@@ -442,6 +442,9 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   };
 }
 
+/**
+ * @deprecated in favor of Rule
+ */
 export interface RawRule extends SavedObjectAttributes {
   enabled: boolean;
   name: string;

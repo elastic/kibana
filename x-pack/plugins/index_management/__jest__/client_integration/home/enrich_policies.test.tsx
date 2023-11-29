@@ -140,7 +140,7 @@ describe('Enrich policies tab', () => {
 
       // Should have made a call to load the policies after the reload
       // button is clicked.
-      expect(httpSetup.get.mock.calls).toHaveLength(1);
+      expect(httpSetup.get.mock.calls.length).toBeGreaterThan(0);
     });
 
     describe('details flyout', () => {

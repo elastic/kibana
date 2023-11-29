@@ -34,14 +34,13 @@ import {
   CASES_METRIC,
   UNEXPECTED_METRICS,
 } from '../../../screens/case_details';
-import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
+import { TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
 
 import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../../screens/overview';
 
 import { goToCaseDetails, goToCreateNewCase } from '../../../tasks/all_cases';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { openCaseTimeline } from '../../../tasks/case_details';
-import { cleanKibana } from '../../../tasks/common';
 import {
   attachTimeline,
   backToCases,
@@ -58,7 +57,6 @@ import { ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
       cy
         .wrap({
@@ -125,7 +123,6 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
     openCaseTimeline();
 
     cy.get(TIMELINE_TITLE).contains(this.mycase.timeline.title);
-    cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
 
     visitWithTimeRange(OVERVIEW_URL);

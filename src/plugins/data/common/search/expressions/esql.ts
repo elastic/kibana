@@ -67,8 +67,14 @@ function normalizeType(type: string): DatatableColumnType {
   }
 }
 
-function sanitize(value: string) {
-  return value.replace(/[\(\)]/g, '_');
+function extractTypeAndReason(attributes: any): { type?: string; reason?: string } {
+  if (['type', 'reason'].every((prop) => prop in attributes)) {
+    return attributes;
+  }
+  if ('error' in attributes) {
+    return extractTypeAndReason(attributes.error);
+  }
+  return {};
 }
 
 interface ESQLSearchParams {
@@ -199,7 +205,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               if (!error.err) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
               } else {
-                const { type, reason } = error.err.attributes;
+                const { type, reason } = extractTypeAndReason(error.err.attributes);
                 if (type === 'parsing_exception') {
                   error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
                 } else {
@@ -210,7 +216,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse }) {
+              next({ rawResponse, requestParams }) {
                 logInspectorRequest()
                   .stats({
                     hits: {
@@ -224,12 +230,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                     },
                   })
                   .json(params)
-                  .ok({ json: rawResponse });
+                  .ok({ json: rawResponse, requestParams });
               },
               error(error) {
-                logInspectorRequest().error({
-                  json: 'attributes' in error ? error.attributes : { message: error.message },
-                });
+                logInspectorRequest()
+                  .json(params)
+                  .error({
+                    json: 'attributes' in error ? error.attributes : { message: error.message },
+                  });
               },
             })
           );
@@ -237,8 +245,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         map(({ rawResponse: body, warning }) => {
           const columns =
             body.columns?.map(({ name, type }) => ({
-              id: sanitize(name),
-              name: sanitize(name),
+              id: name,
+              name,
               meta: { type: normalizeType(type) },
             })) ?? [];
           const columnNames = columns.map(({ name }) => name);

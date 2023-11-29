@@ -958,11 +958,28 @@
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Message.reader",
+            "type": "Object",
+            "tags": [],
+            "label": "reader",
+            "description": [],
+            "signature": [
+              "ReadableStreamDefaultReader<Uint8Array> | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.Message.content",
             "type": "string",
             "tags": [],
             "label": "content",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1002,6 +1019,20 @@
             "signature": [
               "MessagePresentation",
               " | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Message.traceData",
+            "type": "Object",
+            "tags": [],
+            "label": "traceData",
+            "description": [],
+            "signature": [
+              "{ transactionId: string; traceId: string; } | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,

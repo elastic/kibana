@@ -42,14 +42,11 @@ export type DynamicSettings = t.TypeOf<typeof DynamicSettingsCodec>;
 export type DefaultEmail = t.TypeOf<typeof DefaultEmailCodec>;
 export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveCodec>;
 
-export const LocationMonitorsType = t.type({
-  status: t.number,
-  payload: t.array(
-    t.type({
-      id: t.string,
-      count: t.number,
-    })
-  ),
-});
+export const LocationMonitorsType = t.array(
+  t.type({
+    id: t.string,
+    count: t.number,
+  })
+);
 
 export type LocationMonitorsResponse = t.TypeOf<typeof LocationMonitorsType>;

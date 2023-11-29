@@ -13,6 +13,15 @@ export function AddCisIntegrationFormPageProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
+  const browser = getService('browser');
+
+  const cisAws = {
+    getUrlValueInEditPage: async () => {
+      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+      const fieldValue = await (await testSubjects.find('externalLink')).getAttribute('href');
+      return fieldValue;
+    },
+  };
 
   const cisGcp = {
     getIntegrationFormEntirePage: () => testSubjects.find('dataCollectionSetupStep'),
@@ -34,6 +43,11 @@ export function AddCisIntegrationFormPageProvider({
 
     clickSaveButton: async () => {
       const optionToBeClicked = await cisGcp.findOptionInPage('createPackagePolicySaveButton');
+      await optionToBeClicked.click();
+    },
+
+    clickSaveIntegrationButton: async () => {
+      const optionToBeClicked = await cisGcp.findOptionInPage('saveIntegration');
       await optionToBeClicked.click();
     },
 
@@ -80,6 +94,35 @@ export function AddCisIntegrationFormPageProvider({
       const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
       return fieldValue;
     },
+
+    doesStringExistInCodeBlock: async (str: string) => {
+      const flyout = await testSubjects.find('agentEnrollmentFlyout');
+      const codeBlock = await flyout.findByXpath('//code');
+      const commandsToBeCopied = await codeBlock.getVisibleText();
+      return commandsToBeCopied.includes(str);
+    },
+
+    getFieldValueInAddAgentFlyout: async (field: string, value: string) => {
+      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+      const integrationList = await testSubjects.findAll('agentEnrollmentFlyout');
+      await integrationList[0].click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
+      return fieldValue;
+    },
+  };
+
+  const isRadioButtonChecked = async (selector: string) => {
+    const page = await testSubjects.find('dataCollectionSetupStep');
+    const findCheckedButton = await page.findAllByCssSelector(`input[id="${selector}"]:checked`);
+    if (findCheckedButton.length === 0) return false;
+    return true;
+  };
+
+  const getUrlOnPostInstallModal = async () => {
+    /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+    const fieldValue = await (await testSubjects.find('externalLink')).getAttribute('href');
+    return fieldValue;
   };
 
   const navigateToAddIntegrationCspmPage = async () => {
@@ -90,16 +133,62 @@ export function AddCisIntegrationFormPageProvider({
     );
   };
 
-  const navigateToIntegrationCspList = async () => {
-    await PageObjects.common.navigateToActualUrl(
-      'integrations', // Defined in Security Solution plugin
-      '/detail/cloud_security_posture/policies'
+  const navigateToAddIntegrationCnvmPage = async () => {
+    await PageObjects.common.navigateToUrl(
+      'fleet', // Defined in Security Solution plugin
+      'integrations/cloud_security_posture/add-integration/vuln_mgmt',
+      { shouldUseHashForSubUrl: false }
     );
   };
 
+  const navigateToIntegrationCspList = async () => {
+    await PageObjects.common.navigateToActualUrl(
+      'integrations', // Defined in Security Solution plugin
+      '/detail/cloud_security_posture/policies',
+      {
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+      }
+    );
+  };
+
+  const clickPolicyToBeEdited = async (name: string) => {
+    const table = await testSubjects.find('integrationPolicyTable');
+    const integrationToBeEdited = await table.findByXpath(`//text()="${name}"`);
+    await integrationToBeEdited.click();
+  };
+
+  const clickFirstElementOnIntegrationTable = async () => {
+    const integrationList = await testSubjects.findAll('integrationNameLink');
+    await integrationList[0].click();
+  };
+
+  const clickFirstElementOnIntegrationTableAddAgent = async () => {
+    const integrationList = await testSubjects.findAll('addAgentButton');
+    await integrationList[0].click();
+  };
+
+  const clickLaunchAndGetCurrentUrl = async (buttonId: string, tabNumber: number) => {
+    const button = await testSubjects.find(buttonId);
+    await button.click();
+    await browser.switchTab(tabNumber);
+    await new Promise((r) => setTimeout(r, 3000));
+    const currentUrl = await browser.getCurrentUrl();
+    await browser.switchTab(0);
+    return currentUrl;
+  };
+
   return {
+    cisAws,
     cisGcp,
     navigateToAddIntegrationCspmPage,
+    navigateToAddIntegrationCnvmPage,
     navigateToIntegrationCspList,
+    getUrlOnPostInstallModal,
+    isRadioButtonChecked,
+    clickPolicyToBeEdited,
+    clickFirstElementOnIntegrationTable,
+    clickFirstElementOnIntegrationTableAddAgent,
+    clickLaunchAndGetCurrentUrl,
   };
 }

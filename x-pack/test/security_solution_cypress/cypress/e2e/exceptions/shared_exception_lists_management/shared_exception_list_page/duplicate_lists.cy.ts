@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../tasks/common';
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getExceptionList } from '../../../../objects/exception';
 import { assertNumberOfExceptionItemsExists } from '../../../../tasks/exceptions';
@@ -42,9 +42,7 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-// Flaky in serverless tests
-describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

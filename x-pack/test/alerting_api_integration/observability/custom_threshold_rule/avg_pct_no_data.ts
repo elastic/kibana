@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom Threshold rule - AVG - PCT - NoData', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    const DATA_VIEW = 'no-data-pattern';
     const DATA_VIEW_ID = 'data-view-id-no-data';
     let actionId: string;
     let ruleId: string;
@@ -42,9 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await createDataView({
         supertest,
-        name: 'no-data-pattern',
+        name: DATA_VIEW,
         id: DATA_VIEW_ID,
-        title: 'no-data-pattern',
+        title: DATA_VIEW,
       });
     });
 
@@ -83,7 +84,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT,
                 threshold: [0.5],
                 timeSize: 5,
@@ -179,7 +179,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
                 comparator: '>',
                 threshold: [0.5],
                 timeSize: 5,

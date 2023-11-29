@@ -73,12 +73,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'never fire',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
-        size: 100,
       });
       await createRule({
         name: 'always fire',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c > -1',
-        size: 100,
       });
 
       const docs = await waitForDocs(2);
@@ -114,13 +112,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'never fire',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
-        size: 100,
+
         timeField: 'date_epoch_millis',
       });
       await createRule({
         name: 'always fire',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c > -1',
-        size: 100,
+
         timeField: 'date_epoch_millis',
       });
 
@@ -142,7 +140,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'always fire',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 1',
-        size: 100,
       });
 
       const docs = await waitForDocs(1);
@@ -165,7 +162,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'fire then recovers',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 1',
-        size: 100,
+
         notifyWhen: 'onActionGroupChange',
         timeWindowSize: RULE_INTERVAL_SECONDS,
       });
@@ -212,12 +209,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'never fire',
         esqlQuery: 'from test-data-stream | stats c = count(@timestamp) | where c < 0',
-        size: 100,
       });
       await createRule({
         name: 'always fire',
         esqlQuery: 'from test-data-stream | stats c = count(@timestamp) | where c > -1',
-        size: 100,
       });
 
       const docs = await waitForDocs(2);
@@ -234,6 +229,122 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       }
     });
 
+    it('throws an error if the thresholdComparator is not >', async () => {
+      const { body } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'test',
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [],
+          notify_when: 'onActiveAlert',
+          params: {
+            size: 100,
+            timeWindowSize: RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'esqlQuery',
+            timeField: 'date',
+            esqlQuery: {
+              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+            },
+          },
+        })
+        .expect(400);
+      expect(body.message).to.be(
+        'params invalid: [thresholdComparator]: is required to be greater than'
+      );
+    });
+
+    it('throws an error if the threshold is not [0]', async () => {
+      const { body } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'test',
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [],
+          notify_when: 'onActiveAlert',
+          params: {
+            size: 100,
+            timeWindowSize: RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: '>',
+            threshold: [100],
+            searchType: 'esqlQuery',
+            timeField: 'date',
+            esqlQuery: {
+              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+            },
+          },
+        })
+        .expect(400);
+      expect(body.message).to.be('params invalid: [threshold]: is required to be 0');
+    });
+
+    it('throws an error if the timeField is undefined', async () => {
+      const { body } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'test',
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [],
+          notify_when: 'onActiveAlert',
+          params: {
+            size: 100,
+            timeWindowSize: RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: '>',
+            threshold: [0],
+            searchType: 'esqlQuery',
+            esqlQuery: {
+              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+            },
+          },
+        })
+        .expect(400);
+      expect(body.message).to.be('params invalid: [timeField]: is required');
+    });
+
+    it('throws an error if the esqlQuery is undefined', async () => {
+      const { body } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'test',
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [],
+          notify_when: 'onActiveAlert',
+          params: {
+            size: 100,
+            timeWindowSize: RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: '>',
+            threshold: [0],
+            searchType: 'esqlQuery',
+            timeField: 'date',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.be(
+        'params invalid: [esqlQuery.esql]: expected value of type [string] but got [undefined]'
+      );
+    });
+
     async function waitForDocs(count: number): Promise<any[]> {
       return await esTestIndexToolOutput.waitForDocs(
         ES_TEST_INDEX_SOURCE,
@@ -244,7 +355,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     interface CreateRuleParams {
       name: string;
-      size: number;
       esqlQuery: string;
       timeWindowSize?: number;
       timeField?: string;
@@ -312,7 +422,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           actions: [action, recoveryAction],
           notify_when: params.notifyWhen || 'onActiveAlert',
           params: {
-            size: params.size,
+            size: 100,
             timeWindowSize: params.timeWindowSize || RULE_INTERVAL_SECONDS * 5,
             timeWindowUnit: 's',
             thresholdComparator: '>',

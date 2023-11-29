@@ -6,10 +6,10 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants/monitor_defaults';
-import { DataStream, MonitorFields } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
 
 export interface DataStreamConfig {
-  type: DataStream;
+  type: MonitorTypeEnum;
   id: string;
   schedule: string;
   enabled: boolean;
@@ -19,7 +19,7 @@ export interface DataStreamConfig {
   streams: [
     {
       data_stream: {
-        dataset: DataStream;
+        dataset: MonitorTypeEnum;
         type: 'synthetics';
       };
     } & Partial<MonitorFields>

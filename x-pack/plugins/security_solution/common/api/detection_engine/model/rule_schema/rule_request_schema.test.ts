@@ -25,7 +25,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid literal value, expected \\"eql\\", and 52 more"`
+    );
   });
 
   test('strips any unknown values', () => {
@@ -46,7 +48,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid literal value, expected \\"eql\\", and 52 more"`
+    );
   });
 
   test('[rule_id, description] does not validate', () => {
@@ -57,7 +61,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"name: Required, risk_score: Required, severity: Required, type: Invalid literal value, expected \\"eql\\", query: Required, and 44 more"`
+    );
   });
 
   test('[rule_id, description, from] does not validate', () => {
@@ -69,7 +75,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"name: Required, risk_score: Required, severity: Required, type: Invalid literal value, expected \\"eql\\", query: Required, and 44 more"`
+    );
   });
 
   test('[rule_id, description, from, to] does not validate', () => {
@@ -82,7 +90,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"name: Required, risk_score: Required, severity: Required, type: Invalid literal value, expected \\"eql\\", query: Required, and 44 more"`
+    );
   });
 
   test('[rule_id, description, from, to, name] does not validate', () => {
@@ -96,7 +106,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Required, severity: Required, type: Invalid literal value, expected \\"eql\\", query: Required, language: Invalid literal value, expected \\"eql\\", and 36 more"`
+    );
   });
 
   test('[rule_id, description, from, to, name, severity] does not validate', () => {
@@ -111,7 +123,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Required, type: Invalid literal value, expected \\"eql\\", query: Required, language: Invalid literal value, expected \\"eql\\", risk_score: Required, and 28 more"`
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
@@ -127,7 +141,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Required, type: Invalid literal value, expected \\"eql\\", query: Required, language: Invalid literal value, expected \\"eql\\", risk_score: Required, and 27 more"`
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
@@ -144,7 +160,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Required, type: Invalid literal value, expected \\"eql\\", query: Required, language: Invalid literal value, expected \\"eql\\", risk_score: Required, and 27 more"`
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
@@ -162,7 +180,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Required, type: Invalid literal value, expected \\"eql\\", query: Required, language: Invalid literal value, expected \\"eql\\", risk_score: Required, and 27 more"`
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
@@ -202,7 +222,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", risk_score: Required, risk_score: Required, and 22 more"`
+    );
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
@@ -368,7 +390,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"references.0: Expected string, received number, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", references.0: Expected string, received number, references.0: Expected string, received number, and 22 more"`
+    );
   });
 
   test('indexes cannot be numbers', () => {
@@ -379,7 +403,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", index.0: Expected string, received number, index.0: Expected string, received number, type: Invalid literal value, expected \\"saved_query\\", and 20 more"`
+    );
   });
 
   test('saved_query type can have filters with it', () => {
@@ -401,7 +427,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", filters: Expected array, received string, filters: Expected array, received string, type: Invalid literal value, expected \\"saved_query\\", and 20 more"`
+    );
   });
 
   test('language validates with kuery', () => {
@@ -434,7 +462,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up', type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 19 more"`
+    );
   });
 
   test('max_signals cannot be negative', () => {
@@ -493,7 +523,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"tags.0: Expected string, received number, tags.1: Expected string, received number, tags.2: Expected string, received number, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", and 38 more"`
+    );
   });
 
   test('You cannot send in an array of threat that are missing "framework"', () => {
@@ -519,7 +551,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"threat.0.framework: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", threat.0.framework: Required, threat.0.framework: Required, and 22 more"`
+    );
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
@@ -541,7 +575,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"threat.0.tactic: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", threat.0.tactic: Required, threat.0.tactic: Required, and 22 more"`
+    );
   });
 
   test('You can send in an array of threat that are missing "technique"', () => {
@@ -583,7 +619,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"false_positives.0: Expected string, received number, false_positives.1: Expected string, received number, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", false_positives.0: Expected string, received number, and 30 more"`
+    );
   });
 
   test('You cannot set the risk_score to 101', () => {
@@ -655,7 +693,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"meta: Expected object, received string, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", meta: Expected object, received string, meta: Expected object, received string, and 22 more"`
+    );
   });
 
   test('You can omit the query string when filters are present', () => {
@@ -690,7 +730,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', and 22 more"`
+    );
   });
 
   test('You cannot send in an array of actions that are missing "group"', () => {
@@ -701,7 +743,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.group: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.group: Required, actions.0.group: Required, and 22 more"`
+    );
   });
 
   test('You cannot send in an array of actions that are missing "id"', () => {
@@ -712,7 +756,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.id: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.id: Required, actions.0.id: Required, and 22 more"`
+    );
   });
 
   test('You cannot send in an array of actions that are missing "action_type_id"', () => {
@@ -723,7 +769,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.action_type_id: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.action_type_id: Required, actions.0.action_type_id: Required, and 22 more"`
+    );
   });
 
   test('You cannot send in an array of actions that are missing "params"', () => {
@@ -734,7 +782,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.params: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.params: Required, actions.0.params: Required, and 22 more"`
+    );
   });
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
@@ -752,7 +802,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.action_type_id: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.action_type_id: Required, actions.0.action_type_id: Required, and 22 more"`
+    );
   });
 
   describe('note', () => {
@@ -788,7 +840,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"note: Expected string, received object, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", note: Expected string, received object, note: Expected string, received object, and 22 more"`
+      );
     });
 
     test('empty name is not valid', () => {
@@ -872,7 +926,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", saved_id: Required, type: Invalid literal value, expected \\"threshold\\", and 14 more"`
+    );
   });
 
   test('threshold is required when type is threshold and will not validate without it', () => {
@@ -880,7 +936,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 14 more"`
+    );
   });
 
   test('threshold rules fail validation if threshold is not greater than 0', () => {
@@ -958,7 +1016,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type', type: Invalid literal value, expected \\"eql\\", query: Required, and 43 more"`
+      );
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
@@ -999,7 +1059,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 14 more"`
+      );
     });
 
     test('fails validation when threat_mapping is an empty array', () => {
@@ -1068,7 +1130,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", data_view_id: Expected string, received number, data_view_id: Expected string, received number, type: Invalid literal value, expected \\"saved_query\\", and 20 more"`
+      );
     });
 
     test('it should validate a type of "query" with "data_view_id" defined', () => {
@@ -1131,7 +1195,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"investigation_fields.field_names: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", investigation_fields.field_names: Required, investigation_fields.field_names: Required, and 22 more"`
+      );
     });
 
     test('You can send in investigation_fields', () => {
@@ -1166,7 +1232,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"investigation_fields.field_names.0: Expected string, received number, investigation_fields.field_names.1: Expected string, received number, investigation_fields.field_names.2: Expected string, received number, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", and 38 more"`
+      );
     });
 
     test('You cannot send in investigation_fields without specifying fields', () => {
@@ -1177,7 +1245,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"investigation_fields.field_names: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", investigation_fields.field_names: Required, investigation_fields.field_names: Required, and 22 more"`
+      );
     });
   });
 });

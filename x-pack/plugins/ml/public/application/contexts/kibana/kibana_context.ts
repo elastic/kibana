@@ -10,7 +10,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { useKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -18,7 +18,6 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -30,33 +29,34 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
+  cases?: CasesUiStart;
+  charts: ChartsPluginStart;
+  contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
-  security?: SecurityPluginSetup;
-  licenseManagement?: LicenseManagementUIPluginSetup;
-  share: SharePluginStart;
-  embeddable: EmbeddableStart;
-  maps?: MapsStartApi;
-  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer?: DataVisualizerPluginStart;
-  usageCollection?: UsageCollectionSetup;
+  embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsRegistry;
-  dashboard: DashboardStart;
-  spacesApi?: SpacesPluginStart;
-  charts: ChartsPluginStart;
-  cases?: CasesUiStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  core: CoreStart;
-  appName: string;
   lens: LensPublicStart;
+  licenseManagement?: LicenseManagementUIPluginSetup;
+  maps?: MapsStartApi;
+  presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
-  contentManagement: ContentManagementPublicStart;
-  presentationUtil: PresentationUtilPluginStart;
+  security?: SecurityPluginStart;
+  share: SharePluginStart;
+  spacesApi?: SpacesPluginStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  usageCollection?: UsageCollectionSetup;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

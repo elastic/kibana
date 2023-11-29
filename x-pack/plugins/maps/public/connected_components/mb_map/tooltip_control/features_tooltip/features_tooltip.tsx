@@ -6,7 +6,9 @@
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiContextMenuItem, EuiLink } from '@elastic/eui';
+// @ts-ignore file exists, but ts def doesn't
+import { euiContextMenuPanelStyles } from '@elastic/eui/lib/components/context_menu/context_menu_panel.styles';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { GeoJsonProperties } from 'geojson';
@@ -122,17 +124,14 @@ export class FeaturesTooltip extends Component<Props, State> {
 
   _renderBackButton(label: string) {
     return (
-      <button
-        className="euiContextMenuPanelTitle mapFeatureTooltip_backButton"
-        type="button"
+      <EuiContextMenuItem
+        className="mapFeatureTooltip_backButton"
+        css={(euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title}
         onClick={this._showPropertiesView}
+        icon="arrowLeft"
       >
-        <span className="euiContextMenu__itemLayout">
-          <EuiIcon type="arrowLeft" size="m" className="euiContextMenu__icon" />
-
-          <span className="euiContextMenu__text">{label}</span>
-        </span>
-      </button>
+        {label}
+      </EuiContextMenuItem>
     );
   }
 

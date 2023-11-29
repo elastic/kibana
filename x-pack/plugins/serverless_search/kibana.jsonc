@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "cloud",
       "console",
+      "dataViews",
       "dashboard",
       "devTools",
       "discover",
@@ -25,7 +26,9 @@
       "share",
       "visualizations"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "indexManagement",
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

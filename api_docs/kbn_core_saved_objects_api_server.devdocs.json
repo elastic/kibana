@@ -3901,6 +3901,22 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsBulkUpdateOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7607,7 +7623,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
+              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
             "deprecated": false,

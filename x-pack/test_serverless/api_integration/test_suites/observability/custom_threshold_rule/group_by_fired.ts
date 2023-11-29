@@ -88,13 +88,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         const createdRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'apm',
+          consumer: 'observability',
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT_OR_EQ,
                 threshold: [0.2],
                 timeSize: 1,
@@ -150,6 +149,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(executionStatus).to.be('active');
       });
 
+      it('should find the created rule with correct information about the consumer', async () => {
+        const match = await alertingApi.findRule(ruleId);
+        expect(match).not.to.be(undefined);
+        expect(match.consumer).to.be('observability');
+      });
+
       it('should set correct information in the alert document', async () => {
         const resp = await alertingApi.waitForAlertInIndex({
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
@@ -162,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
           'kibana.alert.rule.category',
           'Custom threshold (Technical Preview)'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'apm');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
@@ -198,7 +203,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
                 comparator: '>=',
                 threshold: [0.2],
                 timeSize: 1,
@@ -228,8 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          // Added the S to protocol.getUrlParts as not returning the correct value.
-          `${protocol}s://${hostname}:${port}/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `${protocol}://${hostname}:${port}/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Average system.cpu.total.norm.pct is 80%, above the threshold of 20%. (duration: 1 min, data view: ${DATE_VIEW}, group: host-0)`

@@ -1,18 +1,19 @@
 title: Alerting rule
 description: >
-  The rule that is associated with the alerts. It is required only when
-  `type` is `alert`. This functionality is in technical preview and may be
-  changed or removed in a future release. Elastic will apply best effort to
-  fix any issues, but features in technical preview are not subject to the
-  support SLA of official GA features.
+  The rule that is associated with the alerts.
+  It is required only when `type` is `alert`.
+  This functionality is in technical preview and may be changed or removed in a future release.
+  Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 type: object
 x-technical-preview: true
 properties:
   id:
     description: The rule identifier.
     type: string
-    example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-  name: 
+    examples:
+      - 94d80550-aaf4-11ec-985f-97e55adae8b9
+  name:
     description: The rule name.
     type: string
-    example: security_rule
+    examples:
+      - security_rule

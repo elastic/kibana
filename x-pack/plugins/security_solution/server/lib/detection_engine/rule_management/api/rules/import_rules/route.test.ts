@@ -311,14 +311,14 @@ describe('Import rules route', () => {
         errors: [
           {
             error: {
-              message: 'Invalid value "undefined" supplied to "rule_id"',
+              message: 'rule_id: Required',
               status_code: 400,
             },
             rule_id: '(unknown id)',
           },
           {
             error: {
-              message: 'Invalid value "undefined" supplied to "rule_id"',
+              message: 'rule_id: Required',
               status_code: 400,
             },
             rule_id: '(unknown id)',

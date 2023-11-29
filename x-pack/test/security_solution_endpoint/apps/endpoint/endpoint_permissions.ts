@@ -10,13 +10,18 @@ import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/com
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('Endpoint permissions:', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/171649
+  // FLAKY: https://github.com/elastic/kibana/issues/171650
+  describe.skip('Endpoint permissions:', function () {
+    targetTags(this, ['@ess']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {

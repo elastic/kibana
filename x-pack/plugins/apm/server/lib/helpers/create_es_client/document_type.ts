@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
@@ -33,18 +32,11 @@ function getDefaultFilter(
   ];
 }
 
-const documentTypeConfigMap: Record<
-  ApmDocumentType,
-  {
-    processorEvent: ProcessorEvent;
-    getQuery?: (rollupInterval: RollupInterval) => QueryDslQueryContainer;
-    rollupIntervals: RollupInterval[];
-  }
-> = {
+const documentTypeConfigMap = {
   [ApmDocumentType.ServiceTransactionMetric]: {
     processorEvent: ProcessorEvent.metric,
 
-    getQuery: (rollupInterval) => ({
+    getQuery: (rollupInterval: RollupInterval) => ({
       bool: {
         filter: getDefaultFilter('service_transaction', rollupInterval),
       },
@@ -53,7 +45,7 @@ const documentTypeConfigMap: Record<
   },
   [ApmDocumentType.ServiceSummaryMetric]: {
     processorEvent: ProcessorEvent.metric,
-    getQuery: (rollupInterval) => ({
+    getQuery: (rollupInterval: RollupInterval) => ({
       bool: {
         filter: getDefaultFilter('service_summary', rollupInterval),
       },
@@ -62,7 +54,7 @@ const documentTypeConfigMap: Record<
   },
   [ApmDocumentType.TransactionMetric]: {
     processorEvent: ProcessorEvent.metric,
-    getQuery: (rollupInterval) => ({
+    getQuery: (rollupInterval: RollupInterval) => ({
       bool: {
         filter:
           rollupInterval === RollupInterval.OneMinute
@@ -79,7 +71,7 @@ const documentTypeConfigMap: Record<
   [ApmDocumentType.ServiceDestinationMetric]: {
     processorEvent: ProcessorEvent.metric,
     rollupIntervals: defaultRollupIntervals,
-    getQuery: (rollupInterval) => ({
+    getQuery: (rollupInterval: RollupInterval) => ({
       bool: {
         filter:
           rollupInterval === RollupInterval.OneMinute
@@ -92,7 +84,11 @@ const documentTypeConfigMap: Record<
     processorEvent: ProcessorEvent.error,
     rollupIntervals: [RollupInterval.None],
   },
-};
+  [ApmDocumentType.SpanEvent]: {
+    processorEvent: ProcessorEvent.span,
+    rollupIntervals: [RollupInterval.None],
+  },
+} as const;
 
 type DocumentTypeConfigOf<TApmDocumentType extends ApmDocumentType> =
   typeof documentTypeConfigMap[TApmDocumentType];

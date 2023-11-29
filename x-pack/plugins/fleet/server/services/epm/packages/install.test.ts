@@ -243,6 +243,7 @@ describe('install', () => {
     it('should send telemetry on install failure, async error', async () => {
       jest.mocked(install._installPackage).mockRejectedValue(new Error('error'));
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
@@ -282,7 +283,7 @@ describe('install', () => {
       expect(response.error).toBeUndefined();
 
       expect(install._installPackage).toHaveBeenCalledWith(
-        expect.objectContaining({ installSource: 'upload' })
+        expect.objectContaining({ installSource: 'bundled' })
       );
     });
 

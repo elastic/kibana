@@ -74,6 +74,10 @@ export type AlertsTableStateProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -158,6 +162,7 @@ const AlertsTableStateWithQueryProvider = ({
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
+  dynamicRowHeight,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
@@ -404,6 +409,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      dynamicRowHeight,
       featureIds,
     }),
     [
@@ -431,6 +437,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      dynamicRowHeight,
       featureIds,
     ]
   );

@@ -8,11 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { RISK_SEVERITY_COLOUR } from '../../../../entity_analytics/common/utils';
 import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { useRiskDonutChartData } from './use_risk_donut_chart_data';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import { RISK_SEVERITY_COLOUR } from '../../../../explore/components/risk_score/severity/common';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { Legend } from '../../../../common/components/charts/legend';
 import { ChartLabel } from '../../detection_response/alerts_by_status/chart_label';

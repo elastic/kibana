@@ -40,7 +40,7 @@ export const DATES = {
     },
     logs_and_metrics_with_aws: {
       min: 1564083185000,
-      max: 1564083493080,
+      max: 1564083705100,
     },
   },
   'alert-test-data': {

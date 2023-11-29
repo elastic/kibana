@@ -61,6 +61,7 @@ import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
+import { SwimLaneWrapper } from './alerts';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -506,6 +507,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
+
           {annotationXDomain && Array.isArray(annotations) && annotations.length > 0 ? (
             <>
               <MlTooltipComponent>
@@ -522,29 +524,35 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             </>
           ) : null}
 
-          <SwimlaneContainer
-            id="overall"
-            data-test-subj="mlAnomalyExplorerSwimlaneOverall"
-            filterActive={filterActive}
-            timeBuckets={timeBuckets}
-            swimlaneData={overallSwimlaneData as OverallSwimlaneData}
-            swimlaneType={SWIMLANE_TYPE.OVERALL}
+          <SwimLaneWrapper
             selection={overallCellSelection}
-            onCellsSelection={setSelectedCells}
-            onResize={onResize}
-            isLoading={loading}
-            noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
-                  <NoOverallData />
-                </h5>
-              </EuiText>
-            }
-            showTimeline={false}
-            showLegend={false}
-            yAxisWidth={Y_AXIS_LABEL_WIDTH}
-            chartsService={chartsService}
-          />
+            swimlaneContainerWidth={swimlaneContainerWidth}
+            swimLaneData={overallSwimlaneData as OverallSwimlaneData}
+          >
+            <SwimlaneContainer
+              id="overall"
+              data-test-subj="mlAnomalyExplorerSwimlaneOverall"
+              filterActive={filterActive}
+              timeBuckets={timeBuckets}
+              swimlaneData={overallSwimlaneData as OverallSwimlaneData}
+              swimlaneType={SWIMLANE_TYPE.OVERALL}
+              selection={overallCellSelection}
+              onCellsSelection={setSelectedCells}
+              onResize={onResize}
+              isLoading={loading}
+              noDataWarning={
+                <EuiText textAlign={'center'}>
+                  <h5>
+                    <NoOverallData />
+                  </h5>
+                </EuiText>
+              }
+              showTimeline={false}
+              showLegend={false}
+              yAxisWidth={Y_AXIS_LABEL_WIDTH}
+              chartsService={chartsService}
+            />
+          </SwimLaneWrapper>
 
           <EuiSpacer size="m" />
           {viewBySwimlaneOptions.length > 0 && (

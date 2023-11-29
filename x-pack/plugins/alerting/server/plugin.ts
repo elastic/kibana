@@ -77,7 +77,7 @@ import {
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, getLatestRuleVersion } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
@@ -97,7 +97,7 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
-import { rulesSettingsFeature } from './rules_settings_feature';
+import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
@@ -255,7 +255,7 @@ export class AlertingPlugin {
       };
     });
 
-    plugins.features.registerKibanaFeature(rulesSettingsFeature);
+    plugins.features.registerKibanaFeature(getRulesSettingsFeature(!!plugins.serverless));
 
     plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
@@ -296,6 +296,7 @@ export class AlertingPlugin {
     }
 
     const ruleTypeRegistry = new RuleTypeRegistry({
+      config: this.config,
       logger: this.logger,
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
@@ -304,6 +305,7 @@ export class AlertingPlugin {
       alertsService: this.alertsService,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       inMemoryMetrics: this.inMemoryMetrics,
+      latestRuleVersion: getLatestRuleVersion(),
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 

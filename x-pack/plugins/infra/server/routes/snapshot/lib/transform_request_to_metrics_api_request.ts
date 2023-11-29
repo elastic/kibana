@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { findInventoryFields, findInventoryModel } from '../../../../common/inventory_models';
 import { MetricsAPIMetric, MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';

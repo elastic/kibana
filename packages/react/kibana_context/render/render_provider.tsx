@@ -27,7 +27,7 @@ export const KibanaRenderContextProvider: FC<KibanaRenderContextProviderProps> =
 }) => {
   return (
     <KibanaRootContextProvider globalStyles={false} {...props}>
-      <KibanaErrorBoundaryProvider>
+      <KibanaErrorBoundaryProvider analytics={props.analytics}>
         <KibanaErrorBoundary>{children}</KibanaErrorBoundary>
       </KibanaErrorBoundaryProvider>
     </KibanaRootContextProvider>

@@ -19,7 +19,6 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 
-import type { PackageInfo } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -55,6 +54,7 @@ import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
 
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
+import { getNewSecrets } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -91,7 +91,6 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
 
-  const [] = useState<PackageInfo>();
   const {
     // data
     agentPolicy,
@@ -116,6 +115,14 @@ export const EditPackagePolicyForm = memo<{
   });
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+
+  const newSecrets = useMemo(() => {
+    if (!packageInfo) {
+      return [];
+    }
+
+    return getNewSecrets({ packageInfo, packagePolicy });
+  }, [packageInfo, packagePolicy]);
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -418,7 +425,7 @@ export const EditPackagePolicyForm = memo<{
             )}
             {isUpgrade && upgradeDryRunData && (
               <>
-                <UpgradeStatusCallout dryRunData={upgradeDryRunData} />
+                <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />
                 <EuiSpacer size="xxl" />
               </>
             )}

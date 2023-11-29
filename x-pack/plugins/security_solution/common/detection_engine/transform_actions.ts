@@ -7,12 +7,12 @@
 
 import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
 import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
-import type { NormalizedRuleAction } from '../api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
 import type {
   ResponseAction,
   RuleResponseAction,
 } from '../api/detection_engine/model/rule_response_actions';
-import { RESPONSE_ACTION_TYPES } from '../api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../api/detection_engine/model/rule_response_actions';
 import type { RuleAction } from '../api/detection_engine/model';
 
 export const transformRuleToAlertAction = ({
@@ -63,7 +63,12 @@ export const transformNormalizedRuleToAlertAction = ({
   group,
   id,
   params: params as AlertingRuleAction['params'],
-  ...(alertsFilter && { alertsFilter }),
+  ...(alertsFilter && {
+    // We use "unknown" as the alerts filter type which is stricter than the one
+    // used in the alerting plugin (what they use is essentially "any"). So we
+    // have to to cast here
+    alertsFilter: alertsFilter as AlertingRuleAction['alertsFilter'],
+  }),
   ...(frequency && { frequency }),
 });
 
@@ -85,7 +90,7 @@ export const transformRuleToAlertResponseAction = ({
   action_type_id: actionTypeId,
   params,
 }: ResponseAction): RuleResponseAction => {
-  if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+  if (actionTypeId === ResponseActionTypesEnum['.osquery']) {
     const {
       saved_query_id: savedQueryId,
       ecs_mapping: ecsMapping,
@@ -113,7 +118,7 @@ export const transformAlertToRuleResponseAction = ({
   actionTypeId,
   params,
 }: RuleResponseAction): ResponseAction => {
-  if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+  if (actionTypeId === ResponseActionTypesEnum['.osquery']) {
     const { savedQueryId, ecsMapping, packId, ...rest } = params;
     return {
       params: {

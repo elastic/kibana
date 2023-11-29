@@ -53,7 +53,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppre
           tooltipContent={
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.insights.entities.suppressedAlertTechnicalPreviewTooltip"
-              defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+              defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
             />
           }
           tooltipPosition="bottom"

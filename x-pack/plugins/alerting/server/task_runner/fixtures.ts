@@ -355,7 +355,7 @@ export const generateRunnerResult = ({
   alertInstances = {},
   alertRecoveredInstances = {},
   summaryActions = {},
-  hasError = false,
+  taskRunError,
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -388,7 +388,7 @@ export const generateRunnerResult = ({
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
     },
-    hasError,
+    taskRunError,
   };
 };
 

@@ -59,6 +59,7 @@ import {
   RuleActionAlertsFilterProperty,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -152,6 +153,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   hideGrouping?: boolean;
   hideInterval?: boolean;
   connectorFeatureId?: string;
+  selectedConsumer?: RuleCreationValidConsumer | null;
   validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
   useRuleProducer?: boolean;
@@ -175,6 +177,7 @@ export const RuleForm = ({
   hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
+  selectedConsumer,
   validConsumers,
   onChangeMetaData,
   useRuleProducer,
@@ -250,11 +253,11 @@ export const RuleForm = ({
             validConsumers,
           })
         )
-        .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+        .filter((item) => {
+          return rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer
-        );
+            : item.ruleType!.producer === rule.consumer;
+        });
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
@@ -274,9 +277,13 @@ export const RuleForm = ({
       },
       new Map()
     );
-    setSolutions(
-      new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
-    );
+    const solutionsEntries = [...solutionsResult.entries()];
+    const isOnlyO11y =
+      availableRuleTypesResult.length === 1 &&
+      availableRuleTypesResult.every((rt) => rt.ruleType.producer === AlertConsumers.OBSERVABILITY);
+    if (!isOnlyO11y) {
+      setSolutions(new Map(solutionsEntries.sort(([, a], [, b]) => a.localeCompare(b))));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     ruleTypes,
@@ -399,6 +406,16 @@ export const RuleForm = ({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableRuleTypes, searchText, JSON.stringify(solutionsFilter)]);
+
+  useEffect(() => {
+    if (ruleTypeModel) {
+      const ruleType = ruleTypes.find((rt) => rt.id === ruleTypeModel.id);
+      if (ruleType && useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
+        setConsumer(ruleType.producer as RuleCreationValidConsumer);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ruleTypeModel, ruleTypes]);
 
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is
@@ -628,6 +645,23 @@ export const RuleForm = ({
     }
   };
 
+  const hasFieldsForAAD = useMemo(() => {
+    const hasAlertHasData = selectedRuleType
+      ? selectedRuleType.hasFieldsForAAD ||
+        selectedRuleType.producer === AlertConsumers.SIEM ||
+        selectedRuleType.hasAlertsMappings
+      : false;
+
+    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
+      return (
+        (validConsumers || VALID_CONSUMERS).includes(
+          selectedConsumer as RuleCreationValidConsumer
+        ) && hasAlertHasData
+      );
+    }
+    return hasAlertHasData;
+  }, [rule?.ruleTypeId, selectedConsumer, selectedRuleType, validConsumers]);
+
   const ruleTypeDetails = (
     <>
       <EuiHorizontalRule />
@@ -805,8 +839,12 @@ export const RuleForm = ({
             defaultActionGroupId={defaultActionGroupId}
             hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}
-            producerId={selectedRuleType.producer}
-            hasFieldsForAAD={selectedRuleType.hasFieldsForAAD}
+            producerId={
+              MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId)
+                ? selectedConsumer ?? rule.consumer
+                : selectedRuleType.producer
+            }
+            hasFieldsForAAD={hasFieldsForAAD}
             ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
@@ -824,6 +862,9 @@ export const RuleForm = ({
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
             recoveryActionGroup={recoveryActionGroup}
+            setActionUseAlertDataForTemplate={(enabled: boolean, index: number) => {
+              setActionProperty('useAlertDataForTemplate', enabled, index);
+            }}
             setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
             setActionGroupIdByIndex={(group: string, index: number) =>
               setActionProperty('group', group, index)
@@ -879,8 +920,16 @@ export const RuleForm = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.tagsFieldLabel', {
-              defaultMessage: 'Tags (optional)',
+              defaultMessage: 'Tags',
             })}
+            labelAppend={
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleForm.tagsFieldOptional"
+                  defaultMessage="Optional"
+                />
+              </EuiText>
+            }
           >
             <EuiComboBox
               noSuggestions

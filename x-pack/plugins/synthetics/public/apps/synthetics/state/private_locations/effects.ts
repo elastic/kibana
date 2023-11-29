@@ -7,8 +7,8 @@
 
 import { takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchAgentPolicies } from './api';
-import { getAgentPoliciesAction } from './actions';
+import { fetchAgentPolicies, getSyntheticsPrivateLocations } from './api';
+import { getAgentPoliciesAction, getPrivateLocationsAction } from './actions';
 
 export function* fetchAgentPoliciesEffect() {
   yield takeLeading(
@@ -17,6 +17,17 @@ export function* fetchAgentPoliciesEffect() {
       fetchAgentPolicies,
       getAgentPoliciesAction.success,
       getAgentPoliciesAction.fail
+    )
+  );
+}
+
+export function* fetchPrivateLocationsEffect() {
+  yield takeLeading(
+    getPrivateLocationsAction.get,
+    fetchEffectFactory(
+      getSyntheticsPrivateLocations,
+      getPrivateLocationsAction.success,
+      getPrivateLocationsAction.fail
     )
   );
 }

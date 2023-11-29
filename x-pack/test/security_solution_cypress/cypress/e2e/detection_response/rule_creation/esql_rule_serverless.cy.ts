@@ -9,7 +9,6 @@ import { getEsqlRule } from '../../../objects/rule';
 
 import { ESQL_TYPE, NEW_TERMS_TYPE, THRESHOLD_TYPE } from '../../../screens/create_new_rule';
 
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
@@ -17,10 +16,6 @@ import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 
 describe('Detection ES|QL rules, creation', { tags: ['@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
   });

@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { identity, range } from 'lodash';
+import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
@@ -20,22 +24,24 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { identity, range } from 'lodash';
-import * as Rx from 'rxjs';
-import type { Writable } from 'stream';
+import { CancellationToken } from '@kbn/reporting-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import {
+  UI_SETTINGS_CSV_QUOTE_VALUES,
+  UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_DATEFORMAT_TZ,
+} from './constants';
 import { CsvGenerator } from './generate_csv';
-import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
-import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
-import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from './constants';
 
-const createMockJob = (baseObj: any = {}): JobParams => ({
+const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
   ...baseObj,
 });
 
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: IScopedSearchClient;
-  let mockConfig: CsvConfig;
+  let mockConfig: ReportingConfigType['csv'];
   let mockLogger: jest.Mocked<Logger>;
   let uiSettingsClient: IUiSettingsClient;
   let stream: jest.Mocked<Writable>;
@@ -111,6 +117,7 @@ describe('CsvGenerator', () => {
       maxSizeBytes: 180000,
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
+      enablePanelActionDownload: true,
     };
 
     searchSourceMock.getField = jest.fn((key: string) => {
@@ -237,6 +244,7 @@ describe('CsvGenerator', () => {
       maxSizeBytes: TEST_MAX_SIZE,
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
+      enablePanelActionDownload: true,
     };
 
     mockDataClient.search = jest.fn().mockImplementation(() =>
@@ -385,6 +393,8 @@ describe('CsvGenerator', () => {
         })
       );
 
+    const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+
     const generateCsv = new CsvGenerator(
       createMockJob({ searchSource: {}, columns: [] }),
       mockConfig,
@@ -402,6 +412,8 @@ describe('CsvGenerator', () => {
       stream
     );
     await generateCsv.generateData();
+
+    expect(debugLogSpy.mock.calls).toMatchSnapshot();
 
     expect(content).toMatchSnapshot();
   });
@@ -750,6 +762,7 @@ describe('CsvGenerator', () => {
         maxSizeBytes: 180000,
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s' },
+        enablePanelActionDownload: true,
       };
       mockDataClient.search = jest.fn().mockImplementation(() =>
         Rx.of({
@@ -885,6 +898,82 @@ describe('CsvGenerator', () => {
         ],
       }
     `);
+  });
+
+  describe('debug logging', () => {
+    it('logs the the total hits relation if relation is provided', async () => {
+      mockDataClient.search = jest.fn().mockImplementation(() =>
+        Rx.of({
+          rawResponse: {
+            took: 1,
+            timed_out: false,
+            pit_id: mockPitId,
+            _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+            hits: { hits: [], total: { relation: 'eq', value: 12345 }, max_score: 0 },
+          },
+        })
+      );
+
+      const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+
+      const generateCsv = new CsvGenerator(
+        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        mockConfig,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+
+      await generateCsv.generateData();
+
+      expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: eq.');
+    });
+
+    it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
+      mockDataClient.search = jest.fn().mockImplementation(() =>
+        Rx.of({
+          rawResponse: {
+            took: 1,
+            timed_out: false,
+            pit_id: mockPitId,
+            _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+            hits: { hits: [], total: 12345, max_score: 0 },
+          },
+        })
+      );
+
+      const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+
+      const generateCsv = new CsvGenerator(
+        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        mockConfig,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+
+      await generateCsv.generateData();
+
+      expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: unknown.');
+    });
   });
 
   it('will return partial data if the scroll or search fails', async () => {

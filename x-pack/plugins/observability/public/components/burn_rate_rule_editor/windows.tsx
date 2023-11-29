@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +14,8 @@ import {
   EuiSelect,
   EuiFormRow,
   EuiText,
+  EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 import { SLOResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +33,7 @@ import {
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
 import { WindowResult } from './validation';
+import { BudgetConsumed } from './budget_consumed';
 
 interface WindowProps extends WindowSchema {
   slo?: SLOResponse;
@@ -38,6 +41,7 @@ interface WindowProps extends WindowSchema {
   onDelete: (id: string) => void;
   disableDelete: boolean;
   errors: WindowResult;
+  budgetMode: boolean;
 }
 
 const ACTION_GROUP_OPTIONS = [
@@ -65,6 +69,7 @@ function Window({
   onDelete,
   errors,
   disableDelete,
+  budgetMode = false,
 }: WindowProps) {
   const onLongWindowDurationChange = (duration: Duration) => {
     const longWindowDurationInMinutes = toMinutes(duration);
@@ -112,6 +117,17 @@ function Window({
     return 'N/A';
   };
 
+  const sloTimeWindowInHours = Math.round(
+    toMinutes(toDuration(slo?.timeWindow.duration ?? '30d')) / 60
+  );
+
+  const computeBudgetConsumed = () => {
+    if (slo && longWindow.value > 0 && burnRateThreshold > 0) {
+      return (burnRateThreshold * longWindow.value) / sloTimeWindowInHours;
+    }
+    return 0;
+  };
+
   const allErrors = [...errors.longWindow, ...errors.burnRateThreshold];
 
   return (
@@ -125,15 +141,27 @@ function Window({
             errors={errors.longWindow}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <BurnRate
-            initialBurnRate={burnRateThreshold}
-            maxBurnRate={maxBurnRateThreshold}
-            onChange={onBurnRateChange}
-            errors={errors.burnRateThreshold}
-            helpText={getErrorBudgetExhaustionText(computeErrorBudgetExhaustionInHours())}
-          />
-        </EuiFlexItem>
+        {!budgetMode && (
+          <EuiFlexItem>
+            <BurnRate
+              initialBurnRate={burnRateThreshold}
+              maxBurnRate={maxBurnRateThreshold}
+              onChange={onBurnRateChange}
+              errors={errors.burnRateThreshold}
+            />
+          </EuiFlexItem>
+        )}
+        {budgetMode && (
+          <EuiFlexItem>
+            <BudgetConsumed
+              initialBurnRate={burnRateThreshold}
+              onChange={onBurnRateChange}
+              errors={errors.burnRateThreshold}
+              sloTimeWindowInHours={sloTimeWindowInHours}
+              longLookbackWindowInHours={longWindow.value}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate('xpack.observability.slo.rules.actionGroupSelectorLabel', {
@@ -177,20 +205,43 @@ function Window({
         </EuiText>
       )}
       <EuiText color="subdued" size="xs">
-        <p>{getErrorBudgetExhaustionText(computeErrorBudgetExhaustionInHours())}</p>
+        <p>
+          {getErrorBudgetExhaustionText(
+            computeErrorBudgetExhaustionInHours(),
+            computeBudgetConsumed(),
+            burnRateThreshold,
+            budgetMode
+          )}
+        </p>
       </EuiText>
       <EuiSpacer size="s" />
     </>
   );
 }
 
-const getErrorBudgetExhaustionText = (formattedHours: string) =>
-  i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.text', {
-    defaultMessage: '{formatedHours} hours until error budget exhaustion.',
-    values: {
-      formatedHours: formattedHours,
-    },
-  });
+const getErrorBudgetExhaustionText = (
+  formattedHours: string,
+  budgetConsumed: number,
+  burnRateThreshold: number,
+  budgetMode = false
+) =>
+  budgetMode
+    ? i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.budgetMode.text', {
+        defaultMessage:
+          '{formatedHours} hours until error budget exhaustion. The burn rate threshold is {burnRateThreshold}x.',
+        values: {
+          formatedHours: formattedHours,
+          burnRateThreshold: numeral(burnRateThreshold).format('0[.0]'),
+        },
+      })
+    : i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.burnRateMode.text', {
+        defaultMessage:
+          '{formatedHours} hours until error budget exhaustion. {budgetConsumed} budget consumed before first alert.',
+        values: {
+          formatedHours: formattedHours,
+          budgetConsumed: numeral(budgetConsumed).format('0.00%'),
+        },
+      });
 
 export const createNewWindow = (
   slo?: SLOResponse,
@@ -217,6 +268,7 @@ interface WindowsProps {
 }
 
 export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }: WindowsProps) {
+  const [budgetMode, setBudgetMode] = useState<boolean>(false);
   const handleWindowChange = (windowDef: WindowSchema) => {
     onChange(windows.map((def) => (windowDef.id === def.id ? windowDef : def)));
   };
@@ -229,8 +281,20 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
     onChange([...windows, createNewWindow()]);
   };
 
+  const handleModeChange = () => {
+    setBudgetMode((previous) => !previous);
+  };
+
   return (
     <>
+      <EuiTitle size="xs">
+        <h5>
+          {i18n.translate('xpack.observability.burnRateRuleEditor.h5.defineMultipleBurnRateLabel', {
+            defaultMessage: 'Define multiple burn rate windows',
+          })}
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       {windows.map((windowDef, index) => {
         const windowErrors = errors[index] || {
           longWindow: new Array<string>(),
@@ -245,25 +309,41 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
             onChange={handleWindowChange}
             onDelete={handleWindowDelete}
             disableDelete={windows.length === 1}
+            budgetMode={budgetMode}
           />
         );
       })}
-      <EuiButtonEmpty
-        data-test-subj="sloBurnRateRuleAddWindowButton"
-        color={'primary'}
-        size="xs"
-        iconType={'plusInCircleFilled'}
-        onClick={handleAddWindow}
-        isDisabled={windows.length === (totalNumberOfWindows || 4)}
-        aria-label={i18n.translate('xpack.observability.slo.rules.addWindowAriaLabel', {
-          defaultMessage: 'Add window',
-        })}
-      >
-        <FormattedMessage
-          id="xpack.observability.slo.rules.addWIndowLabel"
-          defaultMessage="Add window"
-        />
-      </EuiButtonEmpty>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={0}>
+          <EuiButtonEmpty
+            data-test-subj="sloBurnRateRuleAddWindowButton"
+            color={'primary'}
+            size="s"
+            iconType={'plusInCircleFilled'}
+            onClick={handleAddWindow}
+            isDisabled={windows.length === (totalNumberOfWindows || 4)}
+            aria-label={i18n.translate('xpack.observability.slo.rules.addWindowAriaLabel', {
+              defaultMessage: 'Add window',
+            })}
+          >
+            <FormattedMessage
+              id="xpack.observability.slo.rules.addWIndowLabel"
+              defaultMessage="Add window"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={0}>
+          <EuiSwitch
+            compressed
+            onChange={handleModeChange}
+            checked={budgetMode}
+            label={i18n.translate('xpack.observability.slo.rules.useBudgetConsumedModeLabel', {
+              defaultMessage: 'Budget consumed mode',
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
     </>
   );
 }

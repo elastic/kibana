@@ -12,6 +12,7 @@ import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -35,6 +36,7 @@ import {
   shimHitsTotal,
 } from '../es_search';
 import { SearchConfigSchema } from '../../../../config';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
@@ -42,18 +44,14 @@ export const enhancedEsSearchStrategyProvider = (
   logger: Logger,
   usage?: SearchUsage,
   useInternalUser: boolean = false
-): ISearchStrategy => {
-  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
-    try {
-      const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-      await client.asyncSearch.delete({ id });
-    } catch (e) {
-      throw getKbnServerError(e);
-    }
+): ISearchStrategy<IEsSearchRequest<IAsyncSearchRequestParams>> => {
+  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    return client.asyncSearch.delete({ id });
   }
 
   function asyncSearch(
-    { id, ...request }: IEsSearchRequest,
+    { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
@@ -61,12 +59,18 @@ export const enhancedEsSearchStrategyProvider = (
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(searchConfig, options)
+        ? {
+            ...getDefaultAsyncGetParams(searchConfig, options),
+            ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
+            ...(request.params?.wait_for_completion_timeout
+              ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
+              : {}),
+          }
         : {
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
             ...request.params,
           };
-      const { body, headers } = id
+      const { body, headers, meta } = id
         ? await client.asyncSearch.get(
             { ...params, id },
             { ...options.transport, signal: options.abortSignal, meta: true }
@@ -79,12 +83,24 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
+      return toAsyncKibanaSearchResponse(
+        { ...body, response },
+        headers?.warning,
+        // do not return requestParams on polling calls
+        id ? undefined : meta?.request?.params
+      );
     };
 
     const cancel = async () => {
-      if (id) {
+      if (!id || options.isStored) return;
+      try {
         await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        // A 404 means either this search request does not exist, or that it is already cancelled
+        if (e.meta?.statusCode === 404) return;
+
+        // Log all other (unexpected) error messages
+        logger.error(`cancelAsyncSearch error: ${e.message}`);
       }
     };
 
@@ -134,6 +150,9 @@ export const enhancedEsSearchStrategyProvider = (
       const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),
+        ...(esResponse.meta?.request?.params
+          ? { requestParams: sanitizeRequestParams(esResponse.meta?.request?.params) }
+          : {}),
         ...getTotalLoaded(response),
       };
     } catch (e) {
@@ -170,7 +189,11 @@ export const enhancedEsSearchStrategyProvider = (
      */
     cancel: async (id, options, { esClient }) => {
       logger.debug(`cancel ${id}`);
-      await cancelAsyncSearch(id, esClient);
+      try {
+        await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
     },
     /**
      *

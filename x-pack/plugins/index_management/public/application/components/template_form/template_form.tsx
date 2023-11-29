@@ -21,6 +21,7 @@ import {
 } from '../shared';
 import { documentationService } from '../../services/documentation';
 import { SectionError } from '../section_error';
+import { serializeAsESLifecycle } from '../../../../common/lib/data_stream_serialization';
 import {
   SimulateTemplateFlyoutContent,
   SimulateTemplateProps,
@@ -190,6 +191,9 @@ export const TemplateForm = ({
       if (Object.keys(outputTemplate.template).length === 0) {
         delete outputTemplate.template;
       }
+      if (outputTemplate.lifecycle) {
+        delete outputTemplate.lifecycle;
+      }
     }
 
     return outputTemplate;
@@ -206,10 +210,13 @@ export const TemplateForm = ({
             settings: wizardData.settings,
             mappings: wizardData.mappings,
             aliases: wizardData.aliases,
+            lifecycle: wizardData.logistics.lifecycle
+              ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
+              : undefined,
           },
         };
 
-        return cleanupTemplateObject(outputTemplate);
+        return cleanupTemplateObject(outputTemplate as TemplateDeserialized);
       },
     []
   );

@@ -43,6 +43,27 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
+  secrets?: {};
+}
+
+export interface NewElasticsearchOutput extends NewBaseOutput {
+  type: OutputType['Elasticsearch'];
+}
+
+export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
+  type: OutputType['RemoteElasticsearch'];
+  service_token?: string;
+  secrets?: {
+    service_token?:
+      | string
+      | {
+          id: string;
+        };
+  };
+}
+
+export interface NewLogstashOutput extends NewBaseOutput {
+  type: OutputType['Logstash'];
   secrets?: {
     ssl?: {
       key?:
@@ -54,15 +75,11 @@ interface NewBaseOutput {
   };
 }
 
-export interface NewElasticsearchOutput extends NewBaseOutput {
-  type: OutputType['Elasticsearch'];
-}
-
-export interface NewLogstashOutput extends NewBaseOutput {
-  type: OutputType['Logstash'];
-}
-
-export type NewOutput = NewElasticsearchOutput | NewLogstashOutput | KafkaOutput;
+export type NewOutput =
+  | NewElasticsearchOutput
+  | NewRemoteElasticsearchOutput
+  | NewLogstashOutput
+  | KafkaOutput;
 
 export type Output = NewOutput & {
   id: string;

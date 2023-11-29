@@ -26,7 +26,7 @@ paths:
 
         If a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -260,7 +260,7 @@ paths:
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -419,7 +419,7 @@ paths:
       description: |
         Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -503,13 +503,13 @@ paths:
       summary: Resolve errors from the Import objects API.
       operationId: resolveImportErrors
       description: |
-        To resolve errors, you can: 
+        To resolve errors, you can:
 
         * Retry certain saved objects
         * Overwrite specific saved objects
         * Change references to different saved objects
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -798,7 +798,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   examples:
     key_rotation_response:
       summary: Encryption key rotation using default parameters.

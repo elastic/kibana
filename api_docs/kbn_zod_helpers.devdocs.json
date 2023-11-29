@@ -21,6 +21,45 @@
     "functions": [
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.ArrayFromString",
+        "type": "Function",
+        "tags": [],
+        "label": "ArrayFromString",
+        "description": [
+          "\nThis is a helper schema to convert comma separated strings to arrays. Useful\nfor processing query params.\n"
+        ],
+        "signature": [
+          "(schema: T) => Zod.ZodEffects<Zod.ZodArray<T, \"many\">, T[\"_output\"][], unknown>"
+        ],
+        "path": "packages/kbn-zod-helpers/src/array_from_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.ArrayFromString.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "Array items schema"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-zod-helpers/src/array_from_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Array schema that accepts a comma-separated string as input"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.expectParseError",
         "type": "Function",
         "tags": [],
@@ -182,6 +221,62 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.safeParseResult",
+        "type": "Function",
+        "tags": [],
+        "label": "safeParseResult",
+        "description": [
+          "\nSafely parse a payload against a schema, returning the output or undefined.\nThis method does not throw validation errors and is useful for validating\noptional objects when we don't care about errors.\n"
+        ],
+        "signature": [
+          "(payload: unknown, schema: T) => T[\"_output\"] | undefined"
+        ],
+        "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.safeParseResult.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "payload",
+            "description": [
+              "Schema payload"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.safeParseResult.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "Validation schema"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Schema output or undefined"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.stringifyZodError",
         "type": "Function",
         "tags": [],
@@ -237,6 +332,24 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.BooleanFromString",
+        "type": "Object",
+        "tags": [],
+        "label": "BooleanFromString",
+        "description": [
+          "\nThis is a helper schema to convert a boolean string (\"true\" or \"false\") to a\nboolean. Useful for processing query params.\n\nAccepts \"true\" or \"false\" as strings, or a boolean."
+        ],
+        "signature": [
+          "Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">"
+        ],
+        "path": "packages/kbn-zod-helpers/src/boolean_from_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

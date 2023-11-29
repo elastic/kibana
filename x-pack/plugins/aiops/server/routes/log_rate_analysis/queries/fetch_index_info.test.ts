@@ -9,63 +9,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis';
+import { paramsSearchQueryMock } from './__mocks__/params_search_query';
 
-import { fetchIndexInfo, getRandomDocsRequest } from './fetch_index_info';
-
-const params: AiopsLogRateAnalysisSchema = {
-  index: 'the-index',
-  timeFieldName: 'the-time-field-name',
-  start: 1577836800000,
-  end: 1609459200000,
-  baselineMin: 10,
-  baselineMax: 20,
-  deviationMin: 30,
-  deviationMax: 40,
-  includeFrozen: false,
-  searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
-};
+import { fetchIndexInfo } from './fetch_index_info';
 
 describe('fetch_index_info', () => {
-  describe('getRandomDocsRequest', () => {
-    it('returns the most basic request body for a sample of random documents', () => {
-      const req = getRandomDocsRequest(params);
-
-      expect(req).toEqual({
-        body: {
-          _source: false,
-          fields: ['*'],
-          query: {
-            function_score: {
-              query: {
-                bool: {
-                  filter: [
-                    { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
-                    {
-                      range: {
-                        'the-time-field-name': {
-                          format: 'epoch_millis',
-                          gte: 1577836800000,
-                          lte: 1609459200000,
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-              random_score: {},
-            },
-          },
-          size: 1000,
-          track_total_hits: true,
-        },
-        index: params.index,
-        ignore_throttled: undefined,
-        ignore_unavailable: true,
-      });
-    });
-  });
-
   describe('fetchFieldCandidates', () => {
     it('returns field candidates and total hits', async () => {
       const esClientFieldCapsMock = jest.fn(() => ({
@@ -105,12 +53,14 @@ describe('fetch_index_info', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const { totalDocCount, fieldCandidates } = await fetchIndexInfo(esClientMock, params);
+      const { baselineTotalDocCount, deviationTotalDocCount, fieldCandidates } =
+        await fetchIndexInfo(esClientMock, paramsSearchQueryMock);
 
       expect(fieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
-      expect(totalDocCount).toEqual(5000000);
+      expect(baselineTotalDocCount).toEqual(5000000);
+      expect(deviationTotalDocCount).toEqual(5000000);
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
-      expect(esClientSearchMock).toHaveBeenCalledTimes(1);
+      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
     });
   });
 });

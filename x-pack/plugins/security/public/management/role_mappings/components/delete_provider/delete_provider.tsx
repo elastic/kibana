@@ -13,7 +13,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { RoleMapping } from '../../../../../common/model';
+import type { RoleMapping } from '../../../../../common';
 import type { RoleMappingsAPIClient } from '../../role_mappings_api_client';
 
 interface Props {

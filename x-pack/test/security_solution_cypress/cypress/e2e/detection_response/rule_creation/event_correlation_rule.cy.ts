@@ -43,7 +43,7 @@ import {
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -58,10 +58,6 @@ import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_manag
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
@@ -75,7 +71,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
     const mitreAttack = rule.threat;
     const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
     const expectedNumberOfRules = 1;
-    const expectedNumberOfAlerts = '2 alerts';
+    const expectedNumberOfAlerts = '1 alert';
 
     it('Creates and enables a new EQL rule', function () {
       visit(CREATE_RULE_URL);
@@ -147,11 +143,12 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
 
     const rule = getEqlSequenceRule();
 
-    beforeEach(() => {
-      cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
+    before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     });
-    afterEach(() => {
-      cy.task('esArchiverUnload', 'auditbeat_big');
+
+    after(() => {
+      cy.task('esArchiverUnload', 'auditbeat_multiple');
     });
 
     it('Creates and enables a new EQL rule with a sequence', function () {

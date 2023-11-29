@@ -10,3 +10,4 @@ export { QueryDescriptionField } from './query_description_field';
 export { IntervalField } from './interval_field';
 export { QueryIdField } from './query_id_field';
 export { ResultsTypeField } from './results_type_field';
+export { TimeoutField } from './timeout_field';

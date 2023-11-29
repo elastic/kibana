@@ -17,6 +17,7 @@ import {
   defaultPositionStateKey,
   DEFAULT_REFRESH_INTERVAL,
 } from '@kbn/logs-shared-plugin/common';
+import moment from 'moment';
 import {
   getTimeRangeEndFromTime,
   getTimeRangeStartFromTime,
@@ -159,8 +160,8 @@ export const initializeFromUrl =
               Either.chain(({ position }) =>
                 position && position.time
                   ? Either.right({
-                      from: getTimeRangeStartFromTime(position.time),
-                      to: getTimeRangeEndFromTime(position.time),
+                      from: getTimeRangeStartFromTime(moment(position.time).valueOf()),
+                      to: getTimeRangeEndFromTime(moment(position.time).valueOf()),
                     })
                   : Either.left(null)
               )

@@ -16,7 +16,11 @@ interface IntervalProps {
   interval: string;
 }
 
-const Interval = ({ interval }: IntervalProps) => <EuiText size="s">{interval}</EuiText>;
+const Interval = ({ interval }: IntervalProps) => (
+  <EuiText size="s" data-test-subj="intervalPropertyValue">
+    {interval}
+  </EuiText>
+);
 
 interface FromProps {
   from: string;
@@ -24,7 +28,9 @@ interface FromProps {
 }
 
 const From = ({ from, interval }: FromProps) => (
-  <EuiText size="s">{getHumanizedDuration(from, interval)}</EuiText>
+  <EuiText size="s" data-test-subj={`fromPropertyValue-${from}`}>
+    {getHumanizedDuration(from, interval)}
+  </EuiText>
 );
 
 export interface RuleScheduleSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
@@ -43,11 +49,11 @@ export const RuleScheduleSection = ({
 
   ruleSectionListItems.push(
     {
-      title: i18n.INTERVAL_FIELD_LABEL,
+      title: <span data-test-subj="intervalPropertyTitle">{i18n.INTERVAL_FIELD_LABEL}</span>,
       description: <Interval interval={rule.interval} />,
     },
     {
-      title: i18n.FROM_FIELD_LABEL,
+      title: <span data-test-subj="fromPropertyTitle">{i18n.FROM_FIELD_LABEL}</span>,
       description: <From from={rule.from} interval={rule.interval} />,
     }
   );

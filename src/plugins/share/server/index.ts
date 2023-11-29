@@ -7,12 +7,12 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { SharePlugin } from './plugin';
 
 export type { SharePluginSetup, SharePluginStart } from './plugin';
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { SharePlugin } = await import('./plugin');
   return new SharePlugin(initializerContext);
 }

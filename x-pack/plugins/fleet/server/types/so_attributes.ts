@@ -151,6 +151,14 @@ interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
   secrets?: {};
 }
 
+export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
+  type: OutputType['RemoteElasticsearch'];
+  service_token?: string;
+  secrets?: {
+    service_token?: { id: string };
+  };
+}
+
 interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
   type: OutputType['Logstash'];
   secrets?: {
@@ -209,6 +217,7 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
 
 export type OutputSOAttributes =
   | OutputSoElasticsearchAttributes
+  | OutputSoRemoteElasticsearchAttributes
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
 

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import { InfraWaffleMapNode } from '../../../../../lib/lib';
@@ -98,23 +97,25 @@ describe('ConditionalToolTip', () => {
       },
     ];
     const wrapper = mount(
-      <EuiThemeProvider darkMode={false}>
-        <ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />
-      </EuiThemeProvider>
+      <ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />
     );
     const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
     expect(tooltip.render()).toMatchSnapshot();
 
-    expect(mockedUseSnapshot).toBeCalledWith({
-      filterQuery: expectedQuery,
-      metrics: expectedMetrics,
-      groupBy: [],
-      nodeType: 'host',
-      sourceId: 'default',
-      currentTime,
-      accountId: '',
-      region: '',
-    } as UseSnapshotRequest);
+    expect(mockedUseSnapshot).toBeCalledWith(
+      {
+        filterQuery: expectedQuery,
+        metrics: expectedMetrics,
+        groupBy: [],
+        includeTimeseries: false,
+        nodeType: 'host',
+        sourceId: 'default',
+        currentTime,
+        accountId: '',
+        region: '',
+      } as UseSnapshotRequest,
+      { abortable: true }
+    );
   });
 });
 

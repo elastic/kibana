@@ -36,6 +36,10 @@ function displayOutputType(type: string) {
       return i18n.translate('xpack.fleet.settings.outputsTable.elasticsearchTypeLabel', {
         defaultMessage: 'Elasticsearch',
       });
+    case 'remote_elasticsearch':
+      return i18n.translate('xpack.fleet.settings.outputsTable.remoteElasticsearchTypeLabel', {
+        defaultMessage: 'Remote Elasticsearch',
+      });
     default:
       return type;
   }

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from '@kbn/core/public';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
@@ -17,7 +17,7 @@ import { getRootCause } from './utils';
 export class EsError extends KbnError {
   readonly attributes: IEsError['attributes'];
 
-  constructor(protected readonly err: IEsError) {
+  constructor(protected readonly err: IEsError, private readonly openInInspector: () => void) {
     super(
       `EsError: ${
         getRootCause(err?.attributes?.error)?.reason ||
@@ -27,7 +27,7 @@ export class EsError extends KbnError {
     this.attributes = err.attributes;
   }
 
-  public getErrorMessage(application: ApplicationStart) {
+  public getErrorMessage() {
     if (!this.attributes?.error) {
       return null;
     }
@@ -44,5 +44,15 @@ export class EsError extends KbnError {
         </EuiCodeBlock>
       </>
     );
+  }
+
+  public getActions(application: ApplicationStart) {
+    return [
+      <EuiButton key="viewRequestDetails" color="primary" onClick={this.openInInspector} size="s">
+        {i18n.translate('data.esError.viewDetailsButtonLabel', {
+          defaultMessage: 'View details',
+        })}
+      </EuiButton>,
+    ];
   }
 }

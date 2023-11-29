@@ -236,7 +236,9 @@ describe('Create rule route', () => {
         },
       });
       const result = await server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid input');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "saved_query", saved_id: Required, type: Invalid literal value, expected "threshold", and 18 more'
+      );
     });
   });
 });
