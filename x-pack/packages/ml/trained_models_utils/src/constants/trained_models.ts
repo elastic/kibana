@@ -143,7 +143,7 @@ export type ModelDefinitionResponse = ModelDefinition & {
   /**
    * Complete model id, e.g. .elser_model_2_linux-x86_64
    */
-  name: string;
+  model_id: string;
 };
 
 export type ElasticModelId = keyof typeof ELASTIC_MODEL_DEFINITIONS;

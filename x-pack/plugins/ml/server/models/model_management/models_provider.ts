@@ -461,7 +461,7 @@ export class ModelsProvider {
 
     const modelDefinitionMap = new Map<string, ModelDefinitionResponse[]>();
 
-    for (const [name, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
+    for (const [modelId, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
       const recommended =
         (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
         (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
@@ -471,7 +471,7 @@ export class ModelsProvider {
       const modelDefinitionResponse = {
         ...def,
         ...(recommended ? { recommended } : {}),
-        name,
+        model_id: modelId,
       };
 
       if (modelDefinitionMap.has(modelName)) {
@@ -553,7 +553,7 @@ export class ModelsProvider {
    */
   async installElasticModel(modelId: string, mlSavedObjectService: MLSavedObjectService) {
     const availableModels = await this.getModelDownloads();
-    const model = availableModels.find((m) => m.name === modelId);
+    const model = availableModels.find((m) => m.model_id === modelId);
     if (!model) {
       throw Boom.notFound('Model not found');
     }
@@ -574,7 +574,7 @@ export class ModelsProvider {
     }
 
     const putResponse = await this._mlClient.putTrainedModel({
-      model_id: model.name,
+      model_id: model.model_id,
       body: model.config,
     });
 
