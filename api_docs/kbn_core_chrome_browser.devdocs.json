@@ -1669,6 +1669,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.isElasticInternalLink",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isElasticInternalLink",
+            "description": [
+              "\nFlag to indicate if the node is an \"external\" cloud link"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
