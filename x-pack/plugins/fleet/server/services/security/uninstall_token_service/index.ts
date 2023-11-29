@@ -230,7 +230,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const uninstallTokens: UninstallToken[] = tokenObject.map(
       ({ id: _id, attributes, created_at: createdAt, error }) => {
         if (error) {
-          throw new UninstallTokenError(`Error when reading Uninstall Token: ${error.message}`);
+          const errorMessage = 'Error when reading Uninstall Token';
+          appContextService.getLogger().error(`${errorMessage} with id '${_id}': '${error}'`);
+          throw new UninstallTokenError(errorMessage);
         }
 
         this.assertPolicyId(attributes);
@@ -514,8 +516,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         // known errors are considered non-fatal
         errorResult.push({ error });
       } else {
-        // re-throw unknown errors
-        throw error;
+        const errorMessage = 'Unknown error happened while checking Uninstall Tokens validity';
+        appContextService.getLogger().error(`${errorMessage}: '${error}'`);
+        throw new UninstallTokenError(errorMessage);
       }
     }
 
@@ -528,21 +531,25 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private assertCreatedAt(createdAt: string | undefined): asserts createdAt is string {
     if (!createdAt) {
-      throw new UninstallTokenError('Uninstall Token is missing creation date.');
+      throw new UninstallTokenError(
+        'Invalid uninstall token: Saved object is missing creation date.'
+      );
     }
   }
 
   private assertToken(attributes: UninstallTokenSOAttributes | undefined) {
     if (!attributes?.token && !attributes?.token_plain) {
       throw new UninstallTokenError(
-        'Invalid uninstall token: Saved object is missing the `token` attribute.'
+        'Invalid uninstall token: Saved object is missing the token attribute.'
       );
     }
   }
 
   private assertPolicyId(attributes: UninstallTokenSOAttributes | undefined) {
     if (!attributes?.policy_id) {
-      throw new UninstallTokenError('Uninstall Token is missing policy ID.');
+      throw new UninstallTokenError(
+        'Invalid uninstall token: Saved object is missing the policy id attribute.'
+      );
     }
   }
 }
