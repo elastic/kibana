@@ -65,7 +65,6 @@ export const EsqlQueryExpression: React.FC<
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
-  const [indexPattern, setIndexPattern] = useState<string>();
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -84,6 +83,7 @@ export const EsqlQueryExpression: React.FC<
     if (esqlQuery && 'esql' in esqlQuery) {
       if (esqlQuery.esql) {
         refreshTimeFields(esqlQuery);
+        refreshEsFields(esqlQuery, false);
       }
     }
     if (timeField) {
@@ -141,16 +141,8 @@ export const EsqlQueryExpression: React.FC<
 
   const refreshTimeFields = async (q: AggregateQuery) => {
     let hasTimestamp = false;
-
     const currentIndexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
-    if (indexPattern !== undefined && currentIndexPattern !== indexPattern) {
-      // reset the sourceFields if the index pattern has changed
-      setParam('sourceFields', DEFAULT_VALUES.SOURCE_FIELDS);
-    }
-    setIndexPattern(currentIndexPattern);
-
     const currentEsFields = await getFields(http, [currentIndexPattern]);
-    setEsFields(currentEsFields);
 
     const timeFields = getTimeFieldOptions(currentEsFields);
     setTimeFieldOptions([firstFieldOption, ...timeFields]);
@@ -161,6 +153,29 @@ export const EsqlQueryExpression: React.FC<
       hasTimestamp = true;
     }
     setDetectTimestamp(hasTimestamp);
+  };
+
+  const refreshEsFields = async (q: AggregateQuery, resetSourceFields: boolean = true) => {
+    let fields: FieldOption[] = [];
+    try {
+      const table = await fetchFieldsFromESQL({ esql: `${get(q, 'esql')} | limit 0` }, expressions);
+      if (table) {
+        fields = table.columns.map((c) => ({
+          name: c.id,
+          type: c.meta.type,
+          normalizedType: c.meta.type,
+          searchable: true,
+          aggregatable: true,
+        }));
+      }
+    } catch (error) {
+      /** ignore error */
+    }
+
+    if (resetSourceFields) {
+      setParam('sourceFields', DEFAULT_VALUES.SOURCE_FIELDS);
+    }
+    setEsFields(fields);
   };
 
   return (
@@ -181,6 +196,7 @@ export const EsqlQueryExpression: React.FC<
             setQuery(q);
             setParam('esqlQuery', q);
             refreshTimeFields(q);
+            refreshEsFields(q);
           }, 500)}
           expandCodeEditor={() => true}
           isCodeEditorExpanded={true}
