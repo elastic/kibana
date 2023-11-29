@@ -11,7 +11,7 @@ import type { AxiosError } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { DashboardActionParams, DashboardActionResponse } from '../../../common/openai/types';
-import { initDashboard } from '../common/create_gen_ai_dashboard';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -231,7 +231,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
 
   /**
    * Deprecated. Use invokeStream instead.
-   * TODO: remove once streaming work is implemented in LLM mode for security solution
+   * TODO: remove once streaming work is implemented in langchain mode for security solution
    * tracked here: https://github.com/elastic/security-team/issues/7363
    */
   public async invokeAI({

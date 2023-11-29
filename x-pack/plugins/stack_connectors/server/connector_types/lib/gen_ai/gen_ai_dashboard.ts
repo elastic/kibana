@@ -8,8 +8,8 @@
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { OPENAI_TITLE, OPENAI_CONNECTOR_ID } from '../../../common/openai/constants';
-import { BEDROCK_TITLE, BEDROCK_CONNECTOR_ID } from '../../../common/bedrock/constants';
+import { OPENAI_TITLE, OPENAI_CONNECTOR_ID } from '../../../../common/openai/constants';
+import { BEDROCK_TITLE, BEDROCK_CONNECTOR_ID } from '../../../../common/bedrock/constants';
 
 const getDashboardTitle = (title: string) => `${title} Token Usage`;
 

@@ -122,10 +122,14 @@ export const getGenAiTokenTracking = async ({
   if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAI') {
     try {
       const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
-        response: result.data.message,
-
+        response: (
+          result.data as unknown as {
+            message: string;
+          }
+        ).message,
         body: JSON.stringify({
-          prompt: validatedParams.subActionParams.messages[0].content,
+          prompt: (validatedParams as { subActionParams: { messages: Array<{ content: string }> } })
+            .subActionParams.messages[0].content,
         }),
       });
 

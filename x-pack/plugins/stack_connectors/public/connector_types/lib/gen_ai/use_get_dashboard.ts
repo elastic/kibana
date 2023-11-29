@@ -20,12 +20,6 @@ export interface UseGetDashboard {
   dashboardUrl: string | null;
   isLoading: boolean;
 }
-
-const getDashboardId = (selectedProvider: string, spaceId: string): string =>
-  `generative-ai-token-usage-${
-    selectedProvider.toLowerCase().includes('openai') ? 'openai' : 'bedrock'
-  }-${spaceId}`;
-
 export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGetDashboard => {
   const {
     dashboard,
@@ -133,3 +127,8 @@ export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGe
     dashboardUrl,
   };
 };
+
+const getDashboardId = (selectedProvider: string, spaceId: string): string =>
+  `generative-ai-token-usage-${
+    selectedProvider.toLowerCase().includes('openai') ? 'openai' : 'bedrock'
+  }-${spaceId}`;
