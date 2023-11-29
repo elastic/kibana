@@ -18,18 +18,14 @@ import { statusColors } from '../common/constants';
 export const ComplianceScoreBar = ({
   totalPassed,
   totalFailed,
-  isReverse = false,
   size = 'm',
 }: {
   totalPassed: number;
   totalFailed: number;
-  isReverse?: boolean;
   size?: 'm' | 'l';
 }) => {
   const { euiTheme } = useEuiTheme();
-  const complianceScore = isReverse
-    ? calculatePostureScore(totalFailed, totalPassed)
-    : calculatePostureScore(totalPassed, totalFailed);
+  const complianceScore = calculatePostureScore(totalPassed, totalFailed);
 
   return (
     <EuiToolTip
@@ -51,7 +47,6 @@ export const ComplianceScoreBar = ({
         <EuiFlexItem>
           <EuiFlexGroup
             gutterSize="none"
-            direction={isReverse ? 'rowReverse' : 'row'}
             css={css`
               height: ${size === 'm' ? euiTheme.size.xs : '6px'};
               border-radius: ${euiTheme.border.radius.medium};
