@@ -21,19 +21,6 @@ export const groupBy = {
       field: 'slo.instanceId',
     },
   },
-  // we might get ride of this by using the ingest pipeline instead
-  errorBudgetEstimated: {
-    terms: {
-      field: 'errorBudgetEstimated',
-    },
-  },
-  // we might get ride of this by using the ingest pipeline instead
-  // Differentiate the temporary document from the summary one
-  isTempDoc: {
-    terms: {
-      field: 'isTempDoc',
-    },
-  },
   // optional fields: only specified for APM indicators. Must include missing_bucket:true
   'service.name': {
     terms: {

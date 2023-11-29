@@ -8,7 +8,7 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SLO } from '../../../../domain/models';
 import {
-  getSLOSummaryPipeline,
+  getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
@@ -20,21 +20,11 @@ export function generateTransformForOccurrences(slo: SLO): TransformPutTransform
   return {
     transform_id: getSLOSummaryTransformId(slo.id, slo.revision),
     dest: {
-      pipeline: getSLOSummaryPipeline(slo.id, slo.revision),
+      pipeline: getSLOSummaryPipelineId(slo.id, slo.revision),
       index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
     },
     source: {
       index: SLO_DESTINATION_INDEX_PATTERN,
-      runtime_mappings: {
-        errorBudgetEstimated: {
-          type: 'boolean',
-          script: 'emit(false)',
-        },
-        isTempDoc: {
-          type: 'boolean',
-          script: 'emit(false)',
-        },
-      },
       query: {
         bool: {
           filter: [
@@ -116,6 +106,11 @@ export function generateTransformForOccurrences(slo: SLO): TransformPutTransform
             script: {
               source: `if (params.sliValue == -1) { return 0 } else if (params.sliValue >= ${slo.objective.target}) { return 4 } else if (params.errorBudgetRemaining > 0) { return 2 } else { return 1 }`,
             },
+          },
+        },
+        latestSliTimestamp: {
+          max: {
+            field: '@timestamp',
           },
         },
       },

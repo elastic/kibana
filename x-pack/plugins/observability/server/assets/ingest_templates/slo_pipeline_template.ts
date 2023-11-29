@@ -9,7 +9,7 @@ import { SLO_RESOURCES_VERSION } from '../constants';
 
 export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => ({
   id,
-  description: 'Monthly date-time index naming for SLO data',
+  description: 'Ingest pipeline for SLO rollup data',
   processors: [
     {
       set: {
@@ -26,7 +26,7 @@ export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => (
     },
   ],
   _meta: {
-    description: 'SLO ingest pipeline',
+    description: 'Ingest pipeline for SLO rollup data',
     version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',

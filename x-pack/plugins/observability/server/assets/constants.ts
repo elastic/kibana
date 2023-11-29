@@ -36,5 +36,5 @@ export const getSLOTransformId = (sloId: string, sloRevision: number) =>
 export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
   `slo-summary-${sloId}-${sloRevision}`;
 
-export const getSLOSummaryPipeline = (sloId: string, sloRevision: number) =>
+export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-summary-pipeline-${sloId}-${sloRevision}`;

@@ -5,63 +5,130 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION } from '../constants';
+import { SLO } from '../../domain/models';
+import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../constants';
 
-// TODO one summary pipeline per SLO will be created
-export const getSLOSummaryPipelineTemplate = (id: string) => ({
-  id,
-  description: 'SLO summary ingest pipeline',
-  processors: [
-    {
-      split: {
-        description: 'Split comma separated list of tags into an array',
-        field: 'slo.tags',
-        separator: ',',
+export const getSLOSummaryPipelineTemplate = (slo: SLO) => {
+  const errorBudgetEstimated =
+    slo.budgetingMethod === 'occurrences' && slo.timeWindow.type === 'calendarAligned';
+  return {
+    id: getSLOSummaryPipelineId(slo.id, slo.revision),
+    description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,
+    processors: [
+      {
+        set: {
+          description: 'Set errorBudgetEstimated field',
+          field: 'errorBudgetEstimated',
+          value: errorBudgetEstimated,
+        },
       },
-    },
-    {
-      set: {
-        description: "if 'statusCode == 0', set status to NO_DATA",
-        if: 'ctx.statusCode == 0',
-        field: 'status',
-        value: 'NO_DATA',
+      {
+        set: {
+          description: 'Set isTempDoc field',
+          field: 'isTempDoc',
+          value: false,
+        },
       },
-    },
-    {
-      set: {
-        description: "if 'statusCode == 1', set statusLabel to VIOLATED",
-        if: 'ctx.statusCode == 1',
-        field: 'status',
-        value: 'VIOLATED',
+      {
+        set: {
+          description: 'Set groupBy field',
+          field: 'slo.groupBy',
+          value: slo.groupBy,
+        },
       },
-    },
-    {
-      set: {
-        description: "if 'statusCode == 2', set status to DEGRADING",
-        if: 'ctx.statusCode == 2',
-        field: 'status',
-        value: 'DEGRADING',
+      {
+        set: {
+          description: 'Set name field',
+          field: 'slo.name',
+          value: slo.name,
+        },
       },
-    },
-    {
-      set: {
-        description: "if 'statusCode == 4', set status to HEALTHY",
-        if: 'ctx.statusCode == 4',
-        field: 'status',
-        value: 'HEALTHY',
+      {
+        set: {
+          description: 'Set description field',
+          field: 'slo.description',
+          value: slo.description,
+        },
       },
-    },
-    {
-      set: {
-        field: 'summaryUpdatedAt',
-        value: '{{{_ingest.timestamp}}}',
+      {
+        set: {
+          description: 'Set tags field',
+          field: 'slo.tags',
+          value: slo.tags,
+        },
       },
+      {
+        set: {
+          description: 'Set indicator.type field',
+          field: 'slo.indicator.type',
+          value: slo.indicator.type,
+        },
+      },
+      {
+        set: {
+          description: 'Set budgetingMethod field',
+          field: 'slo.budgetingMethod',
+          value: slo.budgetingMethod,
+        },
+      },
+      {
+        set: {
+          description: 'Set timeWindow.duration field',
+          field: 'slo.timeWindow.duration',
+          value: slo.timeWindow.duration,
+        },
+      },
+      {
+        set: {
+          description: 'Set timeWindow.type field',
+          field: 'slo.timeWindow.type',
+          value: slo.timeWindow.type,
+        },
+      },
+      {
+        set: {
+          description: "if 'statusCode == 0', set status to NO_DATA",
+          if: 'ctx.statusCode == 0',
+          field: 'status',
+          value: 'NO_DATA',
+        },
+      },
+      {
+        set: {
+          description: "if 'statusCode == 1', set statusLabel to VIOLATED",
+          if: 'ctx.statusCode == 1',
+          field: 'status',
+          value: 'VIOLATED',
+        },
+      },
+      {
+        set: {
+          description: "if 'statusCode == 2', set status to DEGRADING",
+          if: 'ctx.statusCode == 2',
+          field: 'status',
+          value: 'DEGRADING',
+        },
+      },
+      {
+        set: {
+          description: "if 'statusCode == 4', set status to HEALTHY",
+          if: 'ctx.statusCode == 4',
+          field: 'status',
+          value: 'HEALTHY',
+        },
+      },
+      {
+        set: {
+          field: 'summaryUpdatedAt',
+          value: '{{{_ingest.timestamp}}}',
+        },
+      },
+    ],
+    _meta: {
+      description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,
+      version: SLO_RESOURCES_VERSION,
+      managed: true,
+      managed_by: 'observability',
     },
-  ],
-  _meta: {
-    description: 'SLO summary ingest pipeline',
-    version: SLO_RESOURCES_VERSION,
-    managed: true,
-    managed_by: 'observability',
-  },
-});
+  };
+};
