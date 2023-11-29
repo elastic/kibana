@@ -5169,6 +5169,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/openapi-bundler@link:packages/kbn-openapi-bundler":
+  version "0.0.0"
+  uid ""
+
 "@kbn/openapi-generator@link:packages/kbn-openapi-generator":
   version "0.0.0"
   uid ""

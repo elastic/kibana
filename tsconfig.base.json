@@ -1116,6 +1116,8 @@
       "@kbn/oidc-provider-plugin/*": ["x-pack/test/security_api_integration/plugins/oidc_provider/*"],
       "@kbn/open-telemetry-instrumented-plugin": ["test/common/plugins/otel_metrics"],
       "@kbn/open-telemetry-instrumented-plugin/*": ["test/common/plugins/otel_metrics/*"],
+      "@kbn/openapi-bundler": ["packages/kbn-openapi-bundler"],
+      "@kbn/openapi-bundler/*": ["packages/kbn-openapi-bundler/*"],
       "@kbn/openapi-generator": ["packages/kbn-openapi-generator"],
       "@kbn/openapi-generator/*": ["packages/kbn-openapi-generator/*"],
       "@kbn/optimizer": ["packages/kbn-optimizer"],
