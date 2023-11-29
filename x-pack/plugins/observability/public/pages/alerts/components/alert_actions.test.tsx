@@ -17,6 +17,7 @@ import * as pluginContext from '../../../hooks/use_plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../plugin';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shared-plugin/public';
 import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { waitFor } from '@testing-library/react';
@@ -39,13 +40,11 @@ mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.moc
   caseHooksReturnedValue
 );
 
+mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
+
 jest.mock('../../../utils/kibana_react', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
-}));
-
-jest.mock('../../../hooks/use_get_user_cases_permissions', () => ({
-  useGetUserCasesPermissions: jest.fn(() => ({ create: true, read: true })),
 }));
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react', () => ({
@@ -192,5 +191,19 @@ describe('ObservabilityActions component', () => {
     mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
 
     expect(refresh).toHaveBeenCalled();
+  });
+
+  it('should hide the case actions without permissions', async () => {
+    mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(
+      noCasesPermissions()
+    );
+
+    const wrapper = await setup('nothing');
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(0);
+    expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length).toBe(
+      0
+    );
   });
 });
