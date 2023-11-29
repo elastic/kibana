@@ -29,14 +29,16 @@ export const TestTrainedModelContent: FC<ContentProps> = ({
   const mediumPadding = useEuiPaddingSize('m');
 
   const [inputType, setInputType] = useState<INPUT_TYPE>(INPUT_TYPE.TEXT);
-  const testTrainedModelsContext = useTestTrainedModelsContext();
-  const isCreateMode = testTrainedModelsContext?.currentContext.createPipelineFlyoutOpen;
+  const {
+    currentContext: { createPipelineFlyoutOpen },
+  } = useTestTrainedModelsContext();
 
   const onlyShowTab: INPUT_TYPE | undefined = useMemo(() => {
-    return (model.type ?? []).includes(SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) || isCreateMode
+    return (model.type ?? []).includes(SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) ||
+      createPipelineFlyoutOpen
       ? INPUT_TYPE.INDEX
       : undefined;
-  }, [model, isCreateMode]);
+  }, [model, createPipelineFlyoutOpen]);
   return (
     <>
       {' '}

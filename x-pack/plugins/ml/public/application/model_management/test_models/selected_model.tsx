@@ -47,11 +47,10 @@ export const SelectedModel: FC<Props> = ({
   handlePipelineConfigUpdate,
 }) => {
   const { trainedModels } = useMlApiContext();
-  const testTrainedModelsContext = useTestTrainedModelsContext();
-  const pipeline =
-    (testTrainedModelsContext?.currentContext.createPipelineFlyoutOpen &&
-      testTrainedModelsContext?.currentContext.pipelineConfig) ||
-    undefined;
+  const {
+    currentContext: { createPipelineFlyoutOpen, pipelineConfig },
+  } = useTestTrainedModelsContext();
+  const pipeline = (createPipelineFlyoutOpen && pipelineConfig) || undefined;
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {

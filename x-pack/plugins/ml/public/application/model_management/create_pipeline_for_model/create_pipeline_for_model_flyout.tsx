@@ -45,8 +45,8 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
   onClose,
   model,
 }) => {
-  const testTrainedModelsContext = useTestTrainedModelsContext();
-  const pipelineConfig = testTrainedModelsContext?.currentContext.pipelineConfig ?? {};
+  const { currentContext, setCurrentContext } = useTestTrainedModelsContext();
+  const pipelineConfig = currentContext.pipelineConfig ?? {};
 
   const initialState = useMemo(
     () => getInitialState(model, pipelineConfig),
@@ -94,8 +94,8 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
   const handleSetStep = (currentStep: AddInferencePipelineSteps) => {
     setStep(currentStep);
 
-    testTrainedModelsContext?.setCurrentContext({
-      ...testTrainedModelsContext.currentContext,
+    setCurrentContext({
+      ...currentContext,
       pipelineConfig: getPipelineConfig(formState, pipelineConfig),
     });
   };

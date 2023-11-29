@@ -26,7 +26,10 @@ export const InputFormControls: FC<Props> = ({
   inferrer,
   showCreatePipelineButton,
 }) => {
-  const testTrainedModelsContext = useTestTrainedModelsContext();
+  const {
+    currentContext: { createPipelineFlyoutOpen },
+    setCurrentContext,
+  } = useTestTrainedModelsContext();
 
   return (
     <>
@@ -43,14 +46,13 @@ export const InputFormControls: FC<Props> = ({
           />
         </EuiButton>
       </EuiFlexItem>
-      {!testTrainedModelsContext?.currentContext.createPipelineFlyoutOpen &&
-      showCreatePipelineButton ? (
+      {!createPipelineFlyoutOpen && showCreatePipelineButton ? (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             disabled={createPipelineButtonDisabled}
             data-test-subj={'mlTestModelCreatePipelineButton'}
             onClick={() =>
-              testTrainedModelsContext?.setCurrentContext({
+              setCurrentContext({
                 pipelineConfig: inferrer.getPipeline(),
                 defaultSelectedDataViewId: inferrer.getSelectedDataViewId(),
                 defaultSelectedField: inferrer.getInputField(),
