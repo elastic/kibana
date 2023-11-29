@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   CriteriaWithPagination,
   EuiBasicTable,
@@ -21,7 +23,10 @@ import { Connector } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 
+import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
+import { SEARCH_INDEX_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
@@ -43,6 +48,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   },
   onChange,
 }) => {
+  const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<Connector>> = [
     {
       field: 'name',
@@ -102,6 +108,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
             { defaultMessage: 'View this connector' }
           ),
+          enabled: (connector) => !!connector.index_name,
           icon: 'eye',
           isPrimary: false,
           name: (connector) =>
@@ -114,30 +121,13 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
                 },
               }
             ),
-          onClick: () => {},
-          type: 'icon',
-        },
-        {
-          color: 'danger',
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.connectorsTable.columns.actions.delete',
-            {
-              defaultMessage: 'Delete this connector',
-            }
-          ),
-          icon: 'trash',
-          isPrimary: false,
-          name: (connector) =>
-            i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorsTable.actions.delete.caption',
-              {
-                defaultMessage: 'Delete index {connectorName}',
-                values: {
-                  connectorName: connector.name,
-                },
-              }
-            ),
-          onClick: () => {},
+          onClick: (connector) => {
+            navigateToUrl(
+              generateEncodedPath(SEARCH_INDEX_PATH, {
+                indexName: connector.index_name || '',
+              })
+            );
+          },
           type: 'icon',
         },
       ],

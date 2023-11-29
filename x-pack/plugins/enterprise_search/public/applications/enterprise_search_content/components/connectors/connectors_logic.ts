@@ -18,7 +18,6 @@ import {
 export interface ConnectorsActions {
   apiError: FetchConnectorsApiLogicActions['apiError'];
   apiSuccess: FetchConnectorsApiLogicActions['apiSuccess'];
-  closeDeleteModal(): void;
   fetchConnectors({
     connectorType,
     from,
@@ -37,13 +36,10 @@ export interface ConnectorsActions {
   };
   makeRequest: FetchConnectorsApiLogicActions['makeRequest'];
   onPaginate(newPageIndex: number): { newPageIndex: number };
-  openDeleteModal(indexName: string): { indexName: string };
   setIsFirstRequest(): void;
 }
 export interface ConnectorsValues {
   data: typeof FetchConnectorsApiLogic.values.data;
-  isDeleteLoading: boolean;
-  isDeleteModalVisible: boolean;
   isEmpty: boolean;
   isFetchConnectorsDetailsLoading: boolean;
   isFirstRequest: boolean;
@@ -60,7 +56,6 @@ export interface ConnectorsValues {
 
 export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsActions>>({
   actions: {
-    closeDeleteModal: true,
     fetchConnectors: ({ connectorType, from, size, searchQuery }) => ({
       connectorType,
       from,
@@ -68,7 +63,6 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       size,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
-    openDeleteModal: (indexName) => ({ indexName }),
     setIsFirstRequest: true,
   },
   connect: {
