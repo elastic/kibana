@@ -153,7 +153,7 @@ export interface UserContentCommonSchema {
   id: string;
   updatedAt: string;
   managed?: boolean;
-  namespaces: string[];
+  namespaces?: string[];
   references: SavedObjectsReference[];
   type: string;
   attributes: {
@@ -549,7 +549,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             <SpacesList
               canShareToSpaces={canShareToSpaces}
               spacesApi={spacesApi}
-              spaceIds={record.namespaces}
+              spaceIds={record.namespaces ?? []}
               type={record.type}
               noun={record.type}
               id={record.id}
