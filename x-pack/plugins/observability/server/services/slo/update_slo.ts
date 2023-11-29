@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
-import { isEqual } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -43,19 +43,37 @@ export class UpdateSLO {
       return this.toResponse(originalSlo);
     }
 
+    const fields = [
+      'indicator',
+      'groupBy',
+      'timeWindow',
+      'objective',
+      'budgetingMethod',
+      'settings',
+    ];
+    const requireRevisionBump = !isEqual(pick(originalSlo, fields), pick(updatedSlo, fields));
+
     updatedSlo = Object.assign(updatedSlo, {
       updatedAt: new Date(),
-      revision: originalSlo.revision + 1,
+      revision: requireRevisionBump ? originalSlo.revision + 1 : originalSlo.revision,
     });
 
     validateSLO(updatedSlo);
+    await this.repository.save(updatedSlo);
+
+    if (!requireRevisionBump) {
+      await retryTransientEsErrors(
+        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(updatedSlo)),
+        { logger: this.logger }
+      );
+
+      return this.toResponse(updatedSlo);
+    }
 
     const updatedRollupTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     const updatedSummaryTransformId = getSLOSummaryTransformId(updatedSlo.id, updatedSlo.revision);
 
     try {
-      await this.repository.save(updatedSlo);
-
       await this.transformManager.install(updatedSlo);
       await this.transformManager.start(updatedRollupTransformId);
 
