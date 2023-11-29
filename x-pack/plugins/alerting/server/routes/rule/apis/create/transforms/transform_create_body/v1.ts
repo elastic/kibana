@@ -27,7 +27,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
         id: action.id,
         params: action.params,
         actionTypeId: action.actionTypeId,
-        ...(useAlertDataForTemplate ? { useAlertDataForTemplate } : {}),
+        ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
         ...(action.uuid ? { uuid: action.uuid } : {}),
         ...(frequency
           ? {
