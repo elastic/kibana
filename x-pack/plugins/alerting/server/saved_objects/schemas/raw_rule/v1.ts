@@ -168,6 +168,7 @@ const rawRuleAlertsFilterSchema = schema.object({
             key: schema.maybe(schema.string()),
             params: schema.maybe(schema.recordOf(schema.string(), schema.any())), // better type?
             value: schema.maybe(schema.string()),
+            field: schema.maybe(schema.string()),
           }),
           $state: schema.maybe(
             schema.object({
@@ -209,6 +210,7 @@ const rawRuleActionSchema = schema.object({
     })
   ),
   alertsFilter: schema.maybe(rawRuleAlertsFilterSchema),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
 export const rawRuleSchema = schema.object({
@@ -266,5 +268,6 @@ export const rawRuleSchema = schema.object({
       severity: schema.maybe(schema.string()),
     })
   ),
-  params: schema.recordOf(schema.string(), schema.any()),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
+  typeVersion: schema.maybe(schema.number()),
 });
