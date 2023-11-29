@@ -179,7 +179,14 @@ const PanelRT = rt.type({
       fieldName: rt.string,
       title: rt.union([rt.string, rt.undefined]),
       selectedOptions: rt.array(rt.string),
-      helpMessage: rt.any,
+      helpMessage: rt.partial({
+        text: rt.string,
+        link: rt.partial({
+          href: rt.string,
+          'data-test-subj': rt.string,
+          text: rt.string,
+        }),
+      }),
     }),
   ]),
 });
