@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+
 import { API_BASE_PATH } from '../constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+type Options = Partial<ClusterPutComponentTemplateRequest> | { _kbnMeta: Record<string, any> };
 
 export function componentTemplatesApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');
 
-  const createComponentTemplate = (name: string, options: Record<string, any>) =>
+  const createComponentTemplate = (name: string, options: Options) =>
     supertest
       .post(`${API_BASE_PATH}/component_templates`)
       .set('kbn-xsrf', 'xxx')
@@ -30,7 +34,7 @@ export function componentTemplatesApi(getService: FtrProviderContext['getService
       .set('kbn-xsrf', 'xxx')
       .set('x-elastic-internal-origin', 'xxx');
 
-  const updateComponentTemplate = (name: string, options: Record<string, any>) =>
+  const updateComponentTemplate = (name: string, options: Options) =>
     supertest
       .put(`${API_BASE_PATH}/component_templates/${name}`)
       .set('kbn-xsrf', 'xxx')

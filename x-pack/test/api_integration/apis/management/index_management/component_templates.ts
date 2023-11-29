@@ -147,7 +147,6 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             lifecycle: {
-              enabled: true,
               data_retention: '2d',
             },
           },
