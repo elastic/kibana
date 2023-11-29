@@ -10,6 +10,10 @@ import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+import {
   DETECTION_ENGINE_RULES_URL,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '@kbn/security-solution-plugin/common/constants';
@@ -47,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send()
         .expect(200);
 
@@ -66,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send()
         .expect(200);
 
@@ -86,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send(getComplexRule())
         .expect(200);
 
@@ -94,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send()
         .expect(200);
 
@@ -115,6 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
         .send(getWebHookAction())
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       const action = {
@@ -135,7 +140,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send()
         .expect(200);
 
@@ -166,6 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
         .send(getWebHookAction())
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       const action = {
@@ -187,7 +193,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send()
         .expect(200);
       const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
@@ -232,7 +238,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${createRuleBody.id}`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             name: 'Legacy notification with one action',
             interval: '1h',
@@ -254,7 +260,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
 
@@ -311,7 +316,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send()
           .expect(200);
 

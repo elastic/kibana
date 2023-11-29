@@ -29,6 +29,7 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   getRuleSOById,
+  updateUsername,
   createRuleThroughAlertingEndpoint,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -37,6 +38,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess @serverless export_rules', () => {
     describe('exporting rules', () => {
@@ -169,11 +173,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
         const firstRule = removeServerGeneratedProperties(firstRuleParsed);
         const secondRule = removeServerGeneratedProperties(secondRuleParsed);
+        const expectedRule1 = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
+        const expectedRule2 = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
 
-        expect([firstRule, secondRule]).toEqual([
-          getSimpleRuleOutput('rule-2'),
-          getSimpleRuleOutput('rule-1'),
-        ]);
+        expect([firstRule, secondRule]).toEqual([expectedRule2, expectedRule1]);
       });
 
       it('should export multiple actions attached to 1 rule', async () => {
@@ -221,9 +224,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
         const firstRule = removeServerGeneratedProperties(firstRuleParsed);
+        const expectedRule = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
 
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-          ...getSimpleRuleOutput('rule-1'),
+          ...expectedRule,
           actions: [
             {
               ...action1,
@@ -280,9 +284,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
         const firstRule = removeServerGeneratedProperties(firstRuleParsed);
         const secondRule = removeServerGeneratedProperties(secondRuleParsed);
+        const expectedRule2 = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
 
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-          ...getSimpleRuleOutput('rule-2'),
+          ...expectedRule2,
           actions: [
             {
               ...action,
@@ -291,8 +296,10 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         };
+        const expectedRule1 = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
+
         const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
-          ...getSimpleRuleOutput('rule-1'),
+          ...expectedRule1,
           actions: [
             {
               ...action,
@@ -464,9 +471,13 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(200)
             .parse(binaryToString);
+          const expectedRule1 = updateUsername(
+            getSimpleRuleOutput('rule-1'),
+            ELASTICSEARCH_USERNAME
+          );
 
           const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-            ...getSimpleRuleOutput('rule-1'),
+            ...gexpectedRule1,
             actions: [
               {
                 group: 'default',
@@ -543,9 +554,13 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(200)
             .parse(binaryToString);
+          const expectedRule1 = updateUsername(
+            getSimpleRuleOutput('rule-1'),
+            ELASTICSEARCH_USERNAME
+          );
 
           const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-            ...getSimpleRuleOutput('rule-1'),
+            ...expectedRule1,
             actions: [
               {
                 group: 'default',
@@ -665,8 +680,12 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200)
             .parse(binaryToString);
 
+          const expectedRule1 = updateUsername(
+            getSimpleRuleOutput('rule-1'),
+            ELASTICSEARCH_USERNAME
+          );
           const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-            ...getSimpleRuleOutput('rule-1'),
+            ...expectedRule1,
             actions: [
               {
                 group: 'default',
@@ -691,8 +710,12 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           };
 
+          const expectedRule2 = updateUsername(
+            getSimpleRuleOutput('rule-2'),
+            ELASTICSEARCH_USERNAME
+          );
           const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
-            ...getSimpleRuleOutput('rule-2'),
+            ...expectedRule2,
             actions: [
               {
                 group: 'default',
