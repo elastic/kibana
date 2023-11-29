@@ -56,7 +56,7 @@ export async function extractFieldListsFromPlugins(log: SomeDevLog): Promise<Res
       Rx.takeUntil(Rx.fromEvent(fork, 'exit')),
       Rx.map((results) => {
         const [outcome] = results as [Result];
-        log.debug('message received from worker', result);
+        log.debug('message received from worker', outcome);
         fork.kill('SIGILL');
         return outcome;
       }),
