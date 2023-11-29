@@ -18,7 +18,6 @@ interface CustomFieldFilterOptionFactoryProps {
   buttonLabel: string;
   customFieldOptions: Array<{ key: string; label: string }>;
   fieldKey: string;
-  isSelectorView: boolean;
   onFilterOptionChange: FilterChangeHandler;
   type: CustomFieldTypes;
 }
@@ -26,14 +25,13 @@ const customFieldFilterOptionFactory = ({
   buttonLabel,
   customFieldOptions,
   fieldKey,
-  isSelectorView,
   onFilterOptionChange,
   type,
 }: CustomFieldFilterOptionFactoryProps) => {
   return {
     key: `${CUSTOM_FIELD_KEY_PREFIX}${fieldKey}`, // this prefix is set in case custom field has the same key as a system field
     isActive: false,
-    isAvailable: !isSelectorView,
+    isAvailable: true,
     label: buttonLabel,
     deactivate: () => {
       onFilterOptionChange({
@@ -87,6 +85,8 @@ export const useCustomFieldsFilterConfig = ({
   } = useGetCaseConfiguration();
 
   useEffect(() => {
+    if (isSelectorView) return;
+
     const customFieldsFilterConfig: FilterConfig[] = [];
     for (const { key: fieldKey, type, label: buttonLabel } of customFields ?? []) {
       if (customFieldsBuilder[type]) {
@@ -98,7 +98,6 @@ export const useCustomFieldsFilterConfig = ({
               buttonLabel,
               customFieldOptions,
               fieldKey,
-              isSelectorView,
               onFilterOptionChange,
               type,
             })

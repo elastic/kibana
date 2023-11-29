@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { isEqual } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
+import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
 import * as i18n from './translations';
@@ -109,7 +110,6 @@ const CasesTableFiltersComponent = ({
 
   const {
     filters: activeFilters,
-    moreFiltersSelectableComponent: MoreFiltersSelectable,
     selectableOptions,
     activeSelectableOptionKeys,
     onFilterConfigChange,

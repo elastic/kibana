@@ -10,7 +10,6 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterChangeHandler, FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
-import { MoreFiltersSelectable } from './more_filters_selectable';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const mergeSystemAndCustomFieldConfigs = ({
@@ -156,7 +155,6 @@ export const useFilterConfig = ({
   return {
     activeSelectableOptionKeys: activeFilterKeys,
     filters: activeFilters,
-    moreFiltersSelectableComponent: MoreFiltersSelectable,
     onFilterConfigChange: onChange,
     selectableOptions,
   };
