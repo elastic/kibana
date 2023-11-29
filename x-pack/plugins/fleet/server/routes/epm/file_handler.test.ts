@@ -15,12 +15,14 @@ import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_p
 import { getFile, getInstallation } from '../../services/epm/packages/get';
 import type { FleetRequestHandlerContext } from '../..';
 import { appContextService } from '../../services';
-import { unpackBufferEntries, getArchiveEntry, getAsset } from '../../services/epm/archive';
+import { unpackBufferEntries, getArchiveEntry } from '../../services/epm/archive';
+import { getAsset } from '../../services/epm/archive/storage';
 
 import { getFileHandler } from './file_handler';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services/epm/archive');
+jest.mock('../../services/epm/archive/storage');
 jest.mock('../../services/epm/packages/bundled_packages');
 jest.mock('../../services/epm/packages/get');
 
