@@ -636,7 +636,7 @@ export class TaskRunner<
       }
     }
 
-    alertsClient.LogAlerts({
+    alertsClient.logAlerts({
       eventLogger: this.alertingEventLogger,
       ruleRunMetricsStore,
       shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
