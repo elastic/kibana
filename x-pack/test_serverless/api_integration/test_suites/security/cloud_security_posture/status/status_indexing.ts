@@ -16,7 +16,6 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteIndex,
@@ -75,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`, async () => {
         await createPackagePolicy(
-          supertest as SuperTest<Test>,
+          supertest,
           agentPolicyId,
           'kspm',
           'cloudbeat/cis_k8s',
@@ -98,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `, async () => {
         await createPackagePolicy(
-          supertest as SuperTest<Test>,
+          supertest,
           agentPolicyId,
           'cspm',
           'cloudbeat/cis_aws',
@@ -121,7 +120,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`, async () => {
         await createPackagePolicy(
-          supertest as SuperTest<Test>,
+          supertest,
           agentPolicyId,
           'vuln_mgmt',
           'cloudbeat/vuln_mgmt_aws',

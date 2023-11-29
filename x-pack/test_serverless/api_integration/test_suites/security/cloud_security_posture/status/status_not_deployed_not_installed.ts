@@ -10,7 +10,6 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { createPackagePolicy } from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
@@ -48,7 +47,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
-          supertest as SuperTest<Test>,
+          supertest,
           agentPolicyId,
           'kspm',
           'cloudbeat/cis_k8s',
@@ -87,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it(`Should return not-deployed when installed cspm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
-          supertest as SuperTest<Test>,
+          supertest,
           agentPolicyId,
           'cspm',
           'cloudbeat/cis_aws',
@@ -126,7 +125,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it(`Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
-          supertest as SuperTest<Test>,
+          supertest,
           agentPolicyId,
           'vuln_mgmt',
           'cloudbeat/vuln_mgmt_aws',

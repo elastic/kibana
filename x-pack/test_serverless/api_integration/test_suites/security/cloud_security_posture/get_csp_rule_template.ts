@@ -11,7 +11,6 @@ import {
 } from '@kbn/core-http-common';
 import type { GetCspRuleTemplateResponse } from '@kbn/cloud-security-posture-plugin/common/types';
 import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/schemas';
-import { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
@@ -48,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 500 error code when not provide package policy id or benchmark id`, async () => {
       await createPackagePolicy(
-        supertest as SuperTest<Test>,
+        supertest,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
@@ -71,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 500 error code when provide both package policy id and benchmark id`, async () => {
       await createPackagePolicy(
-        supertest as SuperTest<Test>,
+        supertest,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
@@ -119,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 200 status code and filter rules by benchmarkId`, async () => {
       await createPackagePolicy(
-        supertest as SuperTest<Test>,
+        supertest,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
@@ -151,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 200 status code, and only requested fields in the response`, async () => {
       await createPackagePolicy(
-        supertest as SuperTest<Test>,
+        supertest,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
@@ -185,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 200 status code, items sorted by metadata.section field`, async () => {
       await createPackagePolicy(
-        supertest as SuperTest<Test>,
+        supertest,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
@@ -220,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
       const perPage = 10;
 
       await createPackagePolicy(
-        supertest as SuperTest<Test>,
+        supertest,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
