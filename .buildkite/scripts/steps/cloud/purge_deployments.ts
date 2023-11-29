@@ -23,12 +23,11 @@ const DAY_IN_SECONDS = 60 * 60 * 24;
 for (const deployment of prDeployments) {
   try {
     const prNumber = deployment.name.match(/^kibana-pr-([0-9]+)$/)[1];
-    const prJson = execSync(`gh pr view '${prNumber}' --json state,labels,commits`).toString();
+    const prJson = execSync(`gh pr view '${prNumber}' --json state,labels,updatedAt`).toString();
     const pullRequest = JSON.parse(prJson);
     const prOpen = pullRequest.state === 'OPEN';
 
-    const lastCommit = pullRequest.commits.slice(-1)[0];
-    const lastCommitTimestamp = new Date(lastCommit.committedDate).getTime() / 1000;
+    const lastCommitTimestamp = new Date(pullRequest.updatedAt).getTime() / 1000;
 
     const persistDeployment = Boolean(
       pullRequest.labels.filter((label: any) => label.name === 'ci:cloud-persist-deployment').length
