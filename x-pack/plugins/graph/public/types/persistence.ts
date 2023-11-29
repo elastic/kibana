@@ -34,7 +34,6 @@ export interface GraphWorkspaceSavedObject {
   legacyIndexPatternRef?: string;
   _source: Record<string, unknown>;
   updatedAt?: string;
-  namespaces?: string[];
   references: SavedObjectReference[];
 }
 

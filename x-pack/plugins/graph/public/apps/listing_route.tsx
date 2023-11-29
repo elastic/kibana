@@ -26,7 +26,6 @@ type GraphUserContent = UserContentCommonSchema;
 const toTableListViewSavedObject = (savedObject: GraphWorkspaceSavedObject): GraphUserContent => {
   return {
     id: savedObject.id!,
-    namespaces: savedObject.namespaces ?? [],
     updatedAt: savedObject.updatedAt!,
     references: savedObject.references ?? [],
     type: savedObject.type,
