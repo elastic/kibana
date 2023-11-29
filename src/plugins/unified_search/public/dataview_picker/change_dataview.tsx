@@ -345,15 +345,23 @@ export function ChangeDataView({
             fullWidth
             onClick={() => onTextBasedSubmit({ esql: `from ${trigger.title} | limit 10` })}
             data-test-subj="select-text-based-language-panel"
+            contentProps={{
+              css: {
+                justifyContent: 'flex-start',
+                paddingLeft: '26px',
+              },
+            }}
           >
-            {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
-              defaultMessage: 'Try ES|QL',
-            })}
-            <EuiBadge color="hollow">
-              {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTechPreviewLabel', {
-                defaultMessage: 'Technical preview',
+            <span className="eui-textLeft">
+              {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
+                defaultMessage: 'Try ES|QL',
               })}
-            </EuiBadge>
+              <EuiBadge color="hollow">
+                {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTechPreviewLabel', {
+                  defaultMessage: 'Technical preview',
+                })}
+              </EuiBadge>
+            </span>
           </EuiButton>
         </EuiPanel>
       );
