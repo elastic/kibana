@@ -62,17 +62,10 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
             {
               id: 'clickToDownload' as const,
               name: (
-                <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="logoElastic" size="m" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.clickToDownloadTabLabel"
-                      defaultMessage="Click to Download"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.addModelFlyout.clickToDownloadTabLabel"
+                  defaultMessage="Click to Download"
+                />
               ),
               content: (
                 <ClickToDownloadTabContent
@@ -167,14 +160,21 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
           <React.Fragment key={modelName}>
             {modelName === 'elser' ? (
               <div>
-                <EuiTitle size={'s'}>
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.elserTitle"
-                      defaultMessage="ELSER (Elastic Learned Sparse EncodeR)"
-                    />
-                  </h3>
-                </EuiTitle>
+                <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="logoElastic" size="l" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size={'s'}>
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.modelsList.elserTitle"
+                          defaultMessage="ELSER (Elastic Learned Sparse EncodeR)"
+                        />
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiSpacer size="s" />
                 <p>
                   <EuiText color={'subdued'} size={'s'}>
