@@ -7,7 +7,7 @@
  */
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { isTextBasedQuery } from './is_text_based_query';
 import type { DiscoverAppState } from '../services/discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -48,20 +48,11 @@ export function updateSavedSearch({
       .setField('filter', services.data.query.filterManager.getFilters());
   } else if (state) {
     const appFilters = state.filters ? cloneDeep(state.filters) : [];
-    const globalFilters = cloneDeep(globalStateContainer.get()?.filters ?? []);
-    // remove filters which are also present in appState
-    const cleanedGlobalFilters = globalFilters.filter((globalFilter) => {
-      const filterInAppState = appFilters.find(
-        (appFilter) =>
-          isEqual(appFilter.meta, globalFilter.meta) && isEqual(appFilter.query, globalFilter.query)
-      );
-
-      return !filterInAppState;
-    });
+    const globalFilters = globalStateContainer.get()?.filters ?? [];
 
     savedSearch.searchSource
       .setField('query', state.query ?? undefined)
-      .setField('filter', [...appFilters, ...cleanedGlobalFilters]);
+      .setField('filter', [...appFilters, ...globalFilters]);
   }
   if (state) {
     savedSearch.columns = state.columns || [];
