@@ -41,11 +41,9 @@ export const Description: FC = () => {
         indexName,
         scopeId,
         banner: {
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
-              defaultMessage="Preview rule details"
-            />
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.right.about.description.rulePreviewTitle',
+            { defaultMessage: 'Preview rule details' }
           ),
           backgroundColor: 'warning',
           textColor: 'warning',
@@ -66,9 +64,7 @@ export const Description: FC = () => {
           data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
           aria-label={i18n.translate(
             'xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonAriaLabel',
-            {
-              defaultMessage: 'Show rule summary',
-            }
+            { defaultMessage: 'Show rule summary' }
           )}
           disabled={isEmpty(ruleName) || isEmpty(ruleId)}
         >
