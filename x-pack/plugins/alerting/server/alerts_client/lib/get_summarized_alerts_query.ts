@@ -335,7 +335,7 @@ export const getQueryByScopedQueries = ({
   });
 
   return {
-    size: MAX_ALERT_DOCS_TO_RETURN,
+    size: 0,
     track_total_hits: true,
     aggs: { ...aggs },
   };

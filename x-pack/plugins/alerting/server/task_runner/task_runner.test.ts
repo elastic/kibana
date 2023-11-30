@@ -82,7 +82,6 @@ import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { Alert } from '../alert';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -807,7 +806,7 @@ describe('Task Runner', () => {
       return { state: {} };
     });
 
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
+    const mockMaintenanceWindows = [
       {
         ...getMockMaintenanceWindow(),
         categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
@@ -823,30 +822,15 @@ describe('Task Runner', () => {
         },
         id: 'test-id-2',
       } as unknown as MaintenanceWindow,
-    ]);
+    ];
 
-    const newAlert1 = new Alert('1', {
-      meta: {
-        maintenanceWindowIds: ['test-id-1'],
-      },
-    });
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(
+      mockMaintenanceWindows
+    );
 
-    const newAlert2 = new Alert('2', {
-      meta: {
-        maintenanceWindowIds: ['test-id-1'],
-      },
-    });
-
-    // Initially the 2 new alerts should have the maintenance window ID
-    // without scoped query (it applies to all)
-    alertsClient.getProcessedAlerts.mockReturnValue({
-      '1': newAlert1,
-      '2': newAlert2,
-    });
-
-    // MW with scoped query matches alert 1
-    alertsClient.getMaintenanceWindowScopedQueryAlerts.mockResolvedValue({
-      'test-id-2': [newAlert1.getUuid()],
+    alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery.mockResolvedValue({
+      alertIds: [],
+      maintenanceWindowIds: ['test-id-1', 'test-id-2'],
     });
 
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
@@ -865,15 +849,18 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
-    expect(alertsClient.updateAlertMaintenanceWindowIds).toHaveBeenLastCalledWith([
-      newAlert1.getUuid(),
+    expect(alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery).toHaveBeenLastCalledWith({
+      executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      maintenanceWindows: [mockMaintenanceWindows[1]],
+      ruleId: '1',
+      spaceId: 'default',
+    });
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['test-id-1']);
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
+      'test-id-1',
+      'test-id-2',
     ]);
-
-    // The alert should have both MW Ids now
-    expect(newAlert1.getMaintenanceWindowIds()).toEqual(['test-id-1', 'test-id-2']);
-
-    // Other alert only has 1 MW Id (the 1 without scoped query)
-    expect(newAlert2.getMaintenanceWindowIds()).toEqual(['test-id-1']);
   });
 
   test.each(ephemeralTestParams)(

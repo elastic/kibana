@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { GetSummarizedAlertsParams, GetMaintenanceWindowScopedQueryAlertsParams } from './types';
+import {
+  GetSummarizedAlertsParams,
+  GetMaintenanceWindowScopedQueryAlertsParams,
+  UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
+} from './types';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import { AlertRuleData } from '.';
 import { AlertsFilter } from '../types';
@@ -103,6 +107,9 @@ export const getParamsByMaintenanceWindowScopedQuery: GetMaintenanceWindowScoped
       } as unknown as MaintenanceWindow,
     ],
   };
+
+export const getParamsByUpdateMaintenanceWindowIds: UpdateAlertsMaintenanceWindowIdByScopedQueryParams =
+  getParamsByMaintenanceWindowScopedQuery;
 
 export const getExpectedQueryByExecutionUuid = ({
   indexName,

@@ -13,6 +13,7 @@ const createAlertsClientMock = () => {
       logAlerts: jest.fn(),
       updateAlertMaintenanceWindowIds: jest.fn(),
       getMaintenanceWindowScopedQueryAlerts: jest.fn(),
+      updateAlertsMaintenanceWindowIdByScopedQuery: jest.fn(),
       getTrackedAlerts: jest.fn(),
       getProcessedAlerts: jest.fn(),
       getAlertsToSerialize: jest.fn(),

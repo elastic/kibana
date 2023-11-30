@@ -601,7 +601,13 @@ export class ExecutionHandler<
       }
 
       for (const [alertId, alert] of alertsArray) {
-        if (alert.getMaintenanceWindowIds().length !== 0) {
+        const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+        if (alertMaintenanceWindowIds.length !== 0) {
+          this.logger.debug(
+            `no scheduling of summary actions "${action.id}" for rule "${
+              this.taskInstance.params.alertId
+            }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+          );
           continue;
         }
 
