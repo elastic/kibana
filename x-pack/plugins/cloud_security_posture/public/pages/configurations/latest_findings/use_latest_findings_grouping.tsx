@@ -122,7 +122,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 /**
  * Type Guard for checking if the given source is a FindingsRootGroupingAggregation
  */
-const isFindingsRootGroupingAggregation = (
+export const isFindingsRootGroupingAggregation = (
   groupData: Record<string, any> | undefined
 ): groupData is FindingsRootGroupingAggregation => {
   return (

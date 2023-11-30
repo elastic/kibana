@@ -9,6 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiSkeletonTitle,
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
@@ -94,8 +95,19 @@ const NullGroupComponent = ({
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
   selectedGroup,
   bucket,
-  nullGroupMessage
+  nullGroupMessage,
+  isLoading
 ) => {
+  if (isLoading) {
+    return (
+      <EuiSkeletonTitle size="s" isLoading={true}>
+        <FormattedMessage
+          id="xpack.csp.findings.grouping.loadingGroupPanelTitle"
+          defaultMessage="Loading"
+        />
+      </EuiSkeletonTitle>
+    );
+  }
   const benchmarkId = firstNonNullValue(bucket.benchmarkId?.buckets?.[0]?.key);
   switch (selectedGroup) {
     case GROUPING_OPTIONS.RESOURCE:

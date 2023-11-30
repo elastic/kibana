@@ -9,7 +9,6 @@ import { ParsedGroupingAggregation } from '@kbn/securitysolution-grouping/src';
 import { Filter } from '@kbn/es-query';
 import React from 'react';
 import { css } from '@emotion/react';
-import { EmptyState } from '../empty_state';
 import { CSP_GROUPING } from '../test_subjects';
 
 interface CloudSecurityGroupingProps {
@@ -22,7 +21,6 @@ interface CloudSecurityGroupingProps {
   onChangeGroupsItemsPerPage: (size: number) => void;
   onChangeGroupsPage: (index: number) => void;
   selectedGroup: string;
-  onResetFilters: () => void;
 }
 
 export const CloudSecurityGrouping = ({
@@ -35,12 +33,7 @@ export const CloudSecurityGrouping = ({
   onChangeGroupsItemsPerPage,
   onChangeGroupsPage,
   selectedGroup,
-  onResetFilters,
 }: CloudSecurityGroupingProps) => {
-  if (!isFetching && !data.unitsCount?.value) {
-    return <EmptyState onResetFilters={onResetFilters} />;
-  }
-
   return (
     <div
       data-test-subj={CSP_GROUPING}
