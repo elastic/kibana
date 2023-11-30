@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover:enableESQL': true,
   };
 
-  describe('discover esql view', async function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172213
+  describe.skip('discover esql view', async function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
@@ -43,8 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172213
-    describe.skip('test', () => {
+    describe('test', () => {
       it('should render esql view correctly', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
