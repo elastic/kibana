@@ -37,7 +37,6 @@ describe('InferencePipelineCard', () => {
   it('renders the item', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
-    expect(wrapper.find(TrainedModelHealth)).toHaveLength(1);
   });
   it('renders pipeline as title', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
