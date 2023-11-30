@@ -37,13 +37,9 @@ export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
     icon: 'pivot',
-    title: (
-      <FormattedMessage
-        id="guidedOnboardingPackage.gettingStarted.cards.elasticsearchApi.title"
-        defaultMessage="Connect to the Elasticsearch API"
-        values={{ linebreak: <br /> }}
-      />
-    ),
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.elasticsearchApi.title', {
+      defaultMessage: 'Connect to the Elasticsearch API',
+    }),
     telemetryId: 'onboarding--search--elasticsearchEndpointApi',
     order: 1,
     openEndpointModal: true,

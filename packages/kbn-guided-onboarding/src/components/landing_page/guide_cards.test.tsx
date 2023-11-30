@@ -10,12 +10,30 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { GuideCards, GuideCardsProps } from './guide_cards';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { I18nStart } from '@kbn/core-i18n-browser';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 
 const defaultProps: GuideCardsProps = {
   activateGuide: jest.fn(),
   navigateToApp: jest.fn(),
   guidesState: [],
   activeFilter: 'search',
+  openModal: jest.fn(),
+  theme: themeServiceMock.createStartContract(),
+  i18nStart: {} as unknown as I18nStart,
+  share: sharePluginMock.createSetupContract(),
+  cloud: cloudMock.createSetup(),
+  docLinks: {
+    links: {
+      // @ts-ignore only defining what we need
+      fleet: {
+        packageSignatures: 'elastic.co',
+      },
+    },
+  },
+  navigateToUrl: jest.fn(),
 };
 
 describe('guide cards', () => {
