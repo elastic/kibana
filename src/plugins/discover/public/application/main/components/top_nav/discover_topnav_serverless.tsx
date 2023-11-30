@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
 import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
@@ -27,6 +27,10 @@ export const DiscoverTopNavServerless = ({
   const sort = useAppStateSelector((state) => state.sort);
   const dataView = useInternalStateSelector((state) => state.dataView);
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
+  const params = useMemo(
+    () => ({ columns, sort, dataViewSpec: dataView?.toMinimalSpec() }),
+    [columns, dataView, sort]
+  );
 
   if (!services.serverless || customizationContext.displayMode !== 'standalone') {
     return null;
@@ -37,11 +41,7 @@ export const DiscoverTopNavServerless = ({
       {customizationContext.showLogExplorerTabs && (
         <EuiHeaderSection>
           <EuiHeaderSectionItem>
-            <LogExplorerTabs
-              services={services}
-              params={{ columns, sort, dataViewSpec: dataView?.toMinimalSpec() }}
-              selectedTab="discover"
-            />
+            <LogExplorerTabs services={services} params={params} selectedTab="discover" />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       )}
