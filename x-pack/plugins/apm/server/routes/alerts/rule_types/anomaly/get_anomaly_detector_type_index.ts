@@ -14,7 +14,7 @@ import { ANOMALY_DETECTOR_TYPES } from '../../../../../common/rules/apm_rule_typ
 export function getAnomalyDetectorTypeIndex(
   detectorType: ANOMALY_DETECTOR_TYPES
 ) {
-  if (detectorType) {
+  if (detectorType && detectorType !== ANOMALY_DETECTOR_TYPES.ALL) {
     switch (detectorType) {
       case ANOMALY_DETECTOR_TYPES.LATENCY:
         return getApmMlDetectorIndex(ApmMlDetectorType.txLatency);
