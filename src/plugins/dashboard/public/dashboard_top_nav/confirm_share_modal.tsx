@@ -25,6 +25,7 @@ import { SpacesApi } from '@kbn/spaces-plugin/public';
 import React, { useMemo, useState } from 'react';
 
 const ROWS_PER_PAGE = 5;
+const UNKNOWN_SPACE = '?';
 
 export const ConfirmShareModal = ({
   canSave,
@@ -70,14 +71,15 @@ export const ConfirmShareModal = ({
     });
   }
 
-  const visibleSpaces = namespaces.slice(
+  const hiddenSpaces = namespaces.filter((spaceId) => spaceId === UNKNOWN_SPACE);
+  const visibleSpaces = namespaces.filter((spaceId) => spaceId !== UNKNOWN_SPACE);
+
+  const spacesOnActivePage = visibleSpaces.slice(
     activePage * ROWS_PER_PAGE,
     Math.min(namespaces.length + 1, (activePage + 1) * ROWS_PER_PAGE)
   );
 
-  const pageCount = Math.ceil(namespaces.length / ROWS_PER_PAGE);
-
-  console.log({ visibleSpaces });
+  const pageCount = Math.ceil(visibleSpaces.length / ROWS_PER_PAGE);
 
   return (
     <SpacesContextWrapper>
@@ -98,16 +100,18 @@ export const ConfirmShareModal = ({
         </EuiModalHeader>
         <EuiModalBody>
           <LazySpaceList
-            namespaces={visibleSpaces}
+            namespaces={[...spacesOnActivePage, ...hiddenSpaces]}
             behaviorContext="outside-space"
             direction="vertical"
             displayLimit={ROWS_PER_PAGE}
           />
-          <EuiPagination
-            pageCount={pageCount}
-            activePage={activePage}
-            onPageClick={setActivePage}
-          />
+          {pageCount > 1 ? (
+            <EuiPagination
+              pageCount={pageCount}
+              activePage={activePage}
+              onPageClick={setActivePage}
+            />
+          ) : null}
         </EuiModalBody>
         <EuiModalFooter>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
