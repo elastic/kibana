@@ -73,7 +73,7 @@ describe('getNumExecutions', () => {
         new Date('2020-12-02T00:00:00.000Z'),
         '1s'
       )
-    ).toEqual(1000);
+    ).toEqual(10000);
   });
 });
 
@@ -146,38 +146,46 @@ describe('getExecutionLogAggregation', () => {
         },
         aggs: {
           executionUuidCardinality: {
-            aggs: {
-              executionUuidCardinality: {
-                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
-              },
+            sum_bucket: {
+              buckets_path: 'executionUuidCardinalityBuckets>filtered._count',
             },
-            filter: {
-              bool: {
-                must: [
-                  {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
+          },
+          executionUuidCardinalityBuckets: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 10000,
+            },
+            aggs: {
+              filtered: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
                         },
-                        {
-                          match: {
-                            'event.provider': 'alerting',
-                          },
-                        },
-                      ],
-                    },
+                      },
+                    ],
                   },
-                ],
+                },
               },
             },
           },
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              size: 10000,
               order: [
                 { 'ruleExecution>executeStartTime': 'asc' },
                 { 'ruleExecution>executionDuration': 'desc' },
@@ -330,50 +338,58 @@ describe('getExecutionLogAggregation', () => {
         },
         aggs: {
           executionUuidCardinality: {
-            aggs: {
-              executionUuidCardinality: {
-                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
-              },
+            sum_bucket: {
+              buckets_path: 'executionUuidCardinalityBuckets>filtered._count',
             },
-            filter: {
-              bool: {
+          },
+          executionUuidCardinalityBuckets: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 10000,
+            },
+            aggs: {
+              filtered: {
                 filter: {
                   bool: {
-                    minimum_should_match: 1,
-                    should: [
+                    filter: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    must: [
                       {
-                        match: {
-                          test: 'test',
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
                   },
                 },
-                must: [
-                  {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
-                        },
-                        {
-                          match: {
-                            'event.provider': 'alerting',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
               },
             },
           },
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              size: 10000,
               order: [
                 { 'ruleExecution>executeStartTime': 'asc' },
                 { 'ruleExecution>executionDuration': 'desc' },
@@ -538,50 +554,58 @@ describe('getExecutionLogAggregation', () => {
         },
         aggs: {
           executionUuidCardinality: {
-            aggs: {
-              executionUuidCardinality: {
-                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
-              },
+            sum_bucket: {
+              buckets_path: 'executionUuidCardinalityBuckets>filtered._count',
             },
-            filter: {
-              bool: {
+          },
+          executionUuidCardinalityBuckets: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 10000,
+            },
+            aggs: {
+              filtered: {
                 filter: {
                   bool: {
-                    minimum_should_match: 1,
-                    should: [
+                    filter: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    must: [
                       {
-                        match: {
-                          test: 'test',
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
                   },
                 },
-                must: [
-                  {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
-                        },
-                        {
-                          match: {
-                            'event.provider': 'alerting',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
               },
             },
           },
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              size: 10000,
               order: [
                 { 'ruleExecution>executeStartTime': 'asc' },
                 { 'ruleExecution>executionDuration': 'desc' },
@@ -932,9 +956,7 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            executionUuidCardinality: {
-              value: 374,
-            },
+            value: 374,
           },
         },
       },
@@ -1188,9 +1210,7 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            executionUuidCardinality: {
-              value: 374,
-            },
+            value: 374,
           },
         },
       },
@@ -1436,9 +1456,7 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            executionUuidCardinality: {
-              value: 374,
-            },
+            value: 374,
           },
         },
       },
@@ -1689,9 +1707,7 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            executionUuidCardinality: {
-              value: 417,
-            },
+            value: 417,
           },
         },
       },
