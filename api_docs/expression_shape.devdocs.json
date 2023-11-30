@@ -635,7 +635,7 @@
             "label": "strokeLinecap",
             "description": [],
             "signature": [
-              "\"butt\" | \"round\" | \"square\" | \"inherit\" | undefined"
+              "\"inherit\" | \"butt\" | \"round\" | \"square\" | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
@@ -677,7 +677,7 @@
             "label": "strokeLinejoin",
             "description": [],
             "signature": [
-              "\"round\" | \"inherit\" | \"miter\" | \"bevel\" | undefined"
+              "\"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
