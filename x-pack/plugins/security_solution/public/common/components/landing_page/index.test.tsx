@@ -13,14 +13,6 @@ jest.mock('../../hooks/use_contract_component', () => ({
   useContractComponents: () => mockUseContractComponents(),
 }));
 
-jest.mock('../../containers/sourcerer', () => {
-  return {
-    useSourcererDataView: jest.fn(() => ({
-      indicesExist: false,
-    })),
-  };
-});
-
 describe('LandingPageComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
