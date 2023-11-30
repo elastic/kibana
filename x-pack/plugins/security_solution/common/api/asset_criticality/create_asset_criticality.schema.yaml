@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   version: 1.0.0
-  title: Create Asset Criticality Schema
+  title: Asset Criticality Create Record Schema
 paths:
   /internal/asset_criticality:
     post:
