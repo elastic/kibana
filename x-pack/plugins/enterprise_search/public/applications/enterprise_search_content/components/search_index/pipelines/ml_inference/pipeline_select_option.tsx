@@ -25,7 +25,7 @@ export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }>
   disabledReason,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type="warning" color="warning" />
       </EuiFlexItem>
@@ -44,7 +44,6 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
     // TODO: Verify text size
     // TODO: Add status & action menu
     // TODO: Test rendering when pipeline.modelType.length == 0
-    // TODO: Fix rendering on mobile
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiTitle size="xxs">
@@ -58,7 +57,10 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
             <EuiFlexItem grow={false}>
-              <MLModelTypeBadge type={pipeline.modelType} />
+              {/* Wrap in a div to prevent the badge from growing to a whole row on mobile*/}
+              <div>
+                <MLModelTypeBadge type={pipeline.modelType} />
+              </div>
             </EuiFlexItem>
           )}
           <EuiFlexItem />

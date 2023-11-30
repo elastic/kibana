@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiSelectable } from '@elastic/eui';
+import { EuiSelectable, useIsWithinMaxBreakpoint } from '@elastic/eui';
 
 import { MLInferenceLogic, MLInferencePipelineOption } from './ml_inference_logic';
 import { PipelineSelectOption, PipelineSelectOptionProps } from './pipeline_select_option';
@@ -69,7 +69,7 @@ export const PipelineSelect: React.FC = () => {
       listProps={{
         activeOptionIndex: getActiveOptionIndex(),
         bordered: true,
-        rowHeight: 90,
+        rowHeight: useIsWithinMaxBreakpoint('s') ? 120 : 90,
         showIcons: true,
         onFocusBadge: false,
       }}
