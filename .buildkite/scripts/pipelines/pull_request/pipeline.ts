@@ -182,7 +182,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps
-    uploadPipeline([...new Set(pipeline)].join('\n'));
+    console.log([...new Set(pipeline)].join('\n'));
   } catch (ex) {
     console.error('PR pipeline generation error', ex.message);
     process.exit(1);
