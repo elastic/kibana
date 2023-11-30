@@ -20,4 +20,4 @@ export enum ChatActionClickType {
   executeEsqlQuery = 'executeEsqlQuery',
 }
 
-export type ChatActionClickHandler = (payload: ChatActionClickPayload) => Promise<unknown>;
+export type ChatActionClickHandler = (payload: ChatActionClickPayload) => void;
