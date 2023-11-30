@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
-import { IsoDateString, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
 export const file_name = t.string;
 export type FileName = t.TypeOf<typeof file_name>;
@@ -41,13 +41,6 @@ export const signal_status_query = t.object;
 
 export const alert_tag_ids = t.array(t.string);
 export type AlertTagIds = t.TypeOf<typeof alert_tag_ids>;
-
-export const created_at = IsoDateString;
-export const updated_at = IsoDateString;
-export const created_by = t.string;
-export const updated_by = t.string;
-
-export const revision = PositiveInteger;
 
 export const indexRecord = t.record(
   t.string,

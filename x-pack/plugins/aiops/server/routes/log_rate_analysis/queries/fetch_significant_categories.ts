@@ -10,10 +10,10 @@ import { uniq } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
-import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 
 import type { Category } from '../../../../common/api/log_categorization/types';
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis';
+import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 import { LOG_RATE_ANALYSIS_SETTINGS } from '../../../../common/constants';
 
 import { fetchCategories } from './fetch_categories';
@@ -42,39 +42,10 @@ export const fetchSignificantCategories = async (
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ) => {
-  // Filter that includes docs from both the baseline and deviation time range.
-  const baselineOrDeviationFilter = {
-    bool: {
-      should: [
-        {
-          range: {
-            [params.timeFieldName]: {
-              gte: params.baselineMin,
-              lte: params.baselineMax,
-              format: 'epoch_millis',
-            },
-          },
-        },
-        {
-          range: {
-            [params.timeFieldName]: {
-              gte: params.deviationMin,
-              lte: params.deviationMax,
-              format: 'epoch_millis',
-            },
-          },
-        },
-      ],
-    },
-  };
-
   const categoriesOverall = await fetchCategories(
     esClient,
     params,
     fieldNames,
-    undefined,
-    undefined,
-    baselineOrDeviationFilter,
     logger,
     sampleProbability,
     emitError,
@@ -83,7 +54,7 @@ export const fetchSignificantCategories = async (
 
   if (categoriesOverall.length !== fieldNames.length) return [];
 
-  const significantCategories: SignificantTerm[] = [];
+  const significantCategories: SignificantItem[] = [];
 
   // Using for...of to allow `await` within the loop.
   for (const [i, fieldName] of fieldNames.entries()) {
@@ -152,7 +123,7 @@ export const fetchSignificantCategories = async (
           score,
           pValue,
           normalizedScore: getNormalizedScore(score),
-          type: SIGNIFICANT_TERM_TYPE.LOG_PATTERN,
+          type: SIGNIFICANT_ITEM_TYPE.LOG_PATTERN,
         });
       }
     });

@@ -63,14 +63,19 @@ function toggleDisabledFeatures(
 ) {
   const disabledFeatureKeys = activeSpace.disabledFeatures;
 
-  const [enabledFeatures, disabledFeatures] = features.reduce(
+  const { enabledFeatures, disabledFeatures } = features.reduce(
     (acc, feature) => {
       if (disabledFeatureKeys.includes(feature.id)) {
-        return [acc[0], [...acc[1], feature]];
+        acc.disabledFeatures.push(feature);
+      } else {
+        acc.enabledFeatures.push(feature);
       }
-      return [[...acc[0], feature], acc[1]];
+      return acc;
     },
-    [[], []] as [KibanaFeature[], KibanaFeature[]]
+    { enabledFeatures: [], disabledFeatures: [] } as {
+      enabledFeatures: KibanaFeature[];
+      disabledFeatures: KibanaFeature[];
+    }
   );
 
   const navLinks = capabilities.navLinks;

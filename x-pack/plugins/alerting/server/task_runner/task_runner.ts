@@ -10,7 +10,12 @@ import { omit, some } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  throwUnrecoverableError,
+  createTaskRunError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ExecutionHandler, RunResult } from './execution_handler';
@@ -937,7 +942,9 @@ export class TaskRunner<
         return { interval: retryInterval };
       }),
       monitoring: this.ruleMonitoring.getMonitoring(),
-      hasError: isErr(schedule),
+      ...(isErr(schedule)
+        ? { taskRunError: createTaskRunError(schedule.error, TaskErrorSource.FRAMEWORK) }
+        : {}),
     };
   }
 

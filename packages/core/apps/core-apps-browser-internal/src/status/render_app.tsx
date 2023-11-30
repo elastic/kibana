@@ -10,13 +10,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import { StatusApp } from './status_app';
 
 interface Deps {
-  http: HttpSetup;
+  http: InternalHttpSetup;
   notifications: NotificationsSetup;
 }
 

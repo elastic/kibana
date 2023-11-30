@@ -355,7 +355,7 @@ const GcpAccountTypeSelect = ({
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel"
-          defaultMessage="Select between single account or organization."
+          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
       <EuiSpacer size="l" />

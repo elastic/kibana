@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { MAX_COMMENT_LENGTH } from '@kbn/security-solution-plugin/common/constants';
 import { getNewRule } from '../../../objects/rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -20,9 +21,7 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
   deleteFirstExceptionItemInListDetailPage,
-  dismissExceptionItemErrorCallOut,
   addExceptionHugeComment,
-  submitNewExceptionItemWithFailure,
   editExceptionComment,
 } from '../../../tasks/exceptions';
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
@@ -41,21 +40,20 @@ import {
   findSharedExceptionListItemsByName,
 } from '../../../tasks/exceptions_table';
 import { visitRuleDetailsPage } from '../../../tasks/rule_details';
-import { deleteEndpointExceptionList, deleteExceptionLists } from '../../../tasks/common';
-import { closeErrorToast } from '../../../tasks/alerts_detection_rules';
+import {
+  deleteAlertsAndRules,
+  deleteEndpointExceptionList,
+  deleteExceptionLists,
+} from '../../../tasks/api_calls/common';
 
-describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
+describe('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
     deleteExceptionLists();
     deleteEndpointExceptionList();
-    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     createRule(getNewRule()).as('createdRule');
     visit(EXCEPTIONS_URL);
-  });
-
-  afterEach(() => {
-    cy.task('esArchiverUnload', 'exceptions');
   });
 
   const exceptionName = 'My item name';
@@ -63,7 +61,7 @@ describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, ()
   const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
   const EXCEPTION_LIST_NAME = 'Newly created list';
 
-  describe('Add, Edit and delete Exception item', () => {
+  describe('Add, edit and delete exception item', () => {
     it('should create exception item from Shared Exception List page and linked to a Rule', () => {
       // Click on "Create shared exception list" button on the header
       // Click on "Create exception item"
@@ -147,7 +145,7 @@ describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, ()
       cy.get(EMPTY_EXCEPTIONS_VIEWER).should('exist');
     });
 
-    it('should handle huge text as a comment gracefully and allow user create exception item after user updates the comment', function () {
+    it('should not allow to add huge text as a comment', function () {
       createSharedExceptionList(
         { name: 'Newly created list', description: 'This is my list.' },
         true
@@ -173,25 +171,18 @@ describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, ()
       linkFirstSharedListOnExceptionFlyout();
 
       // add exception comment which is super long
-      addExceptionHugeComment([...new Array(5000).keys()].map((_) => `Test text!`).join(''));
+      addExceptionHugeComment(
+        [...new Array(MAX_COMMENT_LENGTH + 1).keys()].map((_) => 'a').join('')
+      );
 
-      // submit
-      submitNewExceptionItemWithFailure();
-
-      // Failed to add exception due to comment length and submit button should be disabled
+      // submit button should be disabled due to comment length
       cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-
-      // Close error toast
-      closeErrorToast();
-
-      // Dismiss error callout
-      dismissExceptionItemErrorCallOut();
-
-      // Submit button should be enabled after we dismissed error callout
-      cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
 
       // update exception comment to a reasonable (length wise) text
       editExceptionComment('Exceptional comment');
+
+      // submit button should be enabled
+      cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
 
       // submit
       submitNewExceptionItem();

@@ -12,6 +12,7 @@ import {
   TemplateListItem,
   TemplateType,
 } from '../types';
+import { deserializeESLifecycle } from './data_stream_serialization';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -69,6 +70,7 @@ export function deserializeTemplate(
     name,
     version,
     priority,
+    ...(template.lifecycle ? { lifecycle: deserializeESLifecycle(template.lifecycle) } : {}),
     indexPatterns: indexPatterns.sort(),
     template,
     ilmPolicy: settings?.index?.lifecycle,

@@ -30,7 +30,7 @@ import {
   deleteAlertsAndRules,
   deleteEndpointExceptionList,
   deleteExceptionLists,
-} from '../../../tasks/common';
+} from '../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -55,6 +55,14 @@ describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverle
   const NEW_ITEM_NAME = 'Exception item-EDITED';
   const ITEM_FIELD = 'event.code';
   const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
+
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
+  });
 
   beforeEach(() => {
     deleteExceptionLists();

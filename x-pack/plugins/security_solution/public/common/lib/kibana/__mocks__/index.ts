@@ -37,6 +37,7 @@ export const KibanaServices = {
   }),
   getKibanaVersion: jest.fn(() => '8.0.0'),
   getKibanaBranch: jest.fn(() => 'main'),
+  getBuildFlavor: jest.fn(() => 'traditional'),
   getPrebuiltRulesPackageVersion: jest.fn(() => undefined),
 };
 export const useKibana = jest.fn().mockReturnValue({
@@ -94,7 +95,6 @@ export const useToasts = jest
 export const useCurrentUser = jest.fn();
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());
-export const useGetUserCasesPermissions = jest.fn();
 export const useAppUrl = jest.fn().mockReturnValue({
   getAppUrl: jest
     .fn()

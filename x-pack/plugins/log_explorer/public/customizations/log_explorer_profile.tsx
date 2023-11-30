@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import React from 'react';
-import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { dynamic } from '../utils/dynamic';
-import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { combineLatest, from, map, Subscription, type BehaviorSubject } from 'rxjs';
 import { LogExplorerStateContainer } from '../components/log_explorer';
-import { LogExplorerStartDeps } from '../types';
-import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { LogExplorerCustomizations } from '../components/log_explorer/types';
 import { LogExplorerCustomizationsProvider } from '../hooks/use_log_explorer_customizations';
+import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { LogExplorerStartDeps } from '../types';
+import { dynamic } from '../utils/dynamic';
+import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
@@ -112,6 +113,9 @@ export const createLogExplorerProfileCustomizations =
         openItem: { disabled: true },
         saveItem: { disabled: true },
       },
+      defaultBadges: {
+        unsavedChangesBadge: { disabled: true },
+      },
     });
 
     /**
@@ -119,6 +123,10 @@ export const createLogExplorerProfileCustomizations =
      */
     customizations.set({
       id: 'flyout',
+      size: '60%',
+      title: i18n.translate('xpack.logExplorer.flyoutDetail.title', {
+        defaultMessage: 'Log details',
+      }),
       actions: {
         defaultActions: {
           viewSingleDocument: { disabled: true },

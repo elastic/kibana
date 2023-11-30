@@ -22,7 +22,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { MoveData } from '../move_data';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
@@ -89,7 +89,11 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <RedirectAppLinks application={application}>
+                <RedirectAppLinks
+                  coreStart={{
+                    application,
+                  }}
+                >
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"

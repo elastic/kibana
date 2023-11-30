@@ -6,9 +6,11 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { LicensingPlugin } from './plugin';
 
-export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
+export const plugin = async (context: PluginInitializerContext) => {
+  const { LicensingPlugin } = await import('./plugin');
+  return new LicensingPlugin(context);
+};
 
 export type {
   LicenseCheckState,

@@ -96,7 +96,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT,
                 threshold: [0.9],
                 timeSize: 1,
@@ -194,7 +193,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT,
                 threshold: [0.9],
                 timeSize: 1,

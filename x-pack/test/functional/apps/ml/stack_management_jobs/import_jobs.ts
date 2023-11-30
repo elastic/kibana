@@ -36,8 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
-      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_bank_marketing', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -47,8 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_bank_marketing');
     });
 
     for (const testData of testDataListPositive) {

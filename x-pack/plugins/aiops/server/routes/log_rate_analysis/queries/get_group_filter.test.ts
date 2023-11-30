@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { finalSignificantTermGroups } from '../../../../common/__mocks__/artificial_logs/final_significant_term_groups';
+import { finalSignificantItemGroups } from '../../../../common/__mocks__/artificial_logs/final_significant_item_groups';
 
 import { getGroupFilter } from './get_group_filter';
 
 describe('getGroupFilter', () => {
-  it('gets a query filter for the significant terms of a group', () => {
-    expect(getGroupFilter(finalSignificantTermGroups[0])).toStrictEqual([
+  it('gets a query filter for the significant items of a group', () => {
+    expect(getGroupFilter(finalSignificantItemGroups[0])).toStrictEqual([
       {
         term: {
           url: 'login.php',

@@ -6,17 +6,19 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { getJobId } from '../../../../common/log_analysis';
 import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
 
-export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
+export const cleanUpJobsAndDatafeeds = async <T extends JobType>(
   spaceId: string,
   logViewId: string,
-  jobTypes: JobType[],
+  idFormat: IdFormat,
+  jobTypes: T[],
   fetch: HttpHandler
 ) => {
   try {
-    await callStopDatafeeds({ spaceId, logViewId, jobTypes }, fetch);
+    await callStopDatafeeds({ spaceId, logViewId, idFormat, jobTypes }, fetch);
   } catch (err) {
     // Proceed only if datafeed has been deleted or didn't exist in the first place
     if (err?.response?.status !== 404) {
@@ -24,27 +26,32 @@ export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
     }
   }
 
-  return await deleteJobs(spaceId, logViewId, jobTypes, fetch);
+  return await deleteJobs(spaceId, logViewId, idFormat, jobTypes, fetch);
 };
 
-const deleteJobs = async <JobType extends string>(
+const deleteJobs = async <T extends JobType>(
   spaceId: string,
   logViewId: string,
-  jobTypes: JobType[],
+  idFormat: IdFormat,
+  jobTypes: T[],
   fetch: HttpHandler
 ) => {
-  const deleteJobsResponse = await callDeleteJobs({ spaceId, logViewId, jobTypes }, fetch);
-  await waitUntilJobsAreDeleted(spaceId, logViewId, jobTypes, fetch);
+  const deleteJobsResponse = await callDeleteJobs(
+    { spaceId, logViewId, idFormat, jobTypes },
+    fetch
+  );
+  await waitUntilJobsAreDeleted(spaceId, logViewId, idFormat, jobTypes, fetch);
   return deleteJobsResponse;
 };
 
-const waitUntilJobsAreDeleted = async <JobType extends string>(
+const waitUntilJobsAreDeleted = async <T extends JobType>(
   spaceId: string,
   logViewId: string,
-  jobTypes: JobType[],
+  idFormat: IdFormat,
+  jobTypes: T[],
   fetch: HttpHandler
 ) => {
-  const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, logViewId, jobType));
+  const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, logViewId, idFormat, jobType));
   while (true) {
     const { jobs } = await callGetJobDeletionTasks(fetch);
     const needToWait = jobs

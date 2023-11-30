@@ -50,7 +50,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.mappingsTitle" defaultMessage="Mappings" />
     ),
-    renderTabContent: ({ index }) => <DetailsPageMappings indexName={index.name} />,
+    renderTabContent: ({ index }) => <DetailsPageMappings index={index} />,
     order: 20,
   },
   {

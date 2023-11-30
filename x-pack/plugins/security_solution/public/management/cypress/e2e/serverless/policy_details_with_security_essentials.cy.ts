@@ -9,8 +9,7 @@ import { login } from '../../tasks/login';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170666
-describe.skip(
+describe(
   'When displaying the Policy Details in Security Essentials PLI',
   {
     tags: ['@serverless'],
@@ -24,7 +23,11 @@ describe.skip(
     let loadedPolicyData: IndexedFleetEndpointPolicyResponse;
 
     before(() => {
-      cy.task('indexFleetEndpointPolicy', { policyName: 'tests-serverless' }).then((response) => {
+      cy.task(
+        'indexFleetEndpointPolicy',
+        { policyName: 'tests-serverless' },
+        { timeout: 5 * 60 * 1000 }
+      ).then((response) => {
         loadedPolicyData = response as IndexedFleetEndpointPolicyResponse;
       });
     });

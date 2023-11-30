@@ -233,7 +233,7 @@ const constructLogView = (logView?: LogViewReference) => {
 };
 
 const constructLogPosition = (time: number = 1550671089404) => {
-  return `(position:(tiebreaker:0,time:${time}))`;
+  return `(position:(tiebreaker:0,time:'${moment(time).toISOString()}'))`;
 };
 
 const constructLogFilter = ({

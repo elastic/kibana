@@ -18,6 +18,7 @@ describe('configureToggleCustomFieldFactory ', () => {
     expect(builder).toEqual({
       id: 'toggle',
       label: 'Toggle',
+      getEuiTableColumn: expect.any(Function),
       build: expect.any(Function),
     });
   });

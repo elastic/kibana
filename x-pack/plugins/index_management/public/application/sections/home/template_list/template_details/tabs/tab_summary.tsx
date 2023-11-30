@@ -20,6 +20,8 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
+import { serializeAsESLifecycle } from '../../../../../../../common/lib/data_stream_serialization';
+import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
@@ -28,6 +30,7 @@ interface Props {
   templateDetails: TemplateDeserialized;
 }
 
+const INFINITE_AS_ICON = true;
 const i18nTexts = {
   yes: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.yesDescriptionText', {
     defaultMessage: 'Yes',
@@ -193,6 +196,24 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             <EuiDescriptionListDescription>
               {version || version === 0 ? version : i18nTexts.none}
             </EuiDescriptionListDescription>
+
+            {/* Data retention */}
+            {hasDatastream && templateDetails?.lifecycle && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateDetails.summaryTab.lifecycleDescriptionListTitle"
+                    defaultMessage="Data retention"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {getLifecycleValue(
+                    serializeAsESLifecycle(templateDetails.lifecycle),
+                    INFINITE_AS_ICON
+                  )}
+                </EuiDescriptionListDescription>
+              </>
+            )}
 
             {/* Allow auto create */}
             {isLegacy !== true && (
