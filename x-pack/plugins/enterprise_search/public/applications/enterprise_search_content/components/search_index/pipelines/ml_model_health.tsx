@@ -12,8 +12,8 @@ import { EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { TrainedModelState } from '../../../../../../common/types/pipelines';
 import { MlModelDeploymentState } from '../../../../../../common/types/ml';
+import { TrainedModelState } from '../../../../../../common/types/pipelines';
 
 const modelDownloadingText = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.downloading',
