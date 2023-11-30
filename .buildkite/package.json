@@ -15,6 +15,7 @@
     "tslib": "*"
   },
   "devDependencies": {
+    "@octokit/plugin-rest-endpoint-methods": "^10.2.0",
     "@types/chai": "^4.3.3",
     "@types/js-yaml": "^4.0.5",
     "@types/minimatch": "^3.0.5",
