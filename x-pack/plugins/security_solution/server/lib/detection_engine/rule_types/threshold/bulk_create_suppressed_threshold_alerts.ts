@@ -11,6 +11,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
 import type { ThresholdBucket } from './types';
@@ -21,6 +22,7 @@ import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { bulkCreateWithSuppression } from '../utils/bulk_create_with_suppression';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';
+import { transformBulkCreatedItemsToHits } from './utils';
 
 interface BulkCreateSuppressedThresholdAlertsParams {
   buckets: ThresholdBucket[];
@@ -38,6 +40,7 @@ interface BulkCreateSuppressedThresholdAlertsParams {
 /**
  * wraps threshold alerts and creates them using bulkCreateWithSuppression utility
  * returns {@link GenericBulkCreateResponse}
+ * and unsuppressed alerts, needed to create correct threshold history
  */
 export const bulkCreateSuppressedThresholdAlerts = async ({
   buckets,
@@ -50,9 +53,10 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
   ruleExecutionLogger,
   spaceId,
   runOpts,
-}: BulkCreateSuppressedThresholdAlertsParams): Promise<
-  GenericBulkCreateResponse<BaseFieldsLatest & SuppressionFieldsLatest>
-> => {
+}: BulkCreateSuppressedThresholdAlertsParams): Promise<{
+  bulkCreateResult: GenericBulkCreateResponse<BaseFieldsLatest & SuppressionFieldsLatest>;
+  unsuppressedAlerts: Array<SearchHit<unknown>>;
+}> => {
   const ruleParams = completeRule.ruleParams;
   const suppressionDuration = runOpts.completeRule.ruleParams.alertSuppression?.duration;
   if (!suppressionDuration) {
@@ -88,5 +92,11 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     alertTimestampOverride: runOpts.alertTimestampOverride,
   });
 
-  return bulkCreateResult;
+  return {
+    bulkCreateResult,
+    // if there errors we going to use created items only
+    unsuppressedAlerts: bulkCreateResult.errors.length
+      ? transformBulkCreatedItemsToHits(bulkCreateResult.createdItems)
+      : wrappedAlerts,
+  };
 };

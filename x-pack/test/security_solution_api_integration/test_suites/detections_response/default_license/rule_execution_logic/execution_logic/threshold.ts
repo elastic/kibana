@@ -863,6 +863,78 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      // needed to ensure threshold history works correctly for suppressed alerts
+      // history should be updated from events in suppressed alerts, not existing alert
+      // so subsequent rule runs won't trigger false positives
+      it('should not generate false positives suppressed alerts when threshold history is present', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T05:45:00.000Z';
+        const firstRunDoc = {
+          id,
+          '@timestamp': timestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondRunDoc = {
+          ...firstRunDoc,
+          '@timestamp': '2020-10-28T06:15:00.000Z',
+        };
+
+        await indexListOfDocuments([
+          firstRunDoc,
+          firstRunDoc,
+          firstRunDoc,
+          secondRunDoc,
+          secondRunDoc,
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          query: `id:${id}`,
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          alert_suppression: {
+            duration: {
+              value: 2,
+              unit: 'h',
+            },
+          },
+          from: 'now-60m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 3,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: 'agent-1',
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
+          [ALERT_ORIGINAL_TIME]: timestamp,
+          [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // only one suppressed alert as expected
+        });
+      });
+
       it('should update the correct alerts based on multi values threshold.field', async () => {
         const id = uuidv4();
         const timestamp = '2020-10-28T05:45:00.000Z';
