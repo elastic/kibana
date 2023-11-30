@@ -11,7 +11,7 @@ Array [
         },
       },
     },
-    "index": ".slo-observability.sli-v2*",
+    "index": ".slo-observability.sli-v3*",
     "query": Object {
       "bool": Object {
         "filter": Array [
