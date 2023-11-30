@@ -131,8 +131,8 @@ const finishSAMLHandshake = async ({
       method: 'post',
       data: `SAMLResponse=${encodedResponse}`,
       headers: {
+        'content-type': 'application/x-www-form-urlencoded',
         ...(sid ? { Cookie: `sid=${sid}` } : {}),
-        ...{ 'content-type': 'application/x-www-form-urlencoded' },
       },
       validateStatus: () => true,
       maxRedirects: 0,
