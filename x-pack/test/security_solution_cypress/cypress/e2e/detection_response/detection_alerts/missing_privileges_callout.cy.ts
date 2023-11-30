@@ -25,13 +25,13 @@ import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 const loadPageAsReadOnlyUser = (url: string) => {
   login(ROLES.t1_analyst);
-  visit(url, { role: ROLES.t1_analyst });
+  visit(url);
   waitForPageTitleToBeShown();
 };
 
 const loadPageAsPlatformEngineer = (url: string) => {
   login(ROLES.platform_engineer);
-  visit(url, { role: ROLES.platform_engineer });
+  visit(url);
   waitForPageTitleToBeShown();
 };
 
