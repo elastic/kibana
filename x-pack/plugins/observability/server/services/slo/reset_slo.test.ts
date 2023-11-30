@@ -9,12 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 
-import {
-  getSLOTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_MODEL_VERSION,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../assets/constants';
+import { SLO_MODEL_VERSION } from '../../assets/constants';
 import { createSLO } from './fixtures/slo';
 import {
   createSLORepositoryMock,
@@ -24,6 +19,8 @@ import {
 import { ResetSLO } from './reset_slo';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
+
+const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
 
 describe('ResetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -46,45 +43,39 @@ describe('ResetSLO', () => {
       mockSummaryTransformManager,
       loggerMock
     );
+    jest.useFakeTimers().setSystemTime(TEST_DATE);
   });
 
-  it('resets the SLO', async () => {
-    const slo = createSLO({ version: 1 });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('resets all associated resources', async () => {
+    const slo = createSLO({ id: 'irrelevant', version: 1 });
     mockRepository.findById.mockResolvedValueOnce(slo);
     mockRepository.save.mockImplementation((v) => Promise.resolve(v));
 
     await resetSLO.execute(slo.id);
 
-    const transformId = getSLOTransformId(slo.id, slo.revision);
-    expect(mockTransformManager.stop).toBeCalledWith(transformId);
-    expect(mockTransformManager.uninstall).toBeCalledWith(transformId);
+    // delete existing resources and data
+    expect(mockSummaryTransformManager.stop).toMatchSnapshot();
+    expect(mockSummaryTransformManager.uninstall).toMatchSnapshot();
 
-    expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        index: SLO_DESTINATION_INDEX_PATTERN,
-        query: {
-          bool: {
-            filter: [{ term: { 'slo.id': slo.id } }],
-          },
-        },
-      })
-    );
-    expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        query: {
-          bool: {
-            filter: [{ term: { 'slo.id': slo.id } }],
-          },
-        },
-      })
-    );
+    expect(mockTransformManager.stop).toMatchSnapshot();
+    expect(mockTransformManager.uninstall).toMatchSnapshot();
 
-    expect(mockTransformManager.install).toBeCalledWith(slo);
-    expect(mockTransformManager.preview).toBeCalledWith(transformId);
-    expect(mockTransformManager.start).toBeCalledWith(transformId);
+    expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+
+    // install resources
+    expect(mockSummaryTransformManager.install).toMatchSnapshot();
+    expect(mockSummaryTransformManager.start).toMatchSnapshot();
+
+    expect(mockEsClient.ingest.putPipeline).toMatchSnapshot();
+
+    expect(mockTransformManager.install).toMatchSnapshot();
+    expect(mockTransformManager.start).toMatchSnapshot();
+
+    expect(mockEsClient.index).toMatchSnapshot();
 
     expect(mockRepository.save).toHaveBeenCalledWith({
       ...slo,
