@@ -101,8 +101,8 @@ steps:
       TARGET: cypress:explore:run:serverless
       CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Explore - Security Solution Cypress Tests"
-    label: 'Serverless Explore - Security Solution Cypress Tests'
+      MSG: "--- Serverless Explore - Security Cypress Tests"
+    label: 'Serverless Explore - Security Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -118,8 +118,8 @@ steps:
       TARGET: cypress:investigations:run:serverless
       CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Investigations Cypress Tests on Serverless"    
-    label: 'Serverless Investigations - Security Solution Cypress Tests'
+      MSG: "--- Serverless Investigations - Security Cypress Tests"    
+    label: 'Serverless Investigations - Security Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -135,8 +135,8 @@ steps:
       TARGET: cypress:rule_management:run:serverless
       CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Rule Management Cypress Tests on Serverless"
-    label: 'Serverless Rule Management - Security Solution Cypress Tests'
+      MSG: "--- Serverless Rule Management - Security Cypress Tests "
+    label: 'Serverless Rule Management - Security Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -152,8 +152,8 @@ steps:
       TARGET: cypress:rule_management:prebuilt_rules:run:serverless
       CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Rule Management - Prebuilt Rules - Cypress Tests on Serverless"
-    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+      MSG: "--- Rule Management - Prebuilt Rules - Security Cypress Tests"
+    label: 'Rule Management - Prebuilt Rules - Security Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
