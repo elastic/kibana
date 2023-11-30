@@ -33,10 +33,6 @@ export const ViewAlertDetailsAlertAction = memo(
     const pagePath = alertId && pageId && resolveAlertPagePath?.(alertId, pageId);
     const linkToAlert = pagePath ? prepend(pagePath) : null;
 
-    if (!linkToAlert) {
-      return null;
-    }
-
     if (isAlertDetailsEnabled && linkToAlert) {
       return (
         <EuiContextMenuItem

@@ -8,7 +8,12 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  AlertConsumers,
+} from '@kbn/rule-data-utils';
 import { AlertActionsProps } from './types';
 import { useBulkUntrackAlerts } from '../../../..';
 
@@ -29,7 +34,7 @@ export const MarkAsUntrackedAlertAction = memo(
       refresh();
     }, [untrackAlerts, alert._index, alert._id, onActionExecuted, refresh]);
 
-    if (!isAlertActive) {
+    if (alert[ALERT_RULE_CONSUMER]?.includes(AlertConsumers.SIEM) || !isAlertActive) {
       return null;
     }
 
