@@ -9,33 +9,11 @@ import { findIndex, flatMap, flatten } from 'lodash';
 import DiffMatchPatch from 'diff-match-patch';
 import type { Diff } from 'diff-match-patch';
 import 'diff-match-patch-line-and-word';
-import * as diff from 'diff';
-import type { Change } from 'diff';
 import { isDelete, isInsert, isNormal, pickRanges } from 'react-diff-view';
 import type { ChangeData, HunkData, RangeTokenNode, TokenizeEnhancer } from 'react-diff-view';
 
-interface JsDiff {
-  diffChars: (oldStr: string, newStr: string) => Change[];
-  diffWords: (oldStr: string, newStr: string) => Change[];
-  diffWordsWithSpace: (oldStr: string, newStr: string) => Change[];
-  diffLines: (oldStr: string, newStr: string) => Change[];
-  diffTrimmedLines: (oldStr: string, newStr: string) => Change[];
-  diffSentences: (oldStr: string, newStr: string) => Change[];
-  diffCss: (oldStr: string, newStr: string) => Change[];
-  diffJson: (oldObject: Record<string, unknown>, newObject: Record<string, unknown>) => Change[];
-}
-
-const jsDiff: JsDiff = diff;
-
 export enum DiffMethod {
   CHARS = 'diffChars',
-  WORDS = 'diffWords',
-  WORDS_WITH_SPACE = 'diffWordsWithSpace',
-  LINES = 'diffLines',
-  TRIMMED_LINES = 'diffTrimmedLines',
-  SENTENCES = 'diffSentences',
-  CSS = 'diffCss',
-  JSON = 'diffJson',
   WORDS_CUSTOM_USING_DMP = 'diffWordsCustomUsingDmp',
 }
 
@@ -59,7 +37,6 @@ function findChangeBlocks(changes: ChangeData[]): ChangeData[][] {
 
 function groupDiffs(diffs: Diff[]): [Diff[], Diff[]] {
   return diffs.reduce<[Diff[], Diff[]]>(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
     ([oldDiffs, newDiffs], diff) => {
       const [type] = diff;
 
@@ -155,21 +132,7 @@ function diffByWord(x: string, y: string): [Diff[], Diff[]] {
   return groupDiffs(diffs);
 }
 
-function diffBy(diffMethod: DiffMethod, x: string, y: string): [Diff[], Diff[]] {
-  const jsDiffChanges: Change[] = jsDiff[diffMethod](x, y);
-  const diffs: Diff[] = diff.convertChangesToDMP(jsDiffChanges);
-
-  if (diffs.length <= 1) {
-    return [[], []];
-  }
-
-  return groupDiffs(diffs);
-}
-
-function diffChangeBlock(
-  changes: ChangeData[],
-  diffMethod: DiffMethod
-): [RangeTokenNode[], RangeTokenNode[]] {
+function diffChangeBlock(changes: ChangeData[]): [RangeTokenNode[], RangeTokenNode[]] {
   /* Convert ChangeData array to two strings representing old source and new source of a change block, like
   
   "created_at": "2023-11-20T16:47:52.801Z",
@@ -191,10 +154,7 @@ function diffChangeBlock(
     ['', '']
   );
 
-  const [oldDiffs, newDiffs] =
-    diffMethod === DiffMethod.WORDS_CUSTOM_USING_DMP // <-- That's basically the only change I made to allow word-level diffing
-      ? diffByWord(oldSource, newSource)
-      : diffBy(diffMethod, oldSource, newSource);
+  const [oldDiffs, newDiffs] = diffByWord(oldSource, newSource);
 
   if (oldDiffs.length === 0 && newDiffs.length === 0) {
     return [[], []];
@@ -220,22 +180,20 @@ function diffChangeBlock(
   return [oldEdits, newEdits];
 }
 
-export function markEditsBy(hunks: HunkData[], diffMethod: DiffMethod): TokenizeEnhancer {
+export function markEditsByWord(hunks: HunkData[]): TokenizeEnhancer {
   const changeBlocks = flatMap(
     hunks.map((hunk) => hunk.changes),
     findChangeBlocks
   );
 
-  const [oldEdits, newEdits] = changeBlocks
-    .map((changes) => diffChangeBlock(changes, diffMethod))
-    .reduce(
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      ([oldEdits, newEdits], [currentOld, currentNew]) => [
-        oldEdits.concat(currentOld),
-        newEdits.concat(currentNew),
-      ],
-      [[], []]
-    );
+  const [oldEdits, newEdits] = changeBlocks.map(diffChangeBlock).reduce(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    ([oldEdits, newEdits], [currentOld, currentNew]) => [
+      oldEdits.concat(currentOld),
+      newEdits.concat(currentNew),
+    ],
+    [[], []]
+  );
 
   return pickRanges(flatten(oldEdits), flatten(newEdits));
 }

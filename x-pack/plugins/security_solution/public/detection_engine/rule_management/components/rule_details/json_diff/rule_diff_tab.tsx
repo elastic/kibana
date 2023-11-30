@@ -25,7 +25,7 @@ import unidiff from 'unidiff';
 import stringify from 'json-stable-stringify';
 import { EuiSpacer, EuiIcon, EuiLink, useEuiTheme, EuiSwitch, EuiRadioGroup } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
-import { markEditsBy, DiffMethod } from './mark_edits_by_word';
+import { markEditsByWord, DiffMethod } from './mark_edits_by_word';
 
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
   stringify(jsObject, { space: 2 });
@@ -159,7 +159,7 @@ const useTokens = (hunks: HunkData[], diffMethod: DiffMethod, oldSource: string)
       */
       diffMethod === DiffMethod.CHARS
         ? markEdits(hunks, { type: 'block' }) // Using built-in "markEdits" enhancer for char-level diffing
-        : markEditsBy(hunks, diffMethod), // Using custom "markEditsBy" enhancer for other-level diffing
+        : markEditsByWord(hunks), // Using custom "markEditsByWord" enhancer for word-level diffing
     ],
   };
 
@@ -211,7 +211,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
   });
 
   /*
-      "parseDiff" converts a unified diff string into a JSDiff File object.
+      "parseDiff" converts a unified diff string into a gitdiff-parser File object.
     */
   const [diffFile] = parseDiff(unifiedDiff, {
     nearbySequences: 'zip',
@@ -417,20 +417,8 @@ export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
       label: 'Chars',
     },
     {
-      id: DiffMethod.WORDS,
-      label: 'Words',
-    },
-    {
       id: DiffMethod.WORDS_CUSTOM_USING_DMP,
       label: 'Words, alternative method (using "diff-match-patch" library)',
-    },
-    {
-      id: DiffMethod.LINES,
-      label: 'Lines',
-    },
-    {
-      id: DiffMethod.SENTENCES,
-      label: 'Sentences',
     },
   ];
 
