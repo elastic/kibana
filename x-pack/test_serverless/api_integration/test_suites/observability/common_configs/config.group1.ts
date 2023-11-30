@@ -27,6 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../common/core'),
       require.resolve('../../common/reporting'),
       require.resolve('../../common/painless_lab'),
+      require.resolve('../../common/console'),
     ],
     junit: {
       reportName: 'Serverless Observability API Integration Tests - Common Group 1',

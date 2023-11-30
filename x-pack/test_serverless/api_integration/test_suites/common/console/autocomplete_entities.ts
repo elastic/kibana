@@ -1,48 +1,59 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../ftr_provider_context';
-import { helpers } from './helpers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
-  const {
-    createIndex,
-    createAlias,
-    createLegacyTemplate,
-    createIndexTemplate,
-    createComponentTemplate,
-    createDataStream,
-    deleteIndex,
-    deleteAlias,
-    deleteLegacyTemplate,
-    deleteIndexTemplate,
-    deleteComponentTemplate,
-    deleteDataStream,
-    sendRequest,
-  } = helpers(getService);
+  const svlCommonApi = getService('svlCommonApi');
+  const consoleService = getService('console');
 
   describe('/api/console/autocomplete_entities', function () {
+    let createIndex: typeof consoleService['helpers']['createIndex'];
+    let createAlias: typeof consoleService['helpers']['createAlias'];
+    let createIndexTemplate: typeof consoleService['helpers']['createIndexTemplate'];
+    let createComponentTemplate: typeof consoleService['helpers']['createComponentTemplate'];
+    let createDataStream: typeof consoleService['helpers']['createDataStream'];
+    let deleteIndex: typeof consoleService['helpers']['deleteIndex'];
+    let deleteAlias: typeof consoleService['helpers']['deleteAlias'];
+    let deleteIndexTemplate: typeof consoleService['helpers']['deleteIndexTemplate'];
+    let deleteComponentTemplate: typeof consoleService['helpers']['deleteComponentTemplate'];
+    let deleteDataStream: typeof consoleService['helpers']['deleteDataStream'];
+    let sendRequest: typeof consoleService['helpers']['sendRequest'];
+
     const indexName = 'test-index-1';
     const aliasName = 'test-alias-1';
     const indexTemplateName = 'test-index-template-1';
     const componentTemplateName = 'test-component-template-1';
     const dataStreamName = 'test-data-stream-1';
-    const legacyTemplateName = 'test-legacy-template-1';
 
     before(async () => {
+      ({
+        helpers: {
+          createIndex,
+          createAlias,
+          createIndexTemplate,
+          createComponentTemplate,
+          createDataStream,
+          deleteIndex,
+          deleteAlias,
+          deleteIndexTemplate,
+          deleteComponentTemplate,
+          deleteDataStream,
+          sendRequest,
+        },
+      } = consoleService);
+
       // Setup indices, aliases, templates, and data streams
       await createIndex(indexName);
       await createAlias(indexName, aliasName);
       await createComponentTemplate(componentTemplateName);
       await createIndexTemplate(indexTemplateName, [dataStreamName], [componentTemplateName]);
       await createDataStream(dataStreamName);
-      await createLegacyTemplate(legacyTemplateName);
     });
 
     after(async () => {
@@ -52,11 +63,10 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteDataStream(dataStreamName);
       await deleteIndexTemplate(indexTemplateName);
       await deleteComponentTemplate(componentTemplateName);
-      await deleteLegacyTemplate(legacyTemplateName);
     });
 
     it('should not succeed if no settings are provided in query params', async () => {
-      const response = await sendRequest({});
+      const response = await sendRequest({}).set(svlCommonApi.getInternalRequestHeader());
       const { status } = response;
       expect(status).to.be(400);
     });
@@ -67,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         fields: true,
         templates: true,
         dataStreams: true,
-      });
+      }).set(svlCommonApi.getInternalRequestHeader());
 
       const { body, status } = response;
       expect(status).to.be(200);
@@ -87,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         fields: false,
         templates: false,
         dataStreams: false,
-      });
+      }).set(svlCommonApi.getInternalRequestHeader());
 
       const { body, status } = response;
       expect(status).to.be(200);
@@ -102,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return empty templates with templates setting is set to false', async () => {
       const response = await sendRequest({
         templates: false,
-      });
+      }).set(svlCommonApi.getInternalRequestHeader());
       const { body, status } = response;
       expect(status).to.be(200);
       expect(body.legacyTemplates).to.eql({});
@@ -113,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return empty data streams with dataStreams setting is set to false', async () => {
       const response = await sendRequest({
         dataStreams: false,
-      });
+      }).set(svlCommonApi.getInternalRequestHeader());
       const { body, status } = response;
       expect(status).to.be(200);
       expect(body.dataStreams).to.eql({});
@@ -122,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return empty aliases with indices setting is set to false', async () => {
       const response = await sendRequest({
         indices: false,
-      });
+      }).set(svlCommonApi.getInternalRequestHeader());
       const { body, status } = response;
       expect(status).to.be(200);
       expect(body.aliases).to.eql({});
@@ -131,14 +141,16 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return empty mappings with fields setting is set to false', async () => {
       const response = await sendRequest({
         fields: false,
-      });
+      }).set(svlCommonApi.getInternalRequestHeader());
       const { body, status } = response;
       expect(status).to.be(200);
       expect(body.mappings).to.eql({});
     });
 
     it('should not return mappings with fields setting is set to true without the list of indices is provided', async () => {
-      const response = await sendRequest({ fields: true });
+      const response = await sendRequest({ fields: true }).set(
+        svlCommonApi.getInternalRequestHeader()
+      );
 
       const { body, status } = response;
       expect(status).to.be(200);
@@ -146,7 +158,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return mappings with fields setting is set to true and the list of indices is provided', async () => {
-      const response = await sendRequest({ fields: true, fieldsIndices: indexName });
+      const response = await sendRequest({ fields: true, fieldsIndices: indexName }).set(
+        svlCommonApi.getInternalRequestHeader()
+      );
 
       const { body, status } = response;
       expect(status).to.be(200);
@@ -154,7 +168,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return aliases with indices setting is set to true', async () => {
-      const response = await sendRequest({ indices: true });
+      const response = await sendRequest({ indices: true }).set(
+        svlCommonApi.getInternalRequestHeader()
+      );
 
       const { body, status } = response;
       expect(status).to.be(200);
@@ -162,7 +178,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return data streams with dataStreams setting is set to true', async () => {
-      const response = await sendRequest({ dataStreams: true });
+      const response = await sendRequest({ dataStreams: true }).set(
+        svlCommonApi.getInternalRequestHeader()
+      );
 
       const { body, status } = response;
       expect(status).to.be(200);
@@ -172,11 +190,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return all templates with templates setting is set to true', async () => {
-      const response = await sendRequest({ templates: true });
+      const response = await sendRequest({ templates: true }).set(
+        svlCommonApi.getInternalRequestHeader()
+      );
 
       const { body, status } = response;
       expect(status).to.be(200);
-      expect(Object.keys(body.legacyTemplates)).to.contain(legacyTemplateName);
       expect(body.indexTemplates.index_templates.map((it: { name: string }) => it.name)).to.contain(
         indexTemplateName
       );
