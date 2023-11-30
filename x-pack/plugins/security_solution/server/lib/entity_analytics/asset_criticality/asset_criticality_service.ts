@@ -6,9 +6,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { getAssetCriticalityIndex } from '../../../../common/asset_criticality';
 import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
+import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
 interface CriticalityIdentifier {
   id_field: string;
@@ -47,13 +46,11 @@ const buildCriticalitiesQuery = (identifierValuesByField: IdentifierValuesByFiel
   },
 });
 
-const MAX_CRITICALITY_RECORD_COUNT = 10000; // TODO what's the right value here?
-
 const getCriticalitiesByIdentifiers = async ({
-  esClient,
+  assetCriticalityDataClient,
   identifiers,
 }: {
-  esClient: ElasticsearchClient;
+  assetCriticalityDataClient: AssetCriticalityDataClient;
   identifiers: CriticalityIdentifier[];
 }): Promise<AssetCriticalityRecord[]> => {
   if (identifiers.length === 0) {
@@ -68,12 +65,8 @@ const getCriticalitiesByIdentifiers = async ({
   const identifierValuesByField = groupIdentifierValuesByField(validIdentifiers);
   const criticalitiesQuery = buildCriticalitiesQuery(identifierValuesByField);
 
-  const criticalitySearchResponse = await esClient.search<AssetCriticalityRecord>({
-    index: getAssetCriticalityIndex('default'), // TODO use context from data client?
-    body: {
-      query: criticalitiesQuery,
-    },
-    size: MAX_CRITICALITY_RECORD_COUNT,
+  const criticalitySearchResponse = await assetCriticalityDataClient.search({
+    query: criticalitiesQuery,
   });
 
   // @ts-expect-error @elastic/elasticsearch _source is optional
@@ -81,12 +74,12 @@ const getCriticalitiesByIdentifiers = async ({
 };
 
 interface AssetCriticalityServiceFactoryOptions {
-  esClient: ElasticsearchClient;
+  assetCriticalityDataClient: AssetCriticalityDataClient;
 }
 
 export const assetCriticalityServiceFactory = ({
-  esClient,
+  assetCriticalityDataClient,
 }: AssetCriticalityServiceFactoryOptions) => ({
   getCriticalitiesByIdentifiers: (identifiers: CriticalityIdentifier[]) =>
-    getCriticalitiesByIdentifiers({ esClient, identifiers }),
+    getCriticalitiesByIdentifiers({ assetCriticalityDataClient, identifiers }),
 });
