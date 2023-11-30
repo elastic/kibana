@@ -7,12 +7,24 @@
 
 import * as rt from 'io-ts';
 
-export const InfraProfilingRequestParamsRT = rt.type({
+export const InfraProfilingFlamegraphRequestParamsRT = rt.type({
   hostname: rt.string,
-  timeRange: rt.type({
-    from: rt.number,
-    to: rt.number,
-  }),
+  from: rt.number,
+  to: rt.number,
 });
 
-export type InfraProfilingRequestParams = rt.TypeOf<typeof InfraProfilingRequestParamsRT>;
+export const InfraProfilingFunctionsRequestParamsRT = rt.type({
+  hostname: rt.string,
+  from: rt.number,
+  to: rt.number,
+  startIndex: rt.number,
+  endIndex: rt.number,
+});
+
+export type InfraProfilingFlamegraphRequestParams = rt.TypeOf<
+  typeof InfraProfilingFlamegraphRequestParamsRT
+>;
+
+export type InfraProfilingFunctionsRequestParams = rt.TypeOf<
+  typeof InfraProfilingFunctionsRequestParamsRT
+>;

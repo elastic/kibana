@@ -176,6 +176,7 @@
     "@kbn/discover-utils",
     "@kbn/core-application-common",
     "@kbn/openapi-generator",
+    "@kbn/openapi-bundler",
     "@kbn/es",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-styled",
