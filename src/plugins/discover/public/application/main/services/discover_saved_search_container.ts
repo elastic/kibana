@@ -24,7 +24,7 @@ import type { DiscoverGlobalStateContainer } from './discover_global_state_conta
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
-  state: false,
+  state: false, // We don't compare filter types (global vs appState).
 };
 
 export interface UpdateParams {
