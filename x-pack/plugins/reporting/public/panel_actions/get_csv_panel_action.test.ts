@@ -17,6 +17,7 @@ import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
 import type { ActionContext } from './get_csv_panel_action';
 import { ReportingCsvPanelAction } from './get_csv_panel_action';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 type LicenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
 
@@ -119,7 +120,7 @@ describe('GetCsvReportPanelAction', () => {
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
       setField: jest.fn(),
-      getField: jest.fn(),
+      getField: jest.fn((name) => (name === 'index' ? dataViewMock : undefined)),
       getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
     } as unknown as SearchSource;
     context.embeddable.getSavedSearch = () => {

@@ -12,6 +12,7 @@ import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { Filter, ISearchSource, SearchSourceFields } from 'src/plugins/data/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  isNestedFieldParent,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
@@ -93,6 +94,21 @@ export async function getSharingData(
       const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
       if (useFieldsApi && columns.length) {
         searchSource.setField('fields', columns);
+      const useFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+      if (useFieldsApi) {
+        searchSource.removeField('fieldsFromSource');
+        const fields = columns.length
+          ? columns.map((column) => {
+              let field = column;
+
+              // If this column is a nested field, add a wildcard to the field name in order to fetch
+              // all leaf fields for the report, since the fields API doesn't support nested field roots
+              if (isNestedFieldParent(column, index)) {
+                field = `${column}.*`;
+              }
+
+              return { field, include_unmapped: 'true' };
+            })
       }
       return searchSource.getSerializedFields(true);
     },
