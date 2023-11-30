@@ -547,22 +547,6 @@ describe('ServiceNow service', () => {
       });
     });
 
-    test('it should log warning if no incident found', async () => {
-      requestMock.mockImplementationOnce(() => ({
-        status: 404,
-        data: { result: [] },
-      }));
-      const res = await service.getIncidentByCorrelationId('custom_correlation_id');
-
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "No incident found with correlation ID custom_correlation_id.",
-        ]
-      `);
-      expect(res).toBe(null);
-    });
-
     test('it should throw an error', async () => {
       requestMock.mockImplementationOnce(() => {
         throw new Error('An error has occurred');
@@ -1095,7 +1079,7 @@ describe('ServiceNow service', () => {
         expect(requestMock).toHaveBeenCalledTimes(1);
         expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Incident is already closed.",
+          "[ServiceNow][CloseIncident] Incident with correlation_id: null or incidentId: 1 is closed.",
         ]
       `);
       });
@@ -1103,13 +1087,18 @@ describe('ServiceNow service', () => {
       test('it should return null if found incident with correlation id is null', async () => {
         requestMock.mockImplementationOnce(() => ({
           data: {
-            result: [null],
+            result: [],
           },
         }));
 
         const res = await service.closeIncident({ incidentId: null, correlationId: 'bar' });
 
         expect(requestMock).toHaveBeenCalledTimes(1);
+        expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "[ServiceNow][CloseIncident] No incident found with correlation_id: bar or incidentId: null.",
+        ]
+      `);
         expect(res).toBeNull();
       });
 
@@ -1176,7 +1165,7 @@ describe('ServiceNow service', () => {
         });
 
         mockIncidentResponse(false);
-        mockImportIncident(true);
+        mockIncidentResponse(true);
         mockIncidentResponse(true);
 
         const res = await service.closeIncident({
@@ -1208,7 +1197,7 @@ describe('ServiceNow service', () => {
           axios,
           logger,
           configurationUtilities,
-          url: 'https://example.com/api/now/v2/table/sn_si_incident/undefined',
+          url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'get',
         });
 

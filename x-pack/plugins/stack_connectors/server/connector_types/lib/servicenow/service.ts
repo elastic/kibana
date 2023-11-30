@@ -267,10 +267,6 @@ export const createExternalService: ServiceFactory = ({
 
       checkInstance(res);
 
-      if (res.status === 404) {
-        logger.warn(`No incident found with correlation ID ${correlationId}.`);
-      }
-
       const foundIncident = res.data.result[0] ?? null;
 
       return foundIncident;
@@ -292,8 +288,17 @@ export const createExternalService: ServiceFactory = ({
         incidentToBeClosed = await getIncidentByCorrelationId(correlationId);
       }
 
-      if (incidentToBeClosed?.state === 7) {
-        logger.warn(`Incident is already closed.`);
+      if (incidentToBeClosed === null || incidentToBeClosed?.status === 'error') {
+        logger.warn(
+          `[ServiceNow][CloseIncident] No incident found with correlation_id: ${correlationId} or incidentId: ${incidentId}.`
+        );
+        return null;
+      }
+
+      if (incidentToBeClosed.state === 7) {
+        logger.warn(
+          `[ServiceNow][CloseIncident] Incident with correlation_id: ${correlationId} or incidentId: ${incidentId} is closed.`
+        );
 
         return {
           title: incidentToBeClosed.number,
@@ -301,10 +306,6 @@ export const createExternalService: ServiceFactory = ({
           pushedDate: getPushedDate(incidentToBeClosed.sys_updated_on),
           url: getIncidentViewURL(incidentToBeClosed.sys_id),
         };
-      }
-
-      if (incidentToBeClosed === null || incidentToBeClosed?.status === 'error') {
-        return null;
       }
 
       const closedIncident = await updateIncident({

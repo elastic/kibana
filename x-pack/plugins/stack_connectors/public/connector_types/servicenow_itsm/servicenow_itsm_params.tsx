@@ -99,9 +99,9 @@ const ServiceNowParamsFields: React.FunctionComponent<
       actionParams.subActionParams ??
       ({
         incident: {},
-        comments: [],
+        comments: selectedActionGroupId !== ACTION_GROUP_RECOVERED ? [] : undefined,
       } as unknown as ServiceNowITSMActionParams['subActionParams']),
-    [actionParams.subActionParams]
+    [actionParams.subActionParams, selectedActionGroupId]
   );
 
   const [choices, setChoices] = useState<Fields>(defaultFields);

@@ -337,7 +337,6 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
       expect(editAction.mock.calls[0][1]).toEqual({
         incident: { correlation_id: 'updated correlation id' },
-        comments: [],
       });
     });
   });
