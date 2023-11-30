@@ -20,8 +20,8 @@ import {
 import React, { ChangeEvent } from 'react';
 import { FormikProvider, useFormik, Field, Form } from 'formik';
 
+import { MOCK_IDP_ROLE_NAMES } from '@kbn/mock-idp-utils/src/constants';
 import { useAuthenticator } from './role_switcher';
-import { MOCK_IDP_ROLE_NAMES } from '../common/constants';
 
 export function LoginPage() {
   const [, switchCurrentUser] = useAuthenticator(true);

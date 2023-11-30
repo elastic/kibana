@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { MOCK_IDP_LOGIN_PATH } from '../common/constants';
+import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
 import { RoleSwitcher } from './role_switcher';
 
 export const plugin: PluginInitializer<void, void> = (): Plugin => ({

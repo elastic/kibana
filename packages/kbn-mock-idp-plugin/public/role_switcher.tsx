@@ -11,8 +11,12 @@ import { EuiButton, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { MOCK_IDP_REALM_NAME, MOCK_IDP_REALM_TYPE, MOCK_IDP_ROLE_NAMES } from '../common/constants';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import {
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_REALM_TYPE,
+  MOCK_IDP_ROLE_NAMES,
+} from '@kbn/mock-idp-utils/src/constants';
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
 

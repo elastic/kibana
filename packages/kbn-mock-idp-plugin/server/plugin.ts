@@ -9,7 +9,7 @@
 import type { PluginInitializer, Plugin } from '@kbn/core-plugins-server';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import { MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH, createSAMLResponse } from '../common';
+import { MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH, createSAMLResponse } from '@kbn/mock-idp-utils';
 
 const createSAMLResponseSchema = schema.object({
   username: schema.string(),

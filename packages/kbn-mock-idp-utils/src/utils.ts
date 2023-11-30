@@ -10,9 +10,6 @@ import { Client } from '@elastic/elasticsearch';
 import { SignedXml } from 'xml-crypto';
 import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 import { readFile } from 'fs/promises';
-import zlib from 'zlib';
-import { promisify } from 'util';
-import { parseString } from 'xml2js';
 import { X509Certificate } from 'crypto';
 
 import {
@@ -26,9 +23,6 @@ import {
   MOCK_IDP_LOGIN_PATH,
   MOCK_IDP_LOGOUT_PATH,
 } from './constants';
-
-const inflateRawAsync = promisify(zlib.inflateRaw);
-const parseStringAsync = promisify(parseString);
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -76,7 +70,7 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
  * const samlResponse = await createSAMLResponse({
  *    username: '1234567890',
  *    email: 'mail@elastic.co',
- *    fullname: 'Test User',
+ *    full_nname: 'Test User',
  *    roles: ['t1_analyst', 'editor'],
  *  })
  * ```
@@ -87,7 +81,6 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
  * fetch('/api/security/saml/callback', {
  *   method: 'POST',
  *   body: JSON.stringify({ SAMLResponse: samlResponse }),
- *   redirect: 'manual'
  * })
  * ```
  */
@@ -209,23 +202,4 @@ export async function ensureSAMLRoleMapping(client: Client) {
       },
     },
   });
-}
-
-interface SAMLAuthnRequest {
-  'saml2p:AuthnRequest': {
-    $: {
-      AssertionConsumerServiceURL: string;
-      Destination: string;
-      ID: string;
-      IssueInstant: string;
-    };
-  };
-}
-
-export async function parseSAMLAuthnRequest(samlRequest: string) {
-  const inflatedSAMLRequest = (await inflateRawAsync(Buffer.from(samlRequest, 'base64'))) as Buffer;
-  const parsedSAMLRequest = (await parseStringAsync(
-    inflatedSAMLRequest.toString()
-  )) as SAMLAuthnRequest;
-  return parsedSAMLRequest['saml2p:AuthnRequest'].$;
 }

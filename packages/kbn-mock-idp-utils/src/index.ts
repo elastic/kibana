@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { resolve } from 'path';
-
-export const MOCK_IDP_PLUGIN_PATH = resolve(__dirname, '..');
 
 export {
   MOCK_IDP_LOGIN_PATH,
@@ -23,9 +20,4 @@ export {
   MOCK_IDP_ROLE_NAMES,
 } from './constants';
 
-export {
-  createMockIdpMetadata,
-  createSAMLResponse,
-  ensureSAMLRoleMapping,
-  parseSAMLAuthnRequest,
-} from './utils';
+export { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';

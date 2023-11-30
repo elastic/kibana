@@ -1078,6 +1078,8 @@
       "@kbn/ml-url-state/*": ["x-pack/packages/ml/url_state/*"],
       "@kbn/mock-idp-plugin": ["packages/kbn-mock-idp-plugin"],
       "@kbn/mock-idp-plugin/*": ["packages/kbn-mock-idp-plugin/*"],
+      "@kbn/mock-idp-utils": ["packages/kbn-mock-idp-utils"],
+      "@kbn/mock-idp-utils/*": ["packages/kbn-mock-idp-utils/*"],
       "@kbn/monaco": ["packages/kbn-monaco"],
       "@kbn/monaco/*": ["packages/kbn-monaco/*"],
       "@kbn/monitoring-collection-plugin": ["x-pack/plugins/monitoring_collection"],

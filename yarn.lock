@@ -5093,6 +5093,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/mock-idp-utils@link:packages/kbn-mock-idp-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/monaco@link:packages/kbn-monaco":
   version "0.0.0"
   uid ""
