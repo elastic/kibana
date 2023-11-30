@@ -6,13 +6,19 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('console', () => {
-    loadTestFile(require.resolve('./proxy_route'));
-    loadTestFile(require.resolve('./autocomplete_entities'));
-    loadTestFile(require.resolve('./es_config'));
-    loadTestFile(require.resolve('./spec_definitions'));
+export default function ({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+
+  describe('GET /api/console/es_config', () => {
+    it('returns es host', async () => {
+      const { body } = await supertest
+        .get('/api/console/es_config')
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+      expect(body.host).to.be.ok();
+    });
   });
 }
