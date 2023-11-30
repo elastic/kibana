@@ -30,7 +30,10 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
 
   if (options.filters?.ean) {
     const eans = Array.isArray(options.filters.ean) ? options.filters.ean : [options.filters.ean];
-    const hostnames = eans.map(parseEan).filter(({ kind }) => kind === 'host');
+    const hostnames = eans
+      .map(parseEan)
+      .filter(({ kind }) => kind === 'host')
+      .map(({ id }) => id);
 
     // if EAN filter isn't targeting a host asset, we don't need to do this query
     if (hostnames.length === 0) {

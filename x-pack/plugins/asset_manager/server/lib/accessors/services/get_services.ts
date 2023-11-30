@@ -28,7 +28,10 @@ export async function getServices(
 
   if (options.filters?.ean) {
     const eans = Array.isArray(options.filters.ean) ? options.filters.ean : [options.filters.ean];
-    const services = eans.map(parseEan).filter(({ kind }) => kind === 'service');
+    const services = eans
+      .map(parseEan)
+      .filter(({ kind }) => kind === 'service')
+      .map(({ id }) => id);
 
     if (services.length === 0) {
       return {
