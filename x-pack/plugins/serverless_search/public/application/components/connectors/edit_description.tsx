@@ -19,46 +19,50 @@ import {
   EuiText,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Connector } from '@kbn/search-connectors';
 import { CANCEL_LABEL, EDIT_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
+import { useConnector } from '../../hooks/api/use_connector';
+import { useShowErrorToast } from '../../hooks/use_error_toast';
 
 interface EditDescriptionProps {
-  connectorId: string;
-  description: string;
-  onSuccess: () => void;
+  connector: Connector;
 }
 
-export const EditDescription: React.FC<EditDescriptionProps> = ({
-  connectorId,
-  description,
-  onSuccess,
-}) => {
+export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [newDescription, setNewDescription] = useState(description);
+  const [newDescription, setNewDescription] = useState(connector.description || '');
   const { http } = useKibanaServices();
+  const showErrorToast = useShowErrorToast();
+  const queryClient = useQueryClient();
+  const { queryKey } = useConnector(connector.id);
 
-  useEffect(() => setNewDescription(description), [description]);
+  useEffect(() => setNewDescription(connector.description || ''), [connector.description]);
 
-  const { isLoading, isSuccess, mutate } = useMutation({
+  const { isLoading, mutate } = useMutation({
     mutationFn: async (inputDescription: string) => {
       const body = { description: inputDescription };
-      const result = await http.post(
-        `/internal/serverless_search/connectors/${connectorId}/description`,
-        {
-          body: JSON.stringify(body),
-        }
-      );
-      return result;
+      await http.post(`/internal/serverless_search/connectors/${connector.id}/description`, {
+        body: JSON.stringify(body),
+      });
+      return inputDescription;
+    },
+    onError: (error) =>
+      showErrorToast(
+        error,
+        i18n.translate('xpack.serverlessSearch.connectors.config.connectorDescription', {
+          defaultMessage: 'Error updating description',
+        })
+      ),
+    onSuccess: (successData) => {
+      queryClient.setQueryData(queryKey, {
+        connector: { ...connector, description: successData },
+      });
+      queryClient.invalidateQueries(queryKey);
+      setIsEditing(false);
     },
   });
-
-  useEffect(() => {
-    if (isSuccess) {
-      setIsEditing(false);
-      onSuccess();
-    }
-  }, [isSuccess, onSuccess]);
 
   return (
     <EuiFlexGroup direction="row">
@@ -72,18 +76,23 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({
               defaultMessage: 'Description',
             })}
             labelAppend={
-              <EuiButtonEmpty size="xs" onClick={() => setIsEditing(true)}>
+              <EuiButtonEmpty
+                data-test-subj="serverlessSearchEditDescriptionButton"
+                size="xs"
+                onClick={() => setIsEditing(true)}
+              >
                 {EDIT_LABEL}
               </EuiButtonEmpty>
             }
           >
             {isEditing ? (
               <EuiFieldText
+                data-test-subj="serverlessSearchEditDescriptionFieldText"
                 onChange={(event) => setNewDescription(event.target.value)}
-                value={newDescription}
+                value={newDescription || ''}
               />
             ) : (
-              <EuiText size="s">{description}</EuiText>
+              <EuiText size="s">{connector.description}</EuiText>
             )}
           </EuiFormRow>
         </EuiFlexItem>
@@ -98,6 +107,7 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({
                 `}
               >
                 <EuiButton
+                  data-test-subj="serverlessSearchEditDescriptionButton"
                   color="primary"
                   fill
                   onClick={() => mutate(newDescription)}
@@ -115,10 +125,11 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({
                 `}
               >
                 <EuiButton
+                  data-test-subj="serverlessSearchEditDescriptionButton"
                   size="s"
                   isLoading={isLoading}
                   onClick={() => {
-                    setNewDescription(description);
+                    setNewDescription(connector.description || '');
                     setIsEditing(false);
                   }}
                 >

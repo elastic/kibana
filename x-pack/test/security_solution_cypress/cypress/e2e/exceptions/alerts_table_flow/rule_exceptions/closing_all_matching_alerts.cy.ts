@@ -10,7 +10,7 @@ import {
   goToClosedAlertsOnRuleDetailsPage,
   waitForAlerts,
 } from '../../../../tasks/alerts';
-import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
+import { deleteAlertsAndRules, postDataView } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -33,7 +33,6 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
 
   beforeEach(() => {
     cy.task('esArchiverUnload', 'exceptions');
-    cy.task('esArchiverResetKibana');
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
 

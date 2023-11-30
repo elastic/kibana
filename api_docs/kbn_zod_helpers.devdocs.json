@@ -1,0 +1,355 @@
+{
+  "id": "@kbn/zod-helpers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.ArrayFromString",
+        "type": "Function",
+        "tags": [],
+        "label": "ArrayFromString",
+        "description": [
+          "\nThis is a helper schema to convert comma separated strings to arrays. Useful\nfor processing query params.\n"
+        ],
+        "signature": [
+          "(schema: T) => Zod.ZodEffects<Zod.ZodArray<T, \"many\">, T[\"_output\"][], unknown>"
+        ],
+        "path": "packages/kbn-zod-helpers/src/array_from_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.ArrayFromString.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "Array items schema"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-zod-helpers/src/array_from_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Array schema that accepts a comma-separated string as input"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.expectParseError",
+        "type": "Function",
+        "tags": [],
+        "label": "expectParseError",
+        "description": [],
+        "signature": [
+          "(result: Zod.SafeParseReturnType<Input, Output>) => void"
+        ],
+        "path": "packages/kbn-zod-helpers/src/expect_parse_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.expectParseError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "Zod.SafeParseReturnType<Input, Output>"
+            ],
+            "path": "packages/kbn-zod-helpers/src/expect_parse_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.expectParseSuccess",
+        "type": "Function",
+        "tags": [],
+        "label": "expectParseSuccess",
+        "description": [],
+        "signature": [
+          "(result: Zod.SafeParseReturnType<Input, Output>) => void"
+        ],
+        "path": "packages/kbn-zod-helpers/src/expect_parse_success.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.expectParseSuccess.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "Zod.SafeParseReturnType<Input, Output>"
+            ],
+            "path": "packages/kbn-zod-helpers/src/expect_parse_success.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isValidDateMath",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidDateMath",
+        "description": [],
+        "signature": [
+          "(input: string, ctx: Zod.RefinementCtx) => void"
+        ],
+        "path": "packages/kbn-zod-helpers/src/is_valid_date_math.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isValidDateMath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-zod-helpers/src/is_valid_date_math.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isValidDateMath.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "ctx",
+            "description": [],
+            "signature": [
+              "Zod.RefinementCtx"
+            ],
+            "path": "packages/kbn-zod-helpers/src/is_valid_date_math.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.requiredOptional",
+        "type": "Function",
+        "tags": [],
+        "label": "requiredOptional",
+        "description": [
+          "\nThis helper designed to be used with `z.transform` to make all optional fields required.\n"
+        ],
+        "signature": [
+          "<T>(schema: T) => ",
+          {
+            "pluginId": "@kbn/zod-helpers",
+            "scope": "common",
+            "docId": "kibKbnZodHelpersPluginApi",
+            "section": "def-common.RequiredOptional",
+            "text": "RequiredOptional"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-zod-helpers/src/required_optional.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.requiredOptional.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "Zod schema"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-zod-helpers/src/required_optional.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The same schema but with all optional fields required."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.safeParseResult",
+        "type": "Function",
+        "tags": [],
+        "label": "safeParseResult",
+        "description": [
+          "\nSafely parse a payload against a schema, returning the output or undefined.\nThis method does not throw validation errors and is useful for validating\noptional objects when we don't care about errors.\n"
+        ],
+        "signature": [
+          "(payload: unknown, schema: T) => T[\"_output\"] | undefined"
+        ],
+        "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.safeParseResult.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "payload",
+            "description": [
+              "Schema payload"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.safeParseResult.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "Validation schema"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Schema output or undefined"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.stringifyZodError",
+        "type": "Function",
+        "tags": [],
+        "label": "stringifyZodError",
+        "description": [],
+        "signature": [
+          "(err: Zod.ZodError<any>) => string"
+        ],
+        "path": "packages/kbn-zod-helpers/src/stringify_zod_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.stringifyZodError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "Zod.ZodError<any>"
+            ],
+            "path": "packages/kbn-zod-helpers/src/stringify_zod_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.RequiredOptional",
+        "type": "Type",
+        "tags": [
+          "note"
+        ],
+        "label": "RequiredOptional",
+        "description": [
+          "\nMake any optional fields required, but add `| undefined` to their type.\n\nThis bit of logic is to force all fields to be accounted for in conversions\nfrom the internal rule schema to the response schema. Rather than use\npartial, which makes each field optional, we make each field required but\npossibly undefined. The result is that if a field is forgotten in the\nconversion from internal schema to response schema TS will report an error.\nIf we just used partial instead, then optional fields can be accidentally\nomitted from the conversion - and any actual values in those fields\ninternally will be stripped in the response.\n"
+        ],
+        "signature": [
+          "{ [K in keyof T]-?: [T[K]]; } extends infer U ? U extends Record<keyof U, [unknown]> ? { [K in keyof U]: U[K][0]; } : never : never"
+        ],
+        "path": "packages/kbn-zod-helpers/src/required_optional.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.BooleanFromString",
+        "type": "Object",
+        "tags": [],
+        "label": "BooleanFromString",
+        "description": [
+          "\nThis is a helper schema to convert a boolean string (\"true\" or \"false\") to a\nboolean. Useful for processing query params.\n\nAccepts \"true\" or \"false\" as strings, or a boolean."
+        ],
+        "signature": [
+          "Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">"
+        ],
+        "path": "packages/kbn-zod-helpers/src/boolean_from_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

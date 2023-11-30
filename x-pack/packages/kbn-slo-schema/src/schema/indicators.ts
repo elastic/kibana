@@ -59,22 +59,106 @@ const kqlCustomIndicatorSchema = t.type({
   ]),
 });
 
-const metricCustomValidAggregations = t.keyof({
-  sum: true,
+const timesliceMetricComparatorMapping = {
+  GT: '>',
+  GTE: '>=',
+  LT: '<',
+  LTE: '<=',
+};
+
+const timesliceMetricComparator = t.keyof(timesliceMetricComparatorMapping);
+
+const timesliceMetricBasicMetricWithField = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.keyof({
+      avg: true,
+      max: true,
+      min: true,
+      sum: true,
+      cardinality: true,
+      last_value: true,
+      std_deviation: true,
+    }),
+    field: t.string,
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
+const timesliceMetricDocCountMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('doc_count'),
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
+const timesliceMetricPercentileMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('percentile'),
+    field: t.string,
+    percentile: t.number,
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
+const timesliceMetricMetricDef = t.union([
+  timesliceMetricBasicMetricWithField,
+  timesliceMetricDocCountMetric,
+  timesliceMetricPercentileMetric,
+]);
+
+const timesliceMetricDef = t.type({
+  metrics: t.array(timesliceMetricMetricDef),
+  equation: t.string,
+  threshold: t.number,
+  comparator: timesliceMetricComparator,
 });
+const timesliceMetricIndicatorTypeSchema = t.literal('sli.metric.timeslice');
+const timesliceMetricIndicatorSchema = t.type({
+  type: timesliceMetricIndicatorTypeSchema,
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      metric: timesliceMetricDef,
+      timestampField: t.string,
+    }),
+    t.partial({
+      filter: t.string,
+    }),
+  ]),
+});
+
+const metricCustomDocCountMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('doc_count'),
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
+const metricCustomBasicMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('sum'),
+    field: t.string,
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
 const metricCustomMetricDef = t.type({
-  metrics: t.array(
-    t.intersection([
-      t.type({
-        name: t.string,
-        aggregation: metricCustomValidAggregations,
-        field: t.string,
-      }),
-      t.partial({
-        filter: t.string,
-      }),
-    ])
-  ),
+  metrics: t.array(t.union([metricCustomBasicMetric, metricCustomDocCountMetric])),
   equation: t.string,
 });
 const metricCustomIndicatorTypeSchema = t.literal('sli.metric.custom');
@@ -149,6 +233,7 @@ const indicatorTypesSchema = t.union([
   apmTransactionErrorRateIndicatorTypeSchema,
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorTypeSchema,
+  timesliceMetricIndicatorTypeSchema,
   histogramIndicatorTypeSchema,
 ]);
 
@@ -176,6 +261,7 @@ const indicatorSchema = t.union([
   apmTransactionErrorRateIndicatorSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  timesliceMetricIndicatorSchema,
   histogramIndicatorSchema,
 ]);
 
@@ -186,8 +272,17 @@ export {
   apmTransactionErrorRateIndicatorTypeSchema,
   kqlCustomIndicatorSchema,
   kqlCustomIndicatorTypeSchema,
-  metricCustomIndicatorTypeSchema,
   metricCustomIndicatorSchema,
+  metricCustomIndicatorTypeSchema,
+  metricCustomDocCountMetric,
+  metricCustomBasicMetric,
+  timesliceMetricComparatorMapping,
+  timesliceMetricIndicatorSchema,
+  timesliceMetricIndicatorTypeSchema,
+  timesliceMetricMetricDef,
+  timesliceMetricBasicMetricWithField,
+  timesliceMetricDocCountMetric,
+  timesliceMetricPercentileMetric,
   histogramIndicatorTypeSchema,
   histogramIndicatorSchema,
   indicatorSchema,

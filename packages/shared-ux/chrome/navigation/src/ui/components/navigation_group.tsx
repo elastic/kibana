@@ -6,31 +6,98 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useCallback, useMemo, useContext } from 'react';
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import React, { useMemo, Children, ReactNode, useEffect, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import deepEqual from 'react-fast-compare';
+import type {
+  AppDeepLinkId,
+  ChromeProjectNavigationNode,
+  ChromeNavLink,
+} from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../services';
-import { useInitNavNode } from '../hooks';
-import type { NodeProps, RegisterFunction } from '../types';
+import type { NodeProps } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';
 import { NavigationBucket, type Props as NavigationBucketProps } from './navigation_bucket';
+import { generateUniqueNodeId, getChildType } from '../../utils';
+import { initNavNode } from '../../navnode_utils';
+import { CloudLinks } from '../../cloud_links';
 
-interface Context {
-  register: RegisterFunction;
-}
+/**
+ * Handler to convert the JSX children of the NavigationGroup to the ChromeProjectNavigationNode
+ * interface. We do that by parsing the children with the React.Children func, read their prop
+ * and initiate the node objects.
+ */
+const jsxChildrenToNavigationNode = (
+  {
+    parentNodePath,
+    jsxChildren,
+    rootIndex,
+    treeDepth,
+  }: { parentNodePath: string; jsxChildren?: ReactNode; rootIndex: number; treeDepth: number },
+  { cloudLinks, deepLinks }: { cloudLinks: CloudLinks; deepLinks: Record<string, ChromeNavLink> }
+): ChromeProjectNavigationNode[] | undefined => {
+  if (!jsxChildren) return undefined;
 
-export const NavigationGroupContext = createContext<Context | undefined>(undefined);
+  const navigationNodes: ChromeProjectNavigationNode[] = [];
 
-export function useNavigationGroup<T extends boolean = true>(
-  throwIfNotFound: T = true as T
-): T extends true ? Context : Context | undefined {
-  const context = useContext(NavigationGroupContext);
-  if (!context && throwIfNotFound) {
-    throw new Error('useNavigationGroup must be used within a NavigationGroup provider');
-  }
-  return context as T extends true ? Context : Context | undefined;
-}
+  Children.forEach(jsxChildren, (child, index) => {
+    if (!React.isValidElement(child)) {
+      return;
+    }
+    const title =
+      typeof child.props.children === 'string' ? child.props.children : child.props.title;
+    const childNode = initNavNode(
+      { ...child.props, title, rootIndex, treeDepth, index, parentNodePath },
+      { cloudLinks, deepLinks }
+    );
+
+    if (!childNode) return;
+
+    const childType = getChildType(child);
+
+    if (childType !== 'group') {
+      if (childType === 'item') {
+        if (child.props.children && typeof child.props.children !== 'string') {
+          // Render the node item
+          childNode.renderItem = () => child.props.children;
+        }
+        navigationNodes.push(childNode);
+      } else {
+        // This is a custom JSX node, render it "as is" in the nav.
+        navigationNodes.push({
+          id: generateUniqueNodeId(),
+          title: '',
+          path: '',
+          renderItem: () => child,
+        });
+      }
+      return;
+    }
+
+    if (child.props?.children) {
+      navigationNodes.push({
+        ...childNode,
+        // Recursively add all the children of the group
+        children: jsxChildrenToNavigationNode(
+          {
+            parentNodePath: childNode.path,
+            jsxChildren: child.props.children,
+            rootIndex,
+            treeDepth: treeDepth + 1,
+          },
+          { cloudLinks, deepLinks }
+        ),
+      });
+      return;
+    }
+
+    navigationNodes.push(childNode);
+  });
+
+  return navigationNodes.length > 0 ? navigationNodes : undefined;
+};
 
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -38,7 +105,6 @@ export interface Props<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
-  defaultIsCollapsed?: boolean;
 }
 
 function NavigationGroupInternalComp<
@@ -46,66 +112,60 @@ function NavigationGroupInternalComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
-  const { cloudLinks } = useNavigationServices();
-  const navigationContext = useNavigation();
+  const { cloudLinks, deepLinks$ } = useNavigationServices();
+  const { register } = useNavigation();
+  const deepLinks = useObservable(deepLinks$, {});
+  const { rootIndex = 0 } = props;
 
-  const { children, node } = useMemo(() => {
-    const { children: _children, defaultIsCollapsed, ...rest } = props;
-    return {
-      children: _children,
-      node: {
-        ...rest,
-        isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
-      },
-    };
-  }, [props]);
+  const navNodeRef = useRef<ChromeProjectNavigationNode>();
+  const childrenNodesRef = useRef<ChromeProjectNavigationNode[]>();
 
-  const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node, { cloudLinks });
+  const navNode = useMemo<ChromeProjectNavigationNode | null>(() => {
+    const _navNode = initNavNode(props, { cloudLinks, deepLinks });
 
-  const unstyled = props.unstyled ?? navigationContext.unstyled;
+    if (!_navNode) return null;
 
-  const renderContent = useCallback(() => {
-    if (!path || !navNode) {
-      return null;
-    }
-
-    if (unstyled) {
-      // No UI for unstyled groups
-      return children;
-    }
-
-    // Each "top level" group is rendered using the EuiCollapsibleNavGroup component
-    // inside the NavigationSectionUI. That's how we get the "collapsible" behavior.
-    const isTopLevel = path && path.length === 1;
-
-    return (
-      <>
-        {isTopLevel && (
-          <NavigationSectionUI navNode={navNode} items={Object.values(childrenNodes)} />
-        )}
-        {/* We render the children so they mount and can register themselves but
-        visually they don't appear here in the DOM. They are rendered inside the
-        <EuiCollapsibleNavItem />  "items" prop (see <NavigationSectionUI />) */}
-        {children}
-      </>
+    const childrenNodes = jsxChildrenToNavigationNode(
+      { parentNodePath: _navNode.path, jsxChildren: props.children, rootIndex, treeDepth: 1 },
+      { cloudLinks, deepLinks }
     );
-  }, [navNode, path, childrenNodes, children, unstyled]);
 
-  const contextValue = useMemo(() => {
-    return {
-      register: registerChildNode,
+    const childrenChanged = deepEqual(childrenNodes, childrenNodesRef.current) === false;
+    if (childrenChanged) {
+      childrenNodesRef.current = childrenNodes;
+    }
+
+    const nextValue = {
+      ..._navNode,
+      children: childrenNodesRef.current,
     };
-  }, [registerChildNode]);
 
-  if (!navNode) {
+    const hasChanged = deepEqual(nextValue, navNodeRef.current) === false;
+    if (hasChanged) {
+      navNodeRef.current = nextValue;
+    }
+
+    if (navNodeRef.current === undefined) {
+      // Adding this check for TS purpose, it should never be undefined.
+      throw new Error('Navnode ref is undefined.');
+    }
+
+    return navNodeRef.current;
+  }, [props, cloudLinks, deepLinks, rootIndex]);
+
+  /** Register when mounting and whenever the internal nav node changes */
+  useEffect(() => {
+    if (navNode) {
+      return register(navNode, rootIndex);
+    }
+    return undefined;
+  }, [register, navNode, rootIndex]);
+
+  if (!navNode || navNode.sideNavStatus === 'hidden') {
     return null;
   }
 
-  return (
-    <NavigationGroupContext.Provider value={contextValue}>
-      {renderContent()}
-    </NavigationGroupContext.Provider>
-  );
+  return <NavigationSectionUI navNode={navNode} />;
 }
 
 function NavigationGroupComp<

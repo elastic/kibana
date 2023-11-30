@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
 import type { LicenseService } from '../../../../../common/license';
-import { minimumLicenseForSuppression } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import * as i18n from './translations';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 
 interface TechnicalPreviewBadgeProps {
   label: string;
@@ -24,7 +24,7 @@ export const AlertSuppressionTechnicalPreviewBadge = ({
 }: TechnicalPreviewBadgeProps) => (
   <>
     <TechnicalPreviewBadge label={label} />
-    {!license.isAtLeast(minimumLicenseForSuppression) && (
+    {!license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) && (
       <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
         <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
       </EuiToolTip>

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { getKqlFilter } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { SyntheticsServerSetup } from '../../../types';
 
 type Payload = Array<{
   id: string;
@@ -33,28 +35,32 @@ const aggs = {
   },
 };
 
-export const getLocationMonitors: SyntheticsRestApiRouteFactory = () => ({
+export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
 
   validate: {},
-  handler: async ({ savedObjectsClient: soClient }): Promise<IKibanaResponse<Payload>> => {
-    const locationMonitors = await soClient?.find<unknown, ExpectedResponse>({
-      type: syntheticsMonitorType,
-      perPage: 0,
-      aggs,
-    });
-
-    const payload =
-      locationMonitors.aggregations?.locations.buckets.map(({ key: id, doc_count: count }) => ({
-        id,
-        count,
-      })) ?? [];
-
-    return {
-      options: {},
-      payload,
-      status: 200,
-    };
+  handler: async ({ server }) => {
+    return await getMonitorsByLocation(server);
   },
 });
+
+export const getMonitorsByLocation = async (server: SyntheticsServerSetup, locationId?: string) => {
+  const soClient = server.coreStart.savedObjects.createInternalRepository();
+  const locationFilter = getKqlFilter({ field: 'locations.id', values: locationId });
+
+  const locationMonitors = await soClient.find<unknown, ExpectedResponse>({
+    type: syntheticsMonitorType,
+    perPage: 0,
+    aggs,
+    filter: locationFilter,
+    namespaces: [ALL_SPACES_ID],
+  });
+
+  return (
+    locationMonitors.aggregations?.locations.buckets.map(({ key: id, doc_count: count }) => ({
+      id,
+      count,
+    })) ?? []
+  );
+};

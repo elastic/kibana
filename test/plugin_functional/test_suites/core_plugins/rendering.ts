@@ -238,6 +238,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud_integrations.full_story.org_id (any)',
         // No PII. Just the list of event types we want to forward to FullStory.
         'xpack.cloud_integrations.full_story.eventTypesAllowlist (array)',
+        'xpack.cloud_integrations.full_story.pageVarsDebounceTime (duration)',
         'xpack.cloud_integrations.gain_sight.org_id (any)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
@@ -249,6 +250,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
         'xpack.cloud.serverless.project_name (string)',
+        'xpack.cloud.serverless.project_type (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
@@ -266,27 +268,23 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableIndexActions (any)',
         'xpack.index_management.enableLegacyTemplates (any)',
         'xpack.index_management.enableIndexStats (any)',
+        'xpack.index_management.editableIndexSettings (any)',
+        'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
-         * xpack.infra.featureFlags.customThresholdAlertsEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
-         */
-        'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
-        /**
-         * xpack.infra.featureFlags.logsUIEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
-         */
-        'xpack.infra.featureFlags.logsUIEnabled (any)',
-        /**
-         * xpack.infra.featureFlags.metricsExplorerEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
+         * Feature flags bellow are conditional based on traditional/serverless offering
+         * and will all resolve to xpack.infra.featureFlags.* (boolean)
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
-        /**
-         * xpack.infra.featureFlags.osqueryEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
-         */
+        'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
         'xpack.infra.featureFlags.osqueryEnabled (any)',
+        'xpack.infra.featureFlags.inventoryThresholdAlertRuleEnabled (any)',
+        'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
+        'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
+        'xpack.infra.featureFlags.logsUIEnabled (any)',
+        'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
+        'xpack.infra.featureFlags.profilingEnabled (any)',
+
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
@@ -316,6 +314,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
+        'xpack.securitySolution.offeringSettings (record)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
         'xpack.stack_connectors.enableExperimental (array)',

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { Observable } from 'rxjs';
 
-export type ContractComponentName = 'getStarted' | 'dashboardsLandingCallout';
-
-export type ContractComponents = Partial<Record<ContractComponentName, React.ComponentType>>;
+export type ContractComponents = Partial<{
+  GetStarted: React.ComponentType<{}>;
+  DashboardsLandingCallout: React.ComponentType<{}>;
+}>;
 
 export type SetComponents = (components: ContractComponents) => void;
-export type GetComponent$ = (
-  name: ContractComponentName
-) => Observable<React.ComponentType | undefined>;
+export type GetComponents$ = () => Observable<ContractComponents>;
 
 export class ContractComponentsService {
   private components$: BehaviorSubject<ContractComponents>;
@@ -28,6 +27,5 @@ export class ContractComponentsService {
     this.components$.next(components);
   };
 
-  public getComponent$: GetComponent$ = (name) =>
-    this.components$.pipe(map((components) => components[name]));
+  public getComponents$ = () => this.components$.asObservable();
 }

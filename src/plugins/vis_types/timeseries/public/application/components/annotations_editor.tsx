@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -28,7 +28,7 @@ interface AnnotationsEditorProps {
 }
 
 export const newAnnotation = (defaultIndexPattern?: DataView) => () => ({
-  id: uuidv1(),
+  id: uuidv4(),
   color: '#F00',
   index_pattern:
     defaultIndexPattern && defaultIndexPattern.id ? { id: defaultIndexPattern.id } : '',

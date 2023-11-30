@@ -42,10 +42,6 @@
       }
     }
   },
-  "metrics-data-source": {
-    "dynamic": false,
-    "properties": {}
-  },
   "url": {
     "dynamic": false,
     "properties": {
@@ -1065,9 +1061,6 @@
   "links": {
     "dynamic": false,
     "properties": {
-      "id": {
-        "type": "text"
-      },
       "title": {
         "type": "text"
       },
@@ -1476,6 +1469,10 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
@@ -1648,6 +1645,9 @@
       "overrides": {
         "type": "flattened",
         "index": false
+      },
+      "keep_monitoring_alive": {
+        "type": "boolean"
       }
     }
   },
@@ -1677,6 +1677,10 @@
         "index": false
       },
       "ca_trusted_fingerprint": {
+        "type": "keyword",
+        "index": false
+      },
+      "service_token": {
         "type": "keyword",
         "index": false
       },
@@ -1816,6 +1820,40 @@
       },
       "channel_buffer_size": {
         "type": "integer"
+      },
+      "secrets": {
+        "dynamic": false,
+        "properties": {
+          "password": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "ssl": {
+            "dynamic": false,
+            "properties": {
+              "key": {
+                "dynamic": false,
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "service_token": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -1928,6 +1966,10 @@
             "type": "boolean"
           }
         }
+      },
+      "latest_install_failed_attempts": {
+        "type": "object",
+        "enabled": false
       },
       "installed_kibana": {
         "dynamic": false,
@@ -2138,6 +2180,9 @@
       "interval": {
         "type": "keyword"
       },
+      "timeout": {
+        "type": "short"
+      },
       "ecs_mapping": {
         "dynamic": false,
         "properties": {}
@@ -2186,6 +2231,9 @@
           "interval": {
             "type": "text"
           },
+          "timeout": {
+            "type": "short"
+          },
           "platform": {
             "type": "keyword"
           },
@@ -2227,6 +2275,9 @@
           },
           "interval": {
             "type": "text"
+          },
+          "timeout": {
+            "type": "short"
           },
           "platform": {
             "type": "keyword"
@@ -2450,6 +2501,14 @@
       },
       "datafeeds": {
         "type": "object"
+      },
+      "tags": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
@@ -2594,6 +2653,62 @@
     }
   },
   "synthetics-param": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "infrastructure-ui-source": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "inventory-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "metrics-explorer-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "upgrade-assistant-reindex-operation": {
+    "dynamic": false,
+    "properties": {
+      "indexName": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "integer"
+      }
+    }
+  },
+  "upgrade-assistant-ml-upgrade-operation": {
+    "dynamic": false,
+    "properties": {
+      "snapshotId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  },
+  "monitoring-telemetry": {
+    "properties": {
+      "reportedClusterUuids": {
+        "type": "keyword"
+      }
+    }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
   },
@@ -3059,50 +3174,6 @@
       }
     }
   },
-  "infrastructure-ui-source": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "inventory-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "metrics-explorer-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "upgrade-assistant-reindex-operation": {
-    "dynamic": false,
-    "properties": {
-      "indexName": {
-        "type": "keyword"
-      },
-      "status": {
-        "type": "integer"
-      }
-    }
-  },
-  "upgrade-assistant-ml-upgrade-operation": {
-    "dynamic": false,
-    "properties": {
-      "snapshotId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      }
-    }
-  },
-  "monitoring-telemetry": {
-    "properties": {
-      "reportedClusterUuids": {
-        "type": "keyword"
-      }
-    }
-  },
   "apm-telemetry": {
     "dynamic": false,
     "properties": {}
@@ -3146,17 +3217,5 @@
         "type": "boolean"
       }
     }
-  },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
   }
 }

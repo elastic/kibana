@@ -13,12 +13,15 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 import type { SloEmbeddableInput } from './types';
 
 export type SloOverviewEmbeddableFactory = EmbeddableFactory;
-export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
+export class SloOverviewEmbeddableFactoryDefinition
+  implements EmbeddableFactoryDefinition, IProvidesPanelPlacementSettings<SloEmbeddableInput>
+{
   public readonly type = SLO_EMBEDDABLE;
 
   constructor(
@@ -41,6 +44,15 @@ export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactory
       return Promise.reject();
     }
   }
+
+  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
+    SloEmbeddableInput,
+    unknown
+  >['getPanelPlacementSettings'] = () => {
+    const width = 8;
+    const height = 7;
+    return { width, height, strategy: 'placeAtTop' };
+  };
 
   public async create(initialInput: SloEmbeddableInput, parent?: IContainer) {
     try {

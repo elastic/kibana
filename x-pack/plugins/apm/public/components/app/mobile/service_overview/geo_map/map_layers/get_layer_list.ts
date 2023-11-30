@@ -10,19 +10,21 @@ import { getHttpRequestsLayerList } from './get_http_requests_map_layer_list';
 import { getSessionMapLayerList } from './get_session_map_layer_list';
 import { MapTypes } from '../../../../../../../common/mobile/constants';
 
-export async function getLayerList({
+export function getLayerList({
   selectedMap,
   maps,
+  dataViewId,
 }: {
   selectedMap: MapTypes;
-  maps?: MapsStartApi;
+  maps: MapsStartApi | undefined;
+  dataViewId: string;
 }): Promise<LayerDescriptor[]> {
   switch (selectedMap) {
     case MapTypes.Http:
-      return await getHttpRequestsLayerList(maps);
+      return getHttpRequestsLayerList(maps, dataViewId);
     case MapTypes.Session:
-      return await getSessionMapLayerList(maps);
+      return getSessionMapLayerList(maps, dataViewId);
     default:
-      return await getHttpRequestsLayerList(maps);
+      return getHttpRequestsLayerList(maps, dataViewId);
   }
 }

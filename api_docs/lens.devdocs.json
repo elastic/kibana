@@ -360,7 +360,7 @@
               "\nGets the Lens embeddable's datasource and visualization states\nupdates the embeddable input"
             ],
             "signature": [
-              "(datasourceState: unknown, visualizationState: unknown) => Promise<void>"
+              "(datasourceState: unknown, visualizationState: unknown, visualizationType?: string | undefined) => Promise<void>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -390,6 +390,67 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateVisualization.$3",
+                "type": "string",
+                "tags": [],
+                "label": "visualizationType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.updateSuggestion",
+            "type": "Function",
+            "tags": [],
+            "label": "updateSuggestion",
+            "description": [],
+            "signature": [
+              "(attrs: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensSavedObjectAttributes",
+                "text": "LensSavedObjectAttributes"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateSuggestion.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attrs",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.LensSavedObjectAttributes",
+                    "text": "LensSavedObjectAttributes"
+                  }
                 ],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
@@ -1401,7 +1462,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"bar\" | \"line\" | \"area\""
+              "\"area\" | \"line\" | \"bar\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -2862,7 +2923,7 @@
             "label": "autoScaleMetricAlignment",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -2993,7 +3054,7 @@
             "label": "textAlign",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -3036,7 +3097,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"top\" | \"left\" | \"right\" | \"bottom\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -3084,7 +3145,7 @@
               "\nHorizontal Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"left\" | \"right\" | undefined"
+              "\"right\" | \"left\" | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -5131,6 +5192,20 @@
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SuggestionRequest.datasourceId",
+            "type": "string",
+            "tags": [],
+            "label": "datasourceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5218,6 +5293,20 @@
             ],
             "signature": [
               "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.TableSuggestion.notAssignedMetrics",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "notAssignedMetrics",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6375,7 +6464,7 @@
             "label": "getRemoveOperation",
             "description": [],
             "signature": [
-              "((state: T, layerId: string) => \"remove\" | \"clear\") | undefined"
+              "((state: T, layerId: string) => \"clear\" | \"remove\") | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -8708,7 +8797,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -9035,7 +9124,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -9993,7 +10082,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"above\" | \"below\" | \"auto\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -10469,7 +10558,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -10650,7 +10739,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; base?: number | undefined; actual?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -10862,7 +10951,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"bottom\" | \"auto\""
+          "\"right\" | \"left\" | \"bottom\" | \"auto\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -11141,7 +11230,7 @@
             "label": "autoScaleMetricAlignment",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -11272,7 +11361,7 @@
             "label": "textAlign",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,

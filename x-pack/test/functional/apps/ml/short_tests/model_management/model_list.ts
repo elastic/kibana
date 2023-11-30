@@ -17,7 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
     id: model.name,
   }));
 
-  describe('trained models', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165084
+  describe.skip('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
     const builtInModelData = {
@@ -67,6 +68,25 @@ export default function ({ getService }: FtrProviderContext) {
       },
     };
 
+    const modelWithPipelineAndDestIndex = {
+      modelId: 'dfa_regression_model_n_1',
+      description: '',
+      modelTypes: ['regression', 'tree_ensemble'],
+    };
+    const modelWithPipelineAndDestIndexExpectedValues = {
+      dataViewTitle: `user-index_${modelWithPipelineAndDestIndex.modelId}`,
+      index: `user-index_${modelWithPipelineAndDestIndex.modelId}`,
+      name: `ml-inference-${modelWithPipelineAndDestIndex.modelId}`,
+      description: '',
+      inferenceConfig: {
+        regression: {
+          results_field: 'predicted_value',
+          num_top_feature_importance_values: 0,
+        },
+      },
+      fieldMap: {},
+    };
+
     before(async () => {
       for (const model of trainedModels) {
         await ml.api.importTrainedModel(model.id, model.name);
@@ -77,17 +97,32 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
       await ml.api.assureMlStatsIndexExists();
+
+      // Create ingest pipeline and destination index that's tied to model
+      await ml.api.createIngestPipeline(modelWithPipelineAndDestIndex.modelId);
+      await ml.api.createIndex(modelWithPipelineAndDestIndexExpectedValues.index, undefined, {
+        index: { default_pipeline: `pipeline_${modelWithPipelineAndDestIndex.modelId}` },
+      });
     });
 
     after(async () => {
       await ml.api.stopAllTrainedModelDeploymentsES();
       await ml.api.deleteAllTrainedModelsES();
+
+      await ml.api.cleanMlIndices();
+      await ml.api.deleteIndices(modelWithPipelineAndDestIndexExpectedValues.index);
+
       await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
       await ml.api.deleteIngestPipeline(
         modelWithoutPipelineDataExpectedValues.duplicateName,
         false
       );
-      await ml.api.cleanMlIndices();
+
+      // Need to delete index before ingest pipeline, else it will give error
+      await ml.api.deleteIngestPipeline(modelWithPipelineAndDestIndex.modelId);
+      await ml.testResources.deleteDataViewByTitle(
+        modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
+      );
     });
 
     describe('for ML user with read-only access', () => {
@@ -157,21 +192,19 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
-          'should not show collapsed actions menu for the model in the table'
+          'should show collapsed actions menu for the model in the table'
         );
         await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
           modelWithoutPipelineData.modelId,
-          false
+          true
         );
         await ml.testExecution.logTestStep('should show deploy action for the model in the table');
-        await ml.trainedModelsTable.assertModelDeployActionButtonExists(
+        await ml.trainedModelsTable.assertModelDeployActionButtonEnabled(
           modelWithoutPipelineData.modelId,
           true
         );
         await ml.testExecution.logTestStep('should open the deploy model flyout');
-        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
-          modelWithoutPipelineData.modelId
-        );
+        await ml.trainedModelsTable.clickDeployAction(modelWithoutPipelineData.modelId);
         await ml.testExecution.logTestStep('should complete the deploy model Details step');
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails({
           name: modelWithoutPipelineDataExpectedValues.name,
@@ -216,17 +249,15 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
           modelWithoutPipelineData.modelId,
-          false
+          true
         );
         await ml.testExecution.logTestStep('should show deploy action for the model in the table');
         await ml.trainedModelsTable.assertModelDeployActionButtonExists(
           modelWithoutPipelineData.modelId,
-          true
+          false
         );
         await ml.testExecution.logTestStep('should open the deploy model flyout');
-        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
-          modelWithoutPipelineData.modelId
-        );
+        await ml.trainedModelsTable.clickDeployAction(modelWithoutPipelineData.modelId);
         await ml.testExecution.logTestStep('should complete the deploy model Details step');
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails(
           {
@@ -387,7 +418,44 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      describe('with imported models', function () {
+      it('navigates to data drift', async () => {
+        await ml.testExecution.logTestStep('should show the model map in the expanded row');
+        await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineAndDestIndex.modelId);
+        await ml.trainedModelsTable.assertModelsMapTabContent();
+
+        await ml.testExecution.logTestStep(
+          'should navigate to data drift index pattern creation page'
+        );
+
+        await ml.trainedModelsTable.assertAnalyzeDataDriftActionButtonEnabled(
+          modelWithPipelineAndDestIndex.modelId,
+          true
+        );
+        await ml.trainedModelsTable.clickAnalyzeDataDriftActionButton(
+          modelWithPipelineAndDestIndex.modelId
+        );
+
+        await ml.testExecution.logTestStep(`sets index pattern for reference data set`);
+        await ml.dataDrift.setIndexPatternInput(
+          'reference',
+          `${modelWithPipelineAndDestIndexExpectedValues.index}*`
+        );
+        await ml.dataDrift.assertIndexPatternInput(
+          'comparison',
+          modelWithPipelineAndDestIndexExpectedValues.index
+        );
+
+        await ml.testExecution.logTestStep(`redirects to data drift page`);
+        await ml.trainedModelsTable.clickAnalyzeDataDriftWithoutSaving();
+        await ml.navigation.navigateToTrainedModels();
+      });
+
+      // FLAKY: https://github.com/elastic/kibana/issues/168899
+      describe.skip('with imported models', function () {
+        before(async () => {
+          await ml.navigation.navigateToTrainedModels();
+        });
+
         for (const model of trainedModels) {
           it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
             await ml.trainedModelsTable.ensureRowIsExpanded(model.id);

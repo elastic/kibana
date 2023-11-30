@@ -16,15 +16,14 @@ import { i18n } from '@kbn/i18n';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
-  RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { ConfigSchema } from '..';
 import { customLogsRoutes } from '../components/app/custom_logs';
 import { systemLogsRoutes } from '../components/app/system_logs';
@@ -36,16 +35,6 @@ import {
 import { baseRoutes, routes } from '../routes';
 import { CustomLogs } from '../routes/templates/custom_logs';
 import { SystemLogs } from '../routes/templates/system_logs';
-
-export type BreadcrumbTitle<
-  T extends { [K in keyof T]?: string | undefined } = {}
-> = string | ((props: RouteComponentProps<T>) => string) | null;
-
-export interface RouteDefinition<
-  T extends { [K in keyof T]?: string | undefined } = any
-> extends RouteProps {
-  breadcrumb: BreadcrumbTitle<T>;
-}
 
 export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
@@ -157,45 +146,52 @@ export function ObservabilityOnboardingAppRoot({
   const i18nCore = core.i18n;
   const plugins = { ...deps };
 
+  const renderFeedbackLinkAsPortal = !config.serverless.enabled;
+
   return (
-    <RedirectAppLinks
-      className={APP_WRAPPER_CLASS}
-      application={core.application}
-    >
-      <KibanaContextProvider
-        services={{
-          ...core,
-          ...plugins,
-          observability,
-          data,
-          config,
+    <div className={APP_WRAPPER_CLASS}>
+      <RedirectAppLinks
+        coreStart={{
+          application: core.application,
         }}
       >
-        <KibanaThemeProvider
-          theme$={theme$}
-          modify={{
-            breakpoint: {
-              xxl: 1600,
-              xxxl: 2000,
-            },
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+            observability,
+            data,
+            config,
           }}
         >
-          <i18nCore.Context>
-            <Router history={history}>
-              <EuiErrorBoundary>
-                <HeaderMenuPortal
-                  setHeaderActionMenu={setHeaderActionMenu}
-                  theme$={theme$}
-                >
-                  <ObservabilityOnboardingHeaderActionMenu />
-                </HeaderMenuPortal>
-                <ObservabilityOnboardingApp />
-              </EuiErrorBoundary>
-            </Router>
-          </i18nCore.Context>
-        </KibanaThemeProvider>
-      </KibanaContextProvider>
-    </RedirectAppLinks>
+          <KibanaThemeProvider
+            theme$={theme$}
+            modify={{
+              breakpoint: {
+                xxl: 1600,
+                xxxl: 2000,
+              },
+            }}
+          >
+            <i18nCore.Context>
+              <Router history={history}>
+                <EuiErrorBoundary>
+                  {renderFeedbackLinkAsPortal && (
+                    <HeaderMenuPortal
+                      setHeaderActionMenu={setHeaderActionMenu}
+                      theme$={theme$}
+                    >
+                      <ObservabilityOnboardingHeaderActionMenu />
+                    </HeaderMenuPortal>
+                  )}
+                  <ObservabilityOnboardingApp />
+                </EuiErrorBoundary>
+              </Router>
+            </i18nCore.Context>
+          </KibanaThemeProvider>
+        </KibanaContextProvider>
+      </RedirectAppLinks>
+    </div>
   );
 }
 

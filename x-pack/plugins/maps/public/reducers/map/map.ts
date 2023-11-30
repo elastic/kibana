@@ -13,7 +13,6 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   ADD_LAYER,
-  SET_LAYER_ERROR_STATUS,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_LAYER_PROP,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
@@ -176,25 +175,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           [action.settingKey]: action.settingValue,
         },
       };
-    case SET_LAYER_ERROR_STATUS:
-      const { layerList } = state;
-      const layerIdx = getLayerIndex(layerList, action.layerId);
-      if (layerIdx === -1) {
-        return state;
-      }
-
-      return {
-        ...state,
-        layerList: [
-          ...layerList.slice(0, layerIdx),
-          {
-            ...layerList[layerIdx],
-            __isInErrorState: action.isInErrorState,
-            __errorMessage: action.errorMessage,
-          },
-          ...layerList.slice(layerIdx + 1),
-        ],
-      };
     case UPDATE_SOURCE_DATA_REQUEST:
       return updateSourceDataRequest(state, action.layerId, action.newData);
     case LAYER_DATA_LOAD_STARTED:
@@ -206,7 +186,15 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         action.meta
       );
     case LAYER_DATA_LOAD_ERROR:
-      return stopDataRequest(state, action.layerId, action.dataId, action.requestToken);
+      return stopDataRequest(
+        state,
+        action.layerId,
+        action.dataId,
+        action.requestToken,
+        undefined, // responseMeta meta
+        undefined, // response data
+        action.error
+      );
     case LAYER_DATA_LOAD_ENDED:
       return stopDataRequest(
         state,

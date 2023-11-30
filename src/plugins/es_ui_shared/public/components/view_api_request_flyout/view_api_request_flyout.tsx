@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
 import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;
 interface ViewApiRequestFlyoutProps {
@@ -133,13 +133,15 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
 export const ViewApiRequestFlyout = (props: ViewApiRequestFlyoutProps) => {
   if (props.application) {
     return (
-      <RedirectAppLinks
-        application={props.application}
-        className={APP_WRAPPER_CLASS}
-        data-test-subj="apiRequestFlyoutRedirectWrapper"
-      >
-        <ApiRequestFlyout {...props} />
-      </RedirectAppLinks>
+      <div className={APP_WRAPPER_CLASS} data-test-subj="apiRequestFlyoutRedirectWrapper">
+        <RedirectAppLinks
+          coreStart={{
+            application: props.application,
+          }}
+        >
+          <ApiRequestFlyout {...props} />
+        </RedirectAppLinks>
+      </div>
     );
   }
 

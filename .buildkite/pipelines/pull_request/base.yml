@@ -20,7 +20,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/build_api_docs.sh
-    label: 'Build API Docs'
+    label: 'Check Types and Build API Docs'
     agents:
       queue: n2-4-spot
     key: build_api_docs
@@ -63,7 +63,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
@@ -75,7 +75,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 4
     retry:
       automatic:
         - exit_status: '*'
@@ -87,7 +87,31 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
+    label: 'Serverless Rule Management - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
+    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
@@ -117,6 +141,30 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
+    label: 'Rule Management - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
+    label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
@@ -135,7 +183,7 @@ steps:
       queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 10
     retry:
       automatic:
         - exit_status: '*'
@@ -146,8 +194,8 @@ steps:
     agents:
       queue: n2-4-virt
     depends_on: build
-    timeout_in_minutes: 120
-    parallelism: 2
+    timeout_in_minutes: 60
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
@@ -158,7 +206,7 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 120
+    timeout_in_minutes: 60
     parallelism: 2
     retry:
       automatic:
@@ -170,58 +218,24 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 50
+    timeout_in_minutes: 60
     parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - 'target/kibana-osquery/**/*'
-
-  - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
-    label: 'Security Solution Cypress tests, burning changed specs'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 1
-    retry:
-      automatic: false
-    soft_fail: true
-
-  - command: .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
-    label: 'Security Solution OpenAPI codegen'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
-    parallelism: 1
-
-  - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
-    label: 'Osquery Cypress Tests, burning changed specs'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 50
-    soft_fail: true
-    retry:
-      automatic: false
-    artifact_paths:
-      - 'target/kibana-osquery/**/*'
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Serverless Osquery Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 50
+    timeout_in_minutes: 60
     parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - 'target/kibana-osquery/**/*'
 
   # status_exception: Native role management is not enabled in this Elasticsearch instance
   # - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
@@ -261,16 +275,6 @@ steps:
     label: 'Checks'
     agents:
       queue: n2-2-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/check_types.sh
-    label: 'Check Types'
-    agents:
-      queue: n2-16-spot
     timeout_in_minutes: 60
     retry:
       automatic:

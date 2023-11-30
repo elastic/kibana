@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: Execution Metrics Schema
+  version: not applicable
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleExecutionMetrics:
+      type: object
+      properties:
+        total_search_duration_ms:
+          description: Total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response
+          type: integer
+          minimum: 0
+        total_indexing_duration_ms:
+          description: Total time spent indexing documents during current rule execution cycle
+          type: integer
+          minimum: 0
+        total_enrichment_duration_ms:
+          description: Total time spent enriching documents during current rule execution cycle
+          type: integer
+          minimum: 0
+        execution_gap_duration_s:
+          description: Duration in seconds of execution gap
+          type: integer
+          minimum: 0

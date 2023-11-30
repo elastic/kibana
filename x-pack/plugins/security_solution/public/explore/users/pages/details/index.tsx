@@ -103,7 +103,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
@@ -175,7 +176,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

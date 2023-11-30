@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Alert documents', function () {
     // Timeout of 360000ms exceeded
-    this.tags(['skipOnMKI']);
+    this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;
@@ -164,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: 'all',
           searchType: 'esQuery',
         },
-        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_PRODUCER]: hits1[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],

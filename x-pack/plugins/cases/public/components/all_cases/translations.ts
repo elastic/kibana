@@ -176,3 +176,30 @@ export const NO_ATTACHMENTS_ADDED = i18n.translate(
     defaultMessage: 'No attachments added to the case',
   }
 );
+
+export const COLUMNS = i18n.translate('xpack.cases.allCasesView.columnSelection', {
+  defaultMessage: 'Columns',
+});
+
+export const SHOW_ALL = i18n.translate('xpack.cases.allCasesView.columnSelectionShowAll', {
+  defaultMessage: 'Show All',
+});
+
+export const HIDE_ALL = i18n.translate('xpack.cases.allCasesView.columnSelectionHideAll', {
+  defaultMessage: 'Hide All',
+});
+
+export const SEARCH = i18n.translate('xpack.cases.allCasesView.columnSelectionSearch', {
+  defaultMessage: 'Search',
+});
+
+export const SEARCH_COLUMNS = i18n.translate(
+  'xpack.cases.allCasesView.columnSelectionSearchColumns',
+  {
+    defaultMessage: 'Search Columns',
+  }
+);
+
+export const DRAG_HANDLE = i18n.translate('xpack.cases.allCasesView.columnSelectionDragHandle', {
+  defaultMessage: 'Drag Handle',
+});

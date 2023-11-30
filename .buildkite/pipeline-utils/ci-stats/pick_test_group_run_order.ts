@@ -226,6 +226,10 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  const FTR_EXTRA_ARGS: Record<string, string> = process.env.FTR_EXTRA_ARGS
+    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
+    : {};
+
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
 
   const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
@@ -269,7 +273,12 @@ export async function pickTestGroupRunOrder() {
           ]
         : []),
       // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
-      ...(!prNumber && pipelineSlug !== 'kibana-on-merge'
+      // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
+      // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
+      // of too many ftr groups instead of potential timeouts.
+      ...(!prNumber &&
+      pipelineSlug !== 'kibana-on-merge' &&
+      pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
         ? [
             {
               branch: ownBranch,
@@ -464,6 +473,7 @@ export async function pickTestGroupRunOrder() {
                   },
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
+                    ...FTR_EXTRA_ARGS,
                   },
                   retry: {
                     automatic: [

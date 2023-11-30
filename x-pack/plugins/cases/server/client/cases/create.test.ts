@@ -51,7 +51,7 @@ describe('create', () => {
 
   describe('Assignees', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -108,11 +108,19 @@ describe('create', () => {
         `Failed to create case: Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
       );
     });
+
+    it('should throw if the user does not have the correct license', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+      await expect(create(theCase, clientArgs, casesClientMock)).rejects.toThrow(
+        `Failed to create case: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license`
+      );
+    });
   });
 
   describe('Attributes', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -130,7 +138,7 @@ describe('create', () => {
 
   describe('title', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -173,7 +181,7 @@ describe('create', () => {
     it('should trim title', async () => {
       await create({ ...theCase, title: 'title with spaces      ' }, clientArgs, casesClientMock);
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -199,7 +207,7 @@ describe('create', () => {
 
   describe('description', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -250,7 +258,7 @@ describe('create', () => {
         casesClientMock
       );
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -276,7 +284,7 @@ describe('create', () => {
 
   describe('tags', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -329,7 +337,7 @@ describe('create', () => {
     it('should trim tags', async () => {
       await create({ ...theCase, tags: ['pepsi     ', 'coke'] }, clientArgs, casesClientMock);
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -355,7 +363,7 @@ describe('create', () => {
 
   describe('Category', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -396,7 +404,7 @@ describe('create', () => {
     it('should trim category', async () => {
       await create({ ...theCase, category: 'reporting       ' }, clientArgs, casesClientMock);
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -421,7 +429,7 @@ describe('create', () => {
 
   describe('Custom Fields', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     const casesClient = createCasesClientMock();
     casesClient.configure.get = jest.fn().mockResolvedValue([
@@ -448,7 +456,7 @@ describe('create', () => {
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       },
       {
         key: 'second_key',
@@ -473,7 +481,7 @@ describe('create', () => {
         )
       ).resolves.not.toThrow();
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -517,7 +525,7 @@ describe('create', () => {
       ]);
       await expect(create({ ...theCase }, clientArgs, casesClient)).resolves.not.toThrow();
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -550,7 +558,7 @@ describe('create', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'missing field 1',
               required: true,
             },
             {
@@ -566,7 +574,7 @@ describe('create', () => {
       await expect(
         create({ ...theCase }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: first_key"`
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\""`
       );
     });
 
@@ -578,13 +586,13 @@ describe('create', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'missing field 1',
               required: true,
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
+              label: 'missing field 2',
               required: true,
             },
           ],
@@ -612,7 +620,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: first_key,second_key"`
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
       );
     });
 
@@ -640,7 +648,7 @@ describe('create', () => {
               {
                 key: 'duplicated_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['this is a text field value', 'this is second'],
+                value: 'this is a text field value',
               },
               {
                 key: 'duplicated_key',
@@ -687,7 +695,7 @@ describe('create', () => {
               {
                 key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['this is a text field value', 'this is second'],
+                value: 'this is a text field value',
               },
             ],
           },
@@ -695,7 +703,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: first_key"`
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\""`
       );
     });
 
@@ -713,7 +721,7 @@ describe('create', () => {
               {
                 key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['foobar'],
+                value: 'foobar',
               },
             ],
           },
@@ -742,7 +750,7 @@ describe('create', () => {
         {
           key: 'first_customField_key',
           type: CustomFieldTypes.TEXT,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
         {
           key: 'second_customField_key',
@@ -758,7 +766,7 @@ describe('create', () => {
 
     const casesClient = createCasesClientMock();
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     casesClient.configure.get = jest.fn().mockResolvedValue([
       {
@@ -784,26 +792,28 @@ describe('create', () => {
       await create(caseWithOnlyRequiredFields, clientArgs, casesClient);
 
       expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith({
-        caseId: 'mock-id-1',
-        owner: 'securitySolution',
-        payload: {
-          assignees: [],
-          category: null,
-          connector: { fields: null, id: '.none', name: 'None', type: '.none' },
-          customFields: [],
-          description: 'testing sir',
+        userAction: {
+          caseId: 'mock-id-1',
           owner: 'securitySolution',
-          settings: { syncAlerts: true },
-          severity: 'low',
-          tags: [],
-          title: 'My Case',
-        },
-        type: 'create_case',
-        user: {
-          email: 'damaged_raccoon@elastic.co',
-          full_name: 'Damaged Raccoon',
-          profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-          username: 'damaged_raccoon',
+          payload: {
+            assignees: [],
+            category: null,
+            connector: { fields: null, id: '.none', name: 'None', type: '.none' },
+            customFields: [],
+            description: 'testing sir',
+            owner: 'securitySolution',
+            settings: { syncAlerts: true },
+            severity: 'low',
+            tags: [],
+            title: 'My Case',
+          },
+          type: 'create_case',
+          user: {
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+            profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+            username: 'damaged_raccoon',
+          },
         },
       });
     });
@@ -812,26 +822,28 @@ describe('create', () => {
       await create(caseWithOptionalFields, clientArgs, casesClient);
 
       expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith({
-        caseId: 'mock-id-1',
-        owner: 'securitySolution',
-        payload: {
-          assignees: [{ uid: '1' }],
-          category: 'My category',
-          connector: { fields: null, id: '.none', name: 'None', type: '.none' },
-          customFields: caseWithOptionalFields.customFields,
-          description: 'testing sir',
+        userAction: {
+          caseId: 'mock-id-1',
           owner: 'securitySolution',
-          settings: { syncAlerts: true },
-          severity: 'critical',
-          tags: [],
-          title: 'My Case',
-        },
-        type: 'create_case',
-        user: {
-          email: 'damaged_raccoon@elastic.co',
-          full_name: 'Damaged Raccoon',
-          profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-          username: 'damaged_raccoon',
+          payload: {
+            assignees: [{ uid: '1' }],
+            category: 'My category',
+            connector: { fields: null, id: '.none', name: 'None', type: '.none' },
+            customFields: caseWithOptionalFields.customFields,
+            description: 'testing sir',
+            owner: 'securitySolution',
+            settings: { syncAlerts: true },
+            severity: 'critical',
+            tags: [],
+            title: 'My Case',
+          },
+          type: 'create_case',
+          user: {
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+            profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+            username: 'damaged_raccoon',
+          },
         },
       });
     });

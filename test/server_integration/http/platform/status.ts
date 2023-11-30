@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
 
   describe('status service', () => {
-    // This test must comes first because the timeout only applies to the initial emission
+    // This test must come first because the timeout only applies to the initial emission
     it("returns a timeout for status check that doesn't emit after 30s", async () => {
       let aStatus = await getStatus('statusPluginA');
       expect(aStatus.level).to.eql('unavailable');

@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
-import { InventoryItemType } from '../../../common/inventory_models/types';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';

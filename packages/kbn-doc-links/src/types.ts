@@ -46,6 +46,7 @@ export interface DocLinks {
     readonly guide: string;
   };
   readonly cloud: {
+    readonly beatsAndLogstashConfiguration: string;
     readonly indexManagement: string;
   };
   readonly console: {
@@ -148,7 +149,6 @@ export interface DocLinks {
     readonly connectorsSharepointOnline: string;
     readonly connectorsTeams: string;
     readonly connectorsSlack: string;
-    readonly connectorsWorkplaceSearch: string;
     readonly connectorsZoom: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
@@ -168,7 +168,6 @@ export interface DocLinks {
     readonly machineLearningStart: string;
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
-    readonly mlDocumentEnrichmentUpdateMappings: string;
     readonly searchApplicationsTemplates: string;
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
@@ -198,6 +197,7 @@ export interface DocLinks {
     readonly dropbox: string;
     readonly externalSharePointOnline: string;
     readonly externalIdentities: string;
+    readonly gatedFormBlog: string;
     readonly gitHub: string;
     readonly gettingStarted: string;
     readonly gmail: string;
@@ -348,6 +348,10 @@ export interface DocLinks {
     };
     readonly privileges: string;
     readonly manageDetectionRules: string;
+    readonly createEsqlRuleType: string;
+    readonly entityAnalytics: {
+      readonly riskScorePrerequisites: string;
+    };
   };
   readonly query: {
     readonly eql: string;
@@ -356,6 +360,7 @@ export interface DocLinks {
     readonly luceneQuerySyntax: string;
     readonly percolate: string;
     readonly queryDsl: string;
+    readonly queryESQL: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -405,7 +410,7 @@ export interface DocLinks {
     infrastructureThreshold: string;
     logsThreshold: string;
     metricsThreshold: string;
-    threshold: string;
+    customThreshold: string;
     monitorStatus: string;
     monitorUptime: string;
     tlsCertificate: string;
@@ -415,6 +420,7 @@ export interface DocLinks {
     monitorUptimeSynthetics: string;
     userExperience: string;
     createAlerts: string;
+    syntheticsAlerting: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
@@ -522,6 +528,9 @@ export interface DocLinks {
     api: string;
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
+    elasticAgentInputConfiguration: string;
+    policySecrets: string;
+    remoteESOoutput: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -563,12 +572,16 @@ export interface DocLinks {
     readonly rubyOverview: string;
     readonly rustGuide: string;
     readonly rustOverview: string;
+    readonly eland: string;
   };
   readonly endpoints: {
     readonly troubleshooting: string;
   };
   readonly legal: {
     readonly privacyStatement: string;
+    readonly generalPrivacyStatement: string;
+    readonly termsOfService: string;
+    readonly dataUse: string;
   };
   readonly kibanaUpgradeSavedObjects: {
     readonly resolveMigrationFailures: string;
@@ -581,6 +594,7 @@ export interface DocLinks {
     readonly elasticsearch: string;
   };
   readonly serverlessClients: {
+    readonly clientLib: string;
     readonly goApiReference: string;
     readonly goGettingStarted: string;
     readonly httpApis: string;
@@ -604,11 +618,11 @@ export interface DocLinks {
     readonly integrationsConnectorClient: string;
     readonly integrationsLogstash: string;
   };
+  readonly serverlessSecurity: {
+    readonly apiKeyPrivileges: string;
+  };
   readonly synthetics: {
     readonly featureRoles: string;
-  };
-  readonly esql: {
-    readonly statsBy: string;
   };
   readonly telemetry: {
     readonly settings: string;

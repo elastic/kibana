@@ -33,8 +33,6 @@ export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.sev
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
-export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
-
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
@@ -53,12 +51,6 @@ export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 
 export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 
-export const GROUP_BY_TOP_INPUT = '[data-test-subj="groupByTop"] [data-test-subj="comboBoxInput"]';
-
-export const HOST_NAME = '[data-test-subj^=formatted-field][data-test-subj$=host\\.name]';
-
-export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
-
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
 export const ALERTS_REFRESH_BTN = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="querySubmitButton"]`;
@@ -69,19 +61,11 @@ export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
-export const OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN =
-  '[data-test-subj="open-alert-details-page-menu-item"]';
-
 export const COLUMN_HEADER = '[data-test-subj="dataGridHeader"]';
+
 export const TIMESTAMP_COLUMN = '[data-test-subj="dataGridHeaderCell-@timestamp"]';
+
 export const MESSAGE = '[data-test-subj="formatted-field-message"]';
-
-export const REASON =
-  '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.reason"]';
-
-export const RISK_SCORE = '[data-test-subj^=formatted-field][data-test-subj$=risk_score]';
-
-export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule\\.name]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
@@ -93,15 +77,9 @@ export const OPEN_ANALYZER_BTN = '[data-test-subj="view-in-analyzer"]';
 
 export const ANALYZER_NODE = '[data-test-subj="resolver:node"';
 
-export const SEVERITY = '[data-test-subj^=formatted-field][data-test-subj$=severity]';
-
-export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=source\\.ip]';
-
 export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActionsButton"]';
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
-
-export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
 
@@ -109,12 +87,12 @@ export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-actio
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 
-export const HOST_RISK_HEADER_COLIMN =
+export const HOST_RISK_HEADER_COLUMN =
   '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
 
 export const HOST_RISK_COLUMN = '[data-gridcell-column-id="host.risk.calculated_level"]';
 
-export const USER_RISK_HEADER_COLIMN =
+export const USER_RISK_HEADER_COLUMN =
   '[data-test-subj="dataGridHeaderCell-user.risk.calculated_level"]';
 
 export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_level"]';
@@ -152,8 +130,6 @@ export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButt
 export const SHOW_TOP_N_HEADER =
   '[data-test-subj="topN-container"] [data-test-subj="header-section-title"]';
 
-export const SHOW_TOP_N_CLOSE_BUTTON = '[data-test-subj="close"]';
-
 export const ALERTS_HISTOGRAM_LEGEND =
   '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
 
@@ -164,8 +140,8 @@ export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
 export const LEGEND_ACTIONS = {
   ADD_TO_TIMELINE: (ruleName: string) =>
     `[data-test-subj="legend-${ruleName}-embeddable_addToTimeline"]`,
-  FILTER_FOR: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterIn"]`,
-  FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterOut"]`,
+  FILTER_FOR: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_filterIn"]`,
+  FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_filterOut"]`,
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
 

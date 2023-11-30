@@ -11,7 +11,7 @@ import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
+import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
@@ -38,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
     const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const DATA_VIEW_ID = 'data-view-id';
+    const DATE_VIEW_NAME = 'data-view-name';
     let infraDataIndex: string;
     let actionId: string;
     let ruleId: string;
@@ -48,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
       await createDataView({
         supertest,
-        name: DATE_VIEW,
+        name: DATE_VIEW_NAME,
         id: DATA_VIEW_ID,
         title: DATE_VIEW,
       });
@@ -90,9 +91,8 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
-                comparator: Comparator.GT,
-                threshold: [2],
+                comparator: Comparator.OUTSIDE_RANGE,
+                threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
@@ -186,9 +186,8 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
-                comparator: '>',
-                threshold: [2],
+                comparator: Comparator.OUTSIDE_RANGE,
+                threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: 'count' }],
@@ -212,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          'Custom equation is 3 in the last 1 min. Alert when > 2.'
+          `Document count is 3, not between the threshold of 1 and 2. (duration: 1 min, data view: ${DATE_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('3');
       });

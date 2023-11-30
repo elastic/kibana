@@ -31,7 +31,7 @@ type Props = Pick<
 
 export function BurnRateRuleEditor(props: Props) {
   const { setRuleParams, ruleParams, errors } = props;
-  const { isLoading: loadingInitialSlo, slo: initialSlo } = useFetchSloDetails({
+  const { isLoading: loadingInitialSlo, data: initialSlo } = useFetchSloDetails({
     sloId: ruleParams?.sloId,
   });
 
@@ -95,7 +95,11 @@ export function BurnRateRuleEditor(props: Props) {
   return (
     <>
       <EuiTitle size="xs">
-        <h5>Choose a SLO to monitor</h5>
+        <h5>
+          {i18n.translate('xpack.observability.burnRateRuleEditor.h5.chooseASLOToMonitorLabel', {
+            defaultMessage: 'Choose a SLO to monitor',
+          })}
+        </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
@@ -114,17 +118,14 @@ export function BurnRateRuleEditor(props: Props) {
         </>
       )}
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>Define multiple burn rate windows</h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <Windows
-        slo={selectedSlo}
-        windows={windowDefs}
-        onChange={setWindowDefs}
-        errors={errors.windows}
-      />
-      <EuiSpacer size="m" />
+      {selectedSlo && (
+        <Windows
+          slo={selectedSlo}
+          windows={windowDefs}
+          onChange={setWindowDefs}
+          errors={errors.windows}
+        />
+      )}
     </>
   );
 }

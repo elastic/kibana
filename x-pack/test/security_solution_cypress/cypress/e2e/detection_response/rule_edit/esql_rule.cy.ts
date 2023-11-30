@@ -15,7 +15,7 @@ import { createRule } from '../../../tasks/api_calls/rules';
 
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import { getDetails } from '../../../tasks/rule_details';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   clearEsqlQueryBar,
   fillEsqlQueryBar,
@@ -34,16 +34,14 @@ const rule = getEsqlRule();
 
 const expectedValidEsqlQuery = 'from auditbeat* | stats count(event.category) by event.category';
 
-describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-  });
-
+// FLAKY: https://github.com/elastic/kibana/issues/172253
+// FLAKY: https://github.com/elastic/kibana/issues/172254
+// FLAKY: https://github.com/elastic/kibana/issues/172255
+describe.skip('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     createRule(rule);
-    login();
   });
 
   it('edits ES|QL rule and checks details page', () => {

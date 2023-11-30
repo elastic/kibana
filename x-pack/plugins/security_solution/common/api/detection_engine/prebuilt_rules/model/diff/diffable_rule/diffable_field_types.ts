@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 import { TimeDuration } from '@kbn/securitysolution-io-ts-types';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   BuildingBlockType,
   DataViewId,
@@ -19,8 +21,8 @@ import {
   TimelineTemplateTitle,
   TimestampOverride as TimestampOverrideFieldName,
   TimestampOverrideFallbackDisabled,
-  saved_id,
-} from '../../../../model';
+} from '../../../../model/rule_schema_legacy';
+import { saved_id } from '../../../../model/schemas';
 
 // -------------------------------------------------------------------------------------------------
 // Rule data source

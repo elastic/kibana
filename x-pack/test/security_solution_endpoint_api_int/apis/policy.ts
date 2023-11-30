@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { targetTags } from '../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deletePolicyStream } from './data_stream_helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('Endpoint policy api', () => {
+  describe('Endpoint policy api', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     describe('GET /api/endpoint/policy_response', () => {
       before(
         async () =>

@@ -15,7 +15,13 @@ import {
 
 interface IEditIndexPatternState {
   tab: string;
+  fieldTypes?: string[];
+  schemaFieldTypes?: string[];
+  fieldFilter?: string;
 }
+
+// query param to store app state at
+export const APP_STATE_STORAGE_KEY = '_a';
 
 /**
  * Create state container with sync config for tab navigation specific for edit_index_pattern page
@@ -28,8 +34,6 @@ export function createEditIndexPatternPageStateContainer({
   useHashedUrl: boolean;
 }) {
   const history = createHashHistory();
-  // query param to store app state at
-  const stateStorageKey = '_a';
   // default app state, when there is no initial state in the url
   const defaultState = {
     tab: defaultTab,
@@ -39,7 +43,7 @@ export function createEditIndexPatternPageStateContainer({
     history,
   });
   // extract starting app state from URL and use it as starting app state in state container
-  const initialStateFromUrl = kbnUrlStateStorage.get<IEditIndexPatternState>(stateStorageKey);
+  const initialStateFromUrl = kbnUrlStateStorage.get<IEditIndexPatternState>(APP_STATE_STORAGE_KEY);
   const stateContainer = createStateContainer(
     {
       ...defaultState,
@@ -47,14 +51,30 @@ export function createEditIndexPatternPageStateContainer({
     },
     {
       setTab: (state: IEditIndexPatternState) => (tab: string) => ({ ...state, tab }),
+      setFieldFilter: (state: IEditIndexPatternState) => (fieldFilter: string | undefined) => ({
+        ...state,
+        fieldFilter,
+      }),
+      setFieldTypes: (state: IEditIndexPatternState) => (fieldTypes: string[] | undefined) => ({
+        ...state,
+        fieldTypes: fieldTypes?.length ? fieldTypes : undefined,
+      }),
+      setSchemaFieldTypes:
+        (state: IEditIndexPatternState) => (schemaFieldTypes: string[] | undefined) => ({
+          ...state,
+          schemaFieldTypes: schemaFieldTypes?.length ? schemaFieldTypes : undefined,
+        }),
     },
     {
       tab: (state: IEditIndexPatternState) => () => state.tab,
+      fieldFilter: (state: IEditIndexPatternState) => () => state.fieldFilter,
+      fieldTypes: (state: IEditIndexPatternState) => () => state.fieldTypes,
+      schemaFieldTypes: (state: IEditIndexPatternState) => () => state.schemaFieldTypes,
     }
   );
 
   const { start, stop } = syncState({
-    storageKey: stateStorageKey,
+    storageKey: APP_STATE_STORAGE_KEY,
     stateContainer: {
       ...stateContainer,
       // state syncing utility requires state containers to handle "null"
@@ -64,12 +84,18 @@ export function createEditIndexPatternPageStateContainer({
   });
 
   // makes sure initial url is the same as initial state (this is not really required)
-  kbnUrlStateStorage.set(stateStorageKey, stateContainer.getState(), { replace: true });
+  kbnUrlStateStorage.set(APP_STATE_STORAGE_KEY, stateContainer.getState(), { replace: true });
 
   return {
+    stateContainer,
     startSyncingState: start,
     stopSyncingState: stop,
     setCurrentTab: (newTab: string) => stateContainer.transitions.setTab(newTab),
-    getCurrentTab: () => stateContainer.selectors.tab(),
+    setCurrentFieldFilter: (newFieldFilter: string | undefined) =>
+      stateContainer.transitions.setFieldFilter(newFieldFilter),
+    setCurrentFieldTypes: (newFieldTypes: string[] | undefined) =>
+      stateContainer.transitions.setFieldTypes(newFieldTypes),
+    setCurrentSchemaFieldTypes: (newSchemaFieldTypes: string[] | undefined) =>
+      stateContainer.transitions.setSchemaFieldTypes(newSchemaFieldTypes),
   };
 }

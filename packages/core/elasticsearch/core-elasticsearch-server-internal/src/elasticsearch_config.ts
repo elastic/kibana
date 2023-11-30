@@ -40,7 +40,7 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
-  maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  maxSockets: schema.number({ defaultValue: 800, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
   idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),
@@ -57,7 +57,7 @@ export const configSchema = schema.object({
       },
     })
   ),
-  password: schema.maybe(schema.string()),
+  password: schema.maybe(schema.string({ coerceFromNumber: true })),
   serviceAccountToken: schema.maybe(
     schema.conditional(
       schema.siblingRef('username'),

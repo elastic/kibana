@@ -40,6 +40,7 @@ import {
   CasesFindRequestSortFieldsRt,
   CasesFindResponseRt,
   CasesPatchRequestRt,
+  CasesSearchRequestRt,
 } from './v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 
@@ -105,7 +106,7 @@ const basicCase: Case = {
     {
       key: 'first_custom_field_key',
       type: CustomFieldTypes.TEXT,
-      value: ['this is a text field value', 'this is second'],
+      value: 'this is a text field value',
     },
     {
       key: 'second_custom_field_key',
@@ -115,7 +116,7 @@ const basicCase: Case = {
     {
       key: 'second_custom_field_key',
       type: CustomFieldTypes.TEXT,
-      value: ['www.example.com'],
+      value: 'www.example.com',
     },
   ],
 };
@@ -141,7 +142,7 @@ describe('CasePostRequestRt', () => {
       {
         key: 'first_custom_field_key',
         type: CustomFieldTypes.TEXT,
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       },
       {
         key: 'second_custom_field_key',
@@ -244,8 +245,8 @@ describe('CasePostRequestRt', () => {
   it('removes foo:bar attributes from customFields', () => {
     const customField = {
       key: 'first_custom_field_key',
-      type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
     };
 
     const query = CasePostRequestRt.decode({
@@ -262,8 +263,8 @@ describe('CasePostRequestRt', () => {
   it('removes foo:bar attributes from field inside customFields', () => {
     const customField = {
       key: 'first_custom_field_key',
-      type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
     };
 
     const query = CasePostRequestRt.decode({
@@ -280,8 +281,8 @@ describe('CasePostRequestRt', () => {
   it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
       key: 'first_custom_field_key',
-      type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
     });
 
     expect(
@@ -310,8 +311,8 @@ describe('CasePostRequestRt', () => {
           customFields: [
             {
               key: 'first_custom_field_key',
-              type: 'text',
-              value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)],
+              type: CustomFieldTypes.TEXT,
+              value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
             },
           ],
         })
@@ -321,7 +322,7 @@ describe('CasePostRequestRt', () => {
     );
   });
 
-  it('throws an error when a text customFields is an empty array', () => {
+  it('throws an error when a text customField is an empty string', () => {
     expect(
       PathReporter.report(
         CasePostRequestRt.decode({
@@ -329,25 +330,8 @@ describe('CasePostRequestRt', () => {
           customFields: [
             {
               key: 'first_custom_field_key',
-              type: 'text',
-              value: [],
-            },
-          ],
-        })
-      )
-    ).toContain('The length of the field value is too short. Array must be of length >= 1.');
-  });
-
-  it('throws an error when a text customField is an array with an empty string', () => {
-    expect(
-      PathReporter.report(
-        CasePostRequestRt.decode({
-          ...defaultRequest,
-          customFields: [
-            {
-              key: 'first_custom_field_key',
-              type: 'text',
-              value: [''],
+              type: CustomFieldTypes.TEXT,
+              value: '',
             },
           ],
         })
@@ -474,6 +458,50 @@ describe('CasesFindRequestRt', () => {
       expect(PathReporter.report(CasesFindRequestRt.decode({ reporters }))).toContain(
         'The length of the field reporters is too long. Array must be of length <= 100.'
       );
+    });
+  });
+});
+
+describe('CasesSearchRequestRt', () => {
+  const defaultRequest = {
+    tags: ['new', 'case'],
+    status: CaseStatuses.open,
+    severity: CaseSeverity.LOW,
+    assignees: ['damaged_racoon'],
+    reporters: ['damaged_racoon'],
+    defaultSearchOperator: 'AND',
+    from: 'now',
+    page: '1',
+    perPage: '10',
+    search: 'search text',
+    searchFields: ['title', 'description'],
+    to: '1w',
+    sortOrder: 'desc',
+    sortField: 'createdAt',
+    owner: 'cases',
+    customFields: {
+      toggle_custom_field_key: [true],
+      another_custom_field: [null, false],
+      text_custom_field: ['hello'],
+      number_custom_field: [1234],
+    },
+  };
+
+  it('has expected attributes in request', () => {
+    const query = CasesSearchRequestRt.decode(defaultRequest);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, page: 1, perPage: 10 },
+    });
+  });
+
+  it('removes foo:bar attributes from request', () => {
+    const query = CasesSearchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, page: 1, perPage: 10 },
     });
   });
 });
@@ -629,8 +657,8 @@ describe('CasePatchRequestRt', () => {
     customFields: [
       {
         key: 'first_custom_field_key',
-        type: 'text',
-        value: ['this is a text field value', 'this is second'],
+        type: CustomFieldTypes.TEXT,
+        value: 'this is a text field value',
       },
       {
         key: 'second_custom_field_key',
@@ -719,8 +747,8 @@ describe('CasePatchRequestRt', () => {
   it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
       key: 'first_custom_field_key',
-      type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
     });
 
     expect(
@@ -743,8 +771,8 @@ describe('CasePatchRequestRt', () => {
           customFields: [
             {
               key: 'first_custom_field_key',
-              type: 'text',
-              value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)],
+              type: CustomFieldTypes.TEXT,
+              value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
             },
           ],
         })

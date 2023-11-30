@@ -5,29 +5,30 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
-  clickRuleName,
   inputQuery,
   loadRuleAlerts,
   submitQuery,
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../support/roles';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 
 describe(
   'Alert Event Details - dynamic params',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  {
+    tags: ['@ess', '@serverless'],
+  },
   () => {
     let ruleId: string;
     let ruleName: string;
 
     before(() => {
+      initializeDataViews();
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
-        loadRuleAlerts(data.name);
       });
     });
 
@@ -36,9 +37,7 @@ describe(
     });
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
-      cy.visit('/app/security/rules');
-      clickRuleName(ruleName);
+      loadRuleAlerts(ruleName);
     });
 
     it('should substitute parameters in investigation guide', () => {
@@ -102,7 +101,6 @@ describe(
       });
 
       it('should substitute params in osquery ran from timelines alerts', () => {
-        loadRuleAlerts(ruleName);
         cy.getBySel('send-alert-to-timeline-button').first().click();
         cy.getBySel('query-events-table').within(() => {
           cy.getBySel('expand-event').first().click();

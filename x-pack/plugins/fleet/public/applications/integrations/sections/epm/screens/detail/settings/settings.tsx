@@ -141,6 +141,11 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
     [packagePoliciesData]
   );
 
+  const agentPolicyIds = useMemo(
+    () => packagePoliciesData?.items.map(({ policy_id: agentPolicyId }) => agentPolicyId) ?? [],
+    [packagePoliciesData]
+  );
+
   const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
     packagePolicyIds ?? [],
     latestVersion,
@@ -329,6 +334,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       <UpdateButton
                         {...packageInfo}
                         version={latestVersion}
+                        agentPolicyIds={agentPolicyIds}
                         packagePolicyIds={packagePolicyIds}
                         dryRunData={dryRunData}
                         isUpgradingPackagePolicies={isUpgradingPackagePolicies}

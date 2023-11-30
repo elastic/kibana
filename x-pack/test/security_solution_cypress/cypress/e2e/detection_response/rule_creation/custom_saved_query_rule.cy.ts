@@ -24,7 +24,7 @@ import {
 
 import { editFirstRule, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -53,10 +53,6 @@ const savedQueryFilterKey = 'testAgent.value';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   describe('Custom saved_query detection rule creation', () => {
     beforeEach(() => {
       login();

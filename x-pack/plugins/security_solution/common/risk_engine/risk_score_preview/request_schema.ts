@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { DataViewId } from '../../api/detection_engine/model/rule_schema';
 import { afterKeysSchema } from '../after_keys';
 import { identifierTypeSchema } from '../identifier_types';
 import { rangeSchema } from '../range';
@@ -15,7 +14,7 @@ import { riskWeightsSchema } from '../risk_weights/schema';
 export const riskScorePreviewRequestSchema = t.exact(
   t.intersection([
     t.type({
-      data_view_id: DataViewId,
+      data_view_id: t.string,
     }),
     t.partial({
       after_keys: afterKeysSchema,

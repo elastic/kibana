@@ -6,10 +6,7 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import {
-  AgentName,
-  ElasticAgentName,
-} from '../../../typings/es_schemas/ui/fields/agent';
+import { AgentName, ElasticAgentName } from '@kbn/elastic-agent-utils';
 import { RollupInterval } from '../../../common/rollup';
 
 export interface TimeframeMap {
@@ -70,6 +67,7 @@ export interface APMPerService {
 }
 
 export interface APMUsage {
+  has_any_services_per_official_agent: boolean;
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
   version: {

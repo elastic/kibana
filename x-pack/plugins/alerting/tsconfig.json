@@ -59,7 +59,8 @@
     "@kbn/serverless",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-application-common"
+    "@kbn/core-application-common",
+    "@kbn/core-saved-objects-api-server"
   ],
   "exclude": ["target/**/*"]
 }

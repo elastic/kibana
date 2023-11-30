@@ -30,7 +30,6 @@ exports[`WarningsFlyoutStep renders 1`] = `
           disabled={false}
           fill={true}
           onClick={[MockFunction]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Continue reindexing"

@@ -11,7 +11,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { EmbeddableSloProps, SloEmbeddableInput } from './types';
+import type { SloEmbeddableInput, EmbeddableSloProps } from './types';
 
 import { ObservabilityPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';

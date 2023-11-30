@@ -65,7 +65,6 @@ export type AlertsTableStateProps = {
   featureIds: ValidFeatureId[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
-  showExpandToDetails: boolean;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
   runtimeMappings?: MappingRuntimeFields;
@@ -75,6 +74,10 @@ export type AlertsTableStateProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -148,7 +151,6 @@ const AlertsTableStateWithQueryProvider = ({
   featureIds,
   query,
   pageSize,
-  showExpandToDetails,
   leadingControlColumns,
   rowHeightsOptions,
   renderCellValue,
@@ -160,6 +162,7 @@ const AlertsTableStateWithQueryProvider = ({
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
+  dynamicRowHeight,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
@@ -387,7 +390,6 @@ const AlertsTableStateWithQueryProvider = ({
       pageSizeOptions: [10, 20, 50, 100],
       id,
       leadingControlColumns: leadingControlColumns ?? [],
-      showExpandToDetails,
       showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
@@ -407,6 +409,8 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      dynamicRowHeight,
+      featureIds,
     }),
     [
       alertsTableConfiguration,
@@ -416,7 +420,6 @@ const AlertsTableStateWithQueryProvider = ({
       pagination.pageSize,
       id,
       leadingControlColumns,
-      showExpandToDetails,
       showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
@@ -434,6 +437,8 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      dynamicRowHeight,
+      featureIds,
     ]
   );
 

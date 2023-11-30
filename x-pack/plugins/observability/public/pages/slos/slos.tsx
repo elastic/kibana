@@ -32,8 +32,8 @@ export function SlosPage() {
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
-  const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
-  const { total } = sloList || { total: 0 };
+  const { isLoading, isError, data: sloList } = useFetchSloList();
+  const { total } = sloList ?? { total: 0 };
 
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(getAutoRefreshState());
@@ -44,6 +44,7 @@ export function SlosPage() {
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
+      deepLinkId: 'observability-overview:slos',
     },
   ]);
 
@@ -61,10 +62,6 @@ export function SlosPage() {
     setIsAutoRefreshing(!isAutoRefreshing);
     storeAutoRefreshState(!isAutoRefreshing);
   };
-
-  if (isInitialLoading) {
-    return null;
-  }
 
   return (
     <ObservabilityPageTemplate

@@ -87,6 +87,7 @@ export function runCli() {
         await Tasks.initTargets(context);
         await Tasks.buildBazelPackages(context);
         await Tasks.optimize(context);
+        await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
         await Tasks.writeServerFiles(context);
         await Tasks.yarnInstall(context);

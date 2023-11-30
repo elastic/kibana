@@ -139,38 +139,40 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         )}
         style={{ maxWidth: '100%' }}
       >
-        <CodeEditor
-          languageId={'json'}
-          height={500}
-          languageConfiguration={{
-            autoClosingPairs: [
-              {
-                open: '{',
-                close: '}',
+        <div data-test-subj={'mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor'}>
+          <CodeEditor
+            languageId={'json'}
+            height={500}
+            languageConfiguration={{
+              autoClosingPairs: [
+                {
+                  open: '{',
+                  close: '}',
+                },
+              ],
+            }}
+            value={advancedEditorRawString}
+            onChange={onChange}
+            options={{
+              ariaLabel: i18n.translate(
+                'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
+                {
+                  defaultMessage: 'Advanced analytics job editor',
+                }
+              ),
+              automaticLayout: true,
+              readOnly: isJobCreated,
+              fontSize: 12,
+              scrollBeyondLastLine: false,
+              quickSuggestions: true,
+              minimap: {
+                enabled: false,
               },
-            ],
-          }}
-          value={advancedEditorRawString}
-          onChange={onChange}
-          options={{
-            ariaLabel: i18n.translate(
-              'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
-              {
-                defaultMessage: 'Advanced analytics job editor',
-              }
-            ),
-            automaticLayout: true,
-            readOnly: isJobCreated,
-            fontSize: 12,
-            scrollBeyondLastLine: false,
-            quickSuggestions: true,
-            minimap: {
-              enabled: false,
-            },
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-        />
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+            }}
+          />
+        </div>
       </EuiFormRow>
       <EuiSpacer />
       {advancedEditorMessages.map((advancedEditorMessage, i) => (
@@ -193,7 +195,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         </Fragment>
       ))}
       <EuiSpacer />
-      <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} />
+      <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} showCreateDataView={true} />
     </EuiForm>
   );
 };

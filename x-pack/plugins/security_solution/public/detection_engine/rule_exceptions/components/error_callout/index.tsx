@@ -18,9 +18,9 @@ import {
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import type { HttpSetup } from '@kbn/core/public';
-import type { Rule } from '../../../rule_management/logic/types';
 import * as i18n from '../../utils/translations';
 import { useDisassociateExceptionList } from '../../../rule_management/logic/use_disassociate_exception_list';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export interface ErrorInfo {
   reason: string | null;
@@ -31,7 +31,7 @@ export interface ErrorInfo {
 
 export interface ErrorCalloutProps {
   http: HttpSetup;
-  rule: Rule | null;
+  rule: RuleResponse | null;
   errorInfo: ErrorInfo;
   onCancel: () => void;
   onSuccess: (listId: string) => void;

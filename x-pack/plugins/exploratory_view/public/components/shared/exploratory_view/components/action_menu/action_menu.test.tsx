@@ -6,27 +6,18 @@
  */
 
 import { render } from '../../rtl_helpers';
-import { fireEvent, screen } from '@testing-library/dom';
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { sampleAttribute } from '../../configurations/test_data/sample_attribute';
 import * as pluginHook from '../../../../../hooks/use_plugin_context';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ExpViewActionMenuContent } from './action_menu';
-import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public';
-import * as obsHooks from '@kbn/observability-shared-plugin/public/hooks/use_get_user_cases_permissions';
 
 jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   appMountParameters: {
     setHeaderActionMenu: jest.fn(),
   },
 } as any);
-
-jest.spyOn(obsHooks, 'useGetUserCasesPermissions').mockImplementation(
-  () =>
-    ({
-      useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
-    } as any)
-);
 
 describe('Action Menu', function () {
   afterAll(() => {

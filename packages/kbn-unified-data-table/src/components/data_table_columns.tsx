@@ -125,9 +125,11 @@ function buildEuiGridColumn({
       : [];
   }
 
+  const columnType = columnTypes?.[columnName] ?? dataViewField?.type;
+
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(dataViewField?.type),
+    schema: getSchemaByKbnType(columnType),
     isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     display: showColumnTokens ? (
       <DataTableColumnHeaderMemoized
@@ -263,6 +265,20 @@ export function getEuiGridColumns({
       showColumnTokens,
     })
   );
+}
+
+export function hasSourceTimeFieldValue(
+  columns: string[],
+  dataView: DataView,
+  columnTypes: DataTableColumnTypes | undefined,
+  showTimeCol: boolean,
+  isPlainRecord: boolean
+) {
+  const timeFieldName = dataView.timeFieldName;
+  if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
+    return showTimeCol;
+  }
+  return timeFieldName in columnTypes;
 }
 
 export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {

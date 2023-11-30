@@ -11,8 +11,6 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import useObservable from 'react-use/lib/useObservable';
-
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -80,24 +78,39 @@ export const SearchIndex: React.FC = () => {
     productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
-  const isAppGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
-  );
-  const isWebsiteGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('websiteSearch', 'add_data')
-  );
-  const isDatabaseGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('databaseSearch', 'add_data')
-  );
+
   useEffect(() => {
-    if (isAppGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
-    } else if (isWebsiteGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
-    } else if (isDatabaseGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
-    }
-  }, [isAppGuideActive, isWebsiteGuideActive, isDatabaseGuideActive, index?.count]);
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('appSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('websiteSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('databaseSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {

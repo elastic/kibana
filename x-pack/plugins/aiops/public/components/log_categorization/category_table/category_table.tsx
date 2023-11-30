@@ -30,7 +30,7 @@ import type {
 } from '../../../../common/api/log_categorization/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
-import type { LogCategorizationAppState } from '../../../application/utils/url_state';
+import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
 
 import { MiniHistogram } from '../../mini_histogram';
 
@@ -135,12 +135,18 @@ export const CategoryTable: FC<Props> = ({
         if (sparkLine === undefined) {
           return null;
         }
-        const histogram = eventRate.map((e) => ({
-          doc_count_overall: e.docCount,
-          doc_count_significant_term: sparkLine[e.key],
-          key: e.key,
-          key_as_string: `${e.key}`,
-        }));
+        const histogram = eventRate.map(({ key: catKey, docCount }) => {
+          const term = sparkLine[catKey] ?? 0;
+          const newTerm = term > docCount ? docCount : term;
+          const adjustedDocCount = docCount - newTerm;
+
+          return {
+            doc_count_overall: adjustedDocCount,
+            doc_count_significant_item: newTerm,
+            key: catKey,
+            key_as_string: `${catKey}`,
+          };
+        });
 
         return (
           <MiniHistogram

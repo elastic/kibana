@@ -25,6 +25,8 @@ import type {
   OutputSOAttributes,
   AgentPolicy,
   OutputSoKafkaAttributes,
+  OutputSoRemoteElasticsearchAttributes,
+  PolicySecretReference,
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -53,6 +55,12 @@ import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
+import {
+  deleteOutputSecrets,
+  deleteSecrets,
+  extractAndUpdateOutputSecrets,
+  extractAndWriteOutputSecrets,
+} from './secrets';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -101,6 +109,12 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output 
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
+}
+
+function isOutputSecretsEnabled() {
+  const { outputSecretsStorage } = appContextService.getExperimentalFeatures();
+
+  return !!outputSecretsStorage;
 }
 
 async function getAgentPoliciesPerOutput(
@@ -405,9 +419,21 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     output: NewOutput,
-    options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
+    options?: {
+      id?: string;
+      fromPreconfiguration?: boolean;
+      overwrite?: boolean;
+      secretHashes?: Record<string, any>;
+    }
   ): Promise<Output> {
-    const data: OutputSOAttributes = { ...omit(output, 'ssl') };
+    const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
+    if (output.type === outputType.RemoteElasticsearch) {
+      if (data.is_default) {
+        throw new OutputInvalidError(
+          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
+        );
+      }
+    }
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
@@ -453,7 +479,10 @@ class OutputService {
       }
     }
 
-    if (data.type === outputType.Elasticsearch && data.hosts) {
+    if (
+      (data.type === outputType.Elasticsearch || data.type === outputType.RemoteElasticsearch) &&
+      data.hosts
+    ) {
       data.hosts = data.hosts.map(normalizeHostsForAgents);
     }
 
@@ -526,6 +555,16 @@ class OutputService {
     }
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
+
+    if (isOutputSecretsEnabled()) {
+      const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
+        output,
+        esClient,
+        secretHashes: output.is_preconfigured ? options?.secretHashes : undefined,
+      });
+
+      if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
+    }
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
@@ -668,7 +707,14 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const soDeleteResult = this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+
+    await deleteOutputSecrets({
+      esClient: appContextService.getInternalUserESClient(),
+      output: originalOutput,
+    });
+
+    return soDeleteResult;
   }
 
   public async update(
@@ -676,10 +722,22 @@ class OutputService {
     esClient: ElasticsearchClient,
     id: string,
     data: Partial<Output>,
-    { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
+    {
+      fromPreconfiguration = false,
+      secretHashes,
+    }: { fromPreconfiguration: boolean; secretHashes?: Record<string, any> } = {
       fromPreconfiguration: false,
     }
   ) {
+    if (data.type === outputType.RemoteElasticsearch) {
+      if (data.is_default) {
+        throw new OutputInvalidError(
+          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
+        );
+      }
+    }
+
+    let secretsToDelete: PolicySecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);
@@ -692,7 +750,18 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+    if (isOutputSecretsEnabled()) {
+      const secretsRes = await extractAndUpdateOutputSecrets({
+        oldOutput: originalOutput,
+        outputUpdate: data,
+        esClient,
+        secretHashes: data.is_preconfigured ? secretHashes : undefined,
+      });
+
+      updateData.secrets = secretsRes.outputUpdate.secrets;
+      secretsToDelete = secretsRes.secretsToDelete;
+    }
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
     await validateTypeChanges(
@@ -730,10 +799,7 @@ class OutputService {
 
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
-      if (
-        (data.type === outputType.Elasticsearch || data.type === outputType.Logstash) &&
-        originalOutput.type === outputType.Kafka
-      ) {
+      if (data.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
 
@@ -741,9 +807,10 @@ class OutputService {
         // remove ES specific field
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
+        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
       }
 
-      if (data.type === outputType.Elasticsearch) {
+      if (data.type !== outputType.Logstash) {
         // remove logstash specific field
         updateData.ssl = null;
       }
@@ -849,7 +916,10 @@ class OutputService {
       }
     }
 
-    if (mergedType === outputType.Elasticsearch && updateData.hosts) {
+    if (
+      (mergedType === outputType.Elasticsearch || mergedType === outputType.RemoteElasticsearch) &&
+      updateData.hosts
+    ) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
@@ -880,6 +950,16 @@ class OutputService {
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
+    }
+
+    if (secretsToDelete.length) {
+      try {
+        await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
+      } catch (err) {
+        appContextService
+          .getLogger()
+          .warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+      }
     }
   }
 }

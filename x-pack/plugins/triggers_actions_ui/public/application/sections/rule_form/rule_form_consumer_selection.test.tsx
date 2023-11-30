@@ -80,4 +80,17 @@ describe('RuleFormConsumerSelectionModal', () => {
     expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
   });
+
+  it('should display nothing if observability is one of the consumer', () => {
+    render(
+      <RuleFormConsumerSelection
+        consumers={['logs', 'observability']}
+        onChange={mockOnChange}
+        errors={{}}
+      />
+    );
+
+    expect(mockOnChange).toHaveBeenLastCalledWith('observability');
+    expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
+  });
 });

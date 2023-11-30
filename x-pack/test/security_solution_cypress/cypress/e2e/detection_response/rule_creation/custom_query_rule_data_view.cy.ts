@@ -52,7 +52,11 @@ import {
   getRulesManagementTableRows,
   goToRuleDetailsOf,
 } from '../../../tasks/alerts_detection_rules';
-import { postDataView } from '../../../tasks/common';
+import {
+  deleteAlertsAndRules,
+  deleteDataView,
+  postDataView,
+} from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   createRuleWithoutEnabling,
@@ -69,8 +73,7 @@ import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_deta
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');
@@ -81,15 +84,17 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
-      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we
-      are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
-      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive
-      cleaning in all the other tests. */
-      cy.task('esArchiverResetKibana');
       if (rule.data_view_id != null) {
         postDataView(rule.data_view_id);
       }
+      deleteAlertsAndRules();
       login();
+    });
+
+    afterEach(() => {
+      if (rule.data_view_id != null) {
+        deleteDataView(rule.data_view_id);
+      }
     });
 
     it('Creates and enables a new rule', function () {
