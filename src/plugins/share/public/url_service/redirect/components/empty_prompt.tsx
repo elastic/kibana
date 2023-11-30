@@ -22,7 +22,8 @@ const defaultTitle = i18n.translate('share.urlService.redirect.components.Error.
 
 const defaultBody = i18n.translate('share.urlService.redirect.components.Error.body', {
   defaultMessage:
-    'The stored URL for this link could not be opened. This could be due to lost Kibana Saved Object data.',
+    `Sorry, the object you're looking for can't be found at this URL.` +
+    ` It might have been removed or maybe it never existed.`,
 });
 
 export interface ErrorProps {
