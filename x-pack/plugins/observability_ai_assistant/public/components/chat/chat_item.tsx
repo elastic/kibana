@@ -27,7 +27,7 @@ import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
 import { ChatActionClickHandler } from './types';
 
 export interface ChatItemProps extends ChatTimelineItem {
-  onEditSubmit: (message: Message) => Promise<void>;
+  onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
@@ -66,13 +66,14 @@ const noPanelMessageClassName = css`
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
   display: { collapsed },
+  message: {
+    message: { function_call: functionCall, role },
+  },
   content,
   currentUser,
   element,
   error,
-  function_call: functionCall,
   loading,
-  role,
   title,
   onEditSubmit,
   onFeedbackClick,
