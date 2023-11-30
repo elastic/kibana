@@ -12,13 +12,15 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, ReactElement } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
   builtInComparators,
+  COMPARATORS,
   IErrorObject,
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -30,8 +32,12 @@ import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
 
+// Create a new object with COMPARATORS.NOT_BETWEEN removed as we use OUTSIDE_RANGE
+const updatedBuiltInComparators = { ...builtInComparators };
+delete updatedBuiltInComparators[COMPARATORS.NOT_BETWEEN];
+
 const customComparators = {
-  ...builtInComparators,
+  ...updatedBuiltInComparators,
   [Comparator.OUTSIDE_RANGE]: {
     text: i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.outsideRangeLabel', {
       defaultMessage: 'Is not between',
@@ -42,6 +48,7 @@ const customComparators = {
 };
 
 interface ExpressionRowProps {
+  title: ReactElement;
   fields: DataViewFieldBase[];
   expressionId: number;
   expression: MetricExpression;
@@ -72,6 +79,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     remove,
     fields,
     canDelete,
+    title,
   } = props;
 
   const { metrics, comparator = Comparator.GT, threshold = [] } = expression;
@@ -141,6 +149,29 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
   return (
     <>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow>
+          <EuiTitle size="xs">
+            <h5>{title}</h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        {canDelete && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="o11yExpressionRowButton"
+              aria-label={i18n.translate(
+                'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
+                {
+                  defaultMessage: 'Remove condition',
+                }
+              )}
+              color={'text'}
+              iconType={'trash'}
+              onClick={() => remove(expressionId)}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow>
           <StyledExpressionRow style={{ gap: 24 }} />
@@ -173,25 +204,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             <EuiSpacer size="s" />
           </>
         </EuiFlexItem>
-        {canDelete && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="o11yExpressionRowButton"
-              aria-label={i18n.translate(
-                'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
-                {
-                  defaultMessage: 'Remove condition',
-                }
-              )}
-              color={'danger'}
-              iconType={'trash'}
-              onClick={() => remove(expressionId)}
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
       {children}
-      <EuiSpacer size={'s'} />
     </>
   );
 };

@@ -19,7 +19,10 @@ import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { HOST_NAME } from '../../../../common/es_fields/apm';
-import { toKueryFilterFormat } from '../../../../common/utils/to_kuery_filter_format';
+import {
+  mergeKueries,
+  toKueryFilterFormat,
+} from '../../../../common/utils/kuery_utils';
 import {
   FETCH_STATUS,
   isPending,
@@ -36,6 +39,7 @@ interface Props {
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
+  kuery: string;
 }
 
 export function ProfilingFlamegraph({
@@ -44,6 +48,7 @@ export function ProfilingFlamegraph({
   serviceName,
   environment,
   dataSource,
+  kuery,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
 
@@ -61,13 +66,14 @@ export function ProfilingFlamegraph({
                 environment,
                 documentType: dataSource.documentType,
                 rollupInterval: dataSource.rollupInterval,
+                kuery,
               },
             },
           }
         );
       }
     },
-    [dataSource, serviceName, start, end, environment]
+    [dataSource, serviceName, start, end, environment, kuery]
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
@@ -86,7 +92,7 @@ export function ProfilingFlamegraph({
             <EuiLink
               data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
               href={profilingLocators?.flamegraphLocator.getRedirectUrl({
-                kuery: hostNamesKueryFormat,
+                kuery: mergeKueries([`(${hostNamesKueryFormat})`, kuery]),
               })}
             >
               {i18n.translate('xpack.apm.profiling.flamegraph.link', {

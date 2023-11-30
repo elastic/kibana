@@ -32,6 +32,7 @@ export interface InsightBaseProps {
   onToggle: (isOpen: boolean) => void;
   children: React.ReactNode;
   loading?: boolean;
+  dataTestSubj?: string;
 }
 
 export function InsightBase({
@@ -44,6 +45,7 @@ export function InsightBase({
   actions,
   onToggle,
   loading,
+  dataTestSubj = 'obsAiAssistantInsightButton',
 }: InsightBaseProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -59,7 +61,7 @@ export function InsightBase({
         id="obsAiAssistantInsight"
         arrowProps={{ css: { alignSelf: 'flex-start' } }}
         buttonContent={
-          <EuiFlexGroup wrap responsive={false} gutterSize="m">
+          <EuiFlexGroup wrap responsive={false} gutterSize="m" data-test-subj={dataTestSubj}>
             <EuiFlexItem grow={false}>
               <EuiSpacer size="xs" />
               <AssistantAvatar size="xs" />

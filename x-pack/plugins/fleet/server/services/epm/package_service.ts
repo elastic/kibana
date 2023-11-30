@@ -29,7 +29,7 @@ import type {
 } from '../../types';
 import type { FleetAuthzRouteConfig } from '../security/types';
 import { checkSuperuser, getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from '../security';
-import { FleetUnauthorizedError } from '../../errors';
+import { FleetUnauthorizedError, FleetError } from '../../errors';
 import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
@@ -208,7 +208,7 @@ class PackageClientImpl implements PackageClient {
     const transformPaths = assetPaths.filter(isTransform);
 
     if (transformPaths.length !== assetPaths.length) {
-      throw new Error('reinstallEsAssets is currently only implemented for transform assets');
+      throw new FleetError('reinstallEsAssets is currently only implemented for transform assets');
     }
 
     if (transformPaths.length) {

@@ -36,7 +36,7 @@ import {
   waitFor,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-  removeRandomValuedProperties,
+  removeRandomValuedPropertiesFromAlert,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -231,11 +231,11 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
-        const source = removeRandomValuedProperties(hit._source);
+        const source = removeRandomValuedPropertiesFromAlert(hit._source);
         expect(source).to.eql({
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
-          'kibana.alert.rule.name': 'Signal Testing Query',
+          'kibana.alert.rule.name': 'Alert Testing Query',
           'kibana.alert.rule.producer': 'siem',
           'kibana.alert.rule.rule_type_id': 'siem.queryRule',
           'kibana.space_ids': ['default'],
@@ -322,7 +322,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.workflow_tags': [],
           'kibana.alert.depth': 2,
           'kibana.alert.reason':
-            'event on security-linux-1 created high alert Signal Testing Query.',
+            'event on security-linux-1 created high alert Alert Testing Query.',
           'kibana.alert.severity': 'high',
           'kibana.alert.risk_score': 1,
           'kibana.alert.rule.parameters': {
@@ -393,11 +393,11 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
-        const source = removeRandomValuedProperties(hit._source);
+        const source = removeRandomValuedPropertiesFromAlert(hit._source);
         expect(source).to.eql({
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
-          'kibana.alert.rule.name': 'Signal Testing Query',
+          'kibana.alert.rule.name': 'Alert Testing Query',
           'kibana.alert.rule.producer': 'siem',
           'kibana.alert.rule.rule_type_id': 'siem.queryRule',
           'kibana.space_ids': ['default'],
@@ -484,7 +484,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.workflow_tags': [],
           'kibana.alert.depth': 2,
           'kibana.alert.reason':
-            'event on security-linux-1 created high alert Signal Testing Query.',
+            'event on security-linux-1 created high alert Alert Testing Query.',
           'kibana.alert.severity': 'high',
           'kibana.alert.risk_score': 1,
           'kibana.alert.rule.parameters': {

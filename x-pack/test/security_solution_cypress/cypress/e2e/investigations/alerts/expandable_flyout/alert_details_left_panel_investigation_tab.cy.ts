@@ -35,10 +35,13 @@ describe(
 
     it('should display investigation guide', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB)
-        .should('be.visible')
-        .and('have.text', 'Investigation');
+        .should('have.text', 'Investigation')
+        .and('have.class', 'euiTab-isSelected');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should(
+        'contain.text',
+        'test markdown'
+      );
     });
   }
 );

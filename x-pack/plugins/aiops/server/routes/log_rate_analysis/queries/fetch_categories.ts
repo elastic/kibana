@@ -28,29 +28,66 @@ import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
 import { getQueryWithParams } from './get_query_with_params';
 
+// Filter that includes docs from both the baseline and deviation time range.
+export const getBaselineOrDeviationFilter = (
+  params: AiopsLogRateAnalysisSchema
+): estypes.QueryDslQueryContainer => {
+  return {
+    bool: {
+      should: [
+        {
+          range: {
+            [params.timeFieldName]: {
+              gte: params.baselineMin,
+              lte: params.baselineMax,
+              format: 'epoch_millis',
+            },
+          },
+        },
+        {
+          range: {
+            [params.timeFieldName]: {
+              gte: params.deviationMin,
+              lte: params.deviationMax,
+              format: 'epoch_millis',
+            },
+          },
+        },
+      ],
+    },
+  };
+};
+
 export const getCategoryRequest = (
   params: AiopsLogRateAnalysisSchema,
   fieldName: string,
-  from: number | undefined,
-  to: number | undefined,
-  filter: estypes.QueryDslQueryContainer,
   { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
   const { index, timeFieldName } = params;
+
   const query = getQueryWithParams({
     params,
-    termFilters: undefined,
-    filter,
+    // We're skipping the overall range query here since this
+    // is covered by the filter which will match docs in both baseline
+    // and deviation time range via `getBaselineOrDeviationFilter`.
+    skipRangeQuery: true,
+    filter: getBaselineOrDeviationFilter(params),
   });
+
   const { params: request } = createCategoryRequest(
     index,
     fieldName,
     timeFieldName,
-    from,
-    to,
+    undefined,
+    undefined,
     query,
     wrap
   );
+
+  // In this case we're only interested in the aggregation which
+  // `createCategoryRequest` returns, so we're re-applying the original
+  // query we create via `getQueryWithParams` here.
+  request.body.query = query;
 
   return request;
 };
@@ -64,9 +101,6 @@ export const fetchCategories = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
   fieldNames: string[],
-  from: number | undefined,
-  to: number | undefined,
-  filter: estypes.QueryDslQueryContainer,
   logger: Logger,
   // The default value of 1 means no sampling will be used
   sampleProbability: number = 1,
@@ -82,7 +116,7 @@ export const fetchCategories = async (
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) => {
-      const request = getCategoryRequest(params, fieldName, from, to, filter, randomSamplerWrapper);
+      const request = getCategoryRequest(params, fieldName, randomSamplerWrapper);
       return esClient.search(request, {
         signal: abortSignal,
         maxRetries: 0,

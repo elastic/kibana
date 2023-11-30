@@ -14,7 +14,3 @@ export const openCorrelationsTab = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON).should('be.visible').click();
 };
-
-export const expandCorrelationsSection = (sectionSelector: string) => {
-  cy.get(`${sectionSelector} button`).should('be.visible').click();
-};

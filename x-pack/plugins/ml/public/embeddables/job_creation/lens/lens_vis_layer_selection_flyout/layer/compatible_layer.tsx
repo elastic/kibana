@@ -17,7 +17,7 @@ import {
 } from '../../../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
-import { useMlFromLensKibanaContext } from '../../context';
+import { useMlFromLensKibanaContext } from '../../../common/context';
 import { JobDetails, CreateADJobParams } from '../../../common/job_details';
 
 interface Props {
@@ -79,6 +79,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
         createADJob={createADJob}
         createADJobInWizard={createADJobInWizard}
         embeddable={embeddable}
+        timeRange={embeddable.getInput().timeRange}
         layer={layer}
         layerIndex={layerIndex}
       >

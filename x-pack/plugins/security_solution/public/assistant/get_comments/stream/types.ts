@@ -6,20 +6,8 @@
  */
 
 export interface PromptObservableState {
-  chunks: Chunk[];
+  chunks: string[];
   message?: string;
   error?: string;
   loading: boolean;
-}
-export interface ChunkChoice {
-  index: 0;
-  delta: { role: string; content: string };
-  finish_reason: null | string;
-}
-export interface Chunk {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  choices: ChunkChoice[];
 }
