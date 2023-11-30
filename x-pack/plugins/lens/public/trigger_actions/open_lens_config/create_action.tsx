@@ -45,8 +45,9 @@ export class CreateESQLPanelAction implements Action<Context> {
   }
 
   public async isCompatible() {
-    // check the UI setting value here
-    return true;
+    // compatible only when ES|QL advanced setting is enabled
+    const { isCreateActionCompatible } = await getAsyncHelpers();
+    return isCreateActionCompatible(this.core);
   }
 
   public async execute({ createNewEmbeddable }: Context) {

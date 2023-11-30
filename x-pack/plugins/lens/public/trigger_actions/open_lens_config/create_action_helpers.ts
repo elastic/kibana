@@ -11,6 +11,7 @@ import type {
   EmbeddableInput,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
@@ -28,6 +29,10 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
+export function isCreateActionCompatible(core: CoreStart) {
+  return core.uiSettings.get('discover:enableESQL');
+}
+
 export async function executeCreateAction({
   deps,
   core,
@@ -40,21 +45,27 @@ export async function executeCreateAction({
     initialInput?: Partial<EmbeddableInput>
   ) => Promise<undefined | IEmbeddable>;
 }) {
-  const visualizationMap = getVisualizationMap();
-  const datasourceMap = getDatasourceMap();
-
+  const isCompatibleAction = isCreateActionCompatible(core);
   const defaultDataView = await deps.dataViews.getDefaultDataView({
     displayErrors: false,
   });
-  if (!defaultDataView) {
-    return undefined;
+  if (!isCompatibleAction || !defaultDataView) {
+    throw new IncompatibleActionError();
   }
+  const visualizationMap = getVisualizationMap();
+  const datasourceMap = getDatasourceMap();
+
+  const defaultIndex = defaultDataView.getIndexPattern();
   const defaultEsqlQuery = {
-    esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
+    esql: `from ${defaultIndex} | limit 10`,
   };
 
+  // For the suggestions api we need only the columns
+  // so we are requesting them with limit 0
+  // this is much more performant than requesting
+  // all the table
   const performantQuery = {
-    esql: `from ${defaultDataView?.getIndexPattern()} | limit 0`,
+    esql: `from ${defaultIndex} | limit 0`,
   };
 
   const table = await fetchDataFromAggregateQuery(
@@ -65,7 +76,7 @@ export async function executeCreateAction({
   );
 
   const context = {
-    dataViewSpec: defaultDataView?.toSpec(),
+    dataViewSpec: defaultDataView.toSpec(),
     fieldName: '',
     textBasedColumns: table?.columns,
     query: defaultEsqlQuery,
