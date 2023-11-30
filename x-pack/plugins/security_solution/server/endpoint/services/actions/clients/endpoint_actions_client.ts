@@ -32,8 +32,6 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  HostMetadataInterface,
-  ImmutableObject,
 } from '../../../../../common/endpoint/types';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
@@ -76,20 +74,13 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       .getActionCreateService()
       .createAction(createPayload, agentIds.valid);
 
-    await this.updateCases(createPayload, agentIds.hosts);
+    await updateCases({
+      casesClient: this.options.casesClient,
+      endpointData: agentIds.hosts,
+      createActionPayload: createPayload,
+    });
 
     return response as TResponse;
-  }
-
-  protected async updateCases(
-    createActionPayload: CreateActionPayload,
-    endpointData: Array<ImmutableObject<HostMetadataInterface>>
-  ): Promise<void> {
-    return updateCases({
-      casesClient: this.options.casesClient,
-      createActionPayload,
-      endpointData,
-    });
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
