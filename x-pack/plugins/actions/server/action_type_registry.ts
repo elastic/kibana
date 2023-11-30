@@ -227,6 +227,8 @@ export class ActionTypeRegistry {
       .filter(([_, actionType]) =>
         featureId ? actionType.supportedFeatureIds.includes(featureId) : true
       )
+      // Temporarily don't return SentinelOne connector for Security Solution Rule Actions
+      .filter(([actionTypeId]) => featureId ? actionTypeId !== '.sentinelone' : true)
       .map(([actionTypeId, actionType]) => ({
         id: actionTypeId,
         name: actionType.name,

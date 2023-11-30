@@ -6,7 +6,7 @@
  */
 
 import { ClassNames } from '@emotion/react';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -90,7 +90,6 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     docLinks,
   } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
-  const canExecute = hasExecuteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -205,21 +204,6 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   ) {
     setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
-
-  const canExecuteConnector = useCallback(
-    (actionTypeId: string) => {
-      if (actionTypesIndex && actionTypesIndex[actionTypeId]) {
-        if (actionTypeId === '.sentinelone') {
-          return canSave;
-        }
-
-        return canExecute;
-      }
-
-      return false;
-    },
-    [actionTypesIndex, canExecute, canSave]
-  );
 
   const actionsTableColumns = [
     {
@@ -362,7 +346,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               </>
             ) : (
               <RunOperation
-                canExecute={canExecuteConnector(item.actionTypeId)}
+                canExecute={!!(hasExecuteActionsCapability(capabilities, item.actionTypeId) && actionTypesIndex && actionTypesIndex[item.actionTypeId])}
                 item={item}
                 onRun={() => editItem(item, EditConnectorTabs.Test)}
               />
