@@ -16,6 +16,8 @@ import {
   EuiTabs,
   EuiTab,
   EuiSpacer,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -274,6 +276,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
+  const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -325,20 +329,59 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                     isSelected={selectedTab === SELECTED_TAB.BUCKET}
                     onClick={() => setSelectedTab(SELECTED_TAB.BUCKET)}
                   >
-                    <FormattedMessage
-                      id="xpack.aiops.logCategorization.tabs.bucket"
-                      defaultMessage="Bucket"
-                    />
+                    <EuiToolTip
+                      content={i18n.translate('xpack.aiops.logCategorization.tabs.bucket.tooltip', {
+                        defaultMessage: 'Patterns that occur in the anomalous bucket.',
+                      })}
+                    >
+                      <EuiFlexGroup gutterSize="none">
+                        <EuiFlexItem>
+                          <FormattedMessage
+                            id="xpack.aiops.logCategorization.tabs.bucket"
+                            defaultMessage="Bucket"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false} css={infoIconCss}>
+                          <EuiIcon
+                            size="s"
+                            color="subdued"
+                            type="questionInCircle"
+                            className="eui-alignTop"
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiToolTip>
                   </EuiTab>
 
                   <EuiTab
                     isSelected={selectedTab === SELECTED_TAB.FULL_TIME_RANGE}
                     onClick={() => setSelectedTab(SELECTED_TAB.FULL_TIME_RANGE)}
                   >
-                    <FormattedMessage
-                      id="xpack.aiops.logCategorization.tabs.fullTimeRange"
-                      defaultMessage="Full time range"
-                    />
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.aiops.logCategorization.tabs.fullTimeRange.tooltip',
+                        {
+                          defaultMessage: 'Patterns that occur in the selected time range.',
+                        }
+                      )}
+                    >
+                      <EuiFlexGroup gutterSize="none">
+                        <EuiFlexItem>
+                          <FormattedMessage
+                            id="xpack.aiops.logCategorization.tabs.fullTimeRange"
+                            defaultMessage="Full time range"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false} css={infoIconCss}>
+                          <EuiIcon
+                            size="s"
+                            color="subdued"
+                            type="questionInCircle"
+                            className="eui-alignTop"
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiToolTip>
                   </EuiTab>
                 </EuiTabs>
                 <EuiSpacer size="s" />
