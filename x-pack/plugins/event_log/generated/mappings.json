@@ -386,6 +386,12 @@
                                                 "process_rule_duration_ms": {
                                                     "type": "long"
                                                 },
+                                                "load_duration_ms": {
+                                                  "type": "long"
+                                              },
+                                                "prepare_to_run_duration_ms": {
+                                                  "type": "long"
+                                              },
                                                 "claim_to_start_duration_ms": {
                                                     "type": "long"
                                                 },

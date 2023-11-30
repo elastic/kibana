@@ -27,7 +27,7 @@ import {
 import type { TaskRunnerContext } from '../task_runner/types';
 import { getFakeKibanaRequest } from '../task_runner/rule_loader';
 import { ElasticsearchError, ErrorWithReason, validateRuleTypeParams } from '../lib';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { RuleRunner } from '../task_runner/rule_runner';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { RuleResultService } from '../monitoring/rule_result_service';
@@ -37,6 +37,12 @@ import { getTimeRange } from '../lib/get_time_range';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from '../task_runner/task_runner_timer';
 import { asErr, asOk, map, Result } from '../lib/result_type';
 import { ILastRun, lastRunFromError, lastRunFromState } from '../lib/last_run_status';
+import {
+  executionStatusFromError,
+  executionStatusFromState,
+  IExecutionStatusAndMetrics,
+} from '../lib/rule_execution_status';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 
 type AdHocRuleRunParamResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
 interface AdHocRuleRunData extends LoadedIndirectParams<AdHocRuleRunParams> {
@@ -115,7 +121,7 @@ export class AdHocTaskRunner {
     fakeRequest,
     ruleRunParams,
     validatedParams: params,
-  }: RunRuleParams): Promise<void> {
+  }: RunRuleParams): Promise<RuleRunMetrics> {
     const { rule, duration, currentStart, end } = ruleRunParams;
     const {
       params: { spaceId },
@@ -190,6 +196,8 @@ export class AdHocTaskRunner {
       state: {},
       validatedParams: params,
     });
+
+    return ruleRunMetricsStore.getMetrics();
   }
 
   public async loadIndirectParams(): Promise<AdHocRuleRunParamResult<AdHocRuleRunData>> {
@@ -222,150 +230,19 @@ export class AdHocTaskRunner {
   }
 
   public async run(): Promise<AdHocRuleTaskRunResult> {
-    let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
+    let runMetrics: Result<RuleRunMetrics, Error>;
     try {
       const runParams = await this.prepareToRun();
-      stateWithMetrics = asOk(await this.runRule(runParams));
+      runMetrics = asOk(await this.runRule(runParams));
     } catch (err) {
-      stateWithMetrics = asErr(err);
+      runMetrics = asErr(err);
       this.logger.error(`Error running ad-hoc rule - ${err.message}`);
     }
 
-    await this.processRunResults({ stateWithMetrics });
+    await this.processRunResults(runMetrics);
     await this.scheduleNewOrDeleteTask();
 
     return { state: {}, ...(this.shouldDeleteTask ? {} : { runAt: new Date() }) };
-
-    // Other options
-    // If we want to always use the latest changes to the rule, we could
-    // just keep the rule ID in the task params and load the rule SO at
-    // the beginning of ad hoc execution. This is less aligned with re-using
-    // this for previews in the future.
-
-    // Event log
-    // We should write event log entries so we can keep a record of what
-    // happened but if we use the "execute" event, it will show up in the
-    // execution log table, but out of order. Maybe an "ad-hoc-execute" event?
-
-    // Rule metrics
-    // Don't update the rule SO with run metrics
-
-    // Rules settings
-    // Use the latest rules settings
-
-    // try {
-    //   const preparedResult = await this.prepareToRun();
-
-    //   this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
-
-    //   (async () => {
-    //     try {
-    //       await preparedResult.rulesClient.clearExpiredSnoozes({
-    //         rule: preparedResult.rule,
-    //         version: preparedResult.version,
-    //       });
-    //     } catch (e) {
-    //       // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
-    //       this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
-    //     }
-    //   })();
-
-    //   stateWithMetrics = asOk(await this.runRule(preparedResult));
-
-    //   // fetch the rule again to ensure we return the correct schedule as it may have
-    //   // changed during the task execution
-    //   const attributes = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
-    //   schedule = asOk(attributes.rule.schedule);
-    // } catch (err) {
-    //   stateWithMetrics = asErr(err);
-    //   schedule = asErr(err);
-    // }
-
-    // let nextRun: string | null = null;
-    // if (isOk(schedule)) {
-    //   nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
-    // } else if (taskSchedule) {
-    //   nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
-    // }
-
-    // const { executionStatus, executionMetrics } = await this.timer.runWithTimer(
-    //   TaskRunnerTimerSpan.ProcessRuleRun,
-    //   async () =>
-    //     this.processRunResults({
-    //       nextRun,
-    //       stateWithMetrics,
-    //     })
-    // );
-
-    // const transformRunStateToTaskState = (
-    //   runStateWithMetrics: RuleTaskStateAndMetrics
-    // ): RuleTaskState => {
-    //   return {
-    //     ...omit(runStateWithMetrics, ['metrics']),
-    //     previousStartedAt: startedAt?.toISOString(),
-    //   };
-    // };
-
-    // if (startedAt) {
-    //   // Capture how long it took for the rule to run after being claimed
-    //   this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-    // }
-
-    // this.alertingEventLogger.done({
-    //   status: executionStatus,
-    //   metrics: executionMetrics,
-    //   timings: this.timer.toJson(),
-    // });
-
-    // return {
-    //   state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
-    //     stateWithMetrics,
-    //     (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
-    //       transformRunStateToTaskState(ruleRunStateWithMetrics),
-    //     (err: ElasticsearchError) => {
-    //       if (isAlertSavedObjectNotFoundError(err, ruleId)) {
-    //         const message = `Executing Rule ${spaceId}:${
-    //           this.ruleType.id
-    //         }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
-    //         this.logger.debug(message);
-    //       } else {
-    //         const error = this.stackTraceLog ? this.stackTraceLog.message : err;
-    //         const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
-    //         const message = `Executing Rule ${spaceId}:${
-    //           this.ruleType.id
-    //         }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
-    //         this.logger.error(message, {
-    //           tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-    //           error: { stack_trace: stack },
-    //         });
-    //       }
-    //       return originalState;
-    //     }
-    //   ),
-    //   schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
-    //     if (isAlertSavedObjectNotFoundError(error, ruleId)) {
-    //       const spaceMessage = spaceId ? `in the "${spaceId}" space ` : '';
-    //       this.logger.warn(
-    //         `Unable to execute rule "${ruleId}" ${spaceMessage}because ${error.message} - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
-    //       );
-    //       throwUnrecoverableError(error);
-    //     }
-
-    //     let retryInterval = taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL;
-
-    //     // Set retry interval smaller for ES connectivity errors
-    //     if (isEsUnavailableError(error, ruleId)) {
-    //       retryInterval =
-    //         parseDuration(retryInterval) > parseDuration(CONNECTIVITY_RETRY_INTERVAL)
-    //           ? CONNECTIVITY_RETRY_INTERVAL
-    //           : retryInterval;
-    //     }
-
-    //     return { interval: retryInterval };
-    //   }),
-    //   monitoring: this.ruleMonitoring.getMonitoring(),
-    //   hasError: isErr(schedule),
-    // };
   }
 
   public async cleanup() {
@@ -426,7 +303,7 @@ export class AdHocTaskRunner {
         ...(namespace ? { namespace } : {}),
       });
 
-      this.alertingEventLogger.start(this.runDate);
+      this.alertingEventLogger.start(this.runDate, EVENT_LOG_ACTIONS.executeBackfill);
       this.alertingEventLogger.setRuleName(rule.name);
 
       // Generate fake request with API key
@@ -461,34 +338,27 @@ export class AdHocTaskRunner {
     });
   }
 
-  private async processRunResults(stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>) {
+  private async processRunResults(runMetrics: Result<RuleRunMetrics, Error>) {
     return await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
-      const {
-        params: { alertId: ruleId, spaceId },
-        startedAt,
-      } = this.taskInstance;
+      const { startedAt } = this.taskInstance;
 
-      const namespace = this.context.spaceIdToNamespace(spaceId);
+      // Getting executionStatus for backwards compatibility
+      const { status: executionStatus } = map<
+        RuleRunMetrics,
+        ElasticsearchError,
+        IExecutionStatusAndMetrics
+      >(
+        runMetrics,
+        (metrics) => executionStatusFromState({ metrics }, this.runDate),
+        (err: ElasticsearchError) => executionStatusFromError(err, this.runDate)
+      );
 
       // New consolidated statuses for lastRun
-      const { lastRun, metrics: executionMetrics } = map<
-        RuleTaskStateAndMetrics,
-        ElasticsearchError,
-        ILastRun
-      >(
-        stateWithMetrics,
-        (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
+      const { metrics: executionMetrics } = map<RuleRunMetrics, ElasticsearchError, ILastRun>(
+        runMetrics,
+        (metrics) => lastRunFromState(metrics, this.ruleResult),
         (err: ElasticsearchError) => lastRunFromError(err)
       );
-
-      this.logger.debug(
-        `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(lastRun)}`
-      );
-      if (executionMetrics) {
-        this.logger.debug(
-          `ruleRunMetrics for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionMetrics)}`
-        );
-      }
 
       // set start and duration based on event log
       const { start, duration } = this.alertingEventLogger.getStartAndDuration();

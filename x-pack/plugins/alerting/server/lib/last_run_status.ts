@@ -6,7 +6,6 @@
  */
 
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import { RuleLastRunOutcomeOrderMap, RuleLastRunOutcomes } from '../../common';
@@ -26,7 +25,7 @@ export interface ILastRun {
 }
 
 export const lastRunFromState = (
-  stateWithMetrics: RuleTaskStateAndMetrics,
+  metrics: RuleRunMetrics,
   ruleResultService: RuleResultService
 ): ILastRun => {
   let outcome: RuleLastRunOutcomes = RuleLastRunOutcomeValues[0];
@@ -35,7 +34,6 @@ export const lastRunFromState = (
   const outcomeMsg: string[] = [];
 
   const { errors, warnings, outcomeMessage } = ruleResultService.getLastRunResults();
-  const { metrics } = stateWithMetrics;
 
   if (warnings.length > 0) {
     outcome = RuleLastRunOutcomeValues[1];

@@ -106,6 +106,7 @@ import { BackfillClient } from './backfill_client/backfill_client';
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
+  executeBackfill: 'execute-backfill',
   executeStart: 'execute-start',
   executeAction: 'execute-action',
   newInstance: 'new-instance',

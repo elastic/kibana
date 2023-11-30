@@ -562,7 +562,8 @@ export class TaskRunner<
         ILastRun
       >(
         stateWithMetrics,
-        (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
+        (ruleRunStateWithMetrics) =>
+          lastRunFromState(ruleRunStateWithMetrics.metrics, this.ruleResult),
         (err: ElasticsearchError) => lastRunFromError(err)
       );
 

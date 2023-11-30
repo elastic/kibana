@@ -92,7 +92,7 @@ export class AlertingEventLogger {
     this.ruleContext = context;
   }
 
-  public start(runDate: Date) {
+  public start(runDate: Date, actionOverride?: string) {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
     }
@@ -105,7 +105,7 @@ export class AlertingEventLogger {
     };
 
     // Initialize the "execute" event
-    this.event = initializeExecuteRecord(context);
+    this.event = initializeExecuteRecord(context, actionOverride);
     this.eventLogger.startTiming(this.event, this.startTime);
 
     // Create and log "execute-start" event
@@ -329,7 +329,7 @@ export function createExecuteTimeoutRecord(context: RuleContextOpts) {
   });
 }
 
-export function initializeExecuteRecord(context: RuleContext) {
+export function initializeExecuteRecord(context: RuleContext, actionOverride?: string) {
   return createAlertEventLogRecordObject({
     ruleId: context.ruleId,
     ruleType: context.ruleType,
@@ -337,7 +337,7 @@ export function initializeExecuteRecord(context: RuleContext) {
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
-    action: EVENT_LOG_ACTIONS.execute,
+    action: actionOverride ?? EVENT_LOG_ACTIONS.execute,
     ruleRevision: context.ruleRevision,
     task: {
       scheduled: context.taskScheduledAt.toISOString(),
