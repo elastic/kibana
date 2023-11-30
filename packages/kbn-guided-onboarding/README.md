@@ -3,5 +3,4 @@
 To run in development you will need the following settings in your kibana.dev.yml:
 
 xpack.cloud.id: 'testID'
-elasticsearch.hosts: ["http://localhost:9200"]
 
