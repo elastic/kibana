@@ -64,5 +64,6 @@ export async function searchStackTraces({
     costPervCPUPerHour,
   });
 
+  console.log('### caue  response:', JSON.stringify(response));
   return decodeStackTraceResponse(response);
 }
