@@ -9,12 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const SAVED_SEARCH_NAME = 'test saved search';
+const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'settings',
     'common',
