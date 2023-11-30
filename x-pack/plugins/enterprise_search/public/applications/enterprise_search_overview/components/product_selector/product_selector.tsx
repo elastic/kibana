@@ -18,7 +18,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WelcomeBanner } from '@kbn/search-api-panels';
 
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
@@ -39,6 +38,7 @@ import { EnterpriseSearchProductCard } from './enterprise_search_product_card';
 import { IngestionSelector } from './ingestion_selector';
 
 import './product_selector.scss';
+import { WelcomeBanner } from './welcome_banner';
 
 interface ProductSelectorProps {
   access: {
@@ -81,9 +81,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <EnterpriseSearchOverviewPageTemplate restrictWidth grow offset={0} customPageSections>
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
-          <EuiText color="ghost">
-            <WelcomeBanner user={user || undefined} image={headerImage} showDescription={false} />
-          </EuiText>
+          <WelcomeBanner user={user || undefined} image={headerImage} />
         </EuiPageTemplate.Section>
 
         <EuiPageTemplate.Section>

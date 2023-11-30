@@ -212,7 +212,7 @@ describe('Exception builder helpers', () => {
         expect(output).toEqual(expected);
       });
 
-      test('it returns all fields unfiletered if "item.nested" is not "child" or "parent"', () => {
+      test('it returns all fields unfiltered if "item.nested" is not "child" or "parent"', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);

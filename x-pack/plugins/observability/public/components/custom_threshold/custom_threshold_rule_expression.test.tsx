@@ -92,7 +92,7 @@ describe('Expression', () => {
           },
         ],
         comparator: Comparator.GT,
-        threshold: [1000],
+        threshold: [100],
         timeSize: 1,
         timeUnit: 'm',
       },

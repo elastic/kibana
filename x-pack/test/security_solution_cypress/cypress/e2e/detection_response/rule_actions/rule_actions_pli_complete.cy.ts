@@ -18,7 +18,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { goToActionsStepTab } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 

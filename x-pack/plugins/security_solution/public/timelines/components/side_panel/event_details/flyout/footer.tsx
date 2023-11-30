@@ -142,7 +142,10 @@ export const FlyoutFooterComponent = React.memo(
 
     return (
       <>
-        <EuiFlyoutFooter data-test-subj="side-panel-flyout-footer">
+        <EuiFlyoutFooter
+          className="side-panel-flyout-footer"
+          data-test-subj="side-panel-flyout-footer"
+        >
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {detailsEcsData && (

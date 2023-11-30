@@ -42,7 +42,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/api_calls/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
 import {
   fillAboutRule,

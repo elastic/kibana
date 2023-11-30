@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
-      indexPattern: { name: string; timeField: string };
+      dataView: { name: string; timeField: string };
       job: DeepPartial<DataFrameAnalyticsConfig>;
       sortBy: {
         column: string;
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'binary classification job',
           archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
-          indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
+          dataView: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_fi_binary_${timestamp}`,
             description:
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'multi class classification job',
           archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
-          indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
+          dataView: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_fi_multi_${timestamp}`,
             description:
@@ -178,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'regression job',
           archive: 'x-pack/test/functional/es_archives/ml/egs_regression',
-          indexPattern: { name: 'ft_egs_regression', timeField: '@timestamp' },
+          dataView: { name: 'ft_egs_regression', timeField: '@timestamp' },
           job: {
             id: `egs_fi_reg_${timestamp}`,
             description: 'This is the job description',
@@ -253,8 +253,8 @@ export default function ({ getService }: FtrProviderContext) {
       for (const testData of testDataList) {
         await esArchiver.loadIfNeeded(testData.archive);
         await ml.testResources.createDataViewIfNeeded(
-          testData.indexPattern.name,
-          testData.indexPattern.timeField
+          testData.dataView.name,
+          testData.dataView.timeField
         );
         await ml.api.createAndRunDFAJob(testData.job as DataFrameAnalyticsConfig);
       }
@@ -263,7 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanMlIndices();
       for (const testData of testDataList) {
-        await ml.testResources.deleteDataViewByTitle(testData.indexPattern.name);
+        await ml.testResources.deleteDataViewByTitle(testData.dataView.name);
       }
     });
 

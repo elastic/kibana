@@ -7,9 +7,11 @@
 
 /* eslint-disable cypress/no-unnecessary-waiting */
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { loadPage } from './common';
+import { waitForActionToSucceed } from './response_actions';
 
 const API_ENDPOINT_ACTION_PATH = '/api/endpoint/action/*';
 export const interceptActionRequests = (
@@ -39,29 +41,6 @@ export const isolateHostWithComment = (comment: string, hostname: string): void 
   cy.contains(`Isolate host ${hostname} from network.`);
   cy.getByTestSubj('endpointHostIsolationForm');
   cy.getByTestSubj('host_isolation_comment').type(comment);
-};
-
-export const isolateHostFromEndpointList = (index: number = 0): void => {
-  // open the action menu and click isolate action
-  cy.getByTestSubj('endpointTableRowActions').eq(index).click();
-  cy.getByTestSubj('isolateLink').click();
-  // isolation form, click confirm button
-  cy.getByTestSubj('hostIsolateConfirmButton').click();
-  // return to endpoint details
-  cy.getByTestSubj('hostIsolateSuccessCompleteButton').click();
-  // close details flyout
-  cy.getByTestSubj('euiFlyoutCloseButton').click();
-
-  // ensure the host is isolated, wait for 3 minutes for the host to be isolated
-  cy.wait(18000);
-
-  cy.getByTestSubj('endpointListTable').within(() => {
-    cy.get('tbody tr')
-      .eq(index)
-      .within(() => {
-        cy.get('td').eq(1).should('contain.text', 'Isolated');
-      });
-  });
 };
 
 export const releaseHostWithComment = (comment: string, hostname: string): void => {
@@ -139,28 +118,46 @@ export const filterOutIsolatedHosts = (): void => {
   cy.getByTestSubj('querySubmitButton').click();
 };
 
-const checkEndpointListForIsolatedHosts = (expectIsolated: boolean): void => {
-  const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
+const checkEndpointListForIsolationStatus = (expectIsolated: boolean): void => {
+  const chainer = expectIsolated ? 'contain' : 'not.contain';
   cy.getByTestSubj('endpointListTable').within(() => {
-    cy.get('tbody tr').each(($tr) => {
-      cy.wrap($tr).within(() => {
+    cy.get('tbody tr')
+      .eq(0)
+      .within(() => {
         cy.get('td').eq(1).should(chainer, 'Isolated');
       });
-    });
   });
 };
 
 export const checkEndpointListForOnlyUnIsolatedHosts = (): void =>
-  checkEndpointListForIsolatedHosts(false);
+  checkEndpointListForIsolationStatus(false);
 export const checkEndpointListForOnlyIsolatedHosts = (): void =>
-  checkEndpointListForIsolatedHosts(true);
+  checkEndpointListForIsolationStatus(true);
+
+export const isolateHostActionViaAPI = (agentId: string): void => {
+  cy.request({
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
+    method: 'POST',
+    url: 'api/endpoint/action/isolate',
+    body: {
+      endpoint_ids: [agentId],
+    },
+  })
+    // verify action was successful
+    .then((response) => waitForActionToSucceed(response.body.data.id))
+    .then((actionResponse) => {
+      expect(actionResponse.status).to.equal('successful');
+    });
+};
 
 export const checkEndpointIsolationStatus = (
   endpointHostname: string,
   expectIsolated: boolean
 ): void => {
-  const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
-
+  const chainer = expectIsolated ? 'contain' : 'not.contain';
   cy.contains(endpointHostname).parents('td').siblings('td').eq(0).should(chainer, 'Isolated');
 };
 
