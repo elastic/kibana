@@ -39,7 +39,7 @@ export function ErrorSampler({
   } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
-    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
+    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
 
   const { rangeFrom, rangeTo, environment, kuery, errorId } = query;
