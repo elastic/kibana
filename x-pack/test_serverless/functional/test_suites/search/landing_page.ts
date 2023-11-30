@@ -81,5 +81,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchLandingPage.apiKeys.createApiKeyCancel();
       });
     });
+
+    describe('Pipeline creation', async () => {
+      it('can redirect to the pipeline creation index page', async () => {
+        await pageObjects.svlSearchLandingPage.pipeline.click();
+        await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToCreatePipelinePage();
+      });
+    });
   });
 }
