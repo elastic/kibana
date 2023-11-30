@@ -178,10 +178,10 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
-      TARGET: cypress:rule_management:run:serverless
+      TARGET: cypress:rule_management:run:ess
       CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Rule Management Cypress Tests on Serverless"
+      MSG: "--- Rule Management - Security Solution Cypress Tests"
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
@@ -195,10 +195,10 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
-      TARGET: cypress:rule_management:prebuilt_rules:run:serverless
+      TARGET: cypress:rule_management:prebuilt_rules:run:ess
       CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Rule Management - Prebuilt Rules - Cypress Tests on Serverless"
+      MSG: "--- Rule Management - Prebuilt Rules - Security Solution Cypress Tests"
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
