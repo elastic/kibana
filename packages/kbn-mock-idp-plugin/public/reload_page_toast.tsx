@@ -8,7 +8,6 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ToastInput } from '@kbn/core-notifications-browser';
@@ -30,9 +29,7 @@ export const createReloadPageToast = (options: {
   i18n: I18nStart;
 }): ToastInput => {
   return {
-    title: i18n.translate('management.settings.form.requiresPageReloadToastDescription', {
-      defaultMessage: `Your role has been set to '${options.user.roles.join(`', '`)}'.`,
-    }),
+    title: `Your role has been set to '${options.user.roles.join(`', '`)}'.`,
     text: toMountPoint(
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -41,9 +38,7 @@ export const createReloadPageToast = (options: {
             onClick={() => window.location.reload()}
             data-test-subj={DATA_TEST_SUBJ_PAGE_RELOAD_BUTTON}
           >
-            {i18n.translate('management.settings.form.requiresPageReloadToastButtonLabel', {
-              defaultMessage: 'Reload page',
-            })}
+            Reload page
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>,
