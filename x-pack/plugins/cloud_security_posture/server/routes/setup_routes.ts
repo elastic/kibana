@@ -19,6 +19,7 @@ import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
 import { defineFindCspRuleTemplateRoute } from './csp_rule_template/get_csp_rule_template';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
+import { defineGetAgentless } from './agentless/agentless';
 
 /**
  * 1. Registers routes
@@ -40,6 +41,7 @@ export async function setupRoutes({
   defineGetCspStatusRoute(router);
   defineFindCspRuleTemplateRoute(router);
   defineGetDetectionEngineAlertsStatus(router);
+  defineGetAgentless(router);
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
