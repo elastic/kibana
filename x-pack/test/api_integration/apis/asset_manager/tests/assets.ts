@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
     const to = new Date().toISOString();
 
     beforeEach(async () => {
-      await synthtrace.clean();
+      await Promise.all([synthtraceInfra.clean(), synthtraceApm.clean()]);
     });
 
     it('should return all assets', async () => {
