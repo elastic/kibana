@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../objects/rule';
+import { getNewRule } from '../../../../../objects/rule';
 
-import { createRule } from '../../../tasks/api_calls/rules';
-import { login } from '../../../tasks/login';
+import { createRule } from '../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   visitRuleDetailsPage,
-} from '../../../tasks/rule_details';
+} from '../../../../../tasks/rule_details';
 import {
   addExceptionFlyoutItemName,
   addTwoAndedConditions,
   addTwoORedConditions,
   submitNewExceptionItem,
-} from '../../../tasks/exceptions';
+} from '../../../../../tasks/exceptions';
 import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
-} from '../../../screens/exceptions';
+} from '../../../../../screens/exceptions';
 
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 
 describe(
   'Add multiple conditions and validate the generated exceptions',

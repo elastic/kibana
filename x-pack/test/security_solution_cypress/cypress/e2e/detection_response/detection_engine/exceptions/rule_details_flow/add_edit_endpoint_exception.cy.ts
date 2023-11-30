@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../objects/rule';
+import { getNewRule } from '../../../../../objects/rule';
 
-import { createRule } from '../../../tasks/api_calls/rules';
-import { login } from '../../../tasks/login';
+import { createRule } from '../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../tasks/login';
 import {
   openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
   searchForExceptionItem,
   visitRuleDetailsPage,
   waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
-} from '../../../tasks/rule_details';
+} from '../../../../../tasks/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
@@ -24,13 +24,13 @@ import {
   selectOs,
   submitEditedExceptionItem,
   submitNewExceptionItem,
-} from '../../../tasks/exceptions';
+} from '../../../../../tasks/exceptions';
 
 import {
   deleteAlertsAndRules,
   deleteEndpointExceptionList,
   deleteExceptionLists,
-} from '../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -44,11 +44,11 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   FIELD_INPUT_PARENT,
-} from '../../../screens/exceptions';
+} from '../../../../../screens/exceptions';
 import {
   createEndpointExceptionList,
   createEndpointExceptionListItem,
-} from '../../../tasks/api_calls/exceptions';
+} from '../../../../../tasks/api_calls/exceptions';
 
 describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverless'] }, () => {
   const ITEM_NAME = 'Sample Exception List Item';

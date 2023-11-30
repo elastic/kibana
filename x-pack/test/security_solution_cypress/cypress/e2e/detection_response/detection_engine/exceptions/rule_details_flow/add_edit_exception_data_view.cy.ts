@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../objects/rule';
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import { createRule } from '../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../../../objects/rule';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../../../screens/alerts';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
-} from '../../../tasks/alerts';
+} from '../../../../../tasks/alerts';
 import {
   editException,
   editExceptionFlyoutItemName,
   submitEditedExceptionItem,
-} from '../../../tasks/exceptions';
-import { login } from '../../../tasks/login';
+} from '../../../../../tasks/exceptions';
+import { login } from '../../../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
   goToAlertsTab,
@@ -26,9 +26,9 @@ import {
   removeException,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
-} from '../../../tasks/rule_details';
+} from '../../../../../tasks/rule_details';
 
-import { postDataView, deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { postDataView, deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -37,8 +37,8 @@ import {
   EXCEPTION_ITEM_CONTAINER,
   VALUES_INPUT,
   FIELD_INPUT_PARENT,
-} from '../../../screens/exceptions';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+} from '../../../../../screens/exceptions';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(

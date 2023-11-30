@@ -7,21 +7,24 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { getExceptionList } from '../../../../objects/exception';
+import { getExceptionList } from '../../../../../../objects/exception';
 import {
   EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
-} from '../../../../screens/exceptions';
-import { createExceptionList, deleteExceptionList } from '../../../../tasks/api_calls/exceptions';
+} from '../../../../../../screens/exceptions';
+import {
+  createExceptionList,
+  deleteExceptionList,
+} from '../../../../../../tasks/api_calls/exceptions';
 import {
   dismissCallOut,
   getCallOut,
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
-} from '../../../../tasks/common/callouts';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import { EXCEPTIONS_URL } from '../../../../urls/navigation';
+} from '../../../../../../tasks/common/callouts';
+import { login } from '../../../../../../tasks/login';
+import { visit } from '../../../../../../tasks/navigation';
+import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539 Do we need to run it in Serverless?
 describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerless'] }, () => {

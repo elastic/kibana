@@ -7,10 +7,10 @@
 
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { MAX_COMMENT_LENGTH } from '@kbn/security-solution-plugin/common/constants';
-import { getNewRule } from '../../../objects/rule';
-import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
-import { createRule } from '../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../../../objects/rule';
+import { login } from '../../../../../tasks/login';
+import { visit } from '../../../../../tasks/navigation';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   addExceptionFlyoutItemName,
   editException,
@@ -23,8 +23,8 @@ import {
   deleteFirstExceptionItemInListDetailPage,
   addExceptionHugeComment,
   editExceptionComment,
-} from '../../../tasks/exceptions';
-import { EXCEPTIONS_URL } from '../../../urls/navigation';
+} from '../../../../../tasks/exceptions';
+import { EXCEPTIONS_URL } from '../../../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
@@ -33,18 +33,18 @@ import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXECPTION_ITEM_CARD_HEADER_TITLE,
   EMPTY_EXCEPTIONS_VIEWER,
-} from '../../../screens/exceptions';
+} from '../../../../../screens/exceptions';
 import {
   addExceptionListFromSharedExceptionListHeaderMenu,
   createSharedExceptionList,
   findSharedExceptionListItemsByName,
-} from '../../../tasks/exceptions_table';
-import { visitRuleDetailsPage } from '../../../tasks/rule_details';
+} from '../../../../../tasks/exceptions_table';
+import { visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import {
   deleteAlertsAndRules,
   deleteEndpointExceptionList,
   deleteExceptionLists,
-} from '../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/common';
 
 describe('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { getException, getExceptionList } from '../../../objects/exception';
-import { getNewRule } from '../../../objects/rule';
+import { getException, getExceptionList } from '../../../../../objects/exception';
+import { getNewRule } from '../../../../../objects/rule';
 
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import { createRule } from '../../../tasks/api_calls/rules';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../../../screens/alerts';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
-} from '../../../tasks/alerts';
-import { login } from '../../../tasks/login';
+} from '../../../../../tasks/alerts';
+import { login } from '../../../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
   goToAlertsTab,
@@ -25,7 +25,7 @@ import {
   searchForExceptionItem,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
-} from '../../../tasks/rule_details';
+} from '../../../../../tasks/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
@@ -36,8 +36,8 @@ import {
   selectSharedListToAddExceptionTo,
   submitEditedExceptionItem,
   submitNewExceptionItem,
-} from '../../../tasks/exceptions';
-import { deleteAlertsAndRules, deleteExceptionLists } from '../../../tasks/api_calls/common';
+} from '../../../../../tasks/exceptions';
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -50,13 +50,13 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   FIELD_INPUT_PARENT,
-} from '../../../screens/exceptions';
+} from '../../../../../screens/exceptions';
 import {
   createExceptionList,
   createExceptionListItem,
   deleteExceptionList,
-} from '../../../tasks/api_calls/exceptions';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+} from '../../../../../tasks/api_calls/exceptions';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(

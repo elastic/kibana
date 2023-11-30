@@ -6,26 +6,26 @@
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { getExceptionList } from '../../../objects/exception';
-import { getNewRule } from '../../../objects/rule';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { login } from '../../../tasks/login';
-import { visitRulesManagementTable } from '../../../tasks/rules_management';
-import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
-import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { getExceptionList } from '../../../../../objects/exception';
+import { getNewRule } from '../../../../../objects/rule';
+import { createRule } from '../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+import { goToExceptionsTab, goToAlertsTab } from '../../../../../tasks/rule_details';
+import { goToRuleDetailsOf } from '../../../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
   ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
-} from '../../../screens/exceptions';
-import { EXCEPTION_ITEM_ACTIONS_BUTTON } from '../../../screens/rule_details';
+} from '../../../../../screens/exceptions';
+import { EXCEPTION_ITEM_ACTIONS_BUTTON } from '../../../../../screens/rule_details';
 import {
   createExceptionList,
   createExceptionListItem,
   deleteExceptionList,
-} from '../../../tasks/api_calls/exceptions';
+} from '../../../../../tasks/api_calls/exceptions';
 
 describe('Exceptions viewer read only', { tags: ['@ess'] }, () => {
   const exceptionList = getExceptionList();

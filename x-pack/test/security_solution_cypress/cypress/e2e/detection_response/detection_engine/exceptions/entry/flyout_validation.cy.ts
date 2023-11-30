@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../objects/rule';
+import { getNewRule } from '../../../../../objects/rule';
 
-import { RULE_STATUS } from '../../../screens/create_new_rule';
+import { RULE_STATUS } from '../../../../../screens/create_new_rule';
 
-import { createRule } from '../../../tasks/api_calls/rules';
-import { login } from '../../../tasks/login';
+import { createRule } from '../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   goToExceptionsTab,
   openEditException,
   visitRuleDetailsPage,
-} from '../../../tasks/rule_details';
+} from '../../../../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
   addExceptionEntryFieldValue,
@@ -29,7 +29,7 @@ import {
   selectCurrentEntryField,
   showFieldConflictsWarningTooltipWithMessage,
   showMappingConflictsWarningMessage,
-} from '../../../tasks/exceptions';
+} from '../../../../../tasks/exceptions';
 import {
   ADD_AND_BTN,
   ADD_OR_BTN,
@@ -45,17 +45,17 @@ import {
   VALUES_INPUT,
   EXCEPTION_FLYOUT_TITLE,
   FIELD_INPUT_PARENT,
-} from '../../../screens/exceptions';
+} from '../../../../../screens/exceptions';
 
-import { reload } from '../../../tasks/common';
+import { reload } from '../../../../../tasks/common';
 import {
   createExceptionList,
   createExceptionListItem,
   updateExceptionListItem,
   deleteExceptionList,
-} from '../../../tasks/api_calls/exceptions';
-import { getExceptionList } from '../../../objects/exception';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/exceptions';
+import { getExceptionList } from '../../../../../objects/exception';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // Test Skipped until we fix the Flyout rerendering issue

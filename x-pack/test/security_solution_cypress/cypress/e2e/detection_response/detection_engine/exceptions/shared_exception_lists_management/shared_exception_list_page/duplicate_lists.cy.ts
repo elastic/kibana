@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../tasks/api_calls/common';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getExceptionList } from '../../../../objects/exception';
-import { assertNumberOfExceptionItemsExists } from '../../../../tasks/exceptions';
+import {
+  deleteAlertsAndRules,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/common';
+import { createRule } from '../../../../../../tasks/api_calls/rules';
+import { getExceptionList } from '../../../../../../objects/exception';
+import { assertNumberOfExceptionItemsExists } from '../../../../../../tasks/exceptions';
 import {
   assertExceptionListsExists,
   duplicateSharedExceptionListFromListsManagementPageByListId,
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
-} from '../../../../tasks/exceptions_table';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import { EXCEPTIONS_URL } from '../../../../urls/navigation';
+} from '../../../../../../tasks/exceptions_table';
+import { login } from '../../../../../../tasks/login';
+import { visit } from '../../../../../../tasks/navigation';
+import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 import {
   createExceptionList,
   createExceptionListItem,
-} from '../../../../tasks/api_calls/exceptions';
-import { getNewRule } from '../../../../objects/rule';
+} from '../../../../../../tasks/api_calls/exceptions';
+import { getNewRule } from '../../../../../../objects/rule';
 
 const expiredDate = new Date(Date.now() - 1000000).toISOString();
 const futureDate = new Date(Date.now() + 1000000).toISOString();

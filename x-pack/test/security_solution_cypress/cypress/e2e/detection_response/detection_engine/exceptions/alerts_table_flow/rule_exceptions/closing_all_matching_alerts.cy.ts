@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../../../../tasks/create_new_rule';
 import {
   addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   waitForAlerts,
-} from '../../../../tasks/alerts';
-import { deleteAlertsAndRules, postDataView } from '../../../../tasks/api_calls/common';
-import { login } from '../../../../tasks/login';
-import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
-import { LOADING_INDICATOR } from '../../../../screens/security_header';
-import { ALERTS_COUNT } from '../../../../screens/alerts';
+} from '../../../../../../tasks/alerts';
+import { deleteAlertsAndRules, postDataView } from '../../../../../../tasks/api_calls/common';
+import { login } from '../../../../../../tasks/login';
+import { visitRuleDetailsPage } from '../../../../../../tasks/rule_details';
+import { createRule } from '../../../../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../../../../objects/rule';
+import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
+import { ALERTS_COUNT } from '../../../../../../screens/alerts';
 import {
   addExceptionEntryFieldValue,
   addExceptionEntryOperatorValue,
@@ -24,7 +24,7 @@ import {
   addExceptionFlyoutItemName,
   selectBulkCloseAlerts,
   submitNewExceptionItem,
-} from '../../../../tasks/exceptions';
+} from '../../../../../../tasks/exceptions';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967

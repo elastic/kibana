@@ -8,7 +8,7 @@
 import {
   IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
-} from '../../../../screens/exceptions';
+} from '../../../../../../screens/exceptions';
 import {
   waitForExceptionsTableToBeLoaded,
   importExceptionLists,
@@ -16,10 +16,10 @@ import {
   importExceptionListWithSelectingCreateNewOption,
   validateImportExceptionListWentSuccessfully,
   validateImportExceptionListFailedBecauseExistingListFound,
-} from '../../../../tasks/exceptions_table';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import { EXCEPTIONS_URL } from '../../../../urls/navigation';
+} from '../../../../../../tasks/exceptions_table';
+import { login } from '../../../../../../tasks/login';
+import { visit } from '../../../../../../tasks/navigation';
+import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 
 describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';

@@ -11,15 +11,15 @@ import {
   addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
   submitNewExceptionItem,
-} from '../../../tasks/exceptions';
+} from '../../../../../tasks/exceptions';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   visitRuleDetailsPage,
-} from '../../../tasks/rule_details';
-import { getNewRule } from '../../../objects/rule';
-import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
-import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+} from '../../../../../tasks/rule_details';
+import { getNewRule } from '../../../../../objects/rule';
+import { login } from '../../../../../tasks/login';
+import { visit } from '../../../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {
   createListsIndex,
   waitForListsIndex,
@@ -29,8 +29,8 @@ import {
   importValueList,
   KNOWN_VALUE_LIST_FILES,
   deleteValueLists,
-} from '../../../tasks/lists';
-import { createRule } from '../../../tasks/api_calls/rules';
+} from '../../../../../tasks/lists';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   CLOSE_ALERTS_CHECKBOX,
   EXCEPTIONS_TABLE_MODAL,
@@ -38,7 +38,7 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
   NO_EXCEPTIONS_EXIST_PROMPT,
-} from '../../../screens/exceptions';
+} from '../../../../../screens/exceptions';
 
 const goToRulesAndOpenValueListModal = () => {
   visit(RULES_MANAGEMENT_URL);

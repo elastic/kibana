@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../objects/rule';
+import { getNewRule } from '../../../../../objects/rule';
 
-import { RULE_STATUS } from '../../../screens/create_new_rule';
+import { RULE_STATUS } from '../../../../../screens/create_new_rule';
 
-import { createRule } from '../../../tasks/api_calls/rules';
-import { login } from '../../../tasks/login';
+import { createRule } from '../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   visitRuleDetailsPage,
   enablesRule,
   waitForTheRuleToBeExecuted,
   goToAlertsTab,
-} from '../../../tasks/rule_details';
+} from '../../../../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
   addExceptionEntryFieldValue,
   addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
   submitNewExceptionItem,
-} from '../../../tasks/exceptions';
-import { CONFIRM_BTN } from '../../../screens/exceptions';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
-import { ALERTS_COUNT } from '../../../screens/alerts';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+} from '../../../../../tasks/exceptions';
+import { CONFIRM_BTN } from '../../../../../screens/exceptions';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { ALERTS_COUNT } from '../../../../../screens/alerts';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

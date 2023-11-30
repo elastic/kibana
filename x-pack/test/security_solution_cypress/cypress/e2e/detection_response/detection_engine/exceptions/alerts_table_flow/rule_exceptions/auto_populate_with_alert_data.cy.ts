@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LOADING_INDICATOR } from '../../../../screens/security_header';
-import { getEndpointRule } from '../../../../objects/rule';
-import { createRule } from '../../../../tasks/api_calls/rules';
+import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
+import { getEndpointRule } from '../../../../../../objects/rule';
+import { createRule } from '../../../../../../tasks/api_calls/rules';
 import {
   addExceptionFromFirstAlert,
   expandFirstAlert,
   openAddRuleExceptionFromAlertActionButton,
-} from '../../../../tasks/alerts';
+} from '../../../../../../tasks/alerts';
 import {
   addExceptionEntryFieldValue,
   addExceptionEntryFieldValueValue,
@@ -22,19 +22,19 @@ import {
   editExceptionFlyoutItemName,
   validateHighlightedFieldsPopulatedAsExceptionConditions,
   validateEmptyExceptionConditionField,
-} from '../../../../tasks/exceptions';
-import { login } from '../../../../tasks/login';
-import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../tasks/rule_details';
+} from '../../../../../../tasks/exceptions';
+import { login } from '../../../../../../tasks/login';
+import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../../../tasks/rule_details';
 
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 import {
   ADD_AND_BTN,
   ENTRY_DELETE_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
-} from '../../../../screens/exceptions';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+} from '../../../../../../screens/exceptions';
+import { waitForAlertsToPopulate } from '../../../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967

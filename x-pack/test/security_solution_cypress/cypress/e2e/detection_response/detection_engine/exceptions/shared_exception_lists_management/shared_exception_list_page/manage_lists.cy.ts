@@ -6,14 +6,17 @@
  */
 
 import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { expectedExportedExceptionList, getExceptionList } from '../../../../objects/exception';
-import { getNewRule } from '../../../../objects/rule';
+import {
+  expectedExportedExceptionList,
+  getExceptionList,
+} from '../../../../../../objects/exception';
+import { getNewRule } from '../../../../../../objects/rule';
 
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
+import { createRule } from '../../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../../tasks/login';
+import { visit } from '../../../../../../tasks/navigation';
 
-import { EXCEPTIONS_URL } from '../../../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 import {
   assertNumberLinkedRules,
   createSharedExceptionList,
@@ -22,14 +25,14 @@ import {
   exportExceptionList,
   linkRulesToExceptionList,
   waitForExceptionsTableToBeLoaded,
-} from '../../../../tasks/exceptions_table';
+} from '../../../../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
-} from '../../../../screens/exceptions';
-import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
+} from '../../../../../../screens/exceptions';
+import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
 
-import { TOASTER } from '../../../../screens/alerts_detection_rules';
+import { TOASTER } from '../../../../../../screens/alerts_detection_rules';
 
 const EXCEPTION_LIST_NAME = 'My test list';
 const EXCEPTION_LIST_TO_DUPLICATE_NAME = 'A test list 2';
