@@ -10,7 +10,6 @@ import { useContractComponents } from '../../hooks/use_contract_component';
 
 export const LandingPageComponent = memo(() => {
   const { GetStarted } = useContractComponents();
-
   return GetStarted ? <GetStarted /> : null;
 });
 
