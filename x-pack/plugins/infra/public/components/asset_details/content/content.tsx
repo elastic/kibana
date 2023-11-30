@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
+import { css } from '@emotion/react';
 import { DatePicker } from '../date_picker/date_picker';
+import { useProfilingStatusData } from '../hooks/use_profiling_status_data';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { Anomalies, Metadata, Processes, Osquery, Logs, Overview, Profiling } from '../tabs';
 import { ContentTabIds } from '../types';
 
 export const Content = () => {
+  const { activeTabId } = useTabSwitcherContext();
+  const { error, loading, response } = useProfilingStatusData({
+    isActive: activeTabId === ContentTabIds.PROFILING,
+  });
+  const showProfilingEmptyState = error !== null && response?.has_setup === false;
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
@@ -22,7 +30,7 @@ export const Content = () => {
             ContentTabIds.LOGS,
             ContentTabIds.METADATA,
             ContentTabIds.PROCESSES,
-            ContentTabIds.PROFILING,
+            ...(loading || showProfilingEmptyState ? [] : [ContentTabIds.PROFILING]),
             ContentTabIds.ANOMALIES,
           ]}
         />
@@ -47,7 +55,18 @@ export const Content = () => {
           <Processes />
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.PROFILING}>
-          <Profiling />
+          {loading ? (
+            <div
+              css={css`
+                display: flex;
+                justify-content: center;
+              `}
+            >
+              <EuiLoadingSpinner size="m" />
+            </div>
+          ) : (
+            <>{showProfilingEmptyState ? <ProfilingEmptyState /> : <Profiling />}</>
+          )}
         </TabPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
