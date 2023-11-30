@@ -51,7 +51,8 @@ describe('CreateSLO', () => {
         id: 'unique-id',
         indicator: createAPMTransactionErrorRateIndicator(),
       });
-      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+      mockTransformManager.install.mockResolvedValue('slo-id-revision');
+      mockSummaryTransformManager.install.mockResolvedValue('slo-summary-id-revision');
 
       const response = await createSLO.execute(sloParams);
 
@@ -66,18 +67,21 @@ describe('CreateSLO', () => {
           revision: 1,
           tags: [],
           enabled: true,
+          version: 2,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
         }),
         { throwOnConflict: true }
       );
-      expect(mockTransformManager.install).toHaveBeenCalledWith(
-        expect.objectContaining({ ...sloParams, id: 'unique-id' })
-      );
-      expect(mockTransformManager.preview).toHaveBeenCalledWith('slo-transform-id');
-      expect(mockTransformManager.start).toHaveBeenCalledWith('slo-transform-id');
-      expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
+
+      expect(mockTransformManager.install).toHaveBeenCalled();
+      expect(mockTransformManager.start).toHaveBeenCalled();
+      expect(esClientMock.ingest.putPipeline.mock.calls[0]).toMatchSnapshot();
+      expect(mockSummaryTransformManager.install).toHaveBeenCalled();
+      expect(mockSummaryTransformManager.start).toHaveBeenCalled();
       expect(esClientMock.index.mock.calls[0]).toMatchSnapshot();
+
+      expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
     });
 
     it('overrides the default values when provided', async () => {
@@ -112,32 +116,20 @@ describe('CreateSLO', () => {
   });
 
   describe('unhappy path', () => {
-    it('deletes the SLO when transform installation fails', async () => {
-      mockTransformManager.install.mockRejectedValue(new Error('Transform install error'));
+    it('rollbacks new resources on failure', async () => {
+      mockTransformManager.install.mockRejectedValue(new Error('Rollup transform install error'));
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform install error');
-      expect(mockRepository.deleteById).toBeCalled();
-    });
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
+        'Rollup transform install error'
+      );
 
-    it('removes the transform and deletes the SLO when transform preview fails', async () => {
-      mockTransformManager.install.mockResolvedValue('slo-transform-id');
-      mockTransformManager.preview.mockRejectedValue(new Error('Transform preview error'));
-      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
-
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform preview error');
-      expect(mockTransformManager.uninstall).toBeCalledWith('slo-transform-id');
-      expect(mockRepository.deleteById).toBeCalled();
-    });
-
-    it('removes the transform and deletes the SLO when transform start fails', async () => {
-      mockTransformManager.install.mockResolvedValue('slo-transform-id');
-      mockTransformManager.start.mockRejectedValue(new Error('Transform start error'));
-      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
-
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform start error');
-      expect(mockTransformManager.uninstall).toBeCalledWith('slo-transform-id');
-      expect(mockRepository.deleteById).toBeCalled();
+      expect(mockSummaryTransformManager.stop).toHaveBeenCalled();
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+      expect(mockTransformManager.stop).toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).toHaveBeenCalled();
+      expect(esClientMock.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockRepository.deleteById).toHaveBeenCalled();
     });
   });
 });
