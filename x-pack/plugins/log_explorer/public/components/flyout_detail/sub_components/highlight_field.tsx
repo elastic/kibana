@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard, EuiTextTruncate } from '@elastic/eui';
 import React, { ReactNode, useMemo, useState } from 'react';
+import { ValuesType } from 'utility-types';
 import {
   flyoutHoverActionFilterForText,
   flyoutHoverActionFilterOutText,
@@ -16,13 +17,14 @@ import {
 } from '../translations';
 import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
 import { HoverActionPopover, HoverActionType } from './hover_popover_action';
+import { LogDocument } from '../types';
 
 interface HighlightFieldProps {
   field: string;
   formattedValue: string;
   icon?: ReactNode;
   label: string | ReactNode;
-  value: unknown;
+  value: ValuesType<LogDocument['flattened']>;
   width: number;
 }
 
@@ -98,7 +100,7 @@ export function HighlightField({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <HoverActionPopover actions={hoverActions} title={formattedValue}>
+        <HoverActionPopover actions={hoverActions} title={value}>
           <EuiFlexGroup
             responsive={false}
             alignItems="center"

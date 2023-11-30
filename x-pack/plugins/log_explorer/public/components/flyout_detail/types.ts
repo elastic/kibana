@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 export interface FlyoutProps extends FlyoutContentProps {
   dataView: DataView;
+  doc: LogDocument;
 }
 
 export interface LogDocument extends DataTableRecord {
