@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { initElasticsearchHelpers } from './elasticsearch';
-
 export { getRandomString } from './random';
