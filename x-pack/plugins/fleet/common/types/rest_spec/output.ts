@@ -47,4 +47,5 @@ export interface PostLogstashApiKeyResponse {
 export interface GetOutputHealthResponse {
   state: string;
   message: string;
+  timestamp: string;
 }

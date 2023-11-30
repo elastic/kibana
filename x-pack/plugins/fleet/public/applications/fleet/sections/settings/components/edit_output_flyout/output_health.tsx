@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiCallOut } from '@elastic/eui';
+import { EuiBadge, EuiCallOut, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -92,9 +92,30 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
     ),
   };
 
-  return outputHealth?.state
-    ? showBadge
-      ? OutputStatusBadge[outputHealth.state] || null
-      : EditOutputStatus[outputHealth.state] || null
-    : null;
+  const msLastTimestamp = new Date(outputHealth?.timestamp || 0).getTime();
+  const lastTimestampText = msLastTimestamp ? (
+    <>
+      <FormattedMessage
+        id="xpack.fleet.outputHealth.timestampTooltipText"
+        defaultMessage="Last reported {timestamp}"
+        values={{
+          timestamp: <FormattedRelative value={msLastTimestamp} />,
+        }}
+      />
+    </>
+  ) : null;
+
+  const outputBadge = (outputHealth?.state && OutputStatusBadge[outputHealth?.state]) || null;
+
+  return showBadge ? (
+    lastTimestampText && outputHealth?.state ? (
+      <EuiToolTip position="top" content={lastTimestampText}>
+        <>{outputBadge} </>
+      </EuiToolTip>
+    ) : (
+      outputBadge
+    )
+  ) : (
+    (outputHealth?.state && EditOutputStatus[outputHealth.state]) || null
+  );
 };

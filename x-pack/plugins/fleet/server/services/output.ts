@@ -965,12 +965,14 @@ class OutputService {
       return {
         state: 'UNKOWN',
         message: '',
+        timestamp: '',
       };
     }
     const latestHit = response.hits.hits[0]._source as any;
     return {
       state: latestHit.state,
       message: latestHit.message ?? '',
+      timestamp: latestHit['@timestamp'],
     };
   }
 }
@@ -978,6 +980,7 @@ class OutputService {
 interface OutputHealth {
   state: string;
   message: string;
+  timestamp: string;
 }
 
 export const outputService = new OutputService();
