@@ -12,6 +12,7 @@ import { FetchPipelineResponse } from '../../../../api/pipelines/fetch_pipeline'
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
+const NORMALIZABLE_PIPELINE_CHARS_REGEX = /[^\w\-]/g;
 export const TRAINED_MODELS_PATH = '/app/ml/trained_models';
 
 export const isValidPipelineName = (input: string): boolean => {
@@ -77,6 +78,10 @@ export const validateInferencePipelineFields = (
     errors.fieldMappings = FIELD_REQUIRED_ERROR;
   }
   return errors;
+};
+
+export const normalizeModelName = (modelName: string): string => {
+  return modelName.replace(NORMALIZABLE_PIPELINE_CHARS_REGEX, '_');
 };
 
 export const EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS = (
