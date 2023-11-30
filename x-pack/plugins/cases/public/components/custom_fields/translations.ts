@@ -66,6 +66,10 @@ export const FIELD_OPTION_REQUIRED = i18n.translate(
   }
 );
 
+export const REQUIRED = i18n.translate('xpack.cases.customFields.required', {
+  defaultMessage: 'Required',
+});
+
 export const REQUIRED_FIELD = (fieldName: string): string =>
   i18n.translate('xpack.cases.customFields.requiredField', {
     values: { fieldName },

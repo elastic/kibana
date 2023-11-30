@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { EuiFlyoutProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import React, { type ComponentType } from 'react';
@@ -38,6 +39,7 @@ export interface FlyoutContentProps {
 
 export interface FlyoutCustomization {
   id: 'flyout';
+  size?: EuiFlyoutProps['size'];
   title?: string;
   actions: {
     defaultActions?: FlyoutDefaultActions;
