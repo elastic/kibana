@@ -74,7 +74,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          severity: initialFilterOptions.severity,
+          severity: initialFilterOptions.severity || [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -91,7 +91,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          status: initialFilterOptions.status,
+          status: initialFilterOptions.status || [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -112,7 +112,7 @@ export const getSystemFilterConfig = ({
       isAvailable: caseAssignmentAuthorized && !isSelectorView,
       getEmptyOptions: () => {
         return {
-          assignees: initialFilterOptions.assignees,
+          assignees: initialFilterOptions.assignees || [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => {
@@ -133,7 +133,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          tags: initialFilterOptions.tags,
+          tags: initialFilterOptions.tags || [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -155,7 +155,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          category: initialFilterOptions.category,
+          category: initialFilterOptions.category || [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -177,7 +177,7 @@ export const getSystemFilterConfig = ({
       isAvailable: availableSolutions.length > 1,
       getEmptyOptions: () => {
         return {
-          owner: initialFilterOptions.owner,
+          owner: initialFilterOptions.owner || [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (

@@ -32,7 +32,6 @@ import { useIsLoadingCases } from './use_is_loading_cases';
 import { useAllCasesState } from './use_all_cases_state';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
-import { DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -66,7 +65,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const hasOwner = !!owner.length;
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
-      ...DEFAULT_FILTER_OPTIONS,
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: [firstAvailableStatus] }),
       owner: hasOwner ? owner : availableSolutions,
     };

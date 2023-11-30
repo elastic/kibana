@@ -11,6 +11,13 @@ import userEvent from '@testing-library/user-event';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusFilter } from './status_filter';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import * as i18n from './translations';
+
+const LABELS = {
+  closed: i18n.STATUS_CLOSED,
+  open: i18n.STATUS_OPEN,
+  inProgress: i18n.STATUS_IN_PROGRESS,
+};
 
 describe('StatusFilter', () => {
   const onChange = jest.fn();
@@ -35,9 +42,9 @@ describe('StatusFilter', () => {
     userEvent.click(screen.getByRole('button', { name: 'Status' }));
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByRole('option', { name: CaseStatuses.open })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: CaseStatuses['in-progress'] })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: CaseStatuses.closed })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: LABELS.open })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: LABELS.closed })).toBeInTheDocument();
     expect(screen.getAllByRole('option').length).toBe(3);
   });
 
@@ -46,7 +53,7 @@ describe('StatusFilter', () => {
 
     userEvent.click(screen.getByRole('button', { name: 'Status' }));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByRole('option', { name: CaseStatuses.open }));
+    userEvent.click(screen.getByRole('option', { name: LABELS.open }));
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
@@ -63,7 +70,7 @@ describe('StatusFilter', () => {
     await waitForEuiPopoverOpen();
 
     expect(screen.getAllByRole('option')).toHaveLength(2);
-    expect(screen.getByRole('option', { name: CaseStatuses.open })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: CaseStatuses['in-progress'] })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: LABELS.open })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
   });
 });
