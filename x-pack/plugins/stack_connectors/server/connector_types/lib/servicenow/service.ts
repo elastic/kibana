@@ -299,6 +299,8 @@ export const createExternalService: ServiceFactory = ({
             logger.warn(
               `[ServiceNow][CloseIncident] No incident found with incidentId: ${incidentId}.`
             );
+
+            return null;
           }
         }
       } else if (correlationId) {

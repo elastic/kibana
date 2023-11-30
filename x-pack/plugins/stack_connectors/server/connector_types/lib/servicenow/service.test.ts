@@ -1062,13 +1062,15 @@ describe('ServiceNow service', () => {
           },
         }));
 
-        await service.closeIncident({ incidentId: 'xyz', correlationId: null });
+        const res = await service.closeIncident({ incidentId: 'xyz', correlationId: null });
 
+        expect(requestMock).toHaveBeenCalledTimes(1);
         expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "[ServiceNow][CloseIncident] No incident found with incidentId: xyz.",
-        ]
-      `);
+          Array [
+            "[ServiceNow][CloseIncident] No incident found with incidentId: xyz.",
+          ]
+        `);
+        expect(res).toBeNull();
       });
 
       test('it should log warning if found incident is closed', async () => {
