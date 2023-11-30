@@ -74,7 +74,11 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
       auth: undefined,
     });
 
-    logger.info(`Discovered kibana running at: ${kibanaUrlWithoutAuth}`);
+    logger.info(
+      `Discovered kibana running at: ${
+        parsedDiscoveredUrl.protocol === 'http' ? discoveredKibanaUrlWithAuth : kibanaUrlWithoutAuth
+      }`
+    );
 
     return discoveredKibanaUrlWithAuth.replace(/\/$/, '');
   } catch (error) {
