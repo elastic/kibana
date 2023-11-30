@@ -19,6 +19,8 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -306,6 +308,11 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   return (
     <EuiModal onClose={onClose}>
       <EuiForm className="kbnShareContextMenu__finalPanel">
+        <EuiSpacer size="xs" />
+        <EuiTitle>
+          <EuiText>{`Share this ${objectType}`}</EuiText>
+        </EuiTitle>
+        <EuiSpacer size="m" />
         <EuiRadioGroup
           options={[
             { id: 'savedObject', label: 'Saved object' },

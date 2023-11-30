@@ -20,6 +20,8 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
@@ -63,19 +65,16 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   } = props;
   const isMounted = useMountedState();
   const [isCreatingShortUrl, setIsCreatingShortUrl] = useState<boolean>(false);
-  const [urlParams, setUrlParams] = useState<undefined | UrlParams>(undefined);
+  const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState({ ['filterBar']: true });
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
 
-  const [exportUrlAs, setExportUrlAs] = useState<ExportUrlAsType>(
-    ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT
-  );
+  const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
-  const [anonymousAccessParameters, setAnonymousAccessParameters] =
-    useState<null | AnonymousAccessServiceContract>(null);
-  const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
+  const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
+  const [usePublicUrl] = useState<boolean>(false);
 
   interface UrlParams {
     [extensionName: string]: {
@@ -331,6 +330,11 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     <EuiModal onClose={onClose}>
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
+          <EuiSpacer size="xs" />
+          <EuiTitle>
+            <EuiText>{`Share this ${props.objectType}`}</EuiText>
+          </EuiTitle>
+          <EuiSpacer size="m" />
           <EuiFlexGroup direction="row">
             <EuiFlexItem grow={1}>
               <EuiCheckboxGroup

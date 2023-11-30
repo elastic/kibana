@@ -124,11 +124,11 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [useCanvasLayout, setCanvasLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
-  const [isShortUrl, setIsShortUrl] = useState<boolean>(false);
+  const [, setIsShortUrl] = useState<boolean>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
-  const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
-  const [objectType, setObjectType] = useState<string>('dashboard');
+  const [, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
+  const [objectType] = useState<string>('dashboard');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
   const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
 
@@ -150,7 +150,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     }
   };
 
-  const getUrlParamExtensions = (url: string): string => {
+  const getUrlParamExtensions = (tempUrl: string): string => {
     return urlParams
       ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
           const urlParam = urlParams[key];
@@ -162,14 +162,14 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
                   : queryAccumulator;
               }, urlAccumulator)
             : urlAccumulator;
-        }, url)
-      : url;
+        }, tempUrl)
+      : tempUrl;
   };
 
-  const updateUrlParams = (url: string) => {
-    url = urlParams ? getUrlParamExtensions(url) : url;
+  const updateUrlParams = (tempUrl: string) => {
+    const temp = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
 
-    return url;
+    return setUrl(temp);
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
@@ -408,16 +408,13 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   };
 
   const setUrl = () => {
-    let tempUrl: string | undefined;
-
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      tempUrl = getSavedObjectUrl();
+      getSavedObjectUrl();
     } else if (shortUrl) {
-      tempUrl = shortUrlCache;
+      setShortUrlCache(shortUrlCache);
     } else {
-      tempUrl = getSnapshotUrl();
+      getSnapshotUrl();
     }
-
     setUrl();
   };
 
