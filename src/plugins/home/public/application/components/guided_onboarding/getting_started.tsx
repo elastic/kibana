@@ -40,7 +40,7 @@ const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelect
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage: `Select a guide to help you make the most of your data.`,
+  defaultMessage: `Filter by solution to see related use cases`,
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
   defaultMessage: `I’d like to explore on my own.`,

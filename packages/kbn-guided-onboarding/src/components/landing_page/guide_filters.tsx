@@ -44,7 +44,7 @@ export const GuideFilters = ({
 }: GuideFiltersProps) => {
   const { euiTheme } = useEuiTheme();
   const activeFilterFill = css`
-    background: ${euiTheme.colors.darkestShade};
+    background: ${euiTheme.colors.primary};
     color: ${euiTheme.colors.lightestShade};
   `;
 
