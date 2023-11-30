@@ -12,7 +12,6 @@ export type { TimelineModel } from './timelines/store/timeline/model';
 export type { LinkItem } from './common/links';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
-export { useSourcererDataView } from './common/containers/sourcerer';
 
 export type { PluginSetup, PluginStart };
 export { Plugin };

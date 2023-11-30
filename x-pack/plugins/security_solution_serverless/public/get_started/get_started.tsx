@@ -9,7 +9,6 @@ import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-import { useSourcererDataView } from '@kbn/security-solution-plugin/public';
 import { TogglePanel } from './toggle_panel';
 
 import type { SecurityProductTypes } from '../../common/config';
@@ -21,10 +20,11 @@ import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
 
 export interface GetStartedProps {
+  indicesExist?: boolean;
   productTypes: SecurityProductTypes;
 }
 
-export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes }) => {
+export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, indicesExist }) => {
   const { euiTheme } = useEuiTheme();
   const {
     onStepClicked,
@@ -41,7 +41,6 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
   const productTier = productTypes.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
-  const { indicesExist } = useSourcererDataView();
 
   return (
     <KibanaPageTemplate
