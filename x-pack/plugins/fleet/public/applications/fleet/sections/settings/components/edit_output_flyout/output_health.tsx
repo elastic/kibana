@@ -39,7 +39,6 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
           defaultMessage: 'Error fetching output state',
         }),
       });
-      return;
     }
     setOutputHealth(outputHealthResponse?.data);
   }, [outputHealthResponse, notifications.toasts]);
