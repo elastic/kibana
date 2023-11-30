@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { calculatePostureScore } from '../../common/utils/helpers';
@@ -19,21 +19,25 @@ export const ComplianceScoreBar = ({
   totalPassed,
   totalFailed,
   size = 'm',
+  overrideCss,
 }: {
   totalPassed: number;
   totalFailed: number;
   size?: 'm' | 'l';
+  overrideCss?: SerializedStyles;
 }) => {
   const { euiTheme } = useEuiTheme();
   const complianceScore = calculatePostureScore(totalPassed, totalFailed);
 
+  // ensures the compliance bar takes full width of its parent
+  const fullWidthTooltipCss = css`
+    width: 100%;
+  `;
+
   return (
     <EuiToolTip
       anchorProps={{
-        // ensures the compliance bar takes full width of its parent
-        css: css`
-          width: 100%;
-        `,
+        css: overrideCss || fullWidthTooltipCss,
       }}
       content={i18n.translate('xpack.csp.complianceScoreBar.tooltipTitle', {
         defaultMessage: '{failed} failed and {passed} passed findings',

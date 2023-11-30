@@ -12,6 +12,7 @@ import {
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
@@ -158,12 +159,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
-            <EuiFlexItem
-              grow={0}
-              css={css`
-                margin-left: 12px;
-              `}
-            >
+            <EuiFlexItem grow={0}>
               <CISBenchmarkIcon
                 type={benchmarkId}
                 name={firstNonNullValue(bucket.benchmarkName?.buckets?.[0]?.key)}
@@ -192,12 +188,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
-            <EuiFlexItem
-              grow={0}
-              css={css`
-                margin-left: 12px;
-              `}
-            >
+            <EuiFlexItem grow={0}>
               <CISBenchmarkIcon
                 type={benchmarkId}
                 name={firstNonNullValue(bucket.benchmarkName?.buckets?.[0]?.key)}
@@ -239,67 +230,61 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
   }
 };
 
+const FindingsCountComponent = ({ bucket }: { bucket: RawBucket<FindingsGroupingAggregation> }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiToolTip content={bucket.doc_count}>
+      <EuiBadge
+        css={css`
+          margin-left: ${euiTheme.size.s}};
+        `}
+        color="hollow"
+      >
+        {getAbbreviatedNumber(bucket.doc_count)}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+};
+
+const FindingsCount = React.memo(FindingsCountComponent);
+
+const ComplianceBarComponent = ({ bucket }: { bucket: RawBucket<FindingsGroupingAggregation> }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const totalFailed = bucket.failedFindings?.doc_count || 0;
+  const totalPassed = bucket.doc_count - totalFailed;
+  return (
+    <ComplianceScoreBar
+      size="l"
+      overrideCss={css`
+        width: 104px;
+        margin-left: ${euiTheme.size.s}};
+      `}
+      totalFailed={totalFailed}
+      totalPassed={totalPassed}
+    />
+  );
+};
+
+const ComplianceBar = React.memo(ComplianceBarComponent);
+
 export const groupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<FindingsGroupingAggregation>
 ): StatRenderer[] => {
-  const renderComplianceBar = () => {
-    const totalFailed = bucket.failedFindings?.doc_count || 0;
-
-    const totalPassed = bucket.doc_count - totalFailed;
-    return (
-      <EuiFlexGroup
-        css={css`
-          width: 198px;
-        `}
-        gutterSize="s"
-      >
-        <EuiFlexItem
-          grow={0}
-          css={css`
-            text-wrap: 'nowrap';
-          `}
-        >
-          <EuiText size="xs">
-            <strong>
-              <FormattedMessage
-                id="xpack.csp.findings.grouping.complianceBar.compliance"
-                defaultMessage="Compliance"
-              />
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ComplianceScoreBar size="l" totalFailed={totalFailed} totalPassed={totalPassed} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-  const renderFindingsCount = () => {
-    return (
-      <EuiToolTip content={bucket.doc_count}>
-        <EuiBadge
-          css={css`
-            margin-left: 8px;
-          `}
-          color="hollow"
-        >
-          {getAbbreviatedNumber(bucket.doc_count)}
-        </EuiBadge>
-      </EuiToolTip>
-    );
-  };
-
   const defaultBadges = [
     {
       title: i18n.translate('xpack.csp.findings.grouping.stats.badges.findings', {
         defaultMessage: 'Findings',
       }),
-      renderer: renderFindingsCount(),
+      renderer: <FindingsCount bucket={bucket} />,
     },
     {
-      title: '',
-      renderer: renderComplianceBar(),
+      title: i18n.translate('xpack.csp.findings.grouping.stats.badges.compliance', {
+        defaultMessage: 'Compliance',
+      }),
+      renderer: <ComplianceBar bucket={bucket} />,
     },
   ];
 
