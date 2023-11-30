@@ -18,7 +18,7 @@ import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
 
 export interface FailedFindingsQueryResult {
-  aggs_by_resource_type: Aggregation<FailedFindingsBucket>;
+  aggs_by_resource_type: Aggregation<PostureStatsBucket>;
 }
 
 export interface BenchmarkVersionQueryResult extends KeyDocCount, FailedFindingsQueryResult {
@@ -33,17 +33,8 @@ export interface BenchmarkVersionQueryResult extends KeyDocCount, FailedFindings
   };
   aggs_by_benchmark_name: Aggregation<KeyDocCount>;
 }
-export interface FailedFindingsBucket extends KeyDocCount {
-  failed_findings: {
-    doc_count: number;
-  };
-  passed_findings: {
-    doc_count: number;
-  };
-  score: { value: number };
-}
 
-export interface FailedFindingsBucket extends KeyDocCount {
+export interface PostureStatsBucket extends KeyDocCount {
   failed_findings: {
     doc_count: number;
   };
@@ -102,8 +93,8 @@ export const getRisksEsQuery = (
   },
 });
 
-export const getFailedFindingsFromAggs = (
-  queryResult: FailedFindingsBucket[]
+export const getPostureStatsFromAggs = (
+  queryResult: PostureStatsBucket[]
 ): ComplianceDashboardData['groupedFindingsEvaluation'] =>
   queryResult.map((bucket) => {
     const totalPassed = bucket.passed_findings.doc_count || 0;
@@ -119,11 +110,11 @@ export const getFailedFindingsFromAggs = (
   });
 
 export const getGroupedFindingsEvaluation = async (
-  logger: Logger,
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string,
-  runtimeMappings: MappingRuntimeFields
+  runtimeMappings: MappingRuntimeFields,
+  logger: Logger
 ): Promise<ComplianceDashboardData['groupedFindingsEvaluation']> => {
   try {
     const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
@@ -135,7 +126,7 @@ export const getGroupedFindingsEvaluation = async (
       return [];
     }
 
-    return getFailedFindingsFromAggs(ruleSections);
+    return getPostureStatsFromAggs(ruleSections);
   } catch (err) {
     logger.error(`Failed to fetch findings stats ${err.message}`);
     logger.error(err);

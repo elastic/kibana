@@ -7,12 +7,17 @@
 
 export const MAPPING_VERSION_DELIMITER = '_';
 
-export const toBenchmarkDocFieldKey = (benchmarkId: string, benchmarkVersion: string) => {
-  if (benchmarkVersion.includes(MAPPING_VERSION_DELIMITER))
-    return `${benchmarkId};${benchmarkVersion.replaceAll('_', '.')}`;
-  return `${benchmarkId};${benchmarkVersion}`;
-};
+/*
+ * The latest finding index store benchmark version field value `v1.2.0`
+ * when we store the benchmark id and version field name in the benchmark scores index,
+ * we need benchmark version with  _ delimiter to avoid JSON mapping for each dot notation
+ * to be read as key. e.g. `v1.2.0` will be `v1_2_0`
+ */
 
-export const toBenchmarkMappingFieldKey = (benchmarkVersion: string) => {
-  return `${benchmarkVersion.replaceAll('.', '_')}`;
-};
+export const toBenchmarkDocFieldKey = (benchmarkId: string, benchmarkVersion: string) =>
+  benchmarkVersion.includes(MAPPING_VERSION_DELIMITER)
+    ? `${benchmarkId};${benchmarkVersion.replaceAll('_', '.')}`
+    : `${benchmarkId};${benchmarkVersion}`;
+
+export const toBenchmarkMappingFieldKey = (benchmarkVersion: string) =>
+  `${benchmarkVersion.replaceAll('.', '_')}`;

@@ -79,11 +79,11 @@ export const getStatsFromFindingsEvaluationsAggs = (
 };
 
 export const getStats = async (
-  logger: Logger,
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string,
-  runtimeMappings: MappingRuntimeFields
+  runtimeMappings: MappingRuntimeFields,
+  logger: Logger
 ): Promise<ComplianceDashboardData['stats']> => {
   try {
     const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(

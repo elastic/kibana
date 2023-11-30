@@ -100,10 +100,10 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
 
           const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] =
             await Promise.all([
-              getStats(logger, esClient, query, pitId, runtimeMappings),
-              getGroupedFindingsEvaluation(logger, esClient, query, pitId, runtimeMappings),
-              getClusters(logger, esClient, query, pitId, runtimeMappings),
-              getTrends(logger, esClient, policyTemplate),
+              getStats(esClient, query, pitId, runtimeMappings, logger),
+              getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings, logger),
+              getClusters(esClient, query, pitId, runtimeMappings, logger),
+              getTrends(esClient, policyTemplate, logger),
             ]);
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
@@ -172,10 +172,10 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
 
           const [stats, groupedFindingsEvaluation, benchmarksWithoutTrends, trends] =
             await Promise.all([
-              getStats(logger, esClient, query, pitId, runtimeMappings),
-              getGroupedFindingsEvaluation(logger, esClient, query, pitId, runtimeMappings),
-              getBenchmarks(logger, esClient, query, pitId, runtimeMappings),
-              getTrends(logger, esClient, policyTemplate),
+              getStats(esClient, query, pitId, runtimeMappings, logger),
+              getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings, logger),
+              getBenchmarks(esClient, query, pitId, runtimeMappings, logger),
+              getTrends(esClient, policyTemplate, logger),
             ]);
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive

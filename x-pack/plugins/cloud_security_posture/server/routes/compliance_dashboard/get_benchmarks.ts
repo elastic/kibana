@@ -17,7 +17,7 @@ import type { BenchmarkData } from '../../../common/types';
 import {
   failedFindingsAggQuery,
   BenchmarkVersionQueryResult,
-  getFailedFindingsFromAggs,
+  getPostureStatsFromAggs,
 } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
@@ -108,7 +108,7 @@ export const getBenchmarksFromAggs = (benchmarks: BenchmarkBucket[]) => {
       const resourcesTypesAggs = version.aggs_by_resource_type.buckets;
       if (!Array.isArray(resourcesTypesAggs))
         throw new Error('missing aggs by resource type per benchmark');
-      const groupedFindingsEvaluation = getFailedFindingsFromAggs(resourcesTypesAggs);
+      const groupedFindingsEvaluation = getPostureStatsFromAggs(resourcesTypesAggs);
 
       return {
         meta: {
@@ -125,11 +125,11 @@ export const getBenchmarksFromAggs = (benchmarks: BenchmarkBucket[]) => {
 };
 
 export const getBenchmarks = async (
-  logger: Logger,
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string,
-  runtimeMappings: MappingRuntimeFields
+  runtimeMappings: MappingRuntimeFields,
+  logger: Logger
 ): Promise<BenchmarkWithoutTrend[]> => {
   try {
     const queryResult = await esClient.search<unknown, BenchmarkQueryResult>(

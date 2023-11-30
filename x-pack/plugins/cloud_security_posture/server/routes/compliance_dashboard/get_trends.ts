@@ -11,30 +11,29 @@ import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 
+interface FindingsDetails {
+  total_findings: number;
+  passed_findings: number;
+  failed_findings: number;
+}
+
+interface ScoreByClusterId {
+  [clusterId: string]: FindingsDetails;
+}
+
+interface ScoreByBenchmarkId {
+  [benchmarkId: string]: {
+    [key: string]: FindingsDetails;
+  };
+}
+
 export interface ScoreTrendDoc {
   '@timestamp': string;
   total_findings: number;
   passed_findings: number;
   failed_findings: number;
-  score_by_cluster_id: Record<
-    string,
-    {
-      total_findings: number;
-      passed_findings: number;
-      failed_findings: number;
-    }
-  >;
-  score_by_benchmark_id: Record<
-    string,
-    Record<
-      string,
-      {
-        total_findings: number;
-        passed_findings: number;
-        failed_findings: number;
-      }
-    >
-  >;
+  score_by_cluster_id: ScoreByClusterId;
+  score_by_benchmark_id: ScoreByBenchmarkId;
 }
 
 export type Trends = Array<{
@@ -111,9 +110,9 @@ export const formatTrends = (scoreTrendDocs: ScoreTrendDoc[]): Trends => {
 };
 
 export const getTrends = async (
-  logger: Logger,
   esClient: ElasticsearchClient,
-  policyTemplate: PosturePolicyTemplate
+  policyTemplate: PosturePolicyTemplate,
+  logger: Logger
 ): Promise<Trends> => {
   try {
     const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery(policyTemplate));
