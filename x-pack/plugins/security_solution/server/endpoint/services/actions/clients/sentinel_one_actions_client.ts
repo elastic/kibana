@@ -8,6 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import { once } from 'lodash';
 import { ResponseActionsClientError } from './errors';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import type {
@@ -41,8 +42,7 @@ const createNotSupportedError = () => {
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private readonly connectorActionsClient: ActionsClient;
-  // @ts-expect-error temporary until we can use the property
-  private connector: Promise<ConnectorWithExtraFindData>;
+  private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
   constructor({
     connectorActions,
@@ -50,28 +50,57 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }: ResponseActionsClientOptions & { connectorActions: ActionsClient }) {
     super(options);
     this.connectorActionsClient = connectorActions;
-    this.connector = this.setup();
+
+    this.getConnector = once(async () => {
+      let connectorList: ConnectorWithExtraFindData[] = [];
+
+      try {
+        connectorList = await this.connectorActionsClient.getAll();
+      } catch (err) {
+        throw new ResponseActionsClientError(
+          `Unable to retrieve list of stack connectors: ${err.message}`,
+          // failure here is likely due to Authz, but because we don't have a good way to determine that,
+          // the `statusCode` below is set to `400` instead of `401`.
+          400,
+          err
+        );
+      }
+      const connector = connectorList.find(({ actionTypeId, isDeprecated, isMissingSecrets }) => {
+        return actionTypeId === SENTINELONE_CONNECTOR_ID && !isDeprecated && !isMissingSecrets;
+      });
+
+      if (!connector) {
+        throw new ResponseActionsClientError(
+          `No SentinelOne stack connector found`,
+          400,
+          connectorList
+        );
+      }
+
+      this.log.debug(`Using SentinelOne stack connector: ${connector.name} (${connector.id})`);
+
+      return connector;
+    });
   }
 
-  private async setup(): Promise<ConnectorWithExtraFindData> {
-    const connector = (await this.connectorActionsClient.getAll()).find(
-      ({ actionTypeId, isDeprecated, isMissingSecrets }) => {
-        return actionTypeId === SENTINELONE_CONNECTOR_ID && !isDeprecated && !isMissingSecrets;
-      }
-    );
+  /**
+   * Sends actions to SentinelOne directly
+   * @private
+   */
+  private async sendAction(): Promise<void> {
+    const { id: connectorId } = await this.getConnector();
 
-    if (!connector) {
-      throw new ResponseActionsClientError(`No SentinelOne connector found`, 400);
-    }
-
-    this.log.debug(`Using SentinelOne connector: ${connector.name} (${connector.id})`);
-
-    // TODO:PT can we check authz on API key for this connector? and error is it is not sufficient? Or maybe that should be done for each response actions?
-
-    return connector;
+    // FIXME:PT implement
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    const sendResponse = await this.sendAction();
+
+    const actionRequestDoc = this.writeActionRequestToEndpointIndex({
+      ...options,
+      command: 'isolate',
+    });
+
     throw createNotSupportedError();
   }
 

@@ -17,12 +17,13 @@ export class ResponseActionsClientError extends CustomHttpRequestError {
       message: this.message,
       statusCode: this.statusCode,
       meta: this.meta,
+      stack: this.stack,
     };
   }
 
   toString() {
     const content = this.toJSON();
     content.meta = dump(content.meta);
-    return JSON.stringify(this.toJSON(), null, 2);
+    return JSON.stringify(content, null, 2);
   }
 }
