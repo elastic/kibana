@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiSkeletonTitle,
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
@@ -57,17 +56,14 @@ const NullGroupComponent = ({
   unit?: string;
 }) => {
   return (
-    <div
-      css={css`
-        & .euiToolTipAnchor {
-          margin-top: -2px;
-          margin-left: 4px;
-          vertical-align: top;
-        }
-      `}
-    >
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
       <strong>{title}</strong>
       <EuiIconTip
+        anchorProps={{
+          css: css`
+            display: inline-flex;
+          `,
+        }}
         content={
           <>
             <FormattedMessage
@@ -90,24 +86,15 @@ const NullGroupComponent = ({
         }
         position="right"
       />
-    </div>
+    </EuiFlexGroup>
   );
 };
 
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
   selectedGroup,
   bucket,
-  nullGroupMessage,
-  isLoading
+  nullGroupMessage
 ) => {
-  if (isLoading) {
-    return (
-      <EuiSkeletonTitle size="s" isLoading={true}>
-        <strong>loading</strong>
-      </EuiSkeletonTitle>
-    );
-  }
-
   const benchmarkId = firstNonNullValue(bucket.benchmarkId?.buckets?.[0]?.key);
   switch (selectedGroup) {
     case GROUPING_OPTIONS.RESOURCE:
