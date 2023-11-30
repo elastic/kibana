@@ -271,8 +271,8 @@ export const ModelsList: FC<Props> = ({
           .map<ModelItem>((modelDefinition) => {
             return {
               model_id: modelDefinition.model_id,
-              type: [ELASTIC_MODEL_TYPE],
-              tags: [ELASTIC_MODEL_TAG],
+              type: modelDefinition.type,
+              tags: modelDefinition.type?.includes('elastic') ? [ELASTIC_MODEL_TAG] : [],
               putModelConfig: modelDefinition.config,
               description: modelDefinition.description,
               state: MODEL_STATE.NOT_DOWNLOADED,

@@ -57,6 +57,7 @@ describe('modelsProvider', () => {
           model_id: '.elser_model_1',
           version: 1,
           modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           config: { input: { field_names: ['text_field'] } },
@@ -65,6 +66,7 @@ describe('modelsProvider', () => {
           model_id: '.elser_model_2',
           version: 2,
           modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           arch: 'amd64',
@@ -75,6 +77,7 @@ describe('modelsProvider', () => {
           recommended: true,
           version: 2,
           modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           config: { input: { field_names: ['text_field'] } },
@@ -83,6 +86,8 @@ describe('modelsProvider', () => {
           default: true,
           version: 1,
           modelName: 'e5',
+          license: 'MIT',
+          type: ['pytorch', 'text_embedding'],
         },
         {
           arch: 'amd64',
@@ -94,6 +99,8 @@ describe('modelsProvider', () => {
           recommended: true,
           version: 1,
           modelName: 'e5',
+          license: 'MIT',
+          type: ['pytorch', 'text_embedding'],
         },
       ]);
     });
@@ -130,6 +137,7 @@ describe('modelsProvider', () => {
           model_id: '.elser_model_1',
           version: 1,
           modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           config: { input: { field_names: ['text_field'] } },
@@ -138,6 +146,7 @@ describe('modelsProvider', () => {
           model_id: '.elser_model_2',
           version: 2,
           modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           arch: 'amd64',
@@ -147,6 +156,7 @@ describe('modelsProvider', () => {
           os: 'Linux',
           version: 2,
           modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           config: { input: { field_names: ['text_field'] } },
@@ -155,6 +165,8 @@ describe('modelsProvider', () => {
           recommended: true,
           version: 1,
           modelName: 'e5',
+          type: ['pytorch', 'text_embedding'],
+          license: 'MIT',
         },
         {
           arch: 'amd64',
@@ -165,6 +177,8 @@ describe('modelsProvider', () => {
           os: 'Linux',
           version: 1,
           modelName: 'e5',
+          type: ['pytorch', 'text_embedding'],
+          license: 'MIT',
         },
       ]);
     });

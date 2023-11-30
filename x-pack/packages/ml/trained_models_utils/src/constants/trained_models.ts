@@ -61,6 +61,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserDescription', {
       defaultMessage: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
     }),
+    type: ['elastic', 'pytorch', 'text_expansion'],
   },
   '.elser_model_2': {
     modelName: 'elser',
@@ -74,6 +75,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2Description', {
       defaultMessage: 'Elastic Learned Sparse EncodeR v2',
     }),
+    type: ['elastic', 'pytorch', 'text_expansion'],
   },
   '.elser_model_2_linux-x86_64': {
     modelName: 'elser',
@@ -88,6 +90,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2x86Description', {
       defaultMessage: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
     }),
+    type: ['elastic', 'pytorch', 'text_expansion'],
   },
   '.multilingual-e5-small': {
     modelName: 'e5',
@@ -101,6 +104,8 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1Description', {
       defaultMessage: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
     }),
+    license: 'MIT',
+    type: ['pytorch', 'text_embedding'],
   },
   '.multilingual-e5-small_linux-x86_64': {
     modelName: 'e5',
@@ -116,6 +121,8 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       defaultMessage:
         'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
     }),
+    license: 'MIT',
+    type: ['pytorch', 'text_embedding'],
   },
 } as const);
 
@@ -137,6 +144,8 @@ export interface ModelDefinition {
   default?: boolean;
   recommended?: boolean;
   hidden?: boolean;
+  license?: string;
+  type?: readonly string[];
 }
 
 export type ModelDefinitionResponse = ModelDefinition & {
