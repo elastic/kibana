@@ -90,7 +90,7 @@ describe('Timelines', (): void => {
     context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.t1_analyst);
-        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.t1_analyst });
+        visitWithTimeRange(OVERVIEW_URL);
       });
 
       it('should not be able to create/update timeline ', () => {
@@ -147,7 +147,8 @@ describe('Timelines', (): void => {
     }
   );
 
-  describe('shows the different timeline states', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172031
+  describe.skip('shows the different timeline states', () => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);
