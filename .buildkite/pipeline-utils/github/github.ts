@@ -26,7 +26,6 @@ export const getPrChanges = async (
     );
   }
 
-  // @ts-expect-error
   const files = await github.paginate(github.pulls.listFiles, {
     owner,
     repo,
