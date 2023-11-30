@@ -124,4 +124,4 @@ export const STATUS_OPTIONS = [
   { value: MaintenanceWindowStatus.Archived, name: i18n.TABLE_STATUS_ARCHIVED },
 ];
 
-export const IS_SCOPED_QUERY_ENABLED = false;
+export const IS_SCOPED_QUERY_ENABLED = true;

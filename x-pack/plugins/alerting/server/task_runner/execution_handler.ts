@@ -574,7 +574,6 @@ export class ExecutionHandler<
     throttledSummaryActions: ThrottledActions
   ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
     const executables = [];
-
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
 

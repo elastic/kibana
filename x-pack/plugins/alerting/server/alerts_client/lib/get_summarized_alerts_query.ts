@@ -318,7 +318,7 @@ export const getQueryByScopedQueries = ({
       filter: {
         bool: {
           ...scopedQueryFilter.bool,
-          filter: [...scopedQueryFilter.bool?.filter, ...filters],
+          filter: [...(scopedQueryFilter.bool?.filter || []), ...filters],
         },
       },
       aggs: {
@@ -326,7 +326,7 @@ export const getQueryByScopedQueries = ({
           top_hits: {
             size: 1,
             _source: {
-              includes: ['kibana.alert.uuid'],
+              includes: [ALERT_UUID],
             },
           },
         },
@@ -429,8 +429,10 @@ const getScopedQueryHitsWithIds = <AlertData extends RuleAlertData>(
   aggregationsResult: SearchResult<AlertData, ScopedQueryAggregationResult>['aggregations']
 ): ScopedQueryAlerts => {
   return Object.entries(aggregationsResult || {}).reduce<ScopedQueryAlerts>(
-    (result, [id, aggregation]) => {
-      result[id] = (aggregation.alertId?.hits?.hits || []).map((hit) => hit._source[ALERT_UUID]);
+    (result, [maintenanceWindowId, aggregation]) => {
+      result[maintenanceWindowId] = (aggregation.alertId?.hits?.hits || []).map(
+        (hit) => hit._source[ALERT_UUID]
+      );
       return result;
     },
     {}

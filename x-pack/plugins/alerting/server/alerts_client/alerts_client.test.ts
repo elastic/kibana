@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   AlertsFilter,
@@ -46,7 +47,11 @@ import * as LegacyAlertsClientModule from './legacy_alerts_client';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { Alert } from '../alert/alert';
 import { AlertsClient, AlertsClientParams } from './alerts_client';
-import { GetSummarizedAlertsParams, ProcessAndLogAlertsOpts } from './types';
+import {
+  GetSummarizedAlertsParams,
+  ProcessAndLogAlertsOpts,
+  GetMaintenanceWindowScopedQueryAlertsParams,
+} from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
 import { keys, range } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -58,6 +63,7 @@ import {
   getExpectedQueryByTimeRange,
   getParamsByExecutionUuid,
   getParamsByTimeQuery,
+  getParamsByMaintenanceWindowScopedQuery,
   mockAAD,
 } from './alerts_client_fixtures';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
@@ -1662,6 +1668,177 @@ describe('Alerts Client', () => {
             ).rejects.toThrowError(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
+          });
+        });
+      });
+
+      describe('getMaintenanceWindowScopedQueryAlerts', () => {
+        const alertWithMwId1 = {
+          ...mockAAD,
+          _id: 'alert_id_1',
+          _source: {
+            ...mockAAD._source,
+            [ALERT_UUID]: 'alert_id_1',
+            [ALERT_MAINTENANCE_WINDOW_IDS]: ['mw1', 'mw2'],
+          },
+        };
+
+        const alertWithMwId2 = {
+          ...mockAAD,
+          _id: 'alert_id_2',
+          _source: {
+            ...mockAAD._source,
+            [ALERT_UUID]: 'alert_id_2',
+            [ALERT_MAINTENANCE_WINDOW_IDS]: ['mw1'],
+          },
+        };
+
+        beforeEach(() => {
+          clusterClient.search.mockReturnValueOnce({
+            // @ts-ignore
+            hits: { total: { value: 2 }, hits: [alertWithMwId1, alertWithMwId2] },
+            aggregations: {
+              mw1: {
+                doc_count: 2,
+                alertId: {
+                  hits: {
+                    hits: [
+                      {
+                        _id: 'alert_id_1',
+                        _source: { [ALERT_UUID]: 'alert_id_1' },
+                      },
+                      {
+                        _id: 'alert_id_2',
+                        _source: { [ALERT_UUID]: 'alert_id_2' },
+                      },
+                    ],
+                  },
+                },
+              },
+              mw2: {
+                doc_count: 1,
+                alertId: {
+                  hits: {
+                    hits: [
+                      {
+                        _id: 'alert_id_1',
+                        _source: { [ALERT_UUID]: 'alert_id_1' },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          });
+        });
+
+        test('should get the persistent lifecycle alerts affected by scoped query successfully', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+          const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts(
+            getParamsByMaintenanceWindowScopedQuery
+          );
+
+          expect(result).toEqual({
+            mw1: ['alert_id_1', 'alert_id_2'],
+            mw2: ['alert_id_1'],
+          });
+        });
+
+        test('should get the persistent continual alerts affected by scoped query successfully', async () => {
+          const alertsClient = new AlertsClient({
+            ...alertsClientParams,
+            ruleType: {
+              ...alertsClientParams.ruleType,
+              autoRecoverAlerts: false,
+            },
+          });
+
+          const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts(
+            getParamsByMaintenanceWindowScopedQuery
+          );
+
+          expect(result).toEqual({
+            mw1: ['alert_id_1', 'alert_id_2'],
+            mw2: ['alert_id_1'],
+          });
+        });
+
+        test('should throw if ruleId is not specified', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+          const { ruleId, ...paramsWithoutRuleId } = getParamsByMaintenanceWindowScopedQuery;
+
+          await expect(
+            alertsClient.getMaintenanceWindowScopedQueryAlerts(
+              paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
+            )
+          ).rejects.toThrowError(
+            'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
+          );
+        });
+
+        test('should throw if spaceId is not specified', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+          const { spaceId, ...paramsWithoutRuleId } = getParamsByMaintenanceWindowScopedQuery;
+
+          await expect(
+            alertsClient.getMaintenanceWindowScopedQueryAlerts(
+              paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
+            )
+          ).rejects.toThrowError(
+            'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
+          );
+        });
+
+        test('should throw if executionUuid is not specified', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+          const { executionUuid, ...paramsWithoutRuleId } = getParamsByMaintenanceWindowScopedQuery;
+
+          await expect(
+            alertsClient.getMaintenanceWindowScopedQueryAlerts(
+              paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
+            )
+          ).rejects.toThrowError(
+            'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
+          );
+        });
+      });
+
+      describe('updateAlertMaintenanceWindowIds', () => {
+        test('should update alerts with new maintenance window Ids', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
+          const alert2 = new Alert('2', { meta: { maintenanceWindowIds: ['mw1', 'mw2'] } });
+          const alert3 = new Alert('3', { meta: { maintenanceWindowIds: ['mw2', 'mw3'] } });
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValue({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+          });
+
+          await alertsClient.updateAlertMaintenanceWindowIds([
+            alert1.getUuid(),
+            alert2.getUuid(),
+            alert3.getUuid(),
+          ]);
+
+          const params = clusterClient.updateByQuery.mock.calls[0][0] as UpdateByQueryRequest;
+
+          expect(params.query).toEqual({
+            terms: {
+              _id: [alert1.getUuid(), alert2.getUuid(), alert3.getUuid()],
+            },
+          });
+
+          expect(params.script).toEqual({
+            source: expect.anything(),
+            lang: 'painless',
+            params: {
+              [alert1.getUuid()]: ['mw1'],
+              [alert2.getUuid()]: ['mw1', 'mw2'],
+              [alert3.getUuid()]: ['mw2', 'mw3'],
+            },
           });
         });
       });
