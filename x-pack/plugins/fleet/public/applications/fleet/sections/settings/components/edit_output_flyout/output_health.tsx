@@ -9,7 +9,8 @@ import { EuiBadge, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import type { GetOutputHealthResponse } from '../../../../../../../common/types';
 
@@ -20,36 +21,28 @@ interface Props {
   output: Output;
   showBadge?: boolean;
 }
-const REFRESH_INTERVAL_MS = 5000;
+const REFRESH_INTERVAL_MS = 10000;
 
 export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge }) => {
   const { notifications } = useStartServices();
   const [outputHealth, setOutputHealth] = useState<GetOutputHealthResponse | null>();
-  const fetchData = useCallback(async () => {
-    try {
-      const response = await sendGetOutputHealth(output.id);
-      if (response.error) {
-        throw response.error;
-      }
-      setOutputHealth(response.data);
-    } catch (error) {
-      notifications.toasts.addError(error, {
+
+  const { data: outputHealthResponse } = useQuery(
+    ['outputHealth', output.id],
+    () => sendGetOutputHealth(output.id),
+    { refetchInterval: REFRESH_INTERVAL_MS }
+  );
+  useEffect(() => {
+    if (outputHealthResponse?.error) {
+      notifications.toasts.addError(outputHealthResponse?.error, {
         title: i18n.translate('xpack.fleet.output.errorFetchingOutputHealth', {
           defaultMessage: 'Error fetching output state',
         }),
       });
+      return;
     }
-  }, [output.id, notifications.toasts]);
-
-  // Send request to get output health
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(() => {
-      fetchData();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [fetchData]);
+    setOutputHealth(outputHealthResponse?.data);
+  }, [outputHealthResponse, notifications.toasts]);
 
   const EditOutputStatus: { [status: string]: JSX.Element | null } = {
     DEGRADED: (
