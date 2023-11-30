@@ -7,11 +7,10 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { SentinelOneActionsClient } from '../../services/actions/clients/sentinel_one_actions_client';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { ResponseActionsClient } from '../../lib/response_actions/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { EndpointActionsClient } from '../../services/actions/clients';
+import { EndpointActionsClient, SentinelOneActionsClient } from '../../services/actions/clients';
 import type {
   NoParametersRequestSchema,
   ResponseActionsRequestBody,

@@ -13,9 +13,9 @@ import {
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { dump } from '../../../utils/dump';
-import { ResponseActionsClientError } from './errors';
-import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
+import { dump } from '../../../../utils/dump';
+import { ResponseActionsClientError } from '../errors';
+import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import type {
   ActionDetails,
   GetProcessesActionOutputContent,
@@ -29,16 +29,16 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-} from '../../../../../common/endpoint/types';
+} from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
-} from '../../../../../common/api/endpoint';
-import type { ResponseActionsClientOptions } from '../../../lib/response_actions/base_response_actions_client';
-import { ResponseActionsClientImpl } from '../../../lib/response_actions/base_response_actions_client';
+} from '../../../../../../common/api/endpoint';
+import type { ResponseActionsClientOptions } from '../../../../lib/response_actions/base_response_actions_client';
+import { ResponseActionsClientImpl } from '../../../../lib/response_actions/base_response_actions_client';
 
 const createNotSupportedError = () => {
   // Throw a 405 Method Not Allowed
@@ -98,7 +98,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // FIXME:PT type properly the options above
   ): Promise<ActionTypeExecutorResult<unknown>> {
     const { id: connectorId } = await this.getConnector();
-    const executeOptions: Parameters<typeof this.connectorActionsClient.execute> = {
+    const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
       actionId: connectorId,
       params: {
         subAction: actionType,
