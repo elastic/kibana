@@ -39,11 +39,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
 (async () => {
   try {
-    // process.env.BUILDKITE_PULL_REQUEST_DRAFT
-
-    if (await isDraftPR()) {
+    // Ideally could use process.env.BUILDKITE_PULL_REQUEST_DRAFT, but its not being set properly in CI
+    if (!GITHUB_PR_LABELS.includes('ci:run_on_draft') && (await isDraftPR())) {
       console.log(
-        'Skipping CI for draft PR. If you need to run CI for this PR add the label xxxxxxx and retrigger CI.'
+        'Skipping CI for draft PR. If you need to run CI for this PR add the label ci:run_on_draft and retrigger CI.'
       );
 
       // Since we skip everything, including post-build, we need to at least make sure the commit status gets set
