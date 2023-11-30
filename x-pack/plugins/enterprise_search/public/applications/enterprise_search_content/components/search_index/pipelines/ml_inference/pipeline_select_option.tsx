@@ -21,6 +21,7 @@ export interface PipelineSelectOptionProps {
   pipeline: MLInferencePipelineOption;
 }
 
+// TODO: Make disabledReason required and remove EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS call without args
 export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }> = ({
   disabledReason,
 }) => {
@@ -41,8 +42,7 @@ export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }>
 export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipeline }) => {
   const modelIdDisplay = pipeline.modelId.length > 0 ? pipeline.modelId : MODEL_REDACTED_VALUE;
   return (
-    // TODO: Verify text size
-    // TODO: Add status & action menu
+    // TODO: Add model state & pipeline info link
     // TODO: Test rendering when pipeline.modelType.length == 0
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
