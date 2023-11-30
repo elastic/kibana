@@ -95,7 +95,6 @@ components:
           - field
           - operator
           - value
-        x-modify: requiredOptional
       description: Overrides generated alerts' risk_score with a value from the source event
 
     Severity:
