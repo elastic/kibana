@@ -26,7 +26,12 @@ import {
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
+import {
+  useLensSelector,
+  selectFramePublicAPI,
+  onActiveDataChange,
+  useLensDispatch,
+} from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { extractReferencesFromState } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
@@ -67,23 +72,25 @@ export function LensEditConfigurationFlyout({
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
-  const activeData: Record<string, Datatable> = useMemo(() => {
-    return {};
-  }, []);
+
+  const dispatch = useLensDispatch();
   useEffect(() => {
     const s = output$?.subscribe(() => {
-      const layers = activeDatasource.getLayers(datasourceState);
+      const activeData: Record<string, Datatable> = {};
       const adaptersTables = lensAdapters?.tables?.tables as Record<string, Datatable>;
-      const [table] = Object.values(adaptersTables || {});
-      layers.forEach((layer) => {
-        if (table) {
-          activeData[layer] = table;
-        }
+      const layers = activeDatasource.getLayers(datasourceState);
+      layers.forEach((layerId) => {
+        activeData[layerId] = adaptersTables[layerId] || {};
       });
+
+      if (adaptersTables) {
+        dispatch(onActiveDataChange({ activeData }));
+      }
     });
     return () => s?.unsubscribe();
-  }, [activeDatasource, lensAdapters, datasourceState, output$, activeData]);
+  }, [dispatch, output$, lensAdapters?.tables?.tables, activeDatasource, datasourceState]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -209,17 +216,6 @@ export function LensEditConfigurationFlyout({
       updateSuggestion,
     ]
   );
-
-  const framePublicAPI = useLensSelector((state) => {
-    const newState = {
-      ...state,
-      lens: {
-        ...state.lens,
-        activeData,
-      },
-    };
-    return selectFramePublicAPI(newState, datasourceMap);
-  });
 
   const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
