@@ -10,7 +10,7 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo $MSG
 
-cd $CURRENT_WORKING_DIR
+cd $ROOT_DIR
 
 TARGETS_ARRAY=$(jq .scripts package.json | jq 'keys')
 if [[ " ${TARGETS_ARRAY[*]} " == *"$TARGET"* ]]; then

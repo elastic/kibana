@@ -60,7 +60,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh 
     env:
       TARGET: cypress:run:serverless
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-serverless-security-cypress
       MSG: "--- Security Serverless Cypress Tests"    
     label: 'Serverless Security Cypress Tests'
@@ -77,7 +77,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:explore:run:serverless
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Serverless Explore - Security Cypress Tests"
     label: 'Serverless Explore - Security Cypress Tests'
@@ -94,7 +94,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:investigations:run:serverless
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Serverless Investigations - Security Cypress Tests"
     label: 'Serverless Investigations - Security Cypress Tests'
@@ -111,7 +111,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:rule_management:run:serverless
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Serverless Rule Management - Security Cypress Tests "
     label: 'Serverless Rule Management - Security Cypress Tests'
@@ -128,7 +128,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:rule_management:prebuilt_rules:run:serverless
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Rule Management - Prebuilt Rules - Security Cypress Tests"
     label: 'Rule Management - Prebuilt Rules - Security Cypress Tests'
@@ -145,7 +145,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:run:ess
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Security Solution Cypress tests (Chrome)"
     label: 'Security Solution Cypress Tests'
@@ -162,7 +162,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:explore:run:ess
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Explore Cypress Tests on Security Solution"
     label: 'Explore - Security Solution Cypress Tests'
@@ -179,7 +179,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:rule_management:run:ess
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Rule Management - Security Solution Cypress Tests"
     label: 'Rule Management - Security Solution Cypress Tests'
@@ -196,7 +196,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:rule_management:prebuilt_rules:run:ess
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Rule Management - Prebuilt Rules - Security Solution Cypress Tests"
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
@@ -213,7 +213,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:investigations:run:ess
-      CURRENT_WORKING_DIR: x-pack/test/security_solution_cypress
+      ROOT_DIR: x-pack/test/security_solution_cypress
       JOB_TITLE: kibana-security-solution-chrome
       MSG: "--- Investigations - Security Solution Cypress Tests"
     label: 'Investigations - Security Solution Cypress Tests'
@@ -230,7 +230,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:dw:run
-      CURRENT_WORKING_DIR: x-pack/plugins/security_solution
+      ROOT_DIR: x-pack/plugins/security_solution
       JOB_TITLE: kibana-defend-workflows-cypress
       MSG: "--- Defend Workflows Cypress tests"
     label: 'Defend Workflows Cypress Tests'
@@ -247,7 +247,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:dw:serverless:run
-      CURRENT_WORKING_DIR: x-pack/plugins/security_solution
+      ROOT_DIR: x-pack/plugins/security_solution
       JOB_TITLE: kibana-defend-workflows-serverless-cypress
       MSG: "--- Defend Workflows Cypress tests on Serverless"
     label: 'Defend Workflows Cypress Tests on Serverless'
@@ -264,7 +264,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:run
-      CURRENT_WORKING_DIR: x-pack/plugins/threat_intelligence
+      ROOT_DIR: x-pack/plugins/threat_intelligence
       JOB_TITLE: kibana-threat-intelligence-chrome
       MSG: "--- Threat Intelligence Cypress tests (Chrome)"
     label: 'Threat Intelligence Cypress Tests'
@@ -306,7 +306,7 @@ steps:
   # - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
   #   env:
   #     TARGET: cypress:run
-  #     CURRENT_WORKING_DIR: x-pack/test_serverless/functional/test_suites/security/cypress
+  #     ROOT_DIR: x-pack/test_serverless/functional/test_suites/security/cypress
   #     JOB_TITLE: kibana-serverless-security-cypress
   #     MSG: "--- Security Defend Workflows Serverless Cypress"
   #   label: 'Serverless Security Defend Workflows Cypress Tests'
