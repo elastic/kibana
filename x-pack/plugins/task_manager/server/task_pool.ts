@@ -109,14 +109,26 @@ export class TaskPool {
    * @returns {Promise<boolean>}
    */
   public async run(tasks: TaskRunner[], attempt = 1): Promise<TaskPoolRunResult> {
+    // Note `this.availableWorkers` is a getter with side effects, so we just want
+    // to call it once for this bit of the code.
+    const availableWorkers = this.availableWorkers;
+    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, availableWorkers);
+
     if (attempt > MAX_RUN_ATTEMPTS) {
+      const stats = [
+        `available workers: ${availableWorkers}`,
+        `tasksToRun: ${tasksToRun.length}`,
+        `leftOverTasks: ${leftOverTasks.length}`,
+        `maxWorkers: ${this.maxWorkers}`,
+        `occupiedWorkers: ${this.occupiedWorkers}`,
+        `workerLoad: ${this.workerLoad}`,
+      ].join(', ');
       this.logger.warn(
-        `task pool run attempts exceeded ${MAX_RUN_ATTEMPTS}; assuming ran out of capacity`
+        `task pool run attempts exceeded ${MAX_RUN_ATTEMPTS}; assuming ran out of capacity; ${stats}`
       );
       return TaskPoolRunResult.RanOutOfCapacity;
     }
 
-    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       await Promise.all(
         tasksToRun
