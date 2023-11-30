@@ -44,7 +44,10 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('ECS field is required.').should('not.exist');
 
     checkResults();
-    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist').click();
+    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist');
+    cy.get(
+      '[data-gridcell-column-index="0"][data-gridcell-row-index="0"] [data-datagrid-interactable="true"]'
+    ).click();
     cy.url().should('include', 'app/fleet/agents/');
   });
 

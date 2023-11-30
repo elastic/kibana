@@ -221,13 +221,15 @@ export async function extractAndWriteSecrets(opts: {
     return { packagePolicy, secretReferences: [] };
   }
 
+  const secretsToCreate = secretPaths.filter((secretPath) => !!secretPath.value.value);
+
   const secrets = await createSecrets({
     esClient,
-    values: secretPaths.map((secretPath) => secretPath.value.value),
+    values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
   const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicy));
-  secretPaths.forEach((secretPath, i) => {
+  secretsToCreate.forEach((secretPath, i) => {
     set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(secrets[i].id));
   });
 
@@ -278,7 +280,7 @@ export async function extractAndUpdateSecrets(opts: {
     // check if the previous secret is actually a secret refrerence
     // it may be that secrets were not enabled at the time of creation
     // in which case they are just stored as plain text
-    if (secretPath.value.value.isSecretRef) {
+    if (secretPath.value.value?.isSecretRef) {
       secretsToDelete.push({ id: secretPath.value.value.id });
     }
   });

@@ -69,8 +69,8 @@ export class SecuritySolutionServerlessPlugin
     registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
     securitySolution.setComponents({
-      getStarted: getSecurityGetStartedComponent(services, productTypes),
-      dashboardsLandingCallout: getDashboardsLandingCallout(services),
+      GetStarted: getSecurityGetStartedComponent(services, productTypes),
+      DashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
 
     startNavigation(services, this.config);
