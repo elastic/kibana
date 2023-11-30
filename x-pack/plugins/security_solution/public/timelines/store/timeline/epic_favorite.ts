@@ -22,16 +22,22 @@ import {
 } from './actions';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import type { ActionTimeline, TimelineById } from './types';
+import type { TimelineById } from './types';
 import type { inputsModel } from '../../../common/store/inputs';
 import type { ResponseFavoriteTimeline } from '../../../../common/api/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 
-export const timelineFavoriteActionsType = new Set([updateIsFavorite.type]);
+type FavoriteTimelineAction = ReturnType<typeof updateIsFavorite>;
+
+const timelineFavoriteActionsType = new Set([updateIsFavorite.type]);
+
+export function isFavoriteTimelineAction(action: Action): action is FavoriteTimelineAction {
+  return timelineFavoriteActionsType.has(action.type);
+}
 
 export const epicPersistTimelineFavorite = (
-  action: ActionTimeline,
+  action: FavoriteTimelineAction,
   timeline: TimelineById,
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>,
@@ -108,7 +114,7 @@ export const createTimelineFavoriteEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) => {
     return action$.pipe(
-      filter((action) => timelineFavoriteActionsType.has(action.type)),
+      filter(isFavoriteTimelineAction),
       mergeMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
         return EMPTY;
