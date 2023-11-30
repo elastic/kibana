@@ -13,10 +13,6 @@ export interface TestTrainedModelsContextType {
   createPipelineFlyoutOpen: boolean;
   defaultSelectedDataViewId?: string;
   defaultSelectedField?: string;
-  multiLabel?: boolean;
-  labelsText?: string;
-  queryText?: string;
-  questionText?: string;
 }
 export const TestTrainedModelsContext = createContext<
   | {

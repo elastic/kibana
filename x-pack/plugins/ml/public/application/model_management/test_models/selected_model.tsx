@@ -48,15 +48,7 @@ export const SelectedModel: FC<Props> = ({
 }) => {
   const { trainedModels } = useMlApiContext();
   const {
-    currentContext: {
-      createPipelineFlyoutOpen,
-      pipelineConfig,
-      defaultSelectedField,
-      multiLabel,
-      labelsText,
-      queryText,
-      questionText,
-    },
+    currentContext: { createPipelineFlyoutOpen, pipelineConfig, defaultSelectedField },
   } = useTestTrainedModelsContext();
   const pipeline = (createPipelineFlyoutOpen && pipelineConfig) || undefined;
 
@@ -87,9 +79,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            defaultSelectedField,
-            labelsText,
-            multiLabel
+            defaultSelectedField
           );
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
           return new TextEmbeddingInference(
@@ -135,17 +125,7 @@ export const SelectedModel: FC<Props> = ({
         defaultSelectedField
       );
     }
-  }, [
-    inputType,
-    model,
-    trainedModels,
-    deploymentId,
-    defaultSelectedField,
-    queryText,
-    multiLabel,
-    labelsText,
-    questionText,
-  ]);
+  }, [inputType, model, trainedModels, deploymentId, defaultSelectedField]);
 
   const updatedPipeline = useObservable(
     inferrer?.getPipeline$() ?? DEFAULT_PIPELINE_OBS,
