@@ -25,7 +25,7 @@ export const AssetCriticalityRecordIdParts = z.object({
 });
 
 export type CreateAssetCriticalityRecord = z.infer<typeof CreateAssetCriticalityRecord>;
-export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.and(
+export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
   z.object({
     /**
      * The criticality level of the asset.
@@ -35,7 +35,7 @@ export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.and(
 );
 
 export type AssetCriticalityRecord = z.infer<typeof AssetCriticalityRecord>;
-export const AssetCriticalityRecord = CreateAssetCriticalityRecord.and(
+export const AssetCriticalityRecord = CreateAssetCriticalityRecord.merge(
   z.object({
     /**
      * The time the record was created or updated.
