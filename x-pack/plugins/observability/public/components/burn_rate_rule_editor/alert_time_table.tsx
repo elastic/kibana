@@ -24,12 +24,10 @@ function formatTime(minutes: number) {
   if (minutes > 59) {
     const mins = minutes % 60;
     const hours = (minutes - mins) / 60;
-    if (mins > 0 && hours > 0) {
-      return i18n.translate('xpack.observability.slo.rules.timeTable.minuteHoursLabel', {
-        defaultMessage: '{hours}h {mins}m',
-        values: { hours, mins },
-      });
-    }
+    return i18n.translate('xpack.observability.slo.rules.timeTable.minuteHoursLabel', {
+      defaultMessage: '{hours}h {mins}m',
+      values: { hours, mins },
+    });
   }
   return i18n.translate('xpack.observability.slo.rules.timeTable.minuteLabel', {
     defaultMessage: '{minutes}m',
