@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/analytics-shippers-gainsight",
-  "owner": "@elastic/kibana-core"
-}
