@@ -6,14 +6,14 @@ info:
 paths: { }
 components:
   parameters:
-    id_field:
+    id_value:
       name: id_value
       in: query
       required: true
       schema:
         type: string
       description: The ID value of the asset.
-    id_value:
+    id_field:
       name: id_field
       in: query
       required: true
