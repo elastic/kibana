@@ -230,9 +230,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const uninstallTokens: UninstallToken[] = tokenObject.map(
       ({ id: _id, attributes, created_at: createdAt, error }) => {
         if (error) {
-          const errorMessage = 'Error when reading Uninstall Token';
-          appContextService.getLogger().error(`${errorMessage} with id '${_id}': '${error}'`);
-          throw new UninstallTokenError(errorMessage);
+          throw new UninstallTokenError(`Error when reading Uninstall Token with id '${_id}'.`);
         }
 
         this.assertPolicyId(attributes);

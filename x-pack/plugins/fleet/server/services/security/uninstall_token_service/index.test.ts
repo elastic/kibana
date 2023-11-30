@@ -545,7 +545,9 @@ describe('UninstallTokenService', () => {
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
           ).resolves.toStrictEqual({
-            error: new UninstallTokenError('Error when reading Uninstall Token'),
+            error: new UninstallTokenError(
+              "Error when reading Uninstall Token with id 'test-so-id-two'."
+            ),
           });
         });
 
@@ -589,7 +591,9 @@ describe('UninstallTokenService', () => {
               errorWithDecryptionSO2.attributes.policy_id
             )
           ).resolves.toStrictEqual({
-            error: new UninstallTokenError('Error when reading Uninstall Token'),
+            error: new UninstallTokenError(
+              "Error when reading Uninstall Token with id 'test-so-id-two'."
+            ),
           });
         });
 
