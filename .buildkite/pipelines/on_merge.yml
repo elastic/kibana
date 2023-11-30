@@ -198,7 +198,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
- - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
+  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
       TARGET: cypress:detection_engine:run:serverless
       ROOT_DIR: x-pack/test/security_solution_cypress
