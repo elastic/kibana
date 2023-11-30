@@ -8,7 +8,6 @@
 
 import ChildProcess from 'child_process';
 import { Readable } from 'stream';
-
 import * as Rx from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -18,19 +17,13 @@ import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects
 
 import type { Result } from './extract_mappings_from_plugins_worker';
 
-function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error') {
-  return observeLines(readable).pipe(
-    Rx.tap((line) => {
-      log[level](line);
-    }),
-    Rx.ignoreElements()
-  );
-}
-
 /**
  * Run a worker process that starts the core with all plugins enabled and sends back the
- * saved object mappings for all plugins. We run this in a child process so that we can
- * harvest logs and feed them into the logger when debugging.
+ * saved object mappings for all plugins.
+ *
+ * We run this in a child process to make it easier to kill the kibana instance once done
+ * (dodges issues with open handles), and so that we can harvest logs and feed them into
+ * the logger when debugging.
  */
 export async function extractMappingsFromPlugins(
   log: SomeDevLog
@@ -77,4 +70,13 @@ export async function extractMappingsFromPlugins(
   log.info(`Got mappings for ${Object.keys(mappings).length} types from plugins.`);
 
   return mappings;
+}
+
+function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error') {
+  return observeLines(readable).pipe(
+    Rx.tap((line) => {
+      log[level](line);
+    }),
+    Rx.ignoreElements()
+  );
 }

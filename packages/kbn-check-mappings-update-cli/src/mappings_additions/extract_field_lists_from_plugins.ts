@@ -14,19 +14,13 @@ import { SomeDevLog } from '@kbn/some-dev-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import type { Result } from './extract_field_lists_from_plugins_worker';
 
-function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error') {
-  return observeLines(readable).pipe(
-    Rx.tap((line) => {
-      log[level](line);
-    }),
-    Rx.ignoreElements()
-  );
-}
-
 /**
  * Run a worker process that starts the core with all plugins enabled and sends back the
- * saved object mappings for all plugins. We run this in a child process so that we can
- * harvest logs and feed them into the logger when debugging.
+ * registered fields for all plugins.
+ *
+ * We run this in a child process to make it easier to kill the kibana instance once done
+ * (dodges issues with open handles), and so that we can harvest logs and feed them into
+ * the logger when debugging.
  */
 export async function extractFieldListsFromPlugins(log: SomeDevLog): Promise<Result> {
   log.info('Loading core with all plugins enabled so that we can get all savedObject mappings...');
@@ -69,4 +63,13 @@ export async function extractFieldListsFromPlugins(log: SomeDevLog): Promise<Res
   }
 
   return result;
+}
+
+function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error') {
+  return observeLines(readable).pipe(
+    Rx.tap((line) => {
+      log[level](line);
+    }),
+    Rx.ignoreElements()
+  );
 }
