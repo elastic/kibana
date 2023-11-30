@@ -23,7 +23,7 @@ paths:
                   $ref: '#/components/schemas/AlertAssignees'
                   description: Details about the assignees to assign and unassign.
                 ids:
-                  $ref: '#/components/schemas/RuleIds'
+                  $ref: '#/components/schemas/AlertIds'
                   description: List of alerts ids to assign and unassign passed assignees.
       responses:
         200:
@@ -50,7 +50,7 @@ components:
             $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/NonEmptyString'
           description: A list of users ids to unassign.
 
-    RuleIds:
+    AlertIds:
       type: array
       items:
         $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/NonEmptyString'

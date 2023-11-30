@@ -29,8 +29,8 @@ export const AlertAssignees = z.object({
 /**
  * A list of alerts ids.
  */
-export type RuleIds = z.infer<typeof RuleIds>;
-export const RuleIds = z.array(NonEmptyString).min(1);
+export type AlertIds = z.infer<typeof AlertIds>;
+export const AlertIds = z.array(NonEmptyString).min(1);
 
 export type SetAlertAssigneesRequestBody = z.infer<typeof SetAlertAssigneesRequestBody>;
 export const SetAlertAssigneesRequestBody = z.object({
@@ -41,6 +41,6 @@ export const SetAlertAssigneesRequestBody = z.object({
   /**
    * List of alerts ids to assign and unassign passed assignees.
    */
-  ids: RuleIds,
+  ids: AlertIds,
 });
 export type SetAlertAssigneesRequestBodyInput = z.input<typeof SetAlertAssigneesRequestBody>;
