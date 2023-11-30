@@ -59,7 +59,8 @@ post:
       required: true
       schema:
         type: string
-        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+        examples:
+          - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   requestBody:
     required: true
     content:
@@ -159,21 +160,7 @@ put:
           schema:
             $ref: '../components/schemas/connector_response_properties.yaml'
     '400':
-      description: Indicates a bad request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              error: 
-                type: string
-                example: Bad Request
-              message:
-                type: string
-                example: "error validating action type config: [index]: expected value of type [string] but got [undefined]"
-              statusCode:
-                type: integer
-                example: 400
+      $ref: '../components/responses/400.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
     '404':

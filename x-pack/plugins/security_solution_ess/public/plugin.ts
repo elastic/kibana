@@ -48,7 +48,7 @@ export class SecuritySolutionEssPlugin
     });
 
     securitySolution.setComponents({
-      getStarted: getSecurityGetStartedComponent(services),
+      GetStarted: getSecurityGetStartedComponent(services),
     });
 
     subscribeBreadcrumbs(services);

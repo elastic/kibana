@@ -82,13 +82,3 @@ To remove a setting from the keystore, use the `remove` command:
 bin/kibana-keystore remove the.setting.name.to.remove
 ----------------------------------------------------------------
 
-[float]
-[[read-settings]]
-=== Read settings
-
-To display the configured setting values, use the `show` command:
-
-[source, sh]
-----------------------------------------------------------------
-bin/kibana-keystore show setting.key
-----------------------------------------------------------------
