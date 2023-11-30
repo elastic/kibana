@@ -452,10 +452,11 @@ describe('alert actions', () => {
             templateTimelineVersion: null,
             version: null,
             savedSearchId: null,
+            savedSearch: null,
             isDiscoverSavedSearchLoaded: false,
+            isDataProviderVisible: false,
           },
           to: '2018-11-05T19:03:25.937Z',
-          resolveTimelineConfig: undefined,
           ruleNote: '# this is some markdown documentation',
           ruleAuthor: ['elastic'],
         };

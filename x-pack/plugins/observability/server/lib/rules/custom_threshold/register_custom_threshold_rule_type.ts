@@ -43,7 +43,6 @@ import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
 import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
-import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/custom_threshold_rule/constants';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
@@ -79,27 +78,9 @@ export function thresholdRuleType(
     timeSize: schema.number(),
   };
 
-  const nonCountCriterion = schema.object({
-    ...baseCriterion,
-    metric: schema.string(),
-    aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
-    metrics: schema.never(),
-    equation: schema.never(),
-    label: schema.never(),
-  });
-
-  const countCriterion = schema.object({
-    ...baseCriterion,
-    aggType: schema.literal('count'),
-    metric: schema.never(),
-    metrics: schema.never(),
-    equation: schema.never(),
-    label: schema.never(),
-  });
-
   const customCriterion = schema.object({
     ...baseCriterion,
-    aggType: schema.literal('custom'),
+    aggType: schema.maybe(schema.literal('custom')),
     metric: schema.never(),
     metrics: schema.arrayOf(
       schema.oneOf([
@@ -133,9 +114,7 @@ export function thresholdRuleType(
     validate: {
       params: schema.object(
         {
-          criteria: schema.arrayOf(
-            schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
-          ),
+          criteria: schema.arrayOf(customCriterion),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
