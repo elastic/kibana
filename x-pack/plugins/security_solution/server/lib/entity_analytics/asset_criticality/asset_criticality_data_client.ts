@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ESFilter } from '@kbn/es-types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
@@ -25,7 +27,10 @@ interface AssetCriticalityUpsert {
 
 type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue'>;
 
+const MAX_CRITICALITY_RESPONSE_SIZE = 10000; // TODO what's the right value here?
+
 const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:${idValue}`;
+
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
   /**
@@ -41,6 +46,21 @@ export class AssetCriticalityDataClient {
         mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
       },
     });
+  }
+
+  public async search({
+    query,
+    size,
+  }: {
+    query: ESFilter;
+    size?: number;
+  }): Promise<SearchResponse<AssetCriticalityRecord>> {
+    const response = await this.options.esClient.search<AssetCriticalityRecord>({
+      index: this.getIndex(),
+      body: { query },
+      size: Math.min(size ?? Infinity, MAX_CRITICALITY_RESPONSE_SIZE),
+    });
+    return response;
   }
 
   private getIndex() {
