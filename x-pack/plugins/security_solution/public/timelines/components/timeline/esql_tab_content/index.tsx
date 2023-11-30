@@ -14,7 +14,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { debounce, isEqualWith } from 'lodash';
+import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
@@ -70,6 +70,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     setDiscoverStateContainer,
     getAppStateFromSavedSearch,
     updateSavedSearch,
+    initializeLocalSavedSearch,
     restoreDiscoverAppStateFromSavedSearch,
     resetDiscoverAppState,
     getDefaultDiscoverAppState,
@@ -170,11 +171,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
 
-  const debouncedUpdateSavedSearch = useMemo(
-    () => debounce(updateSavedSearch, 300),
-    [updateSavedSearch]
-  );
-
   useEffect(() => {
     if (isFetching) return;
     if (!isDiscoverSavedSearchLoaded) return;
@@ -187,11 +183,10 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!index) return;
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
     if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
-    debouncedUpdateSavedSearch(latestState, timelineId);
+    updateSavedSearch(latestState, timelineId);
     combinedDiscoverSavedSearchStateRef.current = latestState;
   }, [
     getCombinedDiscoverSavedSearchState,
-    debouncedUpdateSavedSearch,
     savedSearchById,
     updateSavedSearch,
     isDiscoverSavedSearchLoaded,
@@ -230,6 +225,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       let savedSearchAppState;
       if (savedSearchId) {
         const localSavedSearch = await savedSearchService.get(savedSearchId);
+        initializeLocalSavedSearch(localSavedSearch, timelineId);
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
@@ -299,6 +295,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       savedSearchId,
       savedSearchService,
       getDefaultDiscoverAppState,
+      timelineId,
+      initializeLocalSavedSearch,
     ]
   );
 
