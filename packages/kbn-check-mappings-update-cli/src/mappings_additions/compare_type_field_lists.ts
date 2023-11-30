@@ -11,6 +11,7 @@ import { difference } from 'lodash';
 export interface CompareResult {
   error: boolean;
   fieldsToAdd: string[];
+  registeredFields: string[];
   missingFromModelVersion: string[];
   missingFromDefinition: string[];
 }
@@ -29,6 +30,7 @@ export const compareFieldLists = ({
   if (!currentFields) {
     return {
       error: false,
+      registeredFields,
       fieldsToAdd: registeredFields,
       missingFromModelVersion: [],
       missingFromDefinition: [],
@@ -55,7 +57,8 @@ export const compareFieldLists = ({
 
   return {
     error: anyFieldMissing,
-    fieldsToAdd: anyFieldMissing ? [] : registeredFieldsNotInCurrent,
+    registeredFields,
+    fieldsToAdd: registeredFieldsNotInCurrent,
     missingFromModelVersion: registeredFieldsNotInModelVersions,
     missingFromDefinition: modelVersionFieldsNotRegistered,
   };

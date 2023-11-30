@@ -14,12 +14,13 @@ run(
   async ({ log, flagsReader, addCleanupTask }) => {
     const fix = flagsReader.boolean('fix');
     const verify = flagsReader.boolean('verify');
+    const override = flagsReader.boolean('override');
     const task = flagsReader.string('task');
 
     if (!task || task === 'mapping-addition') {
       log.info('Running model version mapping addition checks');
       await log.indent(4, async () => {
-        await runModelVersionMappingAdditionsChecks({ fix, verify, log });
+        await runModelVersionMappingAdditionsChecks({ fix, override, verify, log });
       });
     }
     if (!task || task === 'compatibility') {
@@ -34,7 +35,7 @@ run(
       Determine if the changes performed to the savedObjects mappings are following our standards
     `,
     flags: {
-      boolean: ['fix', 'verify'],
+      boolean: ['fix', 'override', 'verify'],
       string: ['task'],
       default: {
         verify: true,
@@ -42,6 +43,7 @@ run(
       },
       help: `
         --fix              If the current mappings differ from the mappings in the file, update the current_mappings.json file
+        --override              If the current mappings differ from the mappings in the file, update the current_mappings.json file
         --no-verify        Don't run any validation, just update the current_mappings.json file.
         --task             Specify which task(s) to run (compatibility | mapping-addition)
       `,

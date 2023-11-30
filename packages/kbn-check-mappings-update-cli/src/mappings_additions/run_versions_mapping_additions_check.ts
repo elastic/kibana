@@ -15,10 +15,12 @@ import { extractFieldListsFromPlugins } from './extract_field_lists_from_plugins
 
 export const runModelVersionMappingAdditionsChecks = async ({
   fix,
+  override,
   verify,
   log,
 }: {
   fix: boolean;
+  override: boolean;
   verify: boolean;
   log: ToolingLog;
 }) => {
@@ -49,10 +51,16 @@ export const runModelVersionMappingAdditionsChecks = async ({
   const hasError = Object.values(results).some((result) => result.error);
   if (hasError) {
     const errorMessage = getErrorMessage(results);
-    throw createFailError(errorMessage);
-  } else {
-    log.info('Updating field file');
-    const updatedFields = updateCurrentFields(currentFields, results);
+    if (verify) {
+      throw createFailError(errorMessage + `\nUse --override --no-verify`);
+    } else {
+      log.warning(errorMessage);
+    }
+  }
+
+  if (fix || override) {
+    log.info(`Updating field file with override: ${override}`);
+    const updatedFields = updateCurrentFields(currentFields, results, override);
     await writeCurrentFields(updatedFields);
   }
 };
@@ -83,15 +91,20 @@ const getErrorMessage = (results: Record<string, CompareResult>): string => {
 
 const updateCurrentFields = (
   currentFields: FieldListMap,
-  results: Record<string, CompareResult>
+  results: Record<string, CompareResult>,
+  override: boolean
 ): FieldListMap => {
   // mutating the field lists is fine
-  const updatedFields = { ...currentFields };
+  const updatedFields = override ? {} : { ...currentFields };
   Object.entries(results).forEach(([typeName, typeResult]) => {
-    if (!typeResult.error) {
-      updatedFields[typeName] = [
-        ...new Set([...(updatedFields[typeName] || []), ...typeResult.fieldsToAdd]),
-      ].sort();
+    if (override) {
+      updatedFields[typeName] = [...typeResult.registeredFields].sort();
+    } else {
+      if (!typeResult.error) {
+        updatedFields[typeName] = [
+          ...new Set([...(updatedFields[typeName] || []), ...typeResult.fieldsToAdd]),
+        ].sort();
+      }
     }
   });
   return updatedFields;
