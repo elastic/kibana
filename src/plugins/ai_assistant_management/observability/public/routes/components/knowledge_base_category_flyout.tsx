@@ -29,10 +29,13 @@ const CATEGORY_MAP = {
     description: (
       <>
         <EuiText size="m">
-          {i18n.translate('aiAssistantManagementObservability..lensIsAKibanaTextLabel', {
-            defaultMessage:
-              'Lens is a Kibana feature which allows the Assistant to visualize data in response to user queries. These Knowledge base items are loaded into the Knowledge base by default.',
-          })}
+          {i18n.translate(
+            'aiAssistantManagementObservability.knowledgeBaseCategoryFlyout.categoryMap.lensCategoryDescriptionLabel',
+            {
+              defaultMessage:
+                'Lens is a Kibana feature which allows the Assistant to visualize data in response to user queries. These Knowledge base items are loaded into the Knowledge base by default.',
+            }
+          )}
         </EuiText>
       </>
     ),

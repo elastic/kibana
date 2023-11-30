@@ -27,6 +27,9 @@ interface MountParams {
 
 export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
+
+  if (!startDeps.observabilityAIAssistant) return () => {};
+
   const { element, history, setBreadcrumbs } = mountParams;
   const { theme$ } = core.theme;
 
@@ -49,6 +52,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
               notifications: coreStart.notifications,
               observabilityAIAssistant: startDeps.observabilityAIAssistant,
               uiSettings: coreStart.uiSettings,
+              serverless: startDeps.serverless,
               setBreadcrumbs,
             }}
           >

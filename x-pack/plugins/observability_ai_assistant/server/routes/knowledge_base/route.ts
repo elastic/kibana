@@ -8,7 +8,7 @@ import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import type { KnowledgeBaseEntry } from '../../../common/types';
+import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -119,11 +119,14 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
       entry: {
         id,
         text,
+        doc_id: id,
         confidence: resources.params.body.confidence ?? 'high',
         is_correction: resources.params.body.is_correction ?? false,
         public: resources.params.body.public ?? true,
         labels: resources.params.body.labels ?? {},
-        role: resources.params.body.role ?? 'user_entry',
+        role:
+          (resources.params.body.role as KnowledgeBaseEntryRole) ??
+          KnowledgeBaseEntryRole.UserEntry,
       },
     });
   },
@@ -173,14 +176,12 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     }
 
     const entries = resources.params.body.entries.map((entry) => ({
+      doc_id: entry.id,
       confidence: 'high' as KnowledgeBaseEntry['confidence'],
       is_correction: false,
       public: true,
-      labels: {
-        type: 'manual',
-        document_id: entry.id,
-      },
-      role: 'user_entry' as KnowledgeBaseEntry['role'],
+      labels: {},
+      role: KnowledgeBaseEntryRole.UserEntry,
       ...entry,
     }));
 

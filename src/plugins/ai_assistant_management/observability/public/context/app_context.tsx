@@ -9,6 +9,7 @@
 import React, { createContext, useContext } from 'react';
 import { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { StartDependencies } from '../plugin';
 
 interface ContextValue extends StartDependencies {
@@ -16,6 +17,7 @@ interface ContextValue extends StartDependencies {
   navigateToApp: CoreStart['application']['navigateToApp'];
   notifications: CoreStart['notifications'];
   uiSettings: CoreStart['uiSettings'];
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 

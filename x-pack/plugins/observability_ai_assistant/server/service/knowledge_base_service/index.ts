@@ -57,7 +57,7 @@ export enum KnowledgeBaseEntryOperationType {
 
 interface KnowledgeBaseDeleteOperation {
   type: KnowledgeBaseEntryOperationType.Delete;
-  id?: string;
+  doc_id?: string;
   labels?: Record<string, string>;
 }
 
@@ -195,7 +195,7 @@ export class KnowledgeBaseService {
         query: {
           bool: {
             filter: [
-              ...(operation.id ? [{ term: { _id: operation.id } }] : []),
+              ...(operation.doc_id ? [{ term: { _id: operation.doc_id } }] : []),
               ...(operation.labels
                 ? map(operation.labels, (value, key) => {
                     return { term: { [key]: value } };
@@ -250,9 +250,8 @@ export class KnowledgeBaseService {
       return;
     }
 
-    this._queue.push(...operations);
-
     if (!this.hasSetup) {
+      this._queue.push(...operations);
       return;
     }
 
@@ -262,14 +261,10 @@ export class KnowledgeBaseService {
       limiter(() => this.processOperation(operation))
     );
 
-    Promise.all(limitedFunctions)
-      .then(() => {
-        this._queue = [];
-      })
-      .catch((err) => {
-        this.dependencies.logger.error(`Failed to process all queued operations`);
-        this.dependencies.logger.error(err);
-      });
+    Promise.all(limitedFunctions).catch((err) => {
+      this.dependencies.logger.error(`Failed to process all queued operations`);
+      this.dependencies.logger.error(err);
+    });
   }
 
   status = async () => {
@@ -361,7 +356,7 @@ export class KnowledgeBaseService {
           ? {
               query: {
                 wildcard: {
-                  'labels.document_id': {
+                  '_source.document_id': {
                     value: `${query}*`,
                   },
                 },
@@ -371,6 +366,7 @@ export class KnowledgeBaseService {
         size: 500,
         _source: {
           includes: [
+            'document_id',
             'text',
             'is_correction',
             'labels',
@@ -425,6 +421,26 @@ export class KnowledgeBaseService {
       }
       throw error;
     }
+  };
+
+  addEntries = async ({
+    operations,
+  }: {
+    operations: KnowledgeBaseEntryOperation[];
+  }): Promise<void> => {
+    this.dependencies.logger.info(`Starting import of ${operations.length} entries`);
+
+    const limiter = pLimit(5);
+
+    await Promise.all(
+      operations.map((operation) =>
+        limiter(async () => {
+          await this.processOperation(operation);
+        })
+      )
+    );
+
+    this.dependencies.logger.info(`Completed import of ${operations.length} entries`);
   };
 
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {

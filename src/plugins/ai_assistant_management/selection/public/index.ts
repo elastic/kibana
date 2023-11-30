@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { AiAssistantManagementPlugin as AiAssistantManagementPlugin } from './plugin';
+import { AiAssistantManagementPlugin } from './plugin';
 
 export type {
-  AiAssistantManagementSelectionPluginSetup as AiAssistantManagementPluginSetup,
-  AiAssistantManagementSelectionPluginStart as AiAssistantManagementPluginStart,
+  AiAssistantManagementSelectionPluginSetup,
+  AiAssistantManagementSelectionPluginStart,
 } from './plugin';
 
 export function plugin() {

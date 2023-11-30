@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import { createService } from './service/create_service';
 import type {
   ConfigSchema,
@@ -115,6 +116,6 @@ export class ObservabilityAIAssistantPlugin
       });
     });
 
-    return service;
+    return { service, useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service) };
   }
 }

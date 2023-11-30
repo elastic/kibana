@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -32,7 +33,12 @@ const chatService: ObservabilityAIAssistantChatService = {
     signal: AbortSignal;
   }): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
   renderFunction: (name: string, args: string | undefined, response: {}) => (
-    <div>Hello! {name}</div>
+    <div>
+      {i18n.translate('xpack.observabilityAiAssistant.chatService.div.helloLabel', {
+        defaultMessage: 'Hello',
+      })}
+      {name}
+    </div>
   ),
   hasFunction: () => true,
   hasRenderFunction: () => true,
@@ -60,6 +66,7 @@ const service: ObservabilityAIAssistantService = {
       url: {},
       navigate: () => {},
     } as unknown as SharePluginStart),
+  register: () => {},
 };
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {

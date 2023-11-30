@@ -17,22 +17,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useAppContext } from '../../context/app_context';
-import { useGetAiConnectors } from '../../hooks/use_get_ai_connectors';
 
 export const SELECTED_CONNECTOR_LOCAL_STORAGE_KEY =
   'xpack.observabilityAiAssistant.lastUsedConnector';
 
 export function SettingsTab() {
-  const { navigateToApp } = useAppContext();
+  const { navigateToApp, observabilityAIAssistant } = useAppContext();
 
-  const { connectors = [] } = useGetAiConnectors();
-
-  const [selectedConnector, setSelectedConnector] = useLocalStorage(
-    SELECTED_CONNECTOR_LOCAL_STORAGE_KEY,
-    ''
-  );
+  const {
+    connectors = [],
+    selectedConnector,
+    selectConnector,
+  } = observabilityAIAssistant.useGenAIConnectors();
 
   const selectorOptions = connectors.map((connector) => ({
     text: connector.name,
@@ -164,7 +161,7 @@ export function SettingsTab() {
                 options={selectorOptions}
                 value={selectedConnector}
                 onChange={(e) => {
-                  setSelectedConnector(e.target.value);
+                  selectConnector(e.target.value);
                 }}
                 aria-label={i18n.translate(
                   'aiAssistantManagementObservability.settingsPage.euiSelect.generativeAIProviderLabel',

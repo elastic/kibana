@@ -40,6 +40,7 @@ import type {
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
+import { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -75,7 +76,7 @@ export interface ObservabilityAIAssistantChatService {
   ) => React.ReactNode;
 }
 
-export type ChatRegistrationFunction = ({}: {
+export type AssistantRegistrationFunction = ({}: {
   signal: AbortSignal;
   registerFunction: RegisterFunctionDefinition;
   registerContext: RegisterContextDefinition;
@@ -88,10 +89,12 @@ export interface ObservabilityAIAssistantService {
   getLicense: () => Observable<ILicense>;
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
+  register: (fn: AssistantRegistrationFunction) => void;
 }
 
-export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {
-  register: (fn: ChatRegistrationFunction) => void;
+export interface ObservabilityAIAssistantPluginStart {
+  service: ObservabilityAIAssistantService;
+  useGenAIConnectors: () => UseGenAIConnectorsResult;
 }
 
 export interface ObservabilityAIAssistantPluginSetup {}

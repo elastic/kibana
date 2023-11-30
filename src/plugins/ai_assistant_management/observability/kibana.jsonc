@@ -7,7 +7,7 @@
     "server": false,
     "browser": true,
     "requiredPlugins": ["management"],
-    "optionalPlugins": ["actions", "home", "observabilityAIAssistant", "serverless", "spaces"],
+    "optionalPlugins": ["actions", "home", "observabilityAIAssistant", "serverless"],
     "requiredBundles": ["kibanaReact"]
   }
 }

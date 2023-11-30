@@ -8,11 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
+import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAssistantManagementObservabilityPluginSetup {}
@@ -23,11 +25,11 @@ export interface AiAssistantManagementObservabilityPluginStart {}
 export interface SetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginSetup;
 }
 
 export interface StartDependencies {
   serverless?: ServerlessPluginStart;
-  spaces?: SpacesPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
 }
 
@@ -42,7 +44,7 @@ export class AiAssistantManagementObservabilityPlugin
 {
   public setup(
     core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>,
-    { home, management }: SetupDependencies
+    { home, management, observabilityAIAssistant }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
     const title = i18n.translate('aiAssistantManagementObservability.app.title', {
       defaultMessage: 'AI Assistant for Observability',
@@ -62,20 +64,22 @@ export class AiAssistantManagementObservabilityPlugin
       });
     }
 
-    management.sections.section.kibana.registerApp({
-      id: 'aiAssistantManagementObservability',
-      title,
-      hideFromSidebar: true,
-      order: 1,
-      mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./app');
+    if (observabilityAIAssistant) {
+      management.sections.section.kibana.registerApp({
+        id: 'aiAssistantManagementObservability',
+        title,
+        hideFromSidebar: true,
+        order: 1,
+        mount: async (mountParams) => {
+          const { mountManagementSection } = await import('./app');
 
-        return mountManagementSection({
-          core,
-          mountParams,
-        });
-      },
-    });
+          return mountManagementSection({
+            core,
+            mountParams,
+          });
+        },
+      });
+    }
 
     return {};
   }

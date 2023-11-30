@@ -13,7 +13,7 @@ import { useAppContext } from '../context/app_context';
 export function useGetKnowledgeBaseEntries(query: string) {
   const { observabilityAIAssistant } = useAppContext();
 
-  const observabilityAIAssistantApi = observabilityAIAssistant?.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query],

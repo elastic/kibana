@@ -23,6 +23,6 @@ export function createLogAIAssistant({
   observabilityAIAssistant: aiAssistant,
 }: LogAIAssistantFactoryDeps): LogAIAssistantComponent {
   return ({ observabilityAIAssistant = aiAssistant, ...props }) => (
-    <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} {...props} />
+    <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant.service} {...props} />
   );
 }

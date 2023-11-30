@@ -13,6 +13,8 @@ import type { StartDependencies } from './plugin';
 
 interface ContextValue extends StartDependencies {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+
+  capabilities: CoreStart['application']['capabilities'];
   navigateToApp: CoreStart['application']['navigateToApp'];
 }
 

@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 
 export interface UseGenAIConnectorsResult {
@@ -22,6 +23,12 @@ export interface UseGenAIConnectorsResult {
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
   const assistant = useObservabilityAIAssistant();
 
+  return useGenAIConnectorsWithoutContext(assistant);
+}
+
+export function useGenAIConnectorsWithoutContext(
+  assistant: ObservabilityAIAssistantService
+): UseGenAIConnectorsResult {
   const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
 
   const [selectedConnector, setSelectedConnector] = useLocalStorage(
@@ -34,7 +41,6 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const controller = useMemo(() => new AbortController(), []);
-
   const fetchConnectors = useCallback(async () => {
     setLoading(true);
 

@@ -42,8 +42,9 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
           <AppContextProvider
             value={{
               ...startDeps,
-              setBreadcrumbs,
+              capabilities: coreStart.application.capabilities,
               navigateToApp: coreStart.application.navigateToApp,
+              setBreadcrumbs,
             }}
           >
             <RouterProvider history={history} router={aIAssistantManagementSelectionRouter as any}>

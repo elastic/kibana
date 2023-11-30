@@ -102,11 +102,11 @@ export default LogAIAssistant;
 
 function withProviders(Component: React.FunctionComponent<LogAIAssistantProps>) {
   return function ComponentWithProviders({
-    observabilityAIAssistant,
+    observabilityAIAssistant: { service: observabilityAIAssistantService },
     ...props
   }: LogAIAssistantDeps) {
     return (
-      <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+      <ObservabilityAIAssistantProvider value={observabilityAIAssistantService}>
         <Component {...props} />
       </ObservabilityAIAssistantProvider>
     );

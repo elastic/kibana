@@ -47,17 +47,12 @@ export function KnowledgeBaseEditManualEntryFlyout({
   const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
 
   const handleSubmitNewEntryClick = async () => {
-    try {
-      await createEntry({
-        entry: {
-          id: newEntryId,
-          text: newEntryText,
-        },
-      });
-      onClose();
-    } catch (_) {
-      // Error toast should be displayed by the React Query hook.
-    }
+    createEntry({
+      entry: {
+        id: newEntryId,
+        text: newEntryText,
+      },
+    }).then(onClose);
   };
 
   const handleDelete = async () => {

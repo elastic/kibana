@@ -7,7 +7,7 @@
     "server": false,
     "browser": true,
     "requiredPlugins": ["management"],
-    "optionalPlugins": ["home", "serverless", "spaces"],
+    "optionalPlugins": ["home", "serverless"],
     "requiredBundles": ["kibanaReact"]
   }
 }

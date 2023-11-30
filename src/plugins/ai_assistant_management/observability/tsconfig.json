@@ -3,20 +3,19 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["public/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
-    "@kbn/spaces-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/typed-react-router-config",
     "@kbn/core-chrome-browser",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/actions-plugin",
-    "@kbn/serverless",
+    "@kbn/serverless"
   ],
   "exclude": ["target/**/*"]
 }

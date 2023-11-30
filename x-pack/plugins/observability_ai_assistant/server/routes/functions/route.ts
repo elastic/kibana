@@ -15,6 +15,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { KnowledgeBaseEntryRole } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
 
@@ -223,11 +224,12 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       entry: {
         confidence,
         id,
+        doc_id: id,
         is_correction: isCorrection,
         text,
         public: isPublic,
         labels,
-        role: 'assistant_summarization',
+        role: KnowledgeBaseEntryRole.AssistantSummarization,
       },
     });
   },

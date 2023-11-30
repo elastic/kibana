@@ -20,17 +20,15 @@ export function splitKbText({
   return [
     {
       type: KnowledgeBaseEntryOperationType.Delete,
-      labels: {
-        document_id: id,
-      },
+      doc_id: id,
+      labels: {},
     },
     ...texts.map((text, index) => ({
       type: KnowledgeBaseEntryOperationType.Index,
       document: merge({}, rest, {
         id: [id, index].join('_'),
-        labels: {
-          document_id: id,
-        },
+        doc_id: id,
+        labels: {},
         text,
       }),
     })),

@@ -9,6 +9,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiCallOut,
   EuiCard,
   EuiFlexGrid,
   EuiFlexItem,
@@ -21,7 +22,9 @@ import {
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
-  const { setBreadcrumbs, navigateToApp } = useAppContext();
+  const { capabilities, setBreadcrumbs, navigateToApp } = useAppContext();
+
+  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant.show;
 
   useEffect(() => {
     setBreadcrumbs([
@@ -65,6 +68,23 @@ export function AiAssistantSelectionPage() {
           <EuiCard
             description={
               <div>
+                {!observabilityAIAssistantEnabled ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiCallOut
+                      iconType="warning"
+                      title={i18n.translate(
+                        'aiAssistantManagementSelection.aiAssistantSelectionPage.thisFeatureIsDisabledCallOutLabel',
+                        {
+                          defaultMessage:
+                            'This feature is disabled. It can be enabled from Spaces > Features.',
+                        }
+                      )}
+                      size="s"
+                    />
+                    <EuiSpacer size="s" />
+                  </>
+                ) : null}
                 <EuiLink
                   external
                   target="_blank"
@@ -80,6 +100,7 @@ export function AiAssistantSelectionPage() {
             display="plain"
             hasBorder
             icon={<EuiIcon size="l" type="logoObservability" />}
+            isDisabled={!observabilityAIAssistantEnabled}
             layout="horizontal"
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',

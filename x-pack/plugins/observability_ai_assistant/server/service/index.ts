@@ -13,6 +13,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
+import { KnowledgeBaseEntryRole } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
@@ -262,14 +263,14 @@ export class ObservabilityAIAssistantService {
             const entryWithSystemProperties = {
               ...entry,
               '@timestamp': new Date().toISOString(),
+              doc_id: entry.id,
               public: true,
               confidence: 'high' as const,
               is_correction: false,
               labels: {
                 ...entry.labels,
-                document_id: entry.id,
               },
-              role: 'elastic' as const,
+              role: KnowledgeBaseEntryRole.Elastic,
             };
 
             const operations =

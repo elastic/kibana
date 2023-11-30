@@ -123,7 +123,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
             id="aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.uploadAJSONFileTextLabel"
             defaultMessage="Upload a newline delimited JSON ({ext}) file containing a list of entries to add to your Knowledge base."
             values={{
-              ext: <EuiCode language="html">.ldjson</EuiCode>,
+              ext: <EuiCode language="html">.ndjson</EuiCode>,
             }}
           />
         </EuiText>
@@ -159,7 +159,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
           id={filePickerId}
           initialPromptText={i18n.translate(
             'aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.euiFilePicker.selectOrDragAndLabel',
-            { defaultMessage: 'Select or drag and drop a .ldjson file' }
+            { defaultMessage: 'Select or drag and drop a .ndjson file' }
           )}
           onChange={onChange}
         />

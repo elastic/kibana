@@ -14,6 +14,7 @@ import type {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
   ConfigSchema,
+  ObservabilityAIAssistantService,
 } from './types';
 
 export const ContextualInsight = withSuspense(
@@ -30,7 +31,11 @@ export const ObservabilityAIAssistantActionMenuItem = withSuspense(
 
 export { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 
-export type { ObservabilityAIAssistantPluginSetup, ObservabilityAIAssistantPluginStart };
+export type {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantService,
+};
 
 export {
   useObservabilityAIAssistant,
