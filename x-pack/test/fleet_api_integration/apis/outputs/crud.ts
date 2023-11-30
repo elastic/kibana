@@ -200,7 +200,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             state: 'HEALTHY',
             message: '',
-            '@timestamp': Date.parse('2023-11-29T14:25:31Z'),
+            '@timestamp': '' + Date.parse('2023-11-29T14:25:31Z'),
             output: defaultOutputId,
           },
         });
@@ -211,7 +211,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             state: 'DEGRADED',
             message: 'connection error',
-            '@timestamp': Date.parse('2023-11-30T14:25:31Z'),
+            '@timestamp': '' + Date.parse('2023-11-30T14:25:31Z'),
             output: defaultOutputId,
           },
         });
@@ -222,7 +222,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             state: 'HEALTHY',
             message: '',
-            '@timestamp': Date.parse('2023-11-31T14:25:31Z'),
+            '@timestamp': '' + Date.parse('2023-11-31T14:25:31Z'),
             output: 'remote2',
           },
         });
