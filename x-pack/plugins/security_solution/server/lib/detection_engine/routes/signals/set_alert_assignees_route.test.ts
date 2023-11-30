@@ -77,7 +77,9 @@ describe('setAlertAssigneesRoute', () => {
 
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "[]" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'ids: Array must contain at least 1 element(s)'
+      );
     });
 
     test('rejects if empty string provided as an alert id', async () => {
@@ -89,7 +91,9 @@ describe('setAlertAssigneesRoute', () => {
 
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'ids.0: String must contain at least 1 character(s), ids.0: Invalid'
+      );
     });
   });
 
