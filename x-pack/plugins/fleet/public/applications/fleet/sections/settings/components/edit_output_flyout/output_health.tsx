@@ -45,7 +45,12 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
 
   const EditOutputStatus: { [status: string]: JSX.Element | null } = {
     DEGRADED: (
-      <EuiCallOut title="Error" color="danger" iconType="error">
+      <EuiCallOut
+        title="Error"
+        color="danger"
+        iconType="error"
+        data-test-subj="outputHealthDegradedCallout"
+      >
         <p>
           {i18n.translate('xpack.fleet.output.calloutText', {
             defaultMessage: 'Unable to connect to "{name}" at {host}.',
@@ -63,7 +68,12 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
       </EuiCallOut>
     ),
     HEALTHY: (
-      <EuiCallOut title="Healthy" color="success" iconType="check">
+      <EuiCallOut
+        title="Healthy"
+        color="success"
+        iconType="check"
+        data-test-subj="outputHealthHealthyCallout"
+      >
         <p>
           {i18n.translate('xpack.fleet.output.successCalloutText', {
             defaultMessage: 'Connection with remote output established.',
@@ -75,7 +85,7 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
 
   const OutputStatusBadge: { [status: string]: JSX.Element | null } = {
     DEGRADED: (
-      <EuiBadge color="danger">
+      <EuiBadge color="danger" data-test-subj="outputHealthDegradedBadge">
         <FormattedMessage
           id="xpack.fleet.outputHealth.degradedStatusText"
           defaultMessage="Unhealthy"
@@ -83,7 +93,7 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
       </EuiBadge>
     ),
     HEALTHY: (
-      <EuiBadge color="success">
+      <EuiBadge color="success" data-test-subj="outputHealthHealthyBadge">
         <FormattedMessage
           id="xpack.fleet.outputHealth.healthyStatusText"
           defaultMessage="Healthy"
@@ -109,7 +119,11 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
 
   return showBadge ? (
     lastTimestampText && outputHealth?.state ? (
-      <EuiToolTip position="top" content={lastTimestampText}>
+      <EuiToolTip
+        position="top"
+        content={lastTimestampText}
+        data-test-subj="outputHealthBadgeTooltip"
+      >
         <>{outputBadge} </>
       </EuiToolTip>
     ) : (
