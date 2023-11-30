@@ -62,6 +62,7 @@ export class UpdateSLO {
     await this.repository.save(updatedSlo);
 
     if (!requireRevisionBump) {
+      // At this point, we still need to update the summary pipeline to include the changes (name, desc, tags, ...) in the summary index
       await retryTransientEsErrors(
         () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(updatedSlo)),
         { logger: this.logger }
@@ -102,7 +103,7 @@ export class UpdateSLO {
 
       // Restore the previous slo definition
       await this.repository.save(originalSlo);
-      // deletes the created resources for the updated slo
+      // delete the created resources for the updated slo
       await this.summaryTransformManager.stop(updatedSummaryTransformId);
       await this.summaryTransformManager.uninstall(updatedSummaryTransformId);
       await this.transformManager.stop(updatedRollupTransformId);

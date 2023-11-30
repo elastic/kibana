@@ -33,6 +33,11 @@ export function createTempSummaryDocument(slo: SLO) {
       id: slo.id,
       budgetingMethod: slo.budgetingMethod,
       revision: slo.revision,
+      objective: {
+        target: slo.objective.target,
+        timesliceTarget: slo.objective.timesliceTarget ?? null,
+        timesliceWindow: slo.objective.timesliceWindow?.format() ?? null,
+      },
       tags: slo.tags,
     },
     goodEvents: 0,

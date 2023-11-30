@@ -69,6 +69,19 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
                 },
               },
             },
+            objective: {
+              properties: {
+                target: {
+                  type: 'double',
+                },
+                timesliceTarget: {
+                  type: 'double',
+                },
+                timesliceWindow: {
+                  type: 'keyword',
+                },
+              },
+            },
             budgetingMethod: {
               type: 'keyword',
             },

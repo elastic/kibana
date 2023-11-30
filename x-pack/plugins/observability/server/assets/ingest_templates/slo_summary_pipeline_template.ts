@@ -5,12 +5,35 @@
  * 2.0.
  */
 
+import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { SLO } from '../../domain/models';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../constants';
 
 export const getSLOSummaryPipelineTemplate = (slo: SLO) => {
   const errorBudgetEstimated =
     slo.budgetingMethod === 'occurrences' && slo.timeWindow.type === 'calendarAligned';
+
+  const optionalObjectiveTimesliceProcessors = timeslicesBudgetingMethodSchema.is(
+    slo.budgetingMethod
+  )
+    ? [
+        {
+          set: {
+            description: 'Set objective.timesliceTarget field',
+            field: 'slo.objective.timesliceTarget',
+            value: slo.objective.timesliceTarget,
+          },
+        },
+        {
+          set: {
+            description: 'Set objective.timesliceWindow field',
+            field: 'slo.objective.timesliceWindow',
+            value: slo.objective.timesliceWindow!.format(),
+          },
+        },
+      ]
+    : [];
+
   return {
     id: getSLOSummaryPipelineId(slo.id, slo.revision),
     description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,
@@ -85,6 +108,14 @@ export const getSLOSummaryPipelineTemplate = (slo: SLO) => {
           value: slo.timeWindow.type,
         },
       },
+      {
+        set: {
+          description: 'Set objective.target field',
+          field: 'slo.objective.target',
+          value: slo.objective.target,
+        },
+      },
+      ...optionalObjectiveTimesliceProcessors,
       {
         set: {
           description: "if 'statusCode == 0', set status to NO_DATA",
