@@ -10,12 +10,13 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { RESPONSE_SECTION_CONTENT_TEST_ID, RESPONSE_SECTION_HEADER_TEST_ID } from './test_ids';
 import { RightPanelContext } from '../context';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { ResponseSection } from './response_section';
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
 
-const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
+const flyoutContextValue = {} as unknown as ExpandableFlyoutContextValue;
 const panelContextValue = {} as unknown as RightPanelContext;
 
 const renderResponseSection = () =>
