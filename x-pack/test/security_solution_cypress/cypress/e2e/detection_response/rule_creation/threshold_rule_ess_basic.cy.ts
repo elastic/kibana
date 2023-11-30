@@ -11,6 +11,7 @@ import {
 } from '../../../screens/create_new_rule';
 
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { startBasicLicense } from '../../../tasks/api_calls/licensing';
 import { selectThresholdRuleType } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -22,13 +23,7 @@ describe('Threshold rules, ESS basic license', { tags: ['@ess'] }, () => {
     deleteAlertsAndRules();
     login();
     visit(CREATE_RULE_URL);
-
-    // downgrade license to basic
-    cy.request({
-      headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
-      method: 'POST',
-      url: '/api/license/start_basic?acknowledge=true',
-    });
+    startBasicLicense();
   });
 
   it('Alert suppression is disabled for basic license', () => {

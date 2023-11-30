@@ -434,7 +434,7 @@ export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
  * use default schedule options
  */
 export const skipScheduleRuleAction = () => {
-  cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
+  cy.get(SCHEDULE_CONTINUE_BUTTON).click();
 };
 
 export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) => {
@@ -785,8 +785,8 @@ export const enablesAndPopulatesThresholdSuppression = (
     .should('not.be.checked');
 
   // enables suppression for threshold rule
-  // checkbox input covered by label element, so force:true is needed
-  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked').check({ force: true });
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).siblings('label').click();
 
   cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
   cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
