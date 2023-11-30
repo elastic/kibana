@@ -40,7 +40,7 @@ export const NULL_GROUPING_MESSAGES = {
   KUBERNETES: i18n.translate('xpack.csp.findings.grouping.kubernetes.nullGroupTitle', {
     defaultMessage: 'No Kubernetes cluster',
   }),
-  GENERIC_MESSAGE: i18n.translate('xpack.csp.findings.grouping.kubernetes.nullGroupTitle', {
+  GENERIC_MESSAGE: i18n.translate('xpack.csp.findings.grouping.default.nullGroupTitle', {
     defaultMessage: 'No grouping',
   }),
 };
