@@ -273,7 +273,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         }}
         fullWidth
         data-test-subj="repositorySelect"
-        disabled={policy?.isManagedPolicy && (isEditing)}
+        disabled={policy?.isManagedPolicy && isEditing}
       />
     );
   };
@@ -343,7 +343,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             }
           )}
           data-test-subj="snapshotNameInput"
-          disabled={policy?.isManagedPolicy && (isEditing)}
+          disabled={policy?.isManagedPolicy && isEditing}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>
