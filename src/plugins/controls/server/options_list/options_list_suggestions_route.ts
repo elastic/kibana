@@ -8,18 +8,15 @@
 
 import { Observable } from 'rxjs';
 
-import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
-import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { SearchRequest } from '@kbn/data-plugin/common';
-import { schema } from '@kbn/config-schema';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
-import { getSuggestionAggregationBuilder } from './options_list_suggestion_queries';
-import { OptionsListSuggestionAggregationBuilder } from './types';
-import { genericFetchAllSuggestions } from './options_list_all_suggestions_query';
-import { exactMatchSearchAggregation } from './options_list_exact_match_search_query';
+import { getSuggestionAggregationBuilder } from './suggestion_queries';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
@@ -105,24 +102,13 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, runtimeFieldMap, allowExpensiveQueries } = request;
+    const { runPastTimeout, filters, runtimeFieldMap } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
       : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
 
-    let suggestionBuilder: OptionsListSuggestionAggregationBuilder;
-    const hasSearchString = request.searchString && request.searchString.length > 0;
-    if (!hasSearchString) {
-      // the field type only matters when there is a search string; so, if no search string,
-      // return generic "fetch all" aggregation builder
-      suggestionBuilder = genericFetchAllSuggestions;
-    } else if (!allowExpensiveQueries || request.searchTechnique === 'exact') {
-      // if `allowExpensiveQueries` is false, only support exact match searching
-      suggestionBuilder = exactMatchSearchAggregation;
-    } else {
-      suggestionBuilder = getSuggestionAggregationBuilder(request);
-    }
+    const suggestionBuilder = getSuggestionAggregationBuilder(request);
     const validationBuilder = getValidationAggregationBuilder();
 
     const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};

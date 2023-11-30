@@ -9,11 +9,11 @@
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
+import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
+import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
 import { getSortType } from './options_list_suggestion_query_helpers';
-import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
 
-export const genericFetchAllSuggestions: OptionsListSuggestionAggregationBuilder = {
+export const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
   buildAggregation: ({
     fieldName,
     searchString,

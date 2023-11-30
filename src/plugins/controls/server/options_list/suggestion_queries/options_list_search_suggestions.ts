@@ -9,27 +9,27 @@
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 
-import { getIpRangeQuery } from '../../common/options_list/ip_search';
-import { getDefaultSearchTechnique } from '../../common/options_list/suggestions_searching';
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
-import { exactMatchSearchAggregation } from './options_list_exact_match_search_query';
+import { getIpRangeQuery } from '../../../common/options_list/ip_search';
+import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
+import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
+import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
+import { allSuggestionsAggregationBuilder } from './options_list_all_suggestions';
 import {
   getEscapedWildcardQuery,
   getIpBuckets,
   getSortType,
 } from './options_list_suggestion_query_helpers';
-import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
 
 /**
  * Suggestion aggregations
  */
-export const getSuggestionAggregationBuilder = ({
+export const getSearchSuggestionsAggregationBuilder = ({
   fieldSpec,
   searchTechnique,
 }: OptionsListRequestBody) => {
   if (searchTechnique === 'exact') {
     // this shouldn't happen, but just in case, catch it here
-    return exactMatchSearchAggregation;
+    return allSuggestionsAggregationBuilder;
   }
 
   // note that date and boolean fields are non-searchable, so type-specific search aggs are not necessary;
@@ -37,15 +37,15 @@ export const getSuggestionAggregationBuilder = ({
   // type-specific agg because it will be handled by `exactMatchSearchAggregation`
   switch (fieldSpec?.type) {
     case 'ip': {
-      return expensiveSuggestionAggSubtypes.ip;
+      return suggestionAggSubtypes.ip;
     }
     default: {
-      return expensiveSuggestionAggSubtypes.textOrKeywordOrNested;
+      return suggestionAggSubtypes.textOrKeywordOrNested;
     }
   }
 };
 
-const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
+const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
   /**
    * The "textOrKeywordOrNested" query / parser should be used whenever the field is built on some type of string field,
    * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.

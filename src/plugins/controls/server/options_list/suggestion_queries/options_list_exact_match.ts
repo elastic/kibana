@@ -9,11 +9,11 @@
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 
-import { isValidSearch } from '../../common/options_list/suggestions_searching';
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
-import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
+import { isValidSearch } from '../../../common/options_list/suggestions_searching';
+import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
+import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
 
-export const exactMatchSearchAggregation: OptionsListSuggestionAggregationBuilder = {
+export const exactMatchAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
   buildAggregation: ({ fieldName, fieldSpec, searchString }: OptionsListRequestBody) => {
     if (
       !searchString ||

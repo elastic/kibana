@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { getSuggestionAggregationBuilder } from './options_list_suggestion_queries';
-import { OptionsListRequestBody } from '../../common/options_list/types';
+import { OptionsListRequestBody } from '../../../common/options_list/types';
+import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
 
 describe('options list expensive queries', () => {
   let rawSearchResponseMock: SearchResponse = {} as SearchResponse;
@@ -44,7 +44,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_key', direction: 'asc' },
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -76,7 +78,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -121,7 +125,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -166,7 +172,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -210,7 +218,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_count', direction: 'asc' },
           fieldSpec: { subType: { nested: { path: 'path.to.nested' } } } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -262,7 +272,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
                   Object {
@@ -289,7 +301,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { type: 'date' } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -321,7 +335,9 @@ describe('options list expensive queries', () => {
           searchString: '2023',
           fieldSpec: { type: 'date' } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -354,7 +370,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_key', direction: 'asc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -401,7 +419,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_count', direction: 'asc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -447,7 +467,9 @@ describe('options list expensive queries', () => {
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'f688:fb50:6433:bba2:604:f2c:194a:d3c5',
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -492,7 +514,9 @@ describe('options list expensive queries', () => {
           allowExpensiveQueries: true,
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -539,7 +563,9 @@ describe('options list expensive queries', () => {
           sort: { by: '_count', direction: 'desc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
-        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
@@ -587,7 +613,9 @@ describe('options list expensive queries', () => {
         fieldName: 'coolTestField.keyword',
         fieldSpec: { aggregatable: true } as unknown as FieldSpec,
       };
-      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+        optionsListRequestBodyMock
+      );
       rawSearchResponseMock.aggregations = {
         suggestions: {
           buckets: [
@@ -629,7 +657,9 @@ describe('options list expensive queries', () => {
         allowExpensiveQueries: true,
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
       };
-      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+        optionsListRequestBodyMock
+      );
       rawSearchResponseMock.aggregations = {
         suggestions: {
           buckets: [
@@ -664,7 +694,9 @@ describe('options list expensive queries', () => {
         allowExpensiveQueries: true,
         fieldSpec: { subType: { nested: { path: 'path.to.nested' } } } as unknown as FieldSpec,
       };
-      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+        optionsListRequestBodyMock
+      );
       rawSearchResponseMock.aggregations = {
         nestedSuggestions: {
           filteredSuggestions: {
@@ -710,7 +742,9 @@ describe('options list expensive queries', () => {
         allowExpensiveQueries: true,
         fieldSpec: { type: 'ip' } as unknown as FieldSpec,
       };
-      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+        optionsListRequestBodyMock
+      );
       rawSearchResponseMock.aggregations = {
         suggestions: {
           buckets: {
@@ -814,7 +848,9 @@ describe('options list expensive queries', () => {
         allowExpensiveQueries: true,
         fieldSpec: { type: 'date' } as unknown as FieldSpec,
       };
-      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+        optionsListRequestBodyMock
+      );
       rawSearchResponseMock.aggregations = {
         suggestions: {
           buckets: [
