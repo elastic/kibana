@@ -17,8 +17,9 @@ import type {
 import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { MonitorConnectors } from '../../server/routes/default_alerts/default_alert_service';
 import { ActionConnector, ActionTypeId } from './types';
-import { DefaultEmail } from '../runtime_types';
+import { DefaultEmail, DynamicSettings } from '../runtime_types';
 
 export const SLACK_WEBHOOK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
@@ -39,19 +40,42 @@ interface Translations {
   defaultRecoverySubjectMessage: string;
 }
 
+const getKql = (configIds: string[] = []) => {
+  const kql =
+    configIds?.length > 0
+      ? `configId: (${configIds.join(' or ')}) and monitor.custom_connectors: true`
+      : 'monitor.custom_connectors: false';
+
+  return {
+    query: {
+      kql,
+      filters: [],
+    },
+  };
+};
+
 export function populateAlertActions({
-  defaultActions,
-  defaultEmail,
+  allActionConnectors,
+  settings,
   groupId,
   translations,
+  monitorConnectors: monitorConnectorsList,
+  existingActions,
 }: {
   groupId: string;
-  defaultActions: ActionConnector[];
-  defaultEmail?: DefaultEmail;
+  allActionConnectors: ActionConnector[];
+  settings?: DynamicSettings;
   translations: Translations;
+  monitorConnectors?: MonitorConnectors[];
+  existingActions?: RuleAction[];
 }) {
-  const actions: RuleAction[] = [];
-  defaultActions.forEach((aId) => {
+  const defaultActions = (allActionConnectors ?? []).filter((act) =>
+    settings?.defaultConnectors?.includes(act.id)
+  );
+
+  let actions: RuleAction[] = [...(existingActions ?? [])];
+
+  const getRuleAction = (aId: ActionConnector, configIds: string[] = []) => {
     const action: RuleAction = {
       id: aId.id,
       group: groupId,
@@ -61,6 +85,7 @@ export function populateAlertActions({
         throttle: null,
         summary: false,
       },
+      alertsFilter: getKql(configIds),
     };
 
     const recoveredAction: RuleAction = {
@@ -74,6 +99,7 @@ export function populateAlertActions({
         throttle: null,
         summary: false,
       },
+      alertsFilter: getKql(configIds),
     };
 
     switch (aId.actionTypeId) {
@@ -114,9 +140,9 @@ export function populateAlertActions({
         actions.push(recoveredAction);
         break;
       case EMAIL_ACTION_ID:
-        if (defaultEmail) {
-          action.params = getEmailActionParams(translations, defaultEmail);
-          recoveredAction.params = getEmailActionParams(translations, defaultEmail, true);
+        if (settings?.defaultEmail) {
+          action.params = getEmailActionParams(translations, settings.defaultEmail);
+          recoveredAction.params = getEmailActionParams(translations, settings.defaultEmail, true);
           actions.push(recoveredAction);
         }
         break;
@@ -125,8 +151,116 @@ export function populateAlertActions({
           message: translations.defaultActionMessage,
         };
     }
-
+    action.params.configIds = configIds;
+    recoveredAction.params.configIds = configIds;
     actions.push(action);
+  };
+
+  // remove the defaultActions
+  actions = actions.filter((action) => {
+    const configs = (action.params.configIds as string[]) ?? [];
+    return configs.length > 0 || !settings?.defaultConnectors?.includes(action.id);
+  });
+
+  defaultActions.forEach((aId) => {
+    getRuleAction(aId);
+  });
+
+  if (defaultActions.length === 0) {
+    actions = actions.filter((action) => {
+      return ((action.params.configIds as string[]) ?? []).length > 0;
+    });
+  }
+  // remove the ones not part of defaultActions
+  actions = actions.filter((action) => {
+    const configs = (action.params.configIds as string[]) ?? [];
+    return !(configs.length === 0 && !settings?.defaultConnectors?.includes(action.id));
+  });
+
+  // combine the configId
+
+  const addedConnectorsByConfigs: Record<string, string[]> = {};
+  const removedConnectorsByConfigs: Record<string, string[]> = {};
+
+  (monitorConnectorsList ?? []).forEach((monitorConnectors) => {
+    const configId = monitorConnectors.configId;
+    if (configId) {
+      monitorConnectors?.addedConnectors?.forEach((monitorConnector) => {
+        if (addedConnectorsByConfigs[monitorConnector]) {
+          addedConnectorsByConfigs[monitorConnector].push(configId);
+        } else {
+          addedConnectorsByConfigs[monitorConnector] = [configId];
+        }
+      });
+      monitorConnectors?.removedConnectors?.forEach((monitorConnector) => {
+        if (removedConnectorsByConfigs[monitorConnector]) {
+          removedConnectorsByConfigs[monitorConnector].push(configId);
+        } else {
+          removedConnectorsByConfigs[monitorConnector] = [configId];
+        }
+      });
+    }
+  });
+
+  const getBothActions = (connectId: string) => {
+    const currentAction = actions.find((act) => {
+      return (
+        act.id === connectId &&
+        act.group === groupId &&
+        ((act.params?.configIds as string[]) ?? []).length > 0
+      );
+    });
+    const recoveredAction = actions.find((act) => {
+      return (
+        act.id === connectId &&
+        act.group === 'recovered' &&
+        ((act.params?.configIds as string[]) ?? []).length > 0
+      );
+    });
+    return { currentAction, recoveredAction };
+  };
+
+  Object.keys(addedConnectorsByConfigs).forEach((connectId) => {
+    const action = allActionConnectors.find((act) => act.id === connectId);
+    if (action) {
+      const configIds = addedConnectorsByConfigs[connectId];
+      const { currentAction, recoveredAction } = getBothActions(connectId);
+      if (currentAction) {
+        const paramConfigs = (currentAction?.params.configIds ?? []) as string[];
+        const newConfigIds = Array.from(new Set([...paramConfigs, ...configIds]));
+        currentAction.params.configIds = newConfigIds;
+        currentAction.alertsFilter = getKql(newConfigIds);
+        if (recoveredAction) {
+          recoveredAction.params.configIds = newConfigIds;
+          recoveredAction.alertsFilter = getKql(newConfigIds);
+        }
+      } else {
+        getRuleAction(action, configIds);
+      }
+    }
+  });
+
+  Object.keys(removedConnectorsByConfigs).forEach((connectId) => {
+    const action = allActionConnectors.find((act) => act.id === connectId);
+    if (action) {
+      const configIds = removedConnectorsByConfigs[connectId];
+      const { currentAction, recoveredAction } = getBothActions(connectId);
+      const paramConfigs = (currentAction?.params.configIds ?? []) as string[];
+      const newConfigIds = paramConfigs.filter((configId) => !configIds.includes(configId));
+      if (currentAction && newConfigIds.length > 0) {
+        currentAction.params.configIds = Array.from(newConfigIds);
+        currentAction.alertsFilter = getKql(Array.from(newConfigIds));
+        if (recoveredAction) {
+          recoveredAction.params.configIds = Array.from(newConfigIds);
+          recoveredAction.alertsFilter = getKql(Array.from(newConfigIds));
+        }
+      } else {
+        // remove all matching actions
+        actions = actions.filter((act) => {
+          return act.id !== connectId || ((act.params?.configIds as string[]) ?? []).length === 0;
+        });
+      }
+    }
   });
 
   return actions;

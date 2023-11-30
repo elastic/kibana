@@ -36,6 +36,10 @@ export const uptimeRuleFieldMap = {
     type: 'keyword',
     required: false,
   },
+  'monitor.custom_connectors': {
+    type: 'boolean',
+    required: false,
+  },
   // tls alert fields
   'tls.server.x509.issuer.common_name': {
     type: 'keyword',

@@ -2,6 +2,7 @@
   "type": "http",
   "enabled": true,
   "alert": {
+    "has_connectors": false,
     "status": {
       "enabled": true
     }

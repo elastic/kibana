@@ -2632,6 +2632,9 @@
                 "type": "boolean"
               }
             }
+          },
+          "has_connectors": {
+            "type": "boolean"
           }
         }
       },

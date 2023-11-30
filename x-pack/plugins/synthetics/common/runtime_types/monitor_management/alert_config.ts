@@ -19,6 +19,8 @@ export const AlertConfigCodec = t.intersection([
 export const AlertConfigsCodec = t.partial({
   tls: AlertConfigCodec,
   status: AlertConfigCodec,
+  connectors: t.array(t.string),
+  has_connectors: t.boolean,
 });
 
 export type AlertConfig = t.TypeOf<typeof AlertConfigCodec>;

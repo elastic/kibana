@@ -201,6 +201,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
       FIELD(readOnly)[AlertConfigKey.TLS_ENABLED],
+      FIELD(readOnly)[AlertConfigKey.CONNECTORS],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
@@ -222,6 +223,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
       FIELD(readOnly)[AlertConfigKey.TLS_ENABLED],
+      FIELD(readOnly)[AlertConfigKey.CONNECTORS],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
@@ -239,6 +241,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.ENABLED],
       FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
+      FIELD(readOnly)[AlertConfigKey.CONNECTORS],
     ],
     step3: [FIELD(readOnly)['source.inline'], FIELD(readOnly)[ConfigKey.PARAMS]],
     scriptEdit: [FIELD(readOnly)['source.inline'], FIELD(readOnly)[ConfigKey.PARAMS]],
@@ -266,6 +269,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.ENABLED],
       FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
+      FIELD(readOnly)[AlertConfigKey.CONNECTORS],
     ],
     advanced: [
       {
@@ -292,6 +296,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.ENABLED],
       FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
+      FIELD(readOnly)[AlertConfigKey.CONNECTORS],
     ],
     advanced: [DEFAULT_DATA_OPTIONS(readOnly), ICMP_ADVANCED(readOnly).requestConfig],
   },

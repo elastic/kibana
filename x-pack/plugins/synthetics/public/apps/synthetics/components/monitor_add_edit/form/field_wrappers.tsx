@@ -29,6 +29,10 @@ import {
   EuiTextAreaProps,
 } from '@elastic/eui';
 import {
+  AlertConnectorsField,
+  ConnectorFieldProps,
+} from '../fields/alert_config/alert_connectors_field';
+import {
   ThrottlingConfigField,
   ThrottlingConfigFieldProps,
 } from '../fields/throttling/throttling_config_field';
@@ -153,4 +157,8 @@ export const ResponseBodyIndexField = React.forwardRef<unknown, DefaultResponseB
 
 export const ThrottlingWrapper = React.forwardRef<unknown, ThrottlingConfigFieldProps>(
   (props, _ref) => <ThrottlingConfigField {...props} />
+);
+
+export const AlertConnectorWrapper = React.forwardRef<unknown, ConnectorFieldProps>(
+  (props, _ref) => <AlertConnectorsField {...props} />
 );

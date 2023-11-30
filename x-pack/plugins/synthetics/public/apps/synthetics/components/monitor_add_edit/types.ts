@@ -48,6 +48,7 @@ export type FormConfig = MonitorFields & {
   ['schedule.number']: string;
   ['source.inline']: string;
   [AlertConfigKey.STATUS_ENABLED]: boolean;
+  [AlertConfigKey.CONNECTORS]: string[];
   [AlertConfigKey.TLS_ENABLED]: boolean;
   [ConfigKey.LOCATIONS]: FormLocation[];
 
@@ -78,7 +79,7 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   label?: string | React.ReactNode;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
-  hidden?: (depenencies: unknown[]) => boolean;
+  hidden?: (dependencies: unknown[]) => boolean;
   props?: (params: {
     field?: ControllerRenderProps<FormConfig, TFieldKey>;
     formState: FormState<FormConfig>;
@@ -131,6 +132,7 @@ export interface FieldMap {
   [ConfigKey.SCREENSHOTS]: FieldMeta<ConfigKey.SCREENSHOTS>;
   [ConfigKey.ENABLED]: FieldMeta<ConfigKey.ENABLED>;
   [AlertConfigKey.STATUS_ENABLED]: FieldMeta<AlertConfigKey.STATUS_ENABLED>;
+  [AlertConfigKey.CONNECTORS]: FieldMeta<AlertConfigKey.CONNECTORS>;
   [AlertConfigKey.TLS_ENABLED]: FieldMeta<AlertConfigKey.TLS_ENABLED>;
   [ConfigKey.NAMESPACE]: FieldMeta<ConfigKey.NAMESPACE>;
   [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
