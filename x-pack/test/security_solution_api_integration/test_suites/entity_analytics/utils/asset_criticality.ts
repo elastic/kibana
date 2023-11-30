@@ -18,6 +18,10 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
 import { routeWithNamespace } from '../../detections_response/utils';
+
+const getAssetCriticalityIndex = (namespace?: string) =>
+  `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;
+
 export const cleanAssetCriticality = async ({
   log,
   es,
@@ -30,11 +34,29 @@ export const cleanAssetCriticality = async ({
   try {
     await Promise.allSettled([
       es.indices.delete({
-        index: [`.asset-criticality.asset-criticality-${namespace}`],
+        index: [getAssetCriticalityIndex(namespace)],
       }),
     ]);
   } catch (e) {
     log.warning(`Error deleting asset criticality index: ${e.message}`);
+  }
+};
+
+export const getAssetCriticalityDoc = async (opts: {
+  es: Client;
+  idField: string;
+  idValue: string;
+}) => {
+  const { es, idField, idValue } = opts;
+  try {
+    const doc = await es.get({
+      index: getAssetCriticalityIndex(),
+      id: `${idField}:${idValue}`,
+    });
+
+    return doc._source;
+  } catch (e) {
+    return undefined;
   }
 };
 

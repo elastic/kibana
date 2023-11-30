@@ -10,6 +10,7 @@ import {
   cleanRiskEngine,
   cleanAssetCriticality,
   assetCriticalityRouteHelpersFactory,
+  getAssetCriticalityDoc,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 const assetCriticalityIndex = '.asset-criticality.asset-criticality-default';
@@ -20,19 +21,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const supertest = getService('supertest');
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
-
-  const getAssetCriticalityDoc = async (idField: string, idValue: string) => {
-    try {
-      const doc = await es.get({
-        index: assetCriticalityIndex,
-        id: `${idField}:${idValue}`,
-      });
-
-      return doc._source;
-    } catch (e) {
-      return undefined;
-    }
-  };
 
   describe('@ess @serverless @skipInQA asset_criticality Asset Criticality APIs', () => {
     beforeEach(async () => {
@@ -109,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result.criticality_level).to.eql('important');
         expect(result['@timestamp']).to.be.a('string');
 
-        const doc = await getAssetCriticalityDoc('host.name', 'host-01');
+        const doc = await getAssetCriticalityDoc({ idField: 'host.name', idValue: 'host-01', es });
 
         expect(doc).to.eql(result);
       });
@@ -169,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedDoc['@timestamp']).to.be.a('string');
         expect(updatedDoc['@timestamp']).to.not.eql(createdDoc['@timestamp']);
 
-        const doc = await getAssetCriticalityDoc('host.name', 'host-01');
+        const doc = await getAssetCriticalityDoc({ idField: 'host.name', idValue: 'host-01', es });
 
         expect(doc).to.eql(updatedDoc);
       });
@@ -186,7 +174,11 @@ export default ({ getService }: FtrProviderContext) => {
         await assetCriticalityRoutes.upsert(assetCriticality);
 
         await assetCriticalityRoutes.delete('host.name', 'delete-me');
-        const doc = await getAssetCriticalityDoc('host.name', 'delete-me');
+        const doc = await getAssetCriticalityDoc({
+          idField: 'host.name',
+          idValue: 'delete-me',
+          es,
+        });
 
         expect(doc).to.eql(undefined);
       });
