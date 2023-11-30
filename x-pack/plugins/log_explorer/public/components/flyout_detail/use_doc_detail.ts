@@ -29,8 +29,10 @@ export function useDocDetail(
   };
 
   // Flyout Headers
-  const level = doc.flattened[constants.LOG_LEVEL_FIELD];
-  const message = doc.flattened[constants.MESSAGE_FIELD];
+  const levelArray = doc.flattened[constants.LOG_LEVEL_FIELD];
+  const level = levelArray && levelArray.length ? levelArray[0]?.toLowerCase() : undefined;
+  const messageArray = doc.flattened[constants.MESSAGE_FIELD];
+  const message = messageArray && messageArray.length ? messageArray[0] : undefined;
   const timestamp = formatField(constants.TIMESTAMP_FIELD);
 
   // Service Highlights

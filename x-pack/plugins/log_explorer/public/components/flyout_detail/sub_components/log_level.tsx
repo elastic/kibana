@@ -22,12 +22,11 @@ interface LogLevelProps {
 
 export function LogLevel({ level }: LogLevelProps) {
   if (!level) return null;
-  const levelColor = LEVEL_DICT[level[0]] ?? LEVEL_DICT.default;
-  const [extractedLevel] = level;
+  const levelColor = LEVEL_DICT[level] ?? LEVEL_DICT.default;
 
   return (
     <EuiBadge color={levelColor} data-test-subj="logExplorerFlyoutLogLevel">
-      {extractedLevel?.toLowerCase()}
+      {level}
     </EuiBadge>
   );
 }

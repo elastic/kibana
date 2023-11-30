@@ -15,6 +15,7 @@ import {
   useGeneratedHtmlId,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { flyoutAccordionShowMoreText } from '../translations';
 
 interface HighlightSectionProps {
   title: string;
@@ -36,6 +37,8 @@ export function HighlightSection({ title, children, columns }: HighlightSectionP
   });
 
   const hiddenCount = childLength - limitedChildren.length;
+
+  const showMoreButtonLabel = flyoutAccordionShowMoreText(hiddenCount);
   const showMoreButton = (
     <EuiButtonEmpty
       size="xs"
@@ -44,7 +47,9 @@ export function HighlightSection({ title, children, columns }: HighlightSectionP
       onClick={() => {
         setShowMore(false);
       }}
-    >{`+ ${hiddenCount} more`}</EuiButtonEmpty>
+    >
+      {showMoreButtonLabel}
+    </EuiButtonEmpty>
   );
 
   limitedChildren.push(showMoreButton);
@@ -64,11 +69,11 @@ export function HighlightSection({ title, children, columns }: HighlightSectionP
       <EuiAccordion
         id={accordionId}
         buttonContent={accordionTitle}
-        paddingSize="s"
+        paddingSize="m"
         initialIsOpen={true}
         data-test-subj={`logExplorerFlyoutHighlightSection${title}`}
       >
-        <EuiFlexGrid columns={columns} alignItems="start">
+        <EuiFlexGrid columns={columns} alignItems="start" gutterSize="m">
           {flexChildren}
         </EuiFlexGrid>
       </EuiAccordion>

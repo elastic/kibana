@@ -36,7 +36,7 @@ export const CustomFlyoutContent = ({
     : renderPreviousContent();
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       {/* Apply custom Log Explorer detail */}
       {content}
       {/* Restore default content */}

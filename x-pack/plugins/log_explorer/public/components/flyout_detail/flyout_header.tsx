@@ -43,11 +43,11 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             direction="column"
-            gutterSize="xs"
+            gutterSize="s"
             data-test-subj="logExplorerFlyoutLogMessage"
           >
             <EuiFlexItem>
-              <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
+              <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="xs">
                     {flyoutMessageLabel}

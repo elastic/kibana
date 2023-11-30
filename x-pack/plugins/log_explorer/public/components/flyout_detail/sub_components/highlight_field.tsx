@@ -92,17 +92,6 @@ export function HighlightField({
     [filterForText, filterOutText, actions, field, value, columnAdded]
   );
 
-  const truncatedTextField = (
-    <EuiTextTruncate text={formattedValue} truncation="end" width={width}>
-      {(truncatedText: string) => (
-        <EuiText
-          // Value returned from formatFieldValue is always sanitized
-          dangerouslySetInnerHTML={{ __html: truncatedText }}
-        />
-      )}
-    </EuiTextTruncate>
-  );
-
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
@@ -111,7 +100,7 @@ export function HighlightField({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <HoverActionPopover actions={hoverActions} title={truncatedTextField}>
+        <HoverActionPopover actions={hoverActions} title={value as string}>
           <EuiFlexGroup
             responsive={false}
             alignItems="center"
@@ -119,7 +108,16 @@ export function HighlightField({
             gutterSize="xs"
           >
             {icon && <EuiFlexItem grow={false}>{icon}</EuiFlexItem>}
-            <EuiFlexItem grow={false}>{truncatedTextField}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTextTruncate text={formattedValue} truncation="end" width={width}>
+                {(truncatedText: string) => (
+                  <EuiText
+                    // Value returned from formatFieldValue is always sanitized
+                    dangerouslySetInnerHTML={{ __html: truncatedText }}
+                  />
+                )}
+              </EuiTextTruncate>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </HoverActionPopover>
       </EuiFlexItem>

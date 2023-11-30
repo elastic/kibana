@@ -26,7 +26,7 @@ export interface HoverActionType {
 interface HoverPopoverActionProps {
   children: React.ReactChild;
   actions: HoverActionType[];
-  title: React.ReactNode;
+  title: string;
 }
 
 export const HoverActionPopover = ({ children, actions, title }: HoverPopoverActionProps) => {
@@ -57,8 +57,10 @@ export const HoverActionPopover = ({ children, actions, title }: HoverPopoverAct
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
       >
-        <EuiPopoverTitle>{title}</EuiPopoverTitle>
-        <EuiFlexGroup wrap gutterSize="none" alignItems="center">
+        <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
+          {title}
+        </EuiPopoverTitle>
+        <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
           {actions.map((action) => (
             <EuiToolTip content={action.tooltipContent} key={action.id}>
               <EuiButtonIcon
