@@ -6,9 +6,7 @@
  */
 
 import { findIndex, flatMap, flatten } from 'lodash';
-import DiffMatchPatch from 'diff-match-patch';
 import type { Diff } from 'diff-match-patch';
-import 'diff-match-patch-line-and-word';
 import * as diff from 'diff';
 import type { Change } from 'diff';
 import { isDelete, isInsert, isNormal, pickRanges } from 'react-diff-view';
@@ -39,7 +37,9 @@ export enum DiffMethod {
   WORDS_CUSTOM_USING_DMP = 'diffWordsCustomUsingDmp',
 }
 
-const { DIFF_EQUAL, DIFF_DELETE, DIFF_INSERT } = DiffMatchPatch;
+const DMP_DIFF_EQUAL = 0;
+const DMP_DIFF_DELETE = -1;
+const DMP_DIFF_INSERT = 1;
 
 function findChangeBlocks(changes: ChangeData[]): ChangeData[][] {
   const start = findIndex(changes, (change) => !isNormal(change));
@@ -64,10 +64,10 @@ function groupDiffs(diffs: Diff[]): [Diff[], Diff[]] {
       const [type] = diff;
 
       switch (type) {
-        case DIFF_INSERT:
+        case DMP_DIFF_INSERT:
           newDiffs.push(diff);
           break;
-        case DIFF_DELETE:
+        case DMP_DIFF_DELETE:
           oldDiffs.push(diff);
           break;
         default:
@@ -107,7 +107,7 @@ function diffsToEdits(diffs: Diff[], lineNumber: number): RangeTokenNode[] {
     (output, diff) => {
       const [edits, start] = output;
       const [type, value] = diff;
-      if (type !== DIFF_EQUAL) {
+      if (type !== DMP_DIFF_EQUAL) {
         const edit: RangeTokenNode = {
           type: 'edit',
           lineNumber,
@@ -127,32 +127,6 @@ function diffsToEdits(diffs: Diff[], lineNumber: number): RangeTokenNode[] {
 
 function convertToLinesOfEdits(linesOfDiffs: Diff[][], startLineNumber: number) {
   return flatMap(linesOfDiffs, (diffs, i) => diffsToEdits(diffs, startLineNumber + i));
-}
-
-/*
-  UPDATE: I figured that there's a way to do it without relying on "diff-match-patch-line-and-word".
-  See a new function "diffBy" below. Leaving this function here for comparison.
-*/
-function diffByWord(x: string, y: string): [Diff[], Diff[]] {
-  /*
-    This is a modified version of "diffText" from react-diff-view.
-    Original: https://github.com/otakustay/react-diff-view/blob/49cebd0958ef323c830395c1a1da601560a71781/src/tokenize/markEdits.ts#L96
-  */
-  const dmp = new DiffMatchPatch();
-  /*
-    "diff_wordMode" comes from "diff-match-patch-line-and-word".
-    "diff-match-patch-line-and-word" adds word-level diffing to Google's "diff-match-patch" lib by
-    adding a new method "diff_wordMode" to the prototype of DiffMatchPatch.
-    There's an instruction how to do it in the "diff-match-patch" docs and somebody just made it into a package.
-    https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#word-mode
-  */
-  const diffs = dmp.diff_wordMode(x, y);
-
-  if (diffs.length <= 1) {
-    return [[], []];
-  }
-
-  return groupDiffs(diffs);
 }
 
 function diffBy(diffMethod: DiffMethod, x: string, y: string): [Diff[], Diff[]] {
@@ -191,10 +165,7 @@ function diffChangeBlock(
     ['', '']
   );
 
-  const [oldDiffs, newDiffs] =
-    diffMethod === DiffMethod.WORDS_CUSTOM_USING_DMP // <-- That's basically the only change I made to allow word-level diffing
-      ? diffByWord(oldSource, newSource)
-      : diffBy(diffMethod, oldSource, newSource);
+  const [oldDiffs, newDiffs] = diffBy(diffMethod, oldSource, newSource);
 
   if (oldDiffs.length === 0 && newDiffs.length === 0) {
     return [[], []];
