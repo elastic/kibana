@@ -38,6 +38,7 @@ export function ErrorSampler({
     query,
   } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
   );
 

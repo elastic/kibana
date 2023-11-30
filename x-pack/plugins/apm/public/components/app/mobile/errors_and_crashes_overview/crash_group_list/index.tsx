@@ -33,12 +33,6 @@ const ErrorLink = euiStyled(ErrorOverviewLink)`
   ${truncate('100%')};
 `;
 
-const MessageLink = euiStyled(CrashDetailLink)`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeM};
-  ${truncate('100%')};
-`;
-
 type ErrorGroupItem =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/errors/groups/main_statistics'>['errorGroups'][0];
 type ErrorGroupDetailedStatistics =
@@ -109,12 +103,13 @@ function MobileCrashGroupList({
                 id="error-message-tooltip"
                 content={item.name || NOT_AVAILABLE_LABEL}
               >
-                <MessageLink
+                <CrashDetailLink
                   serviceName={serviceName}
-                  errorGroupId={item.groupId}
+                  groupId={item.groupId}
+                  query={query}
                 >
                   {item.name || NOT_AVAILABLE_LABEL}
-                </MessageLink>
+                </CrashDetailLink>
               </EuiToolTip>
             </MessageAndCulpritCell>
           );

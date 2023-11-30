@@ -6,17 +6,39 @@
  */
 
 import React from 'react';
-import { LegacyAPMLink, APMLinkExtendProps } from '../apm_link';
+import { TypeOf } from '@kbn/typed-react-router-config';
+import { EuiLink } from '@elastic/eui';
+import { mobileServiceDetailRoute } from '../../../../routing/mobile_service_detail';
+import { useApmRouter } from '../../../../../hooks/use_apm_router';
 
-interface Props extends APMLinkExtendProps {
+interface Props {
+  children: React.ReactNode;
+  title?: string;
   serviceName: string;
-  errorGroupId: string;
+  groupId: string;
+  query: TypeOf<
+    typeof mobileServiceDetailRoute,
+    '/mobile-services/{serviceName}/errors-and-crashes'
+  >['query'];
 }
 
-function CrashDetailLink({ serviceName, errorGroupId, ...rest }: Props) {
+function CrashDetailLink({ serviceName, groupId, query, ...rest }: Props) {
+  const router = useApmRouter();
+  const crashDetailsLink = router.link(
+    `/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}`,
+    {
+      path: {
+        serviceName,
+        groupId,
+      },
+      query,
+    }
+  );
+
   return (
-    <LegacyAPMLink
-      path={`/mobile-services/${serviceName}/errors-and-crashes/crashes/${errorGroupId}`}
+    <EuiLink
+      data-test-subj="apmCrashDetailsLink"
+      href={crashDetailsLink}
       {...rest}
     />
   );
