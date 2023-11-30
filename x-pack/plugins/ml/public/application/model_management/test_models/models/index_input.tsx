@@ -121,9 +121,11 @@ export const InferenceInputFormIndexControls: FC<Props> = ({
 export function useIndexInput({
   inferrer,
   defaultSelectedDataViewId,
+  defaultSelectedField,
 }: {
   inferrer: InferrerType;
   defaultSelectedDataViewId?: string;
+  defaultSelectedField?: string;
 }) {
   const {
     services: {
@@ -142,7 +144,10 @@ export function useIndexInput({
   );
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [fieldNames, setFieldNames] = useState<Array<{ value: string; text: string }>>([]);
-  const selectedField = useObservable(inferrer.getInputField$(), inferrer.getInputField());
+  const selectedField = useObservable(
+    inferrer.getInputField$(),
+    defaultSelectedField ?? inferrer.getInputField()
+  );
 
   const setSelectedField = useCallback(
     (fieldName: string) => inferrer.setInputField(fieldName),
@@ -235,15 +240,16 @@ export function useIndexInput({
             text: displayName,
           }));
         setFieldNames(tempFieldNames);
-        const defaultField = inferrer.getInputField();
+
         const fieldName =
-          defaultField && tempFieldNames.find((field) => field.value === defaultField)
-            ? defaultField
+          defaultSelectedField &&
+          tempFieldNames.find((field) => field.value === defaultSelectedField)
+            ? defaultSelectedField
             : tempFieldNames[0].value;
         inferrer.setInputField(fieldName);
       }
     },
-    [selectedDataView, inferrer]
+    [selectedDataView, inferrer, defaultSelectedField]
   );
 
   useEffect(
@@ -252,7 +258,7 @@ export function useIndexInput({
     },
     // only load examples if selectedField changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedField, selectedDataView?.id]
+    [selectedField]
   );
 
   function reloadExamples() {
