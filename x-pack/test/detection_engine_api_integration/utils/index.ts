@@ -86,3 +86,4 @@ export * from './prebuilt_rules/delete_all_prebuilt_rule_assets';
 export * from './prebuilt_rules/install_mock_prebuilt_rules';
 export * from './prebuilt_rules/install_prebuilt_rules_and_timelines';
 export * from './get_legacy_action_so';
+export * from './delete_all_exceptions';

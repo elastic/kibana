@@ -75,6 +75,7 @@
     "@kbn/serverless",
     "@kbn/logging",
     "@kbn/search-response-warnings",
+    "@kbn/calculate-width-from-char-count",
   ],
   "exclude": [
     "target/**/*",
