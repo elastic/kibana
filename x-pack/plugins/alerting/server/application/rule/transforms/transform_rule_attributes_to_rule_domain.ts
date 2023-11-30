@@ -122,7 +122,8 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
   esRule: RuleAttributes,
   transformParams: TransformEsToRuleParams
 ): RuleDomain<Params> => {
-  const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
+  const { scheduledTaskId, executionStatus, executionGaps, monitoring, snoozeSchedule, lastRun } =
+    esRule;
 
   const {
     id,
@@ -193,6 +194,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     notifyWhen: esRule.notifyWhen,
     mutedInstanceIds: esRule.mutedInstanceIds,
     executionStatus: transformEsExecutionStatus(logger, id, executionStatus),
+    ...(executionGaps ? { executionGaps } : {}),
     ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
     snoozeSchedule: snoozeScheduleDates ?? [],
     ...(includeSnoozeData

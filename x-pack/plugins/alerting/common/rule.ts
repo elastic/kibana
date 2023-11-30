@@ -163,6 +163,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
+  executionGaps?: RuleExecutionGap[];
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   activeSnoozes?: string[];
@@ -284,4 +285,10 @@ export interface RuleMonitoring {
     calculated_metrics: RuleMonitoringCalculatedMetrics;
     last_run: RuleMonitoringLastRun;
   };
+}
+
+export interface RuleExecutionGap {
+  gapStart: string;
+  gapEnd: string;
+  gapDuration: number;
 }

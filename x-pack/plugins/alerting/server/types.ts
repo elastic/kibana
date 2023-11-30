@@ -60,6 +60,7 @@ import {
   AlertsFilterTimeframe,
   RuleAlertData,
   RecoveredActionGroupId,
+  RuleExecutionGap,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -415,7 +416,7 @@ export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
-
+export interface RawRuleExecutionGap extends SavedObjectAttributes, RuleExecutionGap {}
 export interface RawRuleAlertsFilter extends AlertsFilter {
   query?: {
     kql: string;
@@ -484,6 +485,7 @@ export interface RawRule extends SavedObjectAttributes {
   mutedInstanceIds: string[];
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
+  executionGaps?: RawRuleExecutionGap[];
   monitoring?: RawRuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   isSnoozedUntil?: string | null;

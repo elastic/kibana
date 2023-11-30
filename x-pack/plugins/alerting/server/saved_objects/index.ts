@@ -41,6 +41,7 @@ export const AlertAttributesExcludedFromAAD = [
   'updatedBy',
   'updatedAt',
   'executionStatus',
+  'executionGaps',
   'monitoring',
   'snoozeEndTime', // field removed in 8.2, but must be retained in case an rule created/updated in 8.2 is being migrated
   'snoozeSchedule',
@@ -62,6 +63,7 @@ export type AlertAttributesExcludedFromAADType =
   | 'updatedBy'
   | 'updatedAt'
   | 'executionStatus'
+  | 'executionGaps'
   | 'monitoring'
   | 'snoozeEndTime'
   | 'snoozeSchedule'

@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { RuleExecutionGap } from '../../../../common';
 import {
   ruleNotifyWhen,
   ruleLastRunOutcomeValues,
@@ -76,6 +77,7 @@ export interface Rule<Params extends RuleParams = never> {
   notifyWhen?: RuleSchemaType['notifyWhen'];
   mutedInstanceIds: RuleSchemaType['mutedInstanceIds'];
   executionStatus: RuleExecutionStatus;
+  executionGaps?: RuleSchemaType['executionGaps'];
   monitoring?: RuleSchemaType['monitoring'];
   snoozeSchedule?: RuleSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleSchemaType['activeSnoozes'];
@@ -111,6 +113,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
   mutedInstanceIds: RuleDomainSchemaType['mutedInstanceIds'];
   executionStatus: RuleExecutionStatus;
+  executionGaps?: RuleDomainSchemaType['executionGaps'];
   monitoring?: RuleDomainSchemaType['monitoring'];
   snoozeSchedule?: RuleDomainSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleDomainSchemaType['activeSnoozes'];

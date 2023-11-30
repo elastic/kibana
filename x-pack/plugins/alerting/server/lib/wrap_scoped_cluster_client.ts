@@ -139,7 +139,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
     try {
       const searchOptions = options ?? {};
       const start = Date.now();
-      opts.logger.info(
+      opts.logger.debug(
         `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
           opts.rule.spaceId
         } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`
@@ -165,7 +165,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       }
 
       opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
-      opts.logger.info(`results for query - ${JSON.stringify(result)}`);
+      opts.logger.debug(`results for query - ${JSON.stringify(result)}`);
       return result;
     } catch (e) {
       if (opts.abortController.signal.aborted) {

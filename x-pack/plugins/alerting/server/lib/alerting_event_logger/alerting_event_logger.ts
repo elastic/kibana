@@ -160,6 +160,10 @@ export class AlertingEventLogger {
     });
   }
 
+  public setGapData(gapMetrics: GapMetrics) {
+    updateEvent(this.event, { gap: gapMetrics });
+  }
+
   public logTimeout() {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
@@ -354,6 +358,13 @@ export function initializeExecuteRecord(context: RuleContext, actionOverride?: s
   });
 }
 
+interface GapMetrics {
+  previousStartedAt: string;
+  dateStart: string;
+  dateEnd: string;
+  gap: number;
+}
+
 interface UpdateEventOpts {
   message?: string;
   outcome?: string;
@@ -364,6 +375,7 @@ interface UpdateEventOpts {
   reason?: string;
   metrics?: RuleRunMetrics;
   timings?: TaskRunnerTimings;
+  gap?: GapMetrics;
   maintenanceWindowIds?: string[];
 }
 
@@ -377,6 +389,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     reason,
     metrics,
     timings,
+    gap,
     alertingOutcome,
     maintenanceWindowIds,
   } = opts;
@@ -442,6 +455,23 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       number_of_searches: metrics.numSearches ? metrics.numSearches : 0,
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,
+    };
+  }
+
+  if (gap) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
+    event.kibana.alert.rule.execution.gap = {
+      ...event.kibana.alert.rule.execution.gap,
+      previous_started_at: gap.previousStartedAt,
+      query_range: {
+        ...event.kibana.alert.rule.execution.gap?.query_range,
+        start: gap.dateStart,
+        end: gap.dateEnd,
+      },
+      gap_ms: gap.gap,
     };
   }
 

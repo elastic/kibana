@@ -119,6 +119,13 @@ const rawRuleLastRunSchema = schema.object({
   ),
 });
 
+const rawRuleExecutionGapsSchema = schema.arrayOf(
+  schema.object({
+    gapStart: schema.string(),
+    gapEnd: schema.string(),
+    gapDuration: schema.number(),
+  })
+);
 const rawRuleMonitoringSchema = schema.object({
   run: schema.object({
     history: schema.arrayOf(
@@ -259,6 +266,7 @@ export const rawRuleSchema = schema.object({
       ])
     )
   ),
+  executionGaps: schema.maybe(rawRuleExecutionGapsSchema),
   monitoring: schema.maybe(rawRuleMonitoringSchema),
   lastRun: schema.maybe(schema.nullable(rawRuleLastRunSchema)),
   nextRun: schema.maybe(schema.nullable(schema.string())),

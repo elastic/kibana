@@ -95,6 +95,14 @@ export const ruleLastRunSchema = schema.object({
   }),
 });
 
+export const ruleExecutionGapSchema = schema.arrayOf(
+  schema.object({
+    gapStart: schema.string(),
+    gapEnd: schema.string(),
+    gapDuration: schema.number(),
+  })
+);
+
 export const monitoringSchema = schema.object({
   run: schema.object({
     history: schema.arrayOf(
@@ -159,6 +167,7 @@ export const ruleDomainSchema = schema.object({
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
   executionStatus: ruleExecutionStatusSchema,
+  executionGaps: schema.maybe(ruleExecutionGapSchema),
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
   activeSnoozes: schema.maybe(schema.arrayOf(schema.string())),
@@ -196,6 +205,7 @@ export const ruleSchema = schema.object({
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
   executionStatus: ruleExecutionStatusSchema,
+  executionGaps: schema.maybe(ruleExecutionGapSchema),
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
   activeSnoozes: schema.maybe(schema.arrayOf(schema.string())),

@@ -11,6 +11,7 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { some } from 'lodash';
 import {
   RuleAlertData,
+  RuleExecutionGap,
   RuleExecutionStatusErrorReasons,
   RuleNotifyWhen,
   RuleTypeParams,
@@ -39,7 +40,10 @@ interface RunOpts {
   alertingEventLogger: AlertingEventLogger;
   executionId: string;
   executorServices: ExecutorServices & {
-    getTimeRangeFn?: (timeWindow: string) => { dateStart: string; dateEnd: string };
+    getTimeRangeFn?: (
+      timeWindow: string,
+      nowDate?: string
+    ) => { dateStart: string; dateEnd: string };
   };
   fakeRequest: KibanaRequest;
   maintenanceWindowIds?: string[];
@@ -164,7 +168,7 @@ export class RuleRunner<
       recoveredAlertsFromState: alertRecoveredRawInstances,
     });
 
-    const { updatedRuleTypeState } = await this.options.timer.runWithTimer(
+    const { updatedRuleTypeState, gap } = await this.options.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
         const checkHasReachedAlertLimit = () => {
@@ -179,6 +183,7 @@ export class RuleRunner<
         };
 
         let executorResult: { state: RuleTypeState } | undefined;
+        let gapMetrics: RuleExecutionGap | null = null;
         try {
           const ctx = {
             type: 'alert',
@@ -186,6 +191,9 @@ export class RuleRunner<
             id: ruleId,
             description: `execute [${rule.ruleTypeId}] with name [${rule.name}] in [${namespace}] namespace`,
           };
+
+          let usedDateStart: string | null = null;
+          let usedDateEnd: string | null = null;
 
           executorResult = await this.options.context.executionContext.withContext(ctx, () =>
             ruleType.executor({
@@ -213,15 +221,19 @@ export class RuleRunner<
               rule,
               logger: this.options.logger,
               flappingSettings,
-              getTimeRange:
-                executorServices.getTimeRangeFn ??
-                ((timeWindow: string, nowDate?: string) =>
-                  getTimeRange({
-                    logger: this.options.logger,
-                    queryDelaySettings,
-                    window: timeWindow,
-                    nowDate,
-                  })),
+              getTimeRange: (timeWindow: string, nowDate?: string) => {
+                const { dateStart, dateEnd } = executorServices.getTimeRangeFn
+                  ? executorServices.getTimeRangeFn(timeWindow, nowDate)
+                  : getTimeRange({
+                      logger: this.options.logger,
+                      queryDelaySettings,
+                      window: timeWindow,
+                      nowDate,
+                    });
+                usedDateStart = dateStart;
+                usedDateEnd = dateEnd;
+                return { dateStart, dateEnd };
+              },
             })
           );
 
@@ -231,6 +243,36 @@ export class RuleRunner<
           // If neither of these apply, this check will throw an error
           // These errors should show up during rule type development
           this.alertsClient.checkLimitUsage();
+
+          // Rudimentary gap detection
+          // Need to take into account security rules already doing gap detection
+          if (previousStartedAt && usedDateStart && usedDateEnd) {
+            const dateStartInMillis = new Date(usedDateStart).valueOf();
+            const previousStartInMillis = new Date(previousStartedAt).valueOf();
+            const gapInMillis = dateStartInMillis - previousStartInMillis;
+            alertingEventLogger.setGapData({
+              previousStartedAt,
+              dateStart: usedDateStart,
+              dateEnd: usedDateEnd,
+              gap: gapInMillis,
+            });
+
+            // todo could we make this threshold configurable? a rule setting?
+            if (gapInMillis > 60000) {
+              console.log(
+                `THERE'S A GAP! ${JSON.stringify({
+                  gapStart: previousStartedAt,
+                  gapEnd: usedDateStart,
+                  gapDuration: gapInMillis,
+                })}`
+              );
+              gapMetrics = {
+                gapStart: previousStartedAt,
+                gapEnd: usedDateStart,
+                gapDuration: gapInMillis,
+              };
+            }
+          }
         } catch (err) {
           // Check if this error is due to reaching the alert limit
           if (!checkHasReachedAlertLimit()) {
@@ -254,6 +296,7 @@ export class RuleRunner<
 
         return {
           updatedRuleTypeState: executorResult?.state || undefined,
+          gap: gapMetrics,
         };
       }
     );
@@ -275,7 +318,7 @@ export class RuleRunner<
       await this.alertsClient.persistAlerts();
     });
 
-    return updatedRuleTypeState;
+    return { updatedRuleTypeState, gap };
   }
 
   private getAADRuleData(

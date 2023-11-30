@@ -37,6 +37,7 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
   RawRuleLastRun,
+  RawRuleExecutionGap,
 } from '../types';
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -149,7 +150,7 @@ export class TaskRunner<
   private searchAbortController: AbortController;
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
-  private ruleMonitoring: RuleMonitoringService;
+  private ruleMonitoringAndGaps: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
   private ruleRunner: RuleRunner<
@@ -194,7 +195,7 @@ export class TaskRunner<
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
-    this.ruleMonitoring = new RuleMonitoringService();
+    this.ruleMonitoringAndGaps = new RuleMonitoringService();
     this.ruleRunner = new RuleRunner<
       AlertData,
       AlertState,
@@ -223,6 +224,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      executionGaps?: RawRuleExecutionGap[];
     }
   ) {
     const client = this.internalSavedObjectsRepository;
@@ -332,7 +334,7 @@ export class TaskRunner<
       this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
     }
 
-    const updatedRuleTypeState = await this.ruleRunner.run({
+    const { updatedRuleTypeState, gap } = await this.ruleRunner.run({
       alertingEventLogger: this.alertingEventLogger,
       executionId: this.executionId,
       executorServices: await getExecutorServices({
@@ -340,7 +342,7 @@ export class TaskRunner<
         fakeRequest,
         abortController: this.searchAbortController,
         logger: this.logger,
-        ruleMonitoringService: this.ruleMonitoring,
+        ruleMonitoringService: this.ruleMonitoringAndGaps,
         ruleResultService: this.ruleResult,
         ruleData: { name: rule.name, alertTypeId: rule.alertTypeId, id: rule.id, spaceId },
       }),
@@ -374,6 +376,7 @@ export class TaskRunner<
       state: this.taskInstance.state,
       validatedParams: params,
     });
+    this.ruleMonitoringAndGaps.addGap(gap);
 
     const executionHandler = new ExecutionHandler({
       rule,
@@ -502,7 +505,8 @@ export class TaskRunner<
         ruleTypeRegistry: this.ruleTypeRegistry,
       });
 
-      this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
+      this.ruleMonitoringAndGaps.setMonitoring(preparedResult.rule.monitoring);
+      this.ruleMonitoringAndGaps.setGaps(preparedResult.rule.executionGaps);
 
       (async () => {
         try {
@@ -603,7 +607,7 @@ export class TaskRunner<
       }
 
       // if executionStatus indicates an error, fill in fields in
-      this.ruleMonitoring.addHistory({
+      this.ruleMonitoringAndGaps.addHistory({
         duration: executionStatus.lastDuration,
         hasError: executionStatus.error != null,
         runDate: this.runDate,
@@ -625,7 +629,8 @@ export class TaskRunner<
           executionStatus: ruleExecutionStatusToRaw(executionStatus),
           nextRun,
           lastRun: lastRunToRaw(lastRun),
-          monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+          monitoring: this.ruleMonitoringAndGaps.getMonitoring() as RawRuleMonitoring,
+          executionGaps: this.ruleMonitoringAndGaps.getGaps() as RawRuleExecutionGap[],
         });
       }
 
@@ -739,7 +744,7 @@ export class TaskRunner<
 
         return { interval: retryInterval };
       }),
-      monitoring: this.ruleMonitoring.getMonitoring(),
+      monitoring: this.ruleMonitoringAndGaps.getMonitoring(),
       ...(isErr(schedule)
         ? { taskRunError: createTaskRunError(schedule.error, TaskErrorSource.FRAMEWORK) }
         : {}),
@@ -809,7 +814,7 @@ export class TaskRunner<
         outcomeMsg,
         alertsCount: {},
       },
-      monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+      monitoring: this.ruleMonitoringAndGaps.getMonitoring() as RawRuleMonitoring,
       nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
     });
   }

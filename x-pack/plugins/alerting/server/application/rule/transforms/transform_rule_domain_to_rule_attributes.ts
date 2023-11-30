@@ -59,6 +59,7 @@ export const transformRuleDomainToRuleAttributes = (
         ? { warning: rule.executionStatus.warning }
         : {}),
     },
+    ...(rule.executionGaps ? { executionGaps: rule.executionGaps } : {}),
     ...(rule.monitoring ? { monitoring: rule.monitoring } : {}),
     ...(rule.snoozeSchedule ? { snoozeSchedule: rule.snoozeSchedule } : {}),
     ...(rule.isSnoozedUntil !== undefined

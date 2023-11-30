@@ -6,10 +6,16 @@
  */
 
 import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
-import { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
+import {
+  RuleMonitoring,
+  RuleMonitoringHistory,
+  PublicRuleMonitoringService,
+  RuleExecutionGap,
+} from '../types';
 
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
+  private gaps: RuleExecutionGap[] = [];
 
   public setLastRunMetricsDuration(duration: number) {
     this.monitoring.run.last_run.metrics.duration = duration;
@@ -21,8 +27,24 @@ export class RuleMonitoringService {
     }
   }
 
+  public setGaps(gapsFromSO: RuleExecutionGap[] | undefined) {
+    if (gapsFromSO) {
+      this.gaps = gapsFromSO;
+    }
+  }
+
+  public addGap(gap: RuleExecutionGap | null) {
+    if (gap) {
+      this.gaps.push(gap);
+    }
+  }
+
   public getMonitoring(): RuleMonitoring {
     return this.monitoring;
+  }
+
+  public getGaps(): RuleExecutionGap[] {
+    return this.gaps;
   }
 
   public addHistory({

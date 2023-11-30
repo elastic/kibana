@@ -101,6 +101,12 @@ export interface RuleMonitoringAttributes {
   };
 }
 
+export interface RuleExecutionGapAttributes {
+  gapStart: string;
+  gapEnd: string;
+  gapDuration: number;
+}
+
 interface IntervaleScheduleAttributes extends SavedObjectAttributes {
   interval: string;
 }
@@ -167,6 +173,7 @@ export interface RuleAttributes {
   mutedInstanceIds: string[];
   meta?: RuleMetaAttributes;
   executionStatus: RuleExecutionStatusAttributes;
+  executionGaps?: RuleExecutionGapAttributes[];
   monitoring?: RuleMonitoringAttributes;
   snoozeSchedule?: RuleSnoozeScheduleAttributes[];
   isSnoozedUntil?: string | null;

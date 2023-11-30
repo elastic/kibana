@@ -151,6 +151,16 @@ export const EventSchema = schema.maybe(
                     uuid: ecsString(),
                     status: ecsString(),
                     status_order: ecsStringOrNumber(),
+                    gap: schema.maybe(
+                      schema.object({
+                        previous_started_at: ecsDate(),
+                        query_range: schema.object({
+                          start: ecsDate(),
+                          end: ecsDate(),
+                        }),
+                        gap_ms: ecsStringOrNumber(),
+                      })
+                    ),
                     metrics: schema.maybe(
                       schema.object({
                         number_of_triggered_actions: ecsStringOrNumber(),

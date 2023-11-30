@@ -338,6 +338,26 @@
                                         "status_order": {
                                             "type": "long"
                                         },
+                                        "gap": {
+                                          "properties": {
+                                            "gap": {
+                                              "type": "long"
+                                            },
+                                            "previous_started_at": {
+                                              "type": "date"
+                                            },
+                                            "query_range": {
+                                              "properties": {
+                                                "start": {
+                                                  "type": "date"
+                                                },
+                                                "end": {
+                                                  "type": "date"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
                                         "metrics": {
                                             "properties": {
                                                 "number_of_triggered_actions": {
