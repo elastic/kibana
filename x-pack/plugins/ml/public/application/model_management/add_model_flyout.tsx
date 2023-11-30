@@ -180,7 +180,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.elserDescription"
-                      defaultMessage="ELSER is Elastic’s NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform."
+                      defaultMessage="ELSER is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform."
                     />
                   </EuiText>
                 </p>
@@ -212,7 +212,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.e5Description"
-                      defaultMessage="E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model is recommended for non-English language documents and queries."
+                      defaultMessage="E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
                     />
                   </EuiText>
                 </p>
