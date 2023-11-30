@@ -661,14 +661,14 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const selectedDataView = state.internalState.getState().dataView;
-    await state.actions.onRefreshDataViewFields(dataViewMock);
+    await state.actions.onRefreshDataViewFields();
     expect(state.internalState.getState().dataView).not.toBe(selectedDataView);
   });
   test('onDataViewRefreshed - ad-hoc data view', async () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.onDataViewCreated(dataViewAdHoc);
     const previousId = dataViewAdHoc.id;
-    await state.actions.onRefreshDataViewFields(dataViewAdHoc);
+    await state.actions.onRefreshDataViewFields();
     expect(state.internalState.getState().dataView?.id).not.toBe(previousId);
   });
 
