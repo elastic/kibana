@@ -11,4 +11,4 @@ export * from './node_logs_locator';
 export * from './infra';
 export * from './get_logs_locators';
 
-export type { LogsSharedLocators } from './types';
+export type { LogsSharedLocators, LogsLocatorParams } from './types';

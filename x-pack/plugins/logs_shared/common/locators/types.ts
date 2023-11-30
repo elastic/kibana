@@ -6,10 +6,22 @@
  */
 
 import * as rt from 'io-ts';
+import { SerializableRecord } from '@kbn/utility-types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { NodeLogsLocatorParams, TraceLogsLocatorParams } from '@kbn/deeplinks-observability';
+import { LogViewReference } from '../log_views/types';
+import { TimeRange } from './time_range';
 
-import { LogsLocatorParams } from './infra';
+export interface LogsLocatorParams extends SerializableRecord {
+  /** Defines log position */
+  time?: number;
+  /**
+   * Optionally set the time range in the time picker.
+   */
+  timeRange?: TimeRange;
+  filter?: string;
+  logView?: LogViewReference;
+}
 
 export const ItemTypeRT = rt.keyof({
   host: null,

@@ -13,7 +13,7 @@ import {
 } from '@kbn/deeplinks-observability';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { LOGS_LOCATOR_ID } from './logs_locator';
-import { LogsLocatorParams } from './infra';
+import { LogsLocatorParams } from './types';
 
 export const getLogsLocatorsFromUrlService = (urlService: UrlService) => {
   const logsLocator = urlService.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)!;

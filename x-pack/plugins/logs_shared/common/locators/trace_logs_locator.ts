@@ -13,7 +13,8 @@ import {
 } from '@kbn/deeplinks-observability';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
-import { INFRA_LOGS_LOCATOR_ID, LogsLocatorParams } from './infra';
+import { INFRA_LOGS_LOCATOR_ID } from './infra';
+import { LogsLocatorParams } from './types';
 
 import { getTraceQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
 
