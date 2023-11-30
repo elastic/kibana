@@ -8,7 +8,6 @@
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { SetFlyoutAlert } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ColumnHeaderOptions, DeprecatedRowRenderer } from '../..';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
@@ -30,7 +29,7 @@ export type DeprecatedCellValueElementProps = EuiDataGridCellValueElementProps &
   isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns
   linkValues: string[] | undefined;
   rowRenderers?: DeprecatedRowRenderer[];
-  setFlyoutAlert?: SetFlyoutAlert;
+  setFlyoutAlert?: (alertId: string) => void;
   scopeId: string;
   truncate?: boolean;
   key?: string;

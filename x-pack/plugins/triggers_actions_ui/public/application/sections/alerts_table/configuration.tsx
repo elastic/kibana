@@ -16,17 +16,13 @@ import {
 } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getDefaultAlertFlyout } from './alerts_flyout/default_alerts_flyout';
 import { AlertActionsCell } from './row_actions/alert_actions_cell';
 import { AlertsTableConfigurationRegistry, RenderCustomActionsRowArgs } from '../../../types';
 import { getAlertFormatters, getRenderCellValue } from './cells/render_cell_value';
 
-const columns: Array<
-  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
-> = [
+const columns = [
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.statusColumnDescription', {
