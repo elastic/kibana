@@ -294,22 +294,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           }
         ),
       },
-      NewFields: {
-        fields: groupedFields.newFields,
-        fieldCount: groupedFields.newFields.length,
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: false,
-        isInitiallyOpen: true,
-        showInAccordion: true,
-        hideDetails: false,
-        hideIfEmpty: !groupedFields.newFields.length,
-        title: i18n.translate('unifiedFieldList.useGroupedFields.newFieldsLabel', {
-          defaultMessage: 'New fields',
-        }),
-        defaultNoFieldsMessage: i18n.translate('unifiedFieldList.useGroupedFields.noNewFields', {
-          defaultMessage: `There are no new fields.`,
-        }),
-      },
     };
 
     // do not show empty field accordion if there is no existence information

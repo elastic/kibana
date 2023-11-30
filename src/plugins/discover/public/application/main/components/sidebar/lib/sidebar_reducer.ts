@@ -91,8 +91,7 @@ export function discoverSidebarReducer(
             fieldCounts: null,
             allFields: null,
             status:
-              state.status === DiscoverSidebarReducerStatus.COMPLETED &&
-              state.dataView?.id !== action.payload.dataView?.id
+              state.status === DiscoverSidebarReducerStatus.COMPLETED
                 ? DiscoverSidebarReducerStatus.INITIAL
                 : state.status,
           };

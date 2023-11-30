@@ -113,7 +113,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
           defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural,
             one {source}
             other {sources}
-          } containing X fields."
+          }."
           values={{
             sourceCount: exactMatchedIndices.length,
           }}

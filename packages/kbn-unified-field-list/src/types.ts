@@ -58,7 +58,6 @@ export enum FieldsGroupNames {
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
   UnmappedFields = 'UnmappedFields',
-  NewFields = 'NewFields',
 }
 
 export interface FieldsGroupDetails {
