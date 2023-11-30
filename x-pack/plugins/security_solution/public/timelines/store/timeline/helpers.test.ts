@@ -138,6 +138,7 @@ const basicTimeline: TimelineModel = {
   title: '',
   version: null,
   savedSearchId: null,
+  savedSearch: null,
   isDataProviderVisible: true,
 };
 const timelineByIdMock: TimelineById = {
