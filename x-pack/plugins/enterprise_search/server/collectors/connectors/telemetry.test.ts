@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { fetchTelemetryMetrics } from '@kbn/search-connectors';
 import { mockLogger } from '../../__mocks__';
+
+import { fetchTelemetryMetrics } from '@kbn/search-connectors';
 
 import { registerTelemetryUsageCollector } from './telemetry';
 
@@ -44,7 +45,8 @@ describe('Connectors Telemetry Usage Collector', () => {
         Promise.resolve({
           native: { total: 5 },
           clients: { total: 2 },
-        }))
+        })
+      );
       registerTelemetryUsageCollector(usageCollectionMock, clientMock, mockLogger);
       const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 

@@ -263,7 +263,11 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        registerCNTelemetryUsageCollector(usageCollection, coreStart.elasticsearch.client, this.logger);
+        registerCNTelemetryUsageCollector(
+          usageCollection,
+          coreStart.elasticsearch.client,
+          this.logger
+        );
         if (config.canDeployEntSearch) {
           registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
           registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);

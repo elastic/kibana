@@ -47,7 +47,8 @@ describe('Connectors Serverless Telemetry Usage Collector', () => {
         Promise.resolve({
           native: { total: 5 },
           clients: { total: 2 },
-        }))
+        })
+      );
       registerTelemetryUsageCollector(usageCollectionMock, clientMock, mockLogger);
       const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 

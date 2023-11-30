@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import {IClusterClient, Logger} from '@kbn/core/server';
+import { IClusterClient, Logger } from '@kbn/core/server';
 
+import { fetchTelemetryMetrics, Telemetry } from '@kbn/search-connectors';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import {fetchTelemetryMetrics, Telemetry} from "@kbn/search-connectors";
-
 
 /**
  * Register the telemetry collector

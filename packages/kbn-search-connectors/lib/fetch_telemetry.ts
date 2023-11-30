@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-
-import {IClusterClient, Logger} from '@kbn/core/server';
+import { IClusterClient, Logger } from '@kbn/core/server';
 import { CONNECTORS_INDEX } from '..';
-import {isIndexNotFoundException} from "@kbn/search-connectors/utils/identify_exceptions";
+import { isIndexNotFoundException } from '../utils/identify_exceptions';
 
 export interface Telemetry {
   native: {
@@ -29,7 +28,10 @@ const defaultTelemetryMetrics: Telemetry = {
   },
 };
 
-export const fetchTelemetryMetrics = async (client: IClusterClient, log: Logger): Promise<Telemetry> => {
+export const fetchTelemetryMetrics = async (
+  client: IClusterClient,
+  log: Logger
+): Promise<Telemetry> => {
   try {
     const nativeCountResponse = await client.asInternalUser.count({
       index: CONNECTORS_INDEX,
@@ -46,7 +48,7 @@ export const fetchTelemetryMetrics = async (client: IClusterClient, log: Logger)
             {
               term: {
                 service_type: {
-                  value: "elastic-crawler",
+                  value: 'elastic-crawler',
                 },
               },
             },

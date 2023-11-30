@@ -8,7 +8,7 @@
 
 import { CONNECTORS_INDEX } from '..';
 
-import {fetchTelemetryMetrics, Telemetry} from "@kbn/search-connectors/lib/fetch_telemetry";
+import { fetchTelemetryMetrics, Telemetry } from './fetch_telemetry';
 
 const indexNotFoundError = {
   meta: {
@@ -45,7 +45,7 @@ const nativeQuery = {
         {
           term: {
             service_type: {
-              value: "elastic-crawler",
+              value: 'elastic-crawler',
             },
           },
         },
@@ -67,7 +67,7 @@ const clientsQuery = {
       ],
     },
   },
-}
+};
 
 const defaultTelemetryMetrics: Telemetry = {
   native: {
@@ -85,7 +85,7 @@ describe('fetchTelemetryMetrics lib', () => {
     },
   } as any;
   const logMock = {
-    error: jest.fn()
+    error: jest.fn(),
   } as any;
 
   beforeEach(() => {
@@ -108,16 +108,22 @@ describe('fetchTelemetryMetrics lib', () => {
         clients: { total: 2 },
       });
       expect(mockClient.asInternalUser.count).toHaveBeenCalledWith(nativeQuery);
-      expect(mockClient.asInternalUser.count).toHaveBeenCalledWith(clientsQuery)
+      expect(mockClient.asInternalUser.count).toHaveBeenCalledWith(clientsQuery);
     });
     it('should return default telemetry metrics on index not found error', async () => {
-      mockClient.asInternalUser.count.mockImplementationOnce(() => Promise.reject(indexNotFoundError));
-      await expect(fetchTelemetryMetrics(mockClient, logMock)).resolves.toEqual(defaultTelemetryMetrics);
+      mockClient.asInternalUser.count.mockImplementationOnce(() =>
+        Promise.reject(indexNotFoundError)
+      );
+      await expect(fetchTelemetryMetrics(mockClient, logMock)).resolves.toEqual(
+        defaultTelemetryMetrics
+      );
       expect(mockClient.asInternalUser.count).toHaveBeenCalledWith(nativeQuery);
     });
     it('should return default telemetry metrics on other error', async () => {
       mockClient.asInternalUser.count.mockImplementationOnce(() => Promise.reject(otherError));
-      await expect(fetchTelemetryMetrics(mockClient, logMock)).resolves.toEqual(defaultTelemetryMetrics);
+      await expect(fetchTelemetryMetrics(mockClient, logMock)).resolves.toEqual(
+        defaultTelemetryMetrics
+      );
       expect(mockClient.asInternalUser.count).toHaveBeenCalledWith(nativeQuery);
     });
   });
