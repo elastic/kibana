@@ -44,6 +44,7 @@ import {
   addNameToTimelineAndSave,
   addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
+import { createTimeline } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
@@ -192,7 +193,7 @@ describe('Timelines', (): void => {
     it('should save timelines as new', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(ROWS).should('have.length', '0');
 
-      createNewTimeline();
+      createTimeline();
       addNameToTimelineAndSave('First');
       addNameToTimelineAndSaveAsNew('Second');
       closeTimeline();

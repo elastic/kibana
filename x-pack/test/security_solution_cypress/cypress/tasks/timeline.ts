@@ -124,7 +124,7 @@ export const addNameToTimelineAndSave = (name: string) => {
 };
 
 export const addNameToTimelineAndSaveAsNew = (name: string) => {
-  cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
+  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
