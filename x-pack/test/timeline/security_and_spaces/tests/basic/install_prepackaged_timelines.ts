@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { TIMELINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllTimelines, waitFor } from '../../../utils';
+import { deleteAllTimelines, waitFor } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -19,10 +19,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('install_prepackaged_timelines', () => {
     describe('creating prepackaged rules', () => {
-      beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
-      });
-
       afterEach(async () => {
         await deleteAllTimelines(es);
       });

@@ -21,7 +21,6 @@ export * from './delete_all_rules';
 export * from './delete_all_event_log_execution_events';
 export * from './delete_all_rule_execution_info';
 export * from './delete_all_alerts';
-export * from './delete_all_timelines';
 export * from './delete_exception_list';
 export * from './delete_rule';
 export * from './finalize_signals_migration';
