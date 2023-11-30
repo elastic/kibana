@@ -4,28 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
+import { EuiSpacer, EuiTabbedContent, type EuiTabbedContentProps } from '@elastic/eui';
 import React from 'react';
-import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
-import { BaseFlameGraph } from '@kbn/profiling-utils';
-import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { useProfilingFlamegraphData } from '../../hooks/use_profilling_flamegraph_data';
-import { useRequestObservable } from '../../hooks/use_request_observable';
-import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
-import { ContentTabIds } from '../../types';
+import { Flamegraph } from './flamegraph';
+import { Functions } from './functions';
 
 export function Profiling() {
-  const { request$ } = useRequestObservable<BaseFlameGraph>();
-  const { asset } = useAssetDetailsRenderPropsContext();
-  const { activeTabId } = useTabSwitcherContext();
-  const { getDateRangeInTimestamp } = useDatePickerContext();
-  const { loading, response } = useProfilingFlamegraphData({
-    active: activeTabId === ContentTabIds.PROFILING,
-    request$,
-    hostname: asset.name,
-    timeRange: getDateRangeInTimestamp(),
-  });
+  const tabs: EuiTabbedContentProps['tabs'] = [
+    {
+      id: 'flamegraph',
+      name: i18n.translate('xpack.infra.profiling.flamegraphTabName', {
+        defaultMessage: 'Flamegraph',
+      }),
+      content: (
+        <>
+          <EuiSpacer />
+          <Flamegraph />
+        </>
+      ),
+    },
+    {
+      id: 'functions',
+      name: i18n.translate('xpack.infra.tabs.profiling.functionsTabName', {
+        defaultMessage: 'Top 10 Functions',
+      }),
+      content: (
+        <>
+          <EuiSpacer />
+          <Functions />
+        </>
+      ),
+    },
+  ];
 
-  return <EmbeddableFlamegraph data={response ?? undefined} isLoading={loading} height="60vh" />;
+  return (
+    <>
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+    </>
+  );
 }

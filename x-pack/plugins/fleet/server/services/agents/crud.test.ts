@@ -151,7 +151,8 @@ describe('Agents CRUD test', () => {
     });
   });
 
-  describe('getAgentsByKuery', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/171541
+  describe.skip('getAgentsByKuery', () => {
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3', '4', '5'], 7)))
