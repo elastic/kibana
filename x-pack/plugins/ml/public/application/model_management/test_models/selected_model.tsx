@@ -113,8 +113,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            defaultSelectedField,
-            questionText
+            defaultSelectedField
           );
         case SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION:
           return new TextExpansionInference(
@@ -122,8 +121,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            defaultSelectedField,
-            queryText
+            defaultSelectedField
           );
         default:
           break;
