@@ -76,5 +76,5 @@ export const commaCompleteItem: AutocompleteCommandDefinition = {
   detail: i18n.translate('monaco.esql.autocomplete.commaDoc', {
     defaultMessage: 'Comma (,)',
   }),
-  sortText: 'B',
+  sortText: 'C',
 };
