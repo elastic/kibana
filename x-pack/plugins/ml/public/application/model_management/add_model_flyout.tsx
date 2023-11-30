@@ -234,7 +234,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                     >
                       <FormattedMessage
                         id="xpack.ml.trainedModels.modelsList.mitLicenseLabel"
-                        defaultMessage="License: mit"
+                        defaultMessage="License: MIT"
                       />
                     </EuiBadge>
                   </EuiFlexItem>
