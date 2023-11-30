@@ -405,7 +405,7 @@ describe('output preconfiguration', () => {
         is_default_monitoring: false,
         hosts: ['test.fr'],
         service_token: 'serviceToken',
-      },
+      } as PreconfiguredOutput,
     ]);
 
     expect(mockedOutputService.create).toBeCalled();
@@ -603,7 +603,7 @@ describe('output preconfiguration', () => {
         type: 'remote_elasticsearch',
         is_preconfigured: true,
         service_token: 'stillUnsecureServiceToken', // field that changed
-      },
+      } as PreconfiguredOutput,
     ]);
 
     expect(mockedOutputService.create).not.toBeCalled();
@@ -770,7 +770,7 @@ describe('output preconfiguration', () => {
         ssl: {
           key: 'unsecureKey',
         },
-      },
+      } as PreconfiguredOutput,
     ]);
 
     expect(mockedOutputService.create).not.toBeCalled();
@@ -792,7 +792,7 @@ describe('output preconfiguration', () => {
         hosts: ['https:es.co:80'],
         is_preconfigured: true,
         service_token: 'unsecureServiceToken',
-      },
+      } as PreconfiguredOutput,
     ]);
 
     expect(mockedOutputService.create).not.toBeCalled();
