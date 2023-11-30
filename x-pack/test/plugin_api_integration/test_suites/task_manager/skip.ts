@@ -135,7 +135,6 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           task: {
             taskType: 'sampleTaskWithInvalidVersion',
-            params: {},
           },
         })
         .expect(200)

@@ -235,10 +235,8 @@ export class SampleTaskManagerFixturePlugin
       },
       sampleTaskWithInvalidVersion: {
         title: 'Sample Task That has invalid type version',
-        description: 'Sample Task That has invalid type version',
+        description: 'Task that has he latestTypeVersion',
         maxAttempts: 1,
-        paramsSchema: schema.object({}),
-        indirectParamsSchema: schema.object({}),
         latestTypeVersion: 1,
         createTaskRunner: () => ({
           async loadIndirectParams() {
