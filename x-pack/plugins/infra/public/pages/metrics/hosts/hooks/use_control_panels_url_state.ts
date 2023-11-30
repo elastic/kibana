@@ -120,7 +120,7 @@ const cleanControlPanels = (controlPanels: ControlPanels) => {
     const { dataViewId, ...rest } = explicitInput;
     return {
       ...acc,
-      [key]: { ...rest },
+      [key]: { ...controlPanelConfig, explicitInput: rest },
     };
   }, {});
 };
@@ -131,7 +131,6 @@ const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlP
 
   // Get list of panel which can be overridden to avoid merging additional config from url
   const existingKeys = Object.keys(visiblePanels);
-
   const controlPanelsToOverride = pick(urlPanels, existingKeys);
 
   // Merge default and existing configs and add dataView.id to each of them
