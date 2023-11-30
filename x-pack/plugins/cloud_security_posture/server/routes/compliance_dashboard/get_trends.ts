@@ -10,6 +10,7 @@ import { calculatePostureScore } from '../../../common/utils/helpers';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
+import { CSPM_FINDINGS_STATS_INTERVAL } from '../../tasks/findings_stats_task';
 
 interface FindingsDetails {
   total_findings: number;
@@ -46,7 +47,7 @@ export type Trends = Array<{
 export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   // Amount of samples of the last 24 hours (accounting that we take a sample every 5 minutes)
-  size: (24 * 60) / 5,
+  size: (24 * 60) / CSPM_FINDINGS_STATS_INTERVAL,
   sort: '@timestamp:desc',
   query: {
     bool: {

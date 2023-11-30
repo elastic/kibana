@@ -91,6 +91,8 @@ export const getBenchmarksFromAggs = (benchmarks: BenchmarkBucket[]) => {
     return versions.map((version: BenchmarkVersionQueryResult) => {
       const benchmarkVersion = version.key;
       const assetCount = version.asset_count.value;
+      const resourcesTypesAggs = version.aggs_by_resource_type.buckets;
+
       let benchmarkName = '';
 
       if (!Array.isArray(version.aggs_by_benchmark_name.buckets))
@@ -99,15 +101,16 @@ export const getBenchmarksFromAggs = (benchmarks: BenchmarkBucket[]) => {
       if (version.aggs_by_benchmark_name && version.aggs_by_benchmark_name.buckets.length > 0) {
         benchmarkName = version.aggs_by_benchmark_name.buckets[0].key;
       }
+
+      if (!Array.isArray(resourcesTypesAggs))
+        throw new Error('missing aggs by resource type per benchmark');
+
       const { passed_findings: passedFindings, failed_findings: failedFindings } = version;
       const stats = getStatsFromFindingsEvaluationsAggs({
         passed_findings: passedFindings,
         failed_findings: failedFindings,
       });
 
-      const resourcesTypesAggs = version.aggs_by_resource_type.buckets;
-      if (!Array.isArray(resourcesTypesAggs))
-        throw new Error('missing aggs by resource type per benchmark');
       const groupedFindingsEvaluation = getPostureStatsFromAggs(resourcesTypesAggs);
 
       return {

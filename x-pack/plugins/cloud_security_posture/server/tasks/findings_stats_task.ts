@@ -36,7 +36,7 @@ import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
-const CSPM_FINDINGS_STATS_INTERVAL = '5m';
+export const CSPM_FINDINGS_STATS_INTERVAL = 5;
 
 export async function scheduleFindingsStatsTask(
   taskManager: TaskManagerStartContract,
@@ -48,7 +48,7 @@ export async function scheduleFindingsStatsTask(
       id: CSPM_FINDINGS_STATS_TASK_ID,
       taskType: CSPM_FINDINGS_STATS_TASK_TYPE,
       schedule: {
-        interval: CSPM_FINDINGS_STATS_INTERVAL,
+        interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
       },
       state: emptyState,
       params: {},
