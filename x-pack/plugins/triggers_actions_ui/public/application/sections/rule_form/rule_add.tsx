@@ -313,7 +313,6 @@ const RuleAdd = ({
                 hideGrouping={hideGrouping}
                 hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
-                selectedConsumer={selectedConsumer}
                 setConsumer={setSelectedConsumer}
                 useRuleProducer={useRuleProducer}
               />
