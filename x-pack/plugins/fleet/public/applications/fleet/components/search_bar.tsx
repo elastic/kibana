@@ -56,7 +56,7 @@ const getMappings = (indexPattern: string) => {
     case `.${FLEET_ENROLLMENT_API_PREFIX}`:
       return ENROLLMENT_API_KEY_MAPPINGS;
     default:
-      throw new Error('Mapping not found');
+      return {};
   }
 };
 
@@ -88,11 +88,11 @@ const concatKeys = (obj: any, parentKey = '') => {
   }
   return result;
 };
-
-/** Iterate over mappings and get fieldSpec **/
-const getFieldSpecList = (indexPattern: string) => {
+/** Exported for testing only **/
+export const getFieldSpecs = (indexPattern: string) => {
   const mapping = getMappings(indexPattern);
-  const rawFields = concatKeys(mapping.properties);
+  // @ts-ignore-next-line
+  const rawFields = concatKeys(mapping?.properties) || [];
   const fields = rawFields
     .map((field) => field.replaceAll(/.properties/g, ''))
     .map((field) => field.replace(/.type/g, ''))
@@ -110,9 +110,11 @@ const getFieldSpecList = (indexPattern: string) => {
   return fieldSpecs;
 };
 
-const fieldSpecToFieldMap = (fields: FieldSpec[]) => {
-  if (!fields) return {};
-  const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+const getFieldsMap = (indexPattern: string) => {
+  const fieldSpecs = getFieldSpecs(indexPattern);
+  if (!fieldSpecs) return {};
+
+  const fieldsMap = fieldSpecs.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
     acc[curr.name] = curr;
     return acc;
   }, {});
@@ -154,12 +156,11 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     }
   }, [value]);
 
+  const fieldsMap = useMemo(() => getFieldsMap(indexPattern), [indexPattern]);
+
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const fields = getFieldSpecList(indexPattern);
-        const fieldsMap = fieldSpecToFieldMap(fields);
-
         // Refetch only if fieldsMap is empty
         const skipFetchField = !!fieldsMap;
 
@@ -174,7 +175,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       }
     };
     fetchFields();
-  }, [data.dataViews, fieldPrefix, indexPattern]);
+  }, [data.dataViews, fieldPrefix, fieldsMap, indexPattern]);
 
   return (
     <NoWrapQueryStringInput
