@@ -43,7 +43,7 @@ export const AlertSummaryWidgetCompact = ({
   onClick,
 }: AlertSummaryWidgetCompactProps) => {
   const chartTheme = [
-    theme,
+    ...(theme ? [theme] : []),
     EUI_SPARKLINE_THEME_PARTIAL,
     {
       chartMargins: {

@@ -446,7 +446,7 @@ function StaticColorControls({
         onChange={(color: string) => handleColorChange(color)}
         color={currentColor}
         aria-label={colorLabel}
-        showAlpha={false}
+        showAlpha
         swatches={euiPaletteColorBlind()}
       />
     </EuiFormRow>

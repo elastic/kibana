@@ -8,7 +8,7 @@
 
 // @ts-ignore
 import colorJS from 'color';
-import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 function computeRelativeLuminosity(rgb: string) {
   return colorJS(rgb).luminosity();
@@ -96,11 +96,11 @@ export function getBaseTheme(baseTheme: Theme, bgColor?: string | null): Theme {
   }
 
   const bgLuminosity = computeRelativeLuminosity(bgColor);
-  const mainTheme = bgLuminosity <= 0.179 ? DARK_THEME : LIGHT_THEME;
+  const mainTheme = bgLuminosity <= 0.179 ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
   const color = findBestContrastColor(
     bgColor,
-    LIGHT_THEME.axes.axisTitle.fill,
-    DARK_THEME.axes.axisTitle.fill
+    LEGACY_LIGHT_THEME.axes.axisTitle.fill,
+    LEGACY_DARK_THEME.axes.axisTitle.fill
   );
   return {
     ...mainTheme,

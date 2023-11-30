@@ -200,7 +200,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
 
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
-  const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
@@ -484,7 +483,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               setMlBrushMarginLeft(projection.left);
               setMlBrushWidth(projection.width);
             }}
-            theme={chartTheme}
             baseTheme={chartBaseTheme}
             debugState={window._echDebugStateFlag ?? false}
             showLegend={false}

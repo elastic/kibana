@@ -7,7 +7,6 @@
 
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { createContext, useContext, useMemo } from 'react';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 
 export interface SyntheticsAppColors {
@@ -46,7 +45,6 @@ const defaultContext: SyntheticsThemeContextValues = {
   },
   chartTheme: {
     baseTheme: LIGHT_THEME,
-    theme: EUI_CHARTS_THEME_LIGHT.theme,
   },
 };
 
@@ -89,7 +87,6 @@ export const SyntheticsThemeContextProvider: React.FC<ThemeContextProps> = ({
       colors,
       chartTheme: {
         baseTheme: darkMode ? DARK_THEME : LIGHT_THEME,
-        theme: darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
       },
     };
   }, [colors, darkMode]);

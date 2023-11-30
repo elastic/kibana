@@ -68,7 +68,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         charts: {
           theme: {
             useChartsBaseTheme: () => {},
-            useChartsTheme: () => {},
           },
           activeCursor: () => {},
         },

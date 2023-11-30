@@ -11,10 +11,9 @@ import {
   Settings,
   Partition,
   PartitionLayout,
-  LIGHT_THEME,
   DARK_THEME,
+  LIGHT_THEME,
 } from '@elastic/charts';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -65,13 +64,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   } = useMlKibana();
   const isDarkTheme = useIsDarkTheme(themeService);
 
-  const { theme, baseTheme } = useMemo(
-    () =>
-      isDarkTheme
-        ? { theme: EUI_CHARTS_THEME_DARK, baseTheme: DARK_THEME }
-        : { theme: EUI_CHARTS_THEME_LIGHT, baseTheme: LIGHT_THEME },
-    [isDarkTheme]
-  );
+  const baseTheme = useMemo(() => (isDarkTheme ? DARK_THEME : LIGHT_THEME), [isDarkTheme]);
 
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 
@@ -173,7 +166,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
         {data.length ? (
           <Chart>
-            <Settings baseTheme={baseTheme} theme={theme.theme} locale={i18n.getLocale()} />
+            <Settings baseTheme={baseTheme} locale={i18n.getLocale()} />
             <Partition<MemoryUsageInfo>
               id="memoryUsageTreeMap"
               data={data}

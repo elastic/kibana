@@ -89,7 +89,7 @@ export const TimeSeries = ({
   const { theme: themeService, activeCursor: activeCursorService } = getCharts();
 
   const chartRef = useRef();
-  const chartTheme = themeService.useChartsTheme();
+  const chartBaseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
     isDateHistogram: true,
@@ -126,8 +126,6 @@ export const TimeSeries = ({
 
   // apply legend style change if bgColor is configured
   const classes = classNames(getChartClasses(backgroundColor));
-
-  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const onBrushEndListener = ({ x }) => {
     if (!x) {
@@ -196,15 +194,12 @@ export const TimeSeries = ({
         pointerUpdateDebounce={0}
         theme={[
           {
-            crosshair: {
-              ...chartTheme.crosshair,
-            },
             axes: {
               tickLabel: {
                 padding: {
                   inner: hasVisibleAnnotations
                     ? TICK_LABEL_WITH_ANNOTATIONS_PADDING
-                    : chartTheme.axes.tickLabel.padding.inner,
+                    : chartBaseTheme.axes.tickLabel.padding.inner,
                 },
               },
             },
@@ -226,9 +221,8 @@ export const TimeSeries = ({
               labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
             },
           },
-          chartTheme,
         ]}
-        baseTheme={baseTheme}
+        baseTheme={chartBaseTheme}
         externalPointerEvents={{
           tooltip: { visible: syncTooltips, placement: Placement.Right },
         }}

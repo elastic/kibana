@@ -40,7 +40,6 @@ export interface Props {
 
 export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
   const charts = useKibana().services.charts;
-  const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
 
   const { euiTheme } = useEuiTheme();
@@ -57,7 +56,7 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
-        theme={[theme, EUI_SPARKLINE_THEME_PARTIAL]}
+        theme={[EUI_SPARKLINE_THEME_PARTIAL]}
         locale={i18n.getLocale()}
       />
       <Tooltip type={TooltipType.None} />

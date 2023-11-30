@@ -188,7 +188,7 @@ function ExplorerChartContainer({
   const chartRef = useRef(null);
 
   const { euiTheme } = useEuiTheme();
-  const chartTheme = chartsService.theme.useChartsTheme();
+  const chartTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
     isDateHistogram: true,

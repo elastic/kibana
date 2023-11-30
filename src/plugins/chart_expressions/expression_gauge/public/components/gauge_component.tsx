@@ -283,8 +283,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       return null;
     }
 
-    const chartTheme = chartsThemeService.useChartsTheme();
-
     const metricColumn = table.columns.find((col) => col.id === accessors.metric);
 
     const chartData = table.rows.filter(
@@ -389,7 +387,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           <Settings
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
-            theme={[{ background: { color: 'transparent' } }, chartTheme]}
+            theme={[{ background: { color: 'transparent' } }]}
             baseTheme={chartBaseTheme}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}

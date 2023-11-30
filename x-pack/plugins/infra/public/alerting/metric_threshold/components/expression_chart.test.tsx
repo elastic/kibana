@@ -26,7 +26,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
         activeCursor: jest.fn(),
         theme: {
           useChartsBaseTheme: jest.fn(() => ({})),
-          useChartsTheme: jest.fn(() => ({})),
         },
       },
     },

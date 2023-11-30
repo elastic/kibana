@@ -326,9 +326,9 @@ export class ExplorerChartDistribution extends React.Component {
           return `M${xPosition},${chartHeight} ${xPosition},0`;
         })
         // Use elastic chart's cursor line style if possible
-        .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
-        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
-        .style('stroke-dasharray', chartTheme.crosshair.line.dash ?? '4,4');
+        .style('stroke', chartTheme.crosshair.line.stroke)
+        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth}px`)
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash?.join(',') ?? '4,4');
 
       cursorMouseLine.exit().remove();
     }

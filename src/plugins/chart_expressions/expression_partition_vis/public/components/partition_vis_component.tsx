@@ -113,7 +113,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     hasOpenedOnAggBasedEditor,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
-  const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 
   const {
@@ -377,12 +376,19 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getPartitionTheme(
         visType,
         visParams,
-        chartTheme,
+        chartBaseTheme,
         containerDimensions,
         rescaleFactor,
         hasOpenedOnAggBasedEditor
       ),
-    [visType, visParams, chartTheme, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
+    [
+      visType,
+      visParams,
+      chartBaseTheme,
+      containerDimensions,
+      rescaleFactor,
+      hasOpenedOnAggBasedEditor,
+    ]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
@@ -574,7 +580,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   // Chart background should be transparent for the usage at Canvas.
                   { background: { color: 'transparent' } },
                   themeOverrides,
-                  chartTheme,
                   {
                     legend: {
                       labelOptions: {

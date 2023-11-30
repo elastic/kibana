@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   Chart,
   Datum,
-  LIGHT_THEME,
+  LEGACY_LIGHT_THEME,
   PartialTheme,
   Partition,
   PartitionLayout,
@@ -69,7 +69,8 @@ export const NetworkTimingsDonut = () => {
       <EuiSpacer size="m" />
       <Chart size={{ height: 240 }}>
         <Settings
-          theme={[themeOverrides, LIGHT_THEME ?? {}]}
+          theme={[themeOverrides]}
+          baseTheme={LEGACY_LIGHT_THEME}
           showLegend={false}
           locale={i18n.getLocale()}
         />

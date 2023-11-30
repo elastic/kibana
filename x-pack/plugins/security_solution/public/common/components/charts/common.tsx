@@ -17,7 +17,7 @@ import type {
   BarSeriesStyle,
   Theme,
 } from '@elastic/charts';
-import { DARK_THEME, LIGHT_THEME, Position } from '@elastic/charts';
+import { LEGACY_DARK_THEME, LEGACY_LIGHT_THEME, Position } from '@elastic/charts';
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
@@ -115,7 +115,7 @@ const theme: PartialTheme = {
 export const useThemes = (): { baseTheme: Theme; theme: PartialTheme } => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
-  const baseTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
+  const baseTheme = isDarkMode ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
   return {
     baseTheme,
     theme,

@@ -46,7 +46,6 @@ export function EventsChartPanel({ slo, range }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const { isLoading, data } = useGetPreviewData(true, slo.indicator, range);
-  const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
@@ -88,7 +87,6 @@ export function EventsChartPanel({ slo, range }: Props) {
                 showLegend
                 showLegendExtra={false}
                 legendPosition={Position.Left}
-                theme={[theme]}
                 noResults={
                   <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
                 }

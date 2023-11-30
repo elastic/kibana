@@ -1333,8 +1333,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
     },
 
-    async getMetricElementIfExists(selector: string, container: WebElementWrapper) {
-      return (await findService.descendantExistsByCssSelector(selector, container))
+    async getMetricElementIfExists(
+      selector: string,
+      container: WebElementWrapper,
+      timeout?: number
+    ) {
+      return (await findService.descendantExistsByCssSelector(selector, container, timeout))
         ? await container.findByCssSelector(selector)
         : undefined;
     },
@@ -1354,8 +1358,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
+        trendlineColor: await (
+          await this.getMetricElementIfExists('.echSingleMetricSparkline__svg > rect', tile, 500)
+        )?.getAttribute('fill'),
         showingTrendline: Boolean(
-          await this.getMetricElementIfExists('.echSingleMetricSparkline', tile)
+          await this.getMetricElementIfExists('.echSingleMetricSparkline', tile, 500)
         ),
       };
     },

@@ -159,7 +159,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     overrides,
   }) => {
     const chartRef = useRef<Chart>(null);
-    const chartTheme = chartsThemeService.useChartsTheme();
     const isDarkTheme = chartsThemeService.useDarkMode();
     // legacy heatmap legend is handled by the uiState
     const [showLegend, setShowLegend] = useState<boolean>(() => {
@@ -547,13 +546,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         grid: {
           stroke: {
             width:
-              args.gridConfig.strokeWidth ??
-              chartTheme.axes?.gridLine?.horizontal?.strokeWidth ??
-              1,
-            color:
-              args.gridConfig.strokeColor ??
-              chartTheme.axes?.gridLine?.horizontal?.stroke ??
-              '#D3DAE6',
+              args.gridConfig.strokeWidth ?? chartBaseTheme.axes.gridLine.horizontal.strokeWidth,
+            color: args.gridConfig.strokeColor ?? chartBaseTheme.axes.gridLine.horizontal.stroke,
           },
         },
         cell: {
@@ -572,13 +566,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         yAxisLabel: {
           visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
           // eui color subdued
-          textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
+          textColor: chartBaseTheme.axes.tickLabel.fill,
           padding: yAxisColumn?.name ? 8 : 0,
         },
         xAxisLabel: {
           visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
           // eui color subdued
-          textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+          textColor: chartBaseTheme.axes.tickLabel.fill,
           padding: xAxisColumn?.name ? 8 : 0,
         },
         brushMask: {
@@ -719,7 +713,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               debugState={window._echDebugStateFlag ?? false}
               theme={[
                 themeOverrides,
-                chartTheme,
                 ...(Array.isArray(settingsThemeOverrides)
                   ? settingsThemeOverrides
                   : [settingsThemeOverrides]),
