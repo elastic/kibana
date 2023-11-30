@@ -55,7 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
       });
 
-      describe('discover', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/172246
+      describe.skip('discover', () => {
         afterEach(async () => {
           await queryBar.clearQuery();
         });
