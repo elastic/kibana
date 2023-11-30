@@ -51,7 +51,7 @@ interface VisitRuleDetailsPageOptions {
 }
 
 export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsPageOptions): void {
-  visit(ruleDetailsUrl(ruleId, options?.tab), { role: options?.role });
+  visit(ruleDetailsUrl(ruleId, options?.tab));
 }
 
 export const enablesRule = () => {
