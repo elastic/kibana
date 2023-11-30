@@ -44,6 +44,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
     // TODO: Verify text size
     // TODO: Add status & action menu
     // TODO: Test rendering when pipeline.modelType.length == 0
+    // TODO: Fix rendering on mobile
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiTitle size="xxs">
