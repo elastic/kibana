@@ -270,6 +270,8 @@ export function validateServiceToken(value: string) {
   }
 }
 
+export const validateServiceTokenSecret = toSecretValidator(validateServiceToken);
+
 export function validateSSLCertificate(value: string) {
   if (!value || value === '') {
     return [

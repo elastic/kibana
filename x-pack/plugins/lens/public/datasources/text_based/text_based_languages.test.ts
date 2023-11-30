@@ -401,6 +401,7 @@ describe('Textbased Data Source', () => {
       );
       expect(suggestions[0].state).toEqual({
         ...state,
+        initialContext: undefined,
         fieldList: textBasedQueryColumns,
         indexPatternRefs: [
           {
@@ -552,6 +553,7 @@ describe('Textbased Data Source', () => {
       );
       expect(suggestions[0].state).toEqual({
         ...state,
+        initialContext: undefined,
         fieldList: textBasedQueryColumns,
         indexPatternRefs: [
           {
