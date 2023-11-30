@@ -1839,7 +1839,17 @@ describe('Execution Handler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(0);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
+
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-1.'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-2.'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-3.'
+    );
   });
 
   test('does not schedule actions with notifyWhen not set to "on status change" for alerts that are flapping', async () => {

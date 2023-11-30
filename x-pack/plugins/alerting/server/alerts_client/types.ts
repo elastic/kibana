@@ -81,11 +81,17 @@ export interface IAlertsClient<
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   persistAlerts(): Promise<void>;
-  updateAlertMaintenanceWindowIds?(idsToUpdate: string[]): Promise<UpdateByQueryResponse>;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getMaintenanceWindowScopedQueryAlerts?(
     params: GetMaintenanceWindowScopedQueryAlertsParams
   ): Promise<ScopedQueryAlerts>;
+  updateAlertMaintenanceWindowIds?(idsToUpdate: string[]): Promise<UpdateByQueryResponse>;
+  updateAlertsMaintenanceWindowIdByScopedQuery?(
+    params: UpdateAlertsMaintenanceWindowIdByScopedQueryParams
+  ): Promise<{
+    alertIds: string[];
+    maintenanceWindowIds: string[];
+  }>;
   getAlertsToSerialize(): {
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
@@ -211,6 +217,9 @@ export interface GetMaintenanceWindowScopedQueryAlertsParams {
   maintenanceWindows: MaintenanceWindow[];
   executionUuid: string;
 }
+
+export type UpdateAlertsMaintenanceWindowIdByScopedQueryParams =
+  GetMaintenanceWindowScopedQueryAlertsParams;
 
 export type GetAlertsQueryParams = Omit<
   GetSummarizedAlertsParams,

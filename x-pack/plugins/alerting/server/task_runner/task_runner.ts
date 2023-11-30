@@ -434,8 +434,6 @@ export class TaskRunner<
       return false;
     });
 
-    const maintenanceWindowsIds = maintenanceWindows.map(({ id }) => id);
-
     const maintenanceWindowsWithScopedQuery = maintenanceWindows.filter(
       ({ scopedQuery }) => scopedQuery
     );
@@ -443,13 +441,14 @@ export class TaskRunner<
       ({ scopedQuery }) => !scopedQuery
     );
 
-    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindows.map(({ id }) => id);
+    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindowsWithoutScopedQuery.map(
+      ({ id }) => id
+    );
 
-    if (maintenanceWindows.length) {
-      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowsIds);
+    // Set the event log MW Id field the first time with MWs without scoped queries
+    if (maintenanceWindowsWithoutScopedQuery.length) {
+      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
     }
-
-    const hasScopedQuery = maintenanceWindowsWithScopedQuery.length > 0;
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -591,49 +590,28 @@ export class TaskRunner<
       await alertsClient.persistAlerts();
     });
 
-    if (hasScopedQuery) {
-      // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
-      // indicating the maintenance window has matches a number of alerts with scoped query.
-      const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts?.({
-        ruleId: rule.id,
-        spaceId,
-        executionUuid: this.executionId,
-        maintenanceWindows: maintenanceWindowsWithScopedQuery,
-      });
+    let updateAlertsMaintenanceWindowResult = null;
 
-      const alertsAffectedByScopedQuery = new Set<string>();
+    try {
+      updateAlertsMaintenanceWindowResult =
+        await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery?.({
+          ruleId: rule.id,
+          spaceId,
+          executionUuid: this.executionId,
+          maintenanceWindows: maintenanceWindowsWithScopedQuery,
+        });
+    } catch (e) {
+      this.logger.debug(
+        `Failed to update alert matched my maintenance window scoped query for rule  ${ruleLabel}.`
+      );
+    }
 
-      if (result) {
-        const newAlerts = Object.values(alertsClient.getProcessedAlerts('new'));
-
-        for (const [scopedQueryMaintenanceWindowId, alertIds] of Object.entries(result)) {
-          // Go through matched alerts, find the in memory object
-          alertIds.forEach((alertId) => {
-            const newAlert = newAlerts.find((alert) => alert.getUuid() === alertId);
-            if (!newAlert) {
-              return;
-            }
-            // Update in memory alert with new maintenance window IDs
-            newAlert.setMaintenanceWindowIds([
-              ...new Set([
-                // Keep existing Ids
-                ...newAlert.getMaintenanceWindowIds(),
-                // Add the ids that don't have scoped queries
-                ...maintenanceWindowsWithoutScopedQuery.map(({ id }) => id),
-                // Add the scoped query id
-                scopedQueryMaintenanceWindowId,
-              ]),
-            ]);
-
-            alertsAffectedByScopedQuery.add(newAlert.getUuid());
-          });
-        }
-      }
-
-      if (alertsAffectedByScopedQuery.size) {
-        // Update alerts with new maintenance window IDs, await not needed
-        alertsClient.updateAlertMaintenanceWindowIds?.([...alertsAffectedByScopedQuery]);
-      }
+    // Set the event log MW ids again, this time including the ids that matched alerts with
+    // scoped query
+    if (updateAlertsMaintenanceWindowResult?.maintenanceWindowIds) {
+      this.alertingEventLogger.setMaintenanceWindowIds(
+        updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+      );
     }
 
     alertsClient.logAlerts({
