@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import useMount from 'react-use/lib/useMount';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ApplicationStart } from '@kbn/core-application-browser';
@@ -47,6 +48,11 @@ export const GuideFilters = ({
     color: ${euiTheme.colors.lightestShade};
   `;
 
+  // set up telemetry for the initial page load where it defaults to the security solution
+  useMount(() => {
+    trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding_search');
+  });
+
   const setQuerystringParams = ({ useCase }: { useCase: string }) => {
     application.navigateToApp('home', { path: `#/getting_started?useCase=${useCase}` });
   };
@@ -56,6 +62,7 @@ export const GuideFilters = ({
     } = e;
     setQuerystringParams({ useCase: dataset.filterId });
     setActiveFilter(dataset.filterId);
+    // capture the clicks based on the solution
     trackUiMetric(METRIC_TYPE.CLICK, `guided_onboarding_${dataset.filterId}`);
   };
 
