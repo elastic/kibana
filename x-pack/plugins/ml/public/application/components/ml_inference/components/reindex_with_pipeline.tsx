@@ -264,6 +264,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
     <EuiButton
       onClick={onReindex}
       disabled={
+        selectedIndex.length === 0 ||
         (destinationIndexInvalidMessage !== undefined && selectedIndex.length > 0) ||
         !canReindex ||
         destinationIndexExists
@@ -395,7 +396,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
             'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexStartedMessage',
             {
               defaultMessage: 'Reindexing of {sourceIndex} to {destinationIndex} has started.',
-              values: { sourceIndex, destinationIndex },
+              values: { sourceIndex: selectedIndex[0].label, destinationIndex },
             }
           )}
           color="success"

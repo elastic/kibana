@@ -19,6 +19,8 @@ import { getZeroShotClassificationInput } from './zero_shot_classification_input
 import { getTextClassificationOutputComponent } from './text_classification_output';
 
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
+  static initialLabelsText?: string;
+  static initialMultiLabel: boolean = false;
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION;
   protected inferenceTypeLabel = i18n.translate(
     'xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.label',
@@ -39,9 +41,28 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
     deploymentId: string,
-    defaultSelectedField?: string
+    defaultSelectedField?: string,
+    initialLabelsText?: string,
+    initialMultiLabel?: boolean
   ) {
     super(trainedModelsApi, model, inputType, deploymentId, defaultSelectedField);
+
+    if (
+      ZeroShotClassificationInference.initialLabelsText === undefined &&
+      initialLabelsText !== undefined
+    ) {
+      ZeroShotClassificationInference.initialLabelsText = initialLabelsText;
+    }
+    if (
+      ZeroShotClassificationInference.initialMultiLabel === undefined &&
+      initialMultiLabel !== undefined
+    ) {
+      ZeroShotClassificationInference.initialMultiLabel = initialMultiLabel;
+    }
+    if (ZeroShotClassificationInference.initialLabelsText) {
+      this.labelsText$.next(ZeroShotClassificationInference.initialLabelsText);
+      this.multiLabel$.next(ZeroShotClassificationInference.initialMultiLabel);
+    }
 
     this.initialize(
       [this.labelsText$.pipe(map((labelsText) => labelsText !== ''))],
@@ -92,6 +113,8 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
   public setLabelsText(text: string) {
     this.labelsText$.next(text);
+    // persist labels text
+    ZeroShotClassificationInference.initialLabelsText = text;
   }
 
   public getLabelsText$() {
@@ -104,6 +127,8 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
   public setMultiLabel(multiLabel: boolean) {
     this.multiLabel$.next(multiLabel);
+    // persist multi label setting
+    ZeroShotClassificationInference.initialMultiLabel = multiLabel;
   }
 
   public getMultiLabel$() {

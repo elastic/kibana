@@ -46,6 +46,7 @@ export type QuestionAnsweringResponse = InferResponse<
 >;
 
 export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringResponse> {
+  static initialQuestionText?: string;
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING;
   protected inferenceTypeLabel = i18n.translate(
     'xpack.ml.trainedModels.testModelsFlyout.questionAnswer.label',
@@ -64,9 +65,20 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
     deploymentId: string,
-    defaultInputField?: string
+    defaultInputField?: string,
+    initialQuestionText?: string
   ) {
     super(trainedModelsApi, model, inputType, deploymentId, defaultInputField);
+
+    if (
+      QuestionAnsweringInference.initialQuestionText === undefined &&
+      initialQuestionText !== undefined
+    ) {
+      QuestionAnsweringInference.initialQuestionText = initialQuestionText;
+    }
+    if (QuestionAnsweringInference.initialQuestionText) {
+      this.questionText$.next(QuestionAnsweringInference.initialQuestionText);
+    }
 
     this.initialize(
       [this.questionText$.pipe(map((questionText) => questionText !== ''))],

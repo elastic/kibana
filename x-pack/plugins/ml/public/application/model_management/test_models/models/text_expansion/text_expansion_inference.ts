@@ -33,6 +33,7 @@ export type TextExpansionResponse = InferResponse<
 >;
 
 export class TextExpansionInference extends InferenceBase<TextExpansionResponse> {
+  static initialQueryText?: string;
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
   protected inferenceTypeLabel = i18n.translate(
     'xpack.ml.trainedModels.testModelsFlyout.textExpansion.label',
@@ -53,9 +54,17 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
     deploymentId: string,
-    defaultInputField?: string
+    defaultInputField?: string,
+    initialqueryText?: string
   ) {
     super(trainedModelsApi, model, inputType, deploymentId, defaultInputField);
+
+    if (TextExpansionInference.initialQueryText === undefined && initialqueryText !== undefined) {
+      TextExpansionInference.initialQueryText = initialqueryText;
+    }
+    if (TextExpansionInference.initialQueryText) {
+      this.queryText$.next(TextExpansionInference.initialQueryText);
+    }
 
     this.initialize(
       [this.queryText$.pipe(map((questionText) => questionText !== ''))],

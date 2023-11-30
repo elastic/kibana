@@ -12,6 +12,9 @@ import { EuiButton, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestTrainedModelsContext } from '../../test_trained_models_context';
 import type { InferrerType } from '..';
+import { ZeroShotClassificationInference } from '../text_classification';
+import { TextExpansionInference } from '../text_expansion';
+import { QuestionAnsweringInference } from '../question_answering';
 
 interface Props {
   testButtonDisabled: boolean;
@@ -57,6 +60,15 @@ export const InputFormControls: FC<Props> = ({
                 defaultSelectedDataViewId: inferrer.getSelectedDataViewId(),
                 defaultSelectedField: inferrer.getInputField(),
                 createPipelineFlyoutOpen: true,
+                ...(inferrer instanceof ZeroShotClassificationInference
+                  ? { multiLabel: inferrer.getMultiLabel(), labelsText: inferrer.getLabelsText() }
+                  : {}),
+                ...(inferrer instanceof TextExpansionInference
+                  ? { queryText: inferrer.getQueryText() }
+                  : {}),
+                ...(inferrer instanceof QuestionAnsweringInference
+                  ? { questionText: inferrer.getQuestionText() }
+                  : {}),
               })
             }
           >
