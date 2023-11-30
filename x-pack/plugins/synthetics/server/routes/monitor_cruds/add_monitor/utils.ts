@@ -6,7 +6,8 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SyntheticsMonitor } from '../../../../common/runtime_types';
+import { CreateMonitorPayLoad } from './add_monitor_api';
+import { MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
 export const getPrivateLocationsForMonitor = async (
@@ -19,4 +20,59 @@ export const getPrivateLocationsForMonitor = async (
     return [];
   }
   return await getPrivateLocations(soClient);
+};
+
+export const parseMonitorLocations = (
+  monitorPayload: CreateMonitorPayLoad,
+  prevLocations?: MonitorFields['locations']
+) => {
+  const { locations, private_locations: privateLocations } = monitorPayload;
+
+  let locs = locations
+    ?.filter((loc) => typeof loc === 'string' || loc.isServiceManaged)
+    .map((loc) => (typeof loc === 'string' ? loc : loc.id));
+  const extractPvtLocs =
+    locations?.filter((loc) => typeof loc !== 'string' && !loc.isServiceManaged) ?? [];
+  let pvtLocs = [...(privateLocations ?? []), ...extractPvtLocs]?.map((loc) =>
+    typeof loc === 'string' ? loc : loc.id
+  );
+  if (prevLocations) {
+    if (!locations && !privateLocations) {
+      locs = prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id);
+      pvtLocs = prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id);
+    } else {
+      if (!privateLocations) {
+        pvtLocs = [
+          ...(pvtLocs ?? []),
+          ...prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),
+        ];
+        if (locations?.length === 0) {
+          locs = [];
+        } else {
+          locs = [
+            ...(locs ?? []),
+            ...prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id),
+          ];
+        }
+      }
+      if (!locations) {
+        locs = [
+          ...(locs ?? []),
+          ...prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id),
+        ];
+        if (privateLocations?.length === 0) {
+          pvtLocs = [];
+        } else {
+          pvtLocs = [
+            ...(pvtLocs ?? []),
+            ...prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),
+          ];
+        }
+      }
+    }
+  }
+  return {
+    locations: Array.from(new Set(locs)),
+    privateLocations: Array.from(new Set(pvtLocs)),
+  };
 };

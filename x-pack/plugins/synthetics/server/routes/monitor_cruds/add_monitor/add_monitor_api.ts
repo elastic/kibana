@@ -10,7 +10,8 @@ import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { MonitorValidationError, ValidationResult } from '../monitor_validation';
+import { parseMonitorLocations } from './utils';
+import { MonitorValidationError } from '../monitor_validation';
 import { getKqlFilter } from '../../common';
 import { deleteMonitor } from '../delete_monitor';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
@@ -158,10 +159,7 @@ export class AddEditMonitorAPI {
     );
   }
 
-  validateMonitorType(
-    monitorFields: MonitorFields,
-    previousMonitor?: MonitorFields
-  ): ValidationResult {
+  validateMonitorType(monitorFields: MonitorFields, previousMonitor?: MonitorFields) {
     const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
     if (previousMonitor) {
       const { [ConfigKey.MONITOR_TYPE]: prevMonitorType } = previousMonitor;
@@ -185,11 +183,15 @@ export class AddEditMonitorAPI {
     }
   }
 
-  async normalizeMonitor(requestPayload: CreateMonitorPayLoad) {
+  async normalizeMonitor(
+    requestPayload: CreateMonitorPayLoad,
+    monitorPayload: CreateMonitorPayLoad,
+    prevLocations?: MonitorFields['locations']
+  ) {
     const { savedObjectsClient, syntheticsMonitorClient } = this.routeContext;
     const {
       locations,
-      private_locations: privateLocations = [],
+      private_locations: privateLocations,
       schedule,
       retest_on_failure: retestOnFailure,
       url: rawUrl,
@@ -198,27 +200,6 @@ export class AddEditMonitorAPI {
     } = requestPayload;
     const monitor = rest as MonitorFields;
 
-    const parseLocations = () => {
-      const locs = locations
-        ?.filter((loc) => typeof loc === 'string' || loc.isServiceManaged)
-        .map((loc) => (typeof loc === 'string' ? loc : loc.id));
-      const extractPvtLocs =
-        locations?.filter((loc) => typeof loc !== 'string' && !loc.isServiceManaged) ?? [];
-      const pvtLocs = [...(privateLocations ?? []), ...extractPvtLocs]?.map((loc) =>
-        typeof loc === 'string' ? loc : loc.id
-      );
-      return {
-        locations: locs,
-        privateLocations: pvtLocs,
-      };
-    };
-
-    if (parseLocations().privateLocations.length > 0) {
-      this.allPrivateLocations = await getPrivateLocations(savedObjectsClient);
-    } else {
-      this.allPrivateLocations = [];
-    }
-
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
     if (monitorType === MonitorTypeEnum.HTTP && !monitor.name) {
       monitor.name = monitor.urls;
@@ -226,16 +207,32 @@ export class AddEditMonitorAPI {
 
     const defaultFields = DEFAULT_FIELDS[monitorType];
 
+    let locationsVal: MonitorFields['locations'] = [];
+
+    if (!locations && !privateLocations && prevLocations) {
+      locationsVal = prevLocations;
+    } else {
+      const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations);
+
+      if (monitorLocations.privateLocations.length > 0) {
+        this.allPrivateLocations = await getPrivateLocations(savedObjectsClient);
+      } else {
+        this.allPrivateLocations = [];
+      }
+
+      locationsVal = getMonitorLocations({
+        monitorLocations,
+        allPublicLocations: syntheticsMonitorClient.syntheticsService.locations,
+        allPrivateLocations: this.allPrivateLocations,
+      });
+    }
+
     return {
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
       [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(retestOnFailure),
-      [ConfigKey.LOCATIONS]: getMonitorLocations({
-        monitorLocations: parseLocations(),
-        allPublicLocations: syntheticsMonitorClient.syntheticsService.locations,
-        allPrivateLocations: this.allPrivateLocations,
-      }),
+      [ConfigKey.LOCATIONS]: locationsVal,
     } as MonitorFields;
   }
 

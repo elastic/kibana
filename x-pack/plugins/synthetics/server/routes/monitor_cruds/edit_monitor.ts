@@ -8,7 +8,8 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
@@ -24,7 +25,7 @@ import {
   MonitorLocations,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { MonitorValidationError, validateMonitor } from './monitor_validation';
+import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   sendTelemetryEvents,
@@ -73,7 +74,23 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         normalizedPreviousMonitor as MonitorFields
       );
 
-      editedMonitor = await editMonitorAPI.normalizeMonitor(editedMonitor);
+      const { errorMessage: unsupportedKeysErrors, formattedConfig } = normalizeAPIConfig(
+        editedMonitor as CreateMonitorPayLoad
+      );
+      if (unsupportedKeysErrors) {
+        return response.badRequest({
+          body: {
+            message: unsupportedKeysErrors,
+            attributes: { details: unsupportedKeysErrors },
+          },
+        });
+      }
+
+      editedMonitor = await editMonitorAPI.normalizeMonitor(
+        formattedConfig as CreateMonitorPayLoad,
+        monitor as CreateMonitorPayLoad,
+        previousMonitor.attributes.locations
+      );
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
@@ -136,6 +153,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     } catch (updateErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
+      }
+      if (updateErr instanceof InvalidLocationError) {
+        return response.badRequest({ body: { message: updateErr.message } });
       }
       if (updateErr instanceof MonitorValidationError) {
         const { reason: message, details, payload } = updateErr.result;

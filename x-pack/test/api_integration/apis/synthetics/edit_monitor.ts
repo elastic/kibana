@@ -62,8 +62,9 @@ export default function ({ getService }: FtrProviderContext) {
       const res = await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
         .set('kbn-xsrf', 'true')
-        .send(modifiedMonitor)
-        .expect(200);
+        .send(modifiedMonitor);
+
+      expect(res.status).eql(200, JSON.stringify(res.body));
 
       const { url, ...rest } = res.body;
 
@@ -114,18 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
         [ConfigKey.NAME]: 'Modified name',
-        [ConfigKey.LOCATIONS]: [
-          {
-            id: 'eu-west-01',
-            label: 'Europe West',
-            geo: {
-              lat: 33.2343132435,
-              lon: 73.2342343434,
-            },
-            url: 'https://example-url.com',
-            isServiceManaged: true,
-          },
-        ],
+        [ConfigKey.LOCATIONS]: [LOCAL_LOCATION],
         [ConfigKey.REQUEST_HEADERS_CHECK]: {
           sampleHeader2: 'sampleValue2',
         },
@@ -176,18 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
         [ConfigKey.NAME]: 'Modified name',
-        [ConfigKey.LOCATIONS]: [
-          {
-            id: 'eu-west-01',
-            label: 'Europe West',
-            geo: {
-              lat: 33.2343132435,
-              lon: 73.2342343434,
-            },
-            url: 'https://example-url.com',
-            isServiceManaged: true,
-          },
-        ],
+        [ConfigKey.LOCATIONS]: [LOCAL_LOCATION],
         [ConfigKey.REQUEST_HEADERS_CHECK]: {
           sampleHeader2: 'sampleValue2',
         },
@@ -266,7 +245,9 @@ export default function ({ getService }: FtrProviderContext) {
         .send(toUpdate);
 
       expect(apiResponse.status).eql(400);
-      expect(apiResponse.body.message).eql('Monitor type is invalid');
+      expect(apiResponse.body.message).eql(
+        'Monitor type cannot be changed from http to invalid-data-steam.'
+      );
     });
 
     it('sets config hash to empty string on edits', async () => {
