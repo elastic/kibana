@@ -56,9 +56,7 @@ export class SloOverviewEmbeddableFactoryDefinition
     SloEmbeddableInput,
     unknown
   >['getPanelPlacementSettings'] = () => {
-    const width = 8;
-    const height = 7;
-    return { width, height, strategy: 'placeAtTop' };
+    return { width: 12, height: 8 };
   };
 
   public async create(initialInput: SloEmbeddableInput, parent?: IContainer) {
