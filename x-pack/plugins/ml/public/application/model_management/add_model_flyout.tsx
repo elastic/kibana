@@ -217,14 +217,28 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                   </EuiText>
                 </p>
                 <EuiSpacer size="s" />
-                <p>
-                  <EuiLink href={docLinks.links.ml.nlpElser} external>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.elserViewDocumentationLinkLabel"
-                      defaultMessage="View documentation"
-                    />
-                  </EuiLink>
-                </p>
+                <EuiFlexGroup justifyContent={'spaceBetween'} gutterSize={'none'}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLink href={'todo'} external>
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.elserViewDocumentationLinkLabel"
+                        defaultMessage="View documentation"
+                      />
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      color="hollow"
+                      target={'_blank'}
+                      href={'https://huggingface.co/elastic/multilingual-e5-small-optimized'}
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.mitLicenseLabel"
+                        defaultMessage="License: mit"
+                      />
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiSpacer size={'l'} />
               </div>
             ) : null}
