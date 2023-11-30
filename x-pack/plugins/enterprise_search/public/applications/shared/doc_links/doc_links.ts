@@ -356,7 +356,7 @@ class DocLinks {
     this.aiSearchDoc = docLinks.links.enterpriseSearch.aiSearchDoc;
     this.aiSearchHelp = docLinks.links.enterpriseSearch.aiSearchHelp;
     this.apiKeys = docLinks.links.enterpriseSearch.apiKeys;
-    this.apiKeyMetadata = docLinks.links.security.elasticsearchEnableApiKeys;
+    this.apiKeyMetadata = docLinks.links.security.mappingRoles;
     this.appSearchAdaptiveRelevance = docLinks.links.appSearch.adaptiveRelevance;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
     this.appSearchApiClients = docLinks.links.appSearch.apiClients;
@@ -469,7 +469,7 @@ class DocLinks {
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.restApis = docLinks.links.apis.restApis;
-    this.roleDescriptors = docLinks.links.security.apiKeyServiceSettings;
+    this.roleDescriptors = docLinks.links.security.definingRoles;
     this.rrf = docLinks.links.elasticsearch.rrf;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
