@@ -12,6 +12,7 @@ export * from './create_connector_document';
 export * from './delete_connector';
 export * from './fetch_connectors';
 export * from './fetch_sync_jobs';
+export * from './fetch_telemetry';
 export * from './update_filtering';
 export * from './update_filtering_draft';
 export * from './update_native';
