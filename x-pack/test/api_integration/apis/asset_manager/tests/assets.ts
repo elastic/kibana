@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(response.body).to.have.property('assets');
-      expect(response.body.hosts.length).to.equal(10);
+      expect(response.body.assets.length).to.equal(10);
     });
 
     it('supports hosts and services', async () => {
