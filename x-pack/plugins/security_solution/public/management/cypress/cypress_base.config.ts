@@ -71,7 +71,7 @@ export const getCypressBaseConfig = (
         baseUrl: 'http://localhost:5601',
         supportFile: 'public/management/cypress/support/e2e.ts',
         specPattern:
-          'public/management/cypress/e2e/**/endpoints_list_response_console.cy.{js,jsx,ts,tsx}',
+          'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
