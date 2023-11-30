@@ -122,7 +122,7 @@ export function DataViewsList({
     }>
       {...selectableProps}
       listProps={{
-        truncationProps: { ...MIDDLE_TRUNCATION_PROPS },
+        truncationProps: MIDDLE_TRUNCATION_PROPS,
         ...(selectableProps?.listProps ? selectableProps.listProps : undefined),
       }}
       data-test-subj="indexPattern-switcher"
