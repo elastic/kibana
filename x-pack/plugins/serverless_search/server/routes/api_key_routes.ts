@@ -20,7 +20,7 @@ export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependen
       if (user) {
         const apiKeys = await client.asCurrentUser.security.getApiKey({ username: user.username });
         const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
-        return response.ok({ body: { apiKeys: validKeys } });
+        return response.ok({ body: { api_keys: validKeys } });
       }
       return response.customError({
         statusCode: 502,
@@ -40,7 +40,7 @@ export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependen
       const result = await security.authc.apiKeys.create(request, request.body);
       if (result) {
         const apiKey = { ...result, beats_logstash_format: `${result.id}:${result.api_key}` };
-        return response.ok({ body: apiKey });
+        return response.ok({ body: { api_key: apiKey } });
       }
       return response.customError({
         statusCode: 502,

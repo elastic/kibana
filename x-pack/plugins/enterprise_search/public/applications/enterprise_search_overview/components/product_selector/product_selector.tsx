@@ -18,7 +18,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import { ErrorStateCallout } from '../../../shared/error_state';
@@ -29,6 +28,7 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 
 import headerImage from '../../assets/search_header.svg';
 
+import { ApiKeyPanel } from '../api_key/api_key_panel';
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
@@ -90,6 +90,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
         </EuiPageTemplate.Section>
 
         <EuiPageTemplate.Section>
+          <ApiKeyPanel user={user} />
           <EuiSpacer size="xl" />
           <EuiTitle>
             <h4>
