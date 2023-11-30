@@ -111,6 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload(auditbeatPath);
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0');
       await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllRules(supertest, log);
     });
@@ -277,6 +278,31 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+      });
+    });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts[0]?._source?.kibana?.alert?.host?.criticality_level).to.eql(
+          'important'
+        );
+        expect(previewAlerts[0]?._source?.kibana?.alert?.user?.criticality_level).to.eql(
+          'very_important'
+        );
       });
     });
 
