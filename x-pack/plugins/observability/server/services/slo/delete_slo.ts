@@ -14,6 +14,7 @@ import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../assets/constants';
+import { retryTransientEsErrors } from '../../utils/retry';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
@@ -37,9 +38,11 @@ export class DeleteSLO {
     await this.transformManager.stop(rollupTransformId);
     await this.transformManager.uninstall(rollupTransformId);
 
-    await this.esClient.ingest.deletePipeline(
-      { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-      { ignore: [404] }
+    await retryTransientEsErrors(() =>
+      this.esClient.ingest.deletePipeline(
+        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+        { ignore: [404] }
+      )
     );
 
     await this.deleteRollupData(slo.id);
