@@ -66,6 +66,10 @@ function options(y: Argv) {
         return arg as Record<string, any> | undefined;
       },
     })
+    .option('skip-package-install', {
+      describe: 'Skip APM Package Install',
+      boolean: false,
+    })
     .showHelpOnFail(false);
 }
 

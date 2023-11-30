@@ -69,7 +69,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'kibana',
       'concurrency',
       'versionOverride',
-      'clean'
+      'clean',
+      'skip-package-install'
     ),
     logLevel: parsedLogLevel,
     file: parsedFile,

@@ -40,7 +40,13 @@ export async function bootstrap(runOptions: RunOptions) {
     concurrency: runOptions.concurrency,
   });
 
-  await kibanaClient.installApmPackage(latestPackageVersion);
+  if (!runOptions['skip-package-install']) {
+    await kibanaClient.installApmPackage(latestPackageVersion);
+  } else {
+    logger.info(
+      `Skipping installation of APM Package, ${latestPackageVersion} found already installed`
+    );
+  }
 
   if (runOptions.clean) {
     await apmEsClient.clean();
