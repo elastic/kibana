@@ -1055,11 +1055,20 @@ describe('ServiceNow service', () => {
       });
 
       test('it should throw an error when the no incidents found with given incidentId ', async () => {
-        await expect(
-          service.closeIncident({ incidentId: 'xyz', correlationId: null })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to update incident with id undefined. Error: An error has occurred while importing the incident Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
-        );
+        requestMock.mockImplementationOnce(() => ({
+          status: 404,
+          data: {
+            result: {},
+          },
+        }));
+
+        await service.closeIncident({ incidentId: 'xyz', correlationId: null });
+
+        expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "[ServiceNow][CloseIncident] No incident found with incidentId: xyz.",
+        ]
+      `);
       });
 
       test('it should log warning if found incident is closed', async () => {
@@ -1103,6 +1112,7 @@ describe('ServiceNow service', () => {
       });
 
       test('it should throw an error when instance is not alive', async () => {
+        mockIncidentResponse(false);
         requestMock.mockImplementation(() => ({
           status: 200,
           data: {},

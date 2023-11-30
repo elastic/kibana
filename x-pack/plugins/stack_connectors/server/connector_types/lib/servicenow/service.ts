@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
@@ -159,8 +159,17 @@ export const createExternalService: ServiceFactory = ({
 
       checkInstance(res);
 
+      if (res.status === 404) {
+        const error: AxiosError = new Error(`Unable to get incident with id ${id}`) as AxiosError;
+        error.response = { status: res.status } as AxiosResponse;
+        throw error;
+      }
+
       return { ...res.data.result };
     } catch (error) {
+      if (error?.response?.status) {
+        throw error;
+      }
       throw createServiceError(error, `Unable to get incident with id ${id}`);
     }
   };
@@ -283,12 +292,20 @@ export const createExternalService: ServiceFactory = ({
       if (correlationId == null && incidentId == null) {
         throw new Error('No correlationId or incidentId found.');
       } else if (incidentId) {
-        incidentToBeClosed = await getIncident(incidentId);
+        try {
+          incidentToBeClosed = await getIncident(incidentId);
+        } catch (err) {
+          if (err.response.status === 404) {
+            logger.warn(
+              `[ServiceNow][CloseIncident] No incident found with incidentId: ${incidentId}.`
+            );
+          }
+        }
       } else if (correlationId) {
         incidentToBeClosed = await getIncidentByCorrelationId(correlationId);
       }
 
-      if (incidentToBeClosed === null || incidentToBeClosed?.status === 'error') {
+      if (incidentToBeClosed === null) {
         logger.warn(
           `[ServiceNow][CloseIncident] No incident found with correlation_id: ${correlationId} or incidentId: ${incidentId}.`
         );
