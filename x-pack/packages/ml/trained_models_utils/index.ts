@@ -20,6 +20,7 @@ export {
   type ModelDefinitionResponse,
   type ElserVersion,
   type GetModelDownloadConfigOptions,
+  type ElasticCuratedModelName,
   ELSER_ID_V1,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,

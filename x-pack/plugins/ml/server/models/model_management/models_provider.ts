@@ -23,7 +23,7 @@ import {
   type ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ElasticCurateModelName } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
@@ -502,7 +502,7 @@ export class ModelsProvider {
    * @returns
    */
   async getCuratedModelConfig(
-    modelName: ElasticCurateModelName,
+    modelName: ElasticCuratedModelName,
     options?: GetModelDownloadConfigOptions
   ): Promise<ModelDefinitionResponse> | never {
     const modelDownloadConfig = (await this.getModelDownloads()).filter(
