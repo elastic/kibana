@@ -11,6 +11,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { css } from '@emotion/react';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { GuideCardSolutions } from './guide_cards';
 
 const filterButtonCss = css`
@@ -32,8 +33,14 @@ export interface GuideFiltersProps {
   activeFilter: GuideFilterValues;
   setActiveFilter: React.Dispatch<React.SetStateAction<GuideFilterValues>>;
   application: ApplicationStart;
+  trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;
 }
-export const GuideFilters = ({ activeFilter, setActiveFilter, application }: GuideFiltersProps) => {
+export const GuideFilters = ({
+  activeFilter,
+  setActiveFilter,
+  application,
+  trackUiMetric,
+}: GuideFiltersProps) => {
   const { euiTheme } = useEuiTheme();
   const activeFilterFill = css`
     background: ${euiTheme.colors.darkestShade};
@@ -49,6 +56,7 @@ export const GuideFilters = ({ activeFilter, setActiveFilter, application }: Gui
     } = e;
     setQuerystringParams({ useCase: dataset.filterId });
     setActiveFilter(dataset.filterId);
+    trackUiMetric(METRIC_TYPE.CLICK, `guided_onboarding_${dataset.filterId}`);
   };
 
   return (

@@ -203,7 +203,7 @@ export const GettingStarted = () => {
   }
 
   return (
-    <KibanaPageTemplate panelled={false} grow justifyContent="center">
+    <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center" data-test-subj="guided-onboarding--landing-page">
         <EuiTitle size="l" className="eui-textCenter">
           <h1>{title}</h1>
@@ -218,6 +218,7 @@ export const GettingStarted = () => {
           activeFilter={filter}
           setActiveFilter={setFilter}
           data-test-subj="onboarding--guideFilters"
+          trackUiMetric={trackUiMetric}
         />
         <EuiSpacer size="xxl" />
         <GuideCards
