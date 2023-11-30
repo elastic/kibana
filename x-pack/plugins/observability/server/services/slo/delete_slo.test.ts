@@ -16,13 +16,18 @@ import {
 } from '../../assets/constants';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
-import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
+import {
+  createSLORepositoryMock,
+  createSummaryTransformManagerMock,
+  createTransformManagerMock,
+} from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 describe('DeleteSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
+  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockRulesClient: jest.Mocked<RulesClientApi>;
   let deleteSLO: DeleteSLO;
@@ -30,9 +35,16 @@ describe('DeleteSLO', () => {
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
+    mockSummaryTransformManager = createSummaryTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockRulesClient = rulesClientMock.create();
-    deleteSLO = new DeleteSLO(mockRepository, mockTransformManager, mockEsClient, mockRulesClient);
+    deleteSLO = new DeleteSLO(
+      mockRepository,
+      mockTransformManager,
+      mockSummaryTransformManager,
+      mockEsClient,
+      mockRulesClient
+    );
   });
 
   describe('happy path', () => {

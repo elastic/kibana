@@ -6,7 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 
 import {
   getSLOTransformId,
@@ -15,7 +16,11 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../assets/constants';
 import { createSLO } from './fixtures/slo';
-import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
+import {
+  createSLORepositoryMock,
+  createSummaryTransformManagerMock,
+  createTransformManagerMock,
+} from './mocks';
 import { ResetSLO } from './reset_slo';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
@@ -23,14 +28,24 @@ import { TransformManager } from './transform_manager';
 describe('ResetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
+  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<MockedLogger>;
   let resetSLO: ResetSLO;
 
   beforeEach(() => {
+    loggerMock = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    resetSLO = new ResetSLO(mockEsClient, mockRepository, mockTransformManager);
+    mockSummaryTransformManager = createSummaryTransformManagerMock();
+    resetSLO = new ResetSLO(
+      mockEsClient,
+      mockRepository,
+      mockTransformManager,
+      mockSummaryTransformManager,
+      loggerMock
+    );
   });
 
   it('resets the SLO', async () => {

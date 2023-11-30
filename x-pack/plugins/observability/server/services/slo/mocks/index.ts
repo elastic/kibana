@@ -28,6 +28,16 @@ const createTransformManagerMock = (): jest.Mocked<TransformManager> => {
   };
 };
 
+const createSummaryTransformManagerMock = (): jest.Mocked<TransformManager> => {
+  return {
+    install: jest.fn(),
+    preview: jest.fn(),
+    uninstall: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+};
+
 const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
   return {
     save: jest.fn(),
@@ -59,6 +69,7 @@ const createSLIClientMock = (): jest.Mocked<SLIClient> => {
 export {
   createResourceInstallerMock,
   createTransformManagerMock,
+  createSummaryTransformManagerMock,
   createSLORepositoryMock,
   createSummaryClientMock,
   createSummarySearchClientMock,

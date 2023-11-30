@@ -7,19 +7,26 @@
 
 import { createSLO } from './fixtures/slo';
 import { ManageSLO } from './manage_slo';
-import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
+import {
+  createSLORepositoryMock,
+  createSummaryTransformManagerMock,
+  createTransformManagerMock,
+} from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 describe('ManageSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
+  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let manageSLO: ManageSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    manageSLO = new ManageSLO(mockRepository, mockTransformManager);
+    mockSummaryTransformManager = createSummaryTransformManagerMock();
+
+    manageSLO = new ManageSLO(mockRepository, mockTransformManager, mockSummaryTransformManager);
   });
 
   describe('Enable', () => {

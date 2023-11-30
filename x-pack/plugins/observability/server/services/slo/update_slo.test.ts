@@ -6,7 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import { UpdateSLOParams } from '@kbn/slo-schema';
 import { cloneDeep, pick, omit } from 'lodash';
 
@@ -22,7 +23,11 @@ import {
   createSLO,
   createSLOWithTimeslicesBudgetingMethod,
 } from './fixtures/slo';
-import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
+import {
+  createSLORepositoryMock,
+  createSummaryTransformManagerMock,
+  createTransformManagerMock,
+} from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { UpdateSLO } from './update_slo';
@@ -31,13 +36,23 @@ describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<MockedLogger>;
+  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let updateSLO: UpdateSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
+    loggerMock = loggingSystemMock.createLogger();
+    mockSummaryTransformManager = createSummaryTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    updateSLO = new UpdateSLO(mockRepository, mockTransformManager, mockEsClient);
+    updateSLO = new UpdateSLO(
+      mockRepository,
+      mockTransformManager,
+      mockSummaryTransformManager,
+      mockEsClient,
+      loggerMock
+    );
   });
 
   describe('when the update payload does not change the original SLO', () => {

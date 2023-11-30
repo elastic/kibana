@@ -5,25 +5,44 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  ElasticsearchClientMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
-import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
+import {
+  createSLORepositoryMock,
+  createSummaryTransformManagerMock,
+  createTransformManagerMock,
+} from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 describe('CreateSLO', () => {
   let esClientMock: ElasticsearchClientMock;
+  let loggerMock: jest.Mocked<MockedLogger>;
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
+  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let createSLO: CreateSLO;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    loggerMock = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    createSLO = new CreateSLO(esClientMock, mockRepository, mockTransformManager);
+    mockSummaryTransformManager = createSummaryTransformManagerMock();
+    createSLO = new CreateSLO(
+      esClientMock,
+      mockRepository,
+      mockTransformManager,
+      mockSummaryTransformManager,
+      loggerMock
+    );
   });
 
   describe('happy path', () => {

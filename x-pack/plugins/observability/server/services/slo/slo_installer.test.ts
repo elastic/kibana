@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { createResourceInstallerMock, createSummaryTransformInstallerMock } from './mocks';
+import { createResourceInstallerMock } from './mocks';
 import { DefaultSLOInstaller } from './slo_installer';
 
 describe('SLO Installer', () => {
@@ -19,16 +19,10 @@ describe('SLO Installer', () => {
 
   it.skip('handles concurrent installation', async () => {
     const resourceInstaller = createResourceInstallerMock();
-    const summaryTransformInstaller = createSummaryTransformInstallerMock();
-    const service = new DefaultSLOInstaller(
-      resourceInstaller,
-      summaryTransformInstaller,
-      loggerMock
-    );
+    const service = new DefaultSLOInstaller(resourceInstaller, loggerMock);
 
     await Promise.all([service.install(), service.install()]);
 
     expect(resourceInstaller.ensureCommonResourcesInstalled).toHaveBeenCalledTimes(1);
-    expect(summaryTransformInstaller.installAndStart).toHaveBeenCalledTimes(1);
   });
 });
