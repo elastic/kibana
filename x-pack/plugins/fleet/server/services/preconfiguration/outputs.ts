@@ -82,7 +82,7 @@ export async function createOrUpdatePreconfiguredOutputs(
         ca_sha256: outputData.ca_sha256 ?? null,
         ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
         ssl: outputData.ssl ?? null,
-      };
+      } as NewOutput;
 
       if (!data.hosts || data.hosts.length === 0) {
         data.hosts = outputService.getDefaultESHosts();

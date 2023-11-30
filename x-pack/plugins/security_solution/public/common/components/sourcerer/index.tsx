@@ -25,7 +25,7 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import type { SourcererUrlState } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
-import { FormRow, PopoverContent, StyledButton, StyledFormRow } from './helpers';
+import { FormRow, PopoverContent, StyledButtonEmpty, StyledFormRow } from './helpers';
 import { TemporarySourcerer } from './temporary';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useUpdateDataView } from './use_update_data_view';
@@ -338,14 +338,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                 )}
 
                 <EuiSpacer size="m" />
-                <StyledButton
+                <StyledButtonEmpty
                   color="text"
                   data-test-subj="sourcerer-advanced-options-toggle"
                   iconType={expandAdvancedOptions ? 'arrowDown' : 'arrowRight'}
                   onClick={onExpandAdvancedOptionsClicked}
                 >
                   {i18n.INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE}
-                </StyledButton>
+                </StyledButtonEmpty>
                 {expandAdvancedOptions && <EuiSpacer size="m" />}
                 <FormRow
                   isDisabled={loadingIndexPatterns}
