@@ -290,7 +290,7 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
 
     const isSame =
       key === 'filter'
-        ? isEqualFilters(prevValue, nextValue, FILTERS_COMPARE_OPTIONS) // if a filter gets pinned, we don't show the unsaved changes badge
+        ? isEqualFilters(prevValue, nextValue, FILTERS_COMPARE_OPTIONS) // if a filter gets pinned and the order of filters does not change, we don't show the unsaved changes badge
         : isEqual(prevValue, nextValue);
 
     if (!isSame) {
