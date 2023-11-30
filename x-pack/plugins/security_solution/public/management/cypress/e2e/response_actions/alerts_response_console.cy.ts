@@ -105,7 +105,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
       getAlertsTableRows().should('have.length.greaterThan', 0);
       openInvestigateInTimelineView();
-      cy.getByTestSubj('timeline-flyout').within(() => {
+      cy.getByTestSubj('timeline-modal-content').within(() => {
         openAlertDetailsView();
       });
       openResponderFromEndpointAlertDetails();

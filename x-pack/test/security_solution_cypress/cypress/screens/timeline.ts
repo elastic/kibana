@@ -212,7 +212,7 @@ export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 export const TIMELINE_FILTER_VALUE =
   '[data-test-subj="filterParamsComboBox phraseParamsComboxBox"]';
 
-export const TIMELINE_FLYOUT = '[data-test-subj="timeline-flyout"]';
+export const TIMELINE_FLYOUT = '[data-test-subj="timeline-modal-content"]';
 
 export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 
@@ -225,8 +225,6 @@ export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="insp
 export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
-
-export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"]';
 
 export const TIMELINE_SEARCH_OR_FILTER = '[data-test-subj="timeline-select-search-or-filter"]';
 

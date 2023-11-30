@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useEffect, useCallback } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
-
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { ControlColumnProps } from '../../../../../common/types';
@@ -46,7 +38,6 @@ import type {
 } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
-import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -62,74 +53,6 @@ import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
-const QueryTabHeaderContainer = styled.div`
-  width: 100%;
-`;
-
-QueryTabHeaderContainer.displayName = 'TimelineHeaderContainer';
-
-const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
-  align-items: stretch;
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-
-  &.euiFlyoutHeader {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
-  }
-`;
-
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  overflow-y: hidden;
-  flex: 1;
-
-  .euiFlyoutBody__overflow {
-    overflow: hidden;
-    mask-image: none;
-  }
-
-  .euiFlyoutBody__overflowContent {
-    padding: 0;
-    height: 100%;
-    display: flex;
-  }
-`;
-
-const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
-  background: none;
-  &.euiFlyoutFooter {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0;`}
-  }
-`;
-
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
-  margin: 0;
-  width: 100%;
-  overflow: hidden;
-`;
-
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  overflow: hidden;
-`;
-
-const SourcererFlex = styled(EuiFlexItem)`
-  align-items: flex-end;
-`;
-
-SourcererFlex.displayName = 'SourcererFlex';
-
-const VerticalRule = styled.div`
-  width: 2px;
-  height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
-`;
-
-VerticalRule.displayName = 'VerticalRule';
-
-const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
 
 const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
   prevProps.end === nextProps.end &&
@@ -178,6 +101,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   sort,
   timerangeKind,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
@@ -332,7 +256,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
-        {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        {showEventsCountBadge ? (
+          <EuiBadge
+            css={css`
+              margin-left: ${euiTheme.size.s};
+            `}
+          >
+            {totalCount}
+          </EuiBadge>
+        ) : null}
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
@@ -342,25 +274,40 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
-      <FullWidthFlexGroup gutterSize="none">
-        <ScrollableFlexItem grow={2}>
-          <StyledEuiFlyoutHeader
-            data-test-subj={`${activeTab}-tab-flyout-header`}
-            hasBorder={false}
+      <EuiFlexGroup
+        gutterSize="none"
+        css={css`
+          width: 100%;
+        `}
+      >
+        <EuiFlexItem
+          grow={2}
+          css={css`
+            overflow: hidden;
+          `}
+        >
+          <EuiFlexGroup
+            direction="column"
+            justifyContent="spaceBetween"
+            gutterSize="none"
+            css={css`
+              padding: ${euiTheme.size.m};
+            `}
           >
-            <EuiFlexGroup gutterSize="s" direction="column">
-              {timelineFullScreen && setTimelineFullScreen != null && (
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <ExitFullScreen
-                      fullScreen={timelineFullScreen}
-                      setFullScreen={setTimelineFullScreen}
-                    />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem data-test-subj="timeline-date-picker-container">
-                <QueryTabHeaderContainer data-test-subj="timelineHeader">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                {timelineFullScreen && setTimelineFullScreen != null && (
+                  <EuiFlexItem>
+                    <EuiFlexGroup>
+                      <ExitFullScreen
+                        fullScreen={timelineFullScreen}
+                        setFullScreen={setTimelineFullScreen}
+                      />
+                    </EuiFlexGroup>
+                    <EuiSpacer size="s" />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem data-test-subj={`${TimelineTabs.query}-tab-header`} grow={false}>
                   <QueryTabHeader
                     filterManager={filterManager}
                     show={show && activeTab === TimelineTabs.query}
@@ -368,43 +315,30 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                     status={status}
                     timelineId={timelineId}
                   />
-                </QueryTabHeaderContainer>
-              </EuiFlexItem>
-              {/* TODO: This is a temporary solution to hide the KPIs until lens components play nicely with timelines */}
-              {/* https://github.com/elastic/kibana/issues/17156 */}
-              {/* <EuiFlexItem grow={false}> */}
-              {/*   <TimelineKpi timelineId={timelineId} /> */}
-              {/* </EuiFlexItem> */}
-            </EuiFlexGroup>
-          </StyledEuiFlyoutHeader>
-          <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody
-              data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
-              className="timeline-flyout-body"
-            >
-              <StatefulBody
-                activePage={pageInfo.activePage}
-                browserFields={browserFields}
-                data={isBlankTimeline ? EMPTY_EVENTS : events}
-                id={timelineId}
-                refetch={refetch}
-                renderCellValue={renderCellValue}
-                rowRenderers={rowRenderers}
-                sort={sort}
-                tabType={TimelineTabs.query}
-                totalPages={calculateTotalPages({
-                  itemsCount: totalCount,
-                  itemsPerPage,
-                })}
-                leadingControlColumns={leadingControlColumns}
-                trailingControlColumns={trailingControlColumns}
-              />
-            </StyledEuiFlyoutBody>
+                </EuiFlexItem>
+                <EuiFlexItem data-test-subj={`${TimelineTabs.query}-tab-body`}>
+                  <StatefulBody
+                    activePage={pageInfo.activePage}
+                    browserFields={browserFields}
+                    data={isBlankTimeline ? EMPTY_EVENTS : events}
+                    id={timelineId}
+                    refetch={refetch}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
+                    sort={sort}
+                    tabType={TimelineTabs.query}
+                    totalPages={calculateTotalPages({
+                      itemsCount: totalCount,
+                      itemsPerPage,
+                    })}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={trailingControlColumns}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
 
-            <StyledEuiFlyoutFooter
-              data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
-              className="timeline-flyout-footer"
-            >
+            <EuiFlexItem grow={false} data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}>
               {!isBlankTimeline && (
                 <Footer
                   activePage={pageInfo?.activePage ?? 0}
@@ -421,24 +355,37 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   totalCount={isBlankTimeline ? 0 : totalCount}
                 />
               )}
-            </StyledEuiFlyoutFooter>
-          </EventDetailsWidthProvider>
-        </ScrollableFlexItem>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
         {showExpandedDetails && (
-          <>
-            <VerticalRule />
-            <ScrollableFlexItem grow={1}>
-              <DetailsPanel
-                browserFields={browserFields}
-                handleOnPanelClosed={handleOnPanelClosed}
-                runtimeMappings={runtimeMappings}
-                tabType={TimelineTabs.query}
-                scopeId={timelineId}
+          <EuiFlexItem grow={1}>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  width: 2px;
+                  background-color: ${euiTheme.colors.lightShade};
+                `}
               />
-            </ScrollableFlexItem>
-          </>
+              <EuiFlexItem
+                css={css`
+                  padding: ${euiTheme.size.m};
+                `}
+              >
+                <DetailsPanel
+                  browserFields={browserFields}
+                  handleOnPanelClosed={handleOnPanelClosed}
+                  runtimeMappings={runtimeMappings}
+                  tabType={TimelineTabs.query}
+                  scopeId={timelineId}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         )}
-      </FullWidthFlexGroup>
+      </EuiFlexGroup>
     </>
   );
 };

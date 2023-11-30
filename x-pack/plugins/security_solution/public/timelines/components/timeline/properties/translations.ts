@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TIMELINE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.timeline.properties.timelineDescription',
-  {
-    defaultMessage: 'Timeline Description',
-  }
-);
-
 export const ADD_TO_FAVORITES = i18n.translate(
   'xpack.securitySolution.timeline.properties.addToFavoriteButtonLabel',
   {

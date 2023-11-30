@@ -6,10 +6,15 @@
  */
 
 import { pick } from 'lodash/fp';
-import { EuiProgress } from '@elastic/eui';
+import {
+  EuiProgress,
+  euiPaletteColorBlindBehindText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -18,7 +23,7 @@ import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { FlyoutHeaderPanel } from '../flyout/header';
+import { TimelineModalHeader } from '../modal/header';
 import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -26,19 +31,11 @@ import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
-import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { TimelineTour } from './tour';
-
-const TimelineTemplateBadge = styled.div`
-  background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
-  color: #fff;
-  padding: 10px 15px;
-  font-size: 0.8em;
-`;
 
 export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
 export interface Props {
@@ -197,39 +194,63 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   return (
     <TimelineContext.Provider value={timelineContext}>
-      <TimelineContainer
+      <div
         data-test-subj="timeline"
         data-timeline-id={timelineId}
         onKeyDown={onKeyDown}
         ref={containerElement}
+        css={css`
+          height: 100%;
+        `}
       >
         <TimelineSavingProgress timelineId={timelineId} />
-        <div className="timeline-body" data-test-subj="timeline-body">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={css`
+            height: 100%;
+          `}
+          data-test-subj="timeline-body"
+        >
           {timelineType === TimelineType.template && (
-            <TimelineTemplateBadge className="timeline-template-badge">
-              {i18n.TIMELINE_TEMPLATE}
-            </TimelineTemplateBadge>
+            <EuiFlexItem grow={false}>
+              <div
+                className="timeline-template-badge"
+                css={css`
+                  background: ${euiPaletteColorBlindBehindText()[3]};
+                  color: #fff;
+                  padding: 10px 15px;
+                  font-size: 0.8em;
+                `}
+              >
+                {i18n.TIMELINE_TEMPLATE}
+              </div>
+            </EuiFlexItem>
           )}
           {resolveConflictComponent}
-          <HideShowContainer
-            $isVisible={!timelineFullScreen}
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              ${timelineFullScreen && `display: none;`}
+            `}
             data-test-subj="timeline-hide-show-container"
           >
-            <FlyoutHeaderPanel timelineId={timelineId} />
-          </HideShowContainer>
-
-          <TabsContent
-            graphEventId={graphEventId}
-            sessionViewConfig={sessionViewConfig}
-            renderCellValue={renderCellValue}
-            rowRenderers={rowRenderers}
-            timelineId={timelineId}
-            timelineType={timelineType}
-            timelineDescription={description}
-            timelineFullScreen={timelineFullScreen}
-          />
-        </div>
-      </TimelineContainer>
+            <TimelineModalHeader timelineId={timelineId} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TabsContent
+              graphEventId={graphEventId}
+              sessionViewConfig={sessionViewConfig}
+              renderCellValue={renderCellValue}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+              timelineType={timelineType}
+              timelineDescription={description}
+              timelineFullScreen={timelineFullScreen}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
       {showTimelineTour ? <TimelineTour /> : null}
     </TimelineContext.Provider>
   );

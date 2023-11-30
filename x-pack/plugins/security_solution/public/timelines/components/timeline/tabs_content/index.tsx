@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab, EuiBetaBadge } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiSkeletonText,
+  EuiTabs,
+  EuiTab,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Assistant } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
@@ -50,13 +58,12 @@ import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
     style: {
-      display: $isVisible ? 'flex' : 'none',
+      display: $isVisible ? 'inherit' : 'none',
       overflow: isOverflowYScroll ? 'hidden scroll' : 'hidden',
+      height: '100%',
     },
   })
-)<{ $isVisible: boolean; isOverflowYScroll?: boolean }>`
-  flex: 1;
-`;
+)<{ $isVisible: boolean; isOverflowYScroll?: boolean }>``;
 
 /**
  * A HOC which supplies React.Suspense with a fallback component
@@ -391,126 +398,130 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [activeTab, graphEventId, setQueryAsActiveTab]);
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="none">
       {!timelineFullScreen && (
-        <StyledEuiTabs className="eui-scrollBar">
-          <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.query}`}
-            onClick={setQueryAsActiveTab}
-            isSelected={activeTab === TimelineTabs.query}
-            disabled={false}
-            key={TimelineTabs.query}
-          >
-            <span>{i18n.QUERY_TAB}</span>
-            {showTimeline && <TimelineEventsCountBadge />}
-          </StyledEuiTab>
-          {isEsqlSettingEnabled && (
+        <EuiFlexItem grow={false}>
+          <StyledEuiTabs className="eui-scrollBar">
             <StyledEuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
-              onClick={setEsqlAsActiveTab}
-              isSelected={activeTab === TimelineTabs.esql}
+              data-test-subj={`timelineTabs-${TimelineTabs.query}`}
+              onClick={setQueryAsActiveTab}
+              isSelected={activeTab === TimelineTabs.query}
               disabled={false}
-              key={TimelineTabs.esql}
+              key={TimelineTabs.query}
             >
-              <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
-              <StyledEuiBetaBadge
-                label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
-                size="s"
-                iconType="beaker"
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
-                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-                  />
-                }
-              />
+              <span>{i18n.QUERY_TAB}</span>
+              {showTimeline && <TimelineEventsCountBadge />}
             </StyledEuiTab>
-          )}
-          {timelineType === TimelineType.default && (
-            <StyledEuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
-              onClick={setEqlAsActiveTab}
-              isSelected={activeTab === TimelineTabs.eql}
-              disabled={false}
-              key={TimelineTabs.eql}
-            >
-              <span>{i18n.EQL_TAB}</span>
-              {showTimeline && <EqlEventsCountBadge />}
-            </StyledEuiTab>
-          )}
-          <EuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
-            onClick={setGraphAsActiveTab}
-            isSelected={activeTab === TimelineTabs.graph}
-            disabled={!graphEventId}
-            key={TimelineTabs.graph}
-          >
-            {i18n.ANALYZER_TAB}
-          </EuiTab>
-          {isEnterprisePlus && (
+            {isEsqlSettingEnabled && (
+              <StyledEuiTab
+                data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
+                onClick={setEsqlAsActiveTab}
+                isSelected={activeTab === TimelineTabs.esql}
+                disabled={false}
+                key={TimelineTabs.esql}
+              >
+                <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
+                <StyledEuiBetaBadge
+                  label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
+                  size="s"
+                  iconType="beaker"
+                  tooltipContent={
+                    <FormattedMessage
+                      id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
+                      defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                    />
+                  }
+                />
+              </StyledEuiTab>
+            )}
+            {timelineType === TimelineType.default && (
+              <StyledEuiTab
+                data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
+                onClick={setEqlAsActiveTab}
+                isSelected={activeTab === TimelineTabs.eql}
+                disabled={false}
+                key={TimelineTabs.eql}
+              >
+                <span>{i18n.EQL_TAB}</span>
+                {showTimeline && <EqlEventsCountBadge />}
+              </StyledEuiTab>
+            )}
             <EuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.session}`}
-              onClick={setSessionAsActiveTab}
-              isSelected={activeTab === TimelineTabs.session}
-              disabled={sessionViewConfig === null}
-              key={TimelineTabs.session}
+              data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
+              onClick={setGraphAsActiveTab}
+              isSelected={activeTab === TimelineTabs.graph}
+              disabled={!graphEventId}
+              key={TimelineTabs.graph}
             >
-              {i18n.SESSION_TAB}
+              {i18n.ANALYZER_TAB}
             </EuiTab>
-          )}
-          <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
-            onClick={setNotesAsActiveTab}
-            isSelected={activeTab === TimelineTabs.notes}
-            disabled={timelineType === TimelineType.template}
-            key={TimelineTabs.notes}
-          >
-            <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && timelineType === TimelineType.default && (
-              <div>
-                <CountBadge>{numberOfNotes}</CountBadge>
-              </div>
+            {isEnterprisePlus && (
+              <EuiTab
+                data-test-subj={`timelineTabs-${TimelineTabs.session}`}
+                onClick={setSessionAsActiveTab}
+                isSelected={activeTab === TimelineTabs.session}
+                disabled={sessionViewConfig === null}
+                key={TimelineTabs.session}
+              >
+                {i18n.SESSION_TAB}
+              </EuiTab>
             )}
-          </StyledEuiTab>
-          <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
-            onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineType.template}
-            isSelected={activeTab === TimelineTabs.pinned}
-            key={TimelineTabs.pinned}
-          >
-            <span>{i18n.PINNED_TAB}</span>
-            {showTimeline && numberOfPinnedEvents > 0 && timelineType === TimelineType.default && (
-              <div>
-                <CountBadge>{numberOfPinnedEvents}</CountBadge>
-              </div>
-            )}
-          </StyledEuiTab>
-          {hasAssistantPrivilege && (
             <StyledEuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
-              onClick={setSecurityAssistantAsActiveTab}
+              data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
+              onClick={setNotesAsActiveTab}
+              isSelected={activeTab === TimelineTabs.notes}
               disabled={timelineType === TimelineType.template}
-              isSelected={activeTab === TimelineTabs.securityAssistant}
-              key={TimelineTabs.securityAssistant}
+              key={TimelineTabs.notes}
             >
-              <span>{i18n.SECURITY_ASSISTANT}</span>
+              <span>{i18n.NOTES_TAB}</span>
+              {showTimeline && numberOfNotes > 0 && timelineType === TimelineType.default && (
+                <div>
+                  <CountBadge>{numberOfNotes}</CountBadge>
+                </div>
+              )}
             </StyledEuiTab>
-          )}
-        </StyledEuiTabs>
+            <StyledEuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
+              onClick={setPinnedAsActiveTab}
+              disabled={timelineType === TimelineType.template}
+              isSelected={activeTab === TimelineTabs.pinned}
+              key={TimelineTabs.pinned}
+            >
+              <span>{i18n.PINNED_TAB}</span>
+              {showTimeline && numberOfPinnedEvents > 0 && timelineType === TimelineType.default && (
+                <div>
+                  <CountBadge>{numberOfPinnedEvents}</CountBadge>
+                </div>
+              )}
+            </StyledEuiTab>
+            {hasAssistantPrivilege && (
+              <StyledEuiTab
+                data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
+                onClick={setSecurityAssistantAsActiveTab}
+                disabled={timelineType === TimelineType.template}
+                isSelected={activeTab === TimelineTabs.securityAssistant}
+                key={TimelineTabs.securityAssistant}
+              >
+                <span>{i18n.SECURITY_ASSISTANT}</span>
+              </StyledEuiTab>
+            )}
+          </StyledEuiTabs>
+        </EuiFlexItem>
       )}
 
-      <ActiveTimelineTab
-        activeTimelineTab={activeTab}
-        renderCellValue={renderCellValue}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        timelineType={timelineType}
-        timelineDescription={timelineDescription}
-        setConversationId={setConversationId}
-        showTimeline={showTimeline}
-      />
-    </>
+      <EuiFlexItem>
+        <ActiveTimelineTab
+          activeTimelineTab={activeTab}
+          renderCellValue={renderCellValue}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+          timelineType={timelineType}
+          timelineDescription={timelineDescription}
+          setConversationId={setConversationId}
+          showTimeline={showTimeline}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

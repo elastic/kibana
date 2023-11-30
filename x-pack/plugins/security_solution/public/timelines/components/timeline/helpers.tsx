@@ -174,7 +174,7 @@ export const onTimelineTabKeyPressed = ({
 };
 
 export const ACTIVE_TIMELINE_BUTTON_CLASS_NAME = 'active-timeline-button';
-export const FLYOUT_BUTTON_BAR_CLASS_NAME = 'timeline-flyout-button-bar';
+export const TIMELINE_BOTTOM_BAR_CLASS_NAME = 'timeline-bottom-bar';
 
 /**
  * This function focuses the active timeline button on the next tick. Focus
@@ -186,7 +186,7 @@ export const focusActiveTimelineButton = () => {
   setTimeout(() => {
     document
       .querySelector<HTMLButtonElement>(
-        `div.${FLYOUT_BUTTON_BAR_CLASS_NAME} .${ACTIVE_TIMELINE_BUTTON_CLASS_NAME}`
+        `div.${TIMELINE_BOTTOM_BAR_CLASS_NAME} .${ACTIVE_TIMELINE_BUTTON_CLASS_NAME}`
       )
       ?.focus();
   }, 0);

@@ -27,7 +27,6 @@ import type { Props as StatefulTimelineOwnProps } from '.';
 import { StatefulTimeline } from '.';
 import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore } from '../../../common/store';
@@ -125,7 +124,7 @@ describe('StatefulTimeline', () => {
     expect(wrapper.find('[data-test-subj="timeline"]')).toBeTruthy();
   });
 
-  test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
+  test('it add attribute data-timeline-id', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
@@ -133,12 +132,7 @@ describe('StatefulTimeline', () => {
         </DragDropContextWrapper>
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
-        .first()
-        .exists()
-    ).toEqual(true);
+    expect(wrapper.find(`[data-timeline-id="timeline-test"]`).first().exists()).toEqual(true);
   });
 
   test('on create timeline and timeline savedObjectId: null, sourcerer does not update timeline', () => {

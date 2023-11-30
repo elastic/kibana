@@ -45,7 +45,6 @@ import {
   TIMELINE_FILTER_OPERATOR,
   TIMELINE_FILTER_VALUE,
   TIMELINE_INSPECT_BUTTON,
-  TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE_INPUT,
   TIMELINE_TITLE_BY_ID,
   TIMESTAMP_TOGGLE_FIELD,
@@ -325,10 +324,6 @@ export const createNewTimeline = () => {
 
 export const openCreateTimelineOptionsPopover = () => {
   cy.get(NEW_TIMELINE_ACTION).filter(':visible').should('be.visible').click();
-};
-
-export const closeCreateTimelineOptionsPopover = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').type('{esc}');
 };
 
 export const createNewTimelineTemplate = () => {
