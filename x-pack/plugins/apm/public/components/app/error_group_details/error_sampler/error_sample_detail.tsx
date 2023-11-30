@@ -104,7 +104,8 @@ export function ErrorSampleDetails({
     query,
   } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
-    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
+    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
 
   const { kuery } = query;
