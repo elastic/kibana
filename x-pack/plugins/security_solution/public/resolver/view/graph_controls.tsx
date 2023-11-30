@@ -59,8 +59,14 @@ const StyledGraphControlsColumn = styled.div`
   }
 `;
 
+const COLUMN_WIDTH = ['fit-content(10em)', 'auto'];
+
 const StyledEuiDescriptionListTitle = styled(EuiDescriptionListTitle)`
   text-transform: uppercase;
+`;
+
+const StyledEuiDescriptionListDescription = styled(EuiDescriptionListDescription)`
+  lineheight: '2.2em'; // lineHeight to align center vertically
 `;
 
 const StyledEuiButtonIcon = styled(EuiButtonIcon)<StyledGraphControlProps>`
@@ -380,7 +386,7 @@ const SchemaInformation = ({
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:schema-info"
           type="column"
-          columnWidths={['fit-content(10em)', 'auto']}
+          columnWidths={COLUMN_WIDTH}
           align="left"
           compressed
         >
@@ -470,7 +476,7 @@ const NodeLegend = ({
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:node-legend"
           type="column"
-          columnWidths={['fit-content(10em)', 'auto']}
+          columnWidths={COLUMN_WIDTH}
           align="left"
           compressed
         >
@@ -483,10 +489,7 @@ const NodeLegend = ({
                 state="running"
               />
             </StyledEuiDescriptionListTitle>
-            <EuiDescriptionListDescription
-              data-test-subj="resolver:graph-controls:node-legend:description"
-              style={{ lineHeight: '2.2em' }} // lineHeight to align center vertically
-            >
+            <StyledEuiDescriptionListDescription data-test-subj="resolver:graph-controls:node-legend:description">
               <GeneratedText>
                 {i18n.translate(
                   'xpack.securitySolution.resolver.graphControls.runningProcessCube',
@@ -495,7 +498,7 @@ const NodeLegend = ({
                   }
                 )}
               </GeneratedText>
-            </EuiDescriptionListDescription>
+            </StyledEuiDescriptionListDescription>
             <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:node-legend:title">
               <CubeForProcess
                 id={id}
@@ -504,10 +507,7 @@ const NodeLegend = ({
                 state="terminated"
               />
             </StyledEuiDescriptionListTitle>
-            <EuiDescriptionListDescription
-              data-test-subj="resolver:graph-controls:node-legend:description"
-              style={{ lineHeight: '2.2em' }}
-            >
+            <StyledEuiDescriptionListDescription data-test-subj="resolver:graph-controls:node-legend:description">
               <GeneratedText>
                 {i18n.translate(
                   'xpack.securitySolution.resolver.graphControls.terminatedProcessCube',
@@ -516,7 +516,7 @@ const NodeLegend = ({
                   }
                 )}
               </GeneratedText>
-            </EuiDescriptionListDescription>
+            </StyledEuiDescriptionListDescription>
             <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:node-legend:title">
               <CubeForProcess
                 id={id}
@@ -525,10 +525,7 @@ const NodeLegend = ({
                 state="loading"
               />
             </StyledEuiDescriptionListTitle>
-            <EuiDescriptionListDescription
-              data-test-subj="resolver:graph-controls:node-legend:description"
-              style={{ lineHeight: '2.2em' }}
-            >
+            <StyledEuiDescriptionListDescription data-test-subj="resolver:graph-controls:node-legend:description">
               <GeneratedText>
                 {i18n.translate(
                   'xpack.securitySolution.resolver.graphControls.currentlyLoadingCube',
@@ -537,7 +534,7 @@ const NodeLegend = ({
                   }
                 )}
               </GeneratedText>
-            </EuiDescriptionListDescription>
+            </StyledEuiDescriptionListDescription>
             <StyledEuiDescriptionListTitle data-test-subj="resolver:graph-controls:node-legend:title">
               <CubeForProcess
                 id={id}
@@ -546,16 +543,13 @@ const NodeLegend = ({
                 state="error"
               />
             </StyledEuiDescriptionListTitle>
-            <EuiDescriptionListDescription
-              data-test-subj="resolver:graph-controls:node-legend:description"
-              style={{ lineHeight: '2.2em' }}
-            >
+            <StyledEuiDescriptionListDescription data-test-subj="resolver:graph-controls:node-legend:description">
               <GeneratedText>
                 {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
                   defaultMessage: 'Error Process',
                 })}
               </GeneratedText>
-            </EuiDescriptionListDescription>
+            </StyledEuiDescriptionListDescription>
           </>
         </StyledDescriptionList>
       </div>
