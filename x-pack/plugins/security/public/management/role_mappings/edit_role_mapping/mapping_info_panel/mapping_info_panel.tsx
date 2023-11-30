@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { RoleMapping } from '../../../../../common/model';
+import type { RoleMapping } from '../../../../../common';
 import type { RolesAPIClient } from '../../../roles';
 import { RoleSelector } from '../role_selector';
 import {

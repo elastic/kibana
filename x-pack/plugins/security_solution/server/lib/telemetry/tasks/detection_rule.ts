@@ -11,7 +11,13 @@ import {
   TELEMETRY_CHANNEL_LISTS,
   TASK_METRICS_CHANNEL,
 } from '../constants';
-import { batchTelemetryRecords, templateExceptionList, tlog, createTaskMetric } from '../helpers';
+import {
+  batchTelemetryRecords,
+  templateExceptionList,
+  tlog,
+  createTaskMetric,
+  createUsageCounterLabel,
+} from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
@@ -31,8 +37,18 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const usageCollector = sender.getTelemetryUsageCluster();
+
+      const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
+
       const startTime = Date.now();
       const taskName = 'Security Solution Detection Rule Lists Telemetry';
+
+      tlog(
+        logger,
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
@@ -98,6 +114,13 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           LIST_DETECTION_RULE_EXCEPTION
         );
         tlog(logger, `Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
+
+        usageCollector?.incrementCounter({
+          counterName: createUsageCounterLabel(usageLabelPrefix),
+          counterType: 'detection_rule_count',
+          incrementBy: detectionRuleExceptionsJson.length,
+        });
+
         const batches = batchTelemetryRecords(detectionRuleExceptionsJson, maxTelemetryBatch);
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
@@ -105,7 +128,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return detectionRuleExceptions.length;
+        return detectionRuleExceptionsJson.length;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),

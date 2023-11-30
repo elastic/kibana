@@ -1388,6 +1388,56 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.sanitizeBulkErrorResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "sanitizeBulkErrorResponse",
+        "description": [],
+        "signature": [
+          "(response: ",
+          "BulkResponse",
+          " | ",
+          "TransportResult",
+          "<",
+          "BulkResponse",
+          ", unknown>) => ",
+          "BulkResponse",
+          " | ",
+          "TransportResult",
+          "<",
+          "BulkResponse",
+          ", unknown>"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_client/lib/sanitize_bulk_response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.sanitizeBulkErrorResponse.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "BulkResponse",
+              " | ",
+              "TransportResult",
+              "<",
+              "BulkResponse",
+              ", unknown>"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_client/lib/sanitize_bulk_response.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -5005,9 +5055,9 @@
           },
           "; getAuditLogger: () => ",
           {
-            "pluginId": "security",
+            "pluginId": "@kbn/security-plugin-types-server",
             "scope": "server",
-            "docId": "kibSecurityPluginApi",
+            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
             "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
