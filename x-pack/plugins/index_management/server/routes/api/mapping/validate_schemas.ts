@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { registerMappingRoute } from './register_mapping_route';
-export { registerUpdateMappingRoute } from './register_update_route';
+import { schema } from '@kbn/config-schema';
+
+export const templateSchema = schema.object({}, { unknowns: 'allow' });

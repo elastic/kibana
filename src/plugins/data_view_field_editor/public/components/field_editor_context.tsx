@@ -27,6 +27,7 @@ export interface Context {
   };
   services: {
     search: DataPublicPluginStart['search'];
+    http: CoreStart['http'];
     api: ApiService;
     notifications: NotificationsStart;
   };
