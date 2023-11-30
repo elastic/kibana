@@ -9,9 +9,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Cases', function () {
-    // loadTestFile(require.resolve('./list_view'));
-    // loadTestFile(require.resolve('./configure'));
+    loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./configure'));
     loadTestFile(require.resolve('./attachment_framework'));
-    // loadTestFile(require.resolve('./upgrade'));
+    loadTestFile(require.resolve('./upgrade'));
   });
 };
