@@ -27,6 +27,7 @@ const DEFAULT_VALUES = {
       modelId: 'model_2',
     },
   ],
+  indexName: 'my-index',
 };
 const MOCK_ACTIONS = {
   setInferencePipelineConfiguration: jest.fn(),
@@ -94,6 +95,41 @@ describe('ModelSelect', () => {
         inferenceConfig: undefined,
         modelID: 'model_2',
         fieldMappings: undefined,
+      })
+    );
+  });
+  it('generates pipeline name on selecting an item', () => {
+    setMockValues(DEFAULT_VALUES);
+
+    const wrapper = shallow(<ModelSelect />);
+    expect(wrapper.find(EuiSelectable)).toHaveLength(1);
+    const selectable = wrapper.find(EuiSelectable);
+    selectable.simulate('change', [{ modelId: 'model_1' }, { modelId: 'model_2', checked: 'on' }]);
+    expect(MOCK_ACTIONS.setInferencePipelineConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pipelineName: 'my-index-model_2',
+      })
+    );
+  });
+  it('does not generate pipeline name on selecting an item if it a name was supplied by the user', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      addInferencePipelineModal: {
+        configuration: {
+          ...DEFAULT_VALUES.addInferencePipelineModal.configuration,
+          pipelineName: 'user-pipeline',
+          isPipelineNameUserSupplied: true,
+        },
+      },
+    });
+
+    const wrapper = shallow(<ModelSelect />);
+    expect(wrapper.find(EuiSelectable)).toHaveLength(1);
+    const selectable = wrapper.find(EuiSelectable);
+    selectable.simulate('change', [{ modelId: 'model_1' }, { modelId: 'model_2', checked: 'on' }]);
+    expect(MOCK_ACTIONS.setInferencePipelineConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pipelineName: 'user-pipeline',
       })
     );
   });
