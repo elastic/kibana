@@ -126,7 +126,7 @@ export interface ITelemetryReceiver {
     TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
   >;
 
-  fetchDiagnosticAlerts(
+  fetchDiagnosticAlertsBatch(
     executeFrom: string,
     executeTo: string
   ): AsyncGenerator<TelemetryEvent[], void, unknown>;
@@ -413,7 +413,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.esClient.search(query, { meta: true });
   }
 
-  public async *fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
+  public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
     }

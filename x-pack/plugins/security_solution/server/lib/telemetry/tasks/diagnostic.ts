@@ -38,7 +38,7 @@ export function createTelemetryDiagnosticsTaskConfig() {
 
         let alertCount = 0;
 
-        for await (const alerts of receiver.fetchDiagnosticAlerts(
+        for await (const alerts of receiver.fetchDiagnosticAlertsBatch(
           taskExecutionPeriod.last,
           taskExecutionPeriod.current
         )) {
