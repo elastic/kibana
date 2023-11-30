@@ -30,6 +30,7 @@ import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { FindingsGroupingAggregation } from './use_grouped_findings';
 import { GROUPING_OPTIONS, NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
+import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
 
 /**
  * Return first non-null value. If the field contains an array, this will return the first value that isn't null. If the field isn't an array it'll be returned unless it's null.
@@ -252,6 +253,7 @@ const FindingsCountComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
           margin-left: ${euiTheme.size.s}};
         `}
         color="hollow"
+        data-test-subj={FINDINGS_GROUPING_COUNTER}
       >
         {getAbbreviatedNumber(bucket.doc_count)}
       </EuiBadge>

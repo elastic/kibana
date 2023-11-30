@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { calculatePostureScore } from '../../common/utils/helpers';
 import { statusColors } from '../common/constants';
+import { CSP_FINDINGS_COMPLIANCE_SCORE } from './test_subjects';
 
 /**
  * This component will take 100% of the width set by the parent
@@ -85,6 +86,7 @@ export const ComplianceScoreBar = ({
         >
           <EuiText
             size="xs"
+            data-test-subj={CSP_FINDINGS_COMPLIANCE_SCORE}
             css={css`
               font-weight: ${euiTheme.font.weight.bold};
             `}
