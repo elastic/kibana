@@ -58,12 +58,6 @@ export const PipelineSelect: React.FC = () => {
   };
 
   return (
-    // TODO: Is there a way to make EuiSelectable's border shrink when less than 4 options are available?
-    // TODO: Fix selection highlighting when using keyboard to select
-    // TODO: Can't interface with non-scrolling EuiSelectable with keyboard?
-    // TODO: The virtualized list acts strangely when a pipeline is selected. How to fix?
-    //       Example: If you select an existing pipeline, then attempt to scroll to a pipeline not previously visible
-    //                and select it, you cannot select it
     <EuiSelectable
       options={getPipelineOptions(existingInferencePipelines)}
       listProps={{
