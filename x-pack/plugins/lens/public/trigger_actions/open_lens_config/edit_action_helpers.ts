@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import './inline_flyout.scss';
+import './helpers.scss';
 import { IEmbeddable, tracksOverlays } from '@kbn/embeddable-plugin/public';
 import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
