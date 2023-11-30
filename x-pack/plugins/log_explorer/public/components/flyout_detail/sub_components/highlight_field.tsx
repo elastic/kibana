@@ -112,6 +112,7 @@ export function HighlightField({
               <EuiTextTruncate text={formattedValue} truncation="end" width={width}>
                 {(truncatedText: string) => (
                   <EuiText
+                    size="s"
                     // Value returned from formatFieldValue is always sanitized
                     dangerouslySetInnerHTML={{ __html: truncatedText }}
                   />
