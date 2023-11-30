@@ -53,7 +53,7 @@ describe('resourceInstaller', () => {
       expect.objectContaining({ name: SLO_SUMMARY_INDEX_TEMPLATE_NAME })
     );
 
-    expect(mockClusterClient.ingest.putPipeline).toHaveBeenCalledTimes(2);
+    expect(mockClusterClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
     expect(mockClusterClient.ingest.putPipeline).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ id: SLO_INGEST_PIPELINE_NAME })
