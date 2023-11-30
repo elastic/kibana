@@ -11,13 +11,13 @@ import { refreshAlertPageFilter, selectFirstPageAlerts } from '../../../../tasks
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
-import { loadPageAs } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   alertsTableShowsAssigneesForAlert,
   updateAssigneesForAlert,
   bulkRemoveAllAssignees,
+  loadPageAs,
 } from '../../../../tasks/alert_assignments';
 
 describe(

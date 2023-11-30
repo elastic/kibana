@@ -18,7 +18,6 @@ import {
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
-import { loadPageAs } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
@@ -39,6 +38,7 @@ import {
   updateAssigneesViaAddButtonInFlyout,
   updateAssigneesViaTakeActionButtonInFlyout,
   removeAllAssigneesViaTakeActionButtonInFlyout,
+  loadPageAs,
 } from '../../../../tasks/alert_assignments';
 import { ALERTS_COUNT } from '../../../../screens/alerts';
 

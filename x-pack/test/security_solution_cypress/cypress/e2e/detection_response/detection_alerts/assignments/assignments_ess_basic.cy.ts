@@ -10,12 +10,12 @@ import { getNewRule } from '../../../../objects/rule';
 import { expandFirstAlert } from '../../../../tasks/alerts';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { loadPageAs } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   asigneesMenuItemsAreNotAvailable,
   cannotAddAssigneesViaDetailsFlyout,
+  loadPageAs,
 } from '../../../../tasks/alert_assignments';
 
 describe('Alert user assignment - Basic License', { tags: ['@ess'] }, () => {

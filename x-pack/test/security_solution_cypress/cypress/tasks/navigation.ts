@@ -8,27 +8,17 @@
 import { encode } from '@kbn/rison';
 
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
-import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import { PAGE_TITLE } from '../screens/common/page';
 import { GET_STARTED_URL, hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
-import { constructUrlWithUser, getUrlWithRoute, login, User } from './login';
 
 export const visit = (
   url: string,
   options?: {
     visitOptions?: Partial<Cypress.VisitOptions>;
-    role?: SecurityRoleName;
   }
 ) => {
-  cy.visit(options?.role ? getUrlWithRoute(options.role, url) : url, {
+  cy.visit(url, {
     onBeforeLoad: disableNewFeaturesTours,
     ...options?.visitOptions,
-  });
-};
-
-export const visitWithUser = (url: string, user: User) => {
-  cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad: disableNewFeaturesTours,
   });
 };
 
@@ -36,7 +26,6 @@ export const visitWithTimeRange = (
   url: string,
   options?: {
     visitOptions?: Partial<Cypress.VisitOptions>;
-    role?: SecurityRoleName;
   }
 ) => {
   const timerangeConfig = {
@@ -58,7 +47,7 @@ export const visitWithTimeRange = (
     },
   });
 
-  cy.visit(options?.role ? getUrlWithRoute(options.role, url) : url, {
+  cy.visit(url, {
     ...options,
     qs: {
       ...options?.visitOptions?.qs,
@@ -75,9 +64,9 @@ export const visitWithTimeRange = (
   });
 };
 
-export const visitTimeline = (timelineId: string, role?: SecurityRoleName) => {
+export const visitTimeline = (timelineId: string) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
-  cy.visit(role ? getUrlWithRoute(role, route) : route, {
+  cy.visit(route, {
     onBeforeLoad: disableNewFeaturesTours,
   });
 };
@@ -112,14 +101,4 @@ const disableNewFeaturesTours = (window: Window) => {
   tourStorageKeys.forEach((key) => {
     window.localStorage.setItem(key, JSON.stringify(tourConfig));
   });
-};
-
-export const waitForPageTitleToBeShown = () => {
-  cy.get(PAGE_TITLE).should('be.visible');
-};
-
-export const loadPageAs = (url: string, role?: SecurityRoleName) => {
-  login(role);
-  visitWithTimeRange(url, { role });
-  waitForPageTitleToBeShown();
 };

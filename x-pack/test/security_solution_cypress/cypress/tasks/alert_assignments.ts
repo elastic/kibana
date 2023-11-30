@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import {
   ALERTS_TABLE_ROW_LOADER,
   ALERT_AVATARS_PANEL,
@@ -25,8 +25,11 @@ import {
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
 } from '../screens/alerts';
+import { PAGE_TITLE } from '../screens/common/page';
 import { DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES } from '../screens/expandable_flyout/alert_details_right_panel';
 import { selectFirstPageAlerts } from './alerts';
+import { login } from './login';
+import { visitWithTimeRange } from './navigation';
 
 export const NO_ASSIGNEES = 'No assignees';
 
@@ -41,6 +44,16 @@ export const waitForAssigneesToPopulatePopover = () => {
     },
     { interval: 500, timeout: 12000 }
   );
+};
+
+export const waitForPageTitleToBeShown = () => {
+  cy.get(PAGE_TITLE).should('be.visible');
+};
+
+export const loadPageAs = (url: string, role?: SecurityRoleName) => {
+  login(role);
+  visitWithTimeRange(url);
+  waitForPageTitleToBeShown();
 };
 
 export const openAlertAssigningActionMenu = (alertIndex = 0) => {
