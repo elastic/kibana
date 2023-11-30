@@ -120,13 +120,23 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     };
 
     const selectedFields = sortedSelectedFields || [];
-    const sortedFields = [...(allFields || [])].sort(sortFields);
+    const newFields = dataViewId ? fieldsExistenceReader.getNewFields(dataViewId) : [];
+    console.log({ newFields });
+    const fieldsToSort =
+      allFields && newFields.length
+        ? allFields.map((field) => {
+            return (dataView?.getFieldByName(field.name) as unknown as T) ?? field;
+          })
+        : allFields;
+    const sortedFields = [...(fieldsToSort || [])].sort(sortFields);
+
     const groupedFields = {
       ...getDefaultFieldGroups(),
       ...groupBy(sortedFields, (field) => {
         if (!sortedSelectedFields && onSelectedFieldFilter && onSelectedFieldFilter(field)) {
           selectedFields.push(field);
         }
+
         if (onSupportedFieldFilter && !onSupportedFieldFilter(field)) {
           return 'skippedFields';
         }
@@ -311,18 +321,19 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     return fieldGroupDefinitions;
   }, [
+    sortedSelectedFields,
     allFields,
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails,
-    dataView,
-    dataViewId,
-    hasFieldDataHandler,
-    fieldsExistenceInfoUnavailable,
+    popularFieldsLimit,
     isAffectedByGlobalFilter,
     isAffectedByTimeFilter,
-    popularFieldsLimit,
-    sortedSelectedFields,
+    dataViewId,
+    fieldsExistenceInfoUnavailable,
+    onOverrideFieldGroupDetails,
+    hasFieldDataHandler,
+    fieldsExistenceReader,
+    onSelectedFieldFilter,
+    onSupportedFieldFilter,
+    dataView,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
@@ -403,5 +414,6 @@ function getDefaultFieldGroups() {
     metaFields: [],
     unmappedFields: [],
     skippedFields: [],
+    newFields: [],
   };
 }
