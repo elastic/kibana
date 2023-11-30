@@ -169,7 +169,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
   title: string;
   /** Path in the tree of the node */
-  path: string[];
+  path: string;
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
   /**
@@ -178,9 +178,14 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    */
   children?: ChromeProjectNavigationNode[];
   /**
-   * Flag to indicate if the node is currently active.
+   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
+   * the Navigation.Item component when React components are used to declare the navigation tree.
    */
-  isActive?: boolean;
+  renderItem?: () => React.ReactNode;
+  /**
+   * Flag to indicate if the node is an "external" cloud link
+   */
+  isElasticInternalLink?: boolean;
 }
 
 /** @public */

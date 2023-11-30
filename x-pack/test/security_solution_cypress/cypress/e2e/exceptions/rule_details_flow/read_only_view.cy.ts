@@ -13,7 +13,7 @@ import { login } from '../../../tasks/login';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
 import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -55,7 +55,7 @@ describe('Exceptions viewer read only', { tags: ['@ess'] }, () => {
     });
 
     login(ROLES.t1_analyst);
-    visitRulesManagementTable(ROLES.t1_analyst);
+    visitRulesManagementTable();
     goToRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
   });

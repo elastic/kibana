@@ -32,7 +32,7 @@ describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerle
     createExceptionList(getExceptionList(), getExceptionList().list_id);
 
     login(ROLES.t1_analyst);
-    visit(EXCEPTIONS_URL, { role: ROLES.t1_analyst });
+    visit(EXCEPTIONS_URL);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown

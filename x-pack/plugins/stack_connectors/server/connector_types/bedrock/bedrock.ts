@@ -9,9 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import type { AxiosError } from 'axios';
 import { IncomingMessage } from 'http';
-import { PassThrough, Transform } from 'stream';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { PassThrough } from 'stream';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -178,12 +176,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({ messages, model }: InvokeAIActionParams): Promise<Transform> {
+  public async invokeStream({ messages, model }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
       body: JSON.stringify(formatBedrockBody({ messages })),
       model,
     })) as unknown as IncomingMessage;
-    return res.pipe(transformToString());
+    return res;
   }
 
   /**
@@ -222,25 +220,3 @@ const formatBedrockBody = ({
     stop_sequences: ['\n\nHuman:'],
   };
 };
-
-/**
- * Takes in a readable stream of data and returns a Transform stream that
- * uses the AWS proprietary codec to parse the proprietary bedrock response into
- * a string of the response text alone, returning the response string to the stream
- */
-const transformToString = () =>
-  new Transform({
-    transform(chunk, encoding, callback) {
-      const encoder = new TextEncoder();
-      const decoder = new EventStreamCodec(toUtf8, fromUtf8);
-      const event = decoder.decode(chunk);
-      const body = JSON.parse(
-        Buffer.from(
-          JSON.parse(new TextDecoder('utf-8').decode(event.body)).bytes,
-          'base64'
-        ).toString()
-      );
-      const newChunk = encoder.encode(body.completion);
-      callback(null, newChunk);
-    },
-  });
