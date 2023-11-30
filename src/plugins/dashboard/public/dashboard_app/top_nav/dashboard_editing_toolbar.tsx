@@ -81,7 +81,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
   );
 
   const createNewEmbeddable = useCallback(
-    async (embeddableFactory: EmbeddableFactory) => {
+    async (embeddableFactory: EmbeddableFactory, initialInput?: Partial<EmbeddableInput>) => {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
       }
@@ -89,12 +89,19 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       let explicitInput: Partial<EmbeddableInput>;
       let attributes: unknown;
       try {
-        const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, dashboard);
-        if (isExplicitInputWithAttributes(explicitInputReturn)) {
-          explicitInput = explicitInputReturn.newInput;
-          attributes = explicitInputReturn.attributes;
+        if (initialInput) {
+          explicitInput = initialInput;
         } else {
-          explicitInput = explicitInputReturn;
+          const explicitInputReturn = await embeddableFactory.getExplicitInput(
+            undefined,
+            dashboard
+          );
+          if (isExplicitInputWithAttributes(explicitInputReturn)) {
+            explicitInput = explicitInputReturn.newInput;
+            attributes = explicitInputReturn.attributes;
+          } else {
+            explicitInput = explicitInputReturn;
+          }
         }
       } catch (e) {
         // error likely means user canceled embeddable creation
@@ -115,6 +122,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
           'data-test-subj': 'addEmbeddableToDashboardSuccess',
         });
       }
+      return newEmbeddable;
     },
     [trackUiMetric, dashboard, toasts]
   );

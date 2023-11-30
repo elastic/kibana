@@ -43,13 +43,13 @@ export class ConfigureInLensPanelAction implements Action<Context> {
   }
 
   public async isCompatible({ embeddable }: Context) {
-    const { isActionCompatible } = await getConfigureLensHelpersAsync();
-    return isActionCompatible(embeddable);
+    const { isEditActionCompatible } = await getConfigureLensHelpersAsync();
+    return isEditActionCompatible(embeddable);
   }
 
   public async execute({ embeddable }: Context) {
-    const { executeAction } = await getConfigureLensHelpersAsync();
-    return executeAction({
+    const { executeEditAction } = await getConfigureLensHelpersAsync();
+    return executeEditAction({
       embeddable,
       startDependencies: this.startDependencies,
       overlays: this.overlays,

@@ -1,0 +1,57 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { addPanelMenuTrigger } from '../../triggers';
+
+const onAddPanelActionClick =
+  (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
+  (event: React.MouseEvent) => {
+    closePopover();
+    if (event.currentTarget instanceof HTMLAnchorElement) {
+      if (
+        !event.defaultPrevented && // onClick prevented default
+        event.button === 0 &&
+        (!event.currentTarget.target || event.currentTarget.target === '_self') &&
+        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+      ) {
+        event.preventDefault();
+        action.execute(context);
+      }
+    } else action.execute(context);
+  };
+
+export const getAddPanelActionMenuItems = (
+  actions: Array<Action<object>> | undefined,
+  createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => void,
+  closePopover: () => void
+) => {
+  const actionsWithContext =
+    actions?.map((action) => ({
+      action,
+      context: {
+        createNewEmbeddable,
+      },
+      trigger: addPanelMenuTrigger,
+    })) ?? [];
+
+  return actionsWithContext?.map((item) => {
+    const context: ActionExecutionContext<object> = {
+      ...item.context,
+      trigger: addPanelMenuTrigger,
+    };
+    const actionName = item.action.getDisplayName(context);
+    return {
+      name: actionName,
+      icon: item.action.getIconType(context),
+      onClick: onAddPanelActionClick(item.action, context, closePopover),
+      'data-test-subj': `create-action-${actionName}`,
+      toolTipContent: item.action?.getDisplayNameTooltip?.(context),
+    };
+  });
+};

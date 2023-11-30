@@ -105,7 +105,7 @@ import type {
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
-import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/action';
+import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
 import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';

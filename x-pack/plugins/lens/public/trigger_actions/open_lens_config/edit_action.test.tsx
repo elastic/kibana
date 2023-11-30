@@ -12,7 +12,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { createMockStartDependencies } from '../../editor_frame_service/mocks';
 import { DOC_TYPE } from '../../../common/constants';
-import { ConfigureInLensPanelAction } from './action';
+import { ConfigureInLensPanelAction } from './edit_action';
 
 describe('open config panel action', () => {
   const overlays = overlayServiceMock.createStartContract();

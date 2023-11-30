@@ -7,15 +7,23 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import type {
+  EmbeddableFactory,
+  EmbeddableInput,
+  IEmbeddable,
+} from '@kbn/embeddable-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
-
-// import { isLensEmbeddable } from '../utils';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 
+interface Context {
+  createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => Promise<undefined | IEmbeddable>;
+  initialInput?: Partial<EmbeddableInput>;
+}
+
 export const getAsyncHelpers = async () => await import('../../async_services');
 
-export class CreateESQLPanelAction implements Action<{}> {
+export class CreateESQLPanelAction implements Action<Context> {
   public type = ACTION_CREATE_ESQL_CHART;
   public id = ACTION_CREATE_ESQL_CHART;
   public order = 50;
@@ -41,8 +49,8 @@ export class CreateESQLPanelAction implements Action<{}> {
     return true;
   }
 
-  public async execute() {
+  public async execute({ createNewEmbeddable }: Context) {
     const { executeCreateAction } = await getAsyncHelpers();
-    executeCreateAction({ deps: this.startDependencies });
+    executeCreateAction({ deps: this.startDependencies, core: this.core, createNewEmbeddable });
   }
 }

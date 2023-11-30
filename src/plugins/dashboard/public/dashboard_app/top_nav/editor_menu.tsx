@@ -18,12 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
-import { ADD_PANEL_TRIGGER, addPanelMenuTrigger } from '../../triggers';
+import { ADD_PANEL_TRIGGER } from '../../triggers';
+import { getAddPanelActionMenuItems } from './add_panel_action_menu_items';
 
 interface Props {
   isDisabled?: boolean;
@@ -66,8 +67,9 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
   const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
     UnwrappedEmbeddableFactory[]
   >([]);
-  const [uiActionsMenuItems, setUiActionsMenuItems] = useState<EuiContextMenuPanelItemDescriptor[]>(
-    []
+
+  const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>> | undefined>(
+    undefined
   );
 
   useEffect(() => {
@@ -127,54 +129,17 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
 
   let panelCount = 1 + aggBasedPanelID;
 
-  // move all this logic to a different file
-  const onClick =
-    (action: Action, context: ActionExecutionContext<object>) => (event: React.MouseEvent) => {
-      if (event.currentTarget instanceof HTMLAnchorElement) {
-        if (
-          !event.defaultPrevented && // onClick prevented default
-          event.button === 0 && // ignore everything but left clicks
-          (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
-          !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
-        ) {
-          event.preventDefault();
-          action.execute(context);
-        }
-      } else action.execute(context);
-    };
-
-  // Retrieve menu items registered with the ADD_PANEL_TRIGGER action
+  // Retrieve ADD_PANEL_TRIGGER actions
   useEffect(() => {
     async function loadPanelActions() {
       const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
         ADD_PANEL_TRIGGER,
         {}
       );
-      const actionsWithContext = registeredActions?.map((action) => ({
-        action,
-        context: {},
-        trigger: addPanelMenuTrigger,
-      }));
-      if (actionsWithContext?.length) {
-        const menuItems = actionsWithContext.map((item) => {
-          const context: ActionExecutionContext<object> = {
-            ...item.context,
-            trigger: addPanelMenuTrigger,
-          };
-          const actionName = item.action.getDisplayName(context);
-          return {
-            name: actionName,
-            icon: item.action.getIconType(context),
-            onClick: onClick(item.action, context),
-            'data-test-subj': `create-action-${actionName}`,
-            toolTipContent: item.action?.getDisplayNameTooltip?.(context),
-          };
-        }) as unknown as EuiContextMenuPanelItemDescriptor[];
-        setUiActionsMenuItems(menuItems);
-      }
+      setAddPanelActions(registeredActions);
     }
     loadPanelActions();
-  }, [embeddableFactories, uiActions]);
+  }, [createNewEmbeddable, embeddableFactories, uiActions]);
 
   factories.forEach(({ factory }) => {
     const { grouping } = factory;
@@ -291,7 +256,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
       })),
 
       ...promotedVisTypes.map(getVisTypeMenuItem),
-      ...uiActionsMenuItems,
+      ...getAddPanelActionMenuItems(addPanelActions, createNewEmbeddable, closePopover),
     ];
     if (aggsBasedVisTypes.length > 0) {
       initialPanelItems.push({

@@ -5,10 +5,19 @@
  * 2.0.
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
+import type { CoreStart } from '@kbn/core/public';
+import type {
+  EmbeddableFactory,
+  EmbeddableInput,
+  IEmbeddable,
+} from '@kbn/embeddable-plugin/public';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
 import { suggestionsApi } from '../../lens_suggestions_api';
+import { getLensAttributes } from '../../app_plugin/shared/edit_on_the_fly/helpers';
+import { generateId } from '../../id_generator';
+import { executeEditAction } from './edit_action_helpers';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
@@ -19,13 +28,21 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
-export async function executeCreateAction({ deps }: { deps: LensPluginStartDependencies }) {
+export async function executeCreateAction({
+  deps,
+  core,
+  createNewEmbeddable,
+}: {
+  deps: LensPluginStartDependencies;
+  core: CoreStart;
+  createNewEmbeddable: (
+    embeddableFactory: EmbeddableFactory,
+    initialInput?: Partial<EmbeddableInput>
+  ) => Promise<undefined | IEmbeddable>;
+}) {
   const visualizationMap = getVisualizationMap();
   const datasourceMap = getDatasourceMap();
 
-  // const embeddableStart = this.startDependencies.embeddable;
-  // const factory = embeddableStart.getEmbeddableFactory('lens')!;
-  // console.dir(this.startDependencies);
   const defaultDataView = await deps.dataViews.getDefaultDataView({
     displayErrors: false,
   });
@@ -54,13 +71,37 @@ export async function executeCreateAction({ deps }: { deps: LensPluginStartDepen
     query: defaultEsqlQuery,
   };
 
+  // get the initial attributes from the suggestions api
   const allSuggestions =
     suggestionsApi({ context, dataView: defaultDataView, datasourceMap, visualizationMap }) ?? [];
 
   // Lens might not return suggestions for some cases, i.e. in case of errors
   if (!allSuggestions.length) return undefined;
+  const [firstSuggestion] = allSuggestions;
+  const attrs = getLensAttributes({
+    filters: [],
+    query: defaultEsqlQuery,
+    suggestion: firstSuggestion,
+    dataView: defaultDataView,
+  });
 
-  // get the initial attributes from the suggestions api
-  // create a new embeddable with factory.create
-  // factory?.create()
+  const input = {
+    attributes: attrs,
+    id: generateId(),
+  };
+  const embeddableStart = deps.embeddable;
+  const factory = embeddableStart.getEmbeddableFactory('lens');
+  if (!factory) {
+    return undefined;
+  }
+  const embeddable = await createNewEmbeddable(factory, input);
+  // open the flyout if embeddable has been created successfully
+  if (embeddable) {
+    executeEditAction({
+      embeddable,
+      startDependencies: deps,
+      overlays: core.overlays,
+      theme: core.theme,
+    });
+  }
 }
