@@ -170,7 +170,6 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
 
   return (
     <EuiPopover
-      panelClassName="lnsChangeIndexPatternPopover"
       button={
         <DataLayerHeaderTrigger
           onClick={() => setPopoverIsOpen(!isPopoverOpen)}
@@ -188,7 +187,11 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
           defaultMessage: 'Layer visualization type',
         })}
       </EuiPopoverTitle>
-      <div>
+      <div
+        css={css`
+          width: 320px;
+        `}
+      >
         <EuiSelectable<{
           key?: string;
           label: string;

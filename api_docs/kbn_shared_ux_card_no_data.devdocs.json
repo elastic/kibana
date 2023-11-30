@@ -148,7 +148,7 @@
         "signature": [
           "Partial<Omit<",
           "EuiCardProps",
-          ", \"description\" | \"onClick\" | \"isDisabled\" | \"layout\" | \"button\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
+          ", \"description\" | \"onClick\" | \"isDisabled\" | \"button\" | \"layout\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
         ],
         "path": "packages/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
@@ -186,7 +186,7 @@
         "signature": [
           "Partial<Omit<",
           "EuiCardProps",
-          ", \"description\" | \"onClick\" | \"isDisabled\" | \"layout\" | \"button\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
+          ", \"description\" | \"onClick\" | \"isDisabled\" | \"button\" | \"layout\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
         ],
         "path": "packages/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
