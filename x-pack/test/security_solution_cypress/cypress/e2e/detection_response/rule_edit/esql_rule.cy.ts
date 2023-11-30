@@ -34,7 +34,10 @@ const rule = getEsqlRule();
 
 const expectedValidEsqlQuery = 'from auditbeat* | stats count(event.category) by event.category';
 
-describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/172253
+// FLAKY: https://github.com/elastic/kibana/issues/172254
+// FLAKY: https://github.com/elastic/kibana/issues/172255
+describe.skip('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
