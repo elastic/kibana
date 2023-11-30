@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter } from '@kbn/es-query';
 
 import type { ExperimentalFeatures } from '../../../../../../common';
@@ -59,7 +60,7 @@ export type GetFieldValue = (events: EnrichmentType, path: string) => string | u
 export type MakeSingleFieldMatchQuery = (params: {
   values: string[];
   searchByField: string;
-  extraFilter?: {};
+  extraFilters?: QueryDslQueryContainer[];
 }) => Filter;
 
 export type SearchEnrichments = (params: {
@@ -76,6 +77,11 @@ export type GetIsRiskScoreAvailable = (params: {
   isNewRiskScoreModuleInstalled: boolean;
 }) => Promise<boolean>;
 
+export type GetIsAssetCriticalityAvailable = (params: {
+  spaceId: string;
+  services: RuleServices;
+}) => Promise<boolean>;
+
 export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     spaceId: string;
@@ -89,6 +95,8 @@ export type CreateCriticalityEnrichment = <T extends BaseFieldsLatest>(
   }
 ) => Promise<EventsMapByEnrichments>;
 
+export type CreateEnrichmentFunction = (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
+
 export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     name: string;
@@ -101,9 +109,8 @@ export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
     };
     /** Specifies which fields should be returned when querying the enrichment index. */
     enrichmentResponseFields: string[];
-    createEnrichmentFunction: (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
-    // TODO document
-    extraFilter?: {};
+    createEnrichmentFunction: CreateEnrichmentFunction;
+    extraFilters?: QueryDslQueryContainer[];
   }
 ) => Promise<EventsMapByEnrichments>;
 

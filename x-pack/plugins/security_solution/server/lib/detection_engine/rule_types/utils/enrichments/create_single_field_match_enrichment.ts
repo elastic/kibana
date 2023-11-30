@@ -22,7 +22,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
   createEnrichmentFunction,
   name,
   enrichmentResponseFields,
-  extraFilter,
+  extraFilters,
 }) => {
   try {
     logger.debug(`Enrichment ${name}: started`);
@@ -53,7 +53,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
         makeSingleFieldMatchQuery({
           values: enrichmentValuesChunk,
           searchByField: mappingField.enrichmentField,
-          extraFilter,
+          extraFilters,
         })
       )
       .filter((query) => query.query?.bool?.should?.length > 0)

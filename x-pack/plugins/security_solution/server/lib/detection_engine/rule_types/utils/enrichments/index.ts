@@ -14,6 +14,13 @@ import {
   createUserRiskEnrichments,
   getIsUserRiskScoreAvailable,
 } from './enrichment_by_type/user_risk';
+
+import {
+  createHostAssetCriticalityEnrichments,
+  createUserAssetCriticalityEnrichments,
+  getDoesAssetCriticalityIndexExist,
+} from './enrichment_by_type/asset_criticality';
+
 import type {
   EnrichEventsFunction,
   EventsMapByEnrichments,
@@ -33,6 +40,8 @@ export const enrichEvents: EnrichEventsFunction = async ({
 
     logger.debug('Alert enrichments started');
     const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
+    const isAssetCriticalityEnabled =
+      experimentalFeatures?.entityAnalyticsAssetCriticalityEnabled ?? false;
 
     let isNewRiskScoreModuleInstalled = false;
     if (isNewRiskScoreModuleAvailable) {
@@ -72,16 +81,29 @@ export const enrichEvents: EnrichEventsFunction = async ({
       );
     }
 
-    // TODO, check if the right index exists
-    if (true) {
-      enrichments.push(
-        createUserAssetCriticalityEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
+    if (isAssetCriticalityEnabled) {
+      const doesAssetCriticalityIndexExist = await getDoesAssetCriticalityIndexExist({
+        spaceId,
+        services,
+      });
+      if (doesAssetCriticalityIndexExist) {
+        enrichments.push(
+          createUserAssetCriticalityEnrichments({
+            services,
+            logger,
+            events,
+            spaceId,
+          })
+        );
+        enrichments.push(
+          createHostAssetCriticalityEnrichments({
+            services,
+            logger,
+            events,
+            spaceId,
+          })
+        );
+      }
     }
 
     const allEnrichmentsResults = await Promise.allSettled(enrichments);
