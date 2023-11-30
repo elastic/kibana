@@ -127,5 +127,34 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.numSkippedRuns).to.eql(2);
       });
     });
+
+    it('Skips the tasks with invalid version', async () => {
+      const createdTask = await supertest
+        .post('/api/sample_tasks/schedule')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          task: {
+            taskType: 'sampleTaskWithInvalidVersion',
+            params: {},
+          },
+        })
+        .expect(200)
+        .then((response: { body: SerializedConcreteTaskInstance }) => {
+          log.debug(`Task Scheduled: ${response.body.id}`);
+          return response.body;
+        });
+
+      await retry.try(async () => {
+        const task = await currentTask(createdTask.id);
+        // skips 2 times
+        expect(task.numSkippedRuns).to.eql(2);
+      });
+
+      await retry.try(async () => {
+        const task = await currentTask(createdTask.id);
+        // runs successfully after 2 skips
+        expect(task.status).to.eql(TaskStatus.Idle);
+      });
+    });
   });
 }

@@ -233,6 +233,20 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleTaskWithInvalidVersion: {
+        title: 'Sample Task That has invalid type version',
+        description: 'Sample Task That has invalid type version',
+        maxAttempts: 1,
+        paramsSchema: schema.object({}),
+        indirectParamsSchema: schema.object({}),
+        latestTypeVersion: 1,
+        createTaskRunner: () => ({
+          async loadIndirectParams() {
+            return { data: { indirectParams: {}, typeVersion: 2 } }; // greater then latestTypeVersion:1
+          },
+          async run() {},
+        }),
+      },
       taskToDisable: {
         title: 'Task used for testing it being disabled',
         description: '',
