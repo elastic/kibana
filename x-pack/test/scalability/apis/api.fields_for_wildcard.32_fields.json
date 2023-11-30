@@ -1,5 +1,5 @@
 {
-  "journeyName": "GET /internal/data_views/_fields_for_wildcard",
+  "journeyName": "GET /internal/data_views/_fields_for_wildcard - 32 fields",
   "scalabilitySetup": {
     "responseTimeThreshold": {
       "threshold1": 5000,
@@ -9,22 +9,22 @@
     "warmup": [
       {
         "action": "constantUsersPerSec",
-        "userCount": 1,
+        "userCount": 10,
         "duration": "30s"
       }
     ],
     "test": [
       {
         "action": "rampUsersPerSec",
-        "minUsersCount": 1,
-        "maxUsersCount": 7,
+        "minUsersCount": 10,
+        "maxUsersCount": 375,
         "duration": "140s"
       }
     ],
     "maxDuration": "5m"
   },
   "testData": {
-    "esArchives": ["test/functional/fixtures/es_archiver/many_fields"]
+    "esArchives": ["test/functional/fixtures/es_archiver/kibana_sample_data_flights"]
   },
   "streams": [
     {
@@ -33,7 +33,7 @@
           "http": {
             "method": "GET",
             "path": "/internal/data_views/_fields_for_wildcard",
-            "query": "?pattern=indices*",
+            "query": "?pattern=kibana*",
             "headers": {
               "Cookie": "",
               "Kbn-Version": "",
