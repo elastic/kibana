@@ -26,7 +26,6 @@ Status: `in progress`. The current test plan covers functionality described in [
 
 - The feature is **NOT** available under the Basic license
 - Assignees are stored as an array of users IDs in alert's `kibana.alert.workflow_assignee_ids` field
-- The feature is available under the Basic license
 - There are multiple (five or more) available users which could be assigned to alerts
 - User need to have editor or higher privileges to assign users to alerts
 - Mixed states are not supported by the current version of User Profiles component
