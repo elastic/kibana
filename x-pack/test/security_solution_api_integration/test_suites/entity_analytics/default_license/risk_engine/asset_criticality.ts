@@ -11,9 +11,9 @@ import {
   cleanAssetCriticality,
   assetCriticalityRouteHelpersFactory,
   getAssetCriticalityDoc,
+  getAssetCriticalityIndex,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-const assetCriticalityIndex = '.asset-criticality.asset-criticality-default';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         try {
           assetCriticalityIndexExist = await es.indices.exists({
-            index: assetCriticalityIndex,
+            index: getAssetCriticalityIndex(),
           });
         } catch (e) {
           assetCriticalityIndexExist = false;
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const assetCriticalityIndexResult = await es.indices.get({
-          index: assetCriticalityIndex,
+          index: getAssetCriticalityIndex(),
         });
 
         expect(

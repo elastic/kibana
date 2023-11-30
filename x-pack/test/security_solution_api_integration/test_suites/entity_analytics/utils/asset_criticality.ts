@@ -19,7 +19,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
 import { routeWithNamespace } from '../../detections_response/utils';
 
-const getAssetCriticalityIndex = (namespace?: string) =>
+export const getAssetCriticalityIndex = (namespace?: string) =>
   `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;
 
 export const cleanAssetCriticality = async ({
