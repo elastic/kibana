@@ -11,6 +11,7 @@ import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
+import type { Tool } from 'langchain/tools';
 import { RequestBody, ResponseBody } from '../types';
 
 export interface AgentExecutorParams {
@@ -21,6 +22,7 @@ export interface AgentExecutorParams {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
+  registeredTools?: Tool[];
   request: KibanaRequest<unknown, unknown, RequestBody>;
   elserId?: string;
   traceOptions?: TraceOptions;

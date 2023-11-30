@@ -111,6 +111,7 @@ import { registerRiskScoringTask } from './lib/entity_analytics/risk_engine/task
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
+import { getSecurityAssistantTools } from './assistant/get_security_assistant_tools';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -505,6 +506,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     this.licensing$ = plugins.licensing.license$;
+
+    // Assistant Tool and Feature Registration
+    plugins.elasticAssistant.registerTool('securitySolution', getSecurityAssistantTools());
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

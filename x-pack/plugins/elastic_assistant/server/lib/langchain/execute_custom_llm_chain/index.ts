@@ -31,6 +31,7 @@ export const callAgentExecutor = async ({
   langChainMessages,
   llmType,
   logger,
+  registeredTools = [],
   request,
   elserId,
   kbResource,
@@ -77,6 +78,7 @@ export const callAgentExecutor = async ({
       chain,
       tags: ['esql', 'query-generation', 'knowledge-base'],
     }),
+    ...registeredTools,
   ];
 
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {

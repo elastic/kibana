@@ -17,6 +17,7 @@ import {
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
+import type { Tool } from 'langchain/tools';
 import {
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
@@ -24,6 +25,7 @@ import {
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
   GetElser,
+  PLUGIN_ID,
 } from './types';
 import {
   deleteKnowledgeBaseRoute,
@@ -32,6 +34,13 @@ import {
   postEvaluateRoute,
   postKnowledgeBaseRoute,
 } from './routes';
+import { appContextService, GetRegisteredTools } from './services/app_context';
+
+interface CreateRouteHandlerContextParams {
+  core: CoreSetup<ElasticAssistantPluginStart, unknown>;
+  logger: Logger;
+  getRegisteredTools: GetRegisteredTools;
+}
 
 export class ElasticAssistantPlugin
   implements
@@ -48,15 +57,20 @@ export class ElasticAssistantPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  private createRouteHandlerContext = (
-    core: CoreSetup<ElasticAssistantPluginStart, unknown>,
-    logger: Logger
-  ): IContextProvider<ElasticAssistantRequestHandlerContext, 'elasticAssistant'> => {
+  private createRouteHandlerContext = ({
+    core,
+    logger,
+    getRegisteredTools,
+  }: CreateRouteHandlerContextParams): IContextProvider<
+    ElasticAssistantRequestHandlerContext,
+    typeof PLUGIN_ID
+  > => {
     return async function elasticAssistantRouteHandlerContext(context, request) {
       const [_, pluginsStart] = await core.getStartServices();
 
       return {
         actions: pluginsStart.actions,
+        getRegisteredTools,
         logger,
       };
     };
@@ -65,16 +79,15 @@ export class ElasticAssistantPlugin
   public setup(core: CoreSetup, plugins: ElasticAssistantPluginSetupDependencies) {
     this.logger.debug('elasticAssistant: Setup');
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
-
-    core.http.registerRouteHandlerContext<
-      ElasticAssistantRequestHandlerContext,
-      'elasticAssistant'
-    >(
-      'elasticAssistant',
-      this.createRouteHandlerContext(
-        core as CoreSetup<ElasticAssistantPluginStart, unknown>,
-        this.logger
-      )
+    core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
+      this.createRouteHandlerContext({
+        core: core as CoreSetup<ElasticAssistantPluginStart, unknown>,
+        logger: this.logger,
+        getRegisteredTools: (pluginName: string) => {
+          return appContextService.getRegisteredTools(pluginName);
+        },
+      })
     );
 
     const getElserId: GetElser = once(
@@ -94,16 +107,28 @@ export class ElasticAssistantPlugin
     postEvaluateRoute(router, getElserId);
     return {
       actions: plugins.actions,
+      getRegisteredTools: (pluginName: string) => {
+        return appContextService.getRegisteredTools(pluginName);
+      },
     };
   }
 
   public start(core: CoreStart, plugins: ElasticAssistantPluginStartDependencies) {
     this.logger.debug('elasticAssistant: Started');
+    appContextService.start({ logger: this.logger });
 
     return {
       actions: plugins.actions,
+      getRegisteredTools: (pluginName: string) => {
+        return appContextService.getRegisteredTools(pluginName);
+      },
+      registerTool: (pluginName: string, tool: Tool) => {
+        return appContextService.registerTools(pluginName, tool);
+      },
     };
   }
 
-  public stop() {}
+  public stop() {
+    appContextService.stop();
+  }
 }
