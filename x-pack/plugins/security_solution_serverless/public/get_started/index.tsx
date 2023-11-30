@@ -14,7 +14,7 @@ import type { SecurityProductTypes } from '../../common/config';
 export const getSecurityGetStartedComponent = (
   services: Services,
   productTypes: SecurityProductTypes
-): React.ComponentType<{ indicesExist?: boolean }> =>
+): React.ComponentType =>
   function GetStartedComponent() {
     return (
       <ServicesProvider services={services}>
