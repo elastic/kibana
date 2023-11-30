@@ -346,7 +346,13 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               </>
             ) : (
               <RunOperation
-                canExecute={!!(hasExecuteActionsCapability(capabilities, item.actionTypeId) && actionTypesIndex && actionTypesIndex[item.actionTypeId])}
+                canExecute={
+                  !!(
+                    hasExecuteActionsCapability(capabilities, item.actionTypeId) &&
+                    actionTypesIndex &&
+                    actionTypesIndex[item.actionTypeId]
+                  )
+                }
                 item={item}
                 onRun={() => editItem(item, EditConnectorTabs.Test)}
               />
