@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+
+import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
 import { assetCriticalityServiceFactory } from './asset_criticality_service';
 
-const buildMockCriticalityRecord = () => ({
+const buildMockCriticalityHit = (
+  overrides: Partial<AssetCriticalityRecord> = {}
+): SearchHit<AssetCriticalityRecord> => ({
   _id: 'host.name:not-found',
   _index: '.asset-criticality-default',
   _source: {
     '@timestamp': '2021-09-16T15:00:00.000Z',
     id_field: 'host.name',
-    id_value: 'found',
-    criticality_level: 'critical',
+    id_value: 'hostname',
+    criticality_level: 'normal',
+    ...overrides,
   },
 });
 
@@ -36,13 +42,20 @@ describe('AssetCriticalityService', () => {
       it('returns an empty response if identifier is not found', async () => {
         const service = assetCriticalityServiceFactory({ esClient: esClientMock });
         const result = await service.getCriticalitiesByIdentifiers([baseIdentifier]);
+
         expect(result).toEqual([]);
       });
 
       it('returns a single criticality if identifier is found', async () => {
+        const hits = [buildMockCriticalityHit()];
+        (esClientMock.search as jest.Mock).mockReset().mockResolvedValueOnce({
+          hits: { hits },
+        });
+
         const service = assetCriticalityServiceFactory({ esClient: esClientMock });
         const result = await service.getCriticalitiesByIdentifiers([baseIdentifier]);
-        expect(result).toEqual(['critical']);
+
+        expect(result).toEqual(hits.map((hit) => hit._source));
       });
     });
 
@@ -50,10 +63,11 @@ describe('AssetCriticalityService', () => {
       it('returns an empty response if identifier is not found', async () => {
         const service = assetCriticalityServiceFactory({ esClient: esClientMock });
         const result = await service.getCriticalitiesByIdentifiers([baseIdentifier]);
+
         expect(result).toEqual([]);
       });
 
-      it.skip('deduplicates identifiers', async () => {
+      it('deduplicates identifiers', async () => {
         const service = assetCriticalityServiceFactory({ esClient: esClientMock });
         const duplicateIdentifiers = [
           { id_field: 'user.name', id_value: 'same' },
@@ -61,17 +75,37 @@ describe('AssetCriticalityService', () => {
         ];
         await service.getCriticalitiesByIdentifiers(duplicateIdentifiers);
 
-        expect(esClientMock.search).toHaveBeenCalledOnce();
-        expect(esClientMock.search).toHaveBeenCalledWith({
-          id_field: 'user.name',
-          id_value: 'same',
+        expect(esClientMock.search).toHaveBeenCalledTimes(1);
+        const query = (esClientMock.search as jest.Mock).mock.calls[0][0].body.query;
+        expect(query).toMatchObject({
+          bool: {
+            must: {
+              bool: {
+                should: [{ terms: { 'user.name': ['same'] } }],
+              },
+            },
+          },
         });
       });
 
       it('returns multiple criticalities if identifiers are found', async () => {
+        const hits = [
+          buildMockCriticalityHit(),
+          buildMockCriticalityHit({
+            id_field: 'user.name',
+            id_value: 'username',
+            criticality_level: 'very_important',
+          }),
+        ];
+
+        (esClientMock.search as jest.Mock).mockReset().mockResolvedValueOnce({
+          hits: {
+            hits,
+          },
+        });
         const service = assetCriticalityServiceFactory({ esClient: esClientMock });
         const result = await service.getCriticalitiesByIdentifiers([baseIdentifier]);
-        expect(result).toEqual(['critical']);
+        expect(result).toEqual(hits.map((hit) => hit._source));
       });
     });
 
@@ -119,7 +153,13 @@ describe('AssetCriticalityService', () => {
     });
 
     describe('error conditions', () => {
-      it.todo('throws an error if the client does');
+      it('throws an error if the client does', async () => {
+        (esClientMock.search as jest.Mock).mockReset().mockRejectedValueOnce(new Error('foo'));
+        const service = assetCriticalityServiceFactory({ esClient: esClientMock });
+        await expect(() =>
+          service.getCriticalitiesByIdentifiers([baseIdentifier])
+        ).rejects.toThrowError('foo');
+      });
     });
   });
 });

@@ -76,7 +76,7 @@ const getCriticalitiesByIdentifiers = async ({
     size: MAX_CRITICALITY_RECORD_COUNT,
   });
 
-  // @ts-expect-error _source is optional // TODO
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   return criticalitySearchResponse.hits.hits.map((hit) => hit._source);
 };
 
