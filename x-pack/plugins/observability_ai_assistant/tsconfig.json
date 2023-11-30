@@ -46,7 +46,8 @@
     "@kbn/es-query",
     "@kbn/rule-registry-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/utility-types-jest"
   ],
   "exclude": ["target/**/*"]
 }
