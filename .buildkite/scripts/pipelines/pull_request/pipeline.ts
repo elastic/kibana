@@ -39,6 +39,18 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
 (async () => {
   try {
+    if (process.env.BUILDKITE_PULL_REQUEST_DRAFT) {
+      console.log(
+        'Skipping CI for draft PR. If you need to run CI for this PR add the label xxxxxxx and retrigger CI.'
+      );
+
+      // Since we skip everything, including post-build, we need to at least make sure the commit status gets set
+      execSync('BUILD_SUCCESSFUL=true .buildkite/scripts/lifecycle/commit_status_complete.sh', {
+        stdio: 'inherit',
+      });
+      process.exit(0);
+    }
+
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
