@@ -124,7 +124,6 @@ describe('createRuleRoute', () => {
         },
         connector_type_id: 'test',
         uuid: '123-456',
-        use_alert_data_for_template: false,
       },
     ],
   };
@@ -199,7 +198,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "useAlertDataForTemplate": undefined,
               },
             ],
             "alertTypeId": "1",
@@ -316,7 +314,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "useAlertDataForTemplate": undefined,
               },
             ],
             "alertTypeId": "1",
@@ -434,7 +431,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "useAlertDataForTemplate": undefined,
               },
             ],
             "alertTypeId": "1",
@@ -552,7 +548,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "useAlertDataForTemplate": undefined,
               },
             ],
             "alertTypeId": "1",
