@@ -20,6 +20,23 @@ interface AlertTimeTableProps {
 
 const ERROR_RATES = [0.01, 0.1, 0.2, 0.5, 1];
 
+function formatTime(minutes: number) {
+  if (minutes > 59) {
+    const mins = minutes % 60;
+    const hours = (minutes - mins) / 60;
+    if (mins > 0 && hours > 0) {
+      return i18n.translate('xpack.observability.slo.rules.timeTable.minuteHoursLabel', {
+        defaultMessage: '{hours}h {mins}m',
+        values: { hours, mins },
+      });
+    }
+  }
+  return i18n.translate('xpack.observability.slo.rules.timeTable.minuteLabel', {
+    defaultMessage: '{minutes}m',
+    values: { minutes },
+  });
+}
+
 export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
   const rows = ERROR_RATES.map((rate) => {
     const windowTimes = windows.reduce((acc, windowDef, index) => {
@@ -48,15 +65,8 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
     ...windows.map((windowDef, index) => ({
       field: `column_${index + 1}`,
       name: `${windowDef.longWindow.value}h @ ${windowDef.burnRateThreshold}x`,
-      render: (time: number | null) =>
-        time
-          ? i18n.translate('xpack.observability.slo.rules.timeTable.minuteLabel', {
-              defaultMessage: '{time} mins.',
-              values: { time },
-            })
-          : i18n.translate('xpack.observability.slo.rules.timeTable.neverLabel', {
-              defaultMessage: 'Never',
-            }),
+      align: 'right',
+      render: (time: number | null) => (time ? formatTime(time) : '-'),
     })),
   ];
   return (
