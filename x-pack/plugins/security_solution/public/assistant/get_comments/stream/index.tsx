@@ -20,6 +20,7 @@ interface Props {
   isError?: boolean;
   isFetching?: boolean;
   isLastComment: boolean;
+  isLangChain: boolean;
   index: number;
   connectorTypeTitle: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
@@ -34,6 +35,7 @@ export const StreamComment = ({
   index,
   isError = false,
   isFetching = false,
+  isLangChain,
   isLastComment,
   reader,
   regenerateMessage,
@@ -45,6 +47,7 @@ export const StreamComment = ({
     connectorTypeTitle,
     reader,
     isError,
+    isLangChain,
   });
 
   const currentState = useRef({ isStreaming, pendingMessage, amendMessage });

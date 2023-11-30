@@ -81,6 +81,7 @@ const AssistantComponent: React.FC<Props> = ({
     docLinks,
     getComments,
     http,
+    knowledgeBase: { assistantLangChain },
     promptContexts,
     setLastConversationId,
     localStorageLastConversationId,
@@ -373,6 +374,7 @@ const AssistantComponent: React.FC<Props> = ({
             amendMessage,
             regenerateMessage: handleRegenerateResponse,
             isFetchingResponse: isLoadingChatSend,
+            isLangChain: assistantLangChain,
           })}
           css={css`
             margin-right: 20px;

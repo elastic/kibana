@@ -75,7 +75,7 @@ export const postActionsConnectorExecuteRoute = (
           kbResource: ESQL_RESOURCE,
         });
 
-        console.log('WE ARE HERE LAST!!!!!!', langChainResponseBody);
+        console.log('WE ARE HERE LAST!!!!!', langChainResponseBody);
 
         return response.ok({
           body: langChainResponseBody,

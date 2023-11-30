@@ -18,6 +18,7 @@ interface StreamObservable {
   reader: ReadableStreamDefaultReader<Uint8Array>;
   setLoading: Dispatch<SetStateAction<boolean>>;
   isError: boolean;
+  isLangChain: boolean;
 }
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
@@ -30,6 +31,7 @@ interface StreamObservable {
 export const getStreamObservable = ({
   connectorTypeTitle,
   isError,
+  isLangChain,
   reader,
   setLoading,
 }: StreamObservable): Observable<PromptObservableState> =>
@@ -37,17 +39,89 @@ export const getStreamObservable = ({
     observer.next({ chunks: [], loading: true });
     const decoder = new TextDecoder();
     const chunks: string[] = [];
+    // Initialize an empty string to store the LangChain buffer.
+    const langChainBuffer: string = '';
     // Initialize an empty string to store the OpenAI buffer.
     let openAIBuffer: string = '';
 
     // Initialize an empty Uint8Array to store the Bedrock concatenated buffer.
     let bedrockBuffer: Uint8Array = new Uint8Array(0);
+    function readLangChain() {
+      reader
+        .read()
+        .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          try {
+            console.log('WE ARE HERE reading langchain', { done, value });
+            if (done) {
+              console.log('WE ARE HERE DONE', { done, langChainBuffer });
+              // if (langChainBuffer) {
+              //   chunks.push(langChainBuffer);
+              // }
+              // observer.next({
+              //   chunks,
+              //   message: chunks.join(''),
+              //   loading: false,
+              // });
+              observer.complete();
+              return;
+            }
+            const decoded = decoder.decode(value);
+            console.log('WE ARE HERE decoded value', decoded);
+            let nextChunks;
+            if (isError) {
+              nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
+              nextChunks.forEach((chunk: string) => {
+                chunks.push(chunk);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              });
+            } else {
+              const parsed: {
+                output: string;
+                intermediateSteps: Array<{
+                  observation: string;
+                }>;
+              } = JSON.parse(decoder.decode(value));
+              if (parsed.output) {
+                const output = parsed.output;
+                observer.next({
+                  chunks: [output],
+                  message: output,
+                  loading: false,
+                });
+              } else {
+                const output = parsed.intermediateSteps[0].observation;
+                const lines = output.split('\n');
+                nextChunks = lines;
+                nextChunks.forEach((chunk: string) => {
+                  chunks.push(chunk);
+                  observer.next({
+                    chunks,
+                    message: chunks.join(''),
+                    loading: true,
+                  });
+                });
+              }
+            }
+          } catch (err) {
+            observer.error(err);
+            return;
+          }
+          readLangChain();
+        })
+        .catch((err) => {
+          observer.error(err);
+        });
+    }
     function readOpenAI() {
       reader
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
-            console.log('WE ARE HERE reading', { done, value });
+            console.log('WE ARE HERE reading openai', { done, value });
             if (done) {
               if (openAIBuffer) {
                 chunks.push(getOpenAIChunks([openAIBuffer])[0]);
@@ -95,7 +169,7 @@ export const getStreamObservable = ({
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
-            console.log('WE ARE HERE reading', { done, value });
+            console.log('WE ARE HERE reading bedrock', { done, value });
             if (done) {
               observer.next({
                 chunks,
@@ -175,7 +249,8 @@ export const getStreamObservable = ({
       observer.complete();
     }
 
-    if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
+    if (isLangChain) readLangChain();
+    else if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
     else if (connectorTypeTitle === 'OpenAI') readOpenAI();
     else badConnector();
 
