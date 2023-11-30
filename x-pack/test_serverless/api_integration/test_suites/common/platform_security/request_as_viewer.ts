@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       // get auth header for Viewer role
-      credentials = await svlUserManager.getCredentialsForRole('viewer');
+      credentials = await svlUserManager.getApiCredentialsForRole('viewer');
     });
 
     it('returns full status payload for authenticated request', async () => {

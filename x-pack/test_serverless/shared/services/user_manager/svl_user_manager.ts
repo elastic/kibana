@@ -73,71 +73,96 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   // to be re-used within FTR config run
   const sessionCache = new Map<Role, Session>();
 
+  const getCloudUserByRole = (role: string) => {
+    if (!roles.includes(role)) {
+      log.warning(`Role '${role}' is not listed in 'kbn-es/src/serverless_resources/roles.yml'`);
+    }
+    if (roleToUserMap.has(role)) {
+      return roleToUserMap.get(role)!;
+    } else {
+      throw new Error(`User with '${role}' role is not defined`);
+    }
+  };
+
+  const getSessionByRole = async (role: string) => {
+    if (sessionCache.has(role)) {
+      return sessionCache.get(role)!;
+    }
+
+    const kbnHost = Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: isCloud ? undefined : config.get('servers.kibana.port'),
+    });
+    let session: Session;
+
+    if (isCloud) {
+      log.debug(`new SAML authentication with '${role}' role`);
+      const kbnVersion = await kibanaServer.version.get();
+      session = await createCloudSAMLSession({
+        ...getCloudUserByRole(role),
+        kbnHost,
+        kbnVersion,
+        log,
+      });
+    } else {
+      log.debug(`new fake SAML authentication with '${role}' role`);
+      session = await createLocalSAMLSession({
+        username: `elastic_${role}`,
+        email: `elastic_${role}@elastic.co`,
+        fullname: `test ${role}`,
+        role,
+        kbnHost,
+        log,
+      });
+    }
+
+    sessionCache.set(role, session);
+    return session;
+  };
+
   return {
     /*
      * Returns auth header to do API calls with 'supertestWithoutAuth' service
      *
-     * @example Create API call with specific user role authentication
+     * @example Create API call as a user with viewer role
      *
      * ```ts
-     * const credentials = await svlUserManager.getCredentialsForRole('viewer');
+     * const credentials = await svlUserManager.getApiCredentialsForRole('viewer');
      * const response = await supertestWithoutAuth
      *   .get('/api/status')
      *   .set(credentials)
      *   .set('kbn-xsrf', 'kibana');
      * ```
      */
-    async getCredentialsForRole(role: string) {
-      const session = await this.getSessionByRole(role);
+    async getApiCredentialsForRole(role: string) {
+      const session = await getSessionByRole(role);
       return { Cookie: `sid=${session.getCookieValue()}` };
     },
 
-    async getSessionByRole(role: string) {
-      if (sessionCache.has(role)) {
-        return sessionCache.get(role)!;
-      }
-
-      const kbnHost = Url.format({
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: isCloud ? undefined : config.get('servers.kibana.port'),
-      });
-      let session: Session;
-
-      if (isCloud) {
-        log.debug(`new SAML authentication with '${role}' role`);
-        const kbnVersion = await kibanaServer.version.get();
-        session = await createCloudSAMLSession({
-          ...this.getCloudUserByRole(role),
-          kbnHost,
-          kbnVersion,
-          log,
-        });
-      } else {
-        log.debug(`new fake SAML authentication with '${role}' role`);
-        session = await createLocalSAMLSession({
-          username: `elastic_${role}`,
-          email: `elastic_${role}@elastic.co`,
-          fullname: `test ${role}`,
-          role,
-          kbnHost,
-          log,
-        });
-      }
-
-      sessionCache.set(role, session);
-      return session;
+    /**
+     * Returns sid cookie that can be added to browser context for authentication
+     *
+     * @example Set cookie in browser context to login with specific role
+     *
+     * ```ts
+     * const sidCookie = await svlUserManager.getSessionCookieForRole(role);
+     * Loading bootstrap.js in order to be on the domain that the cookie will be set for.
+     * await browser.get(deployment.getHostPort() + '/bootstrap.js');
+     * await browser.setCookie('sid', sidCookie);
+     * ```
+     */
+    async getSessionCookieForRole(role: string) {
+      const session = await getSessionByRole(role);
+      return session.getCookieValue();
     },
 
-    getCloudUserByRole(role: string) {
-      if (!roles.includes(role)) {
-        log.warning(`Role '${role}' is not listed in 'kbn-es/src/serverless_resources/roles.yml'`);
-      }
-      if (roleToUserMap.has(role)) {
-        return roleToUserMap.get(role)!;
-      } else {
-        throw new Error(`User with '${role}' role is not defined`);
-      }
+    /**
+     * Returns SAML user email and full name
+     */
+    async getUserData(role: string) {
+      const { email, fullname } = await getSessionByRole(role);
+      return { email, fullname };
     },
   };
 }

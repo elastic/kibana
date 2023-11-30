@@ -25,10 +25,10 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   return {
     async loginWithRole(role: string) {
       log.debug(`Logging in by setting browser cookie for '${role}' role`);
-      const session = await svlUserManager.getSessionByRole(role);
+      const sidCookie = await svlUserManager.getSessionCookieForRole(role);
       // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
       await browser.get(deployment.getHostPort() + '/bootstrap.js');
-      await browser.setCookie('sid', session.getCookieValue());
+      await browser.setCookie('sid', sidCookie);
       // Cookie should be already set in the browsing context, navigating to the Home page
       await browser.get(deployment.getHostPort());
       // Verifying that we are logged in

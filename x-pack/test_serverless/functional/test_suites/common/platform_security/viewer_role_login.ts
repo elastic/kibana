@@ -25,8 +25,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonPage.clickUserAvatar();
       await svlCommonPage.assertUserMenuExists();
       const actualFullname = await testSubjects.getVisibleText('contextMenuPanelTitle');
-      const session = await svlUserManager.getSessionByRole(VIEWER_ROLE);
-      expect(actualFullname).to.be(session.fullname);
+      const userData = await svlUserManager.getUserData(VIEWER_ROLE);
+      expect(actualFullname).to.be(userData.fullname);
     });
   });
 }
