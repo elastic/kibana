@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
 
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
@@ -21,6 +22,7 @@ describe('calculateRiskScores()', () => {
     logger = loggingSystemMock.createLogger();
     params = {
       afterKeys: {},
+      assetCriticalityService: assetCriticalityServiceMock.create(),
       esClient,
       logger,
       index: 'index',

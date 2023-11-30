@@ -18,6 +18,12 @@ interface IdentifierValuesByField {
   [idField: string]: string[];
 }
 
+export interface AssetCriticalityService {
+  getCriticalitiesByIdentifiers: (
+    identifiers: CriticalityIdentifier[]
+  ) => Promise<AssetCriticalityRecord[]>;
+}
+
 const isCriticalityIdentifierValid = (identifier: CriticalityIdentifier): boolean =>
   !isEmpty(identifier.id_field) && !isEmpty(identifier.id_value);
 
@@ -79,7 +85,7 @@ interface AssetCriticalityServiceFactoryOptions {
 
 export const assetCriticalityServiceFactory = ({
   assetCriticalityDataClient,
-}: AssetCriticalityServiceFactoryOptions) => ({
+}: AssetCriticalityServiceFactoryOptions): AssetCriticalityService => ({
   getCriticalitiesByIdentifiers: (identifiers: CriticalityIdentifier[]) =>
     getCriticalitiesByIdentifiers({ assetCriticalityDataClient, identifiers }),
 });

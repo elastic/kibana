@@ -47,12 +47,15 @@ export interface EcsRiskScore {
 
 export type RiskInputs = SimpleRiskInput[];
 
+/**
+ * The API response object representing a risk score
+ */
 export interface RiskScore {
   '@timestamp': string;
   id_field: string;
   id_value: string;
-  asset_criticality_level: string;
-  asset_criticality_modifier: number;
+  asset_criticality_level: string | undefined;
+  asset_criticality_modifier: number | undefined;
   calculated_level: string;
   calculated_score: number;
   calculated_score_norm: number;

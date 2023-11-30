@@ -37,6 +37,8 @@ import {
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
 } from '../../../telemetry/event_based/events';
+import { AssetCriticalityDataClient } from '../../asset_criticality/asset_criticality_data_client';
+import { assetCriticalityServiceFactory } from '../../asset_criticality/asset_criticality_service';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -71,6 +73,16 @@ export const registerRiskScoringTask = ({
     getStartServices().then(([coreStart, _]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+
+      const assetCriticalityDataClient = new AssetCriticalityDataClient({
+        esClient,
+        logger,
+        namespace,
+      });
+      const assetCriticalityService = assetCriticalityServiceFactory({
+        assetCriticalityDataClient,
+      });
+
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,
@@ -87,6 +99,7 @@ export const registerRiskScoringTask = ({
       });
 
       return riskScoreServiceFactory({
+        assetCriticalityService,
         esClient,
         logger,
         riskEngineDataClient,

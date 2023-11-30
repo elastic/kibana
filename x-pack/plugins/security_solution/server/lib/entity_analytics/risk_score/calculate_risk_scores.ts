@@ -25,6 +25,9 @@ import type {
 } from '../../../../common/entity_analytics/risk_engine';
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
+import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
+import { getCriticalityModifier } from '../asset_criticality/helpers';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
 import {
   buildCategoryCountDeclarations,
@@ -40,18 +43,22 @@ import type {
   RiskScoreBucket,
 } from '../types';
 
-const bucketToResponse = ({
+const formatForResponse = ({
   bucket,
+  criticality,
   now,
   identifierField,
 }: {
   bucket: RiskScoreBucket;
+  criticality?: AssetCriticalityRecord;
   now: string;
   identifierField: string;
 }): RiskScore => ({
   '@timestamp': now,
   id_field: identifierField,
   id_value: bucket.key[identifierField],
+  asset_criticality_level: criticality?.criticality_level,
+  asset_criticality_modifier: getCriticalityModifier(criticality?.criticality_level),
   calculated_level: bucket.risk_details.value.level,
   calculated_score: bucket.risk_details.value.score,
   calculated_score_norm: bucket.risk_details.value.normalized_score,
@@ -195,8 +202,37 @@ const buildIdentifierTypeAggregation = ({
   };
 };
 
+const processScores = async ({
+  assetCriticalityService,
+  buckets,
+  identifierField,
+  now,
+}: {
+  assetCriticalityService: AssetCriticalityService;
+  buckets: RiskScoreBucket[];
+  identifierField: string;
+  now: string;
+}): Promise<RiskScore[]> => {
+  const identifiers = buckets.map((bucket) => ({
+    id_field: identifierField,
+    id_value: bucket.key[identifierField],
+  }));
+
+  const criticalities = await assetCriticalityService.getCriticalitiesByIdentifiers(identifiers);
+
+  // TODO can we do this better? We're searching through criticalities on every bucket
+  return buckets.map((bucket) => {
+    const criticality = criticalities.find(
+      (c) => c.id_field === identifierField && c.id_value === bucket.key[identifierField]
+    );
+
+    return formatForResponse({ bucket, criticality, identifierField, now });
+  });
+};
+
 export const calculateRiskScores = async ({
   afterKeys: userAfterKeys,
+  assetCriticalityService,
   debug,
   esClient,
   filter: userFilter,
@@ -208,6 +244,7 @@ export const calculateRiskScores = async ({
   runtimeMappings,
   weights,
 }: {
+  assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
 } & CalculateScoresParams): Promise<CalculateScoresResponse> =>
@@ -274,16 +311,25 @@ export const calculateRiskScores = async ({
       user: response.aggregations.user?.after_key,
     };
 
+    const hostScores = await processScores({
+      assetCriticalityService,
+      buckets: hostBuckets,
+      identifierField: 'host.name',
+      now,
+    });
+    const userScores = await processScores({
+      assetCriticalityService,
+      buckets: userBuckets,
+      identifierField: 'user.name',
+      now,
+    });
+
     return {
       ...(debug ? { request, response } : {}),
       after_keys: afterKeys,
       scores: {
-        host: hostBuckets.map((bucket) =>
-          bucketToResponse({ bucket, identifierField: 'host.name', now })
-        ),
-        user: userBuckets.map((bucket) =>
-          bucketToResponse({ bucket, identifierField: 'user.name', now })
-        ),
+        host: hostScores,
+        user: userScores,
       },
     };
   });
