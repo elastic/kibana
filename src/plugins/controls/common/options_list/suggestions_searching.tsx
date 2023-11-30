@@ -37,10 +37,11 @@ export const isValidSearch = ({
   fieldType,
   searchTechnique,
 }: {
-  searchString: string;
+  searchString?: string;
   fieldType?: string;
   searchTechnique?: OptionsListSearchTechnique;
 }): boolean => {
+  if (!searchString) return false;
   if (searchString.length === 0) return true;
 
   switch (fieldType) {

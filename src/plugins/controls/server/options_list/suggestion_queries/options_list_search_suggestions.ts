@@ -10,9 +10,13 @@ import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 
 import { getIpRangeQuery } from '../../../common/options_list/ip_search';
-import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
+import {
+  getDefaultSearchTechnique,
+  isValidSearch,
+} from '../../../common/options_list/suggestions_searching';
 import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
+import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 import {
   getEscapedWildcardQuery,
   getIpBuckets,
@@ -20,9 +24,11 @@ import {
 } from './options_list_suggestion_query_helpers';
 
 /**
- * Suggestion aggregations
+ * Type-specific search suggestion aggregations. These queries are highly impacted by the field type.
  */
-export const getSearchSuggestionsAggregationBuilder = ({ fieldSpec }: OptionsListRequestBody) => {
+export const getSearchSuggestionsAggregationBuilder = (request: OptionsListRequestBody) => {
+  const { fieldSpec } = request;
+
   // note that date and boolean fields are non-searchable, so type-specific search aggs are not necessary;
   // number fields, on the other hand, only support exact match searching - so, this also does not need a
   // type-specific agg because it will be handled by `exactMatchSearchAggregation`
@@ -30,9 +36,12 @@ export const getSearchSuggestionsAggregationBuilder = ({ fieldSpec }: OptionsLis
     case 'ip': {
       return suggestionAggSubtypes.ip;
     }
-    default: {
+    case 'string': {
       return suggestionAggSubtypes.textOrKeywordOrNested;
     }
+    default:
+      // safe guard just in case an invalid/unsupported field type somehow got through
+      return getExactMatchAggregationBuilder();
   }
 };
 
@@ -127,14 +136,14 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
    * the "IP" query / parser should be used when the options list is built on a field of type IP.
    */
   ip: {
-    buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => {
-      const hasSearchString = searchString && searchString.length > 0;
-
-      if (!hasSearchString) {
-        // we can assume that this is only ever called with a search string
-        return undefined;
-      }
-
+    buildAggregation: ({
+      fieldName,
+      searchString,
+      fieldSpec,
+      searchTechnique,
+      sort,
+      size,
+    }: OptionsListRequestBody) => {
       const filteredSuggestions = {
         terms: {
           size,
@@ -144,9 +153,9 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       };
 
-      const ipRangeQuery = getIpRangeQuery(searchString);
+      const ipRangeQuery = getIpRangeQuery(searchString ?? '');
       if (!ipRangeQuery.validSearch) {
-        return undefined;
+        return {};
       }
       return {
         suggestions: {
@@ -166,8 +175,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       };
     },
-    parse: (rawEsResult, { searchString, sort, size }) => {
-      if (!Boolean(rawEsResult.aggregations?.suggestions)) {
+    parse: (rawEsResult, { searchString, sort, fieldSpec, size, searchTechnique }) => {
+      if (
+        !searchString ||
+        !isValidSearch({ searchString, fieldType: fieldSpec?.type, searchTechnique })
+      ) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
         return { suggestions: [], totalCardinality: 0 };

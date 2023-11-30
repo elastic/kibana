@@ -13,19 +13,18 @@ import { isValidSearch } from '../../../common/options_list/suggestions_searchin
 import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
 
-export const exactMatchAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
+/**
+ * Search for an exact match based on the provided search string.
+ * This query will be more-or-less the same for **all** field types, and it should only ever return
+ * 0 (if no match) or 1 (if a match was found) results.
+ */
+export const getExactMatchAggregationBuilder: () => OptionsListSuggestionAggregationBuilder = () =>
+  exactMatchAggregationBuilder;
+
+const exactMatchAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
   buildAggregation: ({ fieldName, fieldSpec, searchString }: OptionsListRequestBody) => {
-    if (
-      !searchString ||
-      searchString.length === 0 ||
-      !isValidSearch({
-        searchString,
-        fieldType: fieldSpec?.type,
-        searchTechnique: 'exact',
-      })
-    ) {
-      // this must be called with a search string, and that search string must be valid
-      return undefined;
+    if (!isValidSearch({ searchString, fieldType: fieldSpec?.type, searchTechnique: 'exact' })) {
+      return {};
     }
 
     const suggestionsAgg = {
@@ -34,7 +33,7 @@ export const exactMatchAggregationBuilder: OptionsListSuggestionAggregationBuild
           term: {
             [fieldName]: {
               value: searchString,
-              case_insensitive: fieldSpec?.type !== 'number' && fieldSpec?.type !== 'ip',
+              case_insensitive: fieldSpec?.type === 'string',
             },
           },
         },
@@ -65,14 +64,14 @@ export const exactMatchAggregationBuilder: OptionsListSuggestionAggregationBuild
 
     return suggestionsAgg;
   },
-  parse: (rawEsResult, request) => {
-    if (!rawEsResult) {
-      // if rawEsResult is undefined, then the request either (a) was missing a search string or
-      // (b) an invalid search request accidentally got through from the client side to the server
-      // side. Either way, return an empty result
+  parse: (rawEsResult, { searchString, fieldSpec }) => {
+    if (!isValidSearch({ searchString, fieldType: fieldSpec?.type, searchTechnique: 'exact' })) {
+      // if this is happens, that means there is an invalid search that snuck through to the server side code;
+      // so, might as well early return with no suggestions
       return { suggestions: [], totalCardinality: 0 };
     }
-    const subTypeNested = request.fieldSpec && getFieldSubtypeNested(request.fieldSpec);
+
+    const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
 
     const suggestions = get(
       rawEsResult,
@@ -86,7 +85,7 @@ export const exactMatchAggregationBuilder: OptionsListSuggestionAggregationBuild
 
     return {
       suggestions,
-      totalCardinality: suggestions.length, // should only be 0 or 1, since this is only exact match searching
+      totalCardinality: suggestions.length, // should only be 0 or 1, so it's safe to use length here
     };
   },
 };

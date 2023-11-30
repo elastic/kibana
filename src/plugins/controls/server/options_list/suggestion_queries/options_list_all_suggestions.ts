@@ -13,20 +13,21 @@ import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
 import { getSortType } from './options_list_suggestion_query_helpers';
 
-export const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
+/**
+ * Fetch all suggestions without any additional searching/filtering.
+ * This query will be more-or-less the same for **all** field types,
+ */
+export const getAllSuggestionsAggregationBuilder: () => OptionsListSuggestionAggregationBuilder =
+  () => allSuggestionsAggregationBuilder;
+
+const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
   buildAggregation: ({
     fieldName,
-    searchString,
     fieldSpec,
     sort,
     size,
     allowExpensiveQueries,
   }: OptionsListRequestBody) => {
-    if (searchString && searchString.length > 0) {
-      // this should never be called with a search string
-      return undefined;
-    }
-
     let suggestionsAgg: { suggestions: any; unique_terms?: any } = {
       suggestions: {
         terms: {
@@ -65,13 +66,7 @@ export const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationB
 
     return suggestionsAgg;
   },
-  parse: (rawEsResult, request: OptionsListRequestBody) => {
-    const { fieldSpec } = request;
-    if (!rawEsResult) {
-      // if rawEsResult is undefined, then this was called with a search string - this should not
-      // happen, but just in case, return an empty result
-      return { suggestions: [], totalCardinality: 0 };
-    }
+  parse: (rawEsResult, { fieldSpec, allowExpensiveQueries }: OptionsListRequestBody) => {
     const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
     const suggestions = get(
       rawEsResult,
@@ -82,7 +77,7 @@ export const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationB
     }, []);
     return {
       suggestions,
-      totalCardinality: request.allowExpensiveQueries
+      totalCardinality: allowExpensiveQueries
         ? get(
             rawEsResult,
             `aggregations.${
