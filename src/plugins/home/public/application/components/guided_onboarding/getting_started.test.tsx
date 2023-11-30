@@ -19,11 +19,13 @@ import { GettingStarted } from './getting_started';
 import { KEY_ENABLE_WELCOME } from '../home';
 import { GuideFiltersProps } from '@kbn/guided-onboarding/src/components/landing_page/guide_filters';
 import { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 const mockCloud = cloudMock.createSetup();
 const mockChrome = chromeServiceMock.createStartContract();
 const mockApplication = applicationServiceMock.createStartContract();
 const mockHttp = httpServiceMock.createStartContract();
+const mockShare = sharePluginMock.createSetupContract();
 const mockApiService = new ApiService();
 mockApiService.setup(mockHttp, true);
 
@@ -33,6 +35,7 @@ jest.mock('../../kibana_services', () => ({
     chrome: mockChrome,
     application: mockApplication,
     trackUiMetric: jest.fn(),
+    share: mockShare,
     guidedOnboardingService: mockApiService,
   }),
 }));
@@ -77,7 +80,7 @@ describe('getting started', () => {
     expect(findTestSubject(testBed!.component, 'onboarding--loadingIndicator').exists()).toBe(true);
   });
 
-  xtest('displays error section', async () => {
+  test('displays error section', async () => {
     mockHttp.get.mockRejectedValueOnce(new Error('request failed'));
     mockApiService.setup(mockHttp, true);
 
@@ -88,7 +91,7 @@ describe('getting started', () => {
     expect(findTestSubject(testBed!.component, 'onboarding--errorSection').exists()).toBe(true);
   });
 
-  xtest('skip button should disable home welcome screen', async () => {
+  test('skip button should disable home welcome screen', async () => {
     mockHttp.get.mockResolvedValueOnce({ state: [] });
     mockApiService.setup(mockHttp, true);
 
