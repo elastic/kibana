@@ -148,7 +148,6 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   setConsumer?: (consumer: RuleCreationValidConsumer | null) => void;
-  selectedConsumer?: RuleCreationValidConsumer | null;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   hideGrouping?: boolean;
@@ -179,7 +178,6 @@ export const RuleForm = ({
   hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
-  selectedConsumer,
   validConsumers,
   onChangeMetaData,
   useRuleProducer,
