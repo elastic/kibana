@@ -42,8 +42,7 @@ export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }>
 export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipeline }) => {
   const modelIdDisplay = pipeline.modelId.length > 0 ? pipeline.modelId : MODEL_REDACTED_VALUE;
   return (
-    // TODO: Add model state & pipeline info link
-    // TODO: Test rendering when pipeline.modelType.length == 0
+    // TODO: Add model state & pipeline info link. Make sure to check mobile rendering when doing this!
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiTitle size="xxs">
@@ -51,19 +50,18 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+          <EuiFlexItem grow={pipeline.modelType.length <= 0}>
             <EuiText size="s">{modelIdDisplay}</EuiText>
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               {/* Wrap in a div to prevent the badge from growing to a whole row on mobile*/}
               <div>
                 <MLModelTypeBadge type={pipeline.modelType} />
               </div>
             </EuiFlexItem>
           )}
-          <EuiFlexItem />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
