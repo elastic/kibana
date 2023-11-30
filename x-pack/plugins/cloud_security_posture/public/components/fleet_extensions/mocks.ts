@@ -162,8 +162,15 @@ const getPolicyMock = (
   };
 
   const azureVarsMock = {
+    'azure.credentials.type': { value: 'arm_template', type: 'text' },
     'azure.account_type': { type: 'text' },
-    'azure.credentials.type': { type: 'text' },
+    'azure.credentials.tenant_id': { type: 'text' },
+    'azure.credentials.client_id': { type: 'text' },
+    'azure.credentials.client_secret': { type: 'text' },
+    'azure.credentials.client_certificate_path': { type: 'text' },
+    'azure.credentials.client_certificate_password': { type: 'text' },
+    'azure.credentials.client_username': { type: 'text' },
+    'azure.credentials.client_password': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };

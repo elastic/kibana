@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { v4 } from 'uuid';
-import { isEmpty, omitBy } from 'lodash';
+import { isEmpty, last, omitBy } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,6 +15,15 @@ import { Message, MessageRole } from '../../common';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
 import type { ObservabilityAIAssistantChatService } from '../types';
+import { ChatState } from '../hooks/use_chat';
+
+function safeParse(jsonStr: string) {
+  try {
+    return JSON.parse(jsonStr);
+  } catch (err) {
+    return jsonStr;
+  }
+}
 
 function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   let value: object;
@@ -22,7 +31,7 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   if (!message.name) {
     const name = message.function_call?.name;
     const args = message.function_call?.arguments
-      ? JSON.parse(message.function_call.arguments)
+      ? safeParse(message.function_call.arguments)
       : undefined;
 
     value = {
@@ -32,9 +41,9 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   } else {
     const content =
       message.role !== MessageRole.Assistant && message.content
-        ? JSON.parse(message.content)
+        ? safeParse(message.content)
         : message.content;
-    const data = message.data ? JSON.parse(message.data) : undefined;
+    const data = message.data ? safeParse(message.data) : undefined;
     value = omitBy(
       {
         content,
@@ -61,26 +70,36 @@ export function getTimelineItemsfromConversation({
   hasConnector,
   messages,
   startedFrom,
+  chatState,
 }: {
   chatService: ObservabilityAIAssistantChatService;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   hasConnector: boolean;
   messages: Message[];
   startedFrom?: StartedFrom;
+  chatState: ChatState;
 }): ChatTimelineItem[] {
-  return [
+  const messagesWithoutSystem = messages.filter(
+    (message) => message.message.role !== MessageRole.System
+  );
+
+  const items: ChatTimelineItem[] = [
     {
       id: v4(),
       actions: { canCopy: false, canEdit: false, canGiveFeedback: false, canRegenerate: false },
       display: { collapsed: false, hide: false },
       currentUser,
       loading: false,
-      role: MessageRole.User,
+      message: {
+        '@timestamp': new Date().toISOString(),
+        message: { role: MessageRole.User },
+      },
       title: i18n.translate('xpack.observabilityAiAssistant.conversationStartTitle', {
         defaultMessage: 'started a conversation',
       }),
+      role: MessageRole.User,
     },
-    ...messages.map((message, index) => {
+    ...messagesWithoutSystem.map((message, index) => {
       const id = v4();
 
       let title: React.ReactNode = '';
@@ -88,8 +107,10 @@ export function getTimelineItemsfromConversation({
       let element: React.ReactNode | undefined;
 
       const prevFunctionCall =
-        message.message.name && messages[index - 1] && messages[index - 1].message.function_call
-          ? messages[index - 1].message.function_call
+        message.message.name &&
+        messagesWithoutSystem[index - 1] &&
+        messagesWithoutSystem[index - 1].message.function_call
+          ? messagesWithoutSystem[index - 1].message.function_call
           : undefined;
 
       let role = message.message.function_call?.trigger || message.message.role;
@@ -107,10 +128,6 @@ export function getTimelineItemsfromConversation({
       };
 
       switch (role) {
-        case MessageRole.System:
-          display.hide = true;
-          break;
-
         case MessageRole.User:
           actions.canCopy = true;
           actions.canGiveFeedback = false;
@@ -120,15 +137,14 @@ export function getTimelineItemsfromConversation({
 
           // User executed a function:
           if (message.message.name && prevFunctionCall) {
-            let parsedContent;
+            let isError = false;
             try {
-              parsedContent = JSON.parse(message.message.content ?? 'null');
+              const parsedContent = JSON.parse(message.message.content ?? 'null');
+              isError =
+                parsedContent && typeof parsedContent === 'object' && 'error' in parsedContent;
             } catch (error) {
-              parsedContent = message.message.content;
+              isError = true;
             }
-
-            const isError =
-              parsedContent && typeof parsedContent === 'object' && 'error' in parsedContent;
 
             title = !isError ? (
               <FormattedMessage
@@ -190,7 +206,7 @@ export function getTimelineItemsfromConversation({
             display.collapsed = false;
 
             if (startedFrom === 'contextualInsight') {
-              const firstUserMessageIndex = messages.findIndex(
+              const firstUserMessageIndex = messagesWithoutSystem.findIndex(
                 (el) => el.message.role === MessageRole.User
               );
 
@@ -252,7 +268,53 @@ export function getTimelineItemsfromConversation({
         currentUser,
         function_call: message.message.function_call,
         loading: false,
+        message,
       };
     }),
   ];
+
+  const isLoading = chatState === ChatState.Loading;
+
+  let lastMessage = last(items);
+
+  const isNaturalLanguageOnlyAnswerFromAssistant =
+    lastMessage?.message.message.role === MessageRole.Assistant &&
+    !lastMessage.message.message.function_call?.name;
+
+  const addLoadingPlaceholder = isLoading && !isNaturalLanguageOnlyAnswerFromAssistant;
+
+  if (addLoadingPlaceholder) {
+    items.push({
+      id: v4(),
+      actions: {
+        canCopy: false,
+        canEdit: false,
+        canGiveFeedback: false,
+        canRegenerate: false,
+      },
+      display: {
+        collapsed: false,
+        hide: false,
+      },
+      content: '',
+      currentUser,
+      loading: chatState === ChatState.Loading,
+      role: MessageRole.Assistant,
+      title: '',
+      message: {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.Assistant,
+          content: '',
+        },
+      },
+    });
+    lastMessage = last(items);
+  }
+
+  if (isLoading && lastMessage) {
+    lastMessage.loading = isLoading;
+  }
+
+  return items;
 }
