@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 import { createCloudSAMLSession, createLocalSAMLSession } from './saml_auth';
 
 export interface User {
-  readonly username: string;
+  readonly email: string;
   readonly password: string;
 }
 
@@ -23,11 +23,11 @@ export type Role = string;
 
 export class Session {
   readonly cookie;
-  readonly username;
+  readonly email;
   readonly fullname;
-  constructor(cookie: Cookie, username: string, fullname: string) {
+  constructor(cookie: Cookie, email: string, fullname: string) {
     this.cookie = cookie;
-    this.username = username;
+    this.email = email;
     this.fullname = fullname;
   }
 

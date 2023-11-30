@@ -13,20 +13,27 @@ import { parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { Session } from './svl_user_manager';
 
-export interface SAMLSessionParams {
-  username: string;
+export interface CloudSamlSessionParams {
+  email: string;
   password: string;
   kbnHost: string;
   kbnVersion: string;
   log: ToolingLog;
 }
 
-export interface FakeSAMLSessionParams {
+export interface LocalSamlSessionParams {
   username: string;
   email: string;
   fullname: string;
   role: string;
   kbnHost: string;
+  log: ToolingLog;
+}
+
+export interface CreateSamlSessionParams {
+  hostname: string;
+  email: string;
+  password: string;
   log: ToolingLog;
 }
 
@@ -51,12 +58,8 @@ const getCloudUrl = (hostname: string, pathname: string) => {
   });
 };
 
-const createCloudSession = async (
-  hostname: string,
-  email: string,
-  password: string,
-  log: ToolingLog
-) => {
+const createCloudSession = async (params: CreateSamlSessionParams) => {
+  const { hostname, email, password, log } = params;
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/users/_login');
   const sessionResponse: AxiosResponse = await axios.request({
     url: cloudLoginUrl,
@@ -159,17 +162,17 @@ const finishSAMLHandshake = async ({
   return getSessionCookie(authResponse!.headers['set-cookie']![0])!;
 };
 
-export const createCloudSAMLSession = async (params: SAMLSessionParams) => {
-  const { username, password, kbnHost, kbnVersion, log } = params;
-  const hostName = getCloudHostName();
-  const { token, fullname } = await createCloudSession(hostName, username, password, log);
+export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => {
+  const { email, password, kbnHost, kbnVersion, log } = params;
+  const hostname = getCloudHostName();
+  const { token, fullname } = await createCloudSession({ hostname, email, password, log });
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion);
   const samlResponse = await createSAMLResponse(location, token);
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
-  return new Session(cookie, username, fullname);
+  return new Session(cookie, email, fullname);
 };
 
-export const createLocalSAMLSession = async (params: FakeSAMLSessionParams) => {
+export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => {
   const { username, email, fullname, role, kbnHost, log } = params;
   const samlResponse = await createMockedSAMLResponse({
     kibanaUrl: kbnHost + '/api/security/saml/callback',
@@ -179,5 +182,5 @@ export const createLocalSAMLSession = async (params: FakeSAMLSessionParams) => {
     roles: [role],
   });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, log });
-  return new Session(cookie, username, fullname);
+  return new Session(cookie, email, fullname);
 };
