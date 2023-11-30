@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
+import type { LangChainTracer } from 'langchain/callbacks';
 import { RequestBody, ResponseBody } from '../types';
 
 export interface AgentExecutorParams {
@@ -22,10 +23,31 @@ export interface AgentExecutorParams {
   logger: Logger;
   request: KibanaRequest<unknown, unknown, RequestBody>;
   elserId?: string;
+  traceOptions?: TraceOptions;
 }
 
 export type AgentExecutorResponse = Promise<ResponseBody>;
 
 export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
 
-export type AgentExecutorEvaluator = (langChainMessages: BaseMessage[]) => AgentExecutorResponse;
+export type AgentExecutorEvaluator = (
+  langChainMessages: BaseMessage[],
+  exampleId?: string
+) => AgentExecutorResponse;
+
+export interface AgentExecutorEvaluatorWithMetadata {
+  agentEvaluator: AgentExecutorEvaluator;
+  metadata: {
+    connectorName: string;
+    runName: string;
+  };
+}
+
+export interface TraceOptions {
+  evaluationId?: string;
+  exampleId?: string;
+  projectName?: string;
+  runName?: string;
+  tags?: string[];
+  tracers?: LangChainTracer[];
+}
