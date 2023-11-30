@@ -36,6 +36,7 @@ export const API_ACTION_NAME = {
   RESET_ALL: 'reset_all',
   RESET_ERRORS: 'reset_errors',
   RESET_GROUPS: 'reset_groups',
+  SET_ZERO_DOCS_FALLBACK: 'set_zero_docs_fallback',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
@@ -210,6 +211,20 @@ export function updateLoadingStateAction(
   };
 }
 
+interface ApiActionSetZeroDocsFallback {
+  type: typeof API_ACTION_NAME.SET_ZERO_DOCS_FALLBACK;
+  payload: boolean;
+}
+
+export function setZeroDocsFallback(
+  payload: ApiActionSetZeroDocsFallback['payload']
+): ApiActionSetZeroDocsFallback {
+  return {
+    type: API_ACTION_NAME.SET_ZERO_DOCS_FALLBACK,
+    payload,
+  };
+}
+
 export type AiopsLogRateAnalysisApiAction<T extends ApiVersion> =
   | ApiActionAddSignificantItems<T>
   | ApiActionAddSignificantItemsGroup<T>
@@ -220,4 +235,5 @@ export type AiopsLogRateAnalysisApiAction<T extends ApiVersion> =
   | ApiActionResetAll
   | ApiActionResetErrors
   | ApiActionResetGroups
-  | ApiActionUpdateLoadingState;
+  | ApiActionUpdateLoadingState
+  | ApiActionSetZeroDocsFallback;
