@@ -36,7 +36,6 @@ interface AlertParams {
     | ML_ANOMALY_SEVERITY.MINOR
     | ML_ANOMALY_SEVERITY.WARNING;
   anomalyConectorType?:
-    | ANOMALY_DETECTOR_TYPES.ALL
     | ANOMALY_DETECTOR_TYPES.LATENCY
     | ANOMALY_DETECTOR_TYPES.THROUGHPUT
     | ANOMALY_DETECTOR_TYPES.FAILED_TRANSACTION_RATE;
@@ -71,7 +70,7 @@ export function AnomalyRuleType(props: Props) {
       windowSize: 30,
       windowUnit: TIME_UNITS.MINUTE,
       anomalySeverityType: ML_ANOMALY_SEVERITY.CRITICAL,
-      anomalyDetectorType: ANOMALY_DETECTOR_TYPES.ALL,
+      anomalyDetectorType: ANOMALY_DETECTOR_TYPES.LATENCY,
       environment: ENVIRONMENT_ALL.value,
     }
   );

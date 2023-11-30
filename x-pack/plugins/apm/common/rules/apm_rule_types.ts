@@ -295,19 +295,12 @@ export type AnomalyAlertSeverityType = ValuesType<
 >['type'];
 
 export enum ANOMALY_DETECTOR_TYPES {
-  ALL = 'all',
   LATENCY = 'latency',
   THROUGHPUT = 'throughput',
   FAILED_TRANSACTION_RATE = 'failed_transaction_rate',
 }
 
 export const ANOMALY_ALERT_DETECTOR_TYPES = [
-  {
-    type: ANOMALY_DETECTOR_TYPES.ALL,
-    label: i18n.translate('xpack.apm.alerts.anomalyDetector.allLabel', {
-      defaultMessage: 'all',
-    }),
-  },
   {
     type: ANOMALY_DETECTOR_TYPES.LATENCY,
     label: i18n.translate('xpack.apm.alerts.anomalyDetector.latencyLabel', {
