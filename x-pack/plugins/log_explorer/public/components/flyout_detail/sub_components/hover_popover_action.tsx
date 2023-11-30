@@ -14,8 +14,6 @@ import {
   EuiPopoverTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { ValuesType } from 'utility-types';
-import { LogDocument } from '..';
 
 export interface HoverActionType {
   id: string;
@@ -28,7 +26,7 @@ export interface HoverActionType {
 interface HoverPopoverActionProps {
   children: React.ReactChild;
   actions: HoverActionType[];
-  title: ValuesType<LogDocument['flattened']>;
+  title: React.ReactNode;
 }
 
 export const HoverActionPopover = ({ children, actions, title }: HoverPopoverActionProps) => {
