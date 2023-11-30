@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SetAlertAssigneesRequestBody } from './set_alert_assignees_route';
+import type { SetAlertAssigneesRequestBody } from './set_alert_assignees_route.gen';
 
 export const getSetAlertAssigneesRequestMock = (
   assigneesToAdd: string[] = [],
