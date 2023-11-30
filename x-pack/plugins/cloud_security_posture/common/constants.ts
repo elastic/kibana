@@ -10,7 +10,6 @@ import {
   VulnSeverity,
   AwsCredentialsTypeFieldMap,
   GcpCredentialsTypeFieldMap,
-  AzureCredentialsTypeFieldMap,
 } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
@@ -161,7 +160,25 @@ export const GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP: GcpCredentialsTypeFieldMap = {
   'credentials-json': ['gcp.credentials.json'],
 };
 
-export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP: AzureCredentialsTypeFieldMap = {
-  manual: [],
+export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
   arm_template: [],
+  service_principal_with_client_secret: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_secret',
+  ],
+  service_principal_with_client_certificate: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_certificate_path',
+    'azure.credentials.client_certificate_password',
+  ],
+  service_principal_with_client_username_and_password: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_username',
+    'azure.credentials.client_password',
+  ],
+  managed_identity: [],
+  manual: [],
 };
