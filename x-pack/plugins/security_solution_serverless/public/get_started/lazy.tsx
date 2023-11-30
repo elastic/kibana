@@ -12,8 +12,8 @@ const GetStartedLazy = lazy(() => import('./get_started'));
 
 const centerLogoStyle = { display: 'flex', margin: 'auto' };
 
-export const GetStarted = ({ productTypes, indicesExist }: GetStartedProps) => (
+export const GetStarted = ({ productTypes }: GetStartedProps) => (
   <Suspense fallback={<EuiLoadingLogo logo="logoSecurity" size="xl" style={centerLogoStyle} />}>
-    <GetStartedLazy productTypes={productTypes} indicesExist={indicesExist} />
+    <GetStartedLazy productTypes={productTypes} />
   </Suspense>
 );

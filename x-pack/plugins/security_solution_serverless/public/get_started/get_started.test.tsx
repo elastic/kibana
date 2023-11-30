@@ -37,6 +37,9 @@ jest.mock('@kbn/security-solution-navigation', () => ({
     landing: 'landing',
   },
 }));
+jest.mock('@kbn/security-solution-plugin/public', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
+}));
 
 const productTypes = [
   { product_line: 'security', product_tier: 'essentials' },

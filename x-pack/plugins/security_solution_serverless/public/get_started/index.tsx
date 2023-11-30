@@ -15,10 +15,10 @@ export const getSecurityGetStartedComponent = (
   services: Services,
   productTypes: SecurityProductTypes
 ): React.ComponentType<{ indicesExist?: boolean }> =>
-  function GetStartedComponent({ indicesExist }: { indicesExist?: boolean }) {
+  function GetStartedComponent() {
     return (
       <ServicesProvider services={services}>
-        <GetStarted productTypes={productTypes} indicesExist={indicesExist} />
+        <GetStarted productTypes={productTypes} />
       </ServicesProvider>
     );
   };
