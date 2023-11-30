@@ -20,7 +20,7 @@ paths:
                 - ids
               properties:
                 assignees:
-                  $ref: '#/components/schemas/Assignees'
+                  $ref: '#/components/schemas/AlertAssignees'
                   description: Details about the assignees to assign and unassign.
                 ids:
                   $ref: '#/components/schemas/RuleIds'
@@ -33,7 +33,7 @@ paths:
 
 components:
   schemas:
-    Assignees:
+    AlertAssignees:
       type: object
       required:
         - add

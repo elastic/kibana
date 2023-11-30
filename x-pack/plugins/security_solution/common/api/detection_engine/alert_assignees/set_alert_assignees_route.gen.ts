@@ -14,8 +14,8 @@ import { z } from 'zod';
 
 import { NonEmptyString } from '../model/rule_schema/common_attributes.gen';
 
-export type Assignees = z.infer<typeof Assignees>;
-export const Assignees = z.object({
+export type AlertAssignees = z.infer<typeof AlertAssignees>;
+export const AlertAssignees = z.object({
   /**
    * A list of users ids to assign.
    */
@@ -37,7 +37,7 @@ export const SetAlertAssigneesRequestBody = z.object({
   /**
    * Details about the assignees to assign and unassign.
    */
-  assignees: Assignees,
+  assignees: AlertAssignees,
   /**
    * List of alerts ids to assign and unassign passed assignees.
    */

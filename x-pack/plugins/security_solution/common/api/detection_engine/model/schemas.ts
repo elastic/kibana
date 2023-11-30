@@ -111,12 +111,5 @@ export const alert_tags = t.type({
 
 export type AlertTags = t.TypeOf<typeof alert_tags>;
 
-export const alert_assignees = t.type({
-  add: t.array(NonEmptyString),
-  remove: t.array(NonEmptyString),
-});
-
-export type AlertAssignees = t.TypeOf<typeof alert_assignees>;
-
 export const user_search_term = t.string;
 export type UserSearchTerm = t.TypeOf<typeof user_search_term>;
