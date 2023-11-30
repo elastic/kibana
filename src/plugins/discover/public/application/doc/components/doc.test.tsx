@@ -18,7 +18,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
-import { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/hooks';
+import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
 
 const mockSearchApi = jest.fn();
 
