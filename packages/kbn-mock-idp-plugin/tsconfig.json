@@ -19,7 +19,6 @@
     "@kbn/core-plugins-browser",
     "@kbn/core-plugins-server",
     "@kbn/core-theme-browser",
-    "@kbn/dev-utils",
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
