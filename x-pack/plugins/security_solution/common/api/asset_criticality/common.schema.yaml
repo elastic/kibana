@@ -18,11 +18,16 @@ components:
       in: query
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/IdField'
       example: 'host.name'
       description: The field representing the ID.
 
   schemas:
+    IdField:
+      type: string
+      enum:
+        - 'host.name'
+        - 'user.name'
     AssetCriticalityRecordIdParts:
       type: object
       properties:
@@ -30,7 +35,7 @@ components:
           type: string
           description: The ID value of the asset.
         id_field:
-          type: string
+          $ref: '#/components/schemas/IdField'
           example: 'host.name'
           description: The field representing the ID.
       required:

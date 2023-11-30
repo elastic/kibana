@@ -113,6 +113,18 @@ export default ({ getService }: FtrProviderContext) => {
           expectStatusCode: 400,
         });
       });
+
+      it('should return 400 if id_field is invalid', async () => {
+        const assetCriticality = {
+          id_field: 'invalid',
+          id_value: 'host-01',
+          criticality_level: 'important',
+        };
+
+        await assetCriticalityRoutes.upsert(assetCriticality, {
+          expectStatusCode: 400,
+        });
+      });
     });
 
     describe('read', () => {
@@ -131,6 +143,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result.id_value).to.eql('host-02');
         expect(result.criticality_level).to.eql('important');
         expect(result['@timestamp']).to.be.a('string');
+      });
+
+      it('should return a 400 if id_field is invalid', async () => {
+        await assetCriticalityRoutes.get('invalid', 'host-02', {
+          expectStatusCode: 400,
+        });
       });
     });
 

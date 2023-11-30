@@ -93,7 +93,11 @@ export const assetCriticalityRouteHelpersFactory = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(200);
   },
-  get: async (idField: string, idValue: string) => {
+  get: async (
+    idField: string,
+    idValue: string,
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
     const qs = querystring.stringify({ id_field: idField, id_value: idValue });
     const route = `${routeWithNamespace(ASSET_CRITICALITY_URL, namespace)}?${qs}`;
     return supertest
@@ -101,6 +105,6 @@ export const assetCriticalityRouteHelpersFactory = (
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .expect(200);
+      .expect(expectStatusCode);
   },
 });
