@@ -164,8 +164,16 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertTransformDescriptionInputExists();
           await transform.wizard.setTransformDescription(pivotTransformDescription);
 
-          await transform.testExecution.logTestStep('inputs the destination index');
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
+          await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
+          await transform.wizard.assertDestinationIndexValue(pivotTransformId);
           await transform.wizard.setDestinationIndex(pivotTransformDestinationIndex);
 
           await a11y.testAppSnapshot();
@@ -250,8 +258,16 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertTransformDescriptionInputExists();
           await transform.wizard.setTransformDescription(latestTransformDescription);
 
-          await transform.testExecution.logTestStep('inputs the destination index');
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
+          await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
+          await transform.wizard.assertDestinationIndexValue(latestTransformId);
           await transform.wizard.setDestinationIndex(latestTransformDestinationIndex);
 
           await a11y.testAppSnapshot();
