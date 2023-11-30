@@ -71,6 +71,7 @@ import type {
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
+import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 
 export interface ITelemetryReceiver {
   start(
@@ -125,17 +126,10 @@ export interface ITelemetryReceiver {
     TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
   >;
 
-  fetchDiagnosticAlertsBatch(
+  fetchDiagnosticAlerts(
     executeFrom: string,
-    executeTo: string,
-    pitId: string,
-    searchAfterValue: SortResults | undefined
-  ): Promise<{
-    moreToFetch: boolean;
-    newPitId: string;
-    searchAfter: SortResults | undefined;
-    alerts: TelemetryEvent[];
-  }>;
+    executeTo: string
+  ): AsyncGenerator<TelemetryEvent[], void, unknown>;
 
   fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
 
@@ -419,19 +413,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.esClient.search(query, { meta: true });
   }
 
-  public async fetchDiagnosticAlertsBatch(
-    executeFrom: string,
-    executeTo: string,
-    pitId: string,
-    searchAfterValue: SortResults | undefined
-  ) {
+  public async *fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
     }
 
-    let newPitId = pitId;
+    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
     let fetchMore = true;
-    let searchAfter: SortResults | undefined = searchAfterValue;
+    let searchAfter: SortResults | undefined;
 
     const query: ESSearchRequest = {
       query: {
@@ -457,46 +446,42 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
 
     let response = null;
-    try {
-      response = await this.esClient.search(query);
-      const numOfHits = response?.hits.hits.length;
+    while (fetchMore) {
+      try {
+        response = await this.esClient.search(query);
+        const numOfHits = response?.hits.hits.length;
 
-      if (numOfHits > 0) {
-        const lastHit = response?.hits.hits[numOfHits - 1];
-        searchAfter = lastHit?.sort;
+        if (numOfHits > 0) {
+          const lastHit = response?.hits.hits[numOfHits - 1];
+          searchAfter = lastHit?.sort;
+        } else {
+          fetchMore = false;
+        }
+
+        tlog(this.logger, `Diagnostic alerts to return: ${numOfHits}`);
+        fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
+      } catch (e) {
+        tlog(this.logger, e);
+        fetchMore = false;
       }
 
-      fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
-    } catch (e) {
-      tlog(this.logger, e);
-      fetchMore = false;
+      if (response == null) {
+        await this.closePointInTime(pitId);
+        return;
+      }
+
+      const alerts = response?.hits.hits.flatMap((h) =>
+        h._source != null ? ([h._source] as TelemetryEvent[]) : []
+      );
+
+      if (response?.pit_id != null) {
+        pitId = response?.pit_id;
+      }
+
+      yield alerts;
     }
 
-    if (response == null) {
-      return {
-        moreToFetch: false,
-        newPitId: pitId,
-        searchAfter,
-        alerts: [] as TelemetryEvent[],
-      };
-    }
-
-    const alerts: TelemetryEvent[] = response.hits.hits.flatMap((h) =>
-      h._source != null ? ([h._source] as TelemetryEvent[]) : []
-    );
-
-    if (response?.pit_id != null) {
-      newPitId = response?.pit_id;
-    }
-
-    tlog(this.logger, `Diagnostic alerts to return: ${response.hits.hits.length}`);
-
-    return {
-      moreToFetch: fetchMore,
-      newPitId,
-      searchAfter,
-      alerts,
-    };
+    this.closePointInTime(pitId);
   }
 
   public async fetchPolicyConfigs(id: string) {
