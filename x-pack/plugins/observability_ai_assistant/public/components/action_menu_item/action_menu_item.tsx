@@ -6,19 +6,15 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
-import { useConversation } from '../../hooks/use_conversation';
-import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatFlyout } from '../chat/chat_flyout';
 
 export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
-  const connectors = useGenAIConnectors();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -32,14 +28,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
     [service, isOpen]
   );
 
-  const [conversationId, setConversationId] = useState<string>();
-
-  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
-    useConversation({
-      conversationId,
-      connectorId: connectors.selectedConnector,
-      chatService: chatService.value,
-    });
+  const initialMessages = useMemo(() => [], []);
 
   if (!service.isEnabled()) {
     return null;
@@ -72,26 +61,12 @@ export function ObservabilityAIAssistantActionMenuItem() {
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
           <ChatFlyout
+            initialTitle=""
+            initialMessages={initialMessages}
             isOpen={isOpen}
-            title={conversation.value?.conversation.title ?? EMPTY_CONVERSATION_TITLE}
-            messages={displayedMessages}
-            conversationId={conversationId}
             startedFrom="appTopNavbar"
             onClose={() => {
-              setIsOpen(() => false);
-            }}
-            onChatComplete={(messages) => {
-              save(messages)
-                .then((nextConversation) => {
-                  setConversationId(nextConversation.conversation.id);
-                })
-                .catch(() => {});
-            }}
-            onChatUpdate={(nextMessages) => {
-              setDisplayedMessages(nextMessages);
-            }}
-            onChatTitleSave={(newTitle) => {
-              saveTitle(newTitle);
+              setIsOpen(false);
             }}
           />
         </ObservabilityAIAssistantChatServiceProvider>
