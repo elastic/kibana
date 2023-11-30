@@ -12,7 +12,8 @@ import { generateHostsData, generateServicesData } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const synthtrace = getService('infraSynthtraceEsClient');
+  const synthtraceApm = getService('apmSynthtraceEsClient');
+  const synthtraceInfra = getService('infraSynthtraceEsClient');
 
   describe('GET /assets', () => {
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
@@ -24,8 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return all assets', async () => {
       await Promise.all([
-        synthtrace.index(generateHostsData({ from, to, count: 5 })),
-        synthtrace.index(generateServicesData({ from, to, count: 5 })),
+        synthtraceInfra.index(generateHostsData({ from, to, count: 5 })),
+        synthtraceApm.index(generateServicesData({ from, to, count: 5 })),
       ]);
 
       const response = await supertest
