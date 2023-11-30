@@ -50,6 +50,7 @@ import {
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
+import { PublicAlertFactory } from '../alert/create_alert_factory';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -481,7 +482,12 @@ export class AlertsClient<
     return this.legacyAlertsClient.getAlertsToSerialize();
   }
 
-  public factory() {
+  public factory(): PublicAlertFactory<
+    LegacyState,
+    LegacyContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > {
     return this.legacyAlertsClient.factory();
   }
 

@@ -11,6 +11,7 @@ import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
+  RecoveredActionGroup,
   RecoveredActionGroupId,
   RuleTypeParams,
   RuleTypeState,
@@ -78,6 +79,7 @@ export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   {},
   AnomalyDetectionAlertContext,
   typeof ANOMALY_SCORE_MATCH_GROUP_ID,
+  typeof RecoveredActionGroup.id,
   MlAnomalyDetectionAlert
 >;
 

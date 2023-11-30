@@ -14,6 +14,7 @@ import {
 } from '@kbn/task-manager-plugin/server/task';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { parseDuration } from '@kbn/actions-plugin/server/lib/parse_date';
+import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import {
   RuleTypeRegistry,
   AdHocRuleRunParams,
@@ -25,16 +26,17 @@ import {
 } from '../types';
 import type { TaskRunnerContext } from '../task_runner/types';
 import { getFakeKibanaRequest } from '../task_runner/rule_loader';
-import { ErrorWithReason, validateRuleTypeParams } from '../lib';
+import { ElasticsearchError, ErrorWithReason, validateRuleTypeParams } from '../lib';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { IAlertsClient, UntypedAlertsClient } from '../alerts_client/types';
-import { LegacyAlertsClient } from '../alerts_client';
 import { RuleRunner } from '../task_runner/rule_runner';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getExecutorServices } from '../task_runner/get_executor_services';
 import { getTimeRange } from '../lib/get_time_range';
+import { TaskRunnerTimer, TaskRunnerTimerSpan } from '../task_runner/task_runner_timer';
+import { asErr, asOk, map, Result } from '../lib/result_type';
+import { ILastRun, lastRunFromError, lastRunFromState } from '../lib/last_run_status';
 
 type AdHocRuleRunParamResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
 interface AdHocRuleRunData extends LoadedIndirectParams<AdHocRuleRunParams> {
@@ -67,11 +69,18 @@ export class AdHocTaskRunner {
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly internalSavedObjectsRepository: ISavedObjectsRepository;
+  private timer: TaskRunnerTimer;
   private searchAbortController: AbortController;
   private cancelled: boolean;
   private ruleMonitoring: RuleMonitoringService;
   private ruleResult: RuleResultService;
-  private ruleRunner: RuleRunner;
+  private ruleRunner: RuleRunner<
+    RuleAlertData,
+    AlertInstanceState,
+    AlertInstanceContext,
+    string,
+    string
+  >;
   private shouldDeleteTask: boolean = false;
   private adHocRuleRunData?: AdHocRuleRunParamResult<AdHocRuleRunData>;
 
@@ -81,30 +90,25 @@ export class AdHocTaskRunner {
     this.taskInstance = taskInstance;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
+    this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuidv4();
     this.ruleMonitoring = new RuleMonitoringService();
     this.ruleResult = new RuleResultService();
-    this.ruleRunner = new RuleRunner({
+    this.ruleRunner = new RuleRunner<
+      RuleAlertData,
+      AlertInstanceState,
+      AlertInstanceContext,
+      string,
+      string
+    >({
       context: this.context,
       logger: this.logger,
+      timer: this.timer,
       runCancelled: () => this.cancelled,
     });
-  }
-
-  private getAADRuleData(ruleId: string, rule: AdHocRuleRunParams['rule'], spaceId: string) {
-    return {
-      consumer: rule.consumer,
-      executionId: this.executionId,
-      id: ruleId,
-      name: rule.name,
-      parameters: rule.params,
-      revision: rule.revision,
-      spaceId,
-      tags: rule.tags,
-    };
   }
 
   private async runRule({
@@ -114,73 +118,14 @@ export class AdHocTaskRunner {
   }: RunRuleParams): Promise<void> {
     const { rule, duration, currentStart, end } = ruleRunParams;
     const {
-      params: { ruleId, spaceId },
+      params: { spaceId },
     } = this.taskInstance;
 
     this.logger.info(`taskInstance: ${JSON.stringify(this.taskInstance)}`);
 
-    const namespace = this.context.spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
-    const ruleLabel = `${ruleType.id}:${ruleId}: '${rule.name}'`;
+    const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
     const ruleRunMetricsStore = new RuleRunMetricsStore();
-    const alertsClientParams = { logger: this.logger, ruleType };
-
-    this.alertingEventLogger.initialize({
-      ruleId,
-      ruleType,
-      consumer: rule.consumer,
-      spaceId,
-      executionId: this.executionId,
-      taskScheduledAt: this.taskInstance.scheduledAt,
-      ...(namespace ? { namespace } : {}),
-    });
-
-    this.alertingEventLogger.start(this.runDate);
-
-    // Create AlertsClient if rule type has registered an alerts context
-    // with the framework. The AlertsClient will handle reading and
-    // writing from alerts-as-data indices and eventually
-    // we will want to migrate all the processing of alerts out
-    // of the LegacyAlertsClient and into the AlertsClient.
-    let alertsClient: IAlertsClient<
-      RuleAlertData,
-      AlertInstanceState,
-      AlertInstanceContext,
-      string,
-      string
-    >;
-
-    try {
-      const client =
-        (await this.context.alertsService?.createAlertsClient<
-          RuleAlertData,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          string
-        >({
-          ...alertsClientParams,
-          namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
-          rule: this.getAADRuleData(ruleId, rule, spaceId),
-        })) ?? null;
-
-      alertsClient = client
-        ? client
-        : new LegacyAlertsClient<AlertInstanceState, AlertInstanceContext, string, string>(
-            alertsClientParams
-          );
-    } catch (err) {
-      this.logger.error(
-        `Error initializing AlertsClient for context ${ruleType.alerts?.context}. Using legacy alerts client instead. - ${err.message}`
-      );
-
-      alertsClient = new LegacyAlertsClient<
-        AlertInstanceState,
-        AlertInstanceContext,
-        string,
-        string
-      >(alertsClientParams);
-    }
 
     const services = await getExecutorServices({
       context: this.context,
@@ -210,7 +155,6 @@ export class AdHocTaskRunner {
 
     await this.ruleRunner.run({
       alertingEventLogger: this.alertingEventLogger,
-      alertsClient: alertsClient as unknown as UntypedAlertsClient,
       executionId: this.executionId,
       executorServices: {
         ...services,
@@ -238,7 +182,7 @@ export class AdHocTaskRunner {
         updatedAt: rule.updatedAt,
         muteAll: false,
       },
-      ruleId,
+      ruleId: rule.id,
       ruleLabel,
       ruleRunMetricsStore,
       spaceId,
@@ -249,101 +193,46 @@ export class AdHocTaskRunner {
   }
 
   public async loadIndirectParams(): Promise<AdHocRuleRunParamResult<AdHocRuleRunData>> {
-    // Used by task manager to validate ad hoc params before running
-    try {
-      const {
-        params: { adHocRuleRunParamsId, spaceId },
-      } = this.taskInstance;
-      const namespace = this.context.spaceIdToNamespace(spaceId);
+    return await this.timer.runWithTimer(TaskRunnerTimerSpan.LoadSavedObject, async () => {
+      // Used by task manager to validate task params before running
+      try {
+        const {
+          params: { adHocRuleRunParamsId, spaceId },
+        } = this.taskInstance;
+        const namespace = this.context.spaceIdToNamespace(spaceId);
 
-      const adHocRuleRunParams =
-        await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<AdHocRuleRunParams>(
-          'backfill_params',
-          adHocRuleRunParamsId,
-          { namespace }
+        const adHocRuleRunParams =
+          await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<AdHocRuleRunParams>(
+            'backfill_params',
+            adHocRuleRunParamsId,
+            { namespace }
+          );
+
+        this.logger.info(
+          `AdHocTaskRunner loadIndirectParams loaded ${JSON.stringify(adHocRuleRunParams)}`
         );
-
-      this.logger.info(
-        `AdHocTaskRunner loadIndirectParams loaded ${JSON.stringify(adHocRuleRunParams)}`
-      );
-      this.adHocRuleRunData = { data: { indirectParams: adHocRuleRunParams.attributes } };
-    } catch (error) {
-      this.adHocRuleRunData = { error };
-    }
-    return this.adHocRuleRunData;
+        this.adHocRuleRunData = {
+          data: { indirectParams: adHocRuleRunParams.attributes },
+        };
+      } catch (error) {
+        this.adHocRuleRunData = { error };
+      }
+      return this.adHocRuleRunData;
+    });
   }
 
   public async run(): Promise<AdHocRuleTaskRunResult> {
-    if (!this.adHocRuleRunData) {
-      this.adHocRuleRunData = await this.loadIndirectParams();
-    }
-    if (this.adHocRuleRunData.error) {
-      throw this.adHocRuleRunData.error;
-    }
-
-    const adHocRuleRunParams: AdHocRuleRunParams = this.adHocRuleRunData.data.indirectParams;
-
-    // these are from validateRule
+    let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     try {
-      this.ruleTypeRegistry.ensureRuleTypeEnabled(adHocRuleRunParams.rule.alertTypeId);
+      const runParams = await this.prepareToRun();
+      stateWithMetrics = asOk(await this.runRule(runParams));
     } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
-    }
-
-    const ruleType = this.ruleTypeRegistry.get(adHocRuleRunParams.rule.alertTypeId);
-
-    let validatedParams: RuleTypeParams;
-    try {
-      validatedParams = validateRuleTypeParams(
-        adHocRuleRunParams.rule.params,
-        ruleType.validate.params
-      );
-    } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
-    }
-
-    // Generate fake request with API key
-    const fakeRequest = getFakeKibanaRequest(
-      this.context,
-      adHocRuleRunParams.spaceId,
-      adHocRuleRunParams.apiKeyToUse
-    );
-
-    try {
-      await this.runRule({ fakeRequest, ruleRunParams: adHocRuleRunParams, validatedParams });
-    } catch (err) {
+      stateWithMetrics = asErr(err);
       this.logger.error(`Error running ad-hoc rule - ${err.message}`);
     }
 
-    this.logger.info(`Finished running rule ad hoc`);
-    // If no intervalEnd is specified, this is a one time ad hoc rule run
-    // Delete the ad hoc rule run param SO
-    if (!adHocRuleRunParams.end) {
-      this.logger.info(`No intervalEnd specified - one time run`);
-      this.shouldDeleteTask = true;
-    } else {
-      // If the current start + interval > end, we've finished the execution set
-      const newStart = new Date(
-        new Date(adHocRuleRunParams.currentStart).valueOf() +
-          parseDuration(adHocRuleRunParams.duration)
-      );
-      const endAsMillis = new Date(adHocRuleRunParams.end).valueOf();
-      if (newStart.valueOf() > endAsMillis) {
-        this.logger.info(`Completed ad hoc execution sequence`);
-        this.shouldDeleteTask = true;
-      } else {
-        this.logger.info(
-          `Updating ad hoc rule run param SO with new start ${newStart.toISOString()}`
-        );
-        // Update the SO with the new start time
-        await this.internalSavedObjectsRepository.update<AdHocRuleRunParams>(
-          'backfill_params',
-          this.taskInstance.params.adHocRuleRunParamsId,
-          { currentStart: newStart.toISOString() },
-          { refresh: false }
-        );
-      }
-    }
+    await this.processRunResults({ stateWithMetrics });
+    await this.scheduleNewOrDeleteTask();
 
     return { state: {}, ...(this.shouldDeleteTask ? {} : { runAt: new Date() }) };
 
@@ -506,5 +395,160 @@ export class AdHocTaskRunner {
     }
 
     this.cancelled = true;
+  }
+
+  private async prepareToRun(): Promise<RunRuleParams> {
+    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareToRun, async () => {
+      this.runDate = new Date();
+
+      if (!this.adHocRuleRunData) {
+        this.adHocRuleRunData = await this.loadIndirectParams();
+      }
+      if (this.adHocRuleRunData.error) {
+        throw this.adHocRuleRunData.error;
+      }
+
+      const adHocRuleRunParams: AdHocRuleRunParams = this.adHocRuleRunData.data.indirectParams;
+
+      const namespace =
+        this.context.spaceIdToNamespace(adHocRuleRunParams.spaceId) ?? DEFAULT_NAMESPACE_STRING;
+      const ruleType = this.ruleTypeRegistry.get(adHocRuleRunParams.rule.alertTypeId);
+
+      const { rule } = adHocRuleRunParams;
+
+      this.alertingEventLogger.initialize({
+        ruleId: rule.id,
+        ruleType,
+        consumer: rule.consumer,
+        spaceId: adHocRuleRunParams.spaceId,
+        executionId: this.executionId,
+        taskScheduledAt: this.taskInstance.scheduledAt,
+        ...(namespace ? { namespace } : {}),
+      });
+
+      this.alertingEventLogger.start(this.runDate);
+      this.alertingEventLogger.setRuleName(rule.name);
+
+      // Generate fake request with API key
+      const fakeRequest = getFakeKibanaRequest(
+        this.context,
+        adHocRuleRunParams.spaceId,
+        adHocRuleRunParams.apiKeyToUse
+      );
+
+      // these are from validateRule
+      try {
+        this.ruleTypeRegistry.ensureRuleTypeEnabled(adHocRuleRunParams.rule.alertTypeId);
+      } catch (err) {
+        throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
+      }
+
+      let validatedParams: RuleTypeParams;
+      try {
+        validatedParams = validateRuleTypeParams(
+          adHocRuleRunParams.rule.params,
+          ruleType.validate.params
+        );
+      } catch (err) {
+        throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
+      }
+
+      return {
+        validatedParams,
+        fakeRequest,
+        ruleRunParams: adHocRuleRunParams,
+      };
+    });
+  }
+
+  private async processRunResults(stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>) {
+    return await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
+      const {
+        params: { alertId: ruleId, spaceId },
+        startedAt,
+      } = this.taskInstance;
+
+      const namespace = this.context.spaceIdToNamespace(spaceId);
+
+      // New consolidated statuses for lastRun
+      const { lastRun, metrics: executionMetrics } = map<
+        RuleTaskStateAndMetrics,
+        ElasticsearchError,
+        ILastRun
+      >(
+        stateWithMetrics,
+        (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
+        (err: ElasticsearchError) => lastRunFromError(err)
+      );
+
+      this.logger.debug(
+        `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(lastRun)}`
+      );
+      if (executionMetrics) {
+        this.logger.debug(
+          `ruleRunMetrics for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionMetrics)}`
+        );
+      }
+
+      // set start and duration based on event log
+      const { start, duration } = this.alertingEventLogger.getStartAndDuration();
+      if (null != start) {
+        executionStatus.lastExecutionDate = start;
+      }
+      if (null != duration) {
+        executionStatus.lastDuration = nanosToMillis(duration);
+      }
+
+      // if executionStatus indicates an error, fill in fields in
+      this.ruleMonitoring.addHistory({
+        duration: executionStatus.lastDuration,
+        hasError: executionStatus.error != null,
+        runDate: this.runDate,
+      });
+
+      if (startedAt) {
+        // Capture how long it took for the rule to run after being claimed
+        this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+      }
+
+      this.alertingEventLogger.done({
+        status: executionStatus,
+        metrics: executionMetrics,
+        timings: this.timer.toJson(),
+      });
+    });
+  }
+
+  private async scheduleNewOrDeleteTask() {
+    const adHocRuleRunParams: AdHocRuleRunParams = this.adHocRuleRunData!.data!.indirectParams;
+
+    // If no intervalEnd is specified, this is a one time ad hoc rule run
+    // Delete the ad hoc rule run param SO
+    if (!adHocRuleRunParams.end) {
+      this.logger.info(`No intervalEnd specified - one time run`);
+      this.shouldDeleteTask = true;
+    } else {
+      // If the current start + interval > end, we've finished the execution set
+      const newStart = new Date(
+        new Date(adHocRuleRunParams.currentStart).valueOf() +
+          parseDuration(adHocRuleRunParams.duration)
+      );
+      const endAsMillis = new Date(adHocRuleRunParams.end).valueOf();
+      if (newStart.valueOf() > endAsMillis) {
+        this.logger.info(`Completed ad hoc execution sequence`);
+        this.shouldDeleteTask = true;
+      } else {
+        this.logger.info(
+          `Updating ad hoc rule run param SO with new start ${newStart.toISOString()}`
+        );
+        // Update the SO with the new start time
+        await this.internalSavedObjectsRepository.update<AdHocRuleRunParams>(
+          'backfill_params',
+          this.taskInstance.params.adHocRuleRunParamsId,
+          { currentStart: newStart.toISOString() },
+          { refresh: false }
+        );
+      }
+    }
   }
 }

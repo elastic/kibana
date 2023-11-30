@@ -6,10 +6,11 @@
  */
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import { RuleTaskState } from '@kbn/alerting-state-types';
+import { AlertInstanceContext, AlertInstanceState, RuleTaskState } from '@kbn/alerting-state-types';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { some } from 'lodash';
 import {
+  RuleAlertData,
   RuleExecutionStatusErrorReasons,
   RuleNotifyWhen,
   RuleTypeParams,
@@ -20,21 +21,22 @@ import { TaskRunnerContext } from './types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { UntypedAlertsClient } from '../alerts_client/types';
 import { getTimeRange } from '../lib/get_time_range';
 import { ExecutorServices } from './get_executor_services';
 import { ElasticsearchError, ErrorWithReason } from '../lib';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { IAlertsClient } from '../alerts_client/types';
+import { LegacyAlertsClient } from '../alerts_client';
 
 interface ConstructorOpts {
   context: TaskRunnerContext;
+  timer: TaskRunnerTimer;
   logger: Logger;
   runCancelled: () => boolean;
 }
 
 interface RunOpts {
   alertingEventLogger: AlertingEventLogger;
-  alertsClient: UntypedAlertsClient;
   executionId: string;
   executorServices: ExecutorServices & {
     getTimeRangeFn?: (timeWindow: string) => { dateStart: string; dateEnd: string };
@@ -56,22 +58,35 @@ interface StackTraceLog {
   stackTrace?: string;
 }
 
-export class RuleRunner {
-  private timer: TaskRunnerTimer;
+export class RuleRunner<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
   private ruleRunErrorStack: StackTraceLog | null = null;
+  private client?: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
 
-  constructor(private readonly options: ConstructorOpts) {
-    this.timer = new TaskRunnerTimer({ logger: options.logger });
-  }
+  constructor(private readonly options: ConstructorOpts) {}
 
   public get runError() {
     return this.ruleRunErrorStack;
   }
 
+  public get alertsClient(): IAlertsClient<
+    AlertData,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > {
+    return this.client!;
+  }
+
   public async run(opts: RunOpts) {
     const {
       alertingEventLogger,
-      alertsClient,
       executionId,
       executorServices,
       fakeRequest,
@@ -98,8 +113,49 @@ export class RuleRunner {
 
     const flappingSettings = await rulesSettingsClient.flapping().get();
     const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
+    const alertsClientParams = { logger: this.options.logger, ruleType };
 
-    await alertsClient.initializeExecution({
+    try {
+      const client =
+        (await this.options.context.alertsService?.createAlertsClient<
+          AlertData,
+          State,
+          Context,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >({
+          ...alertsClientParams,
+          namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
+          rule: this.getAADRuleData(
+            rule.id,
+            opts.executionId,
+            {
+              consumer: rule.consumer,
+              name: rule.name,
+              params: validatedParams,
+              revision: rule.revision,
+              tags: rule.tags,
+            },
+            spaceId
+          ),
+        })) ?? null;
+
+      this.client = client
+        ? client
+        : new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+            alertsClientParams
+          );
+    } catch (err) {
+      this.options.logger.error(
+        `Error initializing AlertsClient for context ${ruleType.alerts?.context}. Using legacy alerts client instead. - ${err.message}`
+      );
+
+      this.client = new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+        alertsClientParams
+      );
+    }
+
+    await this.alertsClient.initializeExecution({
       maxAlerts: this.options.context.maxAlerts,
       ruleLabel,
       flappingSettings,
@@ -108,11 +164,11 @@ export class RuleRunner {
       recoveredAlertsFromState: alertRecoveredRawInstances,
     });
 
-    const { updatedRuleTypeState } = await this.timer.runWithTimer(
+    const { updatedRuleTypeState } = await this.options.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
         const checkHasReachedAlertLimit = () => {
-          const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
+          const reachedLimit = this.alertsClient.hasReachedAlertLimit() || false;
           if (reachedLimit) {
             this.options.logger.warn(
               `rule execution generated greater than ${this.options.context.maxAlerts} alerts: ${ruleLabel}`
@@ -140,8 +196,8 @@ export class RuleRunner {
                 uiSettingsClient: executorServices.uiSettingsClient,
                 scopedClusterClient: executorServices.wrappedScopedClusterClient.client(),
                 searchSourceClient: executorServices.wrappedSearchSourceClient.searchSourceClient,
-                alertFactory: alertsClient.factory(),
-                alertsClient: alertsClient.client(),
+                alertFactory: this.alertsClient.factory(),
+                alertsClient: this.alertsClient.client(),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(ruleType),
                 shouldStopExecution: () => this.options.runCancelled(),
                 ruleMonitoringService: executorServices.publicRuleMonitoringService,
@@ -174,7 +230,7 @@ export class RuleRunner {
           // or requested it and then reported back whether it exceeded the limit
           // If neither of these apply, this check will throw an error
           // These errors should show up during rule type development
-          alertsClient.checkLimitUsage();
+          this.alertsClient.checkLimitUsage();
         } catch (err) {
           // Check if this error is due to reaching the alert limit
           if (!checkHasReachedAlertLimit()) {
@@ -202,8 +258,8 @@ export class RuleRunner {
       }
     );
 
-    await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      alertsClient.processAndLogAlerts({
+    await this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
+      this.alertsClient.processAndLogAlerts({
         eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
         shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(ruleType),
@@ -215,11 +271,29 @@ export class RuleRunner {
       });
     });
 
-    await this.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-      await alertsClient.persistAlerts();
+    await this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
+      await this.alertsClient.persistAlerts();
     });
 
     return updatedRuleTypeState;
+  }
+
+  private getAADRuleData(
+    ruleId: string,
+    executionId: string,
+    ruleData: { consumer: string; name: string; params: unknown; revision: number; tags: string[] },
+    spaceId: string
+  ) {
+    return {
+      consumer: ruleData.consumer,
+      executionId,
+      id: ruleId,
+      name: ruleData.name,
+      parameters: ruleData.params,
+      revision: ruleData.revision,
+      spaceId,
+      tags: ruleData.tags,
+    };
   }
 
   private shouldLogAndScheduleActionsForAlerts(ruleType: UntypedNormalizedRuleType) {

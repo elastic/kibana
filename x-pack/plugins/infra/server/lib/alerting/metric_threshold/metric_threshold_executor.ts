@@ -95,6 +95,7 @@ export const createMetricThresholdExecutor =
       MetricThresholdAlertState,
       MetricThresholdAlertContext,
       MetricThresholdAllowedActionGroups,
+      typeof RecoveredActionGroup.id,
       MetricThresholdAlert
     >
   ) => {

@@ -29,7 +29,6 @@ import {
   SummarizedAlerts,
   RawAlertInstance,
   RuleAlertData,
-  WithoutReservedActionGroups,
 } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -81,16 +80,13 @@ export interface IAlertsClient<
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
   };
-  factory(): PublicAlertFactory<
-    State,
-    Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  >;
+  factory(): PublicAlertFactory<State, Context, ActionGroupIds, RecoveryActionGroupId>;
   client(): PublicAlertsClient<
     AlertData,
     State,
     Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    ActionGroupIds,
+    RecoveryActionGroupId
   > | null;
 }
 
@@ -132,13 +128,23 @@ export interface PublicAlertsClient<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
-  report(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): ReportedAlertData;
-  setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
+  // report(
+  //   alert: ReportedAlert<
+  //     AlertData,
+  //     State,
+  //     Context,
+  //     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+  //   >
+  // ): ReportedAlertData;
+  setAlertData(alert: UpdateableAlert<AlertData, State, Context, RecoveryActionGroupId>): void;
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
-  getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
+  getRecoveredAlerts: () => Array<
+    RecoveredAlertData<AlertData, State, Context, RecoveryActionGroupId>
+  >;
 }
 
 export interface ReportedAlert<
@@ -158,9 +164,9 @@ export interface RecoveredAlertData<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  RecoveryActionGroupId extends string
 > {
-  alert: LegacyAlert<State, Context, ActionGroupIds>;
+  alert: LegacyAlert<State, Context, RecoveryActionGroupId>;
   hit?: AlertData;
 }
 

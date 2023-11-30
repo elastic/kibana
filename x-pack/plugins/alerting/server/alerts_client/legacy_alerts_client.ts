@@ -11,6 +11,7 @@ import {
   AlertFactory,
   createAlertFactory,
   getPublicAlertFactory,
+  PublicAlertFactory,
 } from '../alert/create_alert_factory';
 import {
   determineAlertsToReturn,
@@ -20,7 +21,7 @@ import {
 } from '../lib';
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
-import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
+import { AlertInstanceContext, AlertInstanceState } from '../types';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettingsFlappingProperties,
@@ -68,11 +69,7 @@ export class LegacyAlertsClient<
     recoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   };
 
-  private alertFactory?: AlertFactory<
-    State,
-    Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  >;
+  private alertFactory?: AlertFactory<State, Context, ActionGroupIds, RecoveryActionGroupId>;
 
   constructor(private readonly options: LegacyAlertsClientParams) {
     this.processedAlerts = {
@@ -113,11 +110,7 @@ export class LegacyAlertsClient<
     // while the original alert is preserved
     this.reportedAlerts = cloneDeep(this.trackedAlerts.active);
 
-    this.alertFactory = createAlertFactory<
-      State,
-      Context,
-      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-    >({
+    this.alertFactory = createAlertFactory<State, Context, ActionGroupIds, RecoveryActionGroupId>({
       alerts: this.reportedAlerts,
       logger: this.options.logger,
       maxAlerts: this.maxAlerts,
@@ -227,7 +220,7 @@ export class LegacyAlertsClient<
     return this.alertFactory!.alertLimit.checkLimitUsage();
   }
 
-  public factory() {
+  public factory(): PublicAlertFactory<State, Context, ActionGroupIds, RecoveryActionGroupId> {
     return getPublicAlertFactory(this.alertFactory!);
   }
 

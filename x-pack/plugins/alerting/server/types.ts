@@ -48,7 +48,6 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertsHealth,
-  WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
@@ -60,6 +59,7 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
+  RecoveredActionGroupId,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -95,6 +95,7 @@ export interface RuleExecutorServices<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never,
+  RecoveryActionGroupId extends string = never,
   AlertData extends RuleAlertData = RuleAlertData
 > {
   searchSourceClient: ISearchStartSearchSource;
@@ -106,12 +107,18 @@ export interface RuleExecutorServices<
    * the alertsClient
    * @deprecated
    */
-  alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
+  alertFactory: PublicAlertFactory<State, Context, ActionGroupIds, RecoveryActionGroupId>;
   /**
    * Only available when framework alerts are enabled and rule
    * type has registered alert context with the framework with shouldWrite set to true
    */
-  alertsClient: PublicAlertsClient<AlertData, State, Context, ActionGroupIds> | null;
+  alertsClient: PublicAlertsClient<
+    AlertData,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > | null;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
@@ -126,6 +133,7 @@ export interface RuleExecutorOptions<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
+  RecoveryActionGroupId extends string = never,
   AlertData extends RuleAlertData = never
 > {
   executionId: string;
@@ -133,7 +141,13 @@ export interface RuleExecutorOptions<
   params: Params;
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
+  services: RuleExecutorServices<
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    AlertData
+  >;
   spaceId: string;
   startedAt: Date;
   state: State;
@@ -154,6 +168,7 @@ export type ExecutorType<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
+  RecoveryActionGroupId extends string = never,
   AlertData extends RuleAlertData = never
 > = (
   options: RuleExecutorOptions<
@@ -162,6 +177,7 @@ export type ExecutorType<
     InstanceState,
     InstanceContext,
     ActionGroupIds,
+    RecoveryActionGroupId,
     AlertData
   >
 ) => Promise<{ state: State }>;
@@ -287,11 +303,8 @@ export interface RuleType<
     State,
     InstanceState,
     InstanceContext,
-    /**
-     * Ensure that the reserved ActionGroups (such as `Recovered`) are not
-     * available for scheduling in the Executor
-     */
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
+    ActionGroupIds,
+    RecoveredActionGroupId | RecoveryActionGroupId,
     AlertData
   >;
   category: string;

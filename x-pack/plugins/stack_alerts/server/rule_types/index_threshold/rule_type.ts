@@ -18,6 +18,7 @@ import {
   ALERT_REASON,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
@@ -212,7 +213,15 @@ export function getRuleType(
   };
 
   async function executor(
-    options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId, StackAlert>
+    options: RuleExecutorOptions<
+      Params,
+      {},
+      {},
+      ActionContext,
+      typeof ActionGroupId,
+      typeof RecoveredActionGroup.id,
+      StackAlert
+    >
   ) {
     const {
       rule: { id: ruleId, name },
