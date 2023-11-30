@@ -422,7 +422,7 @@ Object {
     "managed_by": "observability",
     "version": 3,
   },
-  "description": "Rolled-up SLI data for SLO: irrelevant [id: 89a28a88-77eb-4311-a1ae-05daf1a975f3, revision: 1]",
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
     "index": ".slo-observability.sli-v3",
     "pipeline": ".slo-observability.sli.pipeline-v3",
@@ -566,7 +566,7 @@ Object {
     "runtime_mappings": Object {
       "slo.id": Object {
         "script": Object {
-          "source": Any<String>,
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -590,7 +590,7 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;
 
@@ -601,7 +601,7 @@ Object {
     "managed_by": "observability",
     "version": 3,
   },
-  "description": "Rolled-up SLI data for SLO: irrelevant [id: 244a51a1-4c9b-4026-95d4-a4a372c0e6c3, revision: 1]",
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
     "index": ".slo-observability.sli-v3",
     "pipeline": ".slo-observability.sli.pipeline-v3",
@@ -736,7 +736,7 @@ Object {
     "runtime_mappings": Object {
       "slo.id": Object {
         "script": Object {
-          "source": Any<String>,
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -760,6 +760,6 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;

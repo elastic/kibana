@@ -17,32 +17,20 @@ const generator = new ApmTransactionDurationTransformGenerator();
 
 describe('APM Transaction Duration Transform Generator', () => {
   it('returns the expected transform params with every specified indicator params', () => {
-    const slo = createSLO({ indicator: createAPMTransactionDurationIndicator() });
+    const slo = createSLO({ id: 'irrelevant', indicator: createAPMTransactionDurationIndicator() });
     const transform = generator.getTransformParams(slo);
 
-    expect(transform).toMatchSnapshot({
-      transform_id: expect.any(String),
-      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
-    });
-    expect(transform.transform_id).toEqual(`slo-${slo.id}-${slo.revision}`);
-    expect(transform.source.runtime_mappings!['slo.id']).toMatchObject({
-      script: { source: `emit('${slo.id}')` },
-    });
-    expect(transform.source.runtime_mappings!['slo.revision']).toMatchObject({
-      script: { source: `emit(${slo.revision})` },
-    });
+    expect(transform).toMatchSnapshot();
   });
 
   it('returns the expected transform params for timeslices slo', () => {
     const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
       indicator: createAPMTransactionDurationIndicator(),
     });
     const transform = generator.getTransformParams(slo);
 
-    expect(transform).toMatchSnapshot({
-      transform_id: expect.any(String),
-      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
-    });
+    expect(transform).toMatchSnapshot();
   });
 
   it("does not include the query filter when params are '*'", () => {
