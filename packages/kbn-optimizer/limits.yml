@@ -97,6 +97,7 @@ pageLoadAssetSize:
   mapsEms: 26072
   metricsDataAccess: 60000
   ml: 82187
+  mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
