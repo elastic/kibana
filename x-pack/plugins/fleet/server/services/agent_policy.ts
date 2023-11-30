@@ -1220,12 +1220,13 @@ class AgentPolicyService {
     if (agentPolicy?.is_protected) {
       const uninstallTokenService = appContextService.getUninstallTokenService();
 
-      const uninstallTokenErrors =
-        (await uninstallTokenService?.checkTokenValidityForPolicy(policyId)) ?? [];
+      const uninstallTokenError = await uninstallTokenService?.checkTokenValidityForPolicy(
+        policyId
+      );
 
-      if (uninstallTokenErrors.length > 0) {
+      if (uninstallTokenError) {
         throw new Error(
-          `Cannot enable Agent Tamper Protection: ${uninstallTokenErrors[0].error.message}`
+          `Cannot enable Agent Tamper Protection: ${uninstallTokenError.error.message}`
         );
       }
     }

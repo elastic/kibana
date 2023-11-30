@@ -213,8 +213,9 @@ async function createSetupSideEffects(
   }
 
   logger.debug('Checking validity of Uninstall Tokens');
-  const uninstallTokenErrors =
-    (await appContextService.getUninstallTokenService()?.checkTokenValidityForAllPolicies()) ?? [];
+  const uninstallTokenError = await appContextService
+    .getUninstallTokenService()
+    ?.checkTokenValidityForAllPolicies();
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade agent policy schema', 'preconfiguration');
@@ -231,8 +232,8 @@ async function createSetupSideEffects(
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...packagePolicyUpgradeErrors,
-    ...uninstallTokenErrors,
     ...messageSigningServiceNonFatalErrors,
+    ...(uninstallTokenError ? [uninstallTokenError] : []),
   ];
 
   if (nonFatalErrors.length > 0) {

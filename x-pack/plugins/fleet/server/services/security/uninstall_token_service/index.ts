@@ -144,14 +144,14 @@ export interface UninstallTokenServiceInterface {
    *
    * @param policyId policy Id to check
    */
-  checkTokenValidityForPolicy(policyId: string): Promise<UninstallTokenInvalidError[]>;
+  checkTokenValidityForPolicy(policyId: string): Promise<UninstallTokenInvalidError | null>;
 
   /**
    * Check whether all policies have a valid uninstall token. Rejects returning promise if not.
    *
    * @param policyId policy Id to check
    */
-  checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError[]>;
+  checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError | null>;
 }
 
 export class UninstallTokenService implements UninstallTokenServiceInterface {
@@ -497,24 +497,24 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   public async checkTokenValidityForPolicy(
     policyId: string
-  ): Promise<UninstallTokenInvalidError[]> {
+  ): Promise<UninstallTokenInvalidError | null> {
     return await this.checkTokenValidity([policyId]);
   }
 
-  public async checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError[]> {
+  public async checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError | null> {
     const policyIds = await this.getAllPolicyIds();
     return await this.checkTokenValidity(policyIds);
   }
 
-  private async checkTokenValidity(policyIds: string[]): Promise<UninstallTokenInvalidError[]> {
-    const errorResult: UninstallTokenInvalidError[] = [];
-
+  private async checkTokenValidity(
+    policyIds: string[]
+  ): Promise<UninstallTokenInvalidError | null> {
     try {
       await this.getDecryptedTokensForPolicyIds(policyIds);
     } catch (error) {
       if (error instanceof UninstallTokenError) {
         // known errors are considered non-fatal
-        errorResult.push({ error });
+        return { error };
       } else {
         const errorMessage = 'Unknown error happened while checking Uninstall Tokens validity';
         appContextService.getLogger().error(`${errorMessage}: '${error}'`);
@@ -522,7 +522,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       }
     }
 
-    return errorResult;
+    return null;
   }
 
   private get isEncryptionAvailable(): boolean {
