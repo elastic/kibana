@@ -105,9 +105,11 @@ export const isDraftPR = async (
     );
   }
 
-  return await github.pulls.get({
-    owner,
-    repo,
-    pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
-  });
+  return await github.pulls
+    .get({
+      owner,
+      repo,
+      pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
+    })
+    .then((r) => r.data.draft);
 };
