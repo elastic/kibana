@@ -699,11 +699,13 @@ export const getOperatorOptions = (
   if (item.nested === 'parent' || item.field == null) {
     return [isOperator];
   } else if (listType === 'endpoint') {
-    return isBoolean
-      ? [isOperator]
-      : fieldSupportsMatches(item.field)
-      ? [isOperator, isOneOfOperator, matchesOperator, doesNotMatchOperator]
-      : [isOperator, isOneOfOperator];
+    if (isBoolean) {
+      return [isOperator];
+    } else {
+      return fieldSupportsMatches(item.field)
+        ? [isOperator, isOneOfOperator, matchesOperator, doesNotMatchOperator]
+        : [isOperator, isOneOfOperator];
+    }
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else if (isBoolean) {
