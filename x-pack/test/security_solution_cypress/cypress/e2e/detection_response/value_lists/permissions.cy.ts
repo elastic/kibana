@@ -16,7 +16,7 @@ describe('value list permissions', { tags: ['@ess', '@skipInServerless'] }, () =
   describe('user with restricted access role', () => {
     it('Does not allow a t1 analyst user to upload a value list', () => {
       login(ROLES.t1_analyst);
-      visit(RULES_MANAGEMENT_URL, { role: ROLES.t1_analyst });
+      visit(RULES_MANAGEMENT_URL);
       cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
     });
   });
