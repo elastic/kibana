@@ -12,10 +12,8 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import type { StartPlugins } from '../../../../plugin';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-
-import type { SuggestUserProfilesRequestQueryDecoded } from '../../../../../common/api/detection_engine/users';
-import { suggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
+import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
+import { SuggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
 
 export const suggestUserProfilesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -34,10 +32,7 @@ export const suggestUserProfilesRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof suggestUserProfilesRequestQuery,
-              SuggestUserProfilesRequestQueryDecoded
-            >(suggestUserProfilesRequestQuery),
+            query: buildRouteValidationWithZod(SuggestUserProfilesRequestQuery),
           },
         },
       },

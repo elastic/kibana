@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
-import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
+import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
