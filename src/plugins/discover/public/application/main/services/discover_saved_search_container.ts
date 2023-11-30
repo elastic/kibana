@@ -12,7 +12,7 @@ import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { isEqual, cloneDeep, isFunction } from 'lodash';
+import { isEqual, isFunction } from 'lodash';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
@@ -120,7 +120,7 @@ export function getSavedSearchContainer({
   globalStateContainer: DiscoverGlobalStateContainer;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
-  const savedSearchInitial$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
+  const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
   const set = (savedSearch: SavedSearch) => {
@@ -229,15 +229,10 @@ export function getSavedSearchContainer({
  * @param savedSearch
  */
 export function copySavedSearch(savedSearch: SavedSearch): SavedSearch {
-  const savedSearchCopy = {
+  return {
     ...savedSearch,
     ...{ searchSource: savedSearch.searchSource.createCopy() },
   };
-  savedSearchCopy.searchSource.setField(
-    'filter',
-    cloneDeep(savedSearchCopy.searchSource.getField('filter'))
-  );
-  return savedSearchCopy;
 }
 
 export function getDefaultAppState(savedSearch: SavedSearch, services: DiscoverServices) {
