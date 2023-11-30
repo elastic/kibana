@@ -324,10 +324,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [ACTION_BUTTON_COUNT]
   );
 
+  // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
+  // the previous page from the timeline), yet we still see total count. This is because the timeline
+  // is not getting refreshed when using browser navigation.
+  const showEventsCountBadge = !isBlankTimeline && totalCount >= 0;
+
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
-        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
