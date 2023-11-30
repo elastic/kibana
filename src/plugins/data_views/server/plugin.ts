@@ -50,7 +50,6 @@ export class DataViewsServerPlugin
 
     const config = this.initializerContext.config.get<ClientConfigType>();
 
-    // add conditional
     if (config.fieldListCachingEnabled) {
       core.uiSettings.register(cacheMaxAge);
     }
