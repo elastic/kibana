@@ -13,7 +13,6 @@ import { getIpRangeQuery } from '../../../common/options_list/ip_search';
 import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
 import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
-import { allSuggestionsAggregationBuilder } from './options_list_all_suggestions';
 import {
   getEscapedWildcardQuery,
   getIpBuckets,
@@ -23,15 +22,7 @@ import {
 /**
  * Suggestion aggregations
  */
-export const getSearchSuggestionsAggregationBuilder = ({
-  fieldSpec,
-  searchTechnique,
-}: OptionsListRequestBody) => {
-  if (searchTechnique === 'exact') {
-    // this shouldn't happen, but just in case, catch it here
-    return allSuggestionsAggregationBuilder;
-  }
-
+export const getSearchSuggestionsAggregationBuilder = ({ fieldSpec }: OptionsListRequestBody) => {
   // note that date and boolean fields are non-searchable, so type-specific search aggs are not necessary;
   // number fields, on the other hand, only support exact match searching - so, this also does not need a
   // type-specific agg because it will be handled by `exactMatchSearchAggregation`

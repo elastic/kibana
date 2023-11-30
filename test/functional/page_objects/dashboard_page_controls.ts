@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
 import {
+  ControlWidth,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  ControlWidth,
 } from '@kbn/controls-plugin/common';
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/types';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
+import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import expect from '@kbn/expect';
 
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
   default: 'No field selected yet',
