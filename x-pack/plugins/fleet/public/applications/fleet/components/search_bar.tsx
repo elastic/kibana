@@ -105,6 +105,7 @@ export const getFieldSpecs = (indexPattern: string) => {
       searchable: true,
       aggregatable: true,
       esTypes: [field[1]],
+      readFromDocValues: true,
     };
   });
   return fieldSpecs;
@@ -112,6 +113,7 @@ export const getFieldSpecs = (indexPattern: string) => {
 
 const getFieldsMap = (indexPattern: string) => {
   const fieldSpecs = getFieldSpecs(indexPattern);
+
   if (!fieldSpecs) return {};
 
   const fieldsMap = fieldSpecs.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
@@ -156,26 +158,21 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     }
   }, [value]);
 
-  const fieldsMap = useMemo(() => getFieldsMap(indexPattern), [indexPattern]);
-
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        // Refetch only if fieldsMap is empty
-        const skipFetchField = !!fieldsMap;
-
+        const fieldsMap = getFieldsMap(indexPattern);
         const newDataView = await data.dataViews.create(
           { title: indexPattern, fields: fieldsMap },
-          skipFetchField
+          true
         );
-
         setDataView(newDataView);
       } catch (err) {
         setDataView(undefined);
       }
     };
     fetchFields();
-  }, [data.dataViews, fieldPrefix, fieldsMap, indexPattern]);
+  }, [data.dataViews, fieldPrefix, indexPattern]);
 
   return (
     <NoWrapQueryStringInput

@@ -43,39 +43,6 @@ const fields = [
   },
 ] as FieldSpec[];
 
-const allFields = [
-  {
-    name: 'test-index._id',
-    type: 'string',
-    esTypes: ['_id'],
-  },
-  {
-    name: 'test-index.api_key',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-  {
-    name: 'test-index.name',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-  {
-    name: 'another-index.version',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-  {
-    name: 'test2-index.name',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-  {
-    name: 'fleet-agents.actions',
-    type: 'string',
-    esTypes: ['keyword'],
-  },
-] as FieldSpec[];
-
 jest.mock('../hooks', () => {
   return {
     ...jest.requireActual('../hooks'),
@@ -94,23 +61,6 @@ jest.mock('../hooks', () => {
       },
       data: {
         dataViews: {
-          getFieldsForWildcard: jest.fn().mockResolvedValue([
-            {
-              name: '_id',
-              type: 'string',
-              esTypes: ['_id'],
-            },
-            {
-              name: 'api_key',
-              type: 'string',
-              esTypes: ['keyword'],
-            },
-            {
-              name: 'name',
-              type: 'string',
-              esTypes: ['keyword'],
-            },
-          ]),
           create: jest.fn().mockResolvedValue({
             fields,
           }),
@@ -194,16 +144,17 @@ jest.mock('../hooks', () => {
 
 describe('SearchBar', () => {
   const testRenderer = createFleetTestRendererMock();
-  const result = testRenderer.render(
-    <SearchBar
-      value="test-index.name: test"
-      onChange={() => undefined}
-      fieldPrefix="test-index"
-      indexPattern=".test-index"
-    />
-  );
 
   it('renders the search box', async () => {
+    const result = testRenderer.render(
+      <SearchBar
+        value="test-index.name: test"
+        onChange={() => undefined}
+        fieldPrefix="test-index"
+        indexPattern=".test-index"
+      />
+    );
+    result.debug();
     const textArea = result.queryByTestId('queryInput');
     expect(textArea).not.toBeNull();
     expect(textArea?.getAttribute('placeholder')).toEqual('Filter your data using KQL syntax');
@@ -215,11 +166,13 @@ describe('SearchBar', () => {
 });
 
 describe('getFieldSpecs', () => {
-  it('returns getFieldSpecs for fleet-agents', () => {
+  it('returns fieldSpecs for fleet-agents', () => {
     expect(getFieldSpecs(`.${AGENTS_PREFIX}`)).toHaveLength(66);
   });
   it('returns getFieldSpecs for fleet-enrollment-api-keys', () => {
-    expect(getFieldSpecs(`.${FLEET_ENROLLMENT_API_PREFIX}`)).toEqual([
+    const indexPattern = `.${FLEET_ENROLLMENT_API_PREFIX}`;
+    expect(getFieldSpecs(indexPattern)).toHaveLength(8);
+    expect(getFieldSpecs(indexPattern)).toEqual([
       {
         aggregatable: true,
         esTypes: ['boolean'],
@@ -280,7 +233,9 @@ describe('getFieldSpecs', () => {
   });
 
   it('returns getFieldSpecs for fleet-agent-policy', () => {
-    expect(getFieldSpecs(`.${AGENT_POLICY_SAVED_OBJECT_TYPE}`)).toEqual([
+    const indexPattern = `.${AGENT_POLICY_SAVED_OBJECT_TYPE}`;
+    expect(getFieldSpecs(indexPattern)).toHaveLength(23);
+    expect(getFieldSpecs(indexPattern)).toEqual([
       {
         aggregatable: true,
         esTypes: ['keyword'],
