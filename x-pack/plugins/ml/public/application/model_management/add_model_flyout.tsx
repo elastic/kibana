@@ -186,7 +186,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                 </p>
                 <EuiSpacer size="s" />
                 <p>
-                  <EuiLink href={docLinks.links.ml.nlpElser} external>
+                  <EuiLink href={docLinks.links.ml.nlpElser} external target={'_blank'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.modelsList.elserViewDocumentationLinkLabel"
                       defaultMessage="View documentation"
@@ -219,7 +219,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                 <EuiSpacer size="s" />
                 <EuiFlexGroup justifyContent={'spaceBetween'} gutterSize={'none'}>
                   <EuiFlexItem grow={false}>
-                    <EuiLink href={'todo'} external>
+                    <EuiLink href={docLinks.links.ml.nlpE5} external target={'_blank'}>
                       <FormattedMessage
                         id="xpack.ml.trainedModels.modelsList.elserViewDocumentationLinkLabel"
                         defaultMessage="View documentation"
