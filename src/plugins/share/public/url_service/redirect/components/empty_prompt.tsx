@@ -29,6 +29,7 @@ const defaultBody = i18n.translate('share.urlService.redirect.components.Error.b
 export interface ErrorProps {
   title?: string;
   body?: string;
+  homeHref: string;
   docTitle: ChromeDocTitle;
   error: Error;
 }
@@ -36,16 +37,12 @@ export interface ErrorProps {
 export const RedirectEmptyPrompt: React.FC<ErrorProps> = ({
   title = defaultTitle,
   body = defaultBody,
+  homeHref,
   docTitle,
   error,
 }) => {
   // eslint-disable-next-line no-console
-  console.error('Short URL Redirect Error', error);
-
-  // Using the current URL containing "/app/r/", make a URL to the root basePath
-  // by trimming that part to end up at the Home app or project home.
-  const currentUrl = window.location.href;
-  const newUrl = currentUrl.replace(/\/app\/r\/.*/, '');
+  console.error('Short URL redirect error', error);
 
   docTitle.change(
     i18n.translate('share.urlService.redirect.components.docTitle', { defaultMessage: 'Not Found' })
@@ -58,7 +55,7 @@ export const RedirectEmptyPrompt: React.FC<ErrorProps> = ({
       actions={
         <EuiButtonEmpty
           iconType="arrowLeft"
-          href={newUrl}
+          href={homeHref}
           data-test-subj="redirectErrorEmptyPromptButton"
         >
           {i18n.translate('share.urlService.redirect.components.Error.homeButton', {

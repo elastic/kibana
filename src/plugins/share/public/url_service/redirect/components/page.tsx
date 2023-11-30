@@ -19,13 +19,20 @@ import { RedirectEmptyPrompt } from './empty_prompt';
 import { Spinner } from './spinner';
 
 export interface PageProps {
+  homeHref: string;
   docTitle: ChromeDocTitle;
   customBranding: CustomBrandingSetup;
   manager: Pick<RedirectManager, 'error$'>;
   theme: ThemeServiceSetup;
 }
 
-export const Page: React.FC<PageProps> = ({ manager, customBranding, docTitle, theme }) => {
+export const Page: React.FC<PageProps> = ({
+  manager,
+  homeHref,
+  customBranding,
+  docTitle,
+  theme,
+}) => {
   const error = useObservable(manager.error$);
   const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 
@@ -33,7 +40,7 @@ export const Page: React.FC<PageProps> = ({ manager, customBranding, docTitle, t
     return (
       <KibanaThemeProvider theme={{ theme$: theme.theme$ }}>
         <EuiPageTemplate>
-          <RedirectEmptyPrompt docTitle={docTitle} error={error} />
+          <RedirectEmptyPrompt docTitle={docTitle} error={error} homeHref={homeHref} />
         </EuiPageTemplate>
       </KibanaThemeProvider>
     );
