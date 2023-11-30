@@ -1584,12 +1584,24 @@
   dependencies:
     fast-json-stringify "^2.4.1"
 
+"@elastic/ecs-helpers@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/ecs-helpers/-/ecs-helpers-2.1.1.tgz#8a375b307c33a959938d9ae8f9abb466eb9fb3bf"
+  integrity sha512-ItoNazMnYdlUCmkBYTXc3SG6PF7UlVTbvMdHPvXkfTMPdwGv2G1Xtp5CjDHaGHGOZSwaDrW4RSCXvA/lMSU+rg==
+
 "@elastic/ecs-pino-format@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@elastic/ecs-pino-format/-/ecs-pino-format-1.2.0.tgz#3ee709eb2343b4d1a7a6d23bc467673d8c0de2c2"
   integrity sha512-7TGPoxPMHkhqdp98u9F1+4aNwktgh8tlG/PX2c/d/RcAqHziaRCc72tuwGLMu9K/w/M5bWz0eKbcFXr4fSZGwg==
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
+
+"@elastic/ecs-pino-format@^1.4.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ecs-pino-format/-/ecs-pino-format-1.5.0.tgz#48610e06e939b50bfa3629da0d2fcb1c74a69a20"
+  integrity sha512-7MMVmT50ucEl7no8mUgCIl+pffBVNRl36uZi0vmalWa2xPWISBxM9k9WSP/WTgOkmGj9G35e5g3UfCS1zxshBg==
+  dependencies:
+    "@elastic/ecs-helpers" "^2.1.1"
 
 "@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1":
   version "8.6.0"
@@ -13486,6 +13498,11 @@ cookie@^0.5.0:
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
   integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
 
+cookie@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.6.0.tgz#2798b04b071b0ecbff0dbb62a505a8efa4e19051"
+  integrity sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==
+
 cookiejar@^2.1.4:
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/cookiejar/-/cookiejar-2.1.4.tgz#ee669c1fea2cf42dc31585469d193fef0d65771b"
@@ -15304,12 +15321,12 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.1.0.tgz#b1154a2d8e17b7762badf4fc696d8de7439ce928"
-  integrity sha512-8t9lbyfi4WUPxjPvRNO80QX2Ysf8I+D21wq+aphY+97Fk7kk6SDeZH+5U+o7HWSbqZpo/PYJGuKDUYc9PXuEWw==
+elastic-apm-node@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.2.0.tgz#0b9fe675b94902734965d3b9da5424260e4e45a2"
+  integrity sha512-GbSjtQ+Q9lBZpY6bikatPCL7cMWPuBxHQ2yD0msfuP7JYXhWon42L8N7cqyepmp/F/YF++X8WJxuZM2G7J3kYQ==
   dependencies:
-    "@elastic/ecs-pino-format" "^1.2.0"
+    "@elastic/ecs-pino-format" "^1.4.0"
     "@opentelemetry/api" "^1.4.1"
     "@opentelemetry/core" "^1.11.0"
     "@opentelemetry/sdk-metrics" "^1.12.0"
@@ -15318,7 +15335,7 @@ elastic-apm-node@^4.1.0:
     async-value-promise "^1.1.1"
     basic-auth "^2.0.1"
     breadth-filter "^2.0.0"
-    cookie "^0.5.0"
+    cookie "^0.6.0"
     core-util-is "^1.0.2"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
