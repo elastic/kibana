@@ -49,7 +49,6 @@ export enum ConfigurePipelineTabId {
   USE_EXISTING = 'use_existing',
 }
 
-// TODO: Fix bug when going back to configure step after selecting an existing pipeline
 export const ConfigurePipeline: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration },
@@ -222,6 +221,7 @@ export const ConfigurePipeline: React.FC = () => {
       <EuiTabbedContent
         tabs={tabs}
         autoFocus="selected"
+        initialSelectedTab={tabs[existingPipeline ? 1 : 0]}
         onTabClick={(tab) => {
           const isExistingPipeline = tab.id === ConfigurePipelineTabId.USE_EXISTING;
           if (isExistingPipeline !== configuration.existingPipeline) {
