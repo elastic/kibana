@@ -152,7 +152,7 @@ components:
         - $ref: '#/components/schemas/BaseDefaultableFields'
           x-modify: required
 
-    ResponseRequiredFields:
+    ResponseFields:
       type: object
       properties:
         id:
@@ -185,6 +185,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
         setup:
           $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
+        execution_summary:
+          $ref: '../../rule_monitoring/model/execution_summary.schema.yaml#/components/schemas/RuleExecutionSummary'
       required:
         - id
         - rule_id
@@ -197,12 +199,6 @@ components:
         - related_integrations
         - required_fields
         - setup
-
-    ResponseOptionalFields:
-      type: object
-      properties:
-        execution_summary:
-          $ref: '../../rule_monitoring/model/execution_summary.schema.yaml#/components/schemas/RuleExecutionSummary'
 
     SharedCreateProps:
       x-inline: true
@@ -239,8 +235,7 @@ components:
       x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseResponseProps'
-        - $ref: '#/components/schemas/ResponseRequiredFields'
-        - $ref: '#/components/schemas/ResponseOptionalFields'
+        - $ref: '#/components/schemas/ResponseFields'
 
     ############
     # EQL Rule #
@@ -851,6 +846,8 @@ components:
     ##########################
 
     TypeSpecificCreateProps:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRuleCreateFields'
         - $ref: '#/components/schemas/QueryRuleCreateFields'
@@ -873,6 +870,8 @@ components:
         - $ref: '#/components/schemas/EsqlRulePatchFields'
 
     TypeSpecificResponse:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRuleResponseFields'
         - $ref: '#/components/schemas/QueryRuleResponseFields'
@@ -884,6 +883,8 @@ components:
         - $ref: '#/components/schemas/EsqlRuleResponseFields'
 
     RuleCreateProps:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRuleCreateProps'
         - $ref: '#/components/schemas/QueryRuleCreateProps'
@@ -895,6 +896,8 @@ components:
         - $ref: '#/components/schemas/EsqlRuleCreateProps'
 
     RuleUpdateProps:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRuleUpdateProps'
         - $ref: '#/components/schemas/QueryRuleUpdateProps'
@@ -917,6 +920,8 @@ components:
         - $ref: '#/components/schemas/EsqlRulePatchProps'
 
     RuleResponse:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRule'
         - $ref: '#/components/schemas/QueryRule'
