@@ -26,14 +26,6 @@ export type ControlInput = EmbeddableInput & {
   timeslice?: [number, number];
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
-  helpMessage?: {
-    text: string;
-    link?: {
-      href: string;
-      'data-test-subj': string;
-      text: string;
-    };
-  };
 };
 
 export type DataControlInput = ControlInput & {

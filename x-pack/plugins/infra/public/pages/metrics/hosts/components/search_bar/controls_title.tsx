@@ -1,16 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiFormLabel, EuiPopover, EuiIcon, EuiToolTip, EuiLink } from '@elastic/eui';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
-import { ControlInput } from '../../types';
+import { i18n } from '@kbn/i18n';
+import { availableControlsPanels } from '../../hooks/use_control_panels_url_state';
+
+const helpMessages = {
+  [availableControlsPanels.SERVICE_NAME]: {
+    text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLabel', {
+      defaultMessage: 'Services detected via',
+    })}`,
+    link: {
+      text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLink', {
+        defaultMessage: 'APM',
+      })}`,
+      href: 'https://ela.st/docs-infra-apm',
+      ['data-test-subj']: 'hostsViewServiceNameControlPopoverHelpLink',
+    },
+  },
+};
 
 const TitleWithPopoverMessage = ({
   title,
@@ -18,7 +33,14 @@ const TitleWithPopoverMessage = ({
   embeddableId,
 }: {
   title?: string;
-  helpMessage: ControlInput['helpMessage'];
+  helpMessage: {
+    text: string;
+    link?: {
+      href: string;
+      'data-test-subj': string;
+      text: string;
+    };
+  };
   embeddableId: string;
 }) => {
   const [isPopoverOpen, togglePopover] = useToggle(false);
@@ -68,15 +90,8 @@ const TitleWithPopoverMessage = ({
   ) : null;
 };
 
-export const ControlTitle = ({
-  title,
-  helpMessage,
-  embeddableId,
-}: {
-  helpMessage?: ControlInput['helpMessage'];
-  title?: string;
-  embeddableId: string;
-}) => {
+export const ControlTitle = ({ title, embeddableId }: { title?: string; embeddableId: string }) => {
+  const helpMessage = helpMessages[embeddableId];
   return helpMessage ? (
     <TitleWithPopoverMessage title={title} helpMessage={helpMessage} embeddableId={embeddableId} />
   ) : (

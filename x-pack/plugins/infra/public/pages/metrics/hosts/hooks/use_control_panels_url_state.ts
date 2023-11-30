@@ -12,30 +12,14 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
-const availableControlsPanels = {
+export const availableControlsPanels = {
   HOST_OS_NAME: 'host.os.name',
   CLOUD_PROVIDER: 'cloud.provider',
   SERVICE_NAME: 'service.name',
-};
-
-const helpMessages = {
-  [availableControlsPanels.SERVICE_NAME]: {
-    text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLabel', {
-      defaultMessage: 'Services detected via',
-    })}`,
-    link: {
-      text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLink', {
-        defaultMessage: 'APM',
-      })}`,
-      href: 'https://ela.st/docs-infra-apm',
-      ['data-test-subj']: 'hostsViewServiceNameControlPopoverHelpLink',
-    },
-  },
 };
 
 const controlPanelConfigs: ControlPanels = {
@@ -70,7 +54,6 @@ const controlPanelConfigs: ControlPanels = {
       id: availableControlsPanels.SERVICE_NAME,
       fieldName: availableControlsPanels.SERVICE_NAME,
       title: 'Service Name',
-      helpMessage: helpMessages[availableControlsPanels.SERVICE_NAME],
     },
   },
 };
@@ -132,7 +115,6 @@ const addDataViewIdAndHelpMessageToControlPanels = (
         explicitInput: {
           ...controlPanelConfig.explicitInput,
           dataViewId,
-          helpMessage: controlPanelConfigs[key].explicitInput.helpMessage,
         },
       },
     };
@@ -142,7 +124,7 @@ const addDataViewIdAndHelpMessageToControlPanels = (
 const cleanControlPanels = (controlPanels: ControlPanels) => {
   return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
     const { explicitInput } = controlPanelConfig;
-    const { dataViewId, helpMessage, ...rest } = explicitInput;
+    const { dataViewId, ...rest } = explicitInput;
     return {
       ...acc,
       [key]: { ...rest },
@@ -155,8 +137,7 @@ const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlP
   const visiblePanels = getVisibleControlPanelsConfig(dataView);
 
   // Get list of panel which can be overridden to avoid merging additional config from url
-  // and remove helpMessage as it should not be overwritten
-  const existingKeys = Object.keys(visiblePanels).filter((key) => key !== 'helpMessage');
+  const existingKeys = Object.keys(visiblePanels);
 
   const controlPanelsToOverride = pick(urlPanels, existingKeys);
 
@@ -179,16 +160,6 @@ const PanelRT = rt.type({
       fieldName: rt.string,
       title: rt.union([rt.string, rt.undefined]),
       selectedOptions: rt.array(rt.string),
-      helpMessage: rt.intersection([
-        rt.type({ text: rt.string }),
-        rt.partial({
-          link: rt.type({
-            href: rt.string,
-            'data-test-subj': rt.string,
-            text: rt.string,
-          }),
-        }),
-      ]),
     }),
   ]),
 });

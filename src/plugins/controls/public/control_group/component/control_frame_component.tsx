@@ -9,7 +9,13 @@
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiFormControlLayout, EuiFormRow, EuiLoadingChart } from '@elastic/eui';
+import {
+  EuiFormControlLayout,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiLoadingChart,
+  EuiToolTip,
+} from '@elastic/eui';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
@@ -19,7 +25,6 @@ import {
 } from '../embeddable/control_group_container';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { ControlError } from './control_error_component';
-import { ControlTitle } from './control_title';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -41,8 +46,6 @@ export const ControlFrame = ({
   const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
   const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
   const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
-  const panels = controlGroupSelector((state) => state.explicitInput.panels);
-  const helpMessage = panels[embeddableId].explicitInput.helpMessage;
 
   const embeddable = useChildEmbeddable({
     untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
@@ -77,7 +80,11 @@ export const ControlFrame = ({
     }
 
     return usingTwoLineLayout ? undefined : (
-      <ControlTitle title={title} helpMessage={helpMessage} embeddableId={embeddableId} />
+      <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
+        <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
+          {title}
+        </EuiFormLabel>
+      </EuiToolTip>
     );
   }
 
