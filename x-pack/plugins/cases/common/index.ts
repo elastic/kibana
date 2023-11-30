@@ -29,6 +29,7 @@ export type {
   Ecs,
   CaseViewRefreshPropInterface,
   CasesPermissions,
+  CasesCapabilities,
   CasesStatus,
 } from './ui/types';
 
@@ -52,6 +53,7 @@ export {
   CASE_COMMENT_SAVED_OBJECT,
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
+  CASES_SETTINGS_CAPABILITY,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
