@@ -31,7 +31,13 @@ export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];
 };
 
-export type AzureCredentialsType = 'arm_template' | 'manual';
+export type AzureCredentialsType =
+  | 'arm_template'
+  | 'service_principal_with_client_secret'
+  | 'service_principal_with_client_certificate'
+  | 'service_principal_with_client_username_and_password'
+  | 'managed_identity'
+  | 'manual';
 
 export type AzureCredentialsTypeFieldMap = {
   [key in AzureCredentialsType]: string[];
