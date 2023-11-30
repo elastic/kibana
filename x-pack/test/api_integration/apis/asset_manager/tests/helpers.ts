@@ -7,7 +7,7 @@
 
 import type { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import type { WriteSamplesPostBody } from '@kbn/assetManager-plugin/server';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, infra, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 
