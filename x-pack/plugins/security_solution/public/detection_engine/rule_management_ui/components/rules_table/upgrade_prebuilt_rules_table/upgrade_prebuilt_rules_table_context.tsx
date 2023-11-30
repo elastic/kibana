@@ -28,11 +28,10 @@ import {
   RuleDetailsFlyout,
   TabContentPadding,
 } from '../../../../rule_management/components/rule_details/rule_details_flyout';
-import * as i18n from './translations';
-
+import { RuleDiffTab } from '../../../../rule_management/components/rule_details/json_diff/rule_diff_tab';
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
-
-import { RuleDiffTabReactDiffView } from '../../../../rule_management/components/rule_details/json_diff/rule_diff_tab_react_diff_view';
+import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
+import * as i18n from './translations';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -292,17 +291,18 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
               </EuiButton>
             }
             getRuleTabs={(rule, defaultTabs) => {
-              const activeRule = filteredRules.find(({ id }) => rule.id);
+              const activeRule = filteredRules.find(({ id }) => id === rule.id);
+
               if (!activeRule) {
                 return defaultTabs;
               }
 
-              const diffTabReactDiffView = {
-                id: 'react-diff-view',
-                name: 'react-diff-view',
+              const diffTab = {
+                id: 'updates',
+                name: ruleDetailsI18n.UPDATES_TAB_LABEL,
                 content: (
                   <TabContentPadding>
-                    <RuleDiffTabReactDiffView
+                    <RuleDiffTab
                       oldRule={activeRule.current_rule}
                       newRule={activeRule.target_rule}
                     />
@@ -310,7 +310,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                 ),
               };
 
-              return [diffTabReactDiffView, ...defaultTabs];
+              return [diffTab, ...defaultTabs];
             }}
           />
         )}

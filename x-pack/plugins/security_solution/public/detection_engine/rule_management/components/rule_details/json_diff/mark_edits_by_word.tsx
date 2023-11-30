@@ -93,7 +93,7 @@ function splitDiffToLines(diffs: Diff[]): Diff[][] {
       const next: Diff[][] = [
         ...lines.slice(0, -1),
         [...lines[lines.length - 1], currentLineRemaining],
-        ...nextLines.map((line: string) => [line]),
+        ...nextLines.map((line) => [line]),
       ];
       return next;
     },
