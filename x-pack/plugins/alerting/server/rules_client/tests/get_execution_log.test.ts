@@ -338,9 +338,7 @@ const aggregateResults = {
         ],
       },
       executionUuidCardinality: {
-        executionUuidCardinality: {
-          value: 374,
-        },
+        value: 374,
       },
     },
   },
