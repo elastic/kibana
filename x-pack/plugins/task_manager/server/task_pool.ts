@@ -116,7 +116,7 @@ export class TaskPool {
 
     if (attempt > MAX_RUN_ATTEMPTS) {
       const stats = [
-        `available workers: ${availableWorkers}`,
+        `availableWorkers: ${availableWorkers}`,
         `tasksToRun: ${tasksToRun.length}`,
         `leftOverTasks: ${leftOverTasks.length}`,
         `maxWorkers: ${this.maxWorkers}`,

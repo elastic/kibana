@@ -424,7 +424,7 @@ describe('TaskPool', () => {
 
     expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "task pool run attempts exceeded 3; assuming ran out of capacity; available workers: 0, tasksToRun: 0, leftOverTasks: 1, maxWorkers: 2, occupiedWorkers: 0, workerLoad: 0",
+        "task pool run attempts exceeded 3; assuming ran out of capacity; availableWorkers: 0, tasksToRun: 0, leftOverTasks: 1, maxWorkers: 2, occupiedWorkers: 0, workerLoad: 0",
       ]
     `);
   });
