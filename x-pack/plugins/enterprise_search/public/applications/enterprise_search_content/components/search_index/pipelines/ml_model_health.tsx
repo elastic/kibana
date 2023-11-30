@@ -114,7 +114,7 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   switch (modelState) {
     case TrainedModelState.NotDeployed:
     case MlModelDeploymentState.NotDeployed:
-        modelHealth = {
+      modelHealth = {
         healthColor: 'danger',
         healthText: modelNotDeployedText,
         tooltipText: modelNotDeployedTooltip,
@@ -141,11 +141,11 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
         healthText: modelStartingText,
         tooltipText: modelStartingTooltip,
       };
-      break;      
+      break;
     case TrainedModelState.Started:
     case MlModelDeploymentState.Started:
     case MlModelDeploymentState.FullyAllocated:
-        modelHealth = {
+      modelHealth = {
         healthColor: 'success',
         healthText: modelStartedText,
         tooltipText: modelStartedTooltip,
@@ -188,7 +188,7 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
         healthColor: 'danger',
         healthText: modelNotDeployedText,
         tooltipText: modelNotDeployedTooltip,
-      }
+      };
       break;
   }
   return (
