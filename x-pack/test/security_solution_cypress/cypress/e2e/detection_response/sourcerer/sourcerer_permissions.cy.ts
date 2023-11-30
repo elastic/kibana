@@ -5,31 +5,24 @@
  * 2.0.
  */
 
-import { loginWithUser } from '../../../tasks/login';
-import { visitWithUser } from '../../../tasks/navigation';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { hostsUrl } from '../../../urls/navigation';
 import { postDataView } from '../../../tasks/api_calls/common';
-import {
-  createUsersAndRoles,
-  secReadCasesAll,
-  secReadCasesAllUser,
-} from '../../../tasks/privileges';
 import { TOASTER } from '../../../screens/configure_cases';
+import { visit } from '../../../tasks/navigation';
+import { login } from '../../../tasks/login';
 
-const usersToCreate = [secReadCasesAllUser];
-const rolesToCreate = [secReadCasesAll];
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer permissions', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('Sourcerer permissions', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     dataViews.forEach((dataView: string) => postDataView(dataView));
-    createUsersAndRoles(usersToCreate, rolesToCreate);
   });
 
-  it(`role(s) ${secReadCasesAllUser.roles.join()} shows error when user does not have permissions`, () => {
-    loginWithUser(secReadCasesAllUser);
-    visitWithUser(hostsUrl('allHosts'), secReadCasesAllUser);
+  it(`role Hunter No actions  shows error when user does not have permissions`, () => {
+    login(ROLES.hunter_no_actions);
+    visit(hostsUrl('allHosts'));
     cy.get(TOASTER).should('have.text', 'Write role required to generate data');
   });
 });
