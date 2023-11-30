@@ -720,7 +720,8 @@
     "indicator.params",
     "indicator.type",
     "name",
-    "tags"
+    "tags",
+    "version"
   ],
   "threshold-explorer-view": [],
   "observability-onboarding-state": [
