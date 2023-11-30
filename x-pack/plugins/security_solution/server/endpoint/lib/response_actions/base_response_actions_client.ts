@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
+import { getActionDetailsById } from '../../services';
 import { ResponseActionsClientError } from '../../services/actions/clients/errors';
 import {
   addRuleInfoToAction,
@@ -68,6 +69,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   // protected async updateCases(): Promise<void> {
   //   throw new Error('Method not yet implemented');
   // }
+
+  /**
+   * Returns the action details for a given response action id
+   * @param actionId
+   */
+  public async fetchActionDetails<T extends ActionDetails = ActionDetails>(
+    actionId: string
+  ): Promise<T> {
+    return getActionDetailsById(
+      this.options.esClient,
+      this.options.endpointContext.service.getEndpointMetadataService(),
+      actionId
+    );
+  }
 
   /**
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)

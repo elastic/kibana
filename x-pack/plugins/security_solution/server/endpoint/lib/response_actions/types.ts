@@ -31,6 +31,8 @@ import type {
  * The interface required for a Response Actions provider
  */
 export interface ResponseActionsClient {
+  fetchActionDetails: (actionId: string) => Promise<ActionDetails>;
+
   isolate: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;
 
   release: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;

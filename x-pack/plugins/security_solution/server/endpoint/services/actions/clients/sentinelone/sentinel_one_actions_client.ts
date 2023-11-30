@@ -114,7 +114,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (actionSendResponse.status === 'error') {
       throw new ResponseActionsClientError(
-        `Attempt to send [${actionType}] to SentinelOne failed: ${actionSendResponse.message}. ${actionSendResponse.serviceMessage}`,
+        `Attempt to send [${actionType}] to SentinelOne failed: ${
+          actionSendResponse.serviceMessage || actionSendResponse.message
+        }`,
         500,
         actionSendResponse
       );
@@ -124,16 +126,21 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    const sendResponse = await this.sendAction(SUB_ACTION.ISOLATE_AGENT, {
-      uuid: options.endpoint_ids[0],
+    const agentUUID = options.endpoint_ids[0];
+    // TODO:PT will we support multiple agent IDs? and does S1 even support that? code above needs updating
+
+    await this.sendAction(SUB_ACTION.ISOLATE_AGENT, {
+      uuid: agentUUID,
     });
 
-    const actionRequestDoc = this.writeActionRequestToEndpointIndex({
+    // FIXME:PT need to grab data from the response above and store it with the Request or Response documents on our side
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
       ...options,
       command: 'isolate',
     });
 
-    throw createNotSupportedError();
+    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {

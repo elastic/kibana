@@ -31,11 +31,11 @@ import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 import type { EndpointMetadataService } from '../metadata';
 
-export const getActionDetailsById = async (
+export const getActionDetailsById = async <T extends ActionDetails = ActionDetails>(
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
   actionId: string
-): Promise<ActionDetails> => {
+): Promise<T> => {
   let actionRequestsLogEntries: EndpointActivityLogAction[];
 
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
@@ -148,5 +148,5 @@ export const getActionDetailsById = async (
     parameters: normalizedActionRequest.parameters,
   };
 
-  return actionDetails;
+  return actionDetails as T;
 };
