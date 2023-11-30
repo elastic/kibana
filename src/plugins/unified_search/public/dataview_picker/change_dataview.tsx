@@ -81,7 +81,6 @@ export function ChangeDataView({
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
-  onRefreshFields,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -97,7 +96,9 @@ export function ChangeDataView({
   const { application, data, storage, dataViews, dataViewEditor, appName, usageCollection } =
     kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
+
+  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth, dataViewsList });
+
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );
@@ -216,31 +217,10 @@ export function ChangeDataView({
             })}
           </EuiContextMenuItem>
         ) : (
-          <React.Fragment />
-        )
+          <React.Fragment key="empty" />
+        ),
+        <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
       );
-    }
-    if (onRefreshFields && !isTextBasedLangSelected) {
-      panelItems.push(
-        <EuiContextMenuItem
-          key="refresh"
-          icon="refresh"
-          data-test-subj="dataview-refresh-fields"
-          onClick={async () => {
-            setPopoverIsOpen(false);
-            const dataView = await dataViews.get(currentDataViewId!, false, true);
-            onRefreshFields(dataView!);
-          }}
-        >
-          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.refreshFieldsButton', {
-            defaultMessage: 'Reload data view',
-          })}
-        </EuiContextMenuItem>
-      );
-    }
-
-    if ((onAddField || onRefreshFields) && !isTextBasedLangSelected) {
-      panelItems.push(<EuiHorizontalRule margin="none" key="dataviewActions-divider" />);
     }
 
     panelItems.push(
@@ -359,13 +339,23 @@ export function ChangeDataView({
     if (textBasedLanguages?.length) {
       panelItems.push(
         <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
-        <EuiPanel color="transparent" paddingSize="none">
+        <EuiPanel color="transparent" paddingSize="none" key="try-esql">
           <EuiButton
+            css={css`
+              border-top-right-radius: unset;
+              border-top-left-radius: unset;
+            `}
             color="success"
             size="s"
             fullWidth
             onClick={() => onTextBasedSubmit({ esql: `from ${trigger.title} | limit 10` })}
             data-test-subj="select-text-based-language-panel"
+            contentProps={{
+              css: {
+                justifyContent: 'flex-start',
+                paddingLeft: '26px',
+              },
+            }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
               defaultMessage: 'Try ES|QL',

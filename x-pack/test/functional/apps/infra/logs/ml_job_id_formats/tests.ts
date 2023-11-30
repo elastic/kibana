@@ -30,9 +30,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const requestTracker = createRequestTracker(browser, pageObjects.common);
   let mlJobHelper: MlJobHelper;
 
-  describe('ML job ID formats', function () {
-    this.tags('includeFirefox');
-
+  // Disabled until https://github.com/elastic/kibana/issues/171913 is addressed
+  describe.skip('ML job ID formats', function () {
     this.beforeAll(async () => {
       // Access to ml.api has to happen inside a test or test hook
       mlJobHelper = createMlJobHelper(ml.api);

@@ -190,6 +190,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       metricThresholdAlertRuleEnabled: true,
       logThresholdAlertRuleEnabled: true,
       alertsAndRulesDropdownEnabled: true,
+      profilingEnabled: false,
     },
   };
 

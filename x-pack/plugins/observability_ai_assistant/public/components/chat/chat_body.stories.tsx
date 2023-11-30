@@ -21,8 +21,8 @@ const meta: ComponentMeta<typeof Component> = {
 export default meta;
 const defaultProps: ComponentStoryObj<typeof Component> = {
   args: {
-    title: 'My Conversation',
-    messages: [
+    initialTitle: 'My Conversation',
+    initialMessages: [
       getAssistantSetupMessage({ contexts: [] }),
       {
         '@timestamp': new Date().toISOString(),
@@ -64,8 +64,6 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
     currentUser: {
       username: 'elastic',
     },
-    onChatUpdate: () => {},
-    onChatComplete: () => {},
   },
   render: (props) => {
     return (

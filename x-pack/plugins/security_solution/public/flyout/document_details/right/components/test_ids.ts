@@ -97,8 +97,6 @@ export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen` as const;
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel` as const;
-export const TECHNICAL_PREVIEW_ICON_TEST_ID =
-  `${INSIGHTS_ENTITIES_TEST_ID}TechnicalPreviewIcon` as const;
 
 /* Threat intelligence */
 

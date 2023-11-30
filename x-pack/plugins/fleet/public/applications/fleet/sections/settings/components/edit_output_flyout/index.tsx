@@ -70,7 +70,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   useBreadcrumbs('settings');
   const form = useOutputForm(onClose, output);
   const inputs = form.inputs;
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
   const { euiTheme } = useEuiTheme();
   const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
   const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
@@ -87,10 +87,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const { kafkaOutput: isKafkaOutputEnabled, remoteESOutput: isRemoteESOutputEnabled } =
     ExperimentalFeaturesService.get();
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
+  // Remote ES output not yet supported in serverless
+  const isStateful = !cloud?.isServerlessEnabled;
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
-    ...(isRemoteESOutputEnabled
+    ...(isRemoteESOutputEnabled && isStateful
       ? [{ value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' }]
       : []),
     { value: outputType.Logstash, text: 'Logstash' },
@@ -270,7 +272,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const renderRemoteElasticsearchSection = () => {
     if (isRemoteESOutputEnabled) {
-      return <OutputFormRemoteEsSection inputs={inputs} />;
+      return (
+        <OutputFormRemoteEsSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          onUsePlainText={onUsePlainText}
+        />
+      );
     }
     return null;
   };
@@ -320,7 +328,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         case outputType.Elasticsearch:
           return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
             defaultMessage:
-              'This output type does not support connectivity to a remote Elasticsearch cluster, please the Remote Elasticsearch type for that.',
+              'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
           });
       }
     };
@@ -333,7 +341,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
             values={{
               doc: (
-                <EuiLink href={docLinks.links.fleet.guide} target="_blank">
+                <EuiLink href={docLinks.links.fleet.remoteESOoutput} target="_blank">
                   {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
                     defaultMessage: 'our documentation',
                   })}
