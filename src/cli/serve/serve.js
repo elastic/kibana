@@ -113,10 +113,8 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       // Load mock identity provider plugin and configure realm if supported (ES only supports SAML when run with SSL)
       if (opts.ssl && canRequire('@kbn/mock-idp-plugin/common')) {
         // Ensure the plugin is loaded in dynamically to exclude from production build
-        const {
-          MOCK_IDP_PLUGIN_PATH,
-          MOCK_IDP_REALM_NAME,
-        } = require('@kbn/mock-idp-plugin/common');
+        const { MOCK_IDP_REALM_NAME } = require('@kbn/mock-idp-plugin/common');
+        const pluginPath = resolve(require.resolve('@kbn/mock-idp-plugin/common'), '..');
 
         if (has('server.basePath')) {
           console.log(
@@ -125,7 +123,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
           _.unset(rawConfig, 'server.basePath');
         }
 
-        set('plugins.paths', _.compact([].concat(get('plugins.paths'), MOCK_IDP_PLUGIN_PATH)));
+        set('plugins.paths', _.compact([].concat(get('plugins.paths'), pluginPath)));
         set(`xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
           order: Number.MAX_SAFE_INTEGER,
           realm: MOCK_IDP_REALM_NAME,
