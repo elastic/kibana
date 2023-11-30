@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getObjectKey, parseObjectKey } from './object_key';
-export { getIndexForType } from './get_index_for_type';
-export {
-  getFieldListFromTypeMapping,
-  getFieldListMapFromMappingDefinitions,
-  type FieldListMap,
-} from './get_field_list';
+export { runModelVersionMappingAdditionsChecks } from './run_versions_mapping_additions_check';

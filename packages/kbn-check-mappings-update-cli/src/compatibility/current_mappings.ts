@@ -11,7 +11,7 @@ import Path from 'path';
 
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 
-export const CURRENT_MAPPINGS_FILE = Path.resolve(__dirname, '../current_mappings.json');
+export const CURRENT_MAPPINGS_FILE = Path.resolve(__dirname, '../../current_mappings.json');
 
 export async function readCurrentMappings(): Promise<SavedObjectsTypeMappingDefinitions> {
   let currentMappingsJson;
