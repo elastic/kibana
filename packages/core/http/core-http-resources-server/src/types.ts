@@ -47,7 +47,12 @@ export type HttpResourcesResponseOptions = HttpResponseOptions;
 export interface HttpResourcesServiceToolkit {
   /** To respond with HTML page bootstrapping Kibana application. */
   renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
-  /** To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. */
+  /**
+   * To respond with HTML page bootstrapping Kibana application without retrieving user-specific information.
+   * **Note:**
+   * - Your client-side JavaScript bundle will only be loaded on an anonymous page if `plugin.enabledOnAnonymousPages` is enabled in your plugin's `kibana.jsonc` manifest file.
+   * - You will also need to register the route serving your anonymous app with the `coreSetup.http.anonymousPaths` service in your plugin's client-side `setup` method.
+   * */
   renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
   /** To respond with a custom HTML page. */
   renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;

@@ -97,7 +97,7 @@ export async function createSAMLResponse(options: {
   /** ID from SAML authentication request */
   authnRequestId?: string;
   username: string;
-  fullname?: string;
+  full_name?: string;
   email?: string;
   roles: string[];
 }) {
@@ -139,9 +139,9 @@ export async function createSAMLResponse(options: {
             : ''
         }
         ${
-          options.fullname
+          options.full_name
             ? `<saml:Attribute Name="${MOCK_IDP_ATTRIBUTE_NAME}" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
-        <saml:AttributeValue xsi:type="xs:string">${options.fullname}</saml:AttributeValue>
+        <saml:AttributeValue xsi:type="xs:string">${options.full_name}</saml:AttributeValue>
       </saml:Attribute>`
             : ''
         }
