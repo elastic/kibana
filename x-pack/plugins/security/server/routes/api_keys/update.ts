@@ -9,11 +9,11 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
 
 import type { RouteDefinitionParams } from '..';
 import { UpdateApiKeyValidationError } from '../../authentication/api_keys/api_keys';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../lib';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /**
