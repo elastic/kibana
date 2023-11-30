@@ -76,8 +76,7 @@ export const useControlPanels = (
    * Configure the control panels as
    * 1. Available fields from the data view
    * 2. Existing filters from the URL parameter (not colliding with allowed fields from data view)
-   *  - not including the helpMessage
-   * 3. Enhanced with dataView.id and explicitInput.helpMessage
+   * 3. Enhanced with dataView.id
    */
   const controlsPanelsWithId = dataView
     ? mergeDefaultPanelsWithUrlConfig(dataView, controlPanels)
@@ -103,19 +102,13 @@ const getVisibleControlPanelsConfig = (dataView: DataView | undefined) => {
   }, {} as ControlPanels);
 };
 
-const addDataViewIdAndHelpMessageToControlPanels = (
-  controlPanels: ControlPanels,
-  dataViewId: string = ''
-) => {
+const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: string = '') => {
   return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
     return {
       ...acc,
       [key]: {
         ...controlPanelConfig,
-        explicitInput: {
-          ...controlPanelConfig.explicitInput,
-          dataViewId,
-        },
+        explicitInput: { ...controlPanelConfig.explicitInput, dataViewId },
       },
     };
   }, {});
@@ -142,7 +135,7 @@ const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlP
   const controlPanelsToOverride = pick(urlPanels, existingKeys);
 
   // Merge default and existing configs and add dataView.id to each of them
-  return addDataViewIdAndHelpMessageToControlPanels(
+  return addDataViewIdToControlPanels(
     { ...visiblePanels, ...controlPanelsToOverride },
     dataView.id
   );
