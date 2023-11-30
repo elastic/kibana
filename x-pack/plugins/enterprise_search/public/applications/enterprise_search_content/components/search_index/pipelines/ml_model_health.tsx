@@ -34,7 +34,7 @@ const modelDownloadedText = i18n.translate(
   }
 );
 const modelDownloadedTooltip = i18n.translate(
-  'xpack.enterpriseSearch.inferencePipelineCard.modelState.started.tooltip',
+  'xpack.enterpriseSearch.inferencePipelineCard.modelState.downloaded.tooltip',
   {
     defaultMessage: 'This trained model is downloaded and can be started',
   }
