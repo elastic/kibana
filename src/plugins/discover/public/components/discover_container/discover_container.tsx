@@ -16,7 +16,6 @@ import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { LoadingIndicator } from '../common/loading_indicator';
-import { useSingleton } from '../../application/main/hooks/use_singleton';
 import type { DiscoverCustomizationContext } from '../../application/types';
 
 export interface DiscoverContainerInternalProps {
@@ -45,6 +44,11 @@ const discoverContainerWrapperCss = css`
   }
 `;
 
+const customizationContext: DiscoverCustomizationContext = {
+  displayMode: 'embedded',
+  showLogExplorerTabs: false,
+};
+
 export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
@@ -70,11 +74,6 @@ export const DiscoverContainerInternal = ({
     if (!discoverServices) return;
     return { ...discoverServices, ...overrideServices };
   }, [discoverServices, overrideServices]);
-
-  const customizationContext = useSingleton<DiscoverCustomizationContext>(() => ({
-    displayMode: 'embedded',
-    showLogExplorerTabs: false,
-  }));
 
   if (!initialized || !services || isLoading) {
     return (
