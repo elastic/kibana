@@ -9,7 +9,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
+import { areChangesSkippable, doAnyChangesMatch, isDraftPR } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
@@ -39,7 +39,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
 (async () => {
   try {
-    if (process.env.BUILDKITE_PULL_REQUEST_DRAFT) {
+    // process.env.BUILDKITE_PULL_REQUEST_DRAFT
+
+    if (await isDraftPR()) {
       console.log(
         'Skipping CI for draft PR. If you need to run CI for this PR add the label xxxxxxx and retrigger CI.'
       );

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
+import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
 
 const github = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -25,6 +26,7 @@ export const getPrChanges = async (
     );
   }
 
+  // @ts-expect-error
   const files = await github.paginate(github.pulls.listFiles, {
     owner,
     repo,
@@ -90,4 +92,22 @@ export const doAnyChangesMatch = async (
   );
 
   return anyFilesMatchRequired;
+};
+
+export const isDraftPR = async (
+  owner = process.env.GITHUB_PR_BASE_OWNER,
+  repo = process.env.GITHUB_PR_BASE_REPO,
+  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
+) => {
+  if (!owner || !repo || !prNumber) {
+    throw Error(
+      "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes"
+    );
+  }
+
+  return await github.pulls.get({
+    owner,
+    repo,
+    pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
+  });
 };
