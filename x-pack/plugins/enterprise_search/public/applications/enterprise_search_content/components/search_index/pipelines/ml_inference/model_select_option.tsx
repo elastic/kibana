@@ -108,7 +108,18 @@ export const ModelMenuPopover: React.FC<{
 }> = ({ onClick, closePopover, isOpen, modelDetailsPageUrl }) => {
   return (
     <EuiPopover
-      button={<EuiButtonIcon onClick={onClick} iconType="boxesHorizontal" />}
+      button={
+        <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.actionsButton.label',
+            {
+              defaultMessage: 'All actions',
+            }
+          )}
+          onClick={onClick}
+          iconType="boxesHorizontal"
+        />
+      }
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="leftCenter"
@@ -141,7 +152,14 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
     <EuiFlexGroup alignItems="center">
       {/* Selection radio button */}
       <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-        <EuiRadio id={modelId} checked={checked === 'on'} onChange={() => null} />
+        <EuiRadio
+          title={title}
+          id={modelId}
+          checked={checked === 'on'}
+          onChange={() => null}
+          // @ts-ignore
+          inert
+        />
       </EuiFlexItem>
       {/* Title, model ID, description, license */}
       <EuiFlexItem style={{ overflow: 'hidden' }}>
@@ -154,24 +172,26 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
           <EuiFlexItem>
             <EuiTextColor color="subdued">{modelId}</EuiTextColor>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              {license && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">License: {license}</EuiBadge>
-                </EuiFlexItem>
-              )}
-              {description && (
-                <EuiFlexItem style={{ overflow: 'hidden' }}>
-                  <EuiText size="xs">
-                    <div className="eui-textTruncate" title={description}>
-                      {description}
-                    </div>
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {(license || description) && (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                {license && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">License: {license}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {description && (
+                  <EuiFlexItem style={{ overflow: 'hidden' }}>
+                    <EuiText size="xs">
+                      <div className="eui-textTruncate" title={description}>
+                        {description}
+                      </div>
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       {/* Status indicator OR action button */}

@@ -112,6 +112,16 @@ describe('ModelSelectLogic', () => {
 
         expect(ModelSelectLogic.values.areActionButtonsDisabled).toBe(false);
       });
+      it('is set to true if create API is making a request', () => {
+        CreateModelApiLogic.actions.makeRequest({ modelId: 'model_1' });
+
+        expect(ModelSelectLogic.values.areActionButtonsDisabled).toBe(true);
+      });
+      it('is set to true if start API is making a request', () => {
+        StartModelApiLogic.actions.makeRequest({ modelId: 'model_1' });
+
+        expect(ModelSelectLogic.values.areActionButtonsDisabled).toBe(true);
+      });
     });
 
     describe('selectableModels', () => {

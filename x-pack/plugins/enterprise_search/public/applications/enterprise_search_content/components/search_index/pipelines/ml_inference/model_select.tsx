@@ -13,6 +13,7 @@ import { EuiSelectable } from '@elastic/eui';
 
 import { MlModel } from '../../../../../../../common/types/ml';
 import { IndexNameLogic } from '../../index_name_logic';
+import { IndexViewLogic } from '../../index_view_logic';
 
 import { MLInferenceLogic } from './ml_inference_logic';
 import { ModelSelectLogic } from './model_select_logic';
@@ -21,6 +22,7 @@ import { normalizeModelName } from './utils';
 
 export const ModelSelect: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     addInferencePipelineModal: { configuration },
   } = useValues(MLInferenceLogic);
@@ -53,6 +55,7 @@ export const ModelSelect: React.FC = () => {
 
   return (
     <EuiSelectable
+      data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
       options={getModelSelectOptionProps(selectableModels)}
       singleSelection="always"
       listProps={{
