@@ -203,16 +203,16 @@ export const GettingStarted = () => {
   }
 
   return (
-    <KibanaPageTemplate panelled={false} grow>
-      <EuiPageTemplate.Section alignment="center" data-test-subj="guided-onboarding--landing-page">
+    <KibanaPageTemplate panelled={false}>
+      <EuiPageTemplate.Section data-test-subj="guided-onboarding--landing-page">
         <EuiTitle size="l" className="eui-textCenter">
           <h1>{title}</h1>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="l" />
         <EuiText size="m" textAlign="center">
           <p>{subtitle}</p>
         </EuiText>
-        <EuiSpacer size="xxl" />
+        <EuiSpacer size="l" />
         <GuideFilters
           application={application}
           activeFilter={filter}
@@ -220,6 +220,14 @@ export const GettingStarted = () => {
           data-test-subj="onboarding--guideFilters"
           trackUiMetric={trackUiMetric}
         />
+        <EuiSpacer size="l" />
+
+        <div className="eui-textCenter">
+          {/* data-test-subj used for FS tracking */}
+          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
+            {skipText}
+          </EuiLink>
+        </div>
         <EuiSpacer size="xxl" />
         <GuideCards
           activateGuide={activateGuide}
@@ -235,13 +243,7 @@ export const GettingStarted = () => {
           share={share}
           navigateToUrl={application.navigateToUrl}
         />
-        <EuiSpacer />
-        <div className="eui-textCenter">
-          {/* data-test-subj used for FS tracking */}
-          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
-            {skipText}
-          </EuiLink>
-        </div>
+        <EuiSpacer size="s" />
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );
