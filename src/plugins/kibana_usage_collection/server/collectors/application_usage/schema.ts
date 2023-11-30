@@ -153,6 +153,7 @@ export const applicationUsageSchema = {
   lens: commonSchema,
   maps: commonSchema,
   ml: commonSchema,
+  mock_idp: commonSchema, // Allows SAML login during functional testing which is why it's showing up in this test. Not used in production
   monitoring: commonSchema,
   'observability-log-explorer': commonSchema,
   'observability-overview': commonSchema,
