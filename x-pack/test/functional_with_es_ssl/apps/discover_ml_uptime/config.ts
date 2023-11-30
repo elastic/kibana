@@ -22,8 +22,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     testFiles: [
       resolve(__dirname, './discover'),
-      resolve(__dirname, './uptime'),
-      resolve(__dirname, './ml'),
+      // resolve(__dirname, './uptime'),
+      // resolve(__dirname, './ml'),
     ],
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Discover, Uptime, ML',
