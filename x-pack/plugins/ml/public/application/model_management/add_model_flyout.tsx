@@ -303,7 +303,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                 );
               })}
             </EuiFormFieldset>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="xxl" />
           </React.Fragment>
         );
       })}
