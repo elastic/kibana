@@ -3241,7 +3241,7 @@
         "label": "EuiThemeSize",
         "description": [],
         "signature": [
-          "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | \"xxl\""
+          "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
