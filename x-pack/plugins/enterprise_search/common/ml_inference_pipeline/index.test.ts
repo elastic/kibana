@@ -267,9 +267,11 @@ describe('parseMlInferenceParametersFromPipeline', () => {
 
 describe('parseModelStateFromStats', () => {
   it('returns Started for the lang_ident model', () => {
-    expect(parseModelStateFromStats({
-      model_type: TRAINED_MODEL_TYPE.LANG_IDENT,
-    })).toEqual(TrainedModelState.Started);
+    expect(
+      parseModelStateFromStats({
+        model_type: TRAINED_MODEL_TYPE.LANG_IDENT,
+      })
+    ).toEqual(TrainedModelState.Started);
   });
   it('returns Started', () => {
     expect(

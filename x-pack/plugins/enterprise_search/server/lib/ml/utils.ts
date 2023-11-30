@@ -67,7 +67,7 @@ export const ELSER_MODEL_PLACEHOLDER: MlModel = {
   title: 'ELSER (Elastic Learned Sparse EncodeR)',
   description: i18n.translate('xpack.enterpriseSearch.modelCard.elserPlaceholder.description', {
     defaultMessage:
-      'ELSER is Elastic\'s NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform.',
+      "ELSER is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform.",
   }),
   isPlaceholder: true,
 };
@@ -78,7 +78,8 @@ export const E5_MODEL_PLACEHOLDER: MlModel = {
   type: SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING,
   title: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
   description: i18n.translate('xpack.enterpriseSearch.modelCard.e5Placeholder.description', {
-    defaultMessage: 'E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries.',
+    defaultMessage:
+      'E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries.',
   }),
   license: 'MIT',
   modelDetailsPageUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
