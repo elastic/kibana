@@ -4790,7 +4790,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"createConfiguration\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"updateConfiguration\" | \"deleteCase\" | \"deleteComment\""
+          "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
         ],
         "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
