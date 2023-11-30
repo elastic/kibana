@@ -88,7 +88,12 @@ export function ChatHeader({
                 { defaultMessage: 'Edit conversation' }
               )}
               editModeProps={{ inputProps: { inputRef } }}
-              isReadOnly={!connectors.selectedConnector || licenseInvalid || !Boolean(onSaveTitle)}
+              isReadOnly={
+                !conversationId ||
+                !connectors.selectedConnector ||
+                licenseInvalid ||
+                !Boolean(onSaveTitle)
+              }
               onSave={onSaveTitle}
             />
           ) : null}

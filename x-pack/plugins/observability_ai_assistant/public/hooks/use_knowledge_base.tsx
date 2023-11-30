@@ -57,6 +57,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
             text: i18n.translate('xpack.observabilityAiAssistant.knowledgeBaseReadyContentReload', {
               defaultMessage: 'A page reload is needed to be able to use it.',
             }),
+            toastLifeTimeMs: Number.MAX_VALUE,
           });
         })
         .catch((error) => {

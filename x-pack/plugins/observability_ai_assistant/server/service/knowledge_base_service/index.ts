@@ -356,7 +356,7 @@ export class KnowledgeBaseService {
           ? {
               query: {
                 wildcard: {
-                  '_source.document_id': {
+                  doc_id: {
                     value: `${query}*`,
                   },
                 },
@@ -366,7 +366,7 @@ export class KnowledgeBaseService {
         size: 500,
         _source: {
           includes: [
-            'document_id',
+            'doc_id',
             'text',
             'is_correction',
             'labels',
