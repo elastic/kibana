@@ -32,7 +32,8 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
     private getStartServices: CoreSetup<
       ObservabilityPublicPluginsStart,
       ObservabilityPublicStart
-    >['getStartServices']
+    >['getStartServices'],
+    private kibanaVersion: string
   ) {}
 
   public async isEditable() {
@@ -55,6 +56,7 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
         { uiSettings, application, http, i18n: i18nService, notifications, settings },
         { triggersActionsUi, cases, data, security, charts, uiActions, serverless },
       ] = await this.getStartServices();
+      const kibanaVersion = this.kibanaVersion;
       return new SLOAlertsEmbeddable(
         {
           uiSettings,
@@ -72,6 +74,7 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
           serverless,
         },
         initialInput,
+        kibanaVersion,
         parent
       );
     } catch (e) {

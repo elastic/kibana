@@ -319,7 +319,10 @@ export class Plugin
           const { SloAlertsEmbeddableFactoryDefinition } = await import(
             './embeddable/slo/alerts/slo_alerts_embeddable_factory'
           );
-          const factory = new SloAlertsEmbeddableFactoryDefinition(coreSetup.getStartServices);
+          const factory = new SloAlertsEmbeddableFactoryDefinition(
+            coreSetup.getStartServices,
+            kibanaVersion
+          );
           pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
         };
         registerSloAlertsEmbeddableFactory();

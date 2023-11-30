@@ -64,15 +64,17 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   public readonly type = SLO_ALERTS_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
+  kibanaVersion: string;
 
   constructor(
     private readonly deps: SloEmbeddableDeps,
     initialInput: SloAlertsEmbeddableInput,
+    kibanaVersion: string,
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);
     this.deps = deps;
-
+    this.kibanaVersion = kibanaVersion;
     this.subscription = new Subscription();
     this.subscription.add(this.getInput$().subscribe(() => this.reload()));
   }
@@ -100,6 +102,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     const I18nContext = this.deps.i18n.Context;
     const { slos, timeRange = { from: 'now-15m/m', to: 'now' } } = this.getInput();
     const deps = this.deps;
+    const kibanaVersion = this.kibanaVersion;
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider
@@ -107,6 +110,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
             ...this.deps,
             storage: new Storage(localStorage),
             isServerless: !!deps.serverless,
+            kibanaVersion,
           }}
         >
           <Router history={history}>
