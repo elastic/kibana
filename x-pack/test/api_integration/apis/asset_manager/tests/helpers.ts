@@ -8,11 +8,9 @@
 import type { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import type { WriteSamplesPostBody } from '@kbn/assetManager-plugin/server';
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 
 const SAMPLE_ASSETS_ENDPOINT = '/api/asset-manager/assets/sample';
-
-export type KibanaSupertest = SuperTest<Test>;
 
 // NOTE: In almost every case in tests, you want { refresh: true }
 // in the options of this function, so it is defaulted to that value.
@@ -21,7 +19,7 @@ export type KibanaSupertest = SuperTest<Test>;
 // This refresh key passes through to the underlying ES
 // query via the refresh option, see: https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-refresh.html
 export async function createSampleAssets(
-  supertest: KibanaSupertest,
+  supertest: FtrSupertest,
   options: WriteSamplesPostBody = {}
 ) {
   if (options === null) {
@@ -33,11 +31,11 @@ export async function createSampleAssets(
   return supertest.post(SAMPLE_ASSETS_ENDPOINT).set('kbn-xsrf', 'xxx').send(options).expect(200);
 }
 
-export async function deleteSampleAssets(supertest: KibanaSupertest) {
+export async function deleteSampleAssets(supertest: FtrSupertest) {
   return await supertest.delete(SAMPLE_ASSETS_ENDPOINT).set('kbn-xsrf', 'xxx').expect(200);
 }
 
-export async function viewSampleAssetDocs(supertest: KibanaSupertest) {
+export async function viewSampleAssetDocs(supertest: FtrSupertest) {
   const response = await supertest.get(SAMPLE_ASSETS_ENDPOINT).expect(200);
   expect(response).to.have.property('body');
   expect(response.body).to.have.property('results');

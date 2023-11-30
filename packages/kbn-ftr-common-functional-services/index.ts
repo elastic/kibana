@@ -21,3 +21,5 @@ import { EsProvider } from './services/es';
 export type Es = ProvidedType<typeof EsProvider>;
 
 export type { FtrProviderContext } from './services/ftr_provider_context';
+
+export type { FtrSupertest } from './services/supertest';

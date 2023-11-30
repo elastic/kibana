@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -16,7 +16,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
+  supertest: FtrSupertest,
   supertestWithoutAuth: any
 ) => {
   describe(describeType, () => {

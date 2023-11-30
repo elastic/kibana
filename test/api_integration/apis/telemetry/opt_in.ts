@@ -8,13 +8,13 @@
 
 import expect from '@kbn/expect';
 
-import SuperTest from 'supertest';
-import type { KbnClient } from '@kbn/test';
-import type { TelemetrySavedObjectAttributes } from '@kbn/telemetry-plugin/server/saved_objects';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
+import type { TelemetrySavedObjectAttributes } from '@kbn/telemetry-plugin/server/saved_objects';
+import type { KbnClient } from '@kbn/test';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
@@ -87,7 +87,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
 }
 
 async function postTelemetryV2OptIn(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: FtrSupertest,
   value: unknown,
   statusCode: number
 ): Promise<any> {

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
-import { CSV_QUOTE_VALUES_SETTING } from '@kbn/share-plugin/common/constants';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import expect from '@kbn/expect';
+import { CSV_QUOTE_VALUES_SETTING } from '@kbn/share-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
-  const supertest: SuperTest<any> = getService('supertestWithoutAuth');
+  const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
   const deployment = getService('deployment');

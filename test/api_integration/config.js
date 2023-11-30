@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { services } from './services';
+import { services } from '../common/services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));

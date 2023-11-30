@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SuperTest, Test } from 'supertest';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 
 export const createDataView = async ({
   supertest,
@@ -13,7 +13,7 @@ export const createDataView = async ({
   name,
   title,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   id: string;
   name: string;
   title: string;
@@ -43,7 +43,7 @@ export const deleteDataView = async ({
   supertest,
   id,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   id: string;
 }) => {
   const { body } = await supertest

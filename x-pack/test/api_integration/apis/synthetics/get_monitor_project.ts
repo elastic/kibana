@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
-import type SuperTest from 'supertest';
+import expect from '@kbn/expect';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   LegacyProjectMonitorsRequest,
   ProjectMonitor,
   ProjectMonitorMetaData,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import expect from '@kbn/expect';
+import type { Response } from 'supertest';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -596,7 +596,8 @@ export default function ({ getService }: FtrProviderContext) {
         const fullResponse: ProjectMonitorMetaData[] = [];
         let page = 1;
         while (count >= 250) {
-          const response: SuperTest.Response = await supertest
+          // @ts-ignore
+          const response: Response = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
             .set('kbn-xsrf', 'true')
             .query({
