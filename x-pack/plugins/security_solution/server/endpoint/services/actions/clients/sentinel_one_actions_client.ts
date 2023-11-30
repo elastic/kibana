@@ -6,9 +6,14 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import {
+  SENTINELONE_CONNECTOR_ID,
+  SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { dump } from '../../../utils/dump';
 import { ResponseActionsClientError } from './errors';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import type {
@@ -87,14 +92,41 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Sends actions to SentinelOne directly
    * @private
    */
-  private async sendAction(): Promise<void> {
+  private async sendAction(
+    actionType: SUB_ACTION,
+    actionParams: object
+    // FIXME:PT type properly the options above
+  ): Promise<ActionTypeExecutorResult<unknown>> {
     const { id: connectorId } = await this.getConnector();
+    const executeOptions: Parameters<typeof this.connectorActionsClient.execute> = {
+      actionId: connectorId,
+      params: {
+        subAction: actionType,
+        subActionParams: actionParams,
+      },
+    };
 
-    // FIXME:PT implement
+    this.log.debug(
+      `calling connector actions 'execute()' for SentinelOne with:\b${dump(executeOptions)}`
+    );
+
+    const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
+
+    if (actionSendResponse.status === 'error') {
+      throw new ResponseActionsClientError(
+        `Attempt to send [${actionType}] to SentinelOne failed: ${actionSendResponse.message}. ${actionSendResponse.serviceMessage}`,
+        500,
+        actionSendResponse
+      );
+    }
+
+    return actionSendResponse;
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    const sendResponse = await this.sendAction();
+    const sendResponse = await this.sendAction(SUB_ACTION.ISOLATE_AGENT, {
+      uuid: options.endpoint_ids[0],
+    });
 
     const actionRequestDoc = this.writeActionRequestToEndpointIndex({
       ...options,

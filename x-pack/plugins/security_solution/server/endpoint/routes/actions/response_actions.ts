@@ -337,7 +337,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         return errorHandler(
           logger,
           res,
-          new EndpointError(`No client defined for agentType: ${agentType}`)
+          new EndpointError(`No client defined for agent_type: ${agentType}`)
         );
     }
 
