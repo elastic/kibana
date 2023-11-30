@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
-import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
