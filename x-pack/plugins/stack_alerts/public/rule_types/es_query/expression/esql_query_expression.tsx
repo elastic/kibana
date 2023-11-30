@@ -141,8 +141,8 @@ export const EsqlQueryExpression: React.FC<
 
   const refreshTimeFields = async (q: AggregateQuery) => {
     let hasTimestamp = false;
-    const currentIndexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
-    const currentEsFields = await getFields(http, [currentIndexPattern]);
+    const indexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
+    const currentEsFields = await getFields(http, [indexPattern]);
 
     const timeFields = getTimeFieldOptions(currentEsFields);
     setTimeFieldOptions([firstFieldOption, ...timeFields]);

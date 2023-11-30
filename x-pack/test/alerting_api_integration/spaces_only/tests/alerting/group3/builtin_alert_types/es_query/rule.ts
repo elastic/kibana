@@ -393,7 +393,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           /Document count is \d+.?\d* in the last 20s for group-\d+ in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
         const titlePattern = /rule 'always fire' matched query for group group-\d/;
         const conditionPattern =
-          /Number of matching documents for group group-\d is greater than -1/;
+          /Number of matching documents for group "group-\d" is greater than -1/;
 
         const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
