@@ -74,7 +74,8 @@ const createCloudSession = async (
   });
   const firstName = sessionResponse?.data?.user?.data?.first_name ?? '';
   const lastName = sessionResponse?.data?.user?.data?.last_name ?? '';
-  const fullname = `${firstName} ${lastName}`.trim();
+  const firstLastNames = `${firstName} ${lastName}`.trim();
+  const fullname = firstLastNames.length > 0 ? firstLastNames : email;
   const token = sessionResponse?.data?.token as string;
   if (!token) {
     log.error(
@@ -84,10 +85,7 @@ const createCloudSession = async (
     );
     throw new Error(`Unable to create Cloud session, token is missing.`);
   }
-  return {
-    token: sessionResponse?.data?.token as string,
-    fullname,
-  };
+  return { token, fullname };
 };
 
 const createSAMLRequest = async (kbnUrl: string, kbnVersion: string) => {
