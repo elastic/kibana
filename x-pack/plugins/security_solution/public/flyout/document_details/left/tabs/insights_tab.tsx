@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useCallback } from 'react';
 
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
@@ -77,14 +77,11 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  */
 export const InsightsTab: React.FC = memo(() => {
   const { eventId, indexName, scopeId } = useLeftPanelContext();
-  const { panels, openLeftPanel } = useExpandableFlyoutContext();
-  const [activeInsightsId, setActiveInsightsId] = useState(
-    panels.left?.path?.subTab ?? ENTITIES_TAB_ID
-  );
+  const { openLeftPanel, panels } = useExpandableFlyoutContext();
+  const activeInsightsId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
 
   const onChangeCompressed = useCallback(
     (optionId: string) => {
-      setActiveInsightsId(optionId);
       openLeftPanel({
         id: DocumentDetailsLeftPanelKey,
         path: {
@@ -100,12 +97,6 @@ export const InsightsTab: React.FC = memo(() => {
     },
     [eventId, indexName, scopeId, openLeftPanel]
   );
-
-  useEffect(() => {
-    if (panels.left?.path?.subTab) {
-      setActiveInsightsId(panels.left?.path?.subTab);
-    }
-  }, [panels.left?.path?.subTab]);
 
   return (
     <>
