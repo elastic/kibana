@@ -6,13 +6,13 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { resolve } from 'path';
 import * as fs from 'fs';
-import Url from 'url';
 import { load as loadYaml } from 'js-yaml';
+import { resolve } from 'path';
 import { Cookie } from 'tough-cookie';
-import { createNewSAMLSession, createSessionWithFakeSAMLAuth } from './saml_auth';
+import Url from 'url';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { createCloudSAMLSession, createLocalSAMLSession } from './saml_auth';
 
 export interface User {
   readonly username: string;
@@ -107,7 +107,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       if (isCloud) {
         log.debug(`new SAML authentication with '${role}' role`);
         const kbnVersion = await kibanaServer.version.get();
-        session = await createNewSAMLSession({
+        session = await createCloudSAMLSession({
           ...this.getCloudUserByRole(role),
           kbnHost,
           kbnVersion,
@@ -115,7 +115,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
         });
       } else {
         log.debug(`new fake SAML authentication with '${role}' role`);
-        session = await createSessionWithFakeSAMLAuth({
+        session = await createLocalSAMLSession({
           username: `elastic_${role}`,
           email: `elastic_${role}@elastic.co`,
           fullname: `test ${role}`,
