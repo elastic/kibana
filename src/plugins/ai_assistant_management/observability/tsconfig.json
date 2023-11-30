@@ -14,7 +14,6 @@
     "@kbn/typed-react-router-config",
     "@kbn/core-chrome-browser",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/actions-plugin",
     "@kbn/serverless"
   ],
   "exclude": ["target/**/*"]
