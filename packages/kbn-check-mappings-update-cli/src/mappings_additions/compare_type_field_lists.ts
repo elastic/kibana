@@ -16,17 +16,17 @@ export interface CompareResult {
 }
 
 export const compareFieldLists = ({
-  fileFields,
+  currentFields,
   registeredFields = [],
   modelVersionFields = [],
 }: {
-  fileFields: string[] | undefined;
+  currentFields: string[] | undefined;
   registeredFields: string[] | undefined;
   modelVersionFields: string[] | undefined;
 }): CompareResult => {
   // type not present in the file, so it was just added.
   // in that case we just update the file to add all the registered fields.
-  if (!fileFields) {
+  if (!currentFields) {
     return {
       error: false,
       fieldsToAdd: registeredFields,
@@ -36,17 +36,17 @@ export const compareFieldLists = ({
   }
 
   // we search all registered/mv fields not already in the file
-  const registeredFieldsNotInFile = difference(registeredFields, fileFields);
-  const modelVersionFieldsNotInFile = difference(modelVersionFields, fileFields);
+  const registeredFieldsNotInCurrent = difference(registeredFields, currentFields);
+  const modelVersionFieldsNotInCurrent = difference(modelVersionFields, currentFields);
 
   // then we search for registered fields not in model versions, and the opposite
   const registeredFieldsNotInModelVersions = difference(
-    registeredFieldsNotInFile,
-    modelVersionFieldsNotInFile
+    registeredFieldsNotInCurrent,
+    modelVersionFieldsNotInCurrent
   );
   const modelVersionFieldsNotRegistered = difference(
-    modelVersionFieldsNotInFile,
-    registeredFieldsNotInFile
+    modelVersionFieldsNotInCurrent,
+    registeredFieldsNotInCurrent
   );
 
   // if any non-file field is present only in mapping definition or in model version, then there's an error on the type
@@ -55,7 +55,7 @@ export const compareFieldLists = ({
 
   return {
     error: anyFieldMissing,
-    fieldsToAdd: anyFieldMissing ? [] : registeredFieldsNotInFile,
+    fieldsToAdd: anyFieldMissing ? [] : registeredFieldsNotInCurrent,
     missingFromModelVersion: registeredFieldsNotInModelVersions,
     missingFromDefinition: modelVersionFieldsNotRegistered,
   };

@@ -26,12 +26,12 @@ export const runModelVersionMappingAdditionsChecks = async ({
   const { fieldsFromRegisteredTypes, fieldsFromModelVersions } = await extractFieldListsFromPlugins(
     log
   );
-  const fieldsFromFile = await readCurrentFields();
+  const currentFields = await readCurrentFields();
 
   const allTypeNames = [
     ...new Set([
       ...Object.keys(fieldsFromRegisteredTypes),
-      ...Object.keys(fieldsFromFile),
+      ...Object.keys(currentFields),
       ...Object.keys(fieldsFromModelVersions),
     ]),
   ];
@@ -40,7 +40,7 @@ export const runModelVersionMappingAdditionsChecks = async ({
   const results = allTypeNames.reduce<Record<string, CompareResult>>((memo, typeName) => {
     memo[typeName] = compareFieldLists({
       registeredFields: fieldsFromRegisteredTypes[typeName],
-      fileFields: fieldsFromFile[typeName],
+      currentFields: currentFields[typeName],
       modelVersionFields: fieldsFromModelVersions[typeName],
     });
     return memo;
@@ -52,7 +52,7 @@ export const runModelVersionMappingAdditionsChecks = async ({
     throw createFailError(errorMessage);
   } else {
     log.info('Updating field file');
-    const updatedFields = updateCurrentFields(fieldsFromFile, results);
+    const updatedFields = updateCurrentFields(currentFields, results);
     await writeCurrentFields(updatedFields);
   }
 };
