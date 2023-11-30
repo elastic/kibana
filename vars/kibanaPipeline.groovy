@@ -302,7 +302,7 @@ def buildKibana(maxWorkers = '') {
       runbld("./test/scripts/jenkins_build_kibana.sh", "Build Kibana")
     }
 
-    withGcpServiceAccount.fromVaultSecret('secret/ci/elastic-kibana/migrated/ci-artifacts-key', 'value') {
+    withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
       bash("""
         cd "${env.WORKSPACE}"
         gsutil -q -m cp 'kibana-default.tar.gz' '${getBuildArtifactBucket()}/'
@@ -313,7 +313,7 @@ def buildKibana(maxWorkers = '') {
 }
 
 def downloadDefaultBuildArtifacts() {
-  withGcpServiceAccount.fromVaultSecret('secret/ci/elastic-kibana/migrated/ci-artifacts-key', 'value') {
+  withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
     bash("""
       cd "${env.WORKSPACE}"
       gsutil -q -m cp '${getBuildArtifactBucket()}/kibana-default.tar.gz' ./
