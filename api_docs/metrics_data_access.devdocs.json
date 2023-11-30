@@ -822,7 +822,7 @@
         "label": "InventoryVisType",
         "description": [],
         "signature": [
-          "\"bar\" | \"line\" | \"area\""
+          "\"area\" | \"line\" | \"bar\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
