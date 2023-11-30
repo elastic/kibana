@@ -16,7 +16,6 @@ import { EuiButtonIcon, EuiPanel, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
-import { TrainedModelHealth } from './ml_model_health';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 
 export const DEFAULT_VALUES: InferencePipeline = {
