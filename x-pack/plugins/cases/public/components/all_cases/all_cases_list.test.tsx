@@ -659,6 +659,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution', 'observability'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -686,6 +687,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -709,6 +711,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution', 'observability'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -742,6 +745,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });

@@ -15,13 +15,7 @@ import * as i18n from './translations';
 
 interface Props {
   selectedOptionKeys: CaseSeverity[];
-  onChange: ({
-    filterId,
-    selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
-  }) => void;
+  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
 }
 
 const options = mapToMultiSelectOption(Object.keys(severities) as CaseSeverity[]);

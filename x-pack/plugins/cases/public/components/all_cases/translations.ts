@@ -9,6 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 export * from '../user_profiles/translations';
+export {
+  OPEN as STATUS_OPEN,
+  IN_PROGRESS as STATUS_IN_PROGRESS,
+  CLOSED as STATUS_CLOSED,
+} from '@kbn/cases-components/src/status/translations';
 
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
   defaultMessage: 'No cases to display',
@@ -216,3 +221,7 @@ export const OPTIONS = (totalCount: number) =>
     defaultMessage: '{totalCount, plural, one {# option} other {# options}}',
     values: { totalCount },
   });
+
+export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreFiltersLabel', {
+  defaultMessage: 'More',
+});

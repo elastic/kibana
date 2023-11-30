@@ -26,6 +26,7 @@ import type {
   ExternalReferenceAttachment,
   PersistableStateAttachment,
   Configuration,
+  CustomFieldTypes,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -145,7 +146,7 @@ export interface ParsedUrlQueryParams extends Partial<UrlQueryParams> {
 
 export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
 
-export interface FilterOptions {
+export interface SystemFilterOptions {
   search: string;
   searchFields: string[];
   severity: CaseSeverity[];
@@ -156,6 +157,16 @@ export interface FilterOptions {
   owner: string[];
   category: string[];
 }
+
+export interface FilterOptions extends SystemFilterOptions {
+  customFields: {
+    [key: string]: {
+      type: CustomFieldTypes;
+      options: string[];
+    };
+  };
+}
+
 export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;

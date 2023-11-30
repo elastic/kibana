@@ -54,6 +54,7 @@ import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  CASES_INTERNAL_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -86,6 +87,7 @@ import {
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
+  constructCustomFieldsFilter,
 } from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
 
@@ -259,6 +261,7 @@ export const getCases = async ({
     tags: [],
     owner: [],
     category: [],
+    customFields: {},
   },
   queryParams = {
     page: 1,
@@ -268,7 +271,7 @@ export const getCases = async ({
   },
   signal,
 }: FetchCasesProps): Promise<CasesFindResponseUI> => {
-  const query = {
+  const body = {
     ...removeOptionFromFilter({
       filterKey: 'status',
       filterOptions: filterOptions.status,
@@ -286,14 +289,18 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...constructCustomFieldsFilter(filterOptions.customFields),
     ...queryParams,
   };
 
-  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
-    method: 'GET',
-    query,
-    signal,
-  });
+  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(
+    `${CASES_INTERNAL_URL}/_search`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
 
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
 };

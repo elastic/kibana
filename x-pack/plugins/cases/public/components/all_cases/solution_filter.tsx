@@ -17,13 +17,7 @@ import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FilterPopoverProps {
-  onChange: ({
-    filterId,
-    selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
-  }) => void;
+  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
   selectedOptionKeys: string[];
   availableSolutions: string[];
 }

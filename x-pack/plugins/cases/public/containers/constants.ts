@@ -76,6 +76,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   tags: [],
   owner: [],
   category: [],
+  customFields: {},
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {

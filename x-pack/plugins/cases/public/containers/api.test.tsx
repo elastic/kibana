@@ -77,6 +77,7 @@ import {
   CaseStatuses,
   ConnectorTypes,
   AttachmentType,
+  CustomFieldTypes,
 } from '../../common/types/domain';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -212,12 +213,12 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-        },
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -234,24 +235,25 @@ describe('Cases API', () => {
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
+          status: [CaseStatuses.open],
+          severity: [CaseSeverity.HIGH],
           assignees: ['123'],
           reporters: ['username'],
           tags: ['coke', 'pepsi'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          status: [CaseStatuses.open],
-          severity: [CaseSeverity.HIGH],
           owner: [SECURITY_SOLUTION_OWNER],
-        },
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -266,13 +268,13 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
-          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           severity: [CaseSeverity.HIGH],
-        },
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -287,12 +289,12 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-        },
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -307,13 +309,13 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
-          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           status: [CaseStatuses.open],
-        },
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -328,12 +330,12 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-        },
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -348,12 +350,12 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-        },
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -368,13 +370,13 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
-          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           assignees: 'none',
-        },
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -389,13 +391,13 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
-          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           assignees: ['none', '123'],
-        },
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -417,18 +419,18 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
+          status: [CaseStatuses.open],
           assignees: ['123'],
           reporters: [],
           tags: ['(', '"double"'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          status: [CaseStatuses.open],
           owner: [SECURITY_SOLUTION_OWNER],
-        },
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });
@@ -453,12 +455,49 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
-        method: 'GET',
-        query: {
-          ...DEFAULT_QUERY_PARAMS,
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          ...DEFAULT_QUERY_PARAMS,
+        }),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should send custom fields', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          customFields: {
+            activeCustomFieldKey: {
+              type: CustomFieldTypes.TOGGLE,
+              options: ['on'],
+            },
+            inactiveCustomFieldKey: {
+              type: CustomFieldTypes.TOGGLE,
+              options: ['off'],
+            },
+            emptyCustomFieldKey: {
+              type: CustomFieldTypes.TOGGLE,
+              options: [],
+            },
+          },
         },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          customFields: {
+            activeCustomFieldKey: [true],
+            inactiveCustomFieldKey: [false],
+          },
+          ...DEFAULT_QUERY_PARAMS,
+        }),
         signal: abortCtrl.signal,
       });
     });

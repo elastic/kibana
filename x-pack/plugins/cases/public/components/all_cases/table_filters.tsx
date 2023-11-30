@@ -8,21 +8,18 @@
 import React, { useCallback, useState } from 'react';
 import { isEqual } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
-
+import { mergeWith } from 'lodash';
+import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
-import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
 import type { FilterOptions } from '../../containers/types';
-import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
-import { SolutionFilter } from './solution_filter';
-import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
-import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
-import { AssigneesFilterPopover } from './assignees_filter';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
+import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
+import { useFilterConfig } from './table_filter_config/use_filter_config';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -33,10 +30,17 @@ interface CasesTableFiltersProps {
   availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
+  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
 }
+
+const mergeCustomizer = (objValue: string | string[], srcValue: string | string[], key: string) => {
+  if (Array.isArray(objValue)) {
+    return srcValue;
+  }
+};
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
@@ -47,6 +51,7 @@ const CasesTableFiltersComponent = ({
   availableSolutions,
   isSelectorView = false,
   onCreateCasePressed,
+  initialFilterOptions,
   isLoading,
   currentUserProfile,
   filterOptions,
@@ -56,23 +61,6 @@ const CasesTableFiltersComponent = ({
   const { data: tags = [] } = useGetTags();
   const { data: categories = [] } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
-
-  const onChange = ({
-    filterId,
-    selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
-  }) => {
-    const newFilters = {
-      ...filterOptions,
-      [filterId]: selectedOptionKeys,
-    };
-
-    if (!isEqual(newFilters, filterOptions)) {
-      onFilterChanged(newFilters);
-    }
-  };
 
   const handleSelectedAssignees = useCallback(
     (newAssignees: AssigneesFilteringSelection[]) => {
@@ -85,6 +73,41 @@ const CasesTableFiltersComponent = ({
     },
     [selectedAssignees, onFilterChanged]
   );
+
+  const onFilterOptionsChange = useCallback(
+    (partialFilterOptions: Partial<FilterOptions>) => {
+      const newFilterOptions = mergeWith({}, filterOptions, partialFilterOptions, mergeCustomizer);
+      if (!isEqual(newFilterOptions, filterOptions)) {
+        onFilterChanged(newFilterOptions);
+      }
+    },
+    [filterOptions, onFilterChanged]
+  );
+
+  const { systemFilterConfig } = useSystemFilterConfig({
+    availableSolutions,
+    caseAssignmentAuthorized,
+    categories,
+    countClosedCases,
+    countInProgressCases,
+    countOpenCases,
+    currentUserProfile,
+    handleSelectedAssignees,
+    hiddenStatuses,
+    initialFilterOptions,
+    isLoading,
+    isSelectorView,
+    onFilterOptionsChange,
+    selectedAssignees,
+    tags,
+  });
+
+  const {
+    filters: activeFilters,
+    selectableOptions,
+    activeSelectableOptionKeys,
+    onFilterConfigChange,
+  } = useFilterConfig({ systemFilterConfig, onFilterOptionsChange, isSelectorView });
 
   const handleOnSearch = useCallback(
     (newSearch) => {
@@ -128,47 +151,15 @@ const CasesTableFiltersComponent = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <SeverityFilter selectedOptionKeys={filterOptions.severity} onChange={onChange} />
-          <StatusFilter
-            selectedOptionKeys={filterOptions?.status}
-            onChange={onChange}
-            hiddenStatuses={hiddenStatuses}
-            countClosedCases={countClosedCases}
-            countInProgressCases={countInProgressCases}
-            countOpenCases={countOpenCases}
-          />
-          {caseAssignmentAuthorized && !isSelectorView ? (
-            <AssigneesFilterPopover
-              selectedAssignees={selectedAssignees}
-              currentUserProfile={currentUserProfile}
-              isLoading={isLoading}
-              onSelectionChange={handleSelectedAssignees}
-            />
-          ) : null}
-          <MultiSelectFilter
-            buttonLabel={i18n.TAGS}
-            id={'tags'}
-            limit={MAX_TAGS_FILTER_LENGTH}
-            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
-            onChange={onChange}
-            options={mapToMultiSelectOption(tags)}
-            selectedOptionKeys={filterOptions?.tags}
-          />
-          <MultiSelectFilter
-            buttonLabel={i18n.CATEGORIES}
-            id={'category'}
-            limit={MAX_CATEGORY_FILTER_LENGTH}
-            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_CATEGORY_FILTER_LENGTH, 'categories')}
-            onChange={onChange}
-            options={mapToMultiSelectOption(categories)}
-            selectedOptionKeys={filterOptions?.category}
-          />
-          {availableSolutions.length > 1 && (
-            <SolutionFilter
-              onChange={onChange}
-              selectedOptionKeys={filterOptions?.owner}
-              availableSolutions={availableSolutions}
+        <EuiFilterGroup data-test-subj="cases-table-filters-group">
+          {activeFilters.map((filter) => (
+            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
+          ))}
+          {isSelectorView || (
+            <MoreFiltersSelectable
+              options={selectableOptions}
+              activeFilters={activeSelectableOptionKeys}
+              onChange={onFilterConfigChange}
             />
           )}
         </EuiFilterGroup>
