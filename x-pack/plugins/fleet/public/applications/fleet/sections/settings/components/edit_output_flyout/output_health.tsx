@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiBadge, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import type { GetOutputHealthResponse } from '../../../../../../../common/types';
@@ -17,10 +18,11 @@ import type { Output } from '../../../../types';
 
 interface Props {
   output: Output;
+  showBadge?: boolean;
 }
 const REFRESH_INTERVAL_MS = 5000;
 
-export const OutputHealth: React.FunctionComponent<Props> = ({ output }) => {
+export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge }) => {
   const { notifications } = useStartServices();
   const [outputHealth, setOutputHealth] = useState<GetOutputHealthResponse | null>();
   const fetchData = useCallback(async () => {
@@ -49,22 +51,58 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output }) => {
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  return outputHealth?.state === 'DEGRADED' ? (
-    <EuiCallOut title="Error" color="danger" iconType="error">
-      <p>
-        {i18n.translate('xpack.fleet.output.calloutText', {
-          defaultMessage: 'Unable to connect to "{name}" at {host}.',
-          values: {
-            name: output.name,
-            host: output.hosts?.join(',') ?? '',
-          },
-        })}
-      </p>{' '}
-      <p>
-        {i18n.translate('xpack.fleet.output.calloutPromptText', {
-          defaultMessage: 'Please check the details are correct.',
-        })}
-      </p>
-    </EuiCallOut>
-  ) : null;
+  const EditOutputStatus: { [status: string]: JSX.Element | null } = {
+    DEGRADED: (
+      <EuiCallOut title="Error" color="danger" iconType="error">
+        <p>
+          {i18n.translate('xpack.fleet.output.calloutText', {
+            defaultMessage: 'Unable to connect to "{name}" at {host}.',
+            values: {
+              name: output.name,
+              host: output.hosts?.join(',') ?? '',
+            },
+          })}
+        </p>{' '}
+        <p>
+          {i18n.translate('xpack.fleet.output.calloutPromptText', {
+            defaultMessage: 'Please check the details are correct.',
+          })}
+        </p>
+      </EuiCallOut>
+    ),
+    HEALTHY: (
+      <EuiCallOut title="Healthy" color="success" iconType="check">
+        <p>
+          {i18n.translate('xpack.fleet.output.successCalloutText', {
+            defaultMessage: 'Connection with remote output established.',
+          })}
+        </p>
+      </EuiCallOut>
+    ),
+  };
+
+  const OutputStatusBadge: { [status: string]: JSX.Element | null } = {
+    DEGRADED: (
+      <EuiBadge color="danger">
+        <FormattedMessage
+          id="xpack.fleet.outputHealth.degradedStatusText"
+          defaultMessage="Unhealthy"
+        />
+      </EuiBadge>
+    ),
+    HEALTHY: (
+      <EuiBadge color="success">
+        <FormattedMessage
+          id="xpack.fleet.outputHealth.healthyStatusText"
+          defaultMessage="Healthy"
+        />
+      </EuiBadge>
+    ),
+  };
+
+  return outputHealth?.state
+    ? showBadge
+      ? OutputStatusBadge[outputHealth.state] || null
+      : EditOutputStatus[outputHealth.state] || null
+    : null;
 };
