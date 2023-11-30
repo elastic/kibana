@@ -41,7 +41,7 @@ import {
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967
-describe.skip(
+describe(
   'Endpoint Exceptions workflows from Alert',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
