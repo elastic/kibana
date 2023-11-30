@@ -7,7 +7,10 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form';
+import {
+  AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
+  getDefaultAzureManualCredentialType,
+} from './azure_credentials_form';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
   getArmTemplateUrlFromCspmPackage,
@@ -15,14 +18,28 @@ import {
   NewPackagePolicyPostureInput,
 } from '../utils';
 import {
-  DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE,
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
 import { CLOUDBEAT_AZURE } from '../../../../common/constants';
 import { AzureCredentialsType } from '../../../../common/types';
 
-export type SetupFormat = AzureCredentialsType;
+export type SetupFormat = 'arm_template' | 'manual';
+
+const getSetupFormatFromInput = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>,
+  hasArmTemplateUrl: boolean
+): SetupFormat => {
+  const credentialsType = getAzureCredentialsType(input);
+  if (!credentialsType && hasArmTemplateUrl) {
+    return 'arm_template';
+  }
+  if (credentialsType !== 'arm_template') {
+    return 'manual';
+  }
+
+  return 'arm_template';
+};
 
 const getAzureCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
@@ -107,7 +124,7 @@ export const useAzureCredentialsForm = ({
 
   const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
 
-  const setupFormat = azureCredentialsType;
+  const setupFormat = getSetupFormatFromInput(input, hasArmTemplateUrl);
 
   const group = options[azureCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
@@ -134,6 +151,8 @@ export const useAzureCredentialsForm = ({
     setupFormat,
   });
 
+  const defaultAzureManualCredentialType = getDefaultAzureManualCredentialType(packageInfo);
+
   const onSetupFormatChange = (newSetupFormat: SetupFormat) => {
     if (newSetupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE) {
       fieldsSnapshot.current = Object.fromEntries(
@@ -155,7 +174,7 @@ export const useAzureCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.credentials.type': {
-            value: lastManualCredentialsType.current || DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE,
+            value: lastManualCredentialsType.current || defaultAzureManualCredentialType,
             type: 'text',
           },
           ...fieldsSnapshot.current,
