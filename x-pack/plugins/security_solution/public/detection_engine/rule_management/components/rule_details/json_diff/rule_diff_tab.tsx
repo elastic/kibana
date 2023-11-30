@@ -17,7 +17,6 @@ import {
   getCollapsedLinesCountBetween,
   parseDiff,
   tokenize,
-  markEdits,
 } from 'react-diff-view';
 import 'react-diff-view/style/index.css';
 import type { RenderGutter, HunkData, DecorationProps, TokenizeOptions } from 'react-diff-view';
@@ -157,9 +156,7 @@ const useTokens = (hunks: HunkData[], diffMethod: DiffMethod, oldSource: string)
         "markEditsBy" is a slightly modified version of "markEdits" enhancer from react-diff-view
         to enable word-level highlighting.
       */
-      diffMethod === DiffMethod.CHARS
-        ? markEdits(hunks, { type: 'block' }) // Using built-in "markEdits" enhancer for char-level diffing
-        : markEditsBy(hunks, diffMethod), // Using custom "markEditsBy" enhancer for other-level diffing
+      markEditsBy(hunks, diffMethod),
     ],
   };
 
@@ -211,7 +208,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
   });
 
   /*
-      "parseDiff" converts a unified diff string into a JSDiff File object.
+      "parseDiff" converts a unified diff string into a gitdiff-parser File object.
     */
   const [diffFile] = parseDiff(unifiedDiff, {
     nearbySequences: 'zip',
