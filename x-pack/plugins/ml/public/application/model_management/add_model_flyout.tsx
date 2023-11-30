@@ -49,15 +49,15 @@ type FlyoutTabId = 'clickToDownload' | 'manualDownload';
  */
 export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, modelDownloads }) => {
   const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
-  const isElserTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
+  const isClickToDownloadTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
 
   const [selectedTabId, setSelectedTabId] = useState<FlyoutTabId>(
-    isElserTabVisible ? 'clickToDownload' : 'manualDownload'
+    isClickToDownloadTabVisible ? 'clickToDownload' : 'manualDownload'
   );
 
   const tabs = useMemo(() => {
     return [
-      ...(isElserTabVisible
+      ...(isClickToDownloadTabVisible
         ? [
             {
               id: 'clickToDownload' as const,
@@ -87,7 +87,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
         content: <ManualDownloadTabContent />,
       },
     ];
-  }, [isElserTabVisible, modelDownloads, onSubmit]);
+  }, [isClickToDownloadTabVisible, modelDownloads, onSubmit]);
 
   const selectedTabContent = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)?.content;
