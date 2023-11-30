@@ -13,6 +13,18 @@
   "kbn_references": [
     "@kbn/core-plugins-server",
     "@kbn/config-schema",
-    "@kbn/dev-utils"
+    "@kbn/dev-utils",
+    "@kbn/core-plugins-browser",
+    "@kbn/core-application-browser",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/security-plugin",
+    "@kbn/core-lifecycle-browser"
   ]
 }
