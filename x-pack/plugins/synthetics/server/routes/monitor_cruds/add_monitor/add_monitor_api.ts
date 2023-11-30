@@ -10,6 +10,7 @@ import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { MonitorValidationError, ValidationResult } from '../monitor_validation';
 import { getKqlFilter } from '../../common';
 import { deleteMonitor } from '../delete_monitor';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
@@ -47,7 +48,7 @@ export type CreateMonitorPayLoad = MonitorFields & {
   schedule?: number | MonitorFields['schedule'];
 };
 
-export class AddMonitorAPI {
+export class AddEditMonitorAPI {
   routeContext: RouteContext;
   allPrivateLocations?: PrivateLocationAttributes[];
   constructor(routeContext: RouteContext) {
@@ -155,6 +156,33 @@ export class AddMonitorAPI {
           }
         : undefined
     );
+  }
+
+  validateMonitorType(
+    monitorFields: MonitorFields,
+    previousMonitor?: MonitorFields
+  ): ValidationResult {
+    const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
+    if (previousMonitor) {
+      const { [ConfigKey.MONITOR_TYPE]: prevMonitorType } = previousMonitor;
+
+      if (monitorType !== prevMonitorType) {
+        // monitor type cannot be changed
+        throw new MonitorValidationError({
+          valid: false,
+          reason: i18n.translate('xpack.synthetics.createMonitor.validation.monitorTypeChanged', {
+            defaultMessage:
+              'Monitor type cannot be changed from {prevMonitorType} to {monitorType}.',
+            values: {
+              prevMonitorType,
+              monitorType,
+            },
+          }),
+          details: '',
+          payload: monitorFields,
+        });
+      }
+    }
   }
 
   async normalizeMonitor(requestPayload: CreateMonitorPayLoad) {
