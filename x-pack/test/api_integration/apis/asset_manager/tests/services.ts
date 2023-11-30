@@ -6,10 +6,10 @@
  */
 
 import { omit } from 'lodash';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { ASSETS_ENDPOINT } from './constants';
 import { FtrProviderContext } from '../types';
+import { generateServicesData } from './helpers';
 
 const SERVICES_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/services`;
 
@@ -91,41 +91,4 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
   });
-}
-
-function generateServicesData({
-  from,
-  to,
-  count = 1,
-}: {
-  from: string;
-  to: string;
-  count: number;
-}) {
-  const range = timerange(from, to);
-
-  const services = Array(count)
-    .fill(0)
-    .map((_, idx) =>
-      apm
-        .service({
-          name: `service-${idx}`,
-          environment: 'production',
-          agentName: 'nodejs',
-        })
-        .instance(`my-host-${idx}`)
-    );
-
-  return range
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp, index) =>
-      services.map((service) =>
-        service
-          .transaction({ transactionName: 'GET /foo' })
-          .timestamp(timestamp)
-          .duration(500)
-          .success()
-      )
-    );
 }

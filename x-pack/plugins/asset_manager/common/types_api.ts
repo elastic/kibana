@@ -179,9 +179,10 @@ export const assetFiltersSingleKindRT = rt.exact(
 
 export type SingleKindAssetFilters = rt.TypeOf<typeof assetFiltersSingleKindRT>;
 
+const supportedKindRT = rt.union([rt.literal('host'), rt.literal('service')]);
 export const assetFiltersRT = rt.intersection([
   assetFiltersSingleKindRT,
-  rt.partial({ kind: rt.union([rt.literal('host'), rt.literal('service')]) }),
+  rt.partial({ kind: rt.union([supportedKindRT, rt.array(supportedKindRT)]) }),
 ]);
 
 export type AssetFilters = rt.TypeOf<typeof assetFiltersRT>;
