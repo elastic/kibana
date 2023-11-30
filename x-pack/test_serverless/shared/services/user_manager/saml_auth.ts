@@ -37,6 +37,22 @@ export interface CreateSamlSessionParams {
   log: ToolingLog;
 }
 
+const cleanException = (url: string, ex: any) => {
+  if (ex.isAxiosError) {
+    ex.url = url;
+    if (ex.response?.data) {
+      if (ex.response.data?.message) {
+        ex.response_message = ex.response.data.message;
+      } else {
+        ex.data = ex.response.data;
+      }
+    }
+    ex.config = { REDACTED: 'REDACTED' };
+    ex.request = { REDACTED: 'REDACTED' };
+    ex.response = { REDACTED: 'REDACTED' };
+  }
+};
+
 const getSessionCookie = (cookieString: string) => {
   return parseCookie(cookieString);
 };
@@ -77,11 +93,10 @@ const createCloudSession = async (params: CreateSamlSessionParams) => {
       validateStatus: () => true,
       maxRedirects: 0,
     });
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      log.debug(JSON.stringify(err));
-    }
-    throw new Error('Failed to create new cloud session');
+  } catch (ex) {
+    log.error('Failed to create the new cloud session');
+    cleanException(cloudLoginUrl, ex);
+    throw ex;
   }
 
   const firstName = sessionResponse?.data?.user?.data?.first_name ?? '';
@@ -102,9 +117,10 @@ const createCloudSession = async (params: CreateSamlSessionParams) => {
 
 const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
   let samlResponse: AxiosResponse;
+  const url = kbnUrl + '/internal/security/login';
   try {
     samlResponse = await axios.request({
-      url: kbnUrl + '/internal/security/login',
+      url,
       method: 'post',
       data: {
         providerType: 'saml',
@@ -119,22 +135,21 @@ const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: Toolin
       validateStatus: () => true,
       maxRedirects: 0,
     });
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      log.debug(JSON.stringify(err));
-    }
-    throw new Error('Failed to create SAML request');
+  } catch (ex) {
+    log.error('Failed to create SAML request');
+    cleanException(url, ex);
+    throw ex;
   }
 
   const cookie = getSessionCookie(samlResponse.headers['set-cookie']![0]);
   if (!cookie) {
-    throw new Error(`Failed to parse cookie from SAML response`);
+    throw new Error(`Failed to parse cookie from SAML response headers`);
   }
 
   const location = samlResponse?.data?.location as string;
   if (!location) {
     throw new Error(
-      `Failed to get location from SAML response: ${JSON.stringify(samlResponse.data)}`
+      `Failed to get location from SAML response data: ${JSON.stringify(samlResponse.data)}`
     );
   }
   return { location, sid: cookie.value };
@@ -166,11 +181,12 @@ const finishSAMLHandshake = async ({
   log: ToolingLog;
 }) => {
   const encodedResponse = encodeURIComponent(samlResponse);
+  const url = kbnHost + '/api/security/saml/callback';
   let authResponse: AxiosResponse;
 
   try {
     authResponse = await axios.request({
-      url: kbnHost + '/api/security/saml/callback',
+      url,
       method: 'post',
       data: `SAMLResponse=${encodedResponse}`,
       headers: {
@@ -180,16 +196,15 @@ const finishSAMLHandshake = async ({
       validateStatus: () => true,
       maxRedirects: 0,
     });
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      log.debug(JSON.stringify(err));
-    }
-    throw err;
+  } catch (ex) {
+    log.error('Failed to call SAML callback');
+    cleanException(url, ex);
+    throw ex;
   }
 
   const cookie = getSessionCookie(authResponse!.headers['set-cookie']![0]);
   if (!cookie) {
-    throw new Error(`Failed to get cookie from SAML callback response`);
+    throw new Error(`Failed to get cookie from SAML callback response headers`);
   }
 
   return cookie;
