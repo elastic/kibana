@@ -51,7 +51,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
-          <EuiFlexItem grow={pipeline.modelType.length <= 0}>
+          <EuiFlexItem grow={pipeline.modelType.length === 0}>
             <EuiText size="s">{modelIdDisplay}</EuiText>
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
