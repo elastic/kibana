@@ -32,17 +32,13 @@ describe('TrainedModelHealth', () => {
     types: ['pytorch'],
   };
   it('renders model downloading', () => {
-    const wrapper = shallow(
-      <TrainedModelHealth modelState={MlModelDeploymentState.Downloading} />
-    );
+    const wrapper = shallow(<TrainedModelHealth modelState={MlModelDeploymentState.Downloading} />);
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Downloading');
     expect(health.prop('color')).toEqual('warning');
   });
   it('renders model downloaded', () => {
-    const wrapper = shallow(
-      <TrainedModelHealth modelState={MlModelDeploymentState.Downloaded} />
-    );
+    const wrapper = shallow(<TrainedModelHealth modelState={MlModelDeploymentState.Downloaded} />);
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Downloaded');
     expect(health.prop('color')).toEqual('subdued');
