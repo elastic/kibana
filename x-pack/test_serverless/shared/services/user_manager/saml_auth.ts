@@ -61,20 +61,29 @@ const getCloudUrl = (hostname: string, pathname: string) => {
 const createCloudSession = async (params: CreateSamlSessionParams) => {
   const { hostname, email, password, log } = params;
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/users/_login');
-  const sessionResponse: AxiosResponse = await axios.request({
-    url: cloudLoginUrl,
-    method: 'post',
-    data: {
-      email,
-      password,
-    },
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-    },
-    validateStatus: () => true,
-    maxRedirects: 0,
-  });
+  let sessionResponse: AxiosResponse;
+  try {
+    sessionResponse = await axios.request({
+      url: cloudLoginUrl,
+      method: 'post',
+      data: {
+        email,
+        password,
+      },
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+      },
+      validateStatus: () => true,
+      maxRedirects: 0,
+    });
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      log.debug(JSON.stringify(err));
+    }
+    throw new Error('Failed to create new cloud session');
+  }
+
   const firstName = sessionResponse?.data?.user?.data?.first_name ?? '';
   const lastName = sessionResponse?.data?.user?.data?.last_name ?? '';
   const firstLastNames = `${firstName} ${lastName}`.trim();
@@ -91,25 +100,44 @@ const createCloudSession = async (params: CreateSamlSessionParams) => {
   return { token, fullname };
 };
 
-const createSAMLRequest = async (kbnUrl: string, kbnVersion: string) => {
-  const samlResponse: AxiosResponse = await axios.request({
-    url: kbnUrl + '/internal/security/login',
-    method: 'post',
-    data: {
-      providerType: 'saml',
-      providerName: 'cloud-saml-kibana',
-      currentURL: kbnUrl + '/login?next=%2F"',
-    },
-    headers: {
-      'kbn-version': kbnVersion,
-      'x-elastic-internal-origin': 'Kibana',
-      'content-type': 'application/json',
-    },
-    validateStatus: () => true,
-    maxRedirects: 0,
-  });
-  const cookie = getSessionCookie(samlResponse.headers['set-cookie']![0])!;
-  return { location: samlResponse.data.location, sid: cookie.value };
+const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
+  let samlResponse: AxiosResponse;
+  try {
+    samlResponse = await axios.request({
+      url: kbnUrl + '/internal/security/login',
+      method: 'post',
+      data: {
+        providerType: 'saml',
+        providerName: 'cloud-saml-kibana',
+        currentURL: kbnUrl + '/login?next=%2F"',
+      },
+      headers: {
+        'kbn-version': kbnVersion,
+        'x-elastic-internal-origin': 'Kibana',
+        'content-type': 'application/json',
+      },
+      validateStatus: () => true,
+      maxRedirects: 0,
+    });
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      log.debug(JSON.stringify(err));
+    }
+    throw new Error('Failed to create SAML request');
+  }
+
+  const cookie = getSessionCookie(samlResponse.headers['set-cookie']![0]);
+  if (!cookie) {
+    throw new Error(`Failed to parse cookie from SAML response`);
+  }
+
+  const location = samlResponse?.data?.location as string;
+  if (!location) {
+    throw new Error(
+      `Failed to get location from SAML response: ${JSON.stringify(samlResponse.data)}`
+    );
+  }
+  return { location, sid: cookie.value };
 };
 
 const createSAMLResponse = async (url: string, ecSession: string) => {
@@ -159,14 +187,19 @@ const finishSAMLHandshake = async ({
     throw err;
   }
 
-  return getSessionCookie(authResponse!.headers['set-cookie']![0])!;
+  const cookie = getSessionCookie(authResponse!.headers['set-cookie']![0]);
+  if (!cookie) {
+    throw new Error(`Failed to get cookie from SAML callback response`);
+  }
+
+  return cookie;
 };
 
 export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => {
   const { email, password, kbnHost, kbnVersion, log } = params;
   const hostname = getCloudHostName();
   const { token, fullname } = await createCloudSession({ hostname, email, password, log });
-  const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion);
+  const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log);
   const samlResponse = await createSAMLResponse(location, token);
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
   return new Session(cookie, email, fullname);
