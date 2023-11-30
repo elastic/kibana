@@ -41,6 +41,7 @@ export type {
   Installation,
   EpmPackageInstallStatus,
   InstallationStatus,
+  InstallFailedAttempt,
   PackageInfo,
   ArchivePackage,
   RegistryVarsEntry,

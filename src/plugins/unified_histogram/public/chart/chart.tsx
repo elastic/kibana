@@ -69,6 +69,7 @@ export interface ChartProps {
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   isOnHistogramMode?: boolean;
+  histogramQuery?: AggregateQuery;
   isChartLoading?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
@@ -109,6 +110,7 @@ export function Chart({
   lensAdapters,
   lensEmbeddableOutput$,
   isOnHistogramMode,
+  histogramQuery,
   isChartLoading,
   onResetChartHeight,
   onChartHiddenChange,
@@ -185,7 +187,7 @@ export function Chart({
       getLensAttributes({
         title: chart?.title,
         filters,
-        query,
+        query: histogramQuery ?? query,
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
@@ -199,6 +201,7 @@ export function Chart({
       dataView,
       filters,
       query,
+      histogramQuery,
     ]
   );
 

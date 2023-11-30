@@ -37,7 +37,7 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   getDefaultLogCategorizationAppState,
   type LogCategorizationPageUrlState,
-} from '../../application/utils/url_state';
+} from '../../application/url_state/log_pattern_analysis';
 
 import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';

@@ -941,7 +941,7 @@ module.exports = {
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+        '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
       },
     },
     {
@@ -1536,6 +1536,17 @@ module.exports = {
       excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
+     * Serverless Search overrides
+     */
+    {
+      // All files
+      files: ['x-pack/plugins/serverless_search/**/*.{ts,tsx}', 'packages/kbn-search-*'],
+      rules: {
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
 
