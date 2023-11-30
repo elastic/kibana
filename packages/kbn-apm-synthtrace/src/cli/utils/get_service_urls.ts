@@ -36,6 +36,7 @@ async function discoverAuth(parsedTarget: Url) {
 
 async function getKibanaUrl({ target, logger }: { target: string; logger: Logger }) {
   try {
+    const isCI = process.env.CI?.toLowerCase() === 'true';
     logger.debug(`Checking Kibana URL ${target} for a redirect`);
 
     const unredirectedResponse = await fetch(target, {
@@ -69,14 +70,14 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
       );
     }
 
-    const kibanaUrlWithoutAuth = format({
+    const discoveredKibanaUrlWithoutAuth = format({
       ...parsedDiscoveredUrl,
       auth: undefined,
     });
 
     logger.info(
       `Discovered kibana running at: ${
-        parsedDiscoveredUrl.protocol === 'http' ? discoveredKibanaUrlWithAuth : kibanaUrlWithoutAuth
+        isCI ? discoveredKibanaUrlWithoutAuth : discoveredKibanaUrlWithAuth
       }`
     );
 
