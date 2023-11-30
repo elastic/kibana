@@ -22,10 +22,13 @@ import {
 import 'react-diff-view/style/index.css';
 import type { RenderGutter, HunkData, DecorationProps, TokenizeOptions } from 'react-diff-view';
 import unidiff from 'unidiff';
+import stringify from 'json-stable-stringify';
 import { EuiSpacer, EuiIcon, EuiLink, useEuiTheme, EuiSwitch, EuiRadioGroup } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { markEditsBy, DiffMethod } from './mark_edits_by_word';
-import { sortAndStringifyJson } from './sort_stringify_json';
+
+const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
+  stringify(jsObject, { space: 2 });
 
 interface UnfoldProps extends Omit<DecorationProps, 'children'> {
   start: number;
@@ -407,7 +410,7 @@ interface RuleDiffTabProps {
   newRule: RuleResponse;
 }
 
-export const RuleDiffTabReactDiffView = ({ oldRule, newRule }: RuleDiffTabProps) => {
+export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
   const options = [
     {
       id: DiffMethod.CHARS,

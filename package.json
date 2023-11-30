@@ -912,7 +912,7 @@
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.2.2",
     "del": "^6.1.0",
-    "diff": "^4.0.1",
+    "diff": "^5.1.0",
     "diff-match-patch": "^1.0.5",
     "diff-match-patch-line-and-word": "^0.1.3",
     "elastic-apm-node": "^4.1.0",
