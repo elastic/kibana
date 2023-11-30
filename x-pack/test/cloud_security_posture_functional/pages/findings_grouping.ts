@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     {
       '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
-      result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
+      result: { evaluation: 'passed' },
       orchestrator: {
         cluster: {
           id: '1',
@@ -46,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     {
       '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
-      result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
+      result: { evaluation: 'passed' },
       cloud: {
         account: {
           id: '1',
@@ -143,19 +143,44 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Default Grouping', async () => {
-      it('groups findings by resource and sort case sensitive asc', async () => {
+      it('groups findings by resource and sort by failed findings desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
 
         const grouping = await findings.findingsGrouping();
 
-        const resourceOrder = ['Pod', 'kubelet', 'process'];
+        const resourceOrder = [
+          {
+            resourceName: 'process',
+            resourceId: data[2].resource.id,
+            resourceSubType: data[2].resource.sub_type,
+            findingsCount: 2,
+          },
+          {
+            resourceName: 'Pod',
+            resourceId: data[1].resource.id,
+            resourceSubType: data[1].resource.sub_type,
+            findingsCount: 1,
+          },
+          {
+            resourceName: 'kubelet',
+            resourceId: data[0].resource.id,
+            resourceSubType: data[0].resource.sub_type,
+            findingsCount: 1,
+          },
+        ];
 
-        await asyncForEach(resourceOrder, async (resourceName, index) => {
-          const groupName = await grouping.getRowAtIndex(index);
-          expect(await groupName.getVisibleText()).to.be(resourceName);
-        });
+        await asyncForEach(
+          resourceOrder,
+          async ({ resourceName, resourceId, resourceSubType, findingsCount }, index) => {
+            const groupName = await grouping.getRowAtIndex(index);
+            expect(await groupName.getVisibleText()).to.contain(resourceName);
+            expect(await groupName.getVisibleText()).to.contain(resourceId);
+            expect(await groupName.getVisibleText()).to.contain(resourceSubType);
+            expect(await groupName.getVisibleText()).to.contain(`Findings : ${findingsCount}`);
+          }
+        );
 
         const groupCount = await grouping.getGroupCount();
         expect(groupCount).to.be('3 groups');
@@ -177,16 +202,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(unitCount).to.be('4 findings');
 
         const ruleNameOrder = [
-          'Another upper case rule name',
-          'Upper case rule name',
-          'lower case rule name',
-          'some lower case rule name',
+          {
+            ruleName: 'Another upper case rule name',
+            findingsCount: 1,
+            benchmarkName: data[1].rule.benchmark.name,
+          },
+          {
+            ruleName: 'Upper case rule name',
+            findingsCount: 1,
+            benchmarkName: data[0].rule.benchmark.name,
+          },
+          {
+            ruleName: 'lower case rule name',
+            findingsCount: 1,
+            benchmarkName: data[2].rule.benchmark.name,
+          },
+          {
+            ruleName: 'some lower case rule name',
+            findingsCount: 1,
+            benchmarkName: data[3].rule.benchmark.name,
+          },
         ];
 
-        await asyncForEach(ruleNameOrder, async (resourceName, index) => {
-          const groupName = await grouping.getRowAtIndex(index);
-          expect(await groupName.getVisibleText()).to.be(resourceName);
-        });
+        await asyncForEach(
+          ruleNameOrder,
+          async ({ ruleName, benchmarkName, findingsCount }, index) => {
+            const groupName = await grouping.getRowAtIndex(index);
+            expect(await groupName.getVisibleText()).to.contain(ruleName);
+            expect(await groupName.getVisibleText()).to.contain(benchmarkName);
+            expect(await groupName.getVisibleText()).to.contain(`Findings : ${findingsCount}`);
+          }
+        );
       });
       it('groups findings by cloud account and sort case sensitive asc', async () => {
         const groupSelector = await findings.groupSelector();
