@@ -9,6 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
+import { APP_ID } from '../../../../common';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../services';
 import { ResponseActionsClientError } from '../../services/actions/clients/errors';
 import {
@@ -65,10 +67,76 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     );
   }
 
-  // TODO:PT implement a generic way to update cases without relying on the Attachments being endpoint agents
-  // protected async updateCases(): Promise<void> {
-  //   throw new Error('Method not yet implemented');
-  // }
+  /**
+   * Update cases with information about the hosts that received a response action
+   * @param caseIds
+   * @param alertIds
+   * @param updates
+   * @protected
+   */
+  protected async updateCases({
+    caseIds = [],
+    alertIds = [],
+    updates,
+  }: {
+    caseIds?: string[];
+    /** If defined, any case that the alert is included in will also receive an update */
+    alertIds?: string[];
+    /** The updates that will be added to each case */
+    updates: Array<{
+      command: ResponseActionsApiCommandNames;
+      hostname: string;
+      endpointId: string;
+      comment: string;
+    }>;
+  }): Promise<void> {
+    if (caseIds.length === 0 && alertIds.length === 0) {
+      this.log.debug(`Nothing to do. No caseIds and alertIds are empty`);
+      return;
+    }
+
+    if (updates.length === 0) {
+      this.log.debug(`Nothing to do. No updates defined`);
+      return;
+    }
+
+    const casesClient = this.options.casesClient;
+
+    if (!casesClient) {
+      this.log.debug(`No CasesClient available. Skipping updates to Cases!`);
+      return;
+    }
+
+    const casesFromAlertIds = await Promise.all(
+      alertIds.map((alertID) => {
+        return casesClient.cases
+          .getCasesByAlertID({ alertID, options: { owner: APP_ID } })
+          .then((casesFound) => {
+            return casesFound.map((caseInfo) => caseInfo.id);
+          })
+          .catch((err) => {
+            this.log.warn(
+              `Attempt to get cases for alertID [${alertID}][owner: ${APP_ID}] failed with: ${err.message}`
+            );
+
+            // We don't fail everything here. Just log it and keep going
+            return [] as string[];
+          });
+      })
+    ).then((results) => {
+      return results.flat();
+    });
+
+    const allCases = [...new Set([...caseIds, ...casesFromAlertIds])];
+
+    if (allCases.length === 0) {
+      return;
+    }
+
+    this.log.debug(`Updating cases:\n${dump(allCases)}`);
+
+    // FIXME:PT implement adding the attachment to the case
+  }
 
   /**
    * Returns the action details for a given response action id
