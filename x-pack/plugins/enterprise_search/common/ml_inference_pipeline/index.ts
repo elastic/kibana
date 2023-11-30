@@ -203,7 +203,7 @@ export const parseModelStateFromStats = (
   )
     return TrainedModelState.Started;
 
-  return parseModelState(model?.deployment_stats?.state)
+  return parseModelState(model?.deployment_stats?.state);
 };
 
 export const parseModelState = (state?: string) => {
