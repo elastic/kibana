@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { DeleteDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_delete_response_schema';
 
 import { transformStateSchema, ResponseStatus } from './common';
 
@@ -29,7 +30,7 @@ export type DeleteTransformsRequestSchema = TypeOf<typeof deleteTransformsReques
 export interface DeleteTransformStatus {
   transformDeleted: ResponseStatus;
   destIndexDeleted?: ResponseStatus;
-  destDataViewDeleted?: ResponseStatus;
+  destDataViewDeleted?: DeleteDataViewApiResponseSchema;
   destinationIndex?: string | undefined;
 }
 
