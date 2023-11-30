@@ -1811,7 +1811,7 @@ describe('Alerts Client', () => {
           const alert2 = new Alert('2', { meta: { maintenanceWindowIds: ['mw1', 'mw2'] } });
           const alert3 = new Alert('3', { meta: { maintenanceWindowIds: ['mw2', 'mw3'] } });
 
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValue({
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
             '2': alert2,
             '3': alert3,
