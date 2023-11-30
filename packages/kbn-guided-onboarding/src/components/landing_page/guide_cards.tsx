@@ -44,7 +44,7 @@ export const GuideCards = (props: GuideCardsProps) => {
   return (
     <EuiFlexGroup wrap alignItems="center" justifyContent="center">
       {filteredCards?.map((card, index) => (
-        <EuiFlexItem key={index} grow={false}>
+        <EuiFlexItem key={index}>
           <GuideCard card={card} {...props} />
           <EuiSpacer size="m" />
         </EuiFlexItem>

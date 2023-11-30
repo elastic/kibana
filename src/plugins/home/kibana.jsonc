@@ -6,7 +6,7 @@
     "id": "home",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["dataViews", "share", "urlForwarding", ],
+    "requiredPlugins": ["dataViews", "share", "urlForwarding", "kibanaReact" ],
     "optionalPlugins": ["usageCollection", "customIntegrations", "cloud", "guidedOnboarding"],
   }
 }
