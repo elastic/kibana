@@ -95,6 +95,7 @@ export const RoleSwitcher: FunctionComponent = () => {
         </EuiButton>
       }
       panelPaddingSize="none"
+      offset={4}
       anchorPosition="downRight"
       repositionOnScroll
       repositionToCrossAxis={false}
