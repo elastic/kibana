@@ -91,6 +91,7 @@ export const SearchIndexDocuments: React.FC = () => {
   return (
     <>
       <DocumentsOverview
+        dataTelemetryIdPrefix={`entSearchContent-${ingestionMethod}`}
         searchQueryCallback={searchQueryCallback}
         documentComponent={
           <>
@@ -142,7 +143,6 @@ export const SearchIndexDocuments: React.FC = () => {
             )}
           </>
         }
-        ingestionMethod={ingestionMethod}
       />
     </>
   );

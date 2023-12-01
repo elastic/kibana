@@ -16,18 +16,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent } from 'react';
-import { IngestionMethod } from '../types';
 
 interface DocumentsProps {
   accessControlSwitch?: React.ReactNode;
+  dataTelemetryIdPrefix: string;
   documentComponent: React.ReactNode;
-  ingestionMethod: IngestionMethod;
   searchQueryCallback: (searchQuery: string) => void;
 }
 export const DocumentsOverview: React.FC<DocumentsProps> = ({
   accessControlSwitch,
+  dataTelemetryIdPrefix,
   documentComponent,
-  ingestionMethod,
   searchQueryCallback,
 }) => {
   return (
@@ -48,7 +47,7 @@ export const DocumentsOverview: React.FC<DocumentsProps> = ({
             {accessControlSwitch}
             <EuiFlexItem>
               <EuiFieldSearch
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-searchDocuments`}
+                data-telemetry-id={`${dataTelemetryIdPrefix}-documents-searchDocuments`}
                 placeholder={i18n.translate(
                   'searchIndexDocuments.documents.searchField.placeholder',
                   {

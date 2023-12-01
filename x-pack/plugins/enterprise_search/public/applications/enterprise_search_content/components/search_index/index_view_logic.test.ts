@@ -13,7 +13,6 @@ import {
 import { apiIndex, connectorIndex, crawlerIndex } from '../../__mocks__/view_index.mock';
 
 import { SyncStatus } from '@kbn/search-connectors';
-import { IngestionMethod } from '@kbn/search-index-documents';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';
@@ -21,7 +20,7 @@ import { Status } from '../../../../../common/types/api';
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
 import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
 
-import { IngestionStatus } from '../../types';
+import { IngestionMethod, IngestionStatus } from '../../types';
 
 import { indexToViewIndex } from '../../utils/indices';
 

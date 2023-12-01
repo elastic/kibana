@@ -14,11 +14,11 @@ import { EuiCallOut, EuiPagination } from '@elastic/eui';
 
 import { DocumentList } from './document_list';
 
-import { INDEX_DOCUMENTS_META_DEFAULT, IngestionMethod } from '../types';
+import { INDEX_DOCUMENTS_META_DEFAULT } from '../types';
 import { Result } from './result/result';
 
 export const DEFAULT_VALUES = {
-  dataTelemetryIdPrefix: `entSearchContent-${IngestionMethod.API}`,
+  dataTelemetryIdPrefix: `entSearchContent-api`,
   docs: [],
   docsPerPage: 25,
   isLoading: true,

@@ -11,8 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import { Connector, FeatureName, IngestPipelineParams, SyncStatus } from '@kbn/search-connectors';
 
-import { IngestionMethod } from '@kbn/search-index-documents';
-
 import { Status } from '../../../../../common/types/api';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
@@ -37,7 +35,7 @@ import {
 } from '../../api/index/cached_fetch_index_api_logic';
 
 import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex, IngestionStatus } from '../../types';
+import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 import {
   getIngestionMethod,
   getIngestionStatus,

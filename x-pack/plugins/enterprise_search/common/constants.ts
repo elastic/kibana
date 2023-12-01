@@ -187,7 +187,9 @@ export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-
 export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
+
 export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
+
 export const ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE = 'elastic-crawler';
 
 export const DEFAULT_PIPELINE_NAME = 'ent-search-generic-ingestion';

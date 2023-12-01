@@ -16,4 +16,3 @@ export const INDEX_DOCUMENTS_META_DEFAULT: Pagination = {
 };
 
 export * from './pagination';
-export * from './shared_types';
