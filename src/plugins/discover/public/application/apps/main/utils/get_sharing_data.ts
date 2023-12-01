@@ -10,9 +10,11 @@ import type { Capabilities } from 'kibana/public';
 import type { IUiSettingsClient } from 'src/core/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { Filter, ISearchSource, SearchSourceFields } from 'src/plugins/data/common';
+import { escapeRegExp } from 'lodash';
+import type { IndexPattern } from 'src/plugins/data/public';
+import { getDataViewFieldSubtypeNested } from '@kbn/es-query';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  isNestedFieldParent,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
@@ -93,22 +95,20 @@ export async function getSharingData(
        */
       const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
       if (useFieldsApi && columns.length) {
-        searchSource.setField('fields', columns);
-      const useFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-      if (useFieldsApi) {
-        searchSource.removeField('fieldsFromSource');
-        const fields = columns.length
-          ? columns.map((column) => {
-              let field = column;
+        searchSource.setField(
+          'fields',
+          columns.map((column) => {
+            let field = column;
 
-              // If this column is a nested field, add a wildcard to the field name in order to fetch
-              // all leaf fields for the report, since the fields API doesn't support nested field roots
-              if (isNestedFieldParent(column, index)) {
-                field = `${column}.*`;
-              }
+            // If this column is a nested field, add a wildcard to the field name in order to fetch
+            // all leaf fields for the report, since the fields API doesn't support nested field roots
+            if (isNestedFieldParent(column, index)) {
+              field = `${column}.*`;
+            }
 
-              return { field, include_unmapped: 'true' };
-            })
+            return field;
+          })
+        );
       }
       return searchSource.getSerializedFields(true);
     },
@@ -131,3 +131,18 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
   return !!discover.show;
 };
+
+function isNestedFieldParent(fieldName: string, dataView: IndexPattern): boolean {
+  const nestedRootRegex = new RegExp(escapeRegExp(fieldName) + '(\\.|$)');
+  return (
+    !dataView.fields.getByName(fieldName) &&
+    !!dataView.fields.getAll().find((patternField) => {
+      // We only want to match a full path segment
+      const subTypeNested = getDataViewFieldSubtypeNested(patternField);
+      if (!subTypeNested) {
+        return false;
+      }
+      return nestedRootRegex.test(subTypeNested?.nested.path ?? '');
+    })
+  );
+}
