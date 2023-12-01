@@ -21,10 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../../../../shared/doc_links';
-
-import { TextExpansionCallOutState, TextExpansionDismissButton } from './text_expansion_callout';
-import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { E5MultilingualCallOutState, E5MultilingualDismissButton } from './e5_multilingual_callout';
+import { E5MultilingualCalloutLogic } from './e5_multilingual_callout_logic';
 
 export const DeployModel = ({
   dismiss,
@@ -32,37 +30,37 @@ export const DeployModel = ({
   isCreateButtonDisabled,
   isDismissable,
 }: Pick<
-  TextExpansionCallOutState,
+  E5MultilingualCallOutState,
   'dismiss' | 'ingestionMethod' | 'isCreateButtonDisabled' | 'isDismissable'
 >) => {
-  const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
+  const { createE5MultilingualModel } = useActions(E5MultilingualCalloutLogic);
 
   return (
-    <EuiCallOut color="success">
+    <EuiCallOut color="primary">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiBadge color="success">
+              <EuiBadge color="primary">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.titleBadge"
+                  id="xpack.enterpriseSearch.content.index.pipelines.e5MultilingualCallOut.titleBadge"
                   defaultMessage="New"
                 />
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow>
-              <EuiText color="success" size="xs">
+              <EuiText color="primary" size="xs">
                 <h3>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title',
-                    { defaultMessage: 'Improve your results with ELSER' }
+                    'xpack.enterpriseSearch.content.index.pipelines.e5MultilingualCallOut.title',
+                    { defaultMessage: 'Improve your results with E5' }
                   )}
                 </h3>
               </EuiText>
             </EuiFlexItem>
             {isDismissable && (
               <EuiFlexItem grow={false}>
-                <TextExpansionDismissButton dismiss={dismiss} />
+                <E5MultilingualDismissButton dismiss={dismiss} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -72,8 +70,8 @@ export const DeployModel = ({
             <EuiFlexItem>
               <EuiText size="s">
                 <FormattedHTMLMessage
-                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
-                  defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform."
+                  id="xpack.enterpriseSearch.content.index.pipelines.e5MultilingualCallOut.body"
+                  defaultMessage="E5 (EmbEddings from bidirEctional Encoder rEpresentations) is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
                   tagName="p"
                 />
               </EuiText>
@@ -87,14 +85,14 @@ export const DeployModel = ({
               >
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color="success"
-                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-deployModel`}
+                    color="primary"
+                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-e5MultilingualCallOut-deployModel`}
                     disabled={isCreateButtonDisabled}
                     iconType="launch"
-                    onClick={() => createTextExpansionModel()}
+                    onClick={() => createE5MultilingualModel()}
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.deployButton.label',
+                      'xpack.enterpriseSearch.content.indices.pipelines.e5MultilingualCallOut.deployButton.label',
                       {
                         defaultMessage: 'Deploy',
                       }
@@ -102,9 +100,12 @@ export const DeployModel = ({
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiLink target="_blank" href={docLinks.elser}>
+                  <EuiLink
+                    target="_blank"
+                    href="https://www.elastic.co/search-labs/blog/articles/multilingual-vector-search-e5-embedding-model"
+                  >
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
+                      id="xpack.enterpriseSearch.content.index.pipelines.e5MultilingualCallOut.learnMoreLink"
                       defaultMessage="Learn more"
                     />
                   </EuiLink>
