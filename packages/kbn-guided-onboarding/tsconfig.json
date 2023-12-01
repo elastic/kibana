@@ -24,7 +24,8 @@
     "@kbn/cloud-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-theme-browser-mocks",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/core-doc-links-browser-mocks"
   ],
   "exclude": [
     "target/**/*",
