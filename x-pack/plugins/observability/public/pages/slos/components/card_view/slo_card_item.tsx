@@ -57,10 +57,6 @@ const getSubTitle = (slo: SLOWithSummaryResponse, cardsPerRow: number) => {
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {
-  const {
-    application: { navigateToUrl },
-  } = useKibana().services;
-
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [isMouseOver, setIsMouseOver] = useState(false);
