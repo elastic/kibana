@@ -181,6 +181,17 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
+    case 'unsupportedFieldType':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedFieldType', {
+          defaultMessage:
+            'Field [{field}] cannot be retrieved, it is unsupported or not indexed; returning null',
+          values: {
+            field: out.field,
+          },
+        }),
+        type: 'warning',
+      };
   }
   return { message: '' };
 }
