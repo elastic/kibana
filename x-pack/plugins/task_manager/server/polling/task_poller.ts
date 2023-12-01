@@ -85,6 +85,14 @@ export function createTaskPoller<T, H>({
       return;
     }
     pollInterval$.subscribe((interval) => {
+      if (typeof interval !== 'number' || Number.isNaN(interval) || interval < 0) {
+        // TODO: Investigate why we sometimes get null, causing the setTimeout logic to always schedule
+        // the next polling cycle to run immediately
+        logger.error(
+          new Error(`Expected the new interval to be a number > 0, received: ${interval}`)
+        );
+        return;
+      }
       pollInterval = interval;
       logger.debug(`Task poller now using interval of ${interval}ms`);
     });
