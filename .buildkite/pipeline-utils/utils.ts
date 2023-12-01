@@ -6,8 +6,19 @@
  * Side Public License, v 1.
  */
 
-export * from './buildkite';
-export * as CiStats from './ci-stats';
-export * from './github';
-export * as TestFailures from './test-failures';
-export * from './utils';
+import { execSync } from 'child_process';
+
+const getKibanaDir = (() => {
+  let kibanaDir: string | undefined;
+  return () => {
+    if (!kibanaDir) {
+      kibanaDir = execSync('git rev-parse --show-toplevel', { encoding: 'utf-8' })
+        .toString()
+        .trim();
+    }
+
+    return kibanaDir;
+  };
+})();
+
+export { getKibanaDir };
