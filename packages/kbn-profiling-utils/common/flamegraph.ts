@@ -52,10 +52,6 @@ export interface BaseFlameGraph {
   AnnualCO2TonsInclusive: number[];
   AnnualCostsUSDInclusive: number[];
   AnnualCostsUSDExclusive: number[];
-  SelfAnnualCO2Tons: number;
-  TotalAnnualCO2Tons: number;
-  SelfAnnualCostsUSD: number;
-  TotalAnnualCostsUSD: number;
 }
 
 /** Elasticsearch flamegraph */
@@ -75,8 +71,6 @@ export interface ElasticFlameGraph
   Label: string[];
   SelfAnnualCO2KgsItems: number[];
   TotalAnnualCO2KgsItems: number[];
-  SelfAnnualCO2Kgs: number;
-  TotalAnnualCO2Kgs: number;
   SelfAnnualCostsUSDItems: number[];
   TotalAnnualCostsUSDItems: number[];
 }
@@ -117,12 +111,8 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
     TotalCPU: base.TotalCPU,
     SelfAnnualCO2KgsItems: base.AnnualCO2TonsExclusive.map(convertTonsToKgs),
     TotalAnnualCO2KgsItems: base.AnnualCO2TonsInclusive.map(convertTonsToKgs),
-    SelfAnnualCO2Kgs: convertTonsToKgs(base.SelfAnnualCO2Tons),
-    TotalAnnualCO2Kgs: convertTonsToKgs(base.TotalAnnualCO2Tons),
     SelfAnnualCostsUSDItems: base.AnnualCostsUSDExclusive,
     TotalAnnualCostsUSDItems: base.AnnualCostsUSDInclusive,
-    SelfAnnualCostsUSD: base.SelfAnnualCostsUSD,
-    TotalAnnualCostsUSD: base.TotalAnnualCostsUSD,
   };
 
   const rootFrameGroupID = createFrameGroupID(
