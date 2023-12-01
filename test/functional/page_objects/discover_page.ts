@@ -272,14 +272,14 @@ export class DiscoverPageObject extends FtrService {
     );
   }
 
-  public async setChartInterval(interval: string) {
+  public async setChartInterval(intervalTitle: string) {
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramTimeIntervalSelectorButton');
       await this.testSubjects.existOrFail('unifiedHistogramTimeIntervalSelectorSelectable');
     });
 
     const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[value="${interval}"]`
+      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
     );
     await option.click();
     return await this.header.waitUntilLoadingHasFinished();
