@@ -6,5 +6,9 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/es-query", "@kbn/data-views-plugin"]
+  "kbn_references": [
+    "@kbn/es-query",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+  ]
 }
