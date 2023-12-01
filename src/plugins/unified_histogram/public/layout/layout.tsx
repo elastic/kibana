@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useState } from 'react';
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -268,13 +268,6 @@ export const UnifiedHistogramLayout = ({
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
 
-  const onResetChartHeight = useMemo(() => {
-    return currentTopPanelHeight !== defaultTopPanelHeight &&
-      panelsMode === ResizableLayoutMode.Resizable
-      ? () => onTopPanelHeightChange?.(undefined)
-      : undefined;
-  }, [currentTopPanelHeight, defaultTopPanelHeight, onTopPanelHeightChange, panelsMode]);
-
   return (
     <>
       <InPortal node={topPanelNode}>
@@ -301,7 +294,6 @@ export const UnifiedHistogramLayout = ({
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
-          onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}

@@ -105,7 +105,6 @@ async function mountComponent({
     isChartLoading: Boolean(isChartLoading),
     isPlainRecord,
     appendHistogram,
-    onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,

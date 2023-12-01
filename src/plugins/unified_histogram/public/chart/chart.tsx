@@ -71,7 +71,6 @@ export interface ChartProps {
   isOnHistogramMode?: boolean;
   histogramQuery?: AggregateQuery;
   isChartLoading?: boolean;
-  onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
@@ -112,7 +111,6 @@ export function Chart({
   isOnHistogramMode,
   histogramQuery,
   isChartLoading,
-  onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
   onSuggestionChange,
