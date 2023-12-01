@@ -6,7 +6,7 @@
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { CreateEsIndexRequestBody } from '../../../../../common/api/risk_score';
+import type { CreateEsIndexRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const createIndex = async ({
   esClient,
