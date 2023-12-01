@@ -7,7 +7,7 @@
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
-import { SearchResponseBody, UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -31,7 +31,6 @@ import {
   RawAlertInstance,
   RuleAlertData,
   WithoutReservedActionGroups,
-  ScopedQueryAlerts,
 } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -82,10 +81,6 @@ export interface IAlertsClient<
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   persistAlerts(): Promise<void>;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
-  getMaintenanceWindowScopedQueryAlerts?(
-    params: GetMaintenanceWindowScopedQueryAlertsParams
-  ): Promise<ScopedQueryAlerts>;
-  updateAlertMaintenanceWindowIds?(idsToUpdate: string[]): Promise<UpdateByQueryResponse>;
   updateAlertsMaintenanceWindowIdByScopedQuery?(
     params: UpdateAlertsMaintenanceWindowIdByScopedQueryParams
   ): Promise<{

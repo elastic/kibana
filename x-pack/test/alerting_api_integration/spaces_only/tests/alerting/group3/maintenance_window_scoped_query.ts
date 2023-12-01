@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -16,17 +19,27 @@ import {
   runSoon,
 } from './test_helpers';
 
+const alertAsDataIndex = '.internal.alerts-test.patternfiring.alerts-default-000001';
+
 // eslint-disable-next-line import/no-default-export
 export default function maintenanceWindowScopedQueryTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const es = getService('es');
 
   describe('maintenanceWindowScopedQuery', () => {
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
     afterEach(async () => {
       await objectRemover.removeAll();
+      await es.deleteByQuery({
+        index: alertAsDataIndex,
+        query: {
+          match_all: {},
+        },
+        conflicts: 'proceed',
+      });
     });
 
     it('should associate alerts muted by maintenance window scoped query', async () => {
@@ -34,7 +47,7 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
         instance: [true, true, false, true],
       };
       // Create active maintenance window
-      await createMaintenanceWindow({
+      const maintenanceWindow = await createMaintenanceWindow({
         supertest,
         objectRemover,
         overwrites: {
@@ -75,6 +88,16 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
         supertest,
         retry,
       });
+
+      // Ensure we wrote the new maintenance window ID to the alert doc
+      const result = await es.search<Alert>({
+        index: alertAsDataIndex,
+        body: { query: { match_all: {} } },
+      });
+
+      expect(result.hits.hits[0]?._source?.[ALERT_MAINTENANCE_WINDOW_IDS]).eql([
+        maintenanceWindow.id,
+      ]);
 
       await runSoon({
         id: rule.id,
