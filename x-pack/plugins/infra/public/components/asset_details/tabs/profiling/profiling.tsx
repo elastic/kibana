@@ -10,6 +10,7 @@ import { EuiSpacer, EuiTabbedContent, type EuiTabbedContentProps } from '@elasti
 import React from 'react';
 import { Flamegraph } from './flamegraph';
 import { Functions } from './functions';
+import { DatePicker } from '../../date_picker/date_picker';
 
 export function Profiling() {
   const tabs: EuiTabbedContentProps['tabs'] = [
@@ -41,6 +42,7 @@ export function Profiling() {
 
   return (
     <>
+      <DatePicker />
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
     </>
   );

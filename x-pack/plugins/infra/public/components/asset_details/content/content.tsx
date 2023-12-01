@@ -20,7 +20,6 @@ export const Content = () => {
   const { error, loading, response } = useProfilingStatusData({
     isActive: activeTabId === ContentTabIds.PROFILING,
   });
-  const showProfilingEmptyState = error !== null && response?.has_setup === false;
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
@@ -30,7 +29,6 @@ export const Content = () => {
             ContentTabIds.LOGS,
             ContentTabIds.METADATA,
             ContentTabIds.PROCESSES,
-            ...(loading || showProfilingEmptyState ? [] : [ContentTabIds.PROFILING]),
             ContentTabIds.ANOMALIES,
           ]}
         />
@@ -65,7 +63,13 @@ export const Content = () => {
               <EuiLoadingSpinner size="m" />
             </div>
           ) : (
-            <>{showProfilingEmptyState ? <ProfilingEmptyState /> : <Profiling />}</>
+            <>
+              {error !== null && response?.has_setup === false ? (
+                <ProfilingEmptyState />
+              ) : (
+                <Profiling />
+              )}
+            </>
           )}
         </TabPanel>
       </EuiFlexItem>
