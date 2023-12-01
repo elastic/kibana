@@ -52,10 +52,6 @@ function options(y: Argv) {
       number: true,
       default: 1,
     })
-    .option('versionOverride', {
-      describe: 'Package/observer version override',
-      string: true,
-    })
     .option('logLevel', {
       describe: 'Log level',
       default: 'info',
@@ -66,9 +62,9 @@ function options(y: Argv) {
         return arg as Record<string, any> | undefined;
       },
     })
-    .option('skip-package-install', {
-      describe: 'Skip APM Package Install',
-      boolean: false,
+    .option('assume-package-version', {
+      describe: 'Assumes passed package version to avoid calling Fleet API to install',
+      string: true,
     })
     .showHelpOnFail(false);
 }
