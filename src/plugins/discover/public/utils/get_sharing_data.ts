@@ -17,6 +17,7 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  isNestedFieldParent,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
@@ -113,7 +114,17 @@ export async function getSharingData(
       if (useFieldsApi) {
         searchSource.removeField('fieldsFromSource');
         const fields = columns.length
-          ? columns.map((field) => ({ field, include_unmapped: 'true' }))
+          ? columns.map((column) => {
+              let field = column;
+
+              // If this column is a nested field, add a wildcard to the field name in order to fetch
+              // all leaf fields for the report, since the fields API doesn't support nested field roots
+              if (isNestedFieldParent(column, index)) {
+                field = `${column}.*`;
+              }
+
+              return { field, include_unmapped: 'true' };
+            })
           : [{ field: '*', include_unmapped: 'true' }];
 
         searchSource.setField('fields', fields);

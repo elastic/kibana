@@ -60,8 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return firstFieldIcons;
   }
 
-  // FAILED ES PROMOTION: https://github.com/elastic/kibana/issues/172243
-  describe.skip('discover data grid field tokens', function () {
+  describe('discover data grid field tokens', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
