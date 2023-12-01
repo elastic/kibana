@@ -11,13 +11,20 @@ components:
       properties:
         has_all_required:
           type: boolean
-        elasticsearch:
+        privileges:
           type: object
           properties:
-            index:
+            elasticsearch:
               type: object
               properties:
-                read:
-                  type: boolean
-                write:
-                  type: boolean
+                cluster:
+                  type: object
+                  additionalProperties:
+                    type: boolean
+                index:
+                  type: object
+                  properties:
+                    read:
+                      type: boolean
+                    write:
+                      type: boolean

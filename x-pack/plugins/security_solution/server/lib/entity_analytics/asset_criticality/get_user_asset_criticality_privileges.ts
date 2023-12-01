@@ -7,13 +7,10 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
-  RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
-  RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
-} from '../../../../common/risk_engine';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
+import { ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES } from '../../../../common/asset_criticality';
 
-export const getUserRiskEnginePrivileges = async (
+export const getUserAssetCriticalityPrivileges = async (
   request: KibanaRequest,
   security: SecurityPluginStart
 ) => {
@@ -22,8 +19,8 @@ export const getUserRiskEnginePrivileges = async (
     security,
     privilegesToCheck: {
       elasticsearch: {
-        cluster: RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
-        index: RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
+        cluster: [],
+        index: ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES,
       },
     },
   });

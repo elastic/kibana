@@ -15,12 +15,17 @@ import { z } from 'zod';
 export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
 export const EntityAnalyticsPrivileges = z.object({
   has_all_required: z.boolean().optional(),
-  elasticsearch: z
+  privileges: z
     .object({
-      index: z
+      elasticsearch: z
         .object({
-          read: z.boolean().optional(),
-          write: z.boolean().optional(),
+          cluster: z.object({}).catchall(z.boolean()).optional(),
+          index: z
+            .object({
+              read: z.boolean().optional(),
+              write: z.boolean().optional(),
+            })
+            .optional(),
         })
         .optional(),
     })
