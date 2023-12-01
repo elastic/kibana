@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function helpers(getService: FtrProviderContext['getService']) {
   const client = getService('es');
-  const supertest = getService('supertest');
 
   const createIndex = async (indexName: string) => {
     await client.indices.create({
@@ -123,9 +122,6 @@ export function helpers(getService: FtrProviderContext['getService']) {
     });
   };
 
-  const sendRequest = (query: object) =>
-    supertest.get('/api/console/autocomplete_entities').query(query);
-
   return {
     createIndex,
     createAlias,
@@ -139,6 +135,5 @@ export function helpers(getService: FtrProviderContext['getService']) {
     deleteIndexTemplate,
     deleteComponentTemplate,
     deleteDataStream,
-    sendRequest,
   };
 }

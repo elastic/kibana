@@ -24,8 +24,11 @@ export default ({ getService }: FtrProviderContext) => {
     deleteIndexTemplate,
     deleteComponentTemplate,
     deleteDataStream,
-    sendRequest,
   } = helpers(getService);
+
+  const supertest = getService('supertest');
+  const sendRequest = (query: object) =>
+    supertest.get('/api/console/autocomplete_entities').query(query);
 
   describe('/api/console/autocomplete_entities', function () {
     const indexName = 'test-index-1';
