@@ -233,7 +233,7 @@ export const GettingStarted = () => {
       activeFilter={filter as GuideFilterValues}
       // @ts-ignore A/B testing type issue
       setActiveFilter={setFilter}
-      data-test-subj="onboarding-guideFilters"
+      data-test-subj="onboarding--guideFilters"
       trackUiMetric={trackUiMetric}
     />
   ) : (
@@ -241,7 +241,7 @@ export const GettingStarted = () => {
       application={application}
       activeFilter={filter}
       setActiveFilter={setFilter}
-      data-test-subj="onboarding-guideFilters"
+      data-test-subj="onboarding--guideFilters"
     />
   );
 
