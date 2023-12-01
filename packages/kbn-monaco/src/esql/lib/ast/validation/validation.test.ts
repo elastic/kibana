@@ -12,7 +12,7 @@ import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 // import { getDurationItemsWithQuantifier } from '../../autocomplete/helpers';
 import { AstListener } from '../ast_factory';
 import { validateAst } from './validation';
-import { ESQLMessage } from '../types';
+import { ESQLAst } from '../types';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
@@ -20,11 +20,12 @@ import { FunctionDefinition } from '../definitions/types';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
+import { EditorError } from '../../../../types';
 
 function getCallbackMocks() {
   return {
-    getFieldsFor: jest.fn(async ({ sourcesOnly }) =>
-      sourcesOnly
+    getFieldsFor: jest.fn(async ({ query }) =>
+      !/enrich/.test(query)
         ? [
             ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
               name: `${type}Field`,
@@ -44,7 +45,7 @@ function getCallbackMocks() {
           ]
     ),
     getSources: jest.fn(async () =>
-      ['a', 'index', 'otherIndex', '.secretIndex'].map((name) => ({
+      ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
         name,
         hidden: name.startsWith('.'),
       }))
@@ -158,14 +159,22 @@ function getFieldMapping(
 }
 
 describe('validation logic', () => {
-  const getAstAndErrors = (text: string) => {
+  const getAstAndErrors = async (
+    text: string | undefined
+  ): Promise<{
+    errors: EditorError[];
+    ast: ESQLAst;
+  }> => {
+    if (text == null) {
+      return { ast: [], errors: [] };
+    }
     const errorListener = new ESQLErrorListener();
     const parseListener = new AstListener();
     const parser = getParser(CharStreams.fromString(text), errorListener, parseListener);
 
     parser[ROOT_STATEMENT]();
 
-    return { ...parseListener.getAst(), syntaxErrors: errorListener.getErrors() };
+    return { ...parseListener.getAst(), errors: errorListener.getErrors() };
   };
 
   function testErrorsAndWarningsFn(
@@ -178,14 +187,9 @@ describe('validation logic', () => {
     testFn(
       `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
       async () => {
-        const { ast, syntaxErrors } = getAstAndErrors(statement);
         const callbackMocks = getCallbackMocks();
-        const { warnings, errors } = await validateAst(ast, callbackMocks);
-        const finalErrors = errors.concat(
-          // squash syntax errors
-          syntaxErrors.map(({ message }) => ({ text: message })) as ESQLMessage[]
-        );
-        expect(finalErrors.map((e) => e.text)).toEqual(expectedErrors);
+        const { warnings, errors } = await validateAst(statement, getAstAndErrors, callbackMocks);
+        expect(errors.map((e) => ('message' in e ? e.message : e.text))).toEqual(expectedErrors);
         expect(warnings.map((w) => w.text)).toEqual(expectedWarnings);
       }
     );
@@ -233,8 +237,8 @@ describe('validation logic', () => {
       "SyntaxError: missing {FROM_UNQUOTED_IDENTIFIER, FROM_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from assignment = 1`, [
-      'Unknown index [assignment]',
       'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "="',
+      'Unknown index [assignment]',
     ]);
     testErrorsAndWarnings(`from index`, []);
     testErrorsAndWarnings(`FROM index`, []);
@@ -284,6 +288,7 @@ describe('validation logic', () => {
       'ES|QL does not yet support querying remote indices [*:indexes]',
     ]);
     testErrorsAndWarnings('from .secretIndex', []);
+    testErrorsAndWarnings('from my-index', []);
   });
 
   describe('row', () => {
@@ -521,22 +526,37 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | keep stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | keep `stringField`, `numberField`, `dateField`', []);
     testErrorsAndWarnings('from index | keep 4.5', [
-      'Unknown column [4.5]',
+      "SyntaxError: token recognition error at: '4'",
+      "SyntaxError: token recognition error at: '5'",
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '.'",
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      'Unknown column [.]',
     ]);
     testErrorsAndWarnings('from index | keep `4.5`', ['Unknown column [4.5]']);
     testErrorsAndWarnings('from index | keep missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from index | keep `any#Char$ field`', []);
-    testErrorsAndWarnings('from index | project ', [
-      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
-    ]);
-    testErrorsAndWarnings('from index | project stringField, numberField, dateField', []);
-    testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
-      'Unknown column [missingField]',
-    ]);
+    testErrorsAndWarnings(
+      'from index | project ',
+      [`SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`],
+      ['PROJECT command is no longer supported, please use KEEP instead']
+    );
+    testErrorsAndWarnings(
+      'from index | project stringField, numberField, dateField',
+      [],
+      ['PROJECT command is no longer supported, please use KEEP instead']
+    );
+    testErrorsAndWarnings(
+      'from index | PROJECT stringField, numberField, dateField',
+      [],
+      ['PROJECT command is no longer supported, please use KEEP instead']
+    );
+    testErrorsAndWarnings(
+      'from index | project missingField, numberField, dateField',
+      ['Unknown column [missingField]'],
+      ['PROJECT command is no longer supported, please use KEEP instead']
+    );
     testErrorsAndWarnings('from index | keep s*', []);
     testErrorsAndWarnings('from index | keep *Field', []);
     testErrorsAndWarnings('from index | keep s*Field', []);
@@ -553,21 +573,16 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from index | drop stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | drop 4.5', [
-      'Unknown column [4.5]',
+      "SyntaxError: token recognition error at: '4'",
+      "SyntaxError: token recognition error at: '5'",
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '.'",
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      'Unknown column [.]',
     ]);
     testErrorsAndWarnings('from index | drop missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from index | drop `any#Char$ field`', []);
-    testErrorsAndWarnings('from index | project ', [
-      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
-    ]);
-    testErrorsAndWarnings('from index | project stringField, numberField, dateField', []);
-    testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
-      'Unknown column [missingField]',
-    ]);
     testErrorsAndWarnings('from index | drop s*', []);
     testErrorsAndWarnings('from index | drop *Field', []);
     testErrorsAndWarnings('from index | drop s*Field', []);
@@ -603,7 +618,8 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a | mv_expand listField`, []);
 
     testErrorsAndWarnings('from a | mv_expand listField, b', [
-      'SyntaxError: expected {<EOF>, PIPE} but found ","',
+      "SyntaxError: token recognition error at: ','",
+      "SyntaxError: extraneous input 'b' expecting <EOF>",
     ]);
 
     testErrorsAndWarnings('row a = "a" | mv_expand a', [
@@ -620,22 +636,24 @@ describe('validation logic', () => {
       'SyntaxError: expected {DOT, AS} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | rename a', [
-      'Unknown column [a]',
       'SyntaxError: expected {DOT, AS} but found "<EOF>"',
+      'Unknown column [a]',
     ]);
     testErrorsAndWarnings('from a | rename stringField as', [
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename missingField as', [
-      'Unknown column [missingField]',
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from a | rename stringField as b', []);
     testErrorsAndWarnings('from a | rename stringField AS b', []);
     testErrorsAndWarnings('from a | rename stringField As b', []);
     testErrorsAndWarnings('from a | rename stringField As b, b AS c', []);
     testErrorsAndWarnings('from a | rename fn() as a', [
-      'Unknown column [fn()]',
+      "SyntaxError: token recognition error at: '('",
+      "SyntaxError: token recognition error at: ')'",
+      'Unknown column [fn]',
       'Unknown column [a]',
     ]);
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as a', []);
@@ -663,8 +681,8 @@ describe('validation logic', () => {
       'SyntaxError: expected {STRING, DOT} but found "2"',
     ]);
     testErrorsAndWarnings('from a | dissect stringField .', [
-      'Unknown column [stringField.]',
       "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
+      'Unknown column [stringField.]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField %a', [
       "SyntaxError: missing STRING at '%'",
@@ -678,8 +696,8 @@ describe('validation logic', () => {
       'SyntaxError: expected {ASSIGN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option = ', [
-      'Invalid option for dissect: [option]',
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET} but found "<EOF>"',
+      'Invalid option for dissect: [option]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option = 1', [
       'Invalid option for dissect: [option]',
@@ -705,8 +723,8 @@ describe('validation logic', () => {
       'SyntaxError: expected {STRING, DOT} but found "2"',
     ]);
     testErrorsAndWarnings('from a | grok stringField .', [
-      'Unknown column [stringField.]',
       "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
+      'Unknown column [stringField.]',
     ]);
     testErrorsAndWarnings('from a | grok stringField %a', ["SyntaxError: missing STRING at '%'"]);
     // Do not try to validate the grok pattern string
@@ -844,8 +862,8 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a | eval a=b', ['Unknown column [b]']);
     testErrorsAndWarnings('from a | eval a=b, ', [
-      'Unknown column [b]',
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+      'Unknown column [b]',
     ]);
     testErrorsAndWarnings('from a | eval a=round', ['Unknown column [round]']);
     testErrorsAndWarnings('from a | eval a=round(', [
@@ -951,6 +969,26 @@ describe('validation logic', () => {
               )[0].declaration
             }`,
             expectedErrors
+          );
+        }
+
+        // test that wildcard won't work as arg
+        if (fieldMapping.length === 1) {
+          const fieldMappingWithWildcard = [...fieldMapping];
+          fieldMappingWithWildcard[0].name = '*';
+
+          testErrorsAndWarnings(
+            `from a | eval var = ${
+              getFunctionSignatures(
+                {
+                  name,
+                  ...defRest,
+                  signatures: [{ params: fieldMappingWithWildcard, returnType }],
+                },
+                { withTypes: false }
+              )[0].declaration
+            }`,
+            [`Using wildcards (*) in ${name} is not allowed`]
           );
         }
       }
@@ -1093,19 +1131,19 @@ describe('validation logic', () => {
       'Unknown column [wrongField]',
     ]);
     testErrorsAndWarnings('from a | stats avg(numberField) by 1', [
-      'Unknown column [1]',
       'SyntaxError: expected {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "1"',
+      'Unknown column [1]',
     ]);
     testErrorsAndWarnings('from a | stats avg(numberField) by percentile(numberField)', [
-      'Unknown column [percentile]',
       'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
+      'Unknown column [percentile]',
     ]);
 
     testErrorsAndWarnings(
       'from a | stats avg(numberField) by stringField, percentile(numberField) by ipField',
       [
-        'Unknown column [percentile]',
         'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
+        'Unknown column [percentile]',
       ]
     );
 
@@ -1131,9 +1169,13 @@ describe('validation logic', () => {
     );
 
     testErrorsAndWarnings('from a | stats avg(numberField) by avg(numberField)', [
-      'Unknown column [avg]',
       'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
+      'Unknown column [avg]',
     ]);
+
+    testErrorsAndWarnings('from a | stats count(*)', []);
+    testErrorsAndWarnings('from a | stats var0 = count(*)', []);
+    testErrorsAndWarnings('from a | stats var0 = avg(numberField), count(*)', []);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
       for (const { params, returnType } of signatures) {
@@ -1220,6 +1262,27 @@ describe('validation logic', () => {
             }`,
             expectedErrors
           );
+
+          // test that only count() accepts wildcard as arg
+          // just check that the function accepts only 1 arg as the parser cannot handle multiple args with * as start arg
+          if (fieldMapping.length === 1) {
+            const fieldMappingWithWildcard = [...fieldMapping];
+            fieldMappingWithWildcard[0].name = '*';
+
+            testErrorsAndWarnings(
+              `from a | stats var = ${
+                getFunctionSignatures(
+                  {
+                    name,
+                    ...defRest,
+                    signatures: [{ params: fieldMappingWithWildcard, returnType }],
+                  },
+                  { withTypes: false }
+                )[0].declaration
+              }`,
+              name === 'count' ? [] : [`Using wildcards (*) in ${name} is not allowed`]
+            );
+          }
         }
       }
     }
@@ -1273,8 +1336,8 @@ describe('validation logic', () => {
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = `, [
-      'Unknown column [var0]',
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = c `, [
       'Unknown column [var0]',
@@ -1285,9 +1348,9 @@ describe('validation logic', () => {
     //   `Unknown column [stringField]`,
     // ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = , `, [
-      'Unknown column [var0]',
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at ','",
       'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
+      'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 `, [
       'Unknown column [var1]',
@@ -1298,8 +1361,8 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 = `, [
-      'Unknown column [var1]',
       "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      'Unknown column [var1]',
     ]);
 
     testErrorsAndWarnings(
@@ -1332,61 +1395,55 @@ describe('validation logic', () => {
 
   describe('callbacks', () => {
     it(`it should not fetch source and fields list when a row command is set`, async () => {
-      const { ast } = getAstAndErrors(`row a = 1 | eval a`);
       const callbackMocks = getCallbackMocks();
-      await validateAst(ast, callbackMocks);
+      await validateAst(`row a = 1 | eval a`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getFieldsFor).not.toHaveBeenCalled();
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
     });
 
     it(`it should fetch policies if no enrich command is found`, async () => {
-      const { ast } = getAstAndErrors(`row a = 1 | eval a`);
       const callbackMocks = getCallbackMocks();
-      await validateAst(ast, callbackMocks);
+      await validateAst(`row a = 1 | eval a`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
     });
 
     it(`should not fetch source and fields for empty command`, async () => {
-      const { ast } = getAstAndErrors(` `);
       const callbackMocks = getCallbackMocks();
-      await validateAst(ast, callbackMocks);
+      await validateAst(` `, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getFieldsFor).not.toHaveBeenCalled();
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
     });
 
     it(`should skip initial source and fields call but still call fields for enriched policy`, async () => {
-      const { ast } = getAstAndErrors(`row a = 1 | eval b  = a | enrich policy`);
       const callbackMocks = getCallbackMocks();
-      await validateAst(ast, callbackMocks);
+      await validateAst(`row a = 1 | eval b  = a | enrich policy`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
       expect(callbackMocks.getPolicies).toHaveBeenCalled();
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
       expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
-        customQuery: `from enrichIndex1 | keep otherField, yetAnotherField`,
+        query: `from enrichIndex1 | keep otherField, yetAnotherField`,
       });
     });
 
     it('should call fields callbacks also for show command', async () => {
-      const { ast } = getAstAndErrors(`show functions | keep name`);
       const callbackMocks = getCallbackMocks();
-      await validateAst(ast, callbackMocks);
+      await validateAst(`show functions | keep name`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
       expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
       expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
-        sourcesOnly: true,
+        query: 'show functions',
       });
     });
 
     it(`should fetch additional fields if an enrich command is found`, async () => {
-      const { ast } = getAstAndErrors(`from a | eval b  = a | enrich policy`);
       const callbackMocks = getCallbackMocks();
-      await validateAst(ast, callbackMocks);
+      await validateAst(`from a | eval b  = a | enrich policy`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getSources).toHaveBeenCalled();
       expect(callbackMocks.getPolicies).toHaveBeenCalled();
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(2);
       expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
-        customQuery: `from enrichIndex1 | keep otherField, yetAnotherField`,
+        query: `from enrichIndex1 | keep otherField, yetAnotherField`,
       });
     });
   });

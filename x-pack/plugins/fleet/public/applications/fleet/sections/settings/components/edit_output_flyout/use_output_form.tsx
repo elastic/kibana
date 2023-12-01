@@ -866,7 +866,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               is_default: false,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              service_token: serviceTokenInput.value,
+              service_token: serviceTokenInput.value || undefined,
               ...(!serviceTokenInput.value &&
                 serviceTokenSecretInput.value && {
                   secrets: {

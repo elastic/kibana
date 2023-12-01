@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EditorError } from '../../../../types';
 import { ESQLMessage, ESQLLocation } from '../types';
 
 export interface ESQLVariable {
@@ -103,6 +104,10 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; value: string };
   };
+  noWildcardSupportAsArg: {
+    message: string;
+    type: { name: string };
+  };
   ccsNotSupportedForCommand: {
     message: string;
     type: { value: string };
@@ -113,6 +118,6 @@ export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export interface ValidationResult {
-  errors: ESQLMessage[];
+  errors: Array<ESQLMessage | EditorError>;
   warnings: ESQLMessage[];
 }

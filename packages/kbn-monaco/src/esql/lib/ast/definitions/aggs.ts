@@ -69,18 +69,6 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     }),
   },
   {
-    name: 'count',
-    description: i18n.translate('monaco.esql.definitions.countDoc', {
-      defaultMessage: 'Returns the count of the values in a field.',
-    }),
-  },
-  {
-    name: 'count_distinct',
-    description: i18n.translate('monaco.esql.definitions.countDistinctDoc', {
-      defaultMessage: 'Returns the count of distinct values in a field.',
-    }),
-  },
-  {
     name: 'median',
     description: i18n.translate('monaco.esql.definitions.medianDoc', {
       defaultMessage: 'Returns the 50% percentile.',
@@ -100,4 +88,40 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     }),
     args: [{ name: 'percentile', type: 'number', value: '90' }],
   },
-].map(createNumericAggDefinition);
+]
+  .map(createNumericAggDefinition)
+  .concat([
+    {
+      name: 'count',
+      description: i18n.translate('monaco.esql.definitions.countDoc', {
+        defaultMessage: 'Returns the count of the values in a field.',
+      }),
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [
+            { name: 'column', type: 'any', noNestingFunctions: true, supportsWildcard: true },
+          ],
+          returnType: 'number',
+          examples: [`from index | stats result = count(field)`, `from index | stats count(field)`],
+        },
+      ],
+    },
+    {
+      name: 'count_distinct',
+      description: i18n.translate('monaco.esql.definitions.countDistinctDoc', {
+        defaultMessage: 'Returns the count of distinct values in a field.',
+      }),
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'column', type: 'any', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [
+            `from index | stats result = count_distinct(field)`,
+            `from index | stats count_distinct(field)`,
+          ],
+        },
+      ],
+    },
+  ]);

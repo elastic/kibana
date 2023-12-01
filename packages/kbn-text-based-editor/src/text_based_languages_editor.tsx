@@ -57,7 +57,6 @@ import {
   getWrappedInPipesCode,
   parseErrors,
   getIndicesList,
-  extractESQLQueryToExecute,
   clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
@@ -121,7 +120,7 @@ const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
 
 // for editor width smaller than this value we want to start hiding some text
-const BREAKPOINT_WIDTH = 410;
+const BREAKPOINT_WIDTH = 540;
 
 const languageId = (language: string) => {
   switch (language) {
@@ -323,15 +322,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       getSources: async () => {
         return await getIndicesList(dataViews);
       },
-      getFieldsFor: async (options: { sourcesOnly?: boolean } | { customQuery?: string } = {}) => {
-        // we're caching here with useMemo
-        // and when the editor becomes multi-line it cann be disposed and the ref we had throws
-        // with this method we can get always the fresh model to use
-        const model = monaco.editor
-          .getModels()
-          .find((m) => !m.isDisposed() && m.isAttachedToEditor());
-        const queryToExecute = extractESQLQueryToExecute(model, options);
-
+      getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
           // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {

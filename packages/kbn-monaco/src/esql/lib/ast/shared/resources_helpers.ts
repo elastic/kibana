@@ -9,14 +9,11 @@
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
 
-// These are method useful for any non-validation use cases that can be re-used.
-// Validation has its own logic so DO NOT USE THESE there.
-
-export function getFieldsByTypeHelper(resourceRetriever?: ESQLCallbacks) {
+export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const cacheFields = new Map<string, ESQLRealField>();
   const getFields = async () => {
     if (!cacheFields.size) {
-      const fieldsOfType = await resourceRetriever?.getFieldsFor?.();
+      const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
       for (const field of fieldsOfType || []) {
         cacheFields.set(field.name, field);
       }

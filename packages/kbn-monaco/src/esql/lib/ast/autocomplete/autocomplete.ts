@@ -30,6 +30,7 @@ import {
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type {
   AstProviderFn,
+  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -120,6 +121,27 @@ function isComma(char: string) {
 function isSourceCommand({ label }: AutocompleteCommandDefinition) {
   return ['from', 'row', 'show'].includes(String(label));
 }
+/**
+ * This function count the number of unclosed brackets in order to
+ * locally fix the queryString to generate a valid AST
+ * A known limitation of this is that is not aware of commas "," or pipes "|"
+ * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
+ * @param bracketType
+ * @param text
+ * @returns
+ */
+function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
+  const stack = [];
+  const closingBrackets = { '(': ')', '[': ']' };
+  for (const char of text) {
+    if (char === bracketType) {
+      stack.push(bracketType);
+    } else if (char === closingBrackets[bracketType]) {
+      stack.pop();
+    }
+  }
+  return stack.length;
+}
 
 export async function suggest(
   model: monaco.editor.ITextModel,
@@ -128,8 +150,11 @@ export async function suggest(
   astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ): Promise<AutocompleteCommandDefinition[]> {
-  const innerText = model.getValue();
-  const offset = monacoPositionToOffset(innerText, position);
+  // take the full text but then slice it to the current position
+  const fullText = model.getValue();
+  const offset = monacoPositionToOffset(fullText, position);
+  const innerText = fullText.substring(0, offset);
+
   let finalText = innerText;
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
@@ -142,11 +167,22 @@ export async function suggest(
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
+  // check if all brackets are closed, otherwise close them
+  const unclosedBrackets = countBracketsUnclosed('(', finalText);
+  if (unclosedBrackets > 0) {
+    // inject the closing brackets
+    finalText += Array(unclosedBrackets).fill(')').join('');
+  }
 
   const { ast } = await astProvider(finalText);
 
   const astContext = getAstContext(innerText, ast, offset);
-  const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(resourceRetriever);
+  // build the correct query to fetch the list of fields
+  const queryForFields = buildQueryForFields(ast, finalText);
+  const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
+    queryForFields,
+    resourceRetriever
+  );
   const getSources = getSourcesRetriever(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
@@ -201,8 +237,13 @@ export async function suggest(
   return [];
 }
 
-function getFieldsByTypeRetriever(resourceRetriever?: ESQLCallbacks) {
-  const helpers = getFieldsByTypeHelper(resourceRetriever);
+export function buildQueryForFields(ast: ESQLAst, queryString: string) {
+  const prevCommand = ast[Math.max(ast.length - 2, 0)];
+  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
+}
+
+function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
+  const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);

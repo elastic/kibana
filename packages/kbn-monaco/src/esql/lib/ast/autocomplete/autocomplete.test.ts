@@ -180,15 +180,20 @@ describe('autocomplete', () => {
 
     parser[ROOT_STATEMENT]();
 
-    return { ...parseListener.getAst() };
+    return { ...parseListener.getAst(), errors: [] };
   };
 
-  type TestArgs = [string, string[], string?, Parameters<typeof createCustomCallbackMocks>?];
+  type TestArgs = [
+    string,
+    string[],
+    (string | number)?,
+    Parameters<typeof createCustomCallbackMocks>?
+  ];
 
   const testSuggestionsFn = (
     statement: string,
     expected: string[],
-    triggerCharacter: string = '',
+    triggerCharacter: string | number = '',
     customCallbacksArgs: Parameters<typeof createCustomCallbackMocks> = [
       undefined,
       undefined,
@@ -196,12 +201,21 @@ describe('autocomplete', () => {
     ],
     { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) => {
-    const context = createSuggestContext(statement, triggerCharacter);
-    const offset = statement.lastIndexOf(context.triggerCharacter) + 2;
+    const triggerCharacterString =
+      triggerCharacter == null || typeof triggerCharacter === 'string'
+        ? triggerCharacter
+        : statement[triggerCharacter + 1];
+    const context = createSuggestContext(statement, triggerCharacterString);
+    const offset =
+      typeof triggerCharacter === 'string'
+        ? statement.lastIndexOf(context.triggerCharacter) + 2
+        : triggerCharacter;
     const testFn = only ? test.only : skip ? test.skip : test;
 
     testFn(
-      `${statement} (triggerChar: "${context.triggerCharacter}")=> ["${expected.join('","')}"]`,
+      `${statement} (triggerChar: "${context.triggerCharacter}" @ ${offset})=> ["${expected.join(
+        '","'
+      )}"]`,
       async () => {
         const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
         const { model, position } = createModelAndPosition(statement, offset);
@@ -209,7 +223,7 @@ describe('autocomplete', () => {
           model,
           position,
           context,
-          async (text) => (text ? await getAstAndErrors(text) : { ast: [] }),
+          async (text) => (text ? await getAstAndErrors(text) : { ast: [], errors: [] }),
           callbackMocks
         );
         expect(suggestions.map((i) => i.insertText)).toEqual(expected);
@@ -314,7 +328,6 @@ describe('autocomplete', () => {
         ['boolean']
       ),
       '|',
-      ',',
     ]);
     testSuggestions('from a | where stringField >= stringField and ', [
       ...getFieldNamesByType('boolean'),
@@ -400,7 +413,7 @@ describe('autocomplete', () => {
     testSuggestions('from a | stats a=', [...allAggFunctions]);
     testSuggestions('from a | stats a=max(b) by ', [...fields.map(({ name }) => name)]);
     testSuggestions('from a | stats a=max(b) BY ', [...fields.map(({ name }) => name)]);
-    testSuggestions('from a | stats a=c by d', ['|', ',']);
+    testSuggestions('from a | stats a=c by d ', ['|', ',']);
     testSuggestions('from a | stats a=c by d, ', [...fields.map(({ name }) => name)]);
     testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
     testSuggestions(
@@ -422,6 +435,10 @@ describe('autocomplete', () => {
       'var0',
       'var1',
     ]);
+
+    // smoke testing with suggestions not at the end of the string
+    // but more the cursor back after the min(b) function
+    testSuggestions('from a | stats a = min(b) | sort b', ['by', '|', ','], 27);
   });
 
   describe('enrich', () => {
@@ -431,7 +448,7 @@ describe('autocomplete', () => {
       '| enrich other-policy on b ',
       '| enrich other-policy with c ',
     ]) {
-      testSuggestions(`from a ${prevCommand}| enrich`, ['policy']);
+      testSuggestions(`from a ${prevCommand}| enrich `, ['policy']);
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['on', 'with', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
@@ -473,7 +490,7 @@ describe('autocomplete', () => {
         'var0 =',
         ...getPolicyFields('policy'),
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy with stringField`, ['= $0', '|', ',']);
+      testSuggestions(`from a ${prevCommand}| enrich policy with stringField `, ['= $0', '|', ',']);
     }
   });
 
@@ -586,6 +603,22 @@ describe('autocomplete', () => {
       ],
       '('
     );
+    // test deep function nesting suggestions (and check that the same function is not suggested)
+    // round(round(
+    // round(round(round(
+    // etc...
+    for (const nesting of [1, 2, 3, 4]) {
+      testSuggestions(
+        `from a | eval a=${Array(nesting).fill('round(').join('')}`,
+        [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ],
+        '('
+      );
+    }
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionsDefinitions) {
       // skip this fn for the moment as it's quite hard to test
@@ -660,6 +693,41 @@ describe('autocomplete', () => {
         ...dateSuggestions.map((t) => `${t},`),
         ',',
       ]);
+    });
+  });
+
+  describe('callbacks', () => {
+    it('should send the fields query without the last command', async () => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const statement = 'from a | drop stringField | eval var0 = abs(numberField) ';
+      const triggerOffset = statement.lastIndexOf(' ');
+      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const { model, position } = createModelAndPosition(statement, triggerOffset + 2);
+      await suggest(
+        model,
+        position,
+        context,
+        async (text) => (text ? await getAstAndErrors(text) : { ast: [], errors: [] }),
+        callbackMocks
+      );
+      expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({
+        query: 'from a | drop stringField',
+      });
+    });
+    it('should send the fields query aware of the location', async () => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const statement = 'from a | drop | eval var0 = abs(numberField) ';
+      const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
+      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const { model, position } = createModelAndPosition(statement, triggerOffset + 2);
+      await suggest(
+        model,
+        position,
+        context,
+        async (text) => (text ? await getAstAndErrors(text) : { ast: [], errors: [] }),
+        callbackMocks
+      );
+      expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
     });
   });
 });

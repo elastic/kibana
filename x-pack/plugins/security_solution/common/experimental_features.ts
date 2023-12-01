@@ -125,7 +125,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
-  riskEnginePrivilegesRouteEnabled: false,
+  riskEnginePrivilegesRouteEnabled: true,
+
+  /*
+   * Enables experimental Entity Analytics Asset Criticality feature
+   */
+  entityAnalyticsAssetCriticalityEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

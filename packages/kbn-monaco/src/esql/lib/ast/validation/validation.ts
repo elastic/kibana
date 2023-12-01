@@ -8,11 +8,9 @@
 
 import uniqBy from 'lodash/uniqBy';
 import capitalize from 'lodash/capitalize';
-import { nonNullable } from '../ast_helpers';
 import { CommandOptionsDefinition, SignatureArgType } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
-  createMapFromList,
   extractSingleType,
   getAllArrayTypes,
   getAllArrayValues,
@@ -38,7 +36,7 @@ import {
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
-  ESQLAst,
+  AstProviderFn,
   ESQLAstItem,
   ESQLColumn,
   ESQLCommand,
@@ -49,14 +47,14 @@ import type {
   ESQLSource,
 } from '../types';
 import { getMessageFromId, createMessage } from './errors';
-import type {
-  ESQLPolicy,
-  ESQLRealField,
-  ESQLVariable,
-  ReferenceMaps,
-  ValidationResult,
-} from './types';
+import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';
+import {
+  retrieveSources,
+  retrieveFields,
+  retrievePolicies,
+  retrievePoliciesFields,
+} from './resources';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -177,23 +175,39 @@ function validateFunctionColumnArg(
         })
       );
     } else {
-      // guaranteed by the check above
-      const columnHit = getColumnHit(nameHit!, references);
-      // check the type of the column hit
-      const typeHit = columnHit!.type;
-      if (!isEqualType(actualArg, argDef, references, parentCommand)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wrongArgumentType',
-            values: {
-              name: astFunction.name,
-              argType: argDef.type,
-              value: actualArg.name,
-              givenType: typeHit,
-            },
-            locations: actualArg.location,
-          })
-        );
+      if (actualArg.name === '*') {
+        // if function does not support wildcards return a specific error
+        if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'noWildcardSupportAsArg',
+              values: {
+                name: astFunction.name,
+              },
+              locations: actualArg.location,
+            })
+          );
+        }
+        // do not validate any further for now, only count() accepts wildcard as args...
+      } else {
+        // guaranteed by the check above
+        const columnHit = getColumnHit(nameHit!, references);
+        // check the type of the column hit
+        const typeHit = columnHit!.type;
+        if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'wrongArgumentType',
+              values: {
+                name: astFunction.name,
+                argType: argDef.type,
+                value: actualArg.name,
+                givenType: typeHit,
+              },
+              locations: actualArg.location,
+            })
+          );
+        }
       }
     }
   }
@@ -668,45 +682,6 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
   return messages;
 }
 
-async function retrieveFields(
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
-  if (!callbacks || commands.length < 1) {
-    return new Map();
-  }
-  if (commands[0].name === 'row') {
-    return new Map();
-  }
-  const fields = (await callbacks.getFieldsFor?.({ sourcesOnly: true })) || [];
-  return createMapFromList(fields);
-}
-
-async function retrievePolicies(
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLPolicy>> {
-  if (!callbacks || commands.every(({ name }) => name !== 'enrich')) {
-    return new Map();
-  }
-  const policies = (await callbacks.getPolicies?.()) || [];
-  return createMapFromList(policies);
-}
-
-async function retrieveSources(
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Set<string>> {
-  if (!callbacks || commands.length < 1) {
-    return new Set();
-  }
-  if (['row', 'show'].includes(commands[0].name)) {
-    return new Set();
-  }
-  const sources = (await callbacks?.getSources?.()) || [];
-  return new Set(sources.map(({ name }) => name));
-}
-
 function validateFieldsShadowing(
   fields: Map<string, ESQLRealField>,
   variables: Map<string, ESQLVariable[]>
@@ -737,34 +712,6 @@ function validateFieldsShadowing(
   return messages;
 }
 
-async function retrievePoliciesFields(
-  commands: ESQLCommand[],
-  policies: Map<string, ESQLPolicy>,
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
-  if (!callbacks) {
-    return new Map();
-  }
-  const enrichCommands = commands.filter(({ name }) => name === 'enrich');
-  if (!enrichCommands.length) {
-    return new Map();
-  }
-  const policyNames = enrichCommands
-    .map(({ args }) => (isSourceItem(args[0]) ? args[0].name : undefined))
-    .filter(nonNullable);
-  if (!policyNames.every((name) => policies.has(name))) {
-    return new Map();
-  }
-  const fullPolicies = policyNames.map((name) => policies.get(name)) as ESQLPolicy[];
-
-  const customQuery = `from ${fullPolicies
-    .flatMap(({ sourceIndices }) => sourceIndices)
-    .join(', ')} | keep ${fullPolicies.flatMap(({ enrichFields }) => enrichFields).join(', ')}`;
-
-  const fields = (await callbacks.getFieldsFor?.({ customQuery })) || [];
-  return createMapFromList(fields);
-}
-
 /**
  * This function will perform an high level validation of the
  * query AST. An initial syntax validation is already performed by the parser
@@ -772,16 +719,19 @@ async function retrievePoliciesFields(
  * @param ast A valid AST data structure
  */
 export async function validateAst(
-  ast: ESQLAst,
+  queryString: string,
+  astProvider: AstProviderFn,
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
+
+  const { ast, errors } = await astProvider(queryString);
 
   const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
     // retrieve available fields (if a source command has been defined)
-    retrieveFields(ast, callbacks),
+    retrieveFields(queryString, ast, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(ast, callbacks),
   ]);
@@ -805,7 +755,7 @@ export async function validateAst(
     messages.push(...commandMessages);
   }
   return {
-    errors: messages.filter(({ type }) => type === 'error'),
+    errors: [...errors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
   };
 }

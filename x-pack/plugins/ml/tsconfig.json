@@ -111,5 +111,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/rule-registry-plugin",
     "@kbn/securitysolution-ecs",
+    "@kbn/ml-data-view-utils",
+    "@kbn/ml-creation-wizard-utils",
   ],
 }
