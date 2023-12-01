@@ -8,7 +8,7 @@ set -euo pipefail
 echo "--- Collecting commit info"
 ts-node .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.ts
 
-if [[ "$AUTO_PROMOTE_RC" == "true" || "$AUTO_PROMOTE_RC" == "1" ]]; then
+if [[ "$AUTO_SELECT_COMMIT" == "true" || "$AUTO_SELECT_COMMIT" == "1" ]]; then
   echo "--- Auto promoting to RC, skipping confirmation"
 else
   echo "--- Uploading confirmation step"

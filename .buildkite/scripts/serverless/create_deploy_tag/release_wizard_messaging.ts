@@ -23,7 +23,7 @@ const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';
 const WIZARD_CTX_DEFAULT = 'wizard-main';
 
 const IS_DRY_RUN = process.env.DRY_RUN?.match(/(1|true)/i);
-const IS_AUTOMATED_RUN = process.env.AUTO_PROMOTE_RC?.match(/(1|true)/i);
+const IS_AUTOMATED_RUN = process.env.AUTO_SELECT_COMMIT?.match(/(1|true)/i);
 
 type StateNames =
   | 'start'
@@ -63,7 +63,7 @@ const states: Record<StateNames, StateShape> = {
         );
       }
 
-      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Release candidates</h4>`);
+      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Recent commits...</h4>`);
     },
   },
   initialize: {
@@ -82,7 +82,7 @@ const states: Record<StateNames, StateShape> = {
   },
   wait_for_selection: {
     name: 'Waiting for selection',
-    description: 'Waiting for the Release Manager to select a release candidate commit.',
+    description: 'Waiting for the Release Manager to select a commit.',
     instruction: `Please find, copy and enter a commit SHA to the buildkite input box to proceed.`,
     instructionStyle: 'warning',
     skipWhenAutomated: true,
@@ -91,15 +91,11 @@ const states: Record<StateNames, StateShape> = {
   collect_commit_info: {
     name: 'Collecting commit info',
     description: 'Collecting supplementary info about the selected commit.',
-    instruction: `Please wait, while we're collecting data about the commit, and the release candidate.`,
+    instruction: `Please wait, while we're collecting data about the commits.`,
     instructionStyle: 'info',
     display: true,
     pre: async () => {
-      buildkite.setAnnotation(
-        COMMIT_INFO_CTX,
-        'info',
-        `<h4>:kibana: Selected release candidate info:</h4>`
-      );
+      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Selected commit info:</h4>`);
     },
   },
   wait_for_confirmation: {
@@ -243,7 +239,7 @@ export async function transition(targetStateName: StateNames, data?: any) {
 
 function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | undefined>) {
   const wizardHeader = IS_AUTOMATED_RUN
-    ? `<h3>:kibana: Kibana Serverless automated release candidate promotion :robot_face:</h3>`
+    ? `<h3>:kibana: Kibana Serverless automated promotion :robot_face:</h3>`
     : `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
 
   const wizardSteps = Object.keys(states)
@@ -332,7 +328,7 @@ async function sendReleaseSlackAnnouncement({
   ).data;
   const compareLink = currentCommitSha
     ? `<${compareResponse.html_url}|${compareResponse.total_commits} new commits>`
-    : 'a new release candidate';
+    : 'a new commit';
 
   const mainMessage = [
     `:ship_it_parrot: Promotion of ${compareLink} to QA has been <${process.env.BUILDKITE_BUILD_URL}|initiated>!\n`,

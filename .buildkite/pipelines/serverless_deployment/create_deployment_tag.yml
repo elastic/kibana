@@ -12,7 +12,7 @@ steps:
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state wait_for_selection
     key: select_commit
     env:
-      AUTO_PROMOTE_RC: $AUTO_PROMOTE_RC
+      AUTO_SELECT_COMMIT: $AUTO_SELECT_COMMIT
 
   - wait: ~
 
@@ -24,7 +24,7 @@ steps:
     key: collect_data
     depends_on: select_commit
     env:
-      AUTO_PROMOTE_RC: $AUTO_PROMOTE_RC
+      AUTO_SELECT_COMMIT: $AUTO_SELECT_COMMIT
 
   - wait: ~
 
