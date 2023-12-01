@@ -30,7 +30,6 @@ export interface GuideCardConstants {
   icon: string;
   // the guide will open a specific modal ESApiModal
   openEndpointModal?: boolean;
-  placeholder?: boolean;
 }
 
 export const guideCards: GuideCardConstants[] = [
@@ -250,10 +249,5 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--security--cloud',
     order: 9,
-  },
-  {
-    solution: 'security',
-    order: 10,
-    placeholder: true,
   },
 ].sort((cardA, cardB) => cardA.order - cardB.order) as GuideCardConstants[];

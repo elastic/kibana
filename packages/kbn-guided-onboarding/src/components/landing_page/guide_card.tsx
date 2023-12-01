@@ -121,7 +121,6 @@ export const GuideCard = ({
   const progress = getProgressLabel(guideState);
 
   const cardCss = css`
-    ${card.placeholder === true && `visibility: hidden;`}
     position: relative;
     height: 125px;
     width: 380px;

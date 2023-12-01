@@ -220,14 +220,6 @@ export const GettingStarted = () => {
           data-test-subj="onboarding--guideFilters"
           trackUiMetric={trackUiMetric}
         />
-        <EuiSpacer size="l" />
-
-        <div className="eui-textCenter">
-          {/* data-test-subj used for FS tracking */}
-          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
-            {skipText}
-          </EuiLink>
-        </div>
         <EuiSpacer size="xxl" />
         <GuideCards
           activateGuide={activateGuide}
@@ -244,6 +236,12 @@ export const GettingStarted = () => {
           navigateToUrl={application.navigateToUrl}
         />
         <EuiSpacer size="s" />
+        <div className="eui-textCenter">
+          {/* data-test-subj used for FS tracking */}
+          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
+            {skipText}
+          </EuiLink>
+        </div>
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );
