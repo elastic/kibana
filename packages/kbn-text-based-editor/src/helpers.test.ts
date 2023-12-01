@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { monaco } from '@kbn/monaco';
 import {
   parseErrors,
   parseWarning,
   getInlineEditorText,
   getWrappedInPipesCode,
-  extractESQLQueryToExecute,
   getIndicesList,
 } from './helpers';
 
@@ -256,27 +254,6 @@ describe('helpers', function () {
         { name: '.system1', hidden: true },
         { name: 'logs', hidden: false },
       ]);
-    });
-  });
-
-  describe('extractESQLQueryToExecute', () => {
-    const editorModelMock = {
-      getValue: jest.fn().mockReturnValue('from a | limit 10'),
-    } as unknown as monaco.editor.ITextModel;
-
-    it('should return the custom query', () => {
-      expect(extractESQLQueryToExecute(editorModelMock, { customQuery: 'from b | keep c' })).toBe(
-        'from b | keep c'
-      );
-    });
-
-    it('should return only source command part', () => {
-      expect(extractESQLQueryToExecute(editorModelMock, { sourcesOnly: true })).toBe('from a ');
-    });
-
-    it('should return the model query without the last command', () => {
-      expect(extractESQLQueryToExecute(editorModelMock)).toBe('from a ');
-      expect(extractESQLQueryToExecute(editorModelMock, { sourcesOnly: false })).toBe('from a ');
     });
   });
 });
