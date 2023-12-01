@@ -27,6 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const timelineTestService = getService('timeline');
   const detectionsTestService = getService('detections');
   const log = getService('log');
+  const browser = getService('browser');
 
   // The Alerts Rule seems to run every 5 minutes when there are no failures. This timeout ensures
   // that we wait long enough for them to show up.
@@ -82,8 +83,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170435
-  describe.skip('Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -112,6 +112,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('from the Endpoint list and details', () => {
       before(async () => {
         await pageObjects.endpoint.navigateToEndpointList();
+        await browser.setLocalStorageItem(
+          'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+          '{ isTourActive: false }'
+        );
       });
 
       it('should show Responder from the endpoint list', async () => {
@@ -159,6 +163,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         await pageObjects.timeline.navigateToTimelineList();
+        await browser.setLocalStorageItem(
+          'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+          '{ isTourActive: false }'
+        );
       });
 
       after(async () => {
