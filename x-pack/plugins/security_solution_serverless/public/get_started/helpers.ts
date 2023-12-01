@@ -16,10 +16,8 @@ export const defaultFinishedSteps: Partial<Record<CardId, StepId[]>> = {
   [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
 };
 
-export const isDefaultFinishedCardStep = (cardId: CardId, stepId: StepId) => {
-  const isDefaultFinishedSteps = defaultFinishedSteps[cardId];
-  return isDefaultFinishedSteps != null && isDefaultFinishedSteps.indexOf(stepId) >= 0;
-};
+export const isDefaultFinishedCardStep = (cardId: CardId, stepId: StepId) => 
+    !!defaultFinishedSteps[cardId]?.includes(stepId);
 
 export const getCardTimeInMinutes = (activeSteps: Step[] | undefined, stepsDone: Set<StepId>) =>
   activeSteps?.reduce(
