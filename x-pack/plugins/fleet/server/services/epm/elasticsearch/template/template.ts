@@ -438,11 +438,15 @@ function _generateMappings(
             );
         }
 
-        // Flag that the mapping of this field subobjects property is set.
-        if (field.subobjects !== undefined) {
-          if (path.includes('*')) {
-            subobjects = field.subobjects;
-          }
+        // When a wildcard field specifies the subobjects setting,
+        // the parent intermediate object should set the subobjects
+        // setting.
+        //
+        // For example, if a wildcard field `foo.*` has subobjects,
+        // we should set subobjects on the intermediate object `foo`.
+        //
+        if (field.subobjects !== undefined && path.includes('*')) {
+          subobjects = field.subobjects;
         }
 
         if (dynProperties && matchingType) {
