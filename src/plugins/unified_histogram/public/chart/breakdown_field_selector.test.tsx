@@ -43,7 +43,7 @@ describe('BreakdownFieldSelector', () => {
         Object {
           "checked": "true",
           "label": "No breakdown",
-          "value": "__EMPTY_OPTION__",
+          "value": "__EMPTY_SELECTOR_OPTION__",
         },
         Object {
           "checked": "false",
@@ -88,7 +88,7 @@ describe('BreakdownFieldSelector', () => {
         Object {
           "checked": "false",
           "label": "No breakdown",
-          "value": "__EMPTY_OPTION__",
+          "value": "__EMPTY_SELECTOR_OPTION__",
         },
         Object {
           "checked": "false",

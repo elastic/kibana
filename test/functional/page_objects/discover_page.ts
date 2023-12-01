@@ -226,7 +226,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clearBreakdownField() {
-    await this.chooseBreakdownField('__EMPTY_OPTION__');
+    await this.chooseBreakdownField('__EMPTY_SELECTOR_OPTION__');
   }
 
   public async chooseLensChart(chart: string) {
