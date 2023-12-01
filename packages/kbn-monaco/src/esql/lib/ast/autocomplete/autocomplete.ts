@@ -120,6 +120,27 @@ function isComma(char: string) {
 function isSourceCommand({ label }: AutocompleteCommandDefinition) {
   return ['from', 'row', 'show'].includes(String(label));
 }
+/**
+ * This function count the number of unclosed brackets in order to
+ * locally fix the queryString to generate a valid AST
+ * A known limitation of this is that is not aware of commas "," or pipes "|"
+ * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
+ * @param bracketType
+ * @param text
+ * @returns
+ */
+function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
+  const stack = [];
+  const closingBrackets = { '(': ')', '[': ']' };
+  for (const char of text) {
+    if (char === bracketType) {
+      stack.push(bracketType);
+    } else if (char === closingBrackets[bracketType]) {
+      stack.pop();
+    }
+  }
+  return stack.length;
+}
 
 export async function suggest(
   model: monaco.editor.ITextModel,
@@ -146,10 +167,10 @@ export async function suggest(
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
   // check if all brackets are closed, otherwise close them
-  // @TODO: improve this in the future
-  if (innerText.lastIndexOf('(') > innerText.lastIndexOf(')')) {
+  const unclosedBrackets = countBracketsUnclosed('(', finalText);
+  if (unclosedBrackets > 0) {
     // inject the closing brackets
-    finalText += ')';
+    finalText += Array(unclosedBrackets).fill(')').join('');
   }
 
   const { ast } = await astProvider(finalText);

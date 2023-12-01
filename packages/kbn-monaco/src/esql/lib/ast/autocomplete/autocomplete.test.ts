@@ -604,6 +604,22 @@ describe('autocomplete', () => {
       ],
       '('
     );
+    // test deep function nesting suggestions (and check that the same function is not suggested)
+    // round(round(
+    // round(round(round(
+    // etc...
+    for (const nesting of [1, 2, 3, 4]) {
+      testSuggestions(
+        `from a | eval a=${Array(nesting).fill('round(').join('')}`,
+        [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ],
+        '('
+      );
+    }
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionsDefinitions) {
       // skip this fn for the moment as it's quite hard to test
