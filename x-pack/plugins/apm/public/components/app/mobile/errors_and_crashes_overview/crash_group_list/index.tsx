@@ -20,7 +20,7 @@ import {
 } from '../../../../shared/charts/helper/get_timeseries_color';
 import { SparkPlot } from '../../../../shared/charts/spark_plot';
 import { CrashDetailLink } from '../../../../shared/links/apm/mobile/crash_detail_link';
-import { ErrorOverviewLink } from '../../../../shared/links/apm/error_overview_link';
+import { ErrorOverviewLink } from '../../../../shared/links/apm/mobile/error_overview_link';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
