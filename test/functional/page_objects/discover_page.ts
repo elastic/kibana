@@ -216,11 +216,17 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async chooseBreakdownField(field: string) {
-    await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
+    await this.retry.try(async () => {
+      await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
+      await this.testSubjects.existOrFail('unifiedHistogramBreakdownFieldSelector');
+    });
+
+    const option = await this.find.byCssSelector(`.euiSelectableListItem[value="${field}"]`);
+    await option.click();
   }
 
   public async clearBreakdownField() {
-    await this.comboBox.clear('unifiedHistogramBreakdownFieldSelector');
+    await this.chooseBreakdownField('__EMPTY_OPTION__');
   }
 
   public async chooseLensChart(chart: string) {
