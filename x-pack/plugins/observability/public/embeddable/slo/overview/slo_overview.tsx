@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { SloCardBadgesPortal } from '../../../pages/slos/components/card_view/badges_portal';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
@@ -26,6 +27,8 @@ export function SloOverview({
   lastReloadRequestTime,
   onRenderComplete,
 }: EmbeddableSloProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
   const {
     isLoading,
     data: slo,
@@ -97,17 +100,18 @@ export function SloOverview({
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   return (
-    <>
+    <div ref={containerRef} style={{ width: '100%' }}>
       <SloCardChart slo={slo} historicalSliData={historicalSliData ?? []} cardsPerRow={4} />
-      <SloCardItemBadges
-        slo={slo}
-        rules={rules}
-        activeAlerts={activeAlerts}
-        handleCreateRule={() => {}}
-        hasGroupBy={hasGroupBy}
-        isEmbeddable={true}
-      />
-    </>
+      <SloCardBadgesPortal containerRef={containerRef}>
+        <SloCardItemBadges
+          slo={slo}
+          rules={rules}
+          activeAlerts={activeAlerts}
+          handleCreateRule={() => {}}
+          hasGroupBy={hasGroupBy}
+        />
+      </SloCardBadgesPortal>
+    </div>
   );
 }
 

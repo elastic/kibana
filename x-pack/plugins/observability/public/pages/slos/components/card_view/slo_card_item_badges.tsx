@@ -18,7 +18,6 @@ import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 
 interface Props {
-  isEmbeddable?: boolean;
   hasGroupBy: boolean;
   activeAlerts?: number;
   slo: SLOWithSummaryResponse;
