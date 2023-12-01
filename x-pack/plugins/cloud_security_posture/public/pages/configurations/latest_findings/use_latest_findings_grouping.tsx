@@ -218,6 +218,9 @@ export const useLatestFindingsGrouping = ({
     });
   };
 
+  const isEmptyResults =
+    !isFetching && isFindingsRootGroupingAggregation(groupData) && !groupData.unitsCount?.value;
+
   return {
     groupData,
     grouping,
@@ -236,5 +239,6 @@ export const useLatestFindingsGrouping = ({
     onDistributionBarClick,
     totalPassedFindings,
     totalFailedFindings,
+    isEmptyResults,
   };
 };

@@ -8,15 +8,11 @@ import React, { useCallback } from 'react';
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
 import { EmptyState } from '../../../components/empty_state';
-import { defaultLoadingRenderer } from '../../../components/cloud_posture_page';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import type { FindingsBaseProps } from '../../../common/types';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import { DEFAULT_TABLE_HEIGHT } from './constants';
-import {
-  isFindingsRootGroupingAggregation,
-  useLatestFindingsGrouping,
-} from './use_latest_findings_grouping';
+import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
 import { LatestFindingsTable } from './latest_findings_table';
 import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
@@ -54,28 +50,19 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     totalPassedFindings,
     onDistributionBarClick,
     totalFailedFindings,
+    isEmptyResults,
   } = useLatestFindingsGrouping({ dataView, groupPanelRenderer, groupStatsRenderer });
 
-  if (error) {
+  if (error || isEmptyResults) {
     return (
       <>
         <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
         <EuiSpacer size="m" />
-        <ErrorCallout error={error} />
+        {error && <ErrorCallout error={error} />}
+        {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
       </>
     );
   }
-
-  if (!isFetching && isFindingsRootGroupingAggregation(groupData) && !groupData.unitsCount?.value) {
-    return (
-      <>
-        <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
-        <EuiSpacer size="m" />
-        <EmptyState onResetFilters={onResetFilters} />
-      </>
-    );
-  }
-
   if (isGroupSelected) {
     return (
       <>
@@ -87,21 +74,18 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             passed={totalPassedFindings}
             failed={totalFailedFindings}
           />
-          {isGroupLoading ? (
-            defaultLoadingRenderer()
-          ) : (
-            <CloudSecurityGrouping
-              data={groupData}
-              grouping={grouping}
-              renderChildComponent={renderChildComponent}
-              onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
-              onChangeGroupsPage={onChangeGroupsPage}
-              activePageIndex={activePageIndex}
-              isFetching={isFetching}
-              pageSize={pageSize}
-              selectedGroup={selectedGroup}
-            />
-          )}
+          <CloudSecurityGrouping
+            data={groupData}
+            grouping={grouping}
+            renderChildComponent={renderChildComponent}
+            onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
+            onChangeGroupsPage={onChangeGroupsPage}
+            activePageIndex={activePageIndex}
+            isFetching={isFetching}
+            pageSize={pageSize}
+            selectedGroup={selectedGroup}
+            isGroupLoading={isGroupLoading}
+          />
         </div>
       </>
     );

@@ -41,4 +41,5 @@ export const TAKE_ACTION_SUBJ = 'csp:take_action';
 export const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';
 
 export const CSP_GROUPING = 'cloudSecurityGrouping';
+export const CSP_GROUPING_LOADING = 'cloudSecurityGroupingLoading';
 export const CSP_FINDINGS_COMPLIANCE_SCORE = 'cloudSecurityFindingsComplianceScore';
