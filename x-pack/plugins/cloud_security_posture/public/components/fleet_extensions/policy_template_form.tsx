@@ -588,6 +588,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
 
+    // TODO: get rid of useEffect in favor of directly setting aws.credentials.type
     useEffect(() => {
       setEnabledPolicyInput(input.type);
       // eslint-disable-next-line react-hooks/exhaustive-deps

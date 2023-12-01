@@ -287,7 +287,7 @@ export const AwsCredentialsForm = ({
     </>
   );
 };
-const AwsCredentialTypeSelector = ({
+export const AwsCredentialTypeSelector = ({
   type,
   onChange,
 }: {

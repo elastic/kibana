@@ -105,6 +105,19 @@ export const getAwsCredentialsFormManualOptions = (): Array<{
     .filter(({ value }) => value !== 'cloud_formation');
 };
 
+// TODO: move strings to constants
+export const getAwsCredentialsFormManualOptionsAgentless = (): Array<{
+  value: AwsCredentialsType;
+  text: string;
+}> => {
+  return Object.entries(getAwsCredentialsFormOptions())
+    .map(([key, value]) => ({
+      value: key as AwsCredentialsType,
+      text: value.label,
+    }))
+    .filter(({ value }) => value === 'direct_access_keys' || value === 'temporary_keys');
+};
+
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE = 'assume_role';
 export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = 'direct_access_keys';
 
