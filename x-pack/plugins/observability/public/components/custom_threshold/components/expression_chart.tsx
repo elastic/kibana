@@ -15,6 +15,7 @@ import {
   RectAnnotation,
   Settings,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -192,6 +193,8 @@ export function ExpressionChart({
               tooltip: { visible: true },
             }}
             theme={getChartTheme(isDarkMode)}
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
             locale={i18n.getLocale()}
           />
         </Chart>

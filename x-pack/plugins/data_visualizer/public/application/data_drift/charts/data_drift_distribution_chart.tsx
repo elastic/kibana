@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { Axis, BarSeries, Chart, Tooltip, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Tooltip,
+  Position,
+  ScaleType,
+  Settings,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
 import React from 'react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +46,11 @@ export const DataDriftDistributionChart = ({
     <div css={{ width: '100%', height: CHART_HEIGHT }}>
       <Chart>
         <Tooltip body={DataComparisonChartTooltipBody} />
-        <Settings locale={i18n.getLocale()} />
+        <Settings
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={LEGACY_LIGHT_THEME}
+          locale={i18n.getLocale()}
+        />
         <Axis
           id="bottom"
           position={Position.Bottom}

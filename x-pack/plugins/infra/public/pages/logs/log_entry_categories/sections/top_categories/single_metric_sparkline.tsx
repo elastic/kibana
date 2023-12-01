@@ -40,15 +40,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
 }> = ({ metric, timeRange }) => {
   const isDarkMode = useIsDarkMode();
   const timeZone = useKibanaTimeZoneSetting();
-
-  const theme = useMemo(
-    () => [
-      // localThemeOverride,
-      EUI_SPARKLINE_THEME_PARTIAL,
-      isDarkMode ? DARK_THEME : LIGHT_THEME,
-    ],
-    [isDarkMode]
-  );
+  const baseTheme = useMemo(() => (isDarkMode ? DARK_THEME : LIGHT_THEME), [isDarkMode]);
 
   const xDomain = useMemo(
     () => ({
@@ -61,7 +53,13 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   return (
     <Chart size={sparklineSize}>
       <Tooltip type={TooltipType.None} />
-      <Settings showLegend={false} theme={theme} xDomain={xDomain} locale={i18n.getLocale()} />
+      <Settings
+        showLegend={false}
+        theme={EUI_SPARKLINE_THEME_PARTIAL}
+        baseTheme={baseTheme}
+        xDomain={xDomain}
+        locale={i18n.getLocale()}
+      />
       <AreaSeries
         id="metric"
         data={metric}

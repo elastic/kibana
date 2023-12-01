@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME, Theme } from '@elastic/charts';
 import { useMemo } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
-export const useChartTheme = () => {
+export const useBaseChartTheme = (): Theme => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
-  const theme = useMemo(() => {
+  return useMemo(() => {
     return darkMode ? DARK_THEME : LIGHT_THEME;
   }, [darkMode]);
-
-  return theme;
 };

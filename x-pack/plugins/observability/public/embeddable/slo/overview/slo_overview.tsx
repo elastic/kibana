@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, useEuiBackgroundColor } from '@elastic/eui';
-import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
+import { Chart, Metric, MetricTrendShape, Settings, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { EuiLoadingChart } from '@elastic/eui';
@@ -141,6 +141,8 @@ export function SloOverview({
     <>
       <Chart>
         <Settings
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={LEGACY_LIGHT_THEME}
           onElementClick={() => {
             navigateToUrl(
               basePath.prepend(

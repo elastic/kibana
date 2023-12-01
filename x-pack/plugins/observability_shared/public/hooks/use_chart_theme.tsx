@@ -5,35 +5,36 @@
  * 2.0.
  */
 
-import { PartialTheme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { LIGHT_THEME, DARK_THEME, SettingsProps, PartialTheme } from '@elastic/charts';
 import { useMemo } from 'react';
 import { useTheme } from './use_theme';
 
-export function useChartTheme(): PartialTheme[] {
+export function useChartThemes(): Pick<SettingsProps, 'theme' | 'baseTheme'> {
   const theme = useTheme();
-  const baseChartTheme = theme.darkMode ? DARK_THEME : LIGHT_THEME;
+  const baseTheme = theme.darkMode ? DARK_THEME : LIGHT_THEME;
 
-  return useMemo(
-    () => [
-      {
-        chartMargins: {
-          left: 10,
-          right: 10,
-          top: 35,
-          bottom: 10,
-        },
-        background: {
-          color: 'transparent',
-        },
-        lineSeriesStyle: {
-          point: { visible: false },
-        },
-        areaSeriesStyle: {
-          point: { visible: false },
-        },
+  return useMemo(() => {
+    const themeOverrides: PartialTheme = {
+      chartMargins: {
+        left: 10,
+        right: 10,
+        top: 35,
+        bottom: 10,
       },
-      baseChartTheme,
-    ],
-    [baseChartTheme]
-  );
+      background: {
+        color: 'transparent',
+      },
+      lineSeriesStyle: {
+        point: { visible: false },
+      },
+      areaSeriesStyle: {
+        point: { visible: false },
+      },
+    };
+
+    return {
+      themeOverrides,
+      baseTheme,
+    };
+  }, [baseTheme]);
 }
