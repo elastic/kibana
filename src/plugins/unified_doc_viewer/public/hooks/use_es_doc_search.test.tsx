@@ -40,7 +40,7 @@ const services = {
 describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody given useNewFieldsApi is false', () => {
     const dataView = {
-      getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
+      getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
     const actual = buildSearchBody('1', index, dataView, false);
     expect(actual).toMatchInlineSnapshot(`
@@ -67,7 +67,9 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           },
           "script_fields": Array [],
-          "stored_fields": Array [],
+          "stored_fields": Array [
+            "*",
+          ],
           "version": true,
         },
       }
@@ -76,7 +78,7 @@ describe('Test of <Doc /> helper / hook', () => {
 
   test('buildSearchBody useNewFieldsApi is true', () => {
     const dataView = {
-      getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
+      getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
     const actual = buildSearchBody('1', index, dataView, true);
     expect(actual).toMatchInlineSnapshot(`
@@ -108,7 +110,9 @@ describe('Test of <Doc /> helper / hook', () => {
           },
           "runtime_mappings": Object {},
           "script_fields": Array [],
-          "stored_fields": Array [],
+          "stored_fields": Array [
+            "*",
+          ],
           "version": true,
         },
       }
@@ -117,7 +121,7 @@ describe('Test of <Doc /> helper / hook', () => {
 
   test('buildSearchBody with requestSource', () => {
     const dataView = {
-      getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
+      getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
     const actual = buildSearchBody('1', index, dataView, true, true);
     expect(actual).toMatchInlineSnapshot(`
@@ -150,7 +154,9 @@ describe('Test of <Doc /> helper / hook', () => {
           },
           "runtime_mappings": Object {},
           "script_fields": Array [],
-          "stored_fields": Array [],
+          "stored_fields": Array [
+            "*",
+          ],
           "version": true,
         },
       }
@@ -160,7 +166,6 @@ describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody with runtime fields', () => {
     const dataView = {
       getComputedFields: () => ({
-        storedFields: [],
         scriptFields: [],
         docvalueFields: [],
         runtimeFields: {
@@ -210,7 +215,9 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           },
           "script_fields": Array [],
-          "stored_fields": Array [],
+          "stored_fields": Array [
+            "*",
+          ],
           "version": true,
         },
       }
