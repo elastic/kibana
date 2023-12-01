@@ -75,6 +75,39 @@ describe('AssetCriticalityService', () => {
         expect(result).toEqual([]);
       });
 
+      it('generates a single terms clause for multiple identifier values on the same field', async () => {
+        const service = assetCriticalityServiceFactory({
+          assetCriticalityDataClient: mockAssetCriticalityDataClient,
+        });
+        const multipleIdentifiers = [
+          { id_field: 'user.name', id_value: 'one' },
+          { id_field: 'user.name', id_value: 'other' },
+        ];
+
+        await service.getCriticalitiesByIdentifiers(multipleIdentifiers);
+
+        expect(mockAssetCriticalityDataClient.search).toHaveBeenCalledTimes(1);
+        const query = (mockAssetCriticalityDataClient.search as jest.Mock).mock.calls[0][0].query;
+        expect(query).toMatchObject({
+          bool: {
+            filter: {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { id_field: 'user.name' } },
+                        { terms: { id_value: ['one', 'other'] } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+      });
+
       it('deduplicates identifiers', async () => {
         const service = assetCriticalityServiceFactory({
           assetCriticalityDataClient: mockAssetCriticalityDataClient,
@@ -89,9 +122,18 @@ describe('AssetCriticalityService', () => {
         const query = (mockAssetCriticalityDataClient.search as jest.Mock).mock.calls[0][0].query;
         expect(query).toMatchObject({
           bool: {
-            must: {
+            filter: {
               bool: {
-                should: [{ terms: { 'user.name': ['same'] } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { id_field: 'user.name' } },
+                        { terms: { id_value: ['same'] } },
+                      ],
+                    },
+                  },
+                ],
               },
             },
           },

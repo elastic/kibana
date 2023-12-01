@@ -42,10 +42,15 @@ const groupIdentifierValuesByField = (
 
 const buildCriticalitiesQuery = (identifierValuesByField: IdentifierValuesByField) => ({
   bool: {
-    must: {
+    filter: {
       bool: {
         should: Object.keys(identifierValuesByField).map((idField) => ({
-          terms: { [idField]: identifierValuesByField[idField] },
+          bool: {
+            must: [
+              { term: { id_field: idField } },
+              { terms: { id_value: identifierValuesByField[idField] } },
+            ],
+          },
         })),
       },
     },
