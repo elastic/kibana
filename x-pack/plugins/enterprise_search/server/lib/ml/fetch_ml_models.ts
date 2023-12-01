@@ -20,6 +20,8 @@ import {
   E5_MODEL_PLACEHOLDER,
   LANG_IDENT_MODEL_ID,
   MODEL_TITLES_BY_TYPE,
+  E5_LINUX_OPTIMIZED_MODEL_ID,
+  ELSER_LINUX_OPTIMIZED_MODEL_ID,
 } from './utils';
 
 let compatibleElserModelId = ELSER_MODEL_ID;
@@ -114,7 +116,12 @@ const getModel = (modelConfig: MlTrainedModelConfig, modelStats?: MlTrainedModel
       modelId,
       type,
       title: getUserFriendlyTitle(modelId, type),
-      isPromoted: [ELSER_MODEL_ID, E5_MODEL_ID].includes(modelId),
+      isPromoted: [
+        ELSER_MODEL_ID,
+        ELSER_LINUX_OPTIMIZED_MODEL_ID,
+        E5_MODEL_ID,
+        E5_LINUX_OPTIMIZED_MODEL_ID,
+      ].includes(modelId),
     };
 
     // Enrich deployment stats
