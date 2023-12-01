@@ -7,13 +7,52 @@
  */
 
 import React from 'react';
-import { render } from '../../helpers/test_helper';
+import { useAppContext } from '../../hooks/use_app_context';
+import { coreStart, render } from '../../helpers/test_helper';
 import { SettingsPage } from './settings_page';
 
+jest.mock('../../hooks/use_app_context');
+
+const useAppContextMock = useAppContext as jest.Mock;
+
+const setBreadcrumbs = jest.fn();
+const navigateToApp = jest.fn();
+
 describe('Settings Page', () => {
+  beforeEach(() => {
+    useAppContextMock.mockReturnValue({
+      observabilityAIAssistant: {
+        useGenAIConnectors: () => ({ connectors: [] }),
+      },
+      setBreadcrumbs,
+      navigateToApp,
+    });
+  });
+
+  it('should navigate to home when not authorized', () => {
+    render(<SettingsPage />, false);
+
+    expect(coreStart.application.navigateToApp).toBeCalledWith('home');
+  });
+
   it('should render tabs', () => {
     const { getByTestId } = render(<SettingsPage />);
-    expect(getByTestId('settingsTab')).toBeInTheDocument();
-    expect(getByTestId('knowledgeBaseTab')).toBeInTheDocument();
+
+    expect(getByTestId('settingsPageTab-settings')).toBeInTheDocument();
+    expect(getByTestId('settingsPageTab-knowledge_base')).toBeInTheDocument();
+  });
+
+  it('should set breadcrumbs', () => {
+    render(<SettingsPage />);
+
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      {
+        text: 'AI Assistants',
+        onClick: expect.any(Function),
+      },
+      {
+        text: 'Observability',
+      },
+    ]);
   });
 });

@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
-import { useAppContext } from '../../context/app_context';
+import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
@@ -96,10 +96,11 @@ export function SettingsPage() {
 
       <EuiSpacer size="m" />
 
-      <EuiTabs>
+      <EuiTabs data-test-subj="settingsPageTabs">
         {tabs.map((t, index) => (
           <EuiTab
             key={index}
+            data-test-subj={`settingsPageTab-${t.id}`}
             onClick={() => onSelectedTabChanged(t.id)}
             isSelected={t.id === selectedTabId}
           >

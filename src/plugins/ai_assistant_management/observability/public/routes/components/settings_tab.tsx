@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAppContext } from '../../context/app_context';
+import { useAppContext } from '../../hooks/use_app_context';
 
 export const SELECTED_CONNECTOR_LOCAL_STORAGE_KEY =
   'xpack.observabilityAiAssistant.lastUsedConnector';

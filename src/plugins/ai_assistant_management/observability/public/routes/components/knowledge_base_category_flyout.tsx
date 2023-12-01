@@ -22,7 +22,7 @@ import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/
 import moment from 'moment';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 import { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
-import { useAppContext } from '../../context/app_context';
+import { useAppContext } from '../../hooks/use_app_context';
 
 const CATEGORY_MAP = {
   lens: {

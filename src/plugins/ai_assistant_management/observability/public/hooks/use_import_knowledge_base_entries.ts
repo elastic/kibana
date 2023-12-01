@@ -10,7 +10,7 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAppContext } from '../context/app_context';
+import { useAppContext } from './use_app_context';
 import { REACT_QUERY_KEYS } from '../constants';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;

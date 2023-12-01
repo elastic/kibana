@@ -30,7 +30,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
-import { useAppContext } from '../../context/app_context';
+import { useAppContext } from '../../hooks/use_app_context';
 
 export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void }) {
   const {

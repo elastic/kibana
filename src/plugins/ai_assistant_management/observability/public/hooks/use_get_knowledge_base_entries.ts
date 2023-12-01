@@ -8,7 +8,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
-import { useAppContext } from '../context/app_context';
+import { useAppContext } from './use_app_context';
 
 export function useGetKnowledgeBaseEntries({
   query,

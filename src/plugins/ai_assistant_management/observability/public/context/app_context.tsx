@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext } from 'react';
 import { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { StartDependencies } from '../plugin';
 
-interface ContextValue extends StartDependencies {
+export interface ContextValue extends StartDependencies {
   http: HttpSetup;
   navigateToApp: CoreStart['application']['navigateToApp'];
   notifications: CoreStart['notifications'];
@@ -21,7 +21,7 @@ interface ContextValue extends StartDependencies {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
-const AppContext = createContext<ContextValue>(null as any);
+export const AppContext = createContext<ContextValue>(null as any);
 
 export const AppContextProvider = ({
   children,
@@ -31,12 +31,4 @@ export const AppContextProvider = ({
   children: React.ReactNode;
 }) => {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
-};
-
-export const useAppContext = () => {
-  const ctx = useContext(AppContext);
-  if (!ctx) {
-    throw new Error('"useAppContext" can only be called inside of AppContext.Provider!');
-  }
-  return ctx;
 };

@@ -28,7 +28,7 @@ import moment from 'moment';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
-import { useAppContext } from '../../context/app_context';
+import { useAppContext } from '../../hooks/use_app_context';
 
 export function KnowledgeBaseEditManualEntryFlyout({
   entry,

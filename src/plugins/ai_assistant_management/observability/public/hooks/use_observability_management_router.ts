@@ -9,7 +9,7 @@
 import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useAppContext } from '../context/app_context';
+import { useAppContext } from './use_app_context';
 import {
   AIAssistantManagementObservabilityRouter,
   AIAssistantManagementObservabilityRoutes,

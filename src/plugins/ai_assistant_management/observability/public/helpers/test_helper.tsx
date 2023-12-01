@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -14,8 +15,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 
 import { mockObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
+import { RouterProvider } from '@kbn/typed-react-router-config';
 import { AppContextProvider } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
+import { aIAssistantManagementObservabilityRouter } from '../routes/config';
 
 export const coreStart = coreMock.createStart();
 
@@ -35,12 +38,15 @@ const queryClient = new QueryClient({
 });
 
 export const render = (component: React.ReactNode, show = true) => {
+  const history = createMemoryHistory();
+
   return testLibRender(
     // @ts-ignore
     <IntlProvider locale="en-US" messages={translations.messages}>
       <RedirectToHomeIfUnauthorized
         coreStart={{
           application: {
+            ...coreStart.application,
             // @ts-ignore
             capabilities: { management: { show: true }, observabilityAIAssistant: { show } },
           },
@@ -63,7 +69,14 @@ export const render = (component: React.ReactNode, show = true) => {
             setBreadcrumbs: () => {},
           }}
         >
-          <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider
+              history={history}
+              router={aIAssistantManagementObservabilityRouter as any}
+            >
+              {component}
+            </RouterProvider>
+          </QueryClientProvider>
         </AppContextProvider>
       </RedirectToHomeIfUnauthorized>
     </IntlProvider>
