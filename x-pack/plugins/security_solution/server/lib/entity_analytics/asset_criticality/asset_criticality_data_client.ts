@@ -48,6 +48,12 @@ export class AssetCriticalityDataClient {
     });
   }
 
+  /**
+   *
+   * A general method for searching asset criticality records.
+   * @param query an ESL query to filter criticality results
+   * @returns criticality records matching the query
+   */
   public async search({
     query,
     size,
