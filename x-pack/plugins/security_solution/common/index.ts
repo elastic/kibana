@@ -20,7 +20,7 @@ export {
   DETECTION_ENGINE_RULES_URL_FIND,
 } from './constants';
 export { ELASTIC_SECURITY_RULE_ID } from './detection_engine/constants';
-export { KQL_FILTER_ENABLED_RULES } from './detection_engine/rule_management/rule_filtering';
+export { ENABLED_FIELD } from './detection_engine/rule_management/rule_fields';
 export { allowedExperimentalValues, type ExperimentalFeatures } from './experimental_features';
 
 // Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.

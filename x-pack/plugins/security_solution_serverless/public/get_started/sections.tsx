@@ -8,7 +8,7 @@ import type { MutableRefObject } from 'react';
 import React from 'react';
 
 import type { HttpSetup } from '@kbn/core/public';
-import { KQL_FILTER_ENABLED_RULES } from '@kbn/security-solution-plugin/common';
+import { ENABLED_FIELD } from '@kbn/security-solution-plugin/common';
 import type { Step, StepId } from './types';
 import {
   SectionId,
@@ -117,7 +117,7 @@ export const enablePrebuildRuleSteps: Array<Step<EnablePrebuiltRulesSteps.enable
           per_page: 20,
           sort_field: 'enabled',
           sort_order: 'desc',
-          filter: KQL_FILTER_ENABLED_RULES,
+          filter: `${ENABLED_FIELD}: true`,
         },
       });
       const isRulesInstalled = data?.total > 0;
