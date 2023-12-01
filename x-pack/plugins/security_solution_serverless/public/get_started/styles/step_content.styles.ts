@@ -43,7 +43,7 @@ export const useStepContentStyles = () => {
           margin-block-end: 0px !important;
           line-height: ${euiTheme.size.l};
 
-          & .step-paragraph {
+          .step-paragraph {
             margin-top: ${euiTheme.size.xl};
           }
         }
