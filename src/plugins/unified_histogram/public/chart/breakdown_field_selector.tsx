@@ -6,14 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiSelectableOption,
+  useEuiTheme,
+} from '@elastic/eui';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
 import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
+
+const EMPTY_OPTIONS = '__EMPTY_OPTION__';
+
+type SelectableEntry = EuiSelectableOption<{ value: string }>;
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
@@ -21,83 +35,126 @@ export interface BreakdownFieldSelectorProps {
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
 
-const TRUNCATION_PROPS = { truncation: 'middle' as const };
-const SINGLE_SELECTION = { asPlainText: true };
-
 export const BreakdownFieldSelector = ({
   dataView,
   breakdown,
   onBreakdownFieldChange,
 }: BreakdownFieldSelectorProps) => {
-  const fieldOptions = dataView.fields
-    .filter(fieldSupportsBreakdown)
-    .map((field) => ({ label: field.displayName, value: field.name }))
-    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>();
 
-  const selectedFields = breakdown.field
-    ? [{ label: breakdown.field.displayName, value: breakdown.field.name }]
-    : [];
+  const fieldOptions: SelectableEntry[] = useMemo(() => {
+    const options = dataView.fields
+      .filter(fieldSupportsBreakdown)
+      .map((field) => ({
+        key: field.name,
+        label: field.displayName,
+        value: field.name,
+        checked:
+          breakdown?.field?.name === field.name
+            ? ('on' as EuiSelectableOption['checked'])
+            : undefined,
+      }))
+      .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+
+    options.unshift({
+      key: EMPTY_OPTIONS,
+      value: EMPTY_OPTIONS,
+      label: i18n.translate('unifiedHistogram.noBreakdownFieldPlaceholder', {
+        defaultMessage: 'No breakdown',
+      }),
+      checked: !breakdown?.field ? ('on' as EuiSelectableOption['checked']) : undefined,
+    });
+
+    return options;
+  }, [dataView, breakdown.field]);
 
   const onFieldChange = useCallback(
-    (newOptions: EuiComboBoxOptionOption[]) => {
-      const field = newOptions.length
-        ? dataView.fields.find((currentField) => currentField.name === newOptions[0].value)
-        : undefined;
+    (newOptions: SelectableEntry[]) => {
+      const chosenOption = newOptions.find(({ checked }) => checked === 'on');
+
+      let field;
+
+      if (chosenOption?.value && chosenOption?.value !== EMPTY_OPTIONS) {
+        field = dataView.fields.find((currentField) => currentField.name === chosenOption.value);
+      }
 
       onBreakdownFieldChange?.(field);
+      setIsOpen(false);
     },
-    [dataView.fields, onBreakdownFieldChange]
+    [dataView.fields, onBreakdownFieldChange, setIsOpen]
   );
-
-  const [fieldPopoverDisabled, setFieldPopoverDisabled] = useState(false);
-  const disableFieldPopover = useCallback(() => setFieldPopoverDisabled(true), []);
-  const enableFieldPopover = useCallback(
-    () => setTimeout(() => setFieldPopoverDisabled(false)),
-    []
-  );
-
-  const { euiTheme } = useEuiTheme();
-  const breakdownCss = css`
-    width: 100%;
-    max-width: ${euiTheme.base * 10}px;
-  `;
 
   const panelMinWidth = calculateWidthFromEntries(fieldOptions, ['label']);
 
   return (
-    <EuiToolTip
-      position="top"
-      content={
-        fieldPopoverDisabled
-          ? undefined
-          : i18n.translate('unifiedHistogram.breakdownByTooltip', {
-              defaultMessage: 'Break down by: {field}',
-              values: {
-                field: breakdown.field?.displayName,
-              },
+    <EuiPopover
+      id="unifiedHistogramBreakdownSelector"
+      ownFocus
+      initialFocus=".unifiedHistogramBreakdownSelector__popoverPanel"
+      panelClassName="unifiedHistogramBreakdownSelector__popoverPanel"
+      panelProps={{
+        css: css`
+          min-width: ${panelMinWidth}px;
+        `,
+      }}
+      panelPaddingSize="s"
+      button={
+        <ToolbarButton
+          css={css`
+            max-width: ${euiTheme.base * 12}px;
+          `}
+          onClick={() => setIsOpen(!isOpen)}
+          data-test-subj="unifiedHistogramBreakdownSelectorButton"
+          label={
+            breakdown.field?.displayName ||
+            i18n.translate('unifiedHistogram.noBreakdownFieldPlaceholder', {
+              defaultMessage: 'No breakdown',
             })
+          }
+        />
       }
-      anchorProps={{ css: breakdownCss }}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downLeft"
     >
-      <EuiComboBox
+      <EuiPopoverTitle>
+        <EuiFlexGroup alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            {i18n.translate('unifiedHistogram.breakdownFieldPopoverTitle', {
+              defaultMessage: 'Select breakdown field',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
+      <EuiSelectable
+        searchable
+        singleSelection
         data-test-subj="unifiedHistogramBreakdownFieldSelector"
-        placeholder={i18n.translate('unifiedHistogram.noBreakdownFieldPlaceholder', {
-          defaultMessage: 'No breakdown',
-        })}
-        aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
-          defaultMessage: 'Break down by',
-        })}
-        inputPopoverProps={{ panelMinWidth, anchorPosition: 'downRight' }}
-        singleSelection={SINGLE_SELECTION}
+        searchProps={{
+          'data-test-subj': 'unifiedHistogramBreakdownSelectorSearch',
+          onChange: (value) => setSearchTerm(value),
+        }}
         options={fieldOptions}
-        selectedOptions={selectedFields}
         onChange={onFieldChange}
-        truncationProps={TRUNCATION_PROPS}
-        compressed
-        fullWidth={true}
-        onFocus={disableFieldPopover}
-        onBlur={enableFieldPopover}
-      />
-    </EuiToolTip>
+        noMatchesMessage={
+          <FormattedMessage
+            id="unifiedHistogram.breakdownFieldPopover.noResults"
+            defaultMessage="No results found for {term}"
+            values={{
+              term: <strong>{searchTerm}</strong>,
+            }}
+          />
+        }
+      >
+        {(list, search) => (
+          <>
+            {search}
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };
