@@ -54,7 +54,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   const tooltipContent =
     type === SUPPORTED_FIELD_TYPES.TEXT ? (
       <FormattedMessage
-        id="xpack.dataVisualizer.partialResultsMessage"
+        id="xpack.dataVisualizer.sampledPercentageForTextFieldsMsg"
         defaultMessage="The % of documents for text fields is sampled and calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
         values={{
           sampledDocuments: sampleCount,

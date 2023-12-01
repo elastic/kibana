@@ -35,7 +35,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
   const tooltipContent =
     type === SUPPORTED_FIELD_TYPES.TEXT ? (
       <FormattedMessage
-        id="xpack.dataVisualizer.partialResultsMessage"
+        id="xpack.dataVisualizer.sampledCardinalityForTextFieldsMsg"
         defaultMessage="The cardinality for text fields is sampled and calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
         values={{
           sampledDocuments: sampleCount,
