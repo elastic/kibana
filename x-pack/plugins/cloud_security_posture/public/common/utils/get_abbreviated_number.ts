@@ -14,5 +14,8 @@ import numeral from '@elastic/numeral';
     trillion: 't'
  */
 export const getAbbreviatedNumber = (value: number) => {
+  if (isNaN(value)) {
+    return 0;
+  }
   return value < 1000 ? value : numeral(value).format('0.0a');
 };
