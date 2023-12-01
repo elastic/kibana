@@ -7,8 +7,13 @@
 
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { allowedExperimentalValues } from '../../../../../common';
 
-const fileBeatModules = ['sentinel_one_cloud_funnel', 'sentinel_one'] as const;
+const { sentinelOneDataInAnalyzerEnabled } = allowedExperimentalValues;
+
+const fileBeatModules = [
+  ...(sentinelOneDataInAnalyzerEnabled ? ['sentinel_one_cloud_funnel', 'sentinel_one'] : []),
+] as const;
 
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   const agentType = get(['agent', 'type', 0], ecsData);

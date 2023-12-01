@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import { allowedExperimentalValues } from '../../../../../../common';
 import type { ResolverSchema } from '../../../../../../common/endpoint/types';
 
 interface SupportedSchema {
@@ -25,10 +26,13 @@ interface SupportedSchema {
   schema: ResolverSchema;
 }
 
+const { sentinelOneDataInAnalyzerEnabled } = allowedExperimentalValues;
+
 const supportedFileBeatDataSets = [
   'windows.sysmon_operational',
-  'sentinel_one_cloud_funnel.event',
-  'sentinel_one.alert',
+  ...(sentinelOneDataInAnalyzerEnabled
+    ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
+    : []),
 ];
 
 /**

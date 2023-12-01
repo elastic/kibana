@@ -18,6 +18,7 @@ import { BaseResolverQuery } from './base';
  */
 export class LifecycleQuery extends BaseResolverQuery {
   declare readonly resolverFields: JsonValue[];
+
   constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
     super({ schema, indexPatterns, timeRange, isInternalRequest });
   }
