@@ -142,7 +142,7 @@ describe('metric visualization', () => {
         ).toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "columnId": "metric-col-id",
               "triggerIconType": "color",
             },
@@ -726,7 +726,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorLightestShade);
+        ).toBe(euiLightVars.euiColorEmptyShade);
 
         expect(
           (
@@ -740,7 +740,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorLightestShade);
+        ).toBe(euiLightVars.euiColorEmptyShade);
 
         // this case isn't currently relevant because other parts of the code don't allow showBar to be
         // set when there isn't a max dimension but this test covers the branch anyhow
@@ -756,7 +756,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toEqual(euiThemeVars.euiColorLightestShade);
+        ).toEqual(euiThemeVars.euiColorEmptyShade);
       });
     });
   });
