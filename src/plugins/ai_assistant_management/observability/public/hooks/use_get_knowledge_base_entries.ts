@@ -10,23 +10,33 @@ import { useQuery } from '@tanstack/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useAppContext } from '../context/app_context';
 
-export function useGetKnowledgeBaseEntries(query: string) {
+export function useGetKnowledgeBaseEntries({
+  query,
+  sortBy,
+  sortDirection,
+}: {
+  query: string;
+  sortBy: string;
+  sortDirection: 'asc' | 'desc';
+}) {
   const { observabilityAIAssistant } = useAppContext();
 
   const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
-    queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query],
+    queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query, sortBy, sortDirection],
     queryFn: async ({ signal }) => {
       if (!observabilityAIAssistantApi || !signal) {
         return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
       }
 
-      return observabilityAIAssistantApi?.(`GET /internal/observability_ai_assistant/kb/entries`, {
+      return observabilityAIAssistantApi(`GET /internal/observability_ai_assistant/kb/entries`, {
         signal,
         params: {
           query: {
             query,
+            sortBy,
+            sortDirection,
           },
         },
       });

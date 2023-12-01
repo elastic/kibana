@@ -348,7 +348,15 @@ export class KnowledgeBaseService {
     }
   };
 
-  getEntries = async (query: string | undefined): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  getEntries = async ({
+    query,
+    sortBy,
+    sortDirection,
+  }: {
+    query?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+  }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     try {
       const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
         index: this.dependencies.resources.aliases.kb,
@@ -362,7 +370,15 @@ export class KnowledgeBaseService {
                 },
               },
             }
-          : {}),
+          : {
+              sort: [
+                {
+                  [String(sortBy)]: {
+                    order: sortDirection,
+                  },
+                },
+              ],
+            }),
         size: 500,
         _source: {
           includes: [

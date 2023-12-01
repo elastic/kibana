@@ -7,16 +7,21 @@
  */
 
 import React from 'react';
+import * as t from 'io-ts';
 import { createRouter } from '@kbn/typed-react-router-config';
 import { SettingsPage } from './components/settings_page';
 
-/**
- * The array of route definitions to be used when the application
- * creates the routes.
- */
+const Tabs = t.union([t.literal('settings'), t.literal('knowledge_base'), t.undefined]);
+export type TabsRt = t.TypeOf<typeof Tabs>;
+
 const aIAssistantManagementObservabilityRoutes = {
   '/': {
     element: <SettingsPage />,
+    params: t.type({
+      query: t.partial({
+        tab: Tabs,
+      }),
+    }),
   },
 };
 

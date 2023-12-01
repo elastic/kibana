@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  Criteria,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -25,31 +26,16 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { useAppContext } from '../../context/app_context';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
-import { useAppContext } from '../../context/app_context';
 
 export function KnowledgeBaseTab() {
-  const [selectedCategory, setSelectedCategory] = useState<
-    KnowledgeBaseEntryCategory | undefined
-  >();
-
   const { uiSettings } = useAppContext();
   const dateFormat = uiSettings.get('dateFormat');
-
-  const [flyoutOpenType, setFlyoutOpenType] = useState<
-    'singleEntry' | 'bulkImport' | 'category' | undefined
-  >();
-
-  const [newEntryPopoverOpen, setNewEntryPopoverOpen] = useState(false);
-
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const { entries = [], isLoading, refetch } = useGetKnowledgeBaseEntries(searchQuery);
-  const categories = categorizeEntries({ entries });
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
     {
@@ -68,6 +54,7 @@ export function KnowledgeBaseTab() {
       render: (category: KnowledgeBaseEntryCategory) => {
         return (
           <EuiButtonIcon
+            data-test-subj="pluginsColumnsButton"
             onClick={() => setSelectedCategory(category)}
             aria-label={
               category.categoryName === selectedCategory?.categoryName ? 'Collapse' : 'Expand'
@@ -102,6 +89,7 @@ export function KnowledgeBaseTab() {
       name: i18n.translate('aiAssistantManagementObservability.kbTab.columns.name', {
         defaultMessage: 'Name',
       }),
+      sortable: true,
     },
     {
       name: i18n.translate('aiAssistantManagementObservability.kbTab.columns.numberOfEntries', {
@@ -109,15 +97,10 @@ export function KnowledgeBaseTab() {
       }),
       width: '140px',
       render: (category: KnowledgeBaseEntryCategory) => {
-        if (
-          category.entries.length === 1 &&
-          (category.entries[0].role === 'user_entry' ||
-            category.entries[0].role === 'assistant_summarization')
-        ) {
-          return null;
+        if (category.entries.length > 1 && category.entries[0].role === 'elastic') {
+          return <EuiBadge>{category.entries.length}</EuiBadge>;
         }
-
-        return <EuiBadge>{category.entries.length}</EuiBadge>;
+        return null;
       },
     },
     {
@@ -174,12 +157,47 @@ export function KnowledgeBaseTab() {
     },
   ];
 
+  const [selectedCategory, setSelectedCategory] = useState<
+    KnowledgeBaseEntryCategory | undefined
+  >();
+
+  const [flyoutOpenType, setFlyoutOpenType] = useState<
+    'singleEntry' | 'bulkImport' | 'category' | undefined
+  >();
+
+  const [newEntryPopoverOpen, setNewEntryPopoverOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'doc_id' | '@timestamp'>('doc_id');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const {
+    entries = [],
+    isLoading,
+    refetch,
+  } = useGetKnowledgeBaseEntries({ query, sortBy, sortDirection });
+  const categories = categorizeEntries({ entries });
+
+  const handleChangeSort = ({
+    sort,
+  }: Criteria<KnowledgeBaseEntryCategory & KnowledgeBaseEntry>) => {
+    if (sort) {
+      const { field, direction } = sort;
+      if (field === '@timestamp') {
+        setSortBy(field);
+      }
+      if (field === 'categoryName') {
+        setSortBy('doc_id');
+      }
+      setSortDirection(direction);
+    }
+  };
+
   const handleClickNewEntry = () => {
     setNewEntryPopoverOpen(true);
   };
 
   const handleChangeQuery = (e: React.ChangeEvent<HTMLInputElement> | undefined) => {
-    setSearchQuery(e?.currentTarget.value || '');
+    setQuery(e?.currentTarget.value || '');
   };
 
   return (
@@ -189,12 +207,13 @@ export function KnowledgeBaseTab() {
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow>
               <EuiFieldSearch
+                data-test-subj="knowledgeBaseTabFieldSearch"
                 fullWidth
                 placeholder={i18n.translate(
                   'aiAssistantManagementObservability.knowledgeBaseTab.euiFieldSearch.searchThisLabel',
                   { defaultMessage: 'Search for an entry' }
                 )}
-                value={searchQuery}
+                value={query}
                 onChange={handleChangeQuery}
                 isClearable
                 aria-label={i18n.translate(
@@ -204,7 +223,12 @@ export function KnowledgeBaseTab() {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton color="success" iconType="refresh" onClick={() => refetch()}>
+              <EuiButton
+                data-test-subj="knowledgeBaseTabReloadButton"
+                color="success"
+                iconType="refresh"
+                onClick={() => refetch()}
+              >
                 {i18n.translate(
                   'aiAssistantManagementObservability.knowledgeBaseTab.reloadButtonLabel',
                   { defaultMessage: 'Reload' }
@@ -218,6 +242,7 @@ export function KnowledgeBaseTab() {
                 button={
                   <EuiButton
                     fill
+                    data-test-subj="knowledgeBaseNewEntryButton"
                     iconSide="right"
                     iconType="arrowDown"
                     onClick={handleClickNewEntry}
@@ -237,6 +262,7 @@ export function KnowledgeBaseTab() {
                     <EuiContextMenuItem
                       key="singleEntry"
                       icon="document"
+                      data-test-subj="knowledgeBaseSingleEntryContextMenuItem"
                       onClick={() => {
                         setNewEntryPopoverOpen(false);
                         setFlyoutOpenType('singleEntry');
@@ -251,6 +277,7 @@ export function KnowledgeBaseTab() {
                     <EuiContextMenuItem
                       key="bulkImport"
                       icon="documents"
+                      data-test-subj="knowledgeBaseBulkImportContextMenuItem"
                       onClick={() => {
                         setNewEntryPopoverOpen(false);
                         setFlyoutOpenType('bulkImport');
@@ -270,12 +297,20 @@ export function KnowledgeBaseTab() {
 
         <EuiFlexItem grow={false}>
           <EuiBasicTable<KnowledgeBaseEntryCategory>
+            data-test-subj="knowledgeBaseTable"
             columns={columns}
             items={categories}
             loading={isLoading}
+            sorting={{
+              sort: {
+                field: sortBy === 'doc_id' ? 'categoryName' : sortBy,
+                direction: sortDirection,
+              },
+            }}
             rowProps={(row) => ({
               onClick: () => setSelectedCategory(row),
             })}
+            onChange={handleChangeSort}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

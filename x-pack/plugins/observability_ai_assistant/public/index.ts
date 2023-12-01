@@ -16,6 +16,7 @@ import type {
   ConfigSchema,
   ObservabilityAIAssistantService,
 } from './types';
+export { mockService as mockObservabilityAIAssistantService } from './utils/storybook_decorator';
 
 export const ContextualInsight = withSuspense(
   lazy(() => import('./components/insight/insight').then((m) => ({ default: m.Insight })))
@@ -42,7 +43,7 @@ export {
   useObservabilityAIAssistantOptional,
 } from './hooks/use_observability_ai_assistant';
 
-export type { Conversation, Message } from '../common';
+export type { Conversation, Message, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../common';
 export { MessageRole } from '../common';
 
 export type {

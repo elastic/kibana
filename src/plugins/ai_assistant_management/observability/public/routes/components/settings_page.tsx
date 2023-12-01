@@ -9,17 +9,20 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
 import { useAppContext } from '../../context/app_context';
 import { SettingsTab } from './settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
-
+import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
+import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
+import type { TabsRt } from '../config';
 export function SettingsPage() {
   const { navigateToApp, serverless, setBreadcrumbs } = useAppContext();
 
-  const { search } = useLocation();
-  const searchParams = new URLSearchParams(search);
-  const selectedTab = searchParams.get('tab');
+  const router = useObservabilityAIAssistantManagementRouter();
+
+  const {
+    query: { tab },
+  } = useObservabilityAIAssistantManagementRouterParams('/');
 
   useEffect(() => {
     if (serverless) {
@@ -53,7 +56,7 @@ export function SettingsPage() {
     }
   }, [navigateToApp, serverless, setBreadcrumbs]);
 
-  const tabs = [
+  const tabs: Array<{ id: TabsRt; name: string; content: JSX.Element }> = [
     {
       id: 'settings',
       name: i18n.translate('aiAssistantManagementObservability.settingsPage.settingsLabel', {
@@ -70,14 +73,15 @@ export function SettingsPage() {
     },
   ];
 
-  const [selectedTabId, setSelectedTabId] = useState(
-    selectedTab ? tabs.find((tab) => tab.id === selectedTab)?.id : tabs[0].id
+  const [selectedTabId, setSelectedTabId] = useState<TabsRt>(
+    tab ? tabs.find((t) => t.id === tab)?.id : tabs[0].id
   );
 
   const selectedTabContent = tabs.find((obj) => obj.id === selectedTabId)?.content;
 
-  const onSelectedTabChanged = (id: string) => {
+  const onSelectedTabChanged = (id: TabsRt) => {
     setSelectedTabId(id);
+    router.push('/', { path: '/', query: { tab: id } });
   };
 
   return (
@@ -93,13 +97,13 @@ export function SettingsPage() {
       <EuiSpacer size="m" />
 
       <EuiTabs>
-        {tabs.map((tab, index) => (
+        {tabs.map((t, index) => (
           <EuiTab
             key={index}
-            onClick={() => onSelectedTabChanged(tab.id)}
-            isSelected={tab.id === selectedTabId}
+            onClick={() => onSelectedTabChanged(t.id)}
+            isSelected={t.id === selectedTabId}
           >
-            {tab.name}
+            {t.name}
           </EuiTab>
         ))}
       </EuiTabs>

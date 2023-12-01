@@ -50,6 +50,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
     createEntry({
       entry: {
         id: newEntryId,
+        doc_id: newEntryId,
         text: newEntryText,
       },
     }).then(onClose);
@@ -62,7 +63,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
 
   return (
     <EuiFlyout onClose={onClose}>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder data-test-subj="knowledgeBaseManualEntryFlyout">
         <EuiTitle>
           <h2>
             {!entry
@@ -93,6 +94,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
             )}
           >
             <EuiFieldText
+              data-test-subj="knowledgeBaseEditManualEntryFlyoutFieldText"
               fullWidth
               value={newEntryId}
               onChange={(e) => setNewEntryId(e.target.value)}
@@ -111,6 +113,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="knowledgeBaseEditManualEntryFlyoutDeleteEntryButton"
                 color="danger"
                 iconType="trash"
                 isLoading={isDeleting}
@@ -155,7 +158,11 @@ export function KnowledgeBaseEditManualEntryFlyout({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty disabled={isLoading} onClick={onClose}>
+            <EuiButtonEmpty
+              data-test-subj="knowledgeBaseEditManualEntryFlyoutCancelButton"
+              disabled={isLoading}
+              onClick={onClose}
+            >
               {i18n.translate(
                 'aiAssistantManagementObservability.knowledgeBaseNewManualEntryFlyout.cancelButtonEmptyLabel',
                 { defaultMessage: 'Cancel' }
@@ -163,7 +170,12 @@ export function KnowledgeBaseEditManualEntryFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill isLoading={isLoading} onClick={handleSubmitNewEntryClick}>
+            <EuiButton
+              data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"
+              fill
+              isLoading={isLoading}
+              onClick={handleSubmitNewEntryClick}
+            >
               {i18n.translate(
                 'aiAssistantManagementObservability.knowledgeBaseNewManualEntryFlyout.saveButtonLabel',
                 { defaultMessage: 'Save' }

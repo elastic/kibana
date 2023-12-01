@@ -79,7 +79,10 @@ export function SettingsTab() {
           >
             <EuiFormRow fullWidth>
               <div css={{ textAlign: 'right' }}>
-                <EuiButton onClick={handleNavigateToSpacesConfiguration}>
+                <EuiButton
+                  data-test-subj="settingsTabGoToSpacesButton"
+                  onClick={handleNavigateToSpacesConfiguration}
+                >
                   {i18n.translate(
                     'aiAssistantManagementObservability.settingsPage.goToFeatureControlsButtonLabel',
                     { defaultMessage: 'Go to Spaces' }
@@ -117,7 +120,10 @@ export function SettingsTab() {
           >
             <EuiFormRow fullWidth>
               <div css={{ textAlign: 'right' }}>
-                <EuiButton onClick={handleNavigateToConnectors}>
+                <EuiButton
+                  data-test-subj="settingsTabGoToConnectorsButton"
+                  onClick={handleNavigateToConnectors}
+                >
                   {i18n.translate(
                     'aiAssistantManagementObservability.settingsPage.goToConnectorsButtonLabel',
                     {
@@ -157,7 +163,8 @@ export function SettingsTab() {
               )}
             >
               <EuiSelect
-                id={'generativeAIProvider'}
+                data-test-subj="settingsTabSelect"
+                id="generativeAIProvider"
                 options={selectorOptions}
                 value={selectedConnector}
                 onChange={(e) => {

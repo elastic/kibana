@@ -31,7 +31,7 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
     properties: {
       '@timestamp': date,
       id: keyword,
-      doc_id: text,
+      doc_id: { type: 'text', fielddata: true },
       user: {
         properties: {
           id: keyword,

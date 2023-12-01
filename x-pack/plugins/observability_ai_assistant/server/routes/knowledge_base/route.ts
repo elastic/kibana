@@ -60,12 +60,11 @@ const getKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     tags: ['access:ai_assistant'],
   },
   params: t.type({
-    query: t.union([
-      t.type({
-        query: t.string,
-      }),
-      t.undefined,
-    ]),
+    query: t.type({
+      query: t.string,
+      sortBy: t.string,
+      sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+    }),
   }),
   handler: async (
     resources
@@ -78,7 +77,9 @@ const getKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return await client.getKnowledgeBaseEntries(resources.params.query?.query);
+    const { query, sortBy, sortDirection } = resources.params.query;
+
+    return await client.getKnowledgeBaseEntries({ query, sortBy, sortDirection });
   },
 });
 

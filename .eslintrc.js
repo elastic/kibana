@@ -921,6 +921,7 @@ module.exports = {
         'x-pack/plugins/profiling/**/*.tsx',
         'x-pack/plugins/synthetics/**/*.tsx',
         'x-pack/plugins/ux/**/*.tsx',
+        'src/plugins/ai_assistant_management/**/*.tsx',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',

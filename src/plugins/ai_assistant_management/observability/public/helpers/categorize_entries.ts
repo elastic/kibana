@@ -9,6 +9,7 @@
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 
 export interface KnowledgeBaseEntryCategory {
+  '@timestamp': string;
   categoryName: string;
   entries: KnowledgeBaseEntry[];
 }
@@ -23,7 +24,7 @@ export function categorizeEntries({ entries }: { entries: KnowledgeBaseEntry[] }
       acc[index].entries.push(entry);
       return acc;
     } else {
-      return acc.concat({ categoryName, entries: [entry] });
+      return acc.concat({ categoryName, entries: [entry], '@timestamp': entry['@timestamp'] });
     }
-  }, [] as Array<{ categoryName: string; entries: KnowledgeBaseEntry[] }>);
+  }, [] as Array<{ categoryName: string; entries: KnowledgeBaseEntry[]; '@timestamp': string }>);
 }

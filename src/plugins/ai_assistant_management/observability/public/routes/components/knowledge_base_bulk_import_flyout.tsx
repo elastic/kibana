@@ -78,16 +78,11 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
       );
     }
 
-    try {
-      await mutateAsync({ entries });
-      onClose();
-    } catch (_) {
-      // Error toast should be displayed by the React Query hook.
-    }
+    mutateAsync({ entries }).then(onClose);
   };
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj="knowledgeBaseBulkImportFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>
@@ -168,7 +163,11 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty disabled={isLoading} onClick={onClose}>
+            <EuiButtonEmpty
+              data-test-subj="knowledgeBaseBulkImportFlyoutCancelButton"
+              disabled={isLoading}
+              onClick={onClose}
+            >
               {i18n.translate(
                 'aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.cancelButtonEmptyLabel',
                 { defaultMessage: 'Cancel' }
@@ -176,7 +175,12 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill isLoading={isLoading} onClick={handleSubmitNewEntryClick}>
+            <EuiButton
+              data-test-subj="knowledgeBaseBulkImportFlyoutSaveButton"
+              fill
+              isLoading={isLoading}
+              onClick={handleSubmitNewEntryClick}
+            >
               {i18n.translate(
                 'aiAssistantManagementObservability.knowledgeBaseBulkImportFlyout.saveButtonLabel',
                 { defaultMessage: 'Save' }

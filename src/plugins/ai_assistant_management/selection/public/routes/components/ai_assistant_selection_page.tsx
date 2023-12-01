@@ -56,7 +56,7 @@ export function AiAssistantSelectionPage() {
           'aiAssistantManagementSelection.aiAssistantSettingsPage.descriptionTextLabel',
           {
             defaultMessage:
-              'An automated online assistant is a program that uses artificial intelligence to provide customer service or other assistance on a website.',
+              'AI Assistants use generative AI to help your team by explaining errors, suggesting remediation, and helping you request, analyze, and visualize your data.',
           }
         )}
       </EuiText>
@@ -86,6 +86,7 @@ export function AiAssistantSelectionPage() {
                   </>
                 ) : null}
                 <EuiLink
+                  data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
                   external
                   target="_blank"
                   href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"

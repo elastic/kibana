@@ -414,8 +414,16 @@ export class ObservabilityAIAssistantClient {
     await this.dependencies.knowledgeBaseService.addEntries({ operations });
   };
 
-  getKnowledgeBaseEntries = async (query: string | undefined) => {
-    return this.dependencies.knowledgeBaseService.getEntries(query);
+  getKnowledgeBaseEntries = async ({
+    query,
+    sortBy,
+    sortDirection,
+  }: {
+    query: string;
+    sortBy: string;
+    sortDirection: 'asc' | 'desc';
+  }) => {
+    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
   };
 
   deleteKnowledgeBaseEntry = async (id: string) => {
