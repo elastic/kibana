@@ -25,5 +25,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/security-plugin-types-common",
     "@kbn/mock-idp-utils",
+    "@kbn/cloud-plugin",
   ]
 }
