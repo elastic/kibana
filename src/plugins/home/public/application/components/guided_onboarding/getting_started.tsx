@@ -291,7 +291,7 @@ export const GettingStarted = () => {
         {setGuideFilters}
         <EuiSpacer size="xxl" />
         {setGuideCards}
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xxl" />
         <div className="eui-textCenter">
           {/* data-test-subj used for FS tracking */}
           <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
