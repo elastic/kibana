@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
@@ -45,7 +46,7 @@ export const BreakdownFieldSelector = ({
   const [searchTerm, setSearchTerm] = useState<string>();
 
   const fieldOptions: SelectableEntry[] = useMemo(() => {
-    const options = dataView.fields
+    const options: SelectableEntry[] = dataView.fields
       .filter(fieldSupportsBreakdown)
       .map((field) => ({
         key: field.name,
@@ -55,6 +56,17 @@ export const BreakdownFieldSelector = ({
           breakdown?.field?.name === field.name
             ? ('on' as EuiSelectableOption['checked'])
             : undefined,
+        prepend: (
+          <span
+            css={css`
+              .euiToken {
+                vertical-align: middle;
+              }
+            `}
+          >
+            <FieldIcon {...getFieldIconProps(field)} />
+          </span>
+        ),
       }))
       .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 
