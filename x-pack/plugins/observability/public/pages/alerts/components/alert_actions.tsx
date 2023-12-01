@@ -21,7 +21,7 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { ALERT_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { AlertActionsProps as CustomActionsProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/row_actions/types';
+import { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/row_actions/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths } from '../../../../common/locators/paths';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
@@ -31,7 +31,7 @@ import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..'
 import type { ConfigSchema } from '../../../plugin';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
 
-export interface AlertActionsProps extends CustomActionsProps {
+export interface ObservabilityAlertActionsProps extends AlertActionsProps {
   config: ConfigSchema;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }
@@ -40,7 +40,7 @@ export function AlertActions({
   config,
   observabilityRuleTypeRegistry,
   ...customActionsProps
-}: AlertActionsProps) {
+}: ObservabilityAlertActionsProps) {
   const { alert, refresh } = customActionsProps;
   const {
     cases: {
