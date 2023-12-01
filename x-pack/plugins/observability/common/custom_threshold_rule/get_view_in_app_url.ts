@@ -34,7 +34,7 @@ export const getViewInAppUrl = (
   const isOneCountConditionWithFilter =
     metrics.length === 1 && metrics[0].aggType === 'count' && metrics[0].filter;
   if (filter && isOneCountConditionWithFilter) {
-    query.query = filter + ' and ' + metrics[0].filter;
+    query.query = `${filter} and ${metrics[0].filter}`;
   } else if (isOneCountConditionWithFilter) {
     query.query = metrics[0].filter!;
   } else if (filter) {
