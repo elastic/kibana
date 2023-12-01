@@ -17,7 +17,10 @@ import { serviceNowCommonFields, serviceNowChoices } from './mocks';
 import { snExternalServiceConfig } from './config';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-jest.mock('axios');
+jest.mock('axios', () => ({
+  create: jest.fn(),
+  AxiosError: jest.requireActual('axios').AxiosError,
+}));
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
   const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {

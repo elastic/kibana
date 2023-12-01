@@ -43,12 +43,12 @@ const createErrorMessage = (errorResponse?: ServiceNowError): string => {
 };
 
 export const createServiceError = (error: ResponseError, message: string): AxiosError => {
-  const serviceError = new Error(
+  const serviceError = new AxiosError(
     getErrorMessage(
       i18n.SERVICENOW,
       `${message}. Error: ${error.message} Reason: ${createErrorMessage(error.response?.data)}`
     )
-  ) as AxiosError;
+  );
 
   serviceError.code = error.code;
   serviceError.config = error.config;
