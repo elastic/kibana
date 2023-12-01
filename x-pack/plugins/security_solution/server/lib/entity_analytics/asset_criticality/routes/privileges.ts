@@ -4,19 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ASSET_CRITICALITY_URL, APP_ID } from '../../../../../common/constants';
+import { ASSET_CRITICALITY_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
-export const assetCriticalityGetRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+import { getUserAssetCriticalityPrivileges } from '../get_user_asset_criticality_privileges';
+
+import type { StartPlugins } from '../../../../plugin';
+export const assetCriticalityPrivilegesRoute = (
+  router: SecuritySolutionPluginRouter,
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  logger: Logger
+) => {
   router.versioned
     .get({
       access: 'internal',
-      path: ASSET_CRITICALITY_URL,
+      path: ASSET_CRITICALITY_PRIVILEGES_URL,
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
@@ -24,36 +31,25 @@ export const assetCriticalityGetRoute = (router: SecuritySolutionPluginRouter, l
     .addVersion(
       {
         version: '1',
-        validate: {
-          request: {
-            query: buildRouteValidationWithZod(AssetCriticalityRecordIdParts),
-          },
-        },
+        validate: false,
       },
       async (context, request, response) => {
+        await checkAndInitAssetCriticalityResources(context, logger);
         const siemResponse = buildSiemResponse(response);
+
+        const [_, { security }] = await getStartServices();
+        const body = await getUserAssetCriticalityPrivileges(request, security);
+
         try {
-          await checkAndInitAssetCriticalityResources(context, logger);
-
-          const securitySolution = await context.securitySolution;
-          const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
-          const record = await assetCriticalityClient.get({
-            idField: request.query.id_field,
-            idValue: request.query.id_value,
+          return response.ok({
+            body,
           });
-
-          if (!record) {
-            return response.notFound();
-          }
-
-          return response.ok({ body: record });
         } catch (e) {
           const error = transformError(e);
 
           return siemResponse.error({
             statusCode: error.statusCode,
-            body: { message: error.message, full_error: JSON.stringify(e) },
-            bypassErrorFormat: true,
+            body: error.message,
           });
         }
       }

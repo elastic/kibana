@@ -73,6 +73,7 @@ import {
   assetCriticalityUpsertRoute,
   assetCriticalityGetRoute,
   assetCriticalityDeleteRoute,
+  assetCriticalityPrivilegesRoute,
 } from '../lib/entity_analytics/asset_criticality/routes';
 
 export const initRoutes = (
@@ -173,5 +174,6 @@ export const initRoutes = (
     assetCriticalityUpsertRoute(router, logger);
     assetCriticalityGetRoute(router, logger);
     assetCriticalityDeleteRoute(router, logger);
+    assetCriticalityPrivilegesRoute(router, getStartServices, logger);
   }
 };

@@ -10,6 +10,10 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 import { ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES } from '../../../../common/asset_criticality';
 
+const mutableIndexPrivileges = JSON.parse(
+  JSON.stringify(ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES)
+);
+
 export const getUserAssetCriticalityPrivileges = async (
   request: KibanaRequest,
   security: SecurityPluginStart
@@ -20,7 +24,7 @@ export const getUserAssetCriticalityPrivileges = async (
     privilegesToCheck: {
       elasticsearch: {
         cluster: [],
-        index: ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES,
+        index: mutableIndexPrivileges,
       },
     },
   });

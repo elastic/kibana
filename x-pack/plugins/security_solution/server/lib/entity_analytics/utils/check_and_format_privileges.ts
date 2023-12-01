@@ -46,8 +46,13 @@ export async function checkAndFormatPrivileges({
   return {
     privileges: {
       elasticsearch: {
-        cluster: clusterPrivilegesByPrivilege,
         index: indexPrivilegesByIndex,
+        // only add cluster privileges if there are any
+        ...(Object.keys(clusterPrivilegesByPrivilege).length > 0
+          ? {
+              cluster: clusterPrivilegesByPrivilege,
+            }
+          : {}),
       },
     },
     has_all_required: hasAllRequested,

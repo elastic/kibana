@@ -13,6 +13,9 @@ import {
 } from '../../../../common/risk_engine';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 
+const mutableClusterPrivileges = [...RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES];
+const mutableIndexPrivileges = JSON.parse(JSON.stringify(RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES));
+
 export const getUserRiskEnginePrivileges = async (
   request: KibanaRequest,
   security: SecurityPluginStart
@@ -22,8 +25,8 @@ export const getUserRiskEnginePrivileges = async (
     security,
     privilegesToCheck: {
       elasticsearch: {
-        cluster: RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
-        index: RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
+        cluster: mutableClusterPrivileges,
+        index: mutableIndexPrivileges,
       },
     },
   });

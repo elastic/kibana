@@ -7,6 +7,6 @@
 
 export const ASSET_CRITICALITY_INDEX_PATTERN = '.asset-criticality.asset-criticality-*';
 
-export const ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES = Object.freeze({
+export const ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES = {
   [ASSET_CRITICALITY_INDEX_PATTERN]: ['read', 'write'],
-});
+} as const;
