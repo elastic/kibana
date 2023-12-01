@@ -31,7 +31,7 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
             />
             <span css={calloutTitleStyles}>
               <FormattedMessage
-                id="xpack.securitySolutionServerless.getStarted.viewDashboard.addIntegrationCallout.description"
+                id="xpack.securitySolutionServerless.getStarted.addIntegrationCallout.description"
                 defaultMessage="To {stepName} {addIntegration} first"
                 values={{
                   addIntegration: (
