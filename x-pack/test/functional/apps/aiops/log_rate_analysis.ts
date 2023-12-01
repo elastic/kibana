@@ -149,12 +149,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       }
 
       // Wait for the analysis to finish
-      await aiops.logRateAnalysisPage.assertAnalysisComplete(testData.analysisType);
+      await aiops.logRateAnalysisPage.assertAnalysisComplete(
+        testData.analysisType,
+        testData.dataGenerator
+      );
 
       // At this stage the baseline and deviation brush position should be stored in
       // the url state and a full browser refresh should restore the analysis.
       await browser.refresh();
-      await aiops.logRateAnalysisPage.assertAnalysisComplete(testData.analysisType);
+      await aiops.logRateAnalysisPage.assertAnalysisComplete(
+        testData.analysisType,
+        testData.dataGenerator
+      );
 
       // The group switch should be disabled by default
       await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
@@ -167,8 +173,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const analysisGroupsTable =
           await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
-        expect(orderBy(analysisGroupsTable, 'group')).to.be.eql(
-          orderBy(testData.expected.analysisGroupsTable, 'group')
+
+        const actualAnalysisGroupsTable = orderBy(analysisGroupsTable, 'group');
+        const expectedAnalysisGroupsTable = orderBy(testData.expected.analysisGroupsTable, 'group');
+
+        expect(actualAnalysisGroupsTable).to.be.eql(
+          expectedAnalysisGroupsTable,
+          `Expected analysis groups table to be ${JSON.stringify(
+            expectedAnalysisGroupsTable
+          )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
         );
 
         await ml.testExecution.logTestStep('expand table row');
@@ -177,8 +190,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
           const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
-          expect(orderBy(analysisTable, ['fieldName', 'fieldValue'])).to.be.eql(
-            orderBy(testData.expected.analysisTable, ['fieldName', 'fieldValue'])
+
+          const actualAnalysisTable = orderBy(analysisTable, ['fieldName', 'fieldValue']);
+          const expectedAnalysisTable = orderBy(testData.expected.analysisTable, [
+            'fieldName',
+            'fieldValue',
+          ]);
+
+          expect(actualAnalysisTable).to.be.eql(
+            expectedAnalysisTable,
+            `Expected analysis table results to be ${JSON.stringify(
+              expectedAnalysisTable
+            )}, got ${JSON.stringify(actualAnalysisTable)}`
           );
         }
 
@@ -206,8 +229,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
             const filteredAnalysisGroupsTable =
               await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
-            expect(orderBy(filteredAnalysisGroupsTable, 'group')).to.be.eql(
-              orderBy(testData.expected.filteredAnalysisGroupsTable, 'group')
+
+            const actualFilteredAnalysisGroupsTable = orderBy(filteredAnalysisGroupsTable, 'group');
+            const expectedFilteredAnalysisGroupsTable = orderBy(
+              testData.expected.filteredAnalysisGroupsTable,
+              'group'
+            );
+
+            expect(actualFilteredAnalysisGroupsTable).to.be.eql(
+              expectedFilteredAnalysisGroupsTable,
+              `Expected filtered analysis groups table to be ${JSON.stringify(
+                expectedFilteredAnalysisGroupsTable
+              )}, got ${JSON.stringify(actualFilteredAnalysisGroupsTable)}`
             );
           }
         }

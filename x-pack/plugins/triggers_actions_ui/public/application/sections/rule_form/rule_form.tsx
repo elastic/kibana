@@ -920,8 +920,16 @@ export const RuleForm = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.tagsFieldLabel', {
-              defaultMessage: 'Tags (optional)',
+              defaultMessage: 'Tags',
             })}
+            labelAppend={
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleForm.tagsFieldOptional"
+                  defaultMessage="Optional"
+                />
+              </EuiText>
+            }
           >
             <EuiComboBox
               noSuggestions
