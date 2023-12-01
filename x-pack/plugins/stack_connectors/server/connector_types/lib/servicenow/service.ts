@@ -279,7 +279,7 @@ export const createExternalService: ServiceFactory = ({
 
   const closeIncident = async (params: ExternalServiceParamsClose) => {
     try {
-      const { correlationId, incidentId, closeNotes } = params;
+      const { correlationId, incidentId } = params;
       let incidentToBeClosed = null;
 
       if (correlationId == null && incidentId == null) {
@@ -318,7 +318,7 @@ export const createExternalService: ServiceFactory = ({
         incident: {
           state: '7', // used for "closed" status in serviceNow
           close_code: 'Closed/Resolved by Caller',
-          close_notes: closeNotes ?? 'Closed by Caller',
+          close_notes: 'Closed by Caller',
         },
       });
 

@@ -154,7 +154,6 @@ const closeIncident = async ({
   return await service.closeIncident({
     incidentId: incidentId ?? null,
     correlationId: correlationId ?? null,
-    closeNotes: 'sample close notes',
   });
 };
 
@@ -983,7 +982,7 @@ describe('ServiceNow service', () => {
             elastic_incident_id: '1',
             u_close_code: 'Closed/Resolved by Caller',
             u_state: '7',
-            u_close_notes: 'sample close notes',
+            u_close_notes: 'Closed by Caller',
           },
         });
 
@@ -1048,7 +1047,7 @@ describe('ServiceNow service', () => {
             elastic_incident_id: '1',
             u_close_code: 'Closed/Resolved by Caller',
             u_state: '7',
-            u_close_notes: 'sample close notes',
+            u_close_notes: 'Closed by Caller',
           },
         });
 
@@ -1065,7 +1064,7 @@ describe('ServiceNow service', () => {
 
       test('it should throw an error when the incidentId and correlation Id are null', async () => {
         await expect(
-          service.closeIncident({ incidentId: null, correlationId: null, closeNotes: null })
+          service.closeIncident({ incidentId: null, correlationId: null })
         ).rejects.toThrow(
           '[Action][ServiceNow]: Unable to close incident. Error: No correlationId or incidentId found. Reason: unknown: errorResponse was null'
         );
@@ -1084,7 +1083,6 @@ describe('ServiceNow service', () => {
         const res = await service.closeIncident({
           incidentId: 'xyz',
           correlationId: null,
-          closeNotes: null,
         });
 
         expect(requestMock).toHaveBeenCalledTimes(1);
@@ -1108,7 +1106,7 @@ describe('ServiceNow service', () => {
           },
         }));
 
-        await service.closeIncident({ incidentId: '1', correlationId: null, closeNotes: null });
+        await service.closeIncident({ incidentId: '1', correlationId: null });
 
         expect(requestMock).toHaveBeenCalledTimes(1);
         expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1128,7 +1126,6 @@ describe('ServiceNow service', () => {
         const res = await service.closeIncident({
           incidentId: null,
           correlationId: 'bar',
-          closeNotes: null,
         });
 
         expect(requestMock).toHaveBeenCalledTimes(1);
@@ -1151,7 +1148,6 @@ describe('ServiceNow service', () => {
           service.closeIncident({
             incidentId: '1',
             correlationId: null,
-            closeNotes: null,
           })
         ).rejects.toThrow(
           'There is an issue with your Service Now Instance. Please check Developer instance.'
@@ -1182,7 +1178,6 @@ describe('ServiceNow service', () => {
         const res = await service.closeIncident({
           incidentId: '1',
           correlationId: null,
-          closeNotes: null,
         });
 
         expect(res).toEqual({
@@ -1212,7 +1207,6 @@ describe('ServiceNow service', () => {
         const res = await service.closeIncident({
           incidentId: '1',
           correlationId: null,
-          closeNotes: null,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(1, {
