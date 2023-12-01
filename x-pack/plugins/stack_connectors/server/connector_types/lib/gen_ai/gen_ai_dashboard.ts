@@ -8,10 +8,28 @@
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { OPENAI_TITLE, OPENAI_CONNECTOR_ID } from '../../../../common/openai/constants';
+import { BEDROCK_TITLE, BEDROCK_CONNECTOR_ID } from '../../../../common/bedrock/constants';
 
-export const dashboardTitle = `OpenAI Token Usage`;
+const getDashboardTitle = (title: string) => `${title} Token Usage`;
 
-export const getDashboard = (dashboardId: string): SavedObject<DashboardAttributes> => {
+export const getDashboard = (
+  genAIProvider: 'OpenAI' | 'Bedrock',
+  dashboardId: string
+): SavedObject<DashboardAttributes> => {
+  const attributes =
+    genAIProvider === 'OpenAI'
+      ? {
+          provider: OPENAI_TITLE,
+          dashboardTitle: getDashboardTitle(OPENAI_TITLE),
+          actionTypeId: OPENAI_CONNECTOR_ID,
+        }
+      : {
+          provider: BEDROCK_TITLE,
+          dashboardTitle: getDashboardTitle(BEDROCK_TITLE),
+          actionTypeId: BEDROCK_CONNECTOR_ID,
+        };
+
   const ids: Record<string, string> = {
     genAiSavedObjectId: dashboardId,
     tokens: uuidv4(),
@@ -20,10 +38,9 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
   };
   return {
     attributes: {
-      description: 'Displays OpenAI token consumption per Kibana user',
+      description: `Displays ${attributes.provider} token consumption per Kibana user`,
       kibanaSavedObjectMeta: {
-        searchSourceJSON:
-          '{"query":{"query":"kibana.saved_objects: { type_id  : \\".gen-ai\\" } ","language":"kuery"},"filter":[]}',
+        searchSourceJSON: `{"query":{"query":"kibana.saved_objects: { type_id  : \\"${attributes.actionTypeId}\\" } ","language":"kuery"},"filter":[]}`,
       },
       optionsJSON:
         '{"useMargins":true,"syncColors":false,"syncCursor":true,"syncTooltips":false,"hidePanelTitles":false}',
@@ -125,7 +142,7 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
                     yLeft: 0,
                     yRight: 0,
                   },
-                  yTitle: 'Sum of OpenAI Completion + Prompt Tokens',
+                  yTitle: `Sum of ${attributes.provider} Completion + Prompt Tokens`,
                   axisTitlesVisibilitySettings: {
                     x: true,
                     yLeft: true,
@@ -133,7 +150,7 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
                   },
                 },
                 query: {
-                  query: 'kibana.saved_objects:{ type_id: ".gen-ai"   }',
+                  query: `kibana.saved_objects:{ type_id: "${attributes.actionTypeId}"   }`,
                   language: 'kuery',
                 },
                 filters: [],
@@ -143,7 +160,7 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
                       '475e8ca0-e78e-454a-8597-a5492f70dce3': {
                         columns: {
                           '0f9814ec-0964-4efa-93a3-c7f173df2483': {
-                            label: 'OpenAI Completion Tokens',
+                            label: `${attributes.provider} Completion Tokens`,
                             dataType: 'number',
                             operationType: 'sum',
                             sourceField: 'kibana.action.execution.gen_ai.usage.completion_tokens',
@@ -192,7 +209,7 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
                             customLabel: true,
                           },
                           'b0e390e4-d754-4eb4-9fcc-4347dadda394': {
-                            label: 'OpenAI Prompt Tokens',
+                            label: `${attributes.provider} Prompt Tokens`,
                             dataType: 'number',
                             operationType: 'sum',
                             sourceField: 'kibana.action.execution.gen_ai.usage.prompt_tokens',
@@ -298,7 +315,7 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
                   ],
                 },
                 query: {
-                  query: 'kibana.saved_objects: { type_id  : ".gen-ai" } ',
+                  query: `kibana.saved_objects: { type_id  : "${attributes.actionTypeId}" } `,
                   language: 'kuery',
                 },
                 filters: [],
@@ -334,7 +351,7 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
                             customLabel: true,
                           },
                           'b0e390e4-d754-4eb4-9fcc-4347dadda394': {
-                            label: 'Sum of OpenAI Total Tokens',
+                            label: `Sum of ${attributes.provider} Total Tokens`,
                             dataType: 'number',
                             operationType: 'sum',
                             sourceField: 'kibana.action.execution.gen_ai.usage.total_tokens',
@@ -392,7 +409,7 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
         },
       ]),
       timeRestore: false,
-      title: dashboardTitle,
+      title: attributes.dashboardTitle,
       version: 1,
     },
     coreMigrationVersion: '8.8.0',

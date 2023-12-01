@@ -39,7 +39,9 @@ const mockServices = {
 const mockDashboard = getDashboard as jest.Mock;
 const mockKibana = useKibana as jest.Mock;
 
-describe('useGetDashboard_function', () => {
+const defaultArgs = { connectorId, selectedProvider: 'OpenAI' };
+
+describe('useGetDashboard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDashboard.mockResolvedValue({ data: { available: true } });
@@ -48,36 +50,45 @@ describe('useGetDashboard_function', () => {
     });
   });
 
-  it('fetches the dashboard and sets the dashboard URL', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard({ connectorId }));
-    await waitForNextUpdate();
-    expect(mockDashboard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        connectorId,
-        dashboardId: 'generative-ai-token-usage-space',
-      })
-    );
-    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-      query: {
-        language: 'kuery',
-        query: `kibana.saved_objects: { id  : ${connectorId} }`,
-      },
-      dashboardId: 'generative-ai-token-usage-space',
-    });
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.dashboardUrl).toBe(
-      'http://localhost:5601/app/dashboards#/view/generative-ai-token-usage-space'
-    );
-  });
+  it.each([
+    ['Azure OpenAI', 'openai'],
+    ['OpenAI', 'openai'],
+    ['Bedrock', 'bedrock'],
+  ])(
+    'fetches the %p dashboard and sets the dashboard URL with %p',
+    async (selectedProvider, urlKey) => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useGetDashboard({ ...defaultArgs, selectedProvider })
+      );
+      await waitForNextUpdate();
+      expect(mockDashboard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId,
+          dashboardId: `generative-ai-token-usage-${urlKey}-space`,
+        })
+      );
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+        query: {
+          language: 'kuery',
+          query: `kibana.saved_objects: { id  : ${connectorId} }`,
+        },
+        dashboardId: `generative-ai-token-usage-${urlKey}-space`,
+      });
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.dashboardUrl).toBe(
+        `http://localhost:5601/app/dashboards#/view/generative-ai-token-usage-${urlKey}-space`
+      );
+    }
+  );
 
   it('handles the case where the dashboard is not available.', async () => {
     mockDashboard.mockResolvedValue({ data: { available: false } });
-    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard({ connectorId }));
+    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard(defaultArgs));
     await waitForNextUpdate();
     expect(mockDashboard).toHaveBeenCalledWith(
       expect.objectContaining({
         connectorId,
-        dashboardId: 'generative-ai-token-usage-space',
+        dashboardId: 'generative-ai-token-usage-openai-space',
       })
     );
     expect(mockGetRedirectUrl).not.toHaveBeenCalled();
@@ -91,7 +102,7 @@ describe('useGetDashboard_function', () => {
       services: { ...mockServices, spaces: null },
     });
 
-    const { result } = renderHook(() => useGetDashboard({ connectorId }));
+    const { result } = renderHook(() => useGetDashboard(defaultArgs));
     expect(mockDashboard).not.toHaveBeenCalled();
     expect(mockGetRedirectUrl).not.toHaveBeenCalled();
     expect(result.current.isLoading).toBe(false);
@@ -99,7 +110,9 @@ describe('useGetDashboard_function', () => {
   });
 
   it('handles the case where connectorId is empty string', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard({ connectorId: '' }));
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useGetDashboard({ ...defaultArgs, connectorId: '' })
+    );
     await waitForNextUpdate();
     expect(mockDashboard).not.toHaveBeenCalled();
     expect(mockGetRedirectUrl).not.toHaveBeenCalled();
@@ -111,7 +124,7 @@ describe('useGetDashboard_function', () => {
     mockKibana.mockReturnValue({
       services: { ...mockServices, dashboard: {} },
     });
-    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard({ connectorId }));
+    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard(defaultArgs));
     await waitForNextUpdate();
     expect(result.current.isLoading).toBe(false);
     expect(result.current.dashboardUrl).toBe(null);
@@ -119,7 +132,7 @@ describe('useGetDashboard_function', () => {
 
   it('correctly handles errors and displays the appropriate toast messages.', async () => {
     mockDashboard.mockRejectedValue(new Error('Error fetching dashboard'));
-    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard({ connectorId }));
+    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard(defaultArgs));
     await waitForNextUpdate();
     expect(result.current.isLoading).toBe(false);
     expect(mockToasts.addDanger).toHaveBeenCalledWith({
