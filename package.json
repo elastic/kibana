@@ -78,7 +78,6 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
-    "globby/fast-glob": "^3.2.11",
     "**/@hello-pangea/dnd": "16.2.0",
     "**/@types/node": "18.18.5",
     "**/@typescript-eslint/utils": "5.62.0",
@@ -87,7 +86,8 @@
     "**/hoist-non-react-statics": "^3.3.2",
     "**/isomorphic-fetch/node-fetch": "^2.6.7",
     "**/remark-parse/trim": "1.0.1",
-    "**/typescript": "4.7.4"
+    "**/typescript": "4.7.4",
+    "globby/fast-glob": "^3.2.11"
   },
   "dependencies": {
     "@appland/sql-parser": "^1.5.1",

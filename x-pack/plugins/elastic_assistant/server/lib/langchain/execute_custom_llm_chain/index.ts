@@ -6,17 +6,17 @@
  */
 
 import { PassThrough, Readable } from 'stream';
+import { HttpResponseOutputParser } from 'langchain/output_parsers';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
-import { createConversationalRetrievalChain } from "../conversational_retrieval_chain/index";
-import { HttpResponseOutputParser } from "langchain/output_parsers";
+import { createConversationalRetrievalChain } from '../conversational_retrieval_chain';
 
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
- * Use an implementation of a ConversationalRetrievalChain to generate 
+ * Use an implementation of a ConversationalRetrievalChain to generate
  * output based on retrieved documents.
  *
  */
@@ -59,15 +59,17 @@ export const callAgentExecutor = async ({
       'Please ensure ELSER is configured to use the Knowledge Base, otherwise disable the Knowledge Base in Advanced Settings to continue.'
     );
   }
-  
+
   // Create a retriever that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
   const retriever = esStore.asRetriever(10);
-  
+
   const chain = createConversationalRetrievalChain({
     model: llm,
     retriever,
   });
-  const chainWithOutputParser = chain.pipe(new HttpResponseOutputParser({ contentType: "text/plain" }));
+  const chainWithOutputParser = chain.pipe(
+    new HttpResponseOutputParser({ contentType: 'text/plain' })
+  );
 
   // // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
@@ -97,10 +99,13 @@ export const callAgentExecutor = async ({
   // });
 
   console.log('WE ARE HERE before stream call');
-  if (typeof latestMessage.content !== "string") {
-    throw new Error("Multimodal messages not supported.");
+  if (typeof latestMessage.content !== 'string') {
+    throw new Error('Multimodal messages not supported.');
   }
-  const stream = await chainWithOutputParser.stream({ question: latestMessage.content, chat_history: pastMessages });
+  const stream = await chainWithOutputParser.stream({
+    question: latestMessage.content,
+    chat_history: pastMessages,
+  });
 
   const readable = Readable.from(stream);
 

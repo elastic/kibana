@@ -1,8 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { ChatPromptTemplate, MessagesPlaceholder } from 'langchain/prompts';
-import {
-  RunnableBranch,
-  RunnableSequence,
-} from 'langchain/runnables';
+import { RunnableBranch, RunnableSequence } from 'langchain/runnables';
 import type { VectorStoreRetriever } from 'langchain/vectorstores/base';
 import type { BaseLanguageModel } from 'langchain/base_language';
 import type { BaseMessage } from 'langchain/schema';
@@ -40,9 +44,9 @@ const ANSWER_HUMAN_TEMPLATE = `Answer the following question to the best of your
 {standalone_question}`;
 
 const answerPrompt = ChatPromptTemplate.fromMessages([
-  ["system", ANSWER_SYSTEM_TEMPLATE],
-  new MessagesPlaceholder("chat_history"),
-  ["human", ANSWER_HUMAN_TEMPLATE],
+  ['system', ANSWER_SYSTEM_TEMPLATE],
+  new MessagesPlaceholder('chat_history'),
+  ['human', ANSWER_HUMAN_TEMPLATE],
 ]);
 
 const formatDocuments = (docs: Document[]) => {
@@ -50,7 +54,7 @@ const formatDocuments = (docs: Document[]) => {
     .map((doc, i) => {
       return `<doc>\n${doc.pageContent}\n</doc>`;
     })
-    .join("\n");
+    .join('\n');
 };
 
 export function createConversationalRetrievalChain({
@@ -64,13 +68,13 @@ export function createConversationalRetrievalChain({
     (input) => input.standalone_question,
     retriever,
     formatDocuments,
-  ]).withConfig({ runName: "RetrievalChain" });
+  ]).withConfig({ runName: 'RetrievalChain' });
 
   const standaloneQuestionChain = RunnableSequence.from([
     condenseQuestionPrompt,
     model,
     new StringOutputParser(),
-  ]).withConfig({ runName: "RephraseQuestionChain" });
+  ]).withConfig({ runName: 'RephraseQuestionChain' });
 
   const answerChain = RunnableSequence.from([
     {
@@ -80,9 +84,12 @@ export function createConversationalRetrievalChain({
     },
     answerPrompt,
     model,
-  ]).withConfig({ runName: "AnswerGenerationChain" });
+  ]).withConfig({ runName: 'AnswerGenerationChain' });
 
-  const conversationalRetrievalChain = RunnableSequence.from<{question: string, chat_history: BaseMessage[]}>([
+  const conversationalRetrievalChain = RunnableSequence.from<{
+    question: string;
+    chat_history: BaseMessage[];
+  }>([
     {
       // Small optimization - only rephrase if the question is a followup
       standalone_question: RunnableBranch.from([
