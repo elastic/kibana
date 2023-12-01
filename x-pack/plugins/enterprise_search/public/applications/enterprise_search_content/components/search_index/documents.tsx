@@ -26,7 +26,6 @@ import {
   ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
 } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
-import { stripSearchPrefix } from '../../../../../common/utils/strip_search_prefix';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -69,7 +68,7 @@ export const SearchIndexDocuments: React.FC = () => {
   const indexToShow =
     selectedIndexType === 'content-index'
       ? indexName
-      : stripSearchPrefix(indexName, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+      : `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexName}`;
   const mappingLogic = mappingsWithPropsApiLogic(indexToShow);
   const documentLogic = searchDocumentsApiLogic(indexToShow);
 

@@ -259,6 +259,10 @@ export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
 export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
 export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
+export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
+
+export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
+export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
 
 /**
  * Public Risk Score routes
@@ -292,6 +296,7 @@ export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft` as const;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export` as const;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import` as const;
 export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
+export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
@@ -429,6 +434,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.11',
+  TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -449,8 +455,8 @@ export const RISKY_HOSTS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
 export const RISKY_USERS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
-export const DETECTION_ENTITY_DASHBOARD =
-  'https://www.elastic.co/guide/en/security/current/detection-entity-dashboard.html';
+export const RISKY_ENTITY_SCORE_DOC_LINK =
+  'https://www.elastic.co/guide/en/security/current/advanced-entity-analytics-overview.html#entity-risk-scoring';
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 

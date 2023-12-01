@@ -11,7 +11,8 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { PanelContent } from './content';
 import { PanelHeader } from './header';
 
-export const IsolateHostPanelKey: IsolateHostPanelProps['key'] = 'document-details-isolate-host';
+export const DocumentDetailsIsolateHostPanelKey: IsolateHostPanelProps['key'] =
+  'document-details-isolate-host';
 
 export interface IsolateHostPanelProps extends FlyoutPanelProps {
   key: 'document-details-isolate-host';
