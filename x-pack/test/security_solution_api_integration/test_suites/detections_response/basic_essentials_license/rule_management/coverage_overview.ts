@@ -22,7 +22,6 @@ import {
   installPrebuiltRulesAndTimelines,
   installPrebuiltRules,
   getCustomQueryRuleParams,
-  // createNonSecurityRule,
 } from '../../utils';
 import { getCoverageOverview } from '../../utils/rules/get_coverage_overview';
 
@@ -30,37 +29,53 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const alertingApi = getService('alertingApi');
 
   describe('@serverless @ess coverage_overview', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
 
-    // it('does NOT error when there are no security rules', async () => {
-    //   await createNonSecurityRule(supertest);
-    //   const rule1 = await createRule(
-    //     supertest,
-    //     log,
-    //     getCustomQueryRuleParams({ threat: generateThreatArray(1) })
-    //   );
+    it('does NOT error when there are no security rules', async () => {
+      // Creates a non-security type rule
+      await alertingApi.createRule({
+        consumer: 'security',
+        name: 'Threshold rule',
+        ruleTypeId: 'observability.rules.custom_threshold',
+        params: {
+          criteria: [],
+          searchConfiguration: {
+            query: {
+              query: '',
+              language: 'kuery',
+            },
+            index: 'data-view-id',
+          },
+        },
+      });
+      const rule1 = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({ threat: generateThreatArray(1) })
+      );
 
-    //   const body = await getCoverageOverview(supertest);
+      const body = await getCoverageOverview(supertest);
 
-    //   expect(body).to.eql({
-    //     coverage: {
-    //       T001: [rule1.id],
-    //       TA001: [rule1.id],
-    //       'T001.001': [rule1.id],
-    //     },
-    //     unmapped_rule_ids: [],
-    //     rules_data: {
-    //       [rule1.id]: {
-    //         activity: 'disabled',
-    //         name: 'Custom query rule',
-    //       },
-    //     },
-    //   });
-    // });
+      expect(body).to.eql({
+        coverage: {
+          T001: [rule1.id],
+          TA001: [rule1.id],
+          'T001.001': [rule1.id],
+        },
+        unmapped_rule_ids: [],
+        rules_data: {
+          [rule1.id]: {
+            activity: 'disabled',
+            name: 'Custom query rule',
+          },
+        },
+      });
+    });
 
     describe('without filters', () => {
       it('returns an empty response if there are no rules', async () => {
