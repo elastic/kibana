@@ -57,7 +57,7 @@ const formatDocuments = (docs: Document[]) => {
     .join('\n');
 };
 
-export function createConversationalRetrievalChain({
+export function callConversationalRetrievalChain({
   model,
   retriever,
 }: {

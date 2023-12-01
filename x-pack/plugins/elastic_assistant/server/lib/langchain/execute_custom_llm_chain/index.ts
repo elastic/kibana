@@ -11,7 +11,7 @@ import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
-import { createConversationalRetrievalChain } from '../conversational_retrieval_chain';
+import { callConversationalRetrievalChain } from '../conversational_retrieval_chain';
 
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
@@ -63,7 +63,7 @@ export const callAgentExecutor = async ({
   // Create a retriever that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
   const retriever = esStore.asRetriever(10);
 
-  const chain = createConversationalRetrievalChain({
+  const chain = callConversationalRetrievalChain({
     model: llm,
     retriever,
   });
@@ -106,12 +106,21 @@ export const callAgentExecutor = async ({
     question: latestMessage.content,
     chat_history: pastMessages,
   });
-  console.log('WE ARE HERE after stream call', stream);
-  for await (const chunk of stream) {
-    const decoder = new TextDecoder();
-    console.log('WE ARE HERE CHUNK', decoder.decode(chunk));
+
+  async function* generate() {
+    for await (const chunk of stream) {
+      console.log('WE ARE HERE CHUNK', chunk);
+      yield chunk;
+    }
   }
-  const readable = Readable.from(stream);
+
+  const readable = Readable.from(generate());
+  // console.log('WE ARE HERE after stream call', stream);
+  // for await (const chunk of stream) {
+  //   const decoder = new TextDecoder();
+  //   console.log('WE ARE HERE CHUNK', decoder.decode(chunk));
+  // }
+  // const readable = Readable.from(stream);
   console.log('WE ARE HERE after Readable.from', stream);
 
   return readable.pipe(new PassThrough());

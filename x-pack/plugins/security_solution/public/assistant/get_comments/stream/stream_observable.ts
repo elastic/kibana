@@ -70,49 +70,30 @@ export const getStreamObservable = ({
             let nextChunks;
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
-              nextChunks.forEach((chunk: string) => {
-                chunks.push(chunk);
-                observer.next({
-                  chunks,
-                  message: chunks.join(''),
-                  loading: true,
-                });
-              });
             } else {
-              const parsed: {
-                output: string;
-                intermediateSteps: Array<{
-                  observation: string;
-                }>;
-              } = JSON.parse(decoder.decode(value));
-              if (parsed.output) {
-                const output = parsed.output;
-                observer.next({
-                  chunks: [output],
-                  message: output,
-                  loading: false,
-                });
-              } else {
-                const output = parsed.intermediateSteps[0].observation;
-                const lines = output.split('\n');
-                nextChunks = lines;
-                nextChunks.forEach((chunk: string) => {
-                  chunks.push(chunk);
-                  observer.next({
-                    chunks,
-                    message: chunks.join(''),
-                    loading: true,
-                  });
-                });
-              }
+              const output = decoded;
+              // const lines = output.split('\n');
+              nextChunks = [output];
             }
+
+            console.log('nextChunks', nextChunks);
+            nextChunks.forEach((chunk: string) => {
+              chunks.push(chunk);
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: true,
+              });
+            });
           } catch (err) {
+            console.log('err 1', err);
             observer.error(err);
             return;
           }
           readLangChain();
         })
         .catch((err) => {
+          console.log('err 2', err);
           observer.error(err);
         });
     }
