@@ -24,6 +24,7 @@ import {
   getSampleOfDocumentsForNonAggregatableFields,
   isAggregatableFieldOverallStats,
   isNonAggregatableFieldOverallStats,
+  isNonAggregatableSampledDocs,
   NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
@@ -228,7 +229,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
           let sampledNonAggregatableFieldsExamples: Array<{ [key: string]: string }> | undefined;
           value.forEach((resp, idx) => {
-            if (idx === 0 && resp) {
+            if (idx === 0 && isNonAggregatableSampledDocs(resp)) {
               const docs = resp.rawResponse.hits.hits.map((d) =>
                 getProcessedFields(d.fields ?? {})
               );
