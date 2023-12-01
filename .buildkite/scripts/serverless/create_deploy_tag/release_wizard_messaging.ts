@@ -336,7 +336,7 @@ async function sendReleaseSlackAnnouncement({
     selectedCommitHash: targetCommitSha,
   });
 
-  sendSlackMessage({
+  return sendSlackMessage({
     blocks: [
       {
         type: 'section',
@@ -358,8 +358,6 @@ async function sendReleaseSlackAnnouncement({
         },
       },
     ],
-  }).catch((error) => {
-    console.error("Couldn't send slack message.", error);
   });
 }
 

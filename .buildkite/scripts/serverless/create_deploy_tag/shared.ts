@@ -64,13 +64,26 @@ export interface CommitWithStatuses extends GitCommitExtract {
 }
 
 export function sendSlackMessage(payload: any) {
-  if (process.env.DEPLOY_TAGGER_SLACK_WEBHOOK_URL) {
-    return axios.post(
-      process.env.DEPLOY_TAGGER_SLACK_WEBHOOK_URL,
-      typeof payload === 'string' ? payload : JSON.stringify(payload)
-    );
-  } else {
+  if (!process.env.DEPLOY_TAGGER_SLACK_WEBHOOK_URL) {
     console.log('No SLACK_WEBHOOK_URL set, not sending slack message');
     return Promise.resolve();
+  } else {
+    return axios
+      .post(
+        process.env.DEPLOY_TAGGER_SLACK_WEBHOOK_URL,
+        typeof payload === 'string' ? payload : JSON.stringify(payload)
+      )
+      .catch((error) => {
+        if (axios.isAxiosError(error) && error.response) {
+          console.error(
+            "Couldn't send slack message.",
+            error.response.status,
+            error.response.statusText,
+            error.message
+          );
+        } else {
+          console.error("Couldn't send slack message.", error.message);
+        }
+      });
   }
 }
