@@ -10,8 +10,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ASSET_CRITICALITY_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
-import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { getUserAssetCriticalityPrivileges } from '../get_user_asset_criticality_privileges';
 
 import type { StartPlugins } from '../../../../plugin';
