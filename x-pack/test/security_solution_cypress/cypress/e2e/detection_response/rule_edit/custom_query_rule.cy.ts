@@ -63,7 +63,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     deleteConnectors();
     deleteAlertsAndRules();
     login();
-    createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
+    createRule(getExistingRule({ rule_id: 'rule1', enabled: true, interval: '24h' })).then((createdRule) => {
       visitEditRulePage(createdRule.body.id);
     });
   });
