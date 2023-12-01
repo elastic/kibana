@@ -11,7 +11,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AddAndValidateYourDataCardsId, AddIntegrationsSteps } from '../types';
 import { useStepContext } from '../context/step_context';
 import { AddIntegrationCallout } from './add_integration_callout';
-import { ADD_ELASTIC_RULES } from './translations';
+import { ADD_ELASTIC_RULES, ADD_ELASTIC_RULES_CALLOUT_TITLE } from './translations';
 
 const AddElasticRulesButtonComponent = () => {
   const { finishedSteps } = useStepContext();
@@ -20,7 +20,9 @@ const AddElasticRulesButtonComponent = () => {
   ]?.has(AddIntegrationsSteps.connectToDataSources);
   return (
     <>
-      {!isIntegrationsStepComplete && <AddIntegrationCallout stepName={ADD_ELASTIC_RULES} />}
+      {!isIntegrationsStepComplete && (
+        <AddIntegrationCallout stepName={ADD_ELASTIC_RULES_CALLOUT_TITLE} />
+      )}
       <LinkButton
         id={SecurityPageName.rules}
         fill

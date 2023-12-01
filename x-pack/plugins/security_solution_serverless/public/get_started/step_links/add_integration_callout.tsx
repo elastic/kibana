@@ -6,15 +6,15 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiIcon, useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 
-import { css } from '@emotion/react';
 import { ExternalPageName } from '../../navigation/links/constants';
+import { useAddIntegrationCalloutStyles } from '../styles/add_integration_callout.styles';
 
 const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => {
+  const { calloutWrapperStyles, calloutTitleStyles } = useAddIntegrationCalloutStyles();
   const { euiTheme } = useEuiTheme();
-  const backgroundColor = useEuiBackgroundColor('primary');
 
   return (
     <div>
@@ -28,15 +28,7 @@ const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => 
               color={euiTheme.colors.title}
               className="eui-alignMiddle"
             />
-            <span
-              css={css`
-                color: ${euiTheme.colors.title};
-                font-size: ${euiTheme.size.m};
-                font-weight: ${euiTheme.font.weight.regular};
-                line-height: ${euiTheme.base * 1.25}px;
-                margin-left: ${euiTheme.size.xs};
-              `}
-            >
+            <span css={calloutTitleStyles}>
               <FormattedMessage
                 id="xpack.securitySolutionServerless.getStarted.viewDashboard.addIntegrationCallout.description"
                 defaultMessage="To {stepName} {addIntegration} First"
@@ -61,13 +53,7 @@ const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => 
           </>
         }
         size="s"
-        css={css`
-          border-radius: ${euiTheme.border.radius.medium};
-          border: 1px solid ${euiTheme.colors.lightShade};
-          padding: ${euiTheme.size.xs} ${euiTheme.size.m};
-          background-color: ${backgroundColor};
-          margin-top: ${euiTheme.size.base};
-        `}
+        css={calloutWrapperStyles}
       />
     </div>
   );

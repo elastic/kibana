@@ -14,6 +14,13 @@ export const ADD_ELASTIC_RULES = i18n.translate(
   }
 );
 
+export const ADD_ELASTIC_RULES_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.task.addElasticRules.callout.title',
+  {
+    defaultMessage: 'add Elastic rules',
+  }
+);
+
 export const ADD_INTEGRATIONS = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.task.addIntegrations',
   {
@@ -28,9 +35,23 @@ export const VIEW_ALERTS = i18n.translate(
   }
 );
 
-export const VIEW_DASHBOARDS = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.viewDashboards',
+export const VIEW_ALERTS_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.task.viewAlerts.callout.title',
   {
-    defaultMessage: 'View Dashboards',
+    defaultMessage: 'view Alerts',
+  }
+);
+
+export const GO_TO_DASHBOARDS = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.task.goToDashboards',
+  {
+    defaultMessage: 'Go to dashboards',
+  }
+);
+
+export const VIEW_DASHBOARDS_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.task.viewDashboards.callout.title',
+  {
+    defaultMessage: 'view Dashboards',
   }
 );

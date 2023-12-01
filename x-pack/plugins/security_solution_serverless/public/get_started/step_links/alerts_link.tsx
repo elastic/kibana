@@ -18,7 +18,7 @@ import {
   ViewAlertsSteps,
 } from '../types';
 import { AddIntegrationCallout } from './add_integration_callout';
-import { VIEW_ALERTS } from './translations';
+import { VIEW_ALERTS, VIEW_ALERTS_CALLOUT_TITLE } from './translations';
 
 const AlertsButtonComponent = () => {
   const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
@@ -37,7 +37,9 @@ const AlertsButtonComponent = () => {
 
   return (
     <>
-      {!isIntegrationsStepComplete && <AddIntegrationCallout stepName={VIEW_ALERTS} />}
+      {!isIntegrationsStepComplete && (
+        <AddIntegrationCallout stepName={VIEW_ALERTS_CALLOUT_TITLE} />
+      )}
       <LinkButton
         className="step-paragraph"
         disabled={!isIntegrationsStepComplete}

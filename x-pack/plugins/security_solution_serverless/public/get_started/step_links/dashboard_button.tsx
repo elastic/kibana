@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -17,7 +16,7 @@ import {
 } from '../types';
 import { useStepContext } from '../context/step_context';
 import { AddIntegrationCallout } from './add_integration_callout';
-import { VIEW_DASHBOARDS } from './translations';
+import { GO_TO_DASHBOARDS, VIEW_DASHBOARDS_CALLOUT_TITLE } from './translations';
 
 const DashboardButtonComponent = () => {
   const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
@@ -35,7 +34,9 @@ const DashboardButtonComponent = () => {
   }, [toggleTaskCompleteStatus]);
   return (
     <>
-      {!isIntegrationsStepComplete && <AddIntegrationCallout stepName={VIEW_DASHBOARDS} />}
+      {!isIntegrationsStepComplete && (
+        <AddIntegrationCallout stepName={VIEW_DASHBOARDS_CALLOUT_TITLE} />
+      )}
 
       <LinkButton
         className="step-paragraph"
@@ -44,10 +45,7 @@ const DashboardButtonComponent = () => {
         id={SecurityPageName.dashboards}
         onClick={onClick}
       >
-        <FormattedMessage
-          id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description2.button"
-          defaultMessage="Go to dashboards"
-        />
+        {GO_TO_DASHBOARDS}
       </LinkButton>
     </>
   );

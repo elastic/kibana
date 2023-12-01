@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 
 export const LEFT_CONTENT_PANEL_WIDTH = 486;
 export const RIGHT_CONTENT_PANEL_WIDTH = 510;
-export const RIGHT_CONTENT_HEIGHT = 270;
+export const RIGHT_CONTENT_HEIGHT = 320;
 export const RIGHT_CONTENT_WIDTH = 480;
 
 export const useStepContentStyles = () => {
