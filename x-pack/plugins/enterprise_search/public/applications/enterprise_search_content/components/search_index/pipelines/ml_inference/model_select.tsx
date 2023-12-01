@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiSelectable } from '@elastic/eui';
+import { EuiSelectable, useIsWithinMaxBreakpoint } from '@elastic/eui';
 
 import { MlModel } from '../../../../../../../common/types/ml';
 import { IndexNameLogic } from '../../index_name_logic';
@@ -51,7 +51,10 @@ export const ModelSelect: React.FC = () => {
     });
   };
 
-  const renderIndexOption = (option: ModelSelectOptionProps) => <ModelSelectOption {...option} />;
+  // Make the list dynamically grow with the number of selection items, up to 4 of them
+  const getSelectionListHeight = (selectableModels: MlModel[]) => Math.min(selectableModels.length, 4) * 90;
+
+  const renderOption = (option: ModelSelectOptionProps) => <ModelSelectOption {...option} />;
 
   return (
     <EuiSelectable
@@ -60,13 +63,13 @@ export const ModelSelect: React.FC = () => {
       singleSelection="always"
       listProps={{
         bordered: true,
-        rowHeight: 90,
+        rowHeight: useIsWithinMaxBreakpoint('s') ? 180 : 90,
         showIcons: false,
         onFocusBadge: false,
       }}
-      height={360}
+      height={getSelectionListHeight(selectableModels)}
       onChange={onChange}
-      renderOption={renderIndexOption}
+      renderOption={renderOption}
       isLoading={isLoading}
       searchable
     >

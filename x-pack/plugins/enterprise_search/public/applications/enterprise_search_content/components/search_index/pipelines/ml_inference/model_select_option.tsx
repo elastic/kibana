@@ -23,6 +23,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -160,7 +161,7 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
   const { areActionButtonsDisabled } = useValues(ModelSelectLogic);
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" gutterSize={useIsWithinMaxBreakpoint('s') ? 'xs' : 'l'}>
       {/* Selection radio button */}
       <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
         <EuiRadio
@@ -188,17 +189,20 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 {license && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.licenseBadge.label',
-                        {
-                          defaultMessage: 'License: {license}',
-                          values: {
-                            license,
-                          },
-                        }
-                      )}
-                    </EuiBadge>
+                    {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
+                    <div>
+                      <EuiBadge color="hollow">
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.licenseBadge.label',
+                          {
+                            defaultMessage: 'License: {license}',
+                            values: {
+                              license,
+                            },
+                          }
+                        )}
+                      </EuiBadge>
+                    </div>
                   </EuiFlexItem>
                 )}
                 {description && (
@@ -217,22 +221,25 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
       </EuiFlexItem>
       {/* Status indicator OR action button */}
       <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-        {isPlaceholder ? (
-          <DeployModelButton
-            onClick={() => createModel(modelId)}
-            disabled={areActionButtonsDisabled}
-          />
-        ) : deploymentState === MlModelDeploymentState.Downloaded ? (
-          <StartModelButton
-            onClick={() => startModel(modelId)}
-            disabled={areActionButtonsDisabled}
-          />
-        ) : (
-          <TrainedModelHealth
-            modelState={deploymentState}
-            modelStateReason={deploymentStateReason}
-          />
-        )}
+        {/* Wrap in a div to prevent the badge/button from growing to a whole row on mobile */}
+        <div>
+          {isPlaceholder ? (
+            <DeployModelButton
+              onClick={() => createModel(modelId)}
+              disabled={areActionButtonsDisabled}
+            />
+          ) : deploymentState === MlModelDeploymentState.Downloaded ? (
+            <StartModelButton
+              onClick={() => startModel(modelId)}
+              disabled={areActionButtonsDisabled}
+            />
+          ) : (
+            <TrainedModelHealth
+              modelState={deploymentState}
+              modelStateReason={deploymentStateReason}
+            />
+          )}
+        </div>
       </EuiFlexItem>
       {/* Actions menu */}
       <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
