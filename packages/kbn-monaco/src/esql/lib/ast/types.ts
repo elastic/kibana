@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EditorError } from '../../../types';
+
 export type ESQLAst = ESQLCommand[];
 
 export type ESQLSingleAstItem =
@@ -79,4 +81,6 @@ export interface ESQLMessage {
   location: ESQLLocation;
 }
 
-export type AstProviderFn = (text: string | undefined) => Promise<{ ast: ESQLAst }>;
+export type AstProviderFn = (
+  text: string | undefined
+) => Promise<{ ast: ESQLAst; errors: EditorError[] }>;

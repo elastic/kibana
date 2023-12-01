@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLCallbacks } from '../../../..';
+import type { EditorError } from '../../../types';
+import type { ESQLCallbacks } from '../ast/shared/types';
 import { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../../worker/esql_worker';
 import { suggest } from '../ast/autocomplete/autocomplete';
 import { getHoverItem } from '../ast/hover';
 import { getSignatureHelp } from '../ast/signature';
-import { ESQLMessage } from '../ast/types';
+import type { ESQLMessage } from '../ast/types';
 import { validateAst } from '../ast/validation/validation';
 
 // from linear offset to Monaco position
@@ -31,9 +32,16 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
   throw new Error('Algorithm failure');
 }
 
-function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: ESQLMessage[]) {
+function wrapAsMonacoMessage(
+  type: 'error' | 'warning',
+  code: string,
+  messages: Array<ESQLMessage | EditorError>
+): EditorError[] {
   const fallbackPosition = { column: 0, lineNumber: 0 };
   return messages.map((e) => {
+    if ('severity' in e) {
+      return e;
+    }
     const startPosition = e.location ? offsetToRowColumn(code, e.location.min) : fallbackPosition;
     const endPosition = e.location
       ? offsetToRowColumn(code, e.location.max || 0)
@@ -67,11 +75,15 @@ export class ESQLAstAdapter {
   }
 
   async validate(model: monaco.editor.ITextModel, code: string) {
-    const { ast, errors: syntaxErrors } = await this.getAst(model, code);
-    const { errors, warnings } = await validateAst(ast, this.callbacks);
+    const getAstFn = await this.getAstWorker(model);
+    const { errors, warnings } = await validateAst(
+      code ?? model.getValue(),
+      getAstFn,
+      this.callbacks
+    );
     const monacoErrors = wrapAsMonacoMessage('error', code, errors);
     const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
-    return { errors: syntaxErrors.concat(monacoErrors), warnings: monacoWarnings };
+    return { errors: monacoErrors, warnings: monacoWarnings };
   }
 
   async suggestSignature(

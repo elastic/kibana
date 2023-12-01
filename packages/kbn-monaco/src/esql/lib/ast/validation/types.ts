@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EditorError } from '../../../../types';
 import { ESQLMessage, ESQLLocation } from '../types';
 
 export interface ESQLVariable {
@@ -117,6 +118,6 @@ export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export interface ValidationResult {
-  errors: ESQLMessage[];
+  errors: Array<ESQLMessage | EditorError>;
   warnings: ESQLMessage[];
 }

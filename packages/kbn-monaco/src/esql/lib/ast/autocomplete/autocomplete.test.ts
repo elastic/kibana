@@ -180,7 +180,7 @@ describe('autocomplete', () => {
 
     parser[ROOT_STATEMENT]();
 
-    return { ...parseListener.getAst() };
+    return { ...parseListener.getAst(), errors: [] };
   };
 
   type TestArgs = [
@@ -223,7 +223,7 @@ describe('autocomplete', () => {
           model,
           position,
           context,
-          async (text) => (text ? await getAstAndErrors(text) : { ast: [] }),
+          async (text) => (text ? await getAstAndErrors(text) : { ast: [], errors: [] }),
           callbackMocks
         );
         expect(suggestions.map((i) => i.insertText)).toEqual(expected);
@@ -328,7 +328,6 @@ describe('autocomplete', () => {
         ['boolean']
       ),
       '|',
-      ',',
     ]);
     testSuggestions('from a | where stringField >= stringField and ', [
       ...getFieldNamesByType('boolean'),
@@ -694,6 +693,41 @@ describe('autocomplete', () => {
         ...dateSuggestions.map((t) => `${t},`),
         ',',
       ]);
+    });
+  });
+
+  describe('callbacks', () => {
+    it('should send the fields query without the last command', async () => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const statement = 'from a | drop stringField | eval var0 = abs(numberField) ';
+      const triggerOffset = statement.lastIndexOf(' ');
+      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const { model, position } = createModelAndPosition(statement, triggerOffset + 2);
+      await suggest(
+        model,
+        position,
+        context,
+        async (text) => (text ? await getAstAndErrors(text) : { ast: [], errors: [] }),
+        callbackMocks
+      );
+      expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({
+        query: 'from a | drop stringField',
+      });
+    });
+    it('should send the fields query aware of the location', async () => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const statement = 'from a | drop | eval var0 = abs(numberField) ';
+      const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
+      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const { model, position } = createModelAndPosition(statement, triggerOffset + 2);
+      await suggest(
+        model,
+        position,
+        context,
+        async (text) => (text ? await getAstAndErrors(text) : { ast: [], errors: [] }),
+        callbackMocks
+      );
+      expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
     });
   });
 });

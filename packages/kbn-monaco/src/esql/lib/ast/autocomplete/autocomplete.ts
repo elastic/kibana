@@ -30,6 +30,7 @@ import {
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type {
   AstProviderFn,
+  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -176,7 +177,12 @@ export async function suggest(
   const { ast } = await astProvider(finalText);
 
   const astContext = getAstContext(innerText, ast, offset);
-  const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(resourceRetriever);
+  // build the correct query to fetch the list of fields
+  const queryForFields = buildQueryForFields(ast, finalText);
+  const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
+    queryForFields,
+    resourceRetriever
+  );
   const getSources = getSourcesRetriever(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
@@ -231,8 +237,13 @@ export async function suggest(
   return [];
 }
 
-function getFieldsByTypeRetriever(resourceRetriever?: ESQLCallbacks) {
-  const helpers = getFieldsByTypeHelper(resourceRetriever);
+export function buildQueryForFields(ast: ESQLAst, queryString: string) {
+  const prevCommand = ast[Math.max(ast.length - 2, 0)];
+  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
+}
+
+function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
+  const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);

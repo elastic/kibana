@@ -200,21 +200,6 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   return indices.map((index) => ({ name: index.name, hidden: index.name.startsWith('.') }));
 };
 
-export const extractESQLQueryToExecute = (
-  model: monaco.editor.ITextModel | undefined,
-  options: { sourcesOnly?: boolean } | { customQuery?: string } = {}
-) => {
-  if ('customQuery' in options && options.customQuery) {
-    return options.customQuery;
-  }
-  const pipes = model?.getValue().split('|');
-  pipes?.pop();
-  if (pipes && 'sourcesOnly' in options && options.sourcesOnly) {
-    return pipes[0];
-  }
-  return pipes?.join('|');
-};
-
 // refresh the esql cache entry after 10 minutes
 const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
 
