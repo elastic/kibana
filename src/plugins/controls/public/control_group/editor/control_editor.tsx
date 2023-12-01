@@ -37,7 +37,6 @@ import {
   EuiKeyPadMenuItem,
   EuiSpacer,
   EuiSwitch,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -47,6 +46,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 
+import { TIME_SLIDER_CONTROL } from '../../../common';
 import { pluginServices } from '../../services';
 import {
   ControlEmbeddable,
@@ -89,7 +89,7 @@ export const ControlEditor = ({
 }: EditControlProps) => {
   const {
     dataViews: { getIdsWithTitle, getDefaultId, get },
-    controls: { getControlFactory },
+    controls: { getControlFactory, getControlTypes },
   } = pluginServices.getServices();
 
   const controlGroup = useControlGroupContainer();
@@ -170,21 +170,19 @@ export const ControlEditor = ({
   );
 
   const CompatibleControlTypes = useMemo(() => {
-    if (!fieldRegistry || !selectedField)
-      return (
-        <EuiTextColor color="subdued" data-test-subj="control-editor-type">
-          {ControlGroupStrings.manageControl.dataSource.noControlTypeMessage()}
-        </EuiTextColor>
-      );
-
-    const compatibleControlTypes = fieldRegistry[selectedField].compatibleControlTypes;
+    const allDataControlTypes = getControlTypes().filter((type) => type !== TIME_SLIDER_CONTROL);
     return (
       <EuiKeyPadMenu>
-        {compatibleControlTypes.map((controlType) => {
+        {allDataControlTypes.map((controlType) => {
           const factory = getControlFactory(controlType);
           return (
             <EuiKeyPadMenuItem
               isSelected={controlType === selectedControlType}
+              disabled={
+                fieldRegistry && selectedField
+                  ? !fieldRegistry[selectedField].compatibleControlTypes.includes(controlType)
+                  : true
+              }
               onClick={() => setSelectedControlType(controlType)}
               label={factory.getDisplayName()}
             >
@@ -194,7 +192,7 @@ export const ControlEditor = ({
         })}
       </EuiKeyPadMenu>
     );
-  }, [selectedField, fieldRegistry, getControlFactory, selectedControlType]);
+  }, [selectedField, fieldRegistry, getControlFactory, getControlTypes, selectedControlType]);
 
   const CustomSettings = useMemo(() => {
     if (!selectedControlType || !selectedField || !fieldRegistry) return;

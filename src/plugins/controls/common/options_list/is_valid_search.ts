@@ -11,7 +11,8 @@ import { OptionsListSearchTechnique } from './suggestions_searching';
 
 /**
  * ipaddr is a fairly large library - therefore, this function needs to be separate from
- * the `suggestions_searching` file for bundle size issues
+ * the `suggestions_searching` file (which is used in the OptionsListEditorOptions component,
+ * which is in the factory and not async imported)
  */
 
 export const isValidSearch = ({
