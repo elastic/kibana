@@ -21,6 +21,7 @@ import {
   EuiPopover,
   EuiText,
   EuiSpacer,
+  Pagination,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -29,21 +30,20 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { resultMetaData } from './result/result_metadata';
 
-import { IngestionMethod, Meta } from '../types';
 import { Result } from '..';
 interface DocumentListProps {
-  ingestionMethod: IngestionMethod;
+  dataTelemetryIdPrefix: string;
   docs: SearchHit[];
   docsPerPage: number;
   isLoading: boolean;
   mappings: Record<string, MappingProperty> | undefined;
-  meta: Meta;
+  meta: Pagination;
   onPaginate: (newPageIndex: number) => void;
   setDocsPerPage: (docsPerPage: number) => void;
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({
-  ingestionMethod,
+  dataTelemetryIdPrefix,
   docs,
   docsPerPage,
   isLoading,
@@ -72,14 +72,15 @@ export const DocumentList: React.FC<DocumentListProps> = ({
     return size === docsPerPage ? 'check' : 'empty';
   };
 
+  const pageCount = meta?.pageSize ? Math.ceil(meta.totalItemCount / meta?.pageSize) : 0;
   return (
     <>
       <EuiPagination
         aria-label={i18n.translate('searchIndexDocuments.documentList.paginationAriaLabel', {
           defaultMessage: 'Pagination for document list',
         })}
-        pageCount={meta.page.total_pages}
-        activePage={meta.page.current}
+        pageCount={pageCount}
+        activePage={meta.pageIndex}
         onPageClick={onPaginate}
       />
       <EuiSpacer size="m" />
@@ -98,7 +99,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
               ),
               total: (
                 <strong>
-                  <FormattedNumber value={meta.page.total_results} />
+                  <FormattedNumber value={meta.totalItemCount} />
                 </strong>
               ),
             }}
@@ -122,8 +123,8 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             aria-label={i18n.translate('searchIndexDocuments.documentList.paginationAriaLabel', {
               defaultMessage: 'Pagination for document list',
             })}
-            pageCount={meta.page.total_pages}
-            activePage={meta.page.current}
+            pageCount={pageCount}
+            activePage={meta.pageIndex}
             onPageClick={onPaginate}
           />
         </EuiFlexItem>
@@ -134,7 +135,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             })}
             button={
               <EuiButtonEmpty
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-docsPerPage`}
+                data-telemetry-id={`${dataTelemetryIdPrefix}-documents-docsPerPage`}
                 size="s"
                 iconType="arrowDown"
                 iconSide="right"
@@ -205,7 +206,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       </EuiFlexGroup>
 
       <EuiSpacer />
-      {meta.page.total_results > 9999 && (
+      {meta.totalItemCount > 9999 && (
         <EuiCallOut
           size="s"
           title={

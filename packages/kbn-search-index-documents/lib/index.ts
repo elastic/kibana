@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { Pagination } from '@elastic/eui';
-
-export const DEFAULT_DOCS_PER_PAGE = 25;
-export const INDEX_DOCUMENTS_META_DEFAULT: Pagination = {
-  pageIndex: 0,
-  pageSize: DEFAULT_DOCS_PER_PAGE,
-  totalItemCount: 0,
-};
-
-export * from './pagination';
-export * from './shared_types';
+export * from './fetch_search_results';

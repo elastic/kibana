@@ -24,7 +24,6 @@ import {
 
 import { Status } from '../../../../../common/types/api';
 
-import { DEFAULT_META } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
@@ -37,10 +36,10 @@ import {
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
-export const DEFAULT_PAGINATION = {
-  pageIndex: INDEX_DOCUMENTS_META_DEFAULT.page.current,
-  pageSize: INDEX_DOCUMENTS_META_DEFAULT.page.size,
-  totalItemCount: INDEX_DOCUMENTS_META_DEFAULT.page.total_results,
+const DEFAULT_PAGINATION = {
+  pageIndex: INDEX_DOCUMENTS_META_DEFAULT.pageIndex,
+  pageSize: INDEX_DOCUMENTS_META_DEFAULT.pageSize,
+  totalItemCount: INDEX_DOCUMENTS_META_DEFAULT.totalItemCount,
 };
 
 export const SearchIndexDocuments: React.FC = () => {
@@ -59,7 +58,8 @@ export const SearchIndexDocuments: React.FC = () => {
   const { makeRequest: getMappings } = useActions(mappingLogic);
   const { data, status, error } = useValues(documentLogic);
   const { data: mappingData, status: mappingStatus } = useValues(mappingLogic);
-  const docs = data?.results?.hits.hits ?? [];
+
+  const docs = data?.results ?? [];
 
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,7 +74,11 @@ export const SearchIndexDocuments: React.FC = () => {
   useEffect(() => {
     getDocuments({
       indexName: indexToShow,
-      pagination,
+      pagination: {
+        ...pagination,
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize ?? 10,
+      },
       query: searchQuery,
     });
   }, [indexToShow, pagination, searchQuery]);
@@ -114,12 +118,12 @@ export const SearchIndexDocuments: React.FC = () => {
               })}
             {!isAccessControlIndexNotFound && docs.length > 0 && (
               <DocumentList
-                ingestionMethod={ingestionMethod}
+                dataTelemetryIdPrefix={`entSearchContent-${ingestionMethod}`}
                 docs={docs}
-                docsPerPage={pagination.pageSize}
+                docsPerPage={pagination.pageSize ?? 10}
                 isLoading={status !== Status.SUCCESS && mappingStatus !== Status.SUCCESS}
                 mappings={mappingData?.mappings?.properties ?? {}}
-                meta={data?.meta ?? DEFAULT_META}
+                meta={data?.meta ?? DEFAULT_PAGINATION}
                 onPaginate={(pageIndex) => setPagination({ ...pagination, pageIndex })}
                 setDocsPerPage={(pageSize) => setPagination({ ...pagination, pageSize })}
               />

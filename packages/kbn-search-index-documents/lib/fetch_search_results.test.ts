@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
-
-import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '@kbn/search-index-documents';
+import { DEFAULT_DOCS_PER_PAGE } from '../types';
 
 import { fetchSearchResults } from './fetch_search_results';
 
@@ -22,52 +21,55 @@ describe('fetchSearchResults lib function', () => {
 
   const indexName = 'search-regular-index';
   const query = 'banana';
-
-  const regularSearchResultsResponse = {
-    took: 4,
-    timed_out: false,
-    _shards: {
-      total: 2,
-      successful: 2,
-      skipped: 0,
-      failed: 0,
-    },
+  const mockSearchResponseWithHits = {
+    _shards: { failed: 0, skipped: 0, successful: 2, total: 2 },
     hits: {
-      total: {
-        value: 1,
-        relation: 'eq',
-      },
-      max_score: null,
       hits: [
         {
-          _index: 'search-regular-index',
           _id: '5a12292a0f5ae10021650d7e',
+          _index: 'search-regular-index',
           _score: 4.437291,
-          _source: {
-            name: 'banana',
-            id: '5a12292a0f5ae10021650d7e',
-          },
+          _source: { id: '5a12292a0f5ae10021650d7e', name: 'banana' },
         },
       ],
+
+      max_score: null,
+      total: { relation: 'eq', value: 1 },
+    },
+    timed_out: false,
+    took: 4,
+  };
+  const regularSearchResultsResponse = {
+    data: [
+      {
+        _index: 'search-regular-index',
+        _id: '5a12292a0f5ae10021650d7e',
+        _score: 4.437291,
+        _source: {
+          name: 'banana',
+          id: '5a12292a0f5ae10021650d7e',
+        },
+      },
+    ],
+    _meta: {
+      page: {
+        from: 0,
+        has_more_hits_than_total: false,
+        size: 25,
+        total: 1,
+      },
     },
   };
 
   const emptySearchResultsResponse = {
-    took: 4,
-    timed_out: false,
-    _shards: {
-      total: 2,
-      successful: 2,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 0,
-        relation: 'eq',
+    data: [],
+    _meta: {
+      page: {
+        from: 0,
+        has_more_hits_than_total: false,
+        size: 25,
+        total: 0,
       },
-      max_score: null,
-      hits: [],
     },
   };
 
@@ -76,8 +78,8 @@ describe('fetchSearchResults lib function', () => {
   });
 
   it('should return search results with hits', async () => {
-    mockClient.asCurrentUser.search.mockImplementation(
-      () => regularSearchResultsResponse as SearchResponseBody
+    mockClient.asCurrentUser.search.mockImplementation(() =>
+      Promise.resolve(mockSearchResponseWithHits)
     );
 
     await expect(
@@ -88,20 +90,22 @@ describe('fetchSearchResults lib function', () => {
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       q: query,
-      size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+      size: DEFAULT_DOCS_PER_PAGE,
     });
   });
 
   it('should escape quotes in queries and return results with hits', async () => {
-    mockClient.asCurrentUser.search.mockImplementation(
-      () => regularSearchResultsResponse as SearchResponseBody
+    mockClient.asCurrentUser.search.mockImplementation(() =>
+      Promise.resolve(mockSearchResponseWithHits)
     );
 
     await expect(
       fetchSearchResults(
         mockClient as unknown as IScopedClusterClient,
         indexName,
-        '"yellow banana"'
+        '"yellow banana"',
+        0,
+        DEFAULT_DOCS_PER_PAGE
       )
     ).resolves.toEqual(regularSearchResultsResponse);
 
@@ -109,13 +113,13 @@ describe('fetchSearchResults lib function', () => {
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       q: '\\"yellow banana\\"',
-      size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+      size: DEFAULT_DOCS_PER_PAGE,
     });
   });
 
   it('should return search results with hits when no query is passed', async () => {
-    mockClient.asCurrentUser.search.mockImplementation(
-      () => regularSearchResultsResponse as SearchResponseBody
+    mockClient.asCurrentUser.search.mockImplementation(() =>
+      Promise.resolve(mockSearchResponseWithHits)
     );
 
     await expect(
@@ -125,13 +129,23 @@ describe('fetchSearchResults lib function', () => {
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
-      size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+      size: DEFAULT_DOCS_PER_PAGE,
     });
   });
 
   it('should return empty search results', async () => {
-    mockClient.asCurrentUser.search.mockImplementationOnce(
-      () => emptySearchResultsResponse as SearchResponseBody
+    mockClient.asCurrentUser.search.mockImplementationOnce(() =>
+      Promise.resolve({
+        ...mockSearchResponseWithHits,
+        hits: {
+          ...mockSearchResponseWithHits.hits,
+          total: {
+            ...mockSearchResponseWithHits.hits.total,
+            value: 0,
+          },
+          hits: [],
+        },
+      })
     );
 
     await expect(
@@ -142,7 +156,7 @@ describe('fetchSearchResults lib function', () => {
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       q: query,
-      size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+      size: DEFAULT_DOCS_PER_PAGE,
     });
   });
 });

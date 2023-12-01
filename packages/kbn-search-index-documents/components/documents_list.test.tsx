@@ -18,7 +18,7 @@ import { INDEX_DOCUMENTS_META_DEFAULT, IngestionMethod } from '../types';
 import { Result } from './result/result';
 
 export const DEFAULT_VALUES = {
-  ingestionMethod: IngestionMethod.API,
+  dataTelemetryIdPrefix: `entSearchContent-${IngestionMethod.API}`,
   docs: [],
   docsPerPage: 25,
   isLoading: true,
@@ -79,10 +79,8 @@ describe('DocumentList', () => {
       ...DEFAULT_VALUES,
       ...mockValues,
       meta: {
-        page: {
-          ...INDEX_DOCUMENTS_META_DEFAULT.page,
-          total_results: 10000,
-        },
+        ...INDEX_DOCUMENTS_META_DEFAULT,
+        totalItemCount: 10000,
       },
     };
     const wrapper = shallow(<DocumentList {...values} />);
