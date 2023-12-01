@@ -16,23 +16,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  describe('change point detection', async function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172203
+  describe.skip('change point detection', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     it(`loads the change point detection page`, async () => {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.changePointDetectionPage.navigateToIndexPatternSelection();
+      await aiops.changePointDetectionPage.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForChangePointDetection('ft_ecommerce');
       await aiops.changePointDetectionPage.assertChangePointDetectionPageExists();
     });

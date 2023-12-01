@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
@@ -21,6 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   WelcomeBanner,
   IngestData,
@@ -37,12 +39,10 @@ import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
-import { useQuery } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
 import { useLocation } from 'react-router-dom';
 import { docLinks } from '../../../common/doc_links';
-import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
+import { useAssetBasePath } from '../hooks/use_asset_base_path';
 import {
   API_KEY_PLACEHOLDER,
   CLOUD_ID_PLACEHOLDER,
@@ -53,6 +53,10 @@ import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
+import { ConnectorsCallout } from './connectors_callout';
+import { ConnectorIngestionPanel } from './connectors_ingestion';
+import { PipelineButtonOverview } from './pipeline_button_overview';
+import { PipelinePanel } from './pipeline_panel';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -65,7 +69,7 @@ export const ElasticsearchOverview = () => {
       cloudId: cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER,
     };
   }, [cloud]);
-  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
+  const assetBasePath = useAssetBasePath();
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
@@ -82,12 +86,6 @@ export const ElasticsearchOverview = () => {
     }
   }, [hash]);
 
-  const { data: _data } = useQuery({
-    queryKey: ['fetchConnectors'],
-    queryFn: () =>
-      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
-  });
-
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
@@ -100,7 +98,7 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="select-client-section"
       >
-        <SelectClientPanel docLinks={docLinks} http={http}>
+        <SelectClientPanel docLinks={docLinks} http={http} callout={<ConnectorsCallout />}>
           <EuiFlexItem>
             <LanguageGrid
               assetBasePath={assetBasePath}
@@ -309,6 +307,7 @@ export const ElasticsearchOverview = () => {
           docLinks={docLinks}
           application={application}
           sharePlugin={share}
+          additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
@@ -341,6 +340,42 @@ export const ElasticsearchOverview = () => {
           title={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
             defaultMessage: 'Build your first search query',
           })}
+        />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="pipeline-client-section"
+      >
+        <OverviewPanel
+          description={
+            <FormattedMessage
+              id="xpack.serverlessSearch.pipeline.description"
+              defaultMessage="Use {ingestPipelinesLink} to preprocess your data before it's indexed into Elasticsearch, which is often much easier than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents."
+              values={{
+                ingestPipelinesLink: (
+                  <EuiLink
+                    data-test-subj="serverlessSearchElasticsearchOverviewIngestPipelinesLink"
+                    href={docLinks.ingestionPipelines}
+                    target="_blank"
+                  >
+                    {i18n.translate(
+                      'xpack.serverlessSearch.pipeline.description.ingestPipelinesLink.link',
+                      {
+                        defaultMessage: 'ingest pipelines',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+          leftPanelContent={<PipelinePanel />}
+          links={[]}
+          title={i18n.translate('xpack.serverlessSearch.pipeline.title', {
+            defaultMessage: 'Transform and enrich your data',
+          })}
+          children={<PipelineButtonOverview />}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
@@ -451,7 +486,11 @@ const OverviewFooter = () => {
       <EuiFlexGroup gutterSize="m" alignItems="center">
         {cloud.usersAndRolesUrl && (
           <FooterButtonContainer>
-            <EuiButtonEmpty iconType="users" href={cloud.usersAndRolesUrl}>
+            <EuiButtonEmpty
+              data-test-subj="serverlessSearchOverviewFooterInviteMoreUsersButton"
+              iconType="users"
+              href={cloud.usersAndRolesUrl}
+            >
               {i18n.translate('xpack.serverlessSearch.overview.footer.links.inviteUsers', {
                 defaultMessage: 'Invite more users',
               })}
@@ -459,14 +498,22 @@ const OverviewFooter = () => {
           </FooterButtonContainer>
         )}
         <FooterButtonContainer>
-          <EuiButtonEmpty iconType="heart" href="https://www.elastic.co/community/">
+          <EuiButtonEmpty
+            data-test-subj="serverlessSearchOverviewFooterJoinOurCommunityButton"
+            iconType="heart"
+            href="https://www.elastic.co/community/"
+          >
             {i18n.translate('xpack.serverlessSearch.overview.footer.links.community', {
               defaultMessage: 'Join our community',
             })}
           </EuiButtonEmpty>
         </FooterButtonContainer>
         <FooterButtonContainer>
-          <EuiButtonEmpty iconType="faceHappy" href={docLinks.kibanaFeedback}>
+          <EuiButtonEmpty
+            data-test-subj="serverlessSearchOverviewFooterGiveFeedbackButton"
+            iconType="faceHappy"
+            href={docLinks.kibanaFeedback}
+          >
             {i18n.translate('xpack.serverlessSearch.overview.footer.links.feedback', {
               defaultMessage: 'Give feedback',
             })}

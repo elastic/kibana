@@ -16,7 +16,7 @@ import { OVERVIEW_URL } from '../../../urls/navigation';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
-describe('Overview Page', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
+describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'overview' });
   });

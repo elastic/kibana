@@ -7,7 +7,6 @@
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { ConfigSchema, IEventLogConfig } from './types';
-import { Plugin } from './plugin';
 
 export { millisToNanos, nanosToMillis } from '../common';
 
@@ -30,4 +29,7 @@ export { createReadySignal } from './lib/ready_signal';
 export const config: PluginConfigDescriptor<IEventLogConfig> = {
   schema: ConfigSchema,
 };
-export const plugin = (context: PluginInitializerContext) => new Plugin(context);
+export const plugin = async (context: PluginInitializerContext) => {
+  const { Plugin } = await import('./plugin');
+  return new Plugin(context);
+};

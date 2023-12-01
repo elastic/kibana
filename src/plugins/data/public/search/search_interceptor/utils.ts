@@ -24,13 +24,14 @@ export function getSearchErrorOverrideDisplay({
 }: {
   error: Error;
   application: ApplicationStart;
-}): { title: string; body: ReactNode } | undefined {
+}): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
   if (error instanceof EsError) {
     return {
       title: i18n.translate('data.search.esErrorTitle', {
         defaultMessage: 'Cannot retrieve search results',
       }),
-      body: error.getErrorMessage(application),
+      body: error.getErrorMessage(),
+      actions: error.getActions(application),
     };
   }
 

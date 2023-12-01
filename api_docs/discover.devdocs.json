@@ -794,7 +794,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => void; undoSavedSearchChanges: () => void; updateAdHocDataViewId: () => void; }"
+              ") => void; undoSavedSearchChanges: () => Promise<",
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              ">; updateAdHocDataViewId: () => void; }"
             ],
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
             "deprecated": false,
@@ -980,6 +988,35 @@
             "description": [],
             "signature": [
               "\"flyout\""
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.size",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "Property",
+              ".Width<string | number> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
@@ -1260,6 +1297,39 @@
             "signature": [
               "(() => ",
               "TopNavMenuItem",
+              "[]) | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.TopNavCustomization.defaultBadges",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultBadges",
+            "description": [],
+            "signature": [
+              "TopNavDefaultBadges",
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.TopNavCustomization.getBadges",
+            "type": "Function",
+            "tags": [],
+            "label": "getBadges",
+            "description": [],
+            "signature": [
+              "(() => ",
+              "TopNavBadge",
               "[]) | undefined"
             ],
             "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",

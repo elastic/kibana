@@ -52,11 +52,7 @@ export async function requestOAuthToken<T>(
     };
   } else {
     const errString = stringify(res.data);
-    logger.warn(
-      `error thrown getting the access token from ${tokenUrl} for params: ${JSON.stringify(
-        bodyRequest
-      )}: ${errString}`
-    );
+    logger.warn(`error thrown getting the access token from ${tokenUrl}: ${errString}`);
     throw new Error(errString);
   }
 }

@@ -7,13 +7,12 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
+import { ReportDocument, ReportOutput, ReportSource } from '@kbn/reporting-common/types';
 import moment from 'moment';
-import type { IReport, Report, ReportDocument } from '.';
+import type { IReport, Report } from '.';
 import { SavedReport } from '.';
-import { statuses } from '..';
 import type { ReportingCore } from '../..';
-import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
-import type { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import type { ReportTaskParams } from '../tasks';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
@@ -53,7 +52,7 @@ export interface ReportRecordTimeout {
   _id: string;
   _index: string;
   _source: {
-    status: JobStatus;
+    status: JOB_STATUS;
     process_expiration?: string;
   };
 }
@@ -165,7 +164,7 @@ export class ReportingStore {
         ...sourceDoc({
           process_expiration: new Date(0).toISOString(),
           attempts: 0,
-          status: statuses.JOB_STATUS_PENDING,
+          status: JOB_STATUS.PENDING,
         }),
       },
     };
@@ -283,7 +282,7 @@ export class ReportingStore {
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
       ...processingInfo,
-      status: statuses.JOB_STATUS_PROCESSING,
+      status: JOB_STATUS.PROCESSING,
     });
 
     let body: UpdateResponse<ReportDocument>;
@@ -322,7 +321,7 @@ export class ReportingStore {
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
       ...failedInfo,
-      status: statuses.JOB_STATUS_FAILED,
+      status: JOB_STATUS.FAILED,
     });
 
     let body: UpdateResponse<ReportDocument>;
@@ -353,8 +352,8 @@ export class ReportingStore {
     const { output } = completedInfo;
     const status =
       output && output.warnings && output.warnings.length > 0
-        ? statuses.JOB_STATUS_WARNINGS
-        : statuses.JOB_STATUS_COMPLETED;
+        ? JOB_STATUS.WARNINGS
+        : JOB_STATUS.COMPLETED;
     const doc = sourceDoc({
       ...completedInfo,
       status,
@@ -383,7 +382,7 @@ export class ReportingStore {
 
   public async prepareReportForRetry(report: SavedReport): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
-      status: statuses.JOB_STATUS_PENDING,
+      status: JOB_STATUS.PENDING,
       process_expiration: null,
     });
 
@@ -420,13 +419,13 @@ export class ReportingStore {
       bool: {
         must: [
           { range: { process_expiration: { lt: `now` } } },
-          { terms: { status: [statuses.JOB_STATUS_PROCESSING] } },
+          { terms: { status: [JOB_STATUS.PROCESSING] } },
         ],
       },
     };
     const oldVersionFilter = {
       bool: {
-        must: [{ terms: { status: [statuses.JOB_STATUS_PENDING] } }],
+        must: [{ terms: { status: [JOB_STATUS.PENDING] } }],
         must_not: [{ exists: { field: 'migration_version' } }],
       },
     };

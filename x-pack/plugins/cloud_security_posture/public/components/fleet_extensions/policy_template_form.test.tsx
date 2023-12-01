@@ -1330,6 +1330,27 @@ describe('<CspPolicyTemplateForm />', () => {
       ).toBeInTheDocument();
     });
 
+    it(`doesnt render ${CLOUDBEAT_AZURE} Manual fields when version is not at least version 1.7.0`, () => {
+      let policy = getMockPolicyAzure();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'manual' },
+        'azure.account_type': { value: 'single-account' },
+      });
+
+      const { queryByRole } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.6.0')} />
+      );
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+
+      expect(
+        queryByRole('option', { name: 'Service principal with Client Secret', selected: true })
+      ).not.toBeInTheDocument();
+    });
+
     it(`selects default ${CLOUDBEAT_AZURE} fields`, () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
@@ -1343,6 +1364,243 @@ describe('<CspPolicyTemplateForm />', () => {
         isValid: true,
         updatedPolicy: policy,
       });
+    });
+
+    it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, () => {
+      let policy = getMockPolicyAzure();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'service_principal_with_client_secret' },
+      });
+
+      const { getByLabelText, getByRole } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+      );
+
+      expect(
+        getByRole('option', { name: 'Service principal with Client Secret', selected: true })
+      ).toBeInTheDocument();
+      expect(getByLabelText('Tenant ID')).toBeInTheDocument();
+      expect(getByLabelText('Client ID')).toBeInTheDocument();
+      expect(getByLabelText('Client Secret')).toBeInTheDocument();
+    });
+
+    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, () => {
+      let policy = getMockPolicyAzure();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'service_principal_with_client_secret' },
+      });
+
+      const { rerender, getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+      );
+
+      userEvent.type(getByLabelText('Tenant ID'), 'a');
+
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.tenant_id': { value: 'a' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+
+      rerender(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+      );
+
+      userEvent.type(getByLabelText('Client ID'), 'b');
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.client_id': { value: 'b' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+
+      rerender(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+      );
+
+      userEvent.type(getByLabelText('Client Secret'), 'c');
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.client_secret': { value: 'c' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+    });
+  });
+
+  it(`renders Service principal with Client Certificate fields`, () => {
+    let policy = getMockPolicyAzure();
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
+    });
+
+    const { getByLabelText, getByRole } = render(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    expect(
+      getByRole('option', { name: 'Service principal with Client Certificate', selected: true })
+    ).toBeInTheDocument();
+    expect(getByLabelText('Tenant ID')).toBeInTheDocument();
+    expect(getByLabelText('Client ID')).toBeInTheDocument();
+    expect(getByLabelText('Client Certificate Path')).toBeInTheDocument();
+    expect(getByLabelText('Client Certificate Password')).toBeInTheDocument();
+  });
+
+  it(`updates Service principal with Client Certificate fields`, () => {
+    let policy = getMockPolicyAzure();
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
+    });
+
+    const { rerender, getByLabelText } = render(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    userEvent.type(getByLabelText('Tenant ID'), 'a');
+
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.tenant_id': { value: 'a' },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: policy,
+    });
+
+    rerender(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    userEvent.type(getByLabelText('Client ID'), 'b');
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.client_id': { value: 'b' },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: policy,
+    });
+
+    rerender(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    userEvent.type(getByLabelText('Client Certificate Path'), 'c');
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.client_certificate_path': { value: 'c' },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: policy,
+    });
+
+    rerender(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    userEvent.type(getByLabelText('Client Certificate Password'), 'd');
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.client_certificate_password': { value: 'd' },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: policy,
+    });
+  });
+
+  it(`renders Service principal with Client Username and Password fields`, () => {
+    let policy = getMockPolicyAzure();
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.type': { value: 'service_principal_with_client_username_and_password' },
+    });
+
+    const { getByLabelText, getByRole } = render(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    expect(
+      getByRole('option', {
+        name: 'Service principal with Client Username and Password',
+        selected: true,
+      })
+    ).toBeInTheDocument();
+    expect(getByLabelText('Tenant ID')).toBeInTheDocument();
+    expect(getByLabelText('Client ID')).toBeInTheDocument();
+    expect(getByLabelText('Client Username')).toBeInTheDocument();
+    expect(getByLabelText('Client Password')).toBeInTheDocument();
+  });
+
+  it(`updates Service principal with Client Username and Password fields`, () => {
+    let policy = getMockPolicyAzure();
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.type': { value: 'service_principal_with_client_username_and_password' },
+    });
+
+    const { rerender, getByLabelText } = render(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    userEvent.type(getByLabelText('Tenant ID'), 'a');
+
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.tenant_id': { value: 'a' },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: policy,
+    });
+
+    rerender(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    userEvent.type(getByLabelText('Client ID'), 'b');
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.client_id': { value: 'b' },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: policy,
+    });
+
+    rerender(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    userEvent.type(getByLabelText('Client Username'), 'c');
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.client_username': { value: 'c' },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: policy,
+    });
+
+    rerender(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    userEvent.type(getByLabelText('Client Password'), 'd');
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.client_password': { value: 'd' },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: policy,
     });
   });
 });

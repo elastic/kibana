@@ -9,5 +9,5 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { CorePluginInitializerContextPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
+export const plugin = async (initializerContext: PluginInitializerContext) =>
   new CorePluginInitializerContextPlugin(initializerContext);

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import {
   Visualization,
   FramePublicAPI,
@@ -429,12 +429,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
             onClick={() => setFlyoutOpen(!flyoutOpen)}
             data-test-subj="lnsChartSwitchPopover"
             fontWeight="bold"
-          >
-            <VisualizationSummary
-              visualization={visualization}
-              visualizationMap={props.visualizationMap}
-            />
-          </ToolbarButton>
+            label={
+              <VisualizationSummary
+                visualization={visualization}
+                visualizationMap={props.visualizationMap}
+              />
+            }
+          />
         }
         isOpen={flyoutOpen}
         closePopover={() => setFlyoutOpen(false)}

@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
@@ -147,7 +148,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     });
     const flyoutContextValue = {
       openLeftPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContext;
+    } as unknown as ExpandableFlyoutContextValue;
 
     const { getByTestId } = render(
       <TestProviders>
@@ -161,7 +162,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     getByTestId(TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: THREAT_INTELLIGENCE_TAB_ID },
       params: {
         id: panelContextValue.eventId,

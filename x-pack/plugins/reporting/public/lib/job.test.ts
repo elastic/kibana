@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { jobTypes } from '../../common/constants';
 import { mockJobs } from '../../common/test';
-import * as jobTypes from '../../common/constants/job_types';
 import { Job } from './job';
 
 describe('Job', () => {

@@ -560,7 +560,7 @@
           },
           " extends Omit<",
           "EuiAvatarProps",
-          ", \"type\" | \"name\" | \"color\" | \"iconType\" | \"iconColor\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
+          ", \"type\" | \"name\" | \"color\" | \"iconType\" | \"iconColor\" | \"initials\" | \"initialsLength\" | \"imageUrl\" | \"iconSize\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,

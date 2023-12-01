@@ -8,6 +8,7 @@
 import { mergeWith } from 'lodash';
 import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { Flags } from '@kbn/dev-cli-runner';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
   'no_shard_available_action_exception',
@@ -117,12 +118,20 @@ interface CreateLoggerInterface {
    * on input.
    */
   defaultLogLevel: ToolingLogTextWriterConfig['level'];
+
+  /**
+   * Set the default logging level based on the flag arguments provide to a CLI script that runs
+   * via `@kbn/dev-cli-runner`
+   * @param flags
+   */
+  setDefaultLogLevelFromCliFlags: (flags: Flags) => void;
 }
 
 /**
  * Creates an instance of `ToolingLog` that outputs to `stdout`.
- * The default log `level` for all instances can be set by setting the function's `defaultLogLevel`.
- * Log level can also be explicitly set on input.
+ * The default log `level` for all instances can be set by setting the function's `defaultLogLevel`
+ * property. Default logging level can also be set from CLI scripts that use the `@kbn/dev-cli-runner`
+ * by calling the `setDefaultLogLevelFromCliFlags(flags)` and passing in the `flags` property.
  *
  * @param level
  *
@@ -137,3 +146,14 @@ export const createToolingLogger: CreateLoggerInterface = (level): ToolingLog =>
   });
 };
 createToolingLogger.defaultLogLevel = 'info';
+createToolingLogger.setDefaultLogLevelFromCliFlags = (flags) => {
+  createToolingLogger.defaultLogLevel = flags.verbose
+    ? 'verbose'
+    : flags.debug
+    ? 'debug'
+    : flags.silent
+    ? 'silent'
+    : flags.quiet
+    ? 'error'
+    : 'info';
+};

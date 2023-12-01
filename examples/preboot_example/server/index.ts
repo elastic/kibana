@@ -10,11 +10,13 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
-import { PrebootExamplePlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
   exposeToBrowser: { token: true },
 };
 
-export const plugin = (context: PluginInitializerContext) => new PrebootExamplePlugin(context);
+export const plugin = async (context: PluginInitializerContext) => {
+  const { PrebootExamplePlugin } = await import('./plugin');
+  return new PrebootExamplePlugin(context);
+};

@@ -60,7 +60,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 import {
   createUserAndRole,
   deleteUserAndRole,
@@ -561,7 +561,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('tests with auditbeat data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/169664
+      describe.skip('tests with auditbeat data', () => {
         before(async () => {
           await esArchiver.load(path);
         });

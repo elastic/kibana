@@ -270,7 +270,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
 
   if (isLoading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj={`${dataTestSubject}-statsLoading`} />;
   }
 
   if (!dataView) {
