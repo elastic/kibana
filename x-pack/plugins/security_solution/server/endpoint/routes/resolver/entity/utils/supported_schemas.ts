@@ -29,7 +29,6 @@ interface SupportedSchema {
 const { sentinelOneDataInAnalyzerEnabled } = allowedExperimentalValues;
 
 const supportedFileBeatDataSets = [
-  'windows.sysmon_operational',
   ...(sentinelOneDataInAnalyzerEnabled
     ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
     : []),
@@ -65,6 +64,24 @@ export const supportedSchemas: SupportedSchema[] = [
       {
         field: 'event.module',
         value: 'sysmon',
+      },
+    ],
+    schema: {
+      id: 'process.entity_id',
+      parent: 'process.parent.entity_id',
+      name: 'process.name',
+    },
+  },
+  {
+    name: 'sysmonViaFilebeat',
+    constraints: [
+      {
+        field: 'agent.type',
+        value: 'filebeat',
+      },
+      {
+        field: 'event.dataset',
+        value: 'windows.sysmon_operational',
       },
     ],
     schema: {
