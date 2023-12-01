@@ -47,7 +47,6 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
         ? Object.values(section)?.map<React.ReactNode>((cardItem) => (
             <EuiFlexItem key={cardItem.id}>
               <CardItem
-                activeProducts={activeProducts}
                 activeStepIds={cardItem.activeStepIds}
                 cardId={cardItem.id}
                 data-test-subj={cardItem.id}
