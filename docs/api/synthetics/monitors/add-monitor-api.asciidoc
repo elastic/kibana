@@ -147,7 +147,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
           This monitor examines match successfully if there is no bar or Bar at all, examines match failed if there is bar or Bar in the response body:
       ** `json`: A list of expressions executed against the body when parsed as JSON. Body sizes must be less than or equal to 100 MiB. 
           *** `description` (string): A description of the check.
-          *** `expression` (string): The following configuration shows how to check the response using [gval](https://github.com/PaesslerAG/gval) expressions when the body contains JSON:
+          *** `expression` (string): The following configuration shows how to check the response using https://github.com/PaesslerAG/gval[gval] expressions when the body contains JSON:
 
 
 
