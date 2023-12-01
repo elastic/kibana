@@ -42,6 +42,7 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/core-http-common",
     "@kbn/react-kibana-context-theme",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",
