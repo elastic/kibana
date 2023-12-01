@@ -17,7 +17,28 @@ describe('CasesConnectorRunParamsSchema', () => {
   });
 
   it('accepts valid params', () => {
-    expect(() => CasesConnectorRunParamsSchema.validate(getParams())).not.toThrow();
+    expect(CasesConnectorRunParamsSchema.validate(getParams())).toMatchInlineSnapshot(`
+      Object {
+        "alerts": Array [
+          Object {
+            "_id": "alert-id",
+            "_index": "alert-index",
+          },
+        ],
+        "groupingBy": Array [
+          "host.name",
+        ],
+        "owner": "cases",
+        "reopenClosedCases": false,
+        "rule": Object {
+          "id": "rule-id",
+          "name": "Test rule",
+          "ruleUrl": "https://example.com",
+          "tags": Array [],
+        },
+        "timeWindow": "7d",
+      }
+    `);
   });
 
   describe('alerts', () => {
@@ -120,6 +141,12 @@ describe('CasesConnectorRunParamsSchema', () => {
 
     it('defaults the timeWindow to 7d', () => {
       expect(CasesConnectorRunParamsSchema.validate(getParams()).timeWindow).toBe('7d');
+    });
+  });
+
+  describe('reopenClosedCases', () => {
+    it('defaults the reopenClosedCases to false', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams()).reopenClosedCases).toBe(false);
     });
   });
 });

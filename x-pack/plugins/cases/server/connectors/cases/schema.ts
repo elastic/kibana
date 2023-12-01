@@ -71,4 +71,5 @@ export const CasesConnectorRunParamsSchema = schema.object({
       }
     },
   }),
+  reopenClosedCases: schema.boolean({ defaultValue: false }),
 });
