@@ -135,6 +135,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
           type: 'date',
           format: 'date_optional_time||epoch_millis',
         },
+        spaceId: {
+          type: 'keyword',
+        },
       },
     },
   },

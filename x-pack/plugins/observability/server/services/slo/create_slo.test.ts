@@ -41,7 +41,8 @@ describe('CreateSLO', () => {
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
-      loggerMock
+      loggerMock,
+      'some-space'
     );
   });
 

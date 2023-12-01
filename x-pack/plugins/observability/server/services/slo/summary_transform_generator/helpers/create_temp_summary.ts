@@ -8,7 +8,7 @@
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../../../domain/models';
 
-export function createTempSummaryDocument(slo: SLO) {
+export function createTempSummaryDocument(slo: SLO, spaceId: string) {
   return {
     service: {
       environment: null,
@@ -50,5 +50,6 @@ export function createTempSummaryDocument(slo: SLO) {
     statusCode: 0,
     status: 'NO_DATA',
     isTempDoc: true,
+    spaceId,
   };
 }

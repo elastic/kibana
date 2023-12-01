@@ -18,7 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { LogExplorerLocatorParams, LOG_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -31,7 +31,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
@@ -64,13 +64,14 @@ interface PluginSetup {
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
-  spaces?: SpacesPluginSetup;
+  spaces: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
 }
 
 interface PluginStart {
   alerting: PluginStartContract;
+  spaces: SpacesPluginStart;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];

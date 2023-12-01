@@ -83,8 +83,11 @@ const createSLORoute = createObservabilityServerRoute({
     access: 'public',
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, params, logger, dependencies, request }) => {
     await assertPlatinumLicense(context);
+
+    const spaceId =
+      dependencies.pluginsSetup.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -101,7 +104,8 @@ const createSLORoute = createObservabilityServerRoute({
       repository,
       transformManager,
       summaryTransformManager,
-      logger
+      logger,
+      spaceId
     );
 
     const response = await createSLO.execute(params.body);
@@ -117,9 +121,11 @@ const updateSLORoute = createObservabilityServerRoute({
     access: 'public',
   },
   params: updateSLOParamsSchema,
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, request, params, logger, dependencies }) => {
     await assertPlatinumLicense(context);
 
+    const spaceId =
+      dependencies.pluginsSetup.spaces?.spacesService?.getSpaceId(request) ?? 'default';
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
 
@@ -136,7 +142,8 @@ const updateSLORoute = createObservabilityServerRoute({
       transformManager,
       summaryTransformManager,
       esClient,
-      logger
+      logger,
+      spaceId
     );
 
     const response = await updateSLO.execute(params.path.id, params.body);
@@ -273,9 +280,11 @@ const resetSLORoute = createObservabilityServerRoute({
     access: 'public',
   },
   params: resetSLOParamsSchema,
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, request, params, logger, dependencies }) => {
     await assertPlatinumLicense(context);
 
+    const spaceId =
+      dependencies.pluginsSetup.spaces?.spacesService?.getSpaceId(request) ?? 'default';
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -292,7 +301,8 @@ const resetSLORoute = createObservabilityServerRoute({
       repository,
       transformManager,
       summaryTransformManager,
-      logger
+      logger,
+      spaceId
     );
 
     const response = await resetSLO.execute(params.path.id);
@@ -308,13 +318,16 @@ const findSLORoute = createObservabilityServerRoute({
     access: 'public',
   },
   params: findSLOParamsSchema,
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, request, params, logger, dependencies }) => {
     await assertPlatinumLicense(context);
+
+    const spaceId =
+      dependencies.pluginsSetup.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const summarySearchClient = new DefaultSummarySearchClient(esClient, logger);
+    const summarySearchClient = new DefaultSummarySearchClient(esClient, logger, spaceId);
     const findSLO = new FindSLO(repository, summarySearchClient);
 
     const response = await findSLO.execute(params?.query ?? {});

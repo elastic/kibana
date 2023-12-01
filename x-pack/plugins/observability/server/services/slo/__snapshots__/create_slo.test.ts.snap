@@ -127,6 +127,12 @@ Array [
           "value": "{{{_ingest.timestamp}}}",
         },
       },
+      Object {
+        "set": Object {
+          "field": "spaceId",
+          "value": "some-space",
+        },
+      },
     ],
   },
 ]
@@ -169,6 +175,7 @@ Array [
           "type": "rolling",
         },
       },
+      "spaceId": "some-space",
       "status": "NO_DATA",
       "statusCode": 0,
       "totalEvents": 0,

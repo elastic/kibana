@@ -47,7 +47,11 @@ export interface SummarySearchClient {
 }
 
 export class DefaultSummarySearchClient implements SummarySearchClient {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private spaceId: string
+  ) {}
 
   async search(
     kqlQuery: string,
@@ -57,7 +61,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     try {
       const { count: total } = await this.esClient.count({
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        query: getElastichsearchQueryOrThrow(kqlQuery),
+        query: {
+          bool: {
+            filter: [{ term: { spaceId: this.spaceId } }, getElastichsearchQueryOrThrow(kqlQuery)],
+          },
+        },
       });
 
       if (total === 0) {
@@ -66,7 +74,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        query: getElastichsearchQueryOrThrow(kqlQuery),
+        query: {
+          bool: {
+            filter: [{ term: { spaceId: this.spaceId } }, getElastichsearchQueryOrThrow(kqlQuery)],
+          },
+        },
         sort: {
           // non-temp first, then temp documents
           isTempDoc: {

@@ -41,7 +41,8 @@ describe('ResetSLO', () => {
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
-      loggerMock
+      loggerMock,
+      'some-space'
     );
     jest.useFakeTimers().setSystemTime(TEST_DATE);
   });

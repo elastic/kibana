@@ -30,7 +30,8 @@ export class UpdateSLO {
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private esClient: ElasticsearchClient,
-    private logger: Logger
+    private logger: Logger,
+    private spaceId: string
   ) {}
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
@@ -64,7 +65,8 @@ export class UpdateSLO {
     if (!requireRevisionBump) {
       // At this point, we still need to update the summary pipeline to include the changes (name, desc, tags, ...) in the summary index
       await retryTransientEsErrors(
-        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(updatedSlo)),
+        () =>
+          this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId)),
         { logger: this.logger }
       );
 
@@ -79,7 +81,8 @@ export class UpdateSLO {
       await this.transformManager.start(updatedRollupTransformId);
 
       await retryTransientEsErrors(
-        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(updatedSlo)),
+        () =>
+          this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId)),
         { logger: this.logger }
       );
 
@@ -91,7 +94,7 @@ export class UpdateSLO {
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${updatedSlo.id}`,
-            document: createTempSummaryDocument(updatedSlo),
+            document: createTempSummaryDocument(updatedSlo, this.spaceId),
             refresh: true,
           }),
         { logger: this.logger }

@@ -9,7 +9,7 @@ import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { SLO } from '../../domain/models';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../constants';
 
-export const getSLOSummaryPipelineTemplate = (slo: SLO) => {
+export const getSLOSummaryPipelineTemplate = (slo: SLO, spaceId: string) => {
   const errorBudgetEstimated =
     slo.budgetingMethod === 'occurrences' && slo.timeWindow.type === 'calendarAligned';
 
@@ -152,6 +152,12 @@ export const getSLOSummaryPipelineTemplate = (slo: SLO) => {
         set: {
           field: 'summaryUpdatedAt',
           value: '{{{_ingest.timestamp}}}',
+        },
+      },
+      {
+        set: {
+          field: 'spaceId',
+          value: spaceId,
         },
       },
     ],

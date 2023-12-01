@@ -325,6 +325,12 @@ exports[`ResetSLO resets all associated resources 8`] = `
               "value": "{{{_ingest.timestamp}}}",
             },
           },
+          Object {
+            "set": Object {
+              "field": "spaceId",
+              "value": "some-space",
+            },
+          },
         ],
       },
     ],
@@ -458,6 +464,7 @@ exports[`ResetSLO resets all associated resources 11`] = `
               "type": "rolling",
             },
           },
+          "spaceId": "some-space",
           "status": "NO_DATA",
           "statusCode": 0,
           "totalEvents": 0,

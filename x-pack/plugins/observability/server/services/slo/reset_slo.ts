@@ -28,7 +28,8 @@ export class ResetSLO {
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
-    private logger: Logger
+    private logger: Logger,
+    private spaceId: string
   ) {}
 
   public async execute(sloId: string) {
@@ -48,7 +49,7 @@ export class ResetSLO {
       await this.transformManager.install(slo);
       await this.transformManager.start(rollupTransformId);
       await retryTransientEsErrors(
-        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo)),
+        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo, this.spaceId)),
         { logger: this.logger }
       );
 
@@ -60,7 +61,7 @@ export class ResetSLO {
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${slo.id}`,
-            document: createTempSummaryDocument(slo),
+            document: createTempSummaryDocument(slo, this.spaceId),
             refresh: true,
           }),
         { logger: this.logger }

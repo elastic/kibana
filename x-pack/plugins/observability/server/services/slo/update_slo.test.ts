@@ -53,7 +53,8 @@ describe('UpdateSLO', () => {
       mockTransformManager,
       mockSummaryTransformManager,
       mockEsClient,
-      loggerMock
+      loggerMock,
+      'some-space'
     );
   });
 
