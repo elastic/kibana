@@ -16,6 +16,7 @@ import {
 import { riskScoreCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_calculation/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 
@@ -42,8 +43,13 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
         const spaceId = securityContext.getSpaceId();
         const riskEngineDataClient = securityContext.getRiskEngineDataClient();
         const riskScoreDataClient = securityContext.getRiskScoreDataClient();
+        const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
+        const assetCriticalityService = assetCriticalityServiceFactory({
+          assetCriticalityDataClient,
+        });
 
         const riskScoreService = riskScoreServiceFactory({
+          assetCriticalityService,
           esClient,
           logger,
           riskEngineDataClient,

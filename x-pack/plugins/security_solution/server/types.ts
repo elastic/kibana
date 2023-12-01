@@ -31,7 +31,7 @@ import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import type { EndpointInternalFleetServicesInterface } from './endpoint/services/fleet';
 import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
-import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality/asset_criticality_data_client';
+import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {

@@ -24,9 +24,8 @@ import {
   readRiskScores,
   normalizeScores,
   waitForRiskScoresToBePresent,
-  initAssetCriticality,
-  teardownAssetCriticality,
-  createAssetCriticality,
+  assetCriticalityRouteHelpersFactory,
+  cleanAssetCriticality,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
