@@ -61,10 +61,7 @@ export const findCardByStepId = (
   const cards = getSections().flatMap((s) => s.cards);
   let matchedStep: Step | null = null;
   const matchedCard =
-    cards.find((c) => {
-      matchedStep = c.steps?.find((step) => stepId === step.id) ?? null;
-      return matchedStep != null;
-    }) ?? null;
+    cards.find((c) => !!c.steps?.find((step) => stepId === step.id)) ?? null;
 
   return { matchedCard, matchedStep };
 };
