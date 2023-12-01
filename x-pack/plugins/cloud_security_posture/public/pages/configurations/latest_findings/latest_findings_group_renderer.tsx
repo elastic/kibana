@@ -111,7 +111,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
   }
   const benchmarkId = firstNonNullValue(bucket.benchmarkId?.buckets?.[0]?.key);
   switch (selectedGroup) {
-    case GROUPING_OPTIONS.RESOURCE:
+    case GROUPING_OPTIONS.RESOURCE_NAME:
       return nullGroupMessage ? (
         <NullGroupComponent title={NULL_GROUPING_MESSAGES.RESOURCE} field={selectedGroup} />
       ) : (
@@ -166,7 +166,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case GROUPING_OPTIONS.CLOUD_ACCOUNT:
+    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return nullGroupMessage ? (
         <NullGroupComponent title={NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT} field={selectedGroup} />
       ) : (
@@ -195,7 +195,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case GROUPING_OPTIONS.KUBERNETES:
+    case GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
       return nullGroupMessage ? (
         <NullGroupComponent title={NULL_GROUPING_MESSAGES.KUBERNETES} field={selectedGroup} />
       ) : (

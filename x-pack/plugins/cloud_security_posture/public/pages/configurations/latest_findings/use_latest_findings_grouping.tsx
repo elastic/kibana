@@ -76,44 +76,30 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   ];
 
   switch (field) {
-    case GROUPING_OPTIONS.RESOURCE:
+    case GROUPING_OPTIONS.RESOURCE_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('resourceName', 'resource.id'),
         getTermAggregation('resourceSubType', 'resource.sub_type'),
         getTermAggregation('resourceType', 'resource.type'),
       ];
-
     case GROUPING_OPTIONS.RULE_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkVersion', 'rule.benchmark.version'),
       ];
-    case GROUPING_OPTIONS.CLOUD_ACCOUNT:
+    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
       ];
-    case GROUPING_OPTIONS.KUBERNETES:
+    case GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
-      ];
-    case 'resource.type':
-      return [
-        ...aggMetrics,
-        getTermAggregation('resourceName', 'resource.id'),
-        getTermAggregation('resourceType', 'resource.type'),
-      ];
-    case 'resource.sub_type':
-      return [
-        ...aggMetrics,
-        getTermAggregation('resourceName', 'resource.id'),
-        getTermAggregation('resourceType', 'resource.type'),
-        getTermAggregation('resourceSubType', 'resource.sub_type'),
       ];
   }
   return aggMetrics;

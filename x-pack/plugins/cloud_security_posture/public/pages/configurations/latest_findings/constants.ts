@@ -17,10 +17,10 @@ export const FINDINGS_UNIT = (totalCount: number) =>
   });
 
 export const GROUPING_OPTIONS = {
-  RESOURCE: 'resource.name',
+  RESOURCE_NAME: 'resource.name',
   RULE_NAME: 'rule.name',
-  CLOUD_ACCOUNT: 'cloud.account.name',
-  KUBERNETES: 'orchestrator.cluster.name',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
 };
 
 export const NULL_GROUPING_UNIT = i18n.translate('xpack.csp.findings.grouping.nullGroupUnit', {
@@ -50,7 +50,7 @@ export const defaultGroupingOptions: GroupOption[] = [
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByResource', {
       defaultMessage: 'Resource',
     }),
-    key: GROUPING_OPTIONS.RESOURCE,
+    key: GROUPING_OPTIONS.RESOURCE_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByRuleName', {
@@ -62,13 +62,13 @@ export const defaultGroupingOptions: GroupOption[] = [
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByCloudAccount', {
       defaultMessage: 'Cloud account',
     }),
-    key: GROUPING_OPTIONS.CLOUD_ACCOUNT,
+    key: GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByKubernetesCluster', {
       defaultMessage: 'Kubernetes cluster',
     }),
-    key: GROUPING_OPTIONS.KUBERNETES,
+    key: GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME,
   },
 ];
 
