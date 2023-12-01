@@ -207,7 +207,7 @@ const defaultProps = {
   filterable: true,
   renderMode: 'view',
   uiSettings: {} as unknown as IUiSettingsClient,
-} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'renderMode'>;
+} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable'>;
 
 describe('MetricVisComponent', function () {
   afterEach(() => {

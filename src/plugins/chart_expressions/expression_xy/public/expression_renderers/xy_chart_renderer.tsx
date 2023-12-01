@@ -287,7 +287,6 @@ export const getXyChartRenderer = ({
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
               setDimensions={setDimensions}
-              shouldShowLegendAction={handlers.shouldShowLegendAction}
             />
           </div>
         </I18nProvider>
