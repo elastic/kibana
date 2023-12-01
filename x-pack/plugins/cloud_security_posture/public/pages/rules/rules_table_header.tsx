@@ -23,6 +23,7 @@ interface RulesTableToolbarProps {
   search: (value: string) => void;
   onSectionChange: (value: string | undefined) => void;
   sectionSelectOptions: string[];
+  ruleNumberSelectOptions: string[];
   totalRulesCount: number;
   searchValue: string;
   isSearching: boolean;
@@ -42,16 +43,22 @@ export const RulesTableHeader = ({
   pageSize,
   onSectionChange,
   sectionSelectOptions,
+  ruleNumberSelectOptions,
 }: RulesTableToolbarProps) => {
   const [selected, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
+  const [selected2, setSelected2] = useState<EuiComboBoxOptionOption[]>([]);
 
   const sectionOptions = sectionSelectOptions.map((option) => ({
     label: option,
   }));
 
+  const ruleNumberOptions = ruleNumberSelectOptions.map((option) => ({
+    label: option,
+  }));
+
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem grow={4}>
         <SearchField
           isSearching={isSearching}
           searchValue={searchValue}
@@ -60,23 +67,53 @@ export const RulesTableHeader = ({
           pageSize={pageSize}
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        css={css`
-          max-width: 300px;
-        `}
-      >
-        <EuiComboBox
-          placeholder={i18n.translate('xpack.csp.rules.rulesTableHeader.sectionSelectPlaceholder', {
-            defaultMessage: 'Select CIS Section',
-          })}
-          singleSelection={{ asPlainText: true }}
-          options={sectionOptions}
-          selectedOptions={selected}
-          onChange={(option) => {
-            setSelected(option);
-            onSectionChange(option.length ? option[0].label : undefined);
-          }}
-        />
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem
+            css={css`
+              max-width: 140px;
+            `}
+          >
+            <EuiComboBox
+              fullWidth={true}
+              placeholder={i18n.translate(
+                'xpack.csp.rules.rulesTableHeader.sectionSelectPlaceholder',
+                {
+                  defaultMessage: 'CIS Section',
+                }
+              )}
+              singleSelection={{ asPlainText: true }}
+              options={sectionOptions}
+              selectedOptions={selected}
+              onChange={(option) => {
+                setSelected(option);
+                onSectionChange(option.length ? option[0].label : undefined);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              max-width: 160px;
+            `}
+          >
+            <EuiComboBox
+              fullWidth={true}
+              placeholder={i18n.translate(
+                'xpack.csp.rules.rulesTableHeader.ruleNumberSelectPlaceholder',
+                {
+                  defaultMessage: 'Rule Number',
+                }
+              )}
+              singleSelection={{ asPlainText: true }}
+              options={ruleNumberOptions}
+              selectedOptions={selected2}
+              onChange={(option) => {
+                setSelected2(option);
+                onSectionChange(option.length ? option[0].label : undefined);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

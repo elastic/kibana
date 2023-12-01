@@ -72,7 +72,8 @@ const findCspRuleTemplateHandler = async (
     perPage: options.perPage,
     sortField: options.sortField,
     fields: options?.fields,
-    filter: getBenchmarkFilter(benchmarkId, options.section),
+    // filter: getBenchmarkFilter(benchmarkId, options.section),
+    filter: `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${benchmarkId} AND ${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${options.policyId}"`,
   });
 
   const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map(
@@ -109,14 +110,23 @@ export const defineFindCspRuleTemplateRoute = (router: CspRouter) =>
         if (!(await context.fleet).authz.fleet.all) {
           return response.forbidden();
         }
-
+console.log(request.query)
         const requestBody: GetCspRuleTemplateRequest = request.query;
         const cspContext = await context.csp;
 
         try {
           const cspRulesTemplates: GetCspRuleTemplateResponse = await findCspRuleTemplateHandler(
             cspContext.soClient,
-            requestBody
+            // requestBody
+            {
+              benchmarkId: request.query.packagePolicyId,
+              policyId: request.query.policyId,
+              page: 1,
+              perPage: 10000,
+              searchFields: ['metadata.name.text'],
+              sortField: 'metadata.benchmark.rule_number',
+              sortOrder: 'asc',
+            }
           );
           return response.ok({ body: cspRulesTemplates });
         } catch (err) {

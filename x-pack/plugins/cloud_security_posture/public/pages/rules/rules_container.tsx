@@ -52,9 +52,11 @@ const getPage = (data: CspRuleTemplate[], { page, perPage }: RulesQuery) =>
 const MAX_ITEMS_PER_PAGE = 10000;
 
 export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
+export type PageUrlParamsVersion2 = Record<'benchmarkId' | 'benchmarkVersion', string>;
 
 export const RulesContainer = () => {
-  const params = useParams<PageUrlParams>();
+  const params = useParams<PageUrlParamsVersion2>();
+
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
@@ -71,7 +73,8 @@ export const RulesContainer = () => {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
     },
-    params.packagePolicyId
+    params.benchmarkId,
+    params.benchmarkVersion
   );
 
   const rulesPageData = useMemo(
@@ -85,14 +88,20 @@ export const RulesContainer = () => {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
     },
-    params.packagePolicyId
+    params.benchmarkId,
+    params.benchmarkVersion
   );
-
+console.log(allRules)
   const sectionList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.section),
     [allRules.data]
   );
+  const ruleNumberList = useMemo(
+    () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number),
+    [allRules.data]
+  );
   const cleanedSectionList = [...new Set(sectionList)];
+  const cleanedRuleNumberList = [...new Set(ruleNumberList)];
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
@@ -102,6 +111,7 @@ export const RulesContainer = () => {
             setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
           }
           sectionSelectOptions={cleanedSectionList}
+          ruleNumberSelectOptions={cleanedRuleNumberList}
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
           searchValue={rulesQuery.search || ''}
           totalRulesCount={rulesPageData.all_rules.length}
