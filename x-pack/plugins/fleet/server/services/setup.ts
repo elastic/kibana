@@ -188,12 +188,12 @@ async function createSetupSideEffects(
       'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
     );
   }
-  const messageSigningServiceNonFatalErrors: Array<{ error: MessageSigningError }> = [];
+  let messageSigningServiceNonFatalError: { error: MessageSigningError } | undefined;
   try {
     await appContextService.getMessageSigningService()?.generateKeyPair();
   } catch (error) {
     if (error instanceof MessageSigningError) {
-      messageSigningServiceNonFatalErrors.push({ error });
+      messageSigningServiceNonFatalError = { error };
     } else {
       throw error;
     }
@@ -232,7 +232,7 @@ async function createSetupSideEffects(
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...packagePolicyUpgradeErrors,
-    ...messageSigningServiceNonFatalErrors,
+    ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
     ...(uninstallTokenError ? [uninstallTokenError] : []),
   ];
 
