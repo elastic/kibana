@@ -16,6 +16,8 @@ import { AppInfo, Choice, RESTApiError } from './types';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
 
+export const ACTION_GROUP_RECOVERED = 'recovered';
+
 export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
