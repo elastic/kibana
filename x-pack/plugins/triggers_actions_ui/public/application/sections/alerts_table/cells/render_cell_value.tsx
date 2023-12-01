@@ -88,7 +88,7 @@ export const getFieldFormatterProvider =
 
 export function useFieldFormatter(fieldType: FIELD_FORMAT_IDS) {
   const { fieldFormats } = useKibana().services;
-  return getFieldFormatterProvider(fieldFormats)(fieldType);
+  return getFieldFormatterProvider(fieldFormats as FieldFormatsRegistry)(fieldType);
 }
 
 export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
