@@ -586,7 +586,9 @@ export type GetRenderCellValue = ({
   setFlyoutAlert,
 }: {
   setFlyoutAlert: SetFlyoutAlert;
-}) => (props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }) => React.ReactNode | JSX.Element | null | string;
+}) => (
+  props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }
+) => React.ReactNode | JSX.Element | null | string;
 
 export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>

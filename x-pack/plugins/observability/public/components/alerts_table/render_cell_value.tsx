@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiLink } from '@elastic/eui';
-import { GetRenderCellValue } from "@kbn/triggers-actions-ui-plugin/public";
+import { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import {
   ALERT_DURATION,
@@ -18,9 +18,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import type {
-  TimelineNonEcsData,
-} from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 
 import { asDuration } from '../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../alert_severity_badge';
@@ -69,7 +67,7 @@ export const getRenderCellValue = ({
 }: {
   setFlyoutAlert: (alertId: string) => void;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-}) : ReturnType<GetRenderCellValue> => {
+}): ReturnType<GetRenderCellValue> => {
   return ({ columnId, data }) => {
     if (!data) return null;
     const mappedNonEcsValue = getMappedNonEcsValue({
