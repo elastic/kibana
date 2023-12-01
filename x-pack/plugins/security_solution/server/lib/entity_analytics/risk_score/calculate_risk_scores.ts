@@ -213,6 +213,10 @@ const processScores = async ({
   identifierField: string;
   now: string;
 }): Promise<RiskScore[]> => {
+  if (buckets.length === 0) {
+    return [];
+  }
+
   const identifiers = buckets.map((bucket) => ({
     id_field: identifierField,
     id_value: bucket.key[identifierField],
