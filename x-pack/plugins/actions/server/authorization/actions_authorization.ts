@@ -83,7 +83,9 @@ export class ActionsAuthorization {
             ...additionalPrivileges,
             // SentinelOne sub-actions require that a user have `all` privilege to Actions and Connectors.
             // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
-            actionTypeId === '.sentinelone' ? 'actions:execute-all' : 'actions:execute-read',
+            actionTypeId === '.sentinelone'
+              ? 'api:actions:execute-advanced-connectors'
+              : 'api:actions:execute-basic-connectors',
           ],
         });
         if (!hasAllRequested) {
